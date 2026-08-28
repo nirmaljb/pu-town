@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PuGoApplication {
+public class PuTown {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PuGoApplication.class, args);
+		SpringApplication.run(PuTown.class, args);
 	}
 }
