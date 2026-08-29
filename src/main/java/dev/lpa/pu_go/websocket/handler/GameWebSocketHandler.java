@@ -1,5 +1,6 @@
 package dev.lpa.pu_go.websocket.handler;
 
+import dev.lpa.pu_go.player.PlayerPositions;
 import dev.lpa.pu_go.player.PlayerState;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
@@ -11,6 +12,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import dev.lpa.pu_go.websocket.message.GameMessage;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,10 +47,31 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void handleJoin(PlayerState player, GameMessage msg) {
+    private void handleJoin(PlayerState player, GameMessage msg) throws Exception {
+        msg.setPlayerId(player.getId());
         player.setUsername(msg.getUsername());
         player.setRoomId(msg.getRoomId());
-        roomManager.getOrCreateRoom(player.getRoomId()).addPlayer(player.getId());
+        Room room = roomManager.getOrCreateRoom(player.getRoomId());
+        room.addPlayer(player.getId());
+
+        List<PlayerPositions> playersPositionList = new ArrayList<>();
+
+        for(String playerId: room.getPlayerIds()) {
+            PlayerState otherPlayer = players.get(playerId);
+
+            if(otherPlayer != null && otherPlayer.getSession().isOpen()) {
+                playersPositionList.add(
+                        new PlayerPositions(
+                                otherPlayer.getId(),
+                                otherPlayer.getUsername(),
+                                otherPlayer.getX(),
+                                otherPlayer.getY()
+                        )
+                );
+            }
+        }
+        TextMessage out = new TextMessage(objectMapper.writeValueAsString(playersPositionList));
+        broadcastToPlayer(player.getId(), out);
         broadcastToRoom(player.getRoomId(), msg, player.getId());
     }
 
@@ -62,6 +86,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         msg.setRoomId(player.getRoomId());
         msg.setPlayerId(player.getId());
         broadcastToRoom(player.getRoomId(), msg, null);
+    }
+
+    private void broadcastToPlayer(String playerId, TextMessage msg) throws Exception {
+        PlayerState player = players.get(playerId);
+        if(player == null || !player.getSession().isOpen()) return;
+        player.getSession().sendMessage(msg);
     }
 
     private void broadcastToRoom(String roomId, GameMessage msg, String excludePlayer) {
@@ -82,7 +112,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        PlayerState player = players.get(session.getId());
+        PlayerState player = players.remove(session.getId());
         if(player != null && player.getRoomId() != null) {
             roomManager.removePlayerFromRoom(player.getRoomId(), player.getId());
         }
