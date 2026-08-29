@@ -51,6 +51,26 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handleJoin(PlayerState player, GameMessage msg) throws Exception {
+
+        //In case player is already joined in some room
+        //1. Kick the player out of the old room
+        //2. Admit them in the new room
+        //3. Let the other players in the older room know
+        String oldRoomId = player.getRoomId();
+
+        if(oldRoomId != null && !oldRoomId.equals(msg.getRoomId())) {
+            GameMessage message = new GameMessage();
+
+            message.setPlayerId(player.getId());
+            message.setType("left");
+            message.setRoomId(player.getRoomId());
+            message.setUsername(player.getUsername());
+
+            roomManager.removePlayerFromRoom(oldRoomId, player.getId());
+            broadcastToRoom(player.getRoomId(), message, null);
+        }
+
+
         msg.setPlayerId(player.getId());
         player.setUsername(msg.getUsername());
         player.setRoomId(msg.getRoomId());
@@ -129,8 +149,17 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         PlayerState player = players.remove(session.getId());
         if(player != null && player.getRoomId() != null) {
+            GameMessage message = new GameMessage();
+
+            message.setPlayerId(player.getId());
+            message.setType("disconnected");
+            message.setRoomId(player.getRoomId());
+            message.setUsername(player.getUsername());
+
             roomManager.removePlayerFromRoom(player.getRoomId(), player.getId());
+            broadcastToRoom(player.getRoomId(), message, null);
         }
+
         System.out.println("Client discontinued: " + session.getId());
     }
 }

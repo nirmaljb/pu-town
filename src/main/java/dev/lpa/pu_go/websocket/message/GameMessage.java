@@ -10,7 +10,7 @@ public class GameMessage {
     private String username;
     private Double x;
     private Double y;
-    private String text;
+    private String message;
 
     public GameMessage() {} // required by Jackson for deserialization
 
@@ -26,6 +26,6 @@ public class GameMessage {
     public void setX(Double x) { this.x = x; }
     public Double getY() { return y; }
     public void setY(Double y) { this.y = y; }
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
+    public String getText() { return message; }
+    public void setText(String message) { this.message = message; }
 }
