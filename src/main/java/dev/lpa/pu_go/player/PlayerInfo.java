@@ -1,6 +1,6 @@
 package dev.lpa.pu_go.player;
 
-public record PlayerPositions(
+public record PlayerInfo(
         String id,
         String username,
         double x,

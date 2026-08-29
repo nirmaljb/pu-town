@@ -1,9 +1,10 @@
 package dev.lpa.pu_go.websocket.handler;
 
-import dev.lpa.pu_go.player.PlayerPositions;
+import dev.lpa.pu_go.player.PlayerInfo;
 import dev.lpa.pu_go.player.PlayerState;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
+import dev.lpa.pu_go.room.RoomState;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -39,7 +40,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         PlayerState player = players.get(session.getId());
         if(player == null) return;
 
-        switch(incoming.getType()) {
+        String type = incoming.getType();
+        if(type == null) return;
+        switch(type) {
             case "join" -> handleJoin(player, incoming);
             case "move" -> handleMove(player, incoming);
             case "chat" -> handleChat(player, incoming);
@@ -54,14 +57,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Room room = roomManager.getOrCreateRoom(player.getRoomId());
         room.addPlayer(player.getId());
 
-        List<PlayerPositions> playersPositionList = new ArrayList<>();
+        List<PlayerInfo> playersPositionList = new ArrayList<>();
 
         for(String playerId: room.getPlayerIds()) {
             PlayerState otherPlayer = players.get(playerId);
 
             if(otherPlayer != null && otherPlayer.getSession().isOpen()) {
                 playersPositionList.add(
-                        new PlayerPositions(
+                        new PlayerInfo(
                                 otherPlayer.getId(),
                                 otherPlayer.getUsername(),
                                 otherPlayer.getX(),
@@ -70,12 +73,21 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 );
             }
         }
-        TextMessage out = new TextMessage(objectMapper.writeValueAsString(playersPositionList));
+
+        RoomState roomState = new RoomState(
+                "room_state",
+                playersPositionList
+        );
+
+        TextMessage out = new TextMessage(objectMapper.writeValueAsString(roomState));
         broadcastToPlayer(player.getId(), out);
         broadcastToRoom(player.getRoomId(), msg, player.getId());
     }
 
     private void handleMove(PlayerState player, GameMessage msg) {
+        if(player.getRoomId() == null) {
+            return;
+        }
         player.setX(msg.getX());
         player.setY(msg.getY());
         msg.setPlayerId(player.getId());
@@ -83,6 +95,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handleChat(PlayerState player, GameMessage msg) {
+        if(player.getRoomId() == null) {
+            return;
+        }
         msg.setRoomId(player.getRoomId());
         msg.setPlayerId(player.getId());
         broadcastToRoom(player.getRoomId(), msg, null);
