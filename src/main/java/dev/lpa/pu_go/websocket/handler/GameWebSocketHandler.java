@@ -52,13 +52,19 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private void handleJoin(PlayerState player, GameMessage msg) throws Exception {
 
+        String oldRoomId = player.getRoomId();
+        String newRoomId = msg.getRoomId();
+        //In case player is already join in the same room
+        if(oldRoomId != null && oldRoomId.equals(newRoomId)) {
+            sendRoomState(player);
+            return;
+        }
+
         //In case player is already joined in some room
         //1. Kick the player out of the old room
         //2. Admit them in the new room
         //3. Let the other players in the older room know
-        String oldRoomId = player.getRoomId();
-
-        if(oldRoomId != null && !oldRoomId.equals(msg.getRoomId())) {
+        if(oldRoomId != null) {
             GameMessage message = new GameMessage();
 
             message.setPlayerId(player.getId());
@@ -71,11 +77,17 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
 
 
-        msg.setPlayerId(player.getId());
+        msg.setPlayerId(newRoomId);
+        roomManager.getOrCreateRoom(newRoomId).addPlayer(player.getId());
         player.setUsername(msg.getUsername());
-        player.setRoomId(msg.getRoomId());
+        player.setRoomId(newRoomId);
+
+        broadcastToRoom(player.getRoomId(), msg, player.getId());
+        sendRoomState(player);
+    }
+
+    private void sendRoomState(PlayerState player) throws Exception {
         Room room = roomManager.getOrCreateRoom(player.getRoomId());
-        room.addPlayer(player.getId());
 
         List<PlayerInfo> playersPositionList = new ArrayList<>();
 
@@ -101,7 +113,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
         TextMessage out = new TextMessage(objectMapper.writeValueAsString(roomState));
         broadcastToPlayer(player.getId(), out);
-        broadcastToRoom(player.getRoomId(), msg, player.getId());
     }
 
     private void handleMove(PlayerState player, GameMessage msg) {
