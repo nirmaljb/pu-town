@@ -1,5 +1,7 @@
 package dev.lpa.pu_go.websocket.message;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
@@ -8,6 +10,18 @@ public sealed interface ServerMessage permits ServerMessage.RoomSnapshot, Server
     String type();
 
     record PlayerView(String playerId, String displayName, double x, double y) {}
+
+    enum DepartureReason {
+        LEFT("left"),
+        DISCONNECTED("disconnected");
+
+        private final String wireValue;
+
+        DepartureReason(String wireValue) { this.wireValue = wireValue; }
+
+        @JsonValue
+        public String wireValue() { return wireValue; }
+    }
 
     record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, List<PlayerView> players)
             implements ServerMessage {
@@ -24,8 +38,8 @@ public sealed interface ServerMessage permits ServerMessage.RoomSnapshot, Server
         public PlayerMoved(String playerId, double x, double y) { this(1, "player_moved", playerId, x, y); }
     }
 
-    record PlayerLeft(int version, String type, String playerId, String reason) implements ServerMessage {
-        public PlayerLeft(String playerId, String reason) { this(1, "player_left", playerId, reason); }
+    record PlayerLeft(int version, String type, String playerId, DepartureReason reason) implements ServerMessage {
+        public PlayerLeft(String playerId, DepartureReason reason) { this(1, "player_left", playerId, reason); }
     }
 
     record RoomLeft(int version, String type, String roomId) implements ServerMessage {

@@ -73,6 +73,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         PlayerState player = playersBySession.get(session.getId());
         if (player == null) return;
         synchronized (player) {
+            if (playersBySession.get(session.getId()) != player) return;
             try {
                 ClientMessage incoming = decoder.decode(message.getPayload());
                 if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
@@ -88,34 +89,32 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String oldRoomId = player.getRoomId();
         List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
         roomManager.serialized(involvedRooms, () -> {
-            List<Delivery> created = new ArrayList<>();
+            List<Delivery> pendingDeliveries = new ArrayList<>();
             if (oldRoomId != null && !oldRoomId.equals(message.roomId())) {
-                Room oldRoom = roomManager.getOrCreateRoom(oldRoomId);
-                oldRoom.removePlayer(player.getId());
-                addForPlayers(created, oldRoom.playerIdsSnapshot(), new ServerMessage.PlayerLeft(player.getId(), "left"));
+                pendingDeliveries.addAll(endMembership(player, oldRoomId, ServerMessage.DepartureReason.LEFT, false));
             }
 
             Room room = roomManager.getOrCreateRoom(message.roomId());
             boolean alreadyJoined = room.containsPlayer(player.getId()) && message.roomId().equals(oldRoomId);
-            player.setDisplayName(message.displayName());
             player.setRoomId(message.roomId());
             if (!alreadyJoined) {
+                player.setDisplayName(message.displayName());
                 player.setX(RoomRules.SPAWN_X);
                 player.setY(RoomRules.SPAWN_Y);
                 player.setLastAcceptedMovementNanos(nanoTime.getAsLong());
                 room.addPlayer(player.getId());
                 List<String> existingPlayers = room.playerIdsSnapshot().stream()
                         .filter(playerId -> !playerId.equals(player.getId())).toList();
-                addForPlayers(created, existingPlayers, new ServerMessage.PlayerJoined(viewOf(player)));
+                addForPlayers(pendingDeliveries, existingPlayers, new ServerMessage.PlayerJoined(viewOf(player)));
             }
             List<ServerMessage.PlayerView> snapshotPlayers = room.playerIdsSnapshot().stream()
                     .map(playersById::get)
                     .filter(candidate -> candidate != null && candidate.getSession().isOpen())
                     .map(this::viewOf)
                     .toList();
-            created.add(new Delivery(player.getId(),
+            pendingDeliveries.add(new Delivery(player.getId(),
                     new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), snapshotPlayers)));
-            deliverAll(created);
+            deliverAll(pendingDeliveries);
             return null;
         });
     }
@@ -127,13 +126,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         roomManager.serialized(List.of(roomId), () -> {
-            Room room = roomManager.getOrCreateRoom(roomId);
-            room.removePlayer(player.getId());
             player.setRoomId(null);
-            List<Delivery> created = new ArrayList<>();
-            addForPlayers(created, room.playerIdsSnapshot(), new ServerMessage.PlayerLeft(player.getId(), "left"));
-            created.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
-            deliverAll(created);
+            deliverAll(endMembership(player, roomId, ServerMessage.DepartureReason.LEFT, true));
             return null;
         });
     }
@@ -154,33 +148,42 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             player.setY(message.y());
             player.setLastAcceptedMovementNanos(now);
             Room room = roomManager.getOrCreateRoom(roomId);
-            List<Delivery> created = new ArrayList<>();
-            addForPlayers(created, room.playerIdsSnapshot(),
+            List<Delivery> pendingDeliveries = new ArrayList<>();
+            addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
                     new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y()));
-            deliverAll(created);
+            deliverAll(pendingDeliveries);
             return null;
         });
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        PlayerState player = playersBySession.remove(session.getId());
+        PlayerState player = playersBySession.get(session.getId());
         if (player == null) return;
-        playersById.remove(player.getId());
-        outboxes.remove(player.getId());
         synchronized (player) {
+            if (!playersBySession.remove(session.getId(), player)) return;
+            playersById.remove(player.getId());
+            outboxes.remove(player.getId());
             String roomId = player.getRoomId();
             if (roomId == null) return;
             roomManager.serialized(List.of(roomId), () -> {
-                Room room = roomManager.getOrCreateRoom(roomId);
-                room.removePlayer(player.getId());
-                List<Delivery> created = new ArrayList<>();
-                addForPlayers(created, room.playerIdsSnapshot(),
-                        new ServerMessage.PlayerLeft(player.getId(), "disconnected"));
-                deliverAll(created);
+                deliverAll(endMembership(player, roomId, ServerMessage.DepartureReason.DISCONNECTED, false));
                 return null;
             });
         }
+    }
+
+    private List<Delivery> endMembership(PlayerState player, String roomId,
+                                         ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
+        Room room = roomManager.getOrCreateRoom(roomId);
+        room.removePlayer(player.getId());
+        List<Delivery> pendingDeliveries = new ArrayList<>();
+        addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
+                new ServerMessage.PlayerLeft(player.getId(), reason));
+        if (acknowledgeLeave) {
+            pendingDeliveries.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
+        }
+        return pendingDeliveries;
     }
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
