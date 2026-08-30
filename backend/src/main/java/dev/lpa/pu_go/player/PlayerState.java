@@ -5,10 +5,11 @@ import org.springframework.web.socket.WebSocketSession;
 public class PlayerState {
     private final String playerId;
     private final WebSocketSession session;
-    private String username;
+    private String displayName;
     private String roomId;
     private double x;
     private double y;
+    private long lastAcceptedMovementNanos;
 
     public PlayerState(String playerId, WebSocketSession session) {
         this.playerId = playerId;
@@ -17,12 +18,16 @@ public class PlayerState {
 
     public String getId() { return playerId; }
     public WebSocketSession getSession() { return session; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
     public String getRoomId() { return roomId; }
     public void setRoomId(String roomId) { this.roomId = roomId; }
     public double getX() { return x; }
     public void setX(double x) { this.x = x; }
     public double getY() { return y; }
     public void setY(double y) { this.y = y; }
+    public long getLastAcceptedMovementNanos() { return lastAcceptedMovementNanos; }
+    public void setLastAcceptedMovementNanos(long lastAcceptedMovementNanos) {
+        this.lastAcceptedMovementNanos = lastAcceptedMovementNanos;
+    }
 }

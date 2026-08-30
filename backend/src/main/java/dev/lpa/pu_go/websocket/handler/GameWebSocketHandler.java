@@ -1,176 +1,224 @@
 package dev.lpa.pu_go.websocket.handler;
 
-import dev.lpa.pu_go.player.PlayerInfo;
 import dev.lpa.pu_go.player.PlayerState;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
-import dev.lpa.pu_go.room.RoomState;
+import dev.lpa.pu_go.room.RoomRules;
+import dev.lpa.pu_go.websocket.message.ClientMessage;
+import dev.lpa.pu_go.websocket.message.ClientMessageDecoder;
+import dev.lpa.pu_go.websocket.message.InvalidClientMessageException;
+import dev.lpa.pu_go.websocket.message.ServerMessage;
+import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import dev.lpa.pu_go.websocket.message.GameMessage;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Map<String, PlayerState> players = new ConcurrentHashMap<>();
+    private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
+    private final Map<String, PlayerState> playersBySession = new ConcurrentHashMap<>();
+    private final Map<String, PlayerState> playersById = new ConcurrentHashMap<>();
+    private final Map<String, ConnectionOutbox> outboxes = new ConcurrentHashMap<>();
+    private final Executor outboundExecutor;
+    private final Supplier<String> playerIdSupplier;
+    private final LongSupplier nanoTime;
 
+    @Autowired
     public GameWebSocketHandler(RoomManager roomManager) {
+        this(roomManager, Executors.newCachedThreadPool(), () -> UUID.randomUUID().toString(), System::nanoTime);
+    }
+
+    GameWebSocketHandler(RoomManager roomManager, Executor outboundExecutor,
+                         Supplier<String> playerIdSupplier, LongSupplier nanoTime) {
         this.roomManager = roomManager;
+        this.outboundExecutor = outboundExecutor;
+        this.playerIdSupplier = playerIdSupplier;
+        this.nanoTime = nanoTime;
+    }
+
+    @PreDestroy
+    void stopOutboundExecutor() {
+        if (outboundExecutor instanceof ExecutorService executorService) executorService.shutdownNow();
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        players.put(session.getId(), new PlayerState(session.getId(), session));
-        System.out.println("Session established : " + session.getId());
+        PlayerState player = new PlayerState(playerIdSupplier.get(), session);
+        playersBySession.put(session.getId(), player);
+        playersById.put(player.getId(), player);
+        outboxes.put(player.getId(), new ConnectionOutbox(session, outboundExecutor));
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        GameMessage incoming = objectMapper.readValue(message.getPayload(), GameMessage.class);
-        PlayerState player = players.get(session.getId());
-        if(player == null) return;
-
-        String type = incoming.getType();
-        if(type == null) return;
-        switch(type) {
-            case "join" -> handleJoin(player, incoming);
-            case "move" -> handleMove(player, incoming);
-            case "chat" -> handleChat(player, incoming);
-            default -> System.out.println("Unknown type: " + incoming.getType());
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+        PlayerState player = playersBySession.get(session.getId());
+        if (player == null) return;
+        synchronized (player) {
+            try {
+                ClientMessage incoming = decoder.decode(message.getPayload());
+                if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
+                else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
+                else if (incoming instanceof ClientMessage.MovePlayer move) handleMove(player, move);
+            } catch (InvalidClientMessageException exception) {
+                deliver(new Delivery(player.getId(), new ServerMessage.ErrorMessage(exception.code(), exception.getMessage())));
+            }
         }
     }
 
-    private void handleJoin(PlayerState player, GameMessage msg) throws Exception {
-
+    private void handleJoin(PlayerState player, ClientMessage.JoinRoom message) {
         String oldRoomId = player.getRoomId();
-        String newRoomId = msg.getRoomId();
-        //In case player is already join in the same room
-        if(oldRoomId != null && oldRoomId.equals(newRoomId)) {
-            sendRoomState(player);
-            return;
-        }
-
-        //In case player is already joined in some room
-        //1. Kick the player out of the old room
-        //2. Admit them in the new room
-        //3. Let the other players in the older room know
-        if(oldRoomId != null) {
-            GameMessage message = new GameMessage();
-
-            message.setPlayerId(player.getId());
-            message.setType("left");
-            message.setRoomId(player.getRoomId());
-            message.setUsername(player.getUsername());
-
-            roomManager.removePlayerFromRoom(oldRoomId, player.getId());
-            broadcastToRoom(player.getRoomId(), message, null);
-        }
-
-
-        msg.setPlayerId(newRoomId);
-        roomManager.getOrCreateRoom(newRoomId).addPlayer(player.getId());
-        player.setUsername(msg.getUsername());
-        player.setRoomId(newRoomId);
-
-        broadcastToRoom(player.getRoomId(), msg, player.getId());
-        sendRoomState(player);
-    }
-
-    private void sendRoomState(PlayerState player) throws Exception {
-        Room room = roomManager.getOrCreateRoom(player.getRoomId());
-
-        List<PlayerInfo> playersPositionList = new ArrayList<>();
-
-        for(String playerId: room.getPlayerIds()) {
-            PlayerState otherPlayer = players.get(playerId);
-
-            if(otherPlayer != null && otherPlayer.getSession().isOpen()) {
-                playersPositionList.add(
-                        new PlayerInfo(
-                                otherPlayer.getId(),
-                                otherPlayer.getUsername(),
-                                otherPlayer.getX(),
-                                otherPlayer.getY()
-                        )
-                );
+        List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
+        roomManager.serialized(involvedRooms, () -> {
+            List<Delivery> created = new ArrayList<>();
+            if (oldRoomId != null && !oldRoomId.equals(message.roomId())) {
+                Room oldRoom = roomManager.getOrCreateRoom(oldRoomId);
+                oldRoom.removePlayer(player.getId());
+                addForPlayers(created, oldRoom.playerIdsSnapshot(), new ServerMessage.PlayerLeft(player.getId(), "left"));
             }
-        }
 
-        RoomState roomState = new RoomState(
-                "room_state",
-                playersPositionList
-        );
-
-        TextMessage out = new TextMessage(objectMapper.writeValueAsString(roomState));
-        broadcastToPlayer(player.getId(), out);
-    }
-
-    private void handleMove(PlayerState player, GameMessage msg) {
-        if(player.getRoomId() == null) {
-            return;
-        }
-        player.setX(msg.getX());
-        player.setY(msg.getY());
-        msg.setPlayerId(player.getId());
-        broadcastToRoom(player.getRoomId(), msg, null);
-    }
-
-    private void handleChat(PlayerState player, GameMessage msg) {
-        if(player.getRoomId() == null) {
-            return;
-        }
-        msg.setRoomId(player.getRoomId());
-        msg.setPlayerId(player.getId());
-        broadcastToRoom(player.getRoomId(), msg, null);
-    }
-
-    private void broadcastToPlayer(String playerId, TextMessage msg) throws Exception {
-        PlayerState player = players.get(playerId);
-        if(player == null || !player.getSession().isOpen()) return;
-        player.getSession().sendMessage(msg);
-    }
-
-    private void broadcastToRoom(String roomId, GameMessage msg, String excludePlayer) {
-        Room room = roomManager.getOrCreateRoom(roomId);
-        try {
-            TextMessage out = new TextMessage(objectMapper.writeValueAsString(msg));
-            for(String playerId: room.getPlayerIds()) {
-                if(playerId.equals(excludePlayer)) continue;
-                PlayerState p = players.get(playerId);
-                if (p != null && p.getSession().isOpen()) {
-                    p.getSession().sendMessage(out);
-                }
+            Room room = roomManager.getOrCreateRoom(message.roomId());
+            boolean alreadyJoined = room.containsPlayer(player.getId()) && message.roomId().equals(oldRoomId);
+            player.setDisplayName(message.displayName());
+            player.setRoomId(message.roomId());
+            if (!alreadyJoined) {
+                player.setX(RoomRules.SPAWN_X);
+                player.setY(RoomRules.SPAWN_Y);
+                player.setLastAcceptedMovementNanos(nanoTime.getAsLong());
+                room.addPlayer(player.getId());
+                List<String> existingPlayers = room.playerIdsSnapshot().stream()
+                        .filter(playerId -> !playerId.equals(player.getId())).toList();
+                addForPlayers(created, existingPlayers, new ServerMessage.PlayerJoined(viewOf(player)));
             }
-        }catch(Exception e) {
-            e.printStackTrace();
+            List<ServerMessage.PlayerView> snapshotPlayers = room.playerIdsSnapshot().stream()
+                    .map(playersById::get)
+                    .filter(candidate -> candidate != null && candidate.getSession().isOpen())
+                    .map(this::viewOf)
+                    .toList();
+            created.add(new Delivery(player.getId(),
+                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), snapshotPlayers)));
+            deliverAll(created);
+            return null;
+        });
+    }
+
+    private void handleLeave(PlayerState player) {
+        String roomId = player.getRoomId();
+        if (roomId == null) {
+            deliver(error(player, "not_in_room", "Join a room before leaving it."));
+            return;
         }
+        roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.getOrCreateRoom(roomId);
+            room.removePlayer(player.getId());
+            player.setRoomId(null);
+            List<Delivery> created = new ArrayList<>();
+            addForPlayers(created, room.playerIdsSnapshot(), new ServerMessage.PlayerLeft(player.getId(), "left"));
+            created.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
+            deliverAll(created);
+            return null;
+        });
+    }
+
+    private void handleMove(PlayerState player, ClientMessage.MovePlayer message) {
+        String roomId = player.getRoomId();
+        if (roomId == null) {
+            deliver(error(player, "not_in_room", "Join a room before moving."));
+            return;
+        }
+        roomManager.serialized(List.of(roomId), () -> {
+            long now = nanoTime.getAsLong();
+            if (!RoomRules.acceptsMovement(player, message.x(), message.y(), now)) {
+                deliver(error(player, "invalid_movement", "Position is outside the room or exceeds movement speed."));
+                return null;
+            }
+            player.setX(message.x());
+            player.setY(message.y());
+            player.setLastAcceptedMovementNanos(now);
+            Room room = roomManager.getOrCreateRoom(roomId);
+            List<Delivery> created = new ArrayList<>();
+            addForPlayers(created, room.playerIdsSnapshot(),
+                    new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y()));
+            deliverAll(created);
+            return null;
+        });
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        PlayerState player = players.remove(session.getId());
-        if(player != null && player.getRoomId() != null) {
-            GameMessage message = new GameMessage();
-
-            message.setPlayerId(player.getId());
-            message.setType("disconnected");
-            message.setRoomId(player.getRoomId());
-            message.setUsername(player.getUsername());
-
-            roomManager.removePlayerFromRoom(player.getRoomId(), player.getId());
-            broadcastToRoom(player.getRoomId(), message, null);
+        PlayerState player = playersBySession.remove(session.getId());
+        if (player == null) return;
+        playersById.remove(player.getId());
+        outboxes.remove(player.getId());
+        synchronized (player) {
+            String roomId = player.getRoomId();
+            if (roomId == null) return;
+            roomManager.serialized(List.of(roomId), () -> {
+                Room room = roomManager.getOrCreateRoom(roomId);
+                room.removePlayer(player.getId());
+                List<Delivery> created = new ArrayList<>();
+                addForPlayers(created, room.playerIdsSnapshot(),
+                        new ServerMessage.PlayerLeft(player.getId(), "disconnected"));
+                deliverAll(created);
+                return null;
+            });
         }
-
-        System.out.println("Client discontinued: " + session.getId());
     }
+
+    private ServerMessage.PlayerView viewOf(PlayerState player) {
+        return new ServerMessage.PlayerView(
+                player.getId(), player.getDisplayName(), player.getX(), player.getY()
+        );
+    }
+
+    private static Delivery error(PlayerState player, String code, String message) {
+        return new Delivery(player.getId(), new ServerMessage.ErrorMessage(code, message));
+    }
+
+    private static void addForPlayers(Collection<Delivery> deliveries, Collection<String> playerIds,
+                                      ServerMessage message) {
+        playerIds.forEach(playerId -> deliveries.add(new Delivery(playerId, message)));
+    }
+
+    private void deliverAll(Collection<Delivery> deliveries) {
+        deliveries.forEach(this::deliver);
+    }
+
+    private void deliver(Delivery delivery) {
+        ConnectionOutbox outbox = outboxes.get(delivery.playerId());
+        if (outbox == null) return;
+        try {
+            TextMessage textMessage = new TextMessage(objectMapper.writeValueAsString(delivery.message()));
+            String movementPlayerId = delivery.message() instanceof ServerMessage.PlayerMoved moved
+                    ? moved.playerId() : null;
+            if (!outbox.enqueue(textMessage, movementPlayerId)) {
+                PlayerState player = playersById.get(delivery.playerId());
+                if (player != null && player.getSession().isOpen()) {
+                    player.getSession().close(CloseStatus.SESSION_NOT_RELIABLE);
+                }
+            }
+        } catch (IOException ignored) {
+            // The WebSocket lifecycle callback removes the disconnected player.
+        }
+    }
+
+    private record Delivery(String playerId, ServerMessage message) {}
 }
