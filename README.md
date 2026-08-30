@@ -1,0 +1,116 @@
+# PU Town
+
+PU Town is a small shared top-down game world. Players join isolated rooms, see one another in real time, and move Phaser-rendered avatars while a Spring Boot server validates and broadcasts their positions.
+
+The project currently targets local development. It consists of two processes:
+
+- a Java 17 Spring Boot WebSocket backend on `http://localhost:8080`
+- a TypeScript, Vite, and Phaser frontend on `http://localhost:5173`
+
+## Prerequisites
+
+Install the following before starting:
+
+- JDK 17, including `java` and `javac`
+- Node.js `^20.19.0` or `>=22.12.0`
+- npm
+
+Maven does not need to be installed globally; the repository includes Maven Wrapper. The first installation needs internet access to download Maven, Java dependencies, and npm packages.
+
+## Installation and local development
+
+Clone the repository, then install the frontend dependencies:
+
+```sh
+cd frontend
+npm ci
+```
+
+Start the backend from the repository root:
+
+```sh
+cd backend
+./mvnw spring-boot:run
+```
+
+On Windows, use `mvnw.cmd spring-boot:run` instead.
+
+In a second terminal, start the frontend:
+
+```sh
+cd frontend
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173). The frontend joins the `plaza` room as `Player` by default. Use the arrow keys to move.
+
+To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
+
+```json
+{"status":"healthy"}
+```
+
+Vite may choose another port when `5173` is unavailable, but the backend currently accepts WebSocket connections only from `http://localhost:5173` and `https://localhost:5173`. Free port `5173` before starting the frontend.
+
+## Client options
+
+The frontend reads these URL query parameters:
+
+| Parameter | Default | Purpose |
+| --- | --- | --- |
+| `room` | `plaza` | Room to join |
+| `name` | `Player` | Display name shown beside the avatar |
+| `ws` | `ws://localhost:8080/ws/game` | Backend WebSocket URL |
+
+For example:
+
+```text
+http://localhost:5173/?room=plaza&name=Alex
+```
+
+## Tests and builds
+
+Run the frontend checks:
+
+```sh
+cd frontend
+npm test
+npm run typecheck
+npm run build
+```
+
+The production frontend bundle is written to `frontend/dist/`.
+
+Run the backend tests and create an executable JAR:
+
+```sh
+cd backend
+./mvnw test
+./mvnw package
+```
+
+After packaging, run the backend with:
+
+```sh
+java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
+```
+
+## Architecture
+
+The Phaser client applies local movement immediately, sends absolute positions over a versioned WebSocket protocol, and reconciles with authoritative server updates. The Spring Boot server owns room membership, validates movement, and broadcasts accepted state to players in the same room. All server state is currently held in memory.
+
+Important project documentation:
+
+- [`CONTEXT.md`](CONTEXT.md) defines the project's canonical domain language.
+- [`docs/websocket-protocol-v1.md`](docs/websocket-protocol-v1.md) defines the WebSocket wire contract.
+- [`docs/adr/`](docs/adr/) records the architectural decisions behind movement validation, protocol versioning, frame-boundary updates, and room event serialization.
+- [`AGENTS.md`](AGENTS.md) provides repository guidance for coding agents and contributors working on the codebase.
+
+## Deployment status
+
+Production deployment is not configured. Before deploying, at minimum:
+
+- configure the backend's allowed WebSocket origins for the deployed frontend
+- use a secure `wss://` WebSocket URL when the site is served over HTTPS
+- decide how room state will be shared or routed across server instances
+- add the required hosting, reverse-proxy, and runtime configuration
