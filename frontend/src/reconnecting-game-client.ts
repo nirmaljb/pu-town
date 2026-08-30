@@ -1,24 +1,17 @@
-import { GameTransport, type GameSocket } from "./game-transport.js";
+import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
 
-export interface ReconnectableGameSocket extends GameSocket {
-  readonly readyState: number;
-  addEventListener(type: "message", listener: (event: MessageEvent<unknown>) => void): void;
-  addEventListener(type: "open", listener: () => void): void;
-  addEventListener(type: "close", listener: () => void): void;
-  close(): void;
-}
-
-export type GameSocketFactory = () => ReconnectableGameSocket;
+export type GameSocketFactory = () => WebSocket;
 export type ReconnectScheduler = (reconnect: () => void) => void;
 
-type DesiredMembership = Readonly<{ roomId: string; displayName: string }>;
+type JoinIntent = Readonly<{ roomId: string; displayName: string }>;
 const SOCKET_OPEN = 1;
 
 export class ReconnectingGameClient {
-  #socket: ReconnectableGameSocket | null = null;
+  #socket: WebSocket | null = null;
   #transport: GameTransport | null = null;
-  #desiredMembership: DesiredMembership | null = null;
+  #joinIntent: JoinIntent | null = null;
+  #leaveRequested = false;
   #generation = 0;
   #stopped = false;
 
@@ -34,24 +27,31 @@ export class ReconnectingGameClient {
   }
 
   join(roomId: string, displayName: string): void {
-    this.#desiredMembership = { roomId, displayName };
+    this.#joinIntent = { roomId, displayName };
+    this.#leaveRequested = false;
     if (this.#socket?.readyState === SOCKET_OPEN) this.#transport?.join(roomId, displayName);
   }
 
   leave(): void {
-    this.#desiredMembership = null;
-    if (this.#socket?.readyState === SOCKET_OPEN) this.#transport?.leave();
+    if (this.#joinIntent !== null && this.#socket?.readyState === SOCKET_OPEN) {
+      this.#leaveRequested = true;
+      this.#transport?.leave();
+    } else {
+      this.#joinIntent = null;
+      this.#leaveRequested = false;
+    }
   }
 
   move(x: number, y: number): void {
-    if (this.#desiredMembership !== null && this.#socket?.readyState === SOCKET_OPEN) {
+    if (this.#joinIntent !== null && this.#socket?.readyState === SOCKET_OPEN) {
       this.#transport?.move(x, y);
     }
   }
 
   stop(): void {
     this.#stopped = true;
-    this.#desiredMembership = null;
+    this.#joinIntent = null;
+    this.#leaveRequested = false;
     this.#socket?.close();
   }
 
@@ -59,17 +59,25 @@ export class ReconnectingGameClient {
     if (this.#stopped) return;
     const generation = ++this.#generation;
     const socket = this.createSocket();
-    const transport = new GameTransport(socket, this.inbox, this.onProtocolError);
+    const transport = new GameTransport(socket, this.inbox, this.onProtocolError, message => {
+      if (generation === this.#generation && message.type === "room_left" && this.#leaveRequested) {
+        this.#joinIntent = null;
+        this.#leaveRequested = false;
+      }
+    });
     this.#socket = socket;
     this.#transport = transport;
 
     socket.addEventListener("open", () => {
       if (generation !== this.#generation) return;
-      const desiredMembership = this.#desiredMembership;
-      if (desiredMembership !== null) transport.join(desiredMembership.roomId, desiredMembership.displayName);
+      const joinIntent = this.#joinIntent;
+      if (joinIntent !== null) {
+        this.#leaveRequested = false;
+        transport.join(joinIntent.roomId, joinIntent.displayName);
+      }
     });
     socket.addEventListener("close", () => {
-      if (generation !== this.#generation || this.#stopped || this.#desiredMembership === null) return;
+      if (generation !== this.#generation || this.#stopped || this.#joinIntent === null) return;
       this.scheduleReconnect(() => this.openConnection());
     });
   }

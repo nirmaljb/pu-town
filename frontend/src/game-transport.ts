@@ -4,7 +4,8 @@ import {
   joinRoom,
   leaveRoom,
   movePlayer,
-  type ClientMessage
+  type ClientMessage,
+  type ServerMessage
 } from "./protocol.js";
 
 export interface GameSocket {
@@ -16,12 +17,15 @@ export class GameTransport {
   constructor(
     private readonly socket: GameSocket,
     private readonly inbox: NetworkInbox,
-    onProtocolError: (error: Error) => void = () => undefined
+    onProtocolError: (error: Error) => void = () => undefined,
+    onServerMessage: (message: ServerMessage) => void = () => undefined
   ) {
     socket.addEventListener("message", event => {
       try {
         if (typeof event.data !== "string") throw new Error("Server message must be text");
-        inbox.enqueue(decodeServerMessage(event.data));
+        const message = decodeServerMessage(event.data);
+        inbox.enqueue(message);
+        onServerMessage(message);
       } catch (error) {
         onProtocolError(error instanceof Error ? error : new Error(String(error)));
       }

@@ -3,12 +3,8 @@ import { AvatarReconciler } from "./avatar-reconciler.js";
 import { NetworkFrameBoundary } from "./network-frame-boundary.js";
 import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
+import { MOVEMENT_SEND_INTERVAL_MS, MOVEMENT_SPEED, ROOM_HEIGHT, ROOM_WIDTH } from "./room-rules.js";
 import { emptyWorld } from "./world-state.js";
-
-const ROOM_WIDTH = 1_280;
-const ROOM_HEIGHT = 720;
-const MOVEMENT_SPEED = 240;
-const MOVEMENT_SEND_INTERVAL_MS = 50;
 
 export class PuTownScene extends Phaser.Scene {
   readonly #inbox = new NetworkInbox();
@@ -22,6 +18,7 @@ export class PuTownScene extends Phaser.Scene {
   #authoritativeX = 0;
   #authoritativeY = 0;
   #lastMovementSentAt = 0;
+  #movementDirty = false;
 
   constructor() {
     super("pu-town");
@@ -63,16 +60,25 @@ export class PuTownScene extends Phaser.Scene {
 
     const horizontal = Number(this.#cursors.right.isDown) - Number(this.#cursors.left.isDown);
     const vertical = Number(this.#cursors.down.isDown) - Number(this.#cursors.up.isDown);
-    if (horizontal === 0 && vertical === 0) return;
+    if (horizontal === 0 && vertical === 0) {
+      if (this.#movementDirty) {
+        this.#client?.move(this.#localX, this.#localY);
+        this.#lastMovementSentAt = time;
+        this.#movementDirty = false;
+      }
+      return;
+    }
     const magnitude = Math.hypot(horizontal, vertical);
     const distance = MOVEMENT_SPEED * delta / 1_000;
     this.#localX = Phaser.Math.Clamp(this.#localX + horizontal / magnitude * distance, 0, ROOM_WIDTH);
     this.#localY = Phaser.Math.Clamp(this.#localY + vertical / magnitude * distance, 0, ROOM_HEIGHT);
     this.#avatarReconciler?.moveLocally(selfPlayerId, this.#localX, this.#localY);
+    this.#movementDirty = true;
 
     if (time - this.#lastMovementSentAt >= MOVEMENT_SEND_INTERVAL_MS) {
       this.#client?.move(this.#localX, this.#localY);
       this.#lastMovementSentAt = time;
+      this.#movementDirty = false;
     }
   }
 }
