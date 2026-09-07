@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trace GameWebSocketHandler</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script src="../assets/quiz.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Lesson 0001 · about 8 minutes</p>
+  <h1>Trace one WebSocket through PU Town</h1>
+  <p class="lede">Your win: explain where Spring stops and PU Town begins, then narrate a Player's connection, Join, movement, and departure.</p>
+  <div class="goal"><strong>Guiding model:</strong> Spring delivers lifecycle events; <code>GameWebSocketHandler</code> turns them into authoritative game transitions.</div>
+
+  <h2>1. First split the responsibilities</h2>
+  <section class="two-column">
+    <article class="card framework">
+      <span class="label">Framework</span>
+      <h3>Spring WebSocket</h3>
+      <p><code>WebSocketConfig</code> maps the handler to <code>/ws/game</code>. After a successful HTTP upgrade, Spring invokes connection, text-message, and close callbacks with a <code>WebSocketSession</code>.</p>
+    </article>
+    <article class="card application">
+      <span class="label">Application</span>
+      <h3>PU Town</h3>
+      <p>The handler creates Player identity, decodes protocol v1, manages Room membership, validates positions, and decides which server events each Player receives.</p>
+    </article>
+  </section>
+  <p>This is the architectural hinge: <strong>a WebSocket connection is only a transport relationship</strong>. It becomes a PU Town Room Membership only after a valid <code>join_room</code> command.</p>
+
+  <h2>2. Follow the lifecycle</h2>
+  <ol class="flow">
+    <li><span class="step-number">1</span><div><h3>HTTP upgrades to WebSocket</h3><p><code>WebSocketConfig</code> registers the singleton handler at <code>/ws/game</code> and restricts browser origins.</p></div></li>
+    <li><span class="step-number">2</span><div><h3>Spring reports a connection</h3><p><code>afterConnectionEstablished</code> issues a Player ID, creates <code>PlayerState</code>, and adds three lookup entries: session → Player, ID → Player, and ID → outbox.</p></div></li>
+    <li><span class="step-number">3</span><div><h3>A text frame arrives</h3><p><code>handleTextMessage</code> finds the Player, synchronizes on it, strictly decodes the JSON, then dispatches one sealed command: Join, Leave, or Move. Decode failures become an <code>error</code> event.</p></div></li>
+    <li><span class="step-number">4</span><div><h3>Join creates Room Membership</h3><p><code>handleJoin</code> locks every involved Room in deterministic order. It ends an old membership if needed, resets the Player to the Spawn Point, announces <code>player_joined</code> to existing Players, and sends the joining Player a complete Room Snapshot.</p></div></li>
+    <li><span class="step-number">5</span><div><h3>Move crosses the authority boundary</h3><p><code>handleMove</code> requires Room Membership, locks that Room, and asks <code>RoomRules</code> whether the absolute position is finite, in bounds, and plausible. Only then does it update state and broadcast <code>player_moved</code>.</p></div></li>
+    <li><span class="step-number">6</span><div><h3>Delivery is queued, not written inline</h3><p><code>deliver</code> serializes a <code>ServerMessage</code> and enqueues it in the recipient's <code>ConnectionOutbox</code>. The executor performs actual socket writes sequentially, outside the Room transition.</p></div></li>
+    <li><span class="step-number">7</span><div><h3>Leave and Disconnect remain different</h3><p>Leave clears <code>roomId</code>, tells others the reason was <code>left</code>, and acknowledges with <code>room_left</code>. A later close sees no membership. An unexpected close ends membership with reason <code>disconnected</code>.</p></div></li>
+  </ol>
+
+  <div class="callout"><strong>Why the outbox matters:</strong> Spring warns that standard WebSocket sessions do not allow concurrent sends. PU Town's queue gives each connection one drain loop, preserves structural-event order, replaces superseded unsent movement, caps the queue at 256, and closes a connection that cannot accept essential events.</div>
+
+  <h2>3. See the concurrency architecture</h2>
+  <section class="four-layers">
+    <article class="layer"><strong>Shared handler</strong><br><code>ConcurrentHashMap</code> protects its registries.</article>
+    <article class="layer"><strong>Per Player</strong><br><code>synchronized</code> prevents message/close races.</article>
+    <article class="layer"><strong>Per Room</strong><br>ordered locks serialize transitions and event creation.</article>
+    <article class="layer"><strong>Per connection</strong><br>one bounded outbox serializes network writes.</article>
+  </section>
+  <p>These scopes are deliberately narrower than one global lock: unrelated Rooms can progress independently, while Players in the same Room observe a consistent event order.</p>
+
+  <h2>4. Retrieve, don't reread</h2>
+  <form class="quiz" data-quiz data-correct="a" data-success="that is the inbound protocol boundary." data-hint="find the callback that receives TextMessage.">
+    <fieldset>
+      <legend>Which method is the inbound protocol boundary?</legend>
+      <label class="option"><input type="radio" name="answer" value="a">handleTextMessage decodes and dispatches commands.</label>
+      <label class="option"><input type="radio" name="answer" value="b">handleJoin creates and validates sessions.</label>
+      <label class="option"><input type="radio" name="answer" value="c">deliverAll locks and mutates rooms.</label>
+    </fieldset>
+    <button type="submit">Check answer</button>
+    <p class="result" data-result aria-live="polite"></p>
+  </form>
+
+  <form class="quiz" data-quiz data-correct="a" data-success="Room serialization protects shared transition order." data-hint="ask which state is shared by several Players.">
+    <fieldset>
+      <legend>What orders two Players' transitions in the same Room?</legend>
+      <label class="option"><input type="radio" name="answer" value="a">The room lock orders shared transitions.</label>
+      <label class="option"><input type="radio" name="answer" value="b">The player lock validates movement speed.</label>
+      <label class="option"><input type="radio" name="answer" value="c">The outbox lock assigns player identifiers.</label>
+    </fieldset>
+    <button type="submit">Check answer</button>
+    <p class="result" data-result aria-live="polite"></p>
+  </form>
+
+  <form class="quiz" data-quiz data-correct="a" data-success="the outbox makes sending ordered and bounded." data-hint="separate network writing from protocol decoding.">
+    <fieldset>
+      <legend>What is the main job of <code>ConnectionOutbox</code>?</legend>
+      <label class="option"><input type="radio" name="answer" value="a">It serializes writes and limits backlog.</label>
+      <label class="option"><input type="radio" name="answer" value="b">It parses JSON and rejects extras.</label>
+      <label class="option"><input type="radio" name="answer" value="c">It creates rooms and selects spawns.</label>
+    </fieldset>
+    <button type="submit">Check answer</button>
+    <p class="result" data-result aria-live="polite"></p>
+  </form>
+
+  <section class="teach-back">
+    <h2>5. Teach it back in 60 seconds</h2>
+    <p>Without scrolling up, explain: <strong>(1)</strong> what Spring calls, <strong>(2)</strong> what happens after <code>join_room</code>, <strong>(3)</strong> why movement is authoritative, and <strong>(4)</strong> why socket writes go through an outbox.</p>
+    <p>Send your explanation to the agent. I can identify missing links, correct terminology, and help you tighten it for another developer.</p>
+  </section>
+
+  <p class="footnotes"><strong>Primary reading:</strong> <a href="https://docs.spring.io/spring-framework/reference/web/websocket/server.html">Spring Framework's WebSocket API</a>, especially handler registration and the concurrent-send warning. Then compare <a href="../backend/src/main/java/dev/lpa/pu_go/websocket/handler/GameWebSocketHandler.java">the handler</a>, <a href="../backend/src/main/java/dev/lpa/pu_go/websocket/handler/ConnectionOutbox.java">the outbox</a>, and <a href="../docs/adr/0004-serialize-room-events-and-coalesce-movement.md">ADR 0004</a>. Keep the <a href="../reference/game-websocket-handler-map.html">architecture map</a> for review.</p>
+</main>
+</body>
+</html>

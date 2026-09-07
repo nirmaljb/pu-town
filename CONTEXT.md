@@ -20,6 +20,10 @@ _Avoid_: Player ID, username
 The visible in-world representation of a player. An avatar may change appearance without changing the player it represents.
 _Avoid_: Player
 
+**Player Colour**:
+A visual marker assigned to a player that is distinct from those of other current players in the same room. It may change when the player rejoins and does not determine player identity.
+_Avoid_: Player ID
+
 **Room**:
 An isolated multiplayer space whose state is shared only among its current players.
 _Avoid_: Lobby, channel
@@ -27,6 +31,10 @@ _Avoid_: Lobby, channel
 **Room Snapshot**:
 The complete set of current players and their positions sent to one player after they join or rejoin a room.
 _Avoid_: Initial state, player list
+
+**Room Code**:
+A shareable code that identifies the room a player wants to join. Anyone with the code may join that room without approval.
+_Avoid_: Lobby code, invite link
 
 **Spawn Point**:
 A valid in-room position at which a player may begin a room membership.

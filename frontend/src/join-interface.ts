@@ -14,14 +14,17 @@ export class JoinInterface {
     this.#root.className = "interface";
     this.#root.innerHTML = `
       <section class="entry-panel" aria-labelledby="entry-title">
-        <p class="eyebrow">A little place to be together</p>
-        <h1 id="entry-title">PU Town<span>.</span></h1>
-        <p class="intro">Make a room. Share the code. Meet here.</p>
-        <form novalidate>
+        <div class="menu-heading">
+          <h1 id="entry-title">PU Town</h1>
+          <p class="intro">A little place to be together.</p>
+        </div>
+        <form class="menu-card" novalidate>
+          <h2 class="menu-title">Meet you in town</h2>
+          <p class="menu-description">Create a Room, or join your friends.</p>
           <label for="display-name">Display Name</label>
           <input id="display-name" name="displayName" autocomplete="nickname" placeholder="What should we call you?" aria-describedby="name-hint" required>
           <p id="name-hint" class="hint">1–24 characters. No account needed.</p>
-          <button class="primary" type="submit" value="create">Create Room <span aria-hidden="true">↗</span></button>
+          <button class="primary" type="submit" value="create"><span aria-hidden="true" class="play-marker">▶</span> Create Room</button>
           <div class="divider"><span>or join your friends</span></div>
           <label for="room-code">Room Code</label>
           <div class="join-row">
@@ -30,7 +33,7 @@ export class JoinInterface {
           </div>
           <p class="entry-status" role="status" aria-live="polite"></p>
         </form>
-        <p class="footnote">Up to 8 Players · Move with the arrow keys</p>
+        <p class="footnote"><span>Up to 8 Players</span><span>Move with <span class="key-hint" aria-label="the arrow keys">↑ ← ↓ →</span></span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>

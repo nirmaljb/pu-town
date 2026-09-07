@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GameWebSocketHandler — architecture map</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <p class="eyebrow">PU Town · quick reference</p>
+  <h1><code>GameWebSocketHandler</code> architecture map</h1>
+  <p class="lede">Spring calls the lifecycle hooks. The handler turns those callbacks into serialized Room transitions and queued protocol events.</p>
+
+  <section class="two-column" aria-label="Responsibility split">
+    <article class="card framework">
+      <span class="label">Spring owns</span>
+      <h2>Transport lifecycle</h2>
+      <p>Upgrade HTTP at <code>/ws/game</code>, create a <code>WebSocketSession</code>, deliver text frames, and report closure.</p>
+    </article>
+    <article class="card application">
+      <span class="label">PU Town owns</span>
+      <h2>Game semantics</h2>
+      <p>Issue Player IDs, decode protocol v1, manage Room membership, validate movement, order events, and protect slow connections.</p>
+    </article>
+  </section>
+
+  <h2>Callback → responsibility</h2>
+  <div class="cards">
+    <article class="card"><h3><code>afterConnectionEstablished</code></h3><p>Create a <code>PlayerState</code>; index it by session and Player ID; create its outbox. Connection is not Join.</p></article>
+    <article class="card"><h3><code>handleTextMessage</code></h3><p>Find the Player, serialize that Player's callbacks, decode strict JSON, then route Join, Leave, or Move.</p></article>
+    <article class="card"><h3><code>afterConnectionClosed</code></h3><p>Remove registries and outbox; if the Player still belongs to a Room, end membership as <code>disconnected</code>.</p></article>
+    <article class="card"><h3><code>@PreDestroy</code></h3><p>Stop the executor that drains outbound queues when Spring destroys the application component.</p></article>
+  </div>
+
+  <h2>The four concurrency boundaries</h2>
+  <section class="four-layers">
+    <article class="layer"><strong>1 · Registries</strong><br><code>ConcurrentHashMap</code> makes shared lookup and update safe.</article>
+    <article class="layer"><strong>2 · One Player</strong><br><code>synchronized (player)</code> orders inbound handling against close cleanup.</article>
+    <article class="layer"><strong>3 · One Room</strong><br><code>RoomManager.serialized</code> orders membership, state changes, and event creation.</article>
+    <article class="layer"><strong>4 · One connection</strong><br><code>ConnectionOutbox</code> serializes socket writes, bounds backlog, and coalesces movement.</article>
+  </section>
+
+  <h2>Message outcomes</h2>
+  <div class="cards">
+    <article class="card"><h3>Join</h3><p>Others receive <code>player_joined</code>; the joining Player receives one complete <code>room_snapshot</code>.</p></article>
+    <article class="card"><h3>Accepted move</h3><p>State becomes authoritative; everyone in the Room—including the sender—receives <code>player_moved</code>.</p></article>
+    <article class="card"><h3>Leave</h3><p>Others receive reason <code>left</code>; the leaving Player receives <code>room_left</code>. Closing later does not duplicate departure.</p></article>
+    <article class="card"><h3>Disconnect</h3><p>Remaining Players receive <code>player_left</code> with reason <code>disconnected</code>; no acknowledgement goes to the closed connection.</p></article>
+  </div>
+
+  <div class="callout"><strong>One-sentence architecture:</strong> A singleton Spring text handler translates connection callbacks and strict JSON commands into authoritative, per-Room serialized transitions, then publishes ordered messages through a bounded asynchronous outbox per connection.</div>
+
+  <p class="footnotes">Sources: <a href="../backend/src/main/java/dev/lpa/pu_go/websocket/handler/GameWebSocketHandler.java">handler source</a> · <a href="../docs/websocket-protocol-v1.md">protocol v1</a> · <a href="../docs/adr/0004-serialize-room-events-and-coalesce-movement.md">ADR 0004</a> · <a href="https://docs.spring.io/spring-framework/reference/web/websocket/server.html">Spring WebSocket API</a></p>
+</main>
+</body>
+</html>
