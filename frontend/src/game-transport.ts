@@ -18,9 +18,11 @@ export class GameTransport {
     private readonly socket: GameSocket,
     private readonly inbox: NetworkInbox,
     onProtocolError: (error: Error) => void = () => undefined,
-    onServerMessage: (message: ServerMessage) => void = () => undefined
+    onServerMessage: (message: ServerMessage) => void = () => undefined,
+    isCurrent: () => boolean = () => true
   ) {
     socket.addEventListener("message", event => {
+      if (!isCurrent()) return;
       try {
         if (typeof event.data !== "string") throw new Error("Server message must be text");
         const message = decodeServerMessage(event.data);

@@ -13,6 +13,8 @@ export function emptyWorld(): WorldState {
 
 export function reduceWorldEvent(world: WorldState, event: ServerMessage): WorldState {
   switch (event.type) {
+    case "pong":
+      return world;
     case "room_snapshot":
       return {
         roomId: event.roomId,

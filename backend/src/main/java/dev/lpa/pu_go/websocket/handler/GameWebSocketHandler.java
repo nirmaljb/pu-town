@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
+    private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4");
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -76,7 +77,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             if (playersBySession.get(session.getId()) != player) return;
             try {
                 ClientMessage incoming = decoder.decode(message.getPayload());
-                if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
+                if (incoming instanceof ClientMessage.CreateRoom create) {
+                    Room room = roomManager.createRoom();
+                    handleJoin(player, new ClientMessage.JoinRoom(1, "join_room", room.getRoomId(), create.displayName()));
+                }
+                else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
+                else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
                 else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
                 else if (incoming instanceof ClientMessage.MovePlayer move) handleMove(player, move);
             } catch (InvalidClientMessageException exception) {
@@ -89,15 +95,26 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String oldRoomId = player.getRoomId();
         List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
         roomManager.serialized(involvedRooms, () -> {
+            Room room = roomManager.findRoom(message.roomId());
+            if (room == null) {
+                deliver(error(player, "room_not_found", "Room not found"));
+                return null;
+            }
+            if (!room.containsPlayer(player.getId()) && room.playerIdsSnapshot().size() >= 8) {
+                deliver(error(player, "room_full", "Room is full"));
+                return null;
+            }
             List<Delivery> pendingDeliveries = new ArrayList<>();
             if (oldRoomId != null && !oldRoomId.equals(message.roomId())) {
                 pendingDeliveries.addAll(endMembership(player, oldRoomId, ServerMessage.DepartureReason.LEFT, false));
             }
 
-            Room room = roomManager.getOrCreateRoom(message.roomId());
             boolean alreadyJoined = room.containsPlayer(player.getId()) && message.roomId().equals(oldRoomId);
             player.setRoomId(message.roomId());
             if (!alreadyJoined) {
+                var usedColours = room.playerIdsSnapshot().stream().map(playersById::get)
+                        .filter(java.util.Objects::nonNull).map(PlayerState::getColour).toList();
+                player.setColour(COLOURS.stream().filter(colour -> !usedColours.contains(colour)).findFirst().orElseThrow());
                 player.setDisplayName(message.displayName());
                 player.setX(RoomRules.SPAWN_X);
                 player.setY(RoomRules.SPAWN_Y);
@@ -147,7 +164,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             player.setX(message.x());
             player.setY(message.y());
             player.setLastAcceptedMovementNanos(now);
-            Room room = roomManager.getOrCreateRoom(roomId);
+            Room room = roomManager.findRoom(roomId);
             List<Delivery> pendingDeliveries = new ArrayList<>();
             addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
                     new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y()));
@@ -162,12 +179,15 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (player == null) return;
         synchronized (player) {
             if (!playersBySession.remove(session.getId(), player)) return;
-            playersById.remove(player.getId());
             outboxes.remove(player.getId());
             String roomId = player.getRoomId();
-            if (roomId == null) return;
+            if (roomId == null) {
+                playersById.remove(player.getId());
+                return;
+            }
             roomManager.serialized(List.of(roomId), () -> {
                 deliverAll(endMembership(player, roomId, ServerMessage.DepartureReason.DISCONNECTED, false));
+                playersById.remove(player.getId());
                 return null;
             });
         }
@@ -175,8 +195,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private List<Delivery> endMembership(PlayerState player, String roomId,
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
-        Room room = roomManager.getOrCreateRoom(roomId);
+        Room room = roomManager.findRoom(roomId);
         room.removePlayer(player.getId());
+        roomManager.membershipEnded(room);
         List<Delivery> pendingDeliveries = new ArrayList<>();
         addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
                 new ServerMessage.PlayerLeft(player.getId(), reason));
@@ -188,7 +209,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getX(), player.getY()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getX(), player.getY()
         );
     }
 

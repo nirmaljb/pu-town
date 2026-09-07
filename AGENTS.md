@@ -72,10 +72,8 @@ npm run build
 
 The frontend development server defaults to port `5173`. `npm test` compiles test-importable JavaScript and then runs the Node test runner. `npm run build` writes the static bundle to `frontend/dist/`.
 
-The client accepts these query parameters:
+The client accepts this infrastructure query parameter (room/name options are ignored):
 
-- `room`, defaulting to `plaza`
-- `name`, defaulting to `Player`
 - `ws`, defaulting to `ws://localhost:8080/ws/game`
 
 ## Repository map
@@ -93,7 +91,8 @@ The client accepts these query parameters:
 - `frontend/src/main.ts` — Phaser game bootstrap and canvas sizing.
 - `frontend/src/pu-town-scene.ts` — scene lifecycle, URL configuration, controls, local movement, and movement-send cadence.
 - `frontend/src/protocol.ts` — client message builders, server message types, and strict decoding.
-- `frontend/src/reconnecting-game-client.ts` — connection lifecycle, reconnection, and retained join intent.
+- `frontend/src/reconnecting-game-client.ts` — entry deadlines, heartbeat, reconnection, and retained join intent.
+- `frontend/src/join-interface.ts` — entry form, remembered Display Name, Room Code controls, and reconnect overlay.
 - `frontend/src/game-transport.ts` — WebSocket serialization and inbound-event handoff.
 - `frontend/src/network-inbox.ts` — queue of decoded server events.
 - `frontend/src/network-frame-boundary.ts` — drains network events at the start of each game frame.
@@ -121,7 +120,7 @@ The client accepts these query parameters:
 ## Runtime flow
 
 1. `main.ts` starts the Phaser scene.
-2. `pu-town-scene.ts` reads the URL options, opens the WebSocket, and requests a room join.
+2. `pu-town-scene.ts` reads the WebSocket endpoint option and presents the join interface; submitting it opens the WebSocket and requests Room creation or Join.
 3. The backend issues a new Player ID for the connection and returns a Room Snapshot.
 4. `game-transport.ts` decodes server messages into `network-inbox.ts`.
 5. `network-frame-boundary.ts` applies queued events to `world-state.ts` before the frame reads input or mutates Phaser objects.

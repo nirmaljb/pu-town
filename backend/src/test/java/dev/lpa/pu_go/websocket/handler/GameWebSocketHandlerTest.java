@@ -17,29 +17,45 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class GameWebSocketHandlerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AtomicLong now = new AtomicLong(1_000_000_000L);
-    private final Iterator<String> playerIds = java.util.List.of("player-1", "player-2").iterator();
+    private final java.util.concurrent.atomic.AtomicInteger playerIds = new java.util.concurrent.atomic.AtomicInteger();
+    private final AtomicLong milliseconds = new AtomicLong();
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
-            new RoomManager(), Runnable::run, playerIds::next, now::get
+            new RoomManager(milliseconds::get), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
     );
+
+    @Test
+    void onlyCreateMakesRoomsAndJoinNormalizesCodes() throws Exception {
+        RecordingWebSocketSession alex = connect("session-1");
+        send(alex, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\"ABC234\",\"displayName\":\"Alex\"}");
+        assertEquals("room_not_found", json(alex.payloads().get(0)).get("code").asText());
+        send(alex, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"  Alex  \"}");
+        JsonNode snapshot = json(alex.payloads().get(1));
+        String code = snapshot.get("roomId").asText();
+        org.junit.jupiter.api.Assertions.assertTrue(code.matches("[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}"));
+        assertEquals("Alex", snapshot.get("players").get(0).get("displayName").asText());
+        RecordingWebSocketSession sam = connect("session-2");
+        send(sam, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\" " + code.toLowerCase() + " \",\"displayName\":\"Alex\"}");
+        assertEquals(2, json(sam.payloads().get(0)).get("players").size());
+    }
 
     @Test
     void joiningReturnsSnapshotAndAnnouncesThePlayerToExistingRoomMembers() throws Exception {
         RecordingWebSocketSession alex = connect("session-1");
         send(alex, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Alex"}
+                {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
 
         JsonNode alexSnapshot = json(alex.payloads().get(0));
         assertEquals("room_snapshot", alexSnapshot.get("type").asText());
         assertEquals(1, alexSnapshot.get("version").asInt());
         assertEquals("player-1", alexSnapshot.get("selfPlayerId").asText());
-        assertEquals("plaza", alexSnapshot.get("roomId").asText());
+        org.junit.jupiter.api.Assertions.assertTrue(alexSnapshot.get("roomId").asText().length() == 6);
         assertEquals("Alex", alexSnapshot.get("players").get(0).get("displayName").asText());
 
         RecordingWebSocketSession sam = connect("session-2");
         send(sam, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Sam"}
-                """);
+                {"version":1,"type":"join_room","roomId":"%s","displayName":"Sam"}
+                """.formatted(json(alex.payloads().get(0)).get("roomId").asText()));
 
         JsonNode joined = json(alex.payloads().get(1));
         assertEquals("player_joined", joined.get("type").asText());
@@ -68,7 +84,7 @@ class GameWebSocketHandlerTest {
     void onlyFiniteInBoundsPlausibleMovementBecomesAuthoritative() throws Exception {
         RecordingWebSocketSession session = connect("session-1");
         send(session, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Alex"}
+                {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
 
         now.addAndGet(1_000_000_000L);
@@ -91,12 +107,12 @@ class GameWebSocketHandlerTest {
     void leavingIsAcknowledgedAndDoesNotMasqueradeAsDisconnecting() throws Exception {
         RecordingWebSocketSession alex = connect("session-1");
         send(alex, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Alex"}
+                {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
         RecordingWebSocketSession sam = connect("session-2");
         send(sam, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Sam"}
-                """);
+                {"version":1,"type":"join_room","roomId":"%s","displayName":"Sam"}
+                """.formatted(json(alex.payloads().get(0)).get("roomId").asText()));
 
         send(sam, """
                 {"version":1,"type":"leave_room"}
@@ -115,18 +131,77 @@ class GameWebSocketHandlerTest {
     void disconnectEndsMembershipAndNotifiesRemainingPlayers() throws Exception {
         RecordingWebSocketSession alex = connect("session-1");
         send(alex, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Alex"}
+                {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
         RecordingWebSocketSession sam = connect("session-2");
         send(sam, """
-                {"version":1,"type":"join_room","roomId":"plaza","displayName":"Sam"}
-                """);
+                {"version":1,"type":"join_room","roomId":"%s","displayName":"Sam"}
+                """.formatted(json(alex.payloads().get(0)).get("roomId").asText()));
 
         handler.afterConnectionClosed(sam, org.springframework.web.socket.CloseStatus.NORMAL);
 
         JsonNode left = json(alex.payloads().get(2));
         assertEquals("player_left", left.get("type").asText());
         assertEquals("disconnected", left.get("reason").asText());
+    }
+
+    @Test
+    void roomHasEightDistinctColoursAndDisconnectFreesASlot() throws Exception {
+        RecordingWebSocketSession first = connect("first");
+        send(first, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        String code = json(first.payloads().get(0)).get("roomId").asText();
+        RecordingWebSocketSession last = null;
+        for (int i = 1; i < 8; i++) {
+            last = connect("member-" + i);
+            join(last, code);
+        }
+        java.util.Set<String> colours = new java.util.HashSet<>();
+        json(last.payloads().get(0)).get("players").forEach(p -> colours.add(p.get("colour").asText()));
+        assertEquals(8, colours.size());
+        RecordingWebSocketSession ninth = connect("ninth");
+        join(ninth, code);
+        assertEquals("room_full", json(ninth.payloads().get(0)).get("code").asText());
+        handler.afterConnectionClosed(first, org.springframework.web.socket.CloseStatus.NORMAL);
+        join(ninth, code);
+        assertEquals(8, json(ninth.payloads().get(1)).get("players").size());
+    }
+
+    @Test
+    void emptyRoomExpiresFiveMinutesAfterLastDeparture() throws Exception {
+        RecordingWebSocketSession first = connect("first");
+        send(first, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        String code = json(first.payloads().get(0)).get("roomId").asText();
+        send(first, "{\"version\":1,\"type\":\"leave_room\"}");
+        milliseconds.set(299_999);
+        join(first, code);
+        assertEquals("room_snapshot", json(first.payloads().get(2)).get("type").asText());
+        send(first, "{\"version\":1,\"type\":\"leave_room\"}");
+        milliseconds.addAndGet(299_999);
+        join(first, code);
+        assertEquals("room_snapshot", json(first.payloads().get(4)).get("type").asText());
+        send(first, "{\"version\":1,\"type\":\"leave_room\"}");
+        milliseconds.addAndGet(300_000);
+        join(first, code);
+        assertEquals("room_not_found", json(first.payloads().get(6)).get("code").asText());
+    }
+
+    @Test
+    void heartbeatRespondsAndNamesAreValidatedBeforeCreation() throws Exception {
+        var session = connect("first");
+        send(session, "{\"version\":1,\"type\":\"ping\"}");
+        assertEquals("pong", json(session.payloads().get(0)).get("type").asText());
+        for (String name : List.of("   ", "a".repeat(25))) {
+            send(session, objectMapper.writeValueAsString(java.util.Map.of(
+                    "version", 1, "type", "create_room", "displayName", name)));
+            assertEquals("malformed_message", json(session.payloads().get(session.payloads().size() - 1)).get("code").asText());
+        }
+        send(session, objectMapper.writeValueAsString(java.util.Map.of(
+                "version", 1, "type", "create_room", "displayName", "a".repeat(24))));
+        assertEquals("room_snapshot", json(session.payloads().get(3)).get("type").asText());
+    }
+
+    private void join(RecordingWebSocketSession session, String code) throws Exception {
+        send(session, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\"" + code + "\",\"displayName\":\"Alex\"}");
     }
 
     private RecordingWebSocketSession connect(String sessionId) throws Exception {

@@ -4,12 +4,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.List;
 
-public sealed interface ServerMessage permits ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
+public sealed interface ServerMessage permits ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerMoved, ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage {
     int version();
     String type();
 
-    record PlayerView(String playerId, String displayName, double x, double y) {}
+    record Pong(int version, String type) implements ServerMessage {
+        public Pong() { this(1, "pong"); }
+    }
+
+    record PlayerView(String playerId, String displayName, String colour, double x, double y) {}
 
     enum DepartureReason {
         LEFT("left"),

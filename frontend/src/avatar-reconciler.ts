@@ -17,7 +17,7 @@ export class AvatarReconciler implements WorldReconciler {
       }
     }
     for (const player of world.players.values()) {
-      const avatar = this.#avatars.get(player.playerId) ?? this.createAvatar(player.playerId, player.displayName);
+      const avatar = this.#avatars.get(player.playerId) ?? this.createAvatar(player.playerId, player.displayName, player.colour);
       avatar.container.setPosition(player.x, player.y);
     }
   }
@@ -26,8 +26,8 @@ export class AvatarReconciler implements WorldReconciler {
     this.#avatars.get(playerId)?.container.setPosition(x, y);
   }
 
-  private createAvatar(playerId: string, displayName: string): AvatarView {
-    const body = this.scene.add.circle(0, 0, 16, 0x4f8cff);
+  private createAvatar(playerId: string, displayName: string, colour: string): AvatarView {
+    const body = this.scene.add.circle(0, 0, 16, Number.parseInt(colour.slice(1), 16));
     const label = this.scene.add.text(0, -28, displayName, {
       color: "#ffffff",
       fontFamily: "sans-serif",

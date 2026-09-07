@@ -1,5 +1,5 @@
 import { NetworkInbox } from "./network-inbox.js";
-import { reduceWorldEvent, type WorldState } from "./world-state.js";
+import { emptyWorld, reduceWorldEvent, type WorldState } from "./world-state.js";
 
 export interface WorldReconciler {
   reconcile(world: WorldState): void;
@@ -18,6 +18,12 @@ export class NetworkFrameBoundary {
 
   get world(): WorldState {
     return this.#world;
+  }
+
+  reset(): void {
+    this.inbox.drain();
+    this.#world = emptyWorld();
+    this.view.reconcile(this.#world);
   }
 
   /** Call first from the Phaser scene's update method. */

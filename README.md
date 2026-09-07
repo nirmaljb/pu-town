@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The frontend joins the `plaza` room as `Player` by default. Use the arrow keys to move.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Play starts after the server confirms membership. Use the arrow keys to move. Each Room supports eight Players with distinct colours. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -54,19 +54,11 @@ Vite may choose another port when `5173` is unavailable, but the backend current
 
 ## Client options
 
-The frontend reads these URL query parameters:
+The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to `ws://localhost:8080/ws/game`. The former `room` and `name` parameters are ignored.
 
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| `room` | `plaza` | Room to join |
-| `name` | `Player` | Display name shown beside the avatar |
-| `ws` | `ws://localhost:8080/ws/game` | Backend WebSocket URL |
+Create Room generates a six-character Room Code. Join Room requires an existing code. Empty Rooms expire five minutes after their last Player leaves or disconnects; server restart clears all Rooms.
 
-For example:
-
-```text
-http://localhost:5173/?room=plaza&name=Alex
-```
+Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats detect ten seconds without a server response. Reconnection attempts last up to thirty seconds, after which Retry and Back to join are available. Rejoining gets a new Player ID, spawn position and potentially a new colour; it can fail if the Room has expired or filled.
 
 ## Tests and builds
 

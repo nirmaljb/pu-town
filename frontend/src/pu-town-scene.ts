@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { JoinInterface } from "./join-interface.js";
 import { AvatarReconciler } from "./avatar-reconciler.js";
 import { NetworkFrameBoundary } from "./network-frame-boundary.js";
 import { NetworkInbox } from "./network-inbox.js";
@@ -9,6 +10,7 @@ import { emptyWorld } from "./world-state.js";
 export class PuTownScene extends Phaser.Scene {
   readonly #inbox = new NetworkInbox();
   #client?: ReconnectingGameClient;
+  #interface?: JoinInterface;
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -31,17 +33,30 @@ export class PuTownScene extends Phaser.Scene {
     this.#cursors = this.input.keyboard?.createCursorKeys();
 
     const parameters = new URLSearchParams(window.location.search);
-    const roomId = parameters.get("room") || "plaza";
-    const displayName = parameters.get("name") || "Player";
     const websocketUrl = parameters.get("ws") || "ws://localhost:8080/ws/game";
     this.#client = new ReconnectingGameClient(() => new WebSocket(websocketUrl), this.#inbox);
-    this.#client.join(roomId, displayName);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.#client?.stop());
+    this.#interface = new JoinInterface(this.#client);
+    if (this.input.keyboard) this.input.keyboard.enabled = false;
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.#client?.stop();
+      this.#interface?.destroy();
+    });
   }
 
   update(time: number, delta: number): void {
     // Network state is always applied before this frame reads controls or mutates Phaser objects.
+    this.#client?.update();
     this.#frameBoundary?.beginFrame();
+    this.#interface?.render();
+    const playing = this.#client?.state.status === "playing";
+    if (this.input.keyboard) this.input.keyboard.enabled = playing;
+    if (!playing) {
+      this.#movementDirty = false;
+      this.#localPlayerId = null;
+      if (this.#cursors) for (const key of Object.values(this.#cursors)) key.reset();
+      if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
+      return;
+    }
     const world = this.#frameBoundary?.world;
     const selfPlayerId = world?.selfPlayerId ?? null;
     const authoritativePlayer = selfPlayerId === null ? undefined : world?.players.get(selfPlayerId);

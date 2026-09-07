@@ -6,6 +6,9 @@ public class PlayerState {
     private final String playerId;
     private final WebSocketSession session;
     private String displayName;
+    private String colour;
+    public String getColour() { return colour; }
+    public void setColour(String value) { colour = value; }
     private String roomId;
     private double x;
     private double y;

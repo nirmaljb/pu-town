@@ -29,10 +29,18 @@ public final class ClientMessageDecoder {
         }
         String type = requiredText(root, "type");
         return switch (type) {
+            case "ping" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.Ping(1, type);
+            }
+            case "create_room" -> {
+                requireOnly(root, Set.of("version", "type", "displayName"));
+                yield new ClientMessage.CreateRoom(PROTOCOL_VERSION, type, displayName(root));
+            }
             case "join_room" -> {
                 requireOnly(root, Set.of("version", "type", "roomId", "displayName"));
                 yield new ClientMessage.JoinRoom(PROTOCOL_VERSION, type,
-                        requiredText(root, "roomId"), requiredText(root, "displayName"));
+                        requiredText(root, "roomId").strip().toUpperCase(java.util.Locale.ROOT), displayName(root));
             }
             case "leave_room" -> {
                 requireOnly(root, Set.of("version", "type"));
@@ -45,6 +53,13 @@ public final class ClientMessageDecoder {
             }
             default -> throw new InvalidClientMessageException("unknown_message_type", "Unknown message type: " + type);
         };
+    }
+
+    private static String displayName(JsonNode root) throws InvalidClientMessageException {
+        String name = requiredText(root, "displayName").strip();
+        if (name.codePointCount(0, name.length()) > 24)
+            throw new InvalidClientMessageException("malformed_message", "Display Name must be 1–24 characters.");
+        return name;
     }
 
     private static String requiredText(JsonNode root, String name) throws InvalidClientMessageException {
