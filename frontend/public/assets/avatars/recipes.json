@@ -1,0 +1,812 @@
+{
+  "source": "https://raw.githubusercontent.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/d44ea7d6904891aab8627b80ff4de1560d63bdff/",
+  "revision": "d44ea7d6904891aab8627b80ff4de1560d63bdff",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "directions": [
+    "up",
+    "left",
+    "down",
+    "right"
+  ],
+  "standingColumn": 0,
+  "walkingColumns": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "modifications": "Exact simultaneous RGB palette substitution preserving alpha, then source-over layer composition in listed order at (0,0). No scaling or frame changes.",
+  "presets": [
+    {
+      "id": "townsperson-1",
+      "layers": [
+        {
+          "file": "body/bodies/male/walk.png",
+          "material": "body",
+          "palette": "light",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/male/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/male/walk.png",
+          "material": "cloth",
+          "palette": "navy",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#180716",
+            "#20102B",
+            "#281E41",
+            "#322D6A",
+            "#3C49AD",
+            "#466AC9"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/male/walk.png",
+          "material": "cloth",
+          "palette": "forest",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#09131d",
+            "#07391D",
+            "#0B1F25",
+            "#0B2B28",
+            "#134507",
+            "#1B5502"
+          ]
+        },
+        {
+          "file": "head/heads/human/male/walk.png",
+          "material": "body",
+          "palette": "light",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ]
+        },
+        {
+          "file": "hair/plain/adult/walk.png",
+          "material": "hair",
+          "palette": "ginger",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#300500",
+            "#6A1A00",
+            "#9C3B01",
+            "#CC6901",
+            "#FAA301",
+            "#FFE01E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "townsperson-2",
+      "layers": [
+        {
+          "file": "body/bodies/female/walk.png",
+          "material": "body",
+          "palette": "bronze",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#1A1213",
+            "#442725",
+            "#644133",
+            "#7F4C31",
+            "#AE6B3F",
+            "#D38B59"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/thin/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/thin/walk.png",
+          "material": "cloth",
+          "palette": "charcoal",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#130D14",
+            "#1C2222",
+            "#2A3034",
+            "#4A5057",
+            "#6E7675"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/female/walk.png",
+          "material": "cloth",
+          "palette": "rose",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#1d131e",
+            "#301723",
+            "#562323",
+            "#77372B",
+            "#8A3D28",
+            "#B05F3C"
+          ]
+        },
+        {
+          "file": "head/heads/human/female/walk.png",
+          "material": "body",
+          "palette": "bronze",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#1A1213",
+            "#442725",
+            "#644133",
+            "#7F4C31",
+            "#AE6B3F",
+            "#D38B59"
+          ]
+        },
+        {
+          "file": "hair/curly_long/adult/walk.png",
+          "material": "hair",
+          "palette": "black",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#000000",
+            "#080A0A",
+            "#101414",
+            "#1C2222",
+            "#31313E",
+            "#4A5057"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "townsperson-3",
+      "layers": [
+        {
+          "file": "body/bodies/male/walk.png",
+          "material": "body",
+          "palette": "brown",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#120E10",
+            "#412B29",
+            "#5F4539",
+            "#76513A",
+            "#9C663E",
+            "#B8773F"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/male/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/male/walk.png",
+          "material": "cloth",
+          "palette": "walnut",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#1d0f0e",
+            "#3e2613",
+            "#62351c",
+            "#744b30",
+            "#996b4a",
+            "#a17c50"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/male/walk.png",
+          "material": "cloth",
+          "palette": "sky",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#1a0d18",
+            "#313148",
+            "#586B90",
+            "#9FBBCB",
+            "#C6EEFD",
+            "#FFFFFF"
+          ]
+        },
+        {
+          "file": "head/heads/human/male/walk.png",
+          "material": "body",
+          "palette": "brown",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#120E10",
+            "#412B29",
+            "#5F4539",
+            "#76513A",
+            "#9C663E",
+            "#B8773F"
+          ]
+        },
+        {
+          "file": "hair/curly_short/adult/walk.png",
+          "material": "hair",
+          "palette": "black",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#000000",
+            "#080A0A",
+            "#101414",
+            "#1C2222",
+            "#31313E",
+            "#4A5057"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "townsperson-4",
+      "layers": [
+        {
+          "file": "body/bodies/female/walk.png",
+          "material": "body",
+          "palette": "olive",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#442725",
+            "#7F4C31",
+            "#AE6B3F",
+            "#D38B59",
+            "#E4A47C"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/thin/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/thin/walk.png",
+          "material": "cloth",
+          "palette": "navy",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#180716",
+            "#20102B",
+            "#281E41",
+            "#322D6A",
+            "#3C49AD",
+            "#466AC9"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/female/walk.png",
+          "material": "cloth",
+          "palette": "yellow",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#301723",
+            "#5F2F25",
+            "#BA5B23",
+            "#D99431",
+            "#F3C03F",
+            "#FFE360"
+          ]
+        },
+        {
+          "file": "head/heads/human/female/walk.png",
+          "material": "body",
+          "palette": "olive",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#442725",
+            "#7F4C31",
+            "#AE6B3F",
+            "#D38B59",
+            "#E4A47C"
+          ]
+        },
+        {
+          "file": "hair/bob/adult/walk.png",
+          "material": "hair",
+          "palette": "dark_brown",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#050100",
+            "#160701",
+            "#290E02",
+            "#421603",
+            "#5F1F04",
+            "#792806"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "townsperson-5",
+      "layers": [
+        {
+          "file": "body/bodies/male/walk.png",
+          "material": "body",
+          "palette": "taupe",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#503734",
+            "#785946",
+            "#936849",
+            "#BA8454",
+            "#C7935F"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/male/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/male/walk.png",
+          "material": "cloth",
+          "palette": "charcoal",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#130D14",
+            "#1C2222",
+            "#2A3034",
+            "#4A5057",
+            "#6E7675"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/male/walk.png",
+          "material": "cloth",
+          "palette": "maroon",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#1d131e",
+            "#400B1F",
+            "#551C22",
+            "#682121",
+            "#832121",
+            "#AE424A"
+          ]
+        },
+        {
+          "file": "head/heads/human/male/walk.png",
+          "material": "body",
+          "palette": "taupe",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#271920",
+            "#503734",
+            "#785946",
+            "#936849",
+            "#BA8454",
+            "#C7935F"
+          ]
+        },
+        {
+          "file": "hair/curly_short2/adult/walk.png",
+          "material": "hair",
+          "palette": "gray",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#0E0E0E",
+            "#292929",
+            "#4B4B4B",
+            "#777777",
+            "#AAAAAA",
+            "#D9D9D9"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "townsperson-6",
+      "layers": [
+        {
+          "file": "body/bodies/female/walk.png",
+          "material": "body",
+          "palette": "amber",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#281716",
+            "#9E3E37",
+            "#D28144",
+            "#EA9F54",
+            "#FDD082",
+            "#FBE7A4"
+          ]
+        },
+        {
+          "file": "feet/shoes/basic/thin/walk.png",
+          "material": "cloth",
+          "palette": "black",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#000000",
+            "#101414",
+            "#1C2222",
+            "#22282A",
+            "#2A3034",
+            "#4A5057"
+          ]
+        },
+        {
+          "file": "legs/pants/thin/walk.png",
+          "material": "cloth",
+          "palette": "brown",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#1d131e",
+            "#411E05",
+            "#4B2B13",
+            "#62351C",
+            "#744B30",
+            "#996B4A"
+          ]
+        },
+        {
+          "file": "torso/clothes/shortsleeve/tshirt/female/walk.png",
+          "material": "cloth",
+          "palette": "teal",
+          "sourceColors": [
+            "#281820",
+            "#4D4A5D",
+            "#958080",
+            "#C4B59F",
+            "#E5E6C7",
+            "#FFFFFF"
+          ],
+          "targetColors": [
+            "#180716",
+            "#1B2B47",
+            "#0E4E72",
+            "#156C99",
+            "#0098B2",
+            "#00CFDF"
+          ]
+        },
+        {
+          "file": "head/heads/human/female/walk.png",
+          "material": "body",
+          "palette": "amber",
+          "sourceColors": [
+            "#271920",
+            "#99423c",
+            "#cc8665",
+            "#E4A47C",
+            "#F9D5BA",
+            "#FAECE7"
+          ],
+          "targetColors": [
+            "#281716",
+            "#9E3E37",
+            "#D28144",
+            "#EA9F54",
+            "#FDD082",
+            "#FBE7A4"
+          ]
+        },
+        {
+          "file": "hair/long_straight/adult/walk.png",
+          "material": "hair",
+          "palette": "chestnut",
+          "sourceColors": [
+            "#260D14",
+            "#6A1108",
+            "#A42600",
+            "#BF4000",
+            "#E55600",
+            "#FF8A00"
+          ],
+          "targetColors": [
+            "#200C0D",
+            "#3A130E",
+            "#63200B",
+            "#81310A",
+            "#B6550E",
+            "#D28102"
+          ]
+        }
+      ]
+    }
+  ]
+}
