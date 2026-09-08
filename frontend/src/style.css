@@ -163,3 +163,5 @@ h2 { margin: 16px 0; font-size: 28px; }
   .menu-card::before { animation: none; }
   .entry-panel button { transition: none; }
 }
+
+.art-credits { position: fixed; right: 14px; bottom: 10px; pointer-events: auto; color: #bbc5d8; font-size: 11px; }

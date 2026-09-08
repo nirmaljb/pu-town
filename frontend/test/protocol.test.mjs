@@ -29,7 +29,20 @@ test("create, heartbeat and colour messages use strict schemas", async () => {
   assert.equal(createRoom("a".repeat(24)).displayName.length, 24);
   assert.deepEqual(decodeServerMessage('{"version":1,"type":"pong"}'), { version: 1, type: "pong" });
   assert.throws(() => decodeServerMessage('{"version":1,"type":"pong","x":1}'), /fields/);
-  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", x: 640, y: 360 };
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", x: 640, y: 360 };
   assert.equal(decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player })).player.colour, "#4F8CFF");
   assert.throws(() => decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player: { ...player, colour: "red" } })));
+});
+
+test("snapshots and join announcements require a known Avatar Preset", () => {
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-6", x: 640, y: 360 };
+  for (const envelope of [
+    p => ({ version: 1, type: "player_joined", player: p }),
+    p => ({ version: 1, type: "room_snapshot", selfPlayerId: "p", roomId: "ABC234", players: [p] })
+  ]) {
+    assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope(player))));
+    for (const avatarPreset of [undefined, null, 1, "", "townsperson-7", "../../image"]) {
+      assert.throws(() => decodeServerMessage(JSON.stringify(envelope({ ...player, avatarPreset }))));
+    }
+  }
 });

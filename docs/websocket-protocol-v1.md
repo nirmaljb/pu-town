@@ -24,7 +24,11 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `room_left` | `roomId: string` |
 | `error` | `code: string`, `message: string` |
 
-`PlayerView` contains exactly `playerId`, `displayName`, `colour`, `x`, and `y`. `colour` is an uppercase six-digit hex colour prefixed by `#`.
+`PlayerView` contains exactly `playerId`, `displayName`, `colour`, `avatarPreset`, `x`, and `y`. `colour` is an uppercase six-digit hex colour prefixed by `#`. `avatarPreset` is one of `townsperson-1`, `townsperson-2`, `townsperson-3`, `townsperson-4`, `townsperson-5`, or `townsperson-6`.
+
+The server randomly assigns an Avatar Preset when a new Room Membership begins, including Create Room and Reconnect. Duplicates are allowed. The assignment remains unchanged during movement, repeated Join to the same Room, and failed room switches. Room Snapshots and join announcements carry the same assignment to all observers. A new membership draws again and may receive the same preset. Player Colour remains the distinct marker underneath the character.
+
+Clients infer walking and facing from position changes at game-frame boundaries. Local animation stops when movement stops; remote animation stops after 150 ms without a position change. Standing retains the last direction; new Avatars face down. No facing or animation fields are accepted in movement messages. Positions mark the Avatar's feet; existing room bounds are unchanged, so artwork may clip at the edges.
 
 The server issues a new Player ID for every WebSocket connection. A successful join places the player at `(640, 360)` in a `1280 × 720` room. Movement must remain within those bounds and may cover at most `240` units per second since the last accepted position, plus `32` units of network tolerance.
 
@@ -45,4 +49,4 @@ Empty Rooms expire five minutes after the last departure. Join checks expiry syn
 
 Leave freezes movement immediately. `room_left` acknowledges it; if the connection ends or acknowledgment times out after ten seconds, the client closes it and returns to entry without reconnecting.
 
-These changes extend protocol v1 for the coordinated local client/server release; older clients lacking Player Colour decoding must be updated together with the server.
+These changes extend protocol v1 for the coordinated local client/server release; older clients lacking Player Colour or Avatar Preset decoding must be updated together with the server.

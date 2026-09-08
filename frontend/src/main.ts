@@ -5,6 +5,7 @@ import "./style.css";
 
 new Phaser.Game({
   type: Phaser.AUTO,
+  pixelArt: true,
   parent: "game",
   width: ROOM_WIDTH,
   height: ROOM_HEIGHT,

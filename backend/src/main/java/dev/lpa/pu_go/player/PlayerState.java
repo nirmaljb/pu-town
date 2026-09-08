@@ -7,6 +7,9 @@ public class PlayerState {
     private final WebSocketSession session;
     private String displayName;
     private String colour;
+    private String avatarPreset;
+    public String getAvatarPreset() { return avatarPreset; }
+    public void setAvatarPreset(String value) { avatarPreset = value; }
     public String getColour() { return colour; }
     public void setColour(String value) { colour = value; }
     private String roomId;

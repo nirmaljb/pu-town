@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { JoinInterface } from "./join-interface.js";
-import { AvatarReconciler } from "./avatar-reconciler.js";
+import { AvatarReconciler, preloadAvatars } from "./avatar-reconciler.js";
 import { NetworkFrameBoundary } from "./network-frame-boundary.js";
 import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
@@ -24,6 +24,10 @@ export class PuTownScene extends Phaser.Scene {
 
   constructor() {
     super("pu-town");
+  }
+
+  preload(): void {
+    preloadAvatars(this);
   }
 
   create(): void {
@@ -51,6 +55,7 @@ export class PuTownScene extends Phaser.Scene {
     const playing = this.#client?.state.status === "playing";
     if (this.input.keyboard) this.input.keyboard.enabled = playing;
     if (!playing) {
+      this.#avatarReconciler?.updateAnimations(time, null, true);
       this.#movementDirty = false;
       this.#localPlayerId = null;
       if (this.#cursors) for (const key of Object.values(this.#cursors)) key.reset();
@@ -76,6 +81,7 @@ export class PuTownScene extends Phaser.Scene {
     const horizontal = Number(this.#cursors.right.isDown) - Number(this.#cursors.left.isDown);
     const vertical = Number(this.#cursors.down.isDown) - Number(this.#cursors.up.isDown);
     if (horizontal === 0 && vertical === 0) {
+      this.#avatarReconciler?.updateAnimations(time, selfPlayerId);
       if (this.#movementDirty) {
         this.#client?.move(this.#localX, this.#localY);
         this.#lastMovementSentAt = time;
@@ -88,6 +94,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#localX = Phaser.Math.Clamp(this.#localX + horizontal / magnitude * distance, 0, ROOM_WIDTH);
     this.#localY = Phaser.Math.Clamp(this.#localY + vertical / magnitude * distance, 0, ROOM_HEIGHT);
     this.#avatarReconciler?.moveLocally(selfPlayerId, this.#localX, this.#localY);
+    this.#avatarReconciler?.updateAnimations(time, selfPlayerId);
     this.#movementDirty = true;
 
     if (time - this.#lastMovementSentAt >= MOVEMENT_SEND_INTERVAL_MS) {

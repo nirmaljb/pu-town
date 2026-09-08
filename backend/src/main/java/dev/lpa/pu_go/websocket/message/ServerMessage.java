@@ -13,7 +13,7 @@ public sealed interface ServerMessage permits ServerMessage.Pong, ServerMessage.
         public Pong() { this(1, "pong"); }
     }
 
-    record PlayerView(String playerId, String displayName, String colour, double x, double y) {}
+    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, double x, double y) {}
 
     enum DepartureReason {
         LEFT("left"),

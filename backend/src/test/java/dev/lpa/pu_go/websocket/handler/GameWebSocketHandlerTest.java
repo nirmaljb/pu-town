@@ -64,6 +64,41 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
+    void avatarAssignmentIsSharedAndStableForTheRoomMembership() throws Exception {
+        var alex = connect("alex");
+        send(alex, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        JsonNode initial = json(alex.payloads().get(0));
+        String code = initial.get("roomId").asText();
+        String alexPreset = initial.get("players").get(0).get("avatarPreset").asText();
+        org.junit.jupiter.api.Assertions.assertTrue(alexPreset.matches("townsperson-[1-6]"));
+
+        var sam = connect("sam");
+        join(sam, code);
+        JsonNode announcement = json(alex.payloads().get(1)).get("player");
+        JsonNode samSnapshot = json(sam.payloads().get(0));
+        for (JsonNode player : samSnapshot.get("players")) {
+            String expected = player.get("playerId").asText().equals("player-1")
+                    ? alexPreset : announcement.get("avatarPreset").asText();
+            assertEquals(expected, player.get("avatarPreset").asText());
+            org.junit.jupiter.api.Assertions.assertTrue(expected.matches("townsperson-[1-6]"));
+        }
+
+        // Repeated Join is idempotent; failed room switches keep the current appearance.
+        join(alex, code);
+        join(alex, "AAAAAA".equals(code) ? "BBBBBB" : "AAAAAA");
+        now.addAndGet(1_000_000_000L);
+        send(alex, "{\"version\":1,\"type\":\"move_player\",\"x\":650,\"y\":360}");
+        join(alex, code);
+        JsonNode finalSnapshot = json(alex.payloads().get(alex.payloads().size() - 1));
+        for (JsonNode player : finalSnapshot.get("players")) {
+            if (player.get("playerId").asText().equals("player-1")) {
+                assertEquals(alexPreset, player.get("avatarPreset").asText());
+                assertEquals(650, player.get("x").asDouble());
+            }
+        }
+    }
+
+    @Test
     void malformedOrIncompatibleMessagesAreRejectedAtTheProtocolBoundary() throws Exception {
         RecordingWebSocketSession session = connect("session-1");
 

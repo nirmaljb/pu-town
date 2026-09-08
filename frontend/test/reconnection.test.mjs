@@ -13,7 +13,7 @@ function setup() {
   return { client, sockets, inbox, advance(ms) { now += ms; client.update(); } };
 }
 const snapshot = { version: 1, type: "room_snapshot", roomId: "ABC234", selfPlayerId: "p",
-  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", x: 640, y: 360 }] };
+  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", x: 640, y: 360 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
   const { client, sockets } = setup();

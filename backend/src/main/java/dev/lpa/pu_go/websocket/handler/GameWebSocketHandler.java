@@ -27,12 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4");
+    private static final List<String> AVATAR_PRESETS = List.of("townsperson-1", "townsperson-2", "townsperson-3", "townsperson-4", "townsperson-5", "townsperson-6");
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -115,6 +117,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 var usedColours = room.playerIdsSnapshot().stream().map(playersById::get)
                         .filter(java.util.Objects::nonNull).map(PlayerState::getColour).toList();
                 player.setColour(COLOURS.stream().filter(colour -> !usedColours.contains(colour)).findFirst().orElseThrow());
+                player.setAvatarPreset(AVATAR_PRESETS.get(ThreadLocalRandom.current().nextInt(AVATAR_PRESETS.size())));
                 player.setDisplayName(message.displayName());
                 player.setX(RoomRules.SPAWN_X);
                 player.setY(RoomRules.SPAWN_Y);
@@ -209,7 +212,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getColour(), player.getX(), player.getY()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getX(), player.getY()
         );
     }
 

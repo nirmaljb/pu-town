@@ -20,6 +20,10 @@ _Avoid_: Player ID, username
 The visible in-world representation of a player. An avatar may change appearance without changing the player it represents.
 _Avoid_: Player
 
+**Avatar Preset**:
+A ready-made character appearance assigned to a player's avatar for a room membership. Multiple players may share a preset; it does not determine player identity or gender.
+_Avoid_: Player, Player ID
+
 **Player Colour**:
 A visual marker assigned to a player that is distinct from those of other current players in the same room. It may change when the player rejoins and does not determine player identity.
 _Avoid_: Player ID

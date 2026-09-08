@@ -52,7 +52,8 @@ export class JoinInterface {
             <button type="button" class="back">Back to join</button>
           </div>
         </div>
-      </section>`;
+      </section>
+      <a class="art-credits" href="assets/avatars/credits.html" target="_blank" rel="noopener">Character art credits</a>`;
     document.body.append(this.#root);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");

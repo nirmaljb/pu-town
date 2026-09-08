@@ -17,7 +17,7 @@ test("network events affect the world only when a game frame begins", () => {
     type: "room_snapshot",
     selfPlayerId: "player-1",
     roomId: "plaza",
-    players: [{ playerId: "player-1", displayName: "Alex", x: 640, y: 360 }]
+    players: [{ playerId: "player-1", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", x: 640, y: 360 }]
   });
 
   assert.equal(boundary.world.players.size, 0);
@@ -37,7 +37,7 @@ test("one frame drains queued events in transport order before reconciling once"
   });
 
   inbox.enqueue({ version: 1, type: "player_joined", player: {
-    playerId: "player-2", displayName: "Sam", x: 640, y: 360
+    playerId: "player-2", displayName: "Sam", colour: "#FF8066", avatarPreset: "townsperson-2", x: 640, y: 360
   }});
   inbox.enqueue({ version: 1, type: "player_moved", playerId: "player-2", x: 650, y: 360 });
   inbox.enqueue({ version: 1, type: "player_left", playerId: "player-2", reason: "left" });

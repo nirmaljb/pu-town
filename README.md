@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Play starts after the server confirms membership. Use the arrow keys to move. Each Room supports eight Players with distinct colours. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Play starts after the server confirms membership. Use the arrow keys to move. Each Room supports eight Players with distinct colours. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -58,7 +58,15 @@ The `ws` URL query parameter configures the backend WebSocket endpoint, defaulti
 
 Create Room generates a six-character Room Code. Join Room requires an existing code. Empty Rooms expire five minutes after their last Player leaves or disconnects; server restart clears all Rooms.
 
-Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats detect ten seconds without a server response. Reconnection attempts last up to thirty seconds, after which Retry and Back to join are available. Rejoining gets a new Player ID, spawn position and potentially a new colour; it can fail if the Room has expired or filled.
+Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats detect ten seconds without a server response. Reconnection attempts last up to thirty seconds, after which Retry and Back to join are available. Rejoining gets a new Player ID, spawn position, a fresh random Avatar Preset and potentially a new colour; it can fail if the Room has expired or filled.
+
+## Character artwork
+
+The six sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
+
+[`frontend/public/assets/avatars/recipes.json`](frontend/public/assets/avatars/recipes.json) records the pinned upstream revision, ordered source layers, and exact palette substitutions. [`CREDITS.csv`](frontend/public/assets/avatars/CREDITS.csv) preserves the selected layers' authors, source URLs, and licenses. The game links to a readable credits page. Selected art is used under OGA-BY 3.0, with CC0 bob and long straight hairstyles.
+
+The server and frontend must be restarted/refreshed together for the updated Player View contract. Presets stay fixed for a Room Membership; duplicates are allowed and reconnect draws again. Sprites use feet-anchored coordinates and can clip at the existing room edges.
 
 ## Tests and builds
 

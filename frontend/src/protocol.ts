@@ -1,9 +1,12 @@
+import { requireAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
+
 export const PROTOCOL_VERSION = 1 as const;
 
 export type PlayerView = Readonly<{
   playerId: string;
   displayName: string;
   colour: string;
+  avatarPreset: AvatarPreset;
   x: number;
   y: number;
 }>;
@@ -119,11 +122,12 @@ export function decodeServerMessage(payload: string): ServerMessage {
 
 function decodePlayer(value: unknown): PlayerView {
   const player = requireRecord(value, "player");
-  requireFields(player, ["playerId", "displayName", "colour", "x", "y"]);
+  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "x", "y"]);
   return {
     playerId: requireNonEmptyString(player.playerId, "playerId"),
     displayName: requireNonEmptyString(player.displayName, "displayName"),
     colour: requireColour(player.colour),
+    avatarPreset: requireAvatarPreset(player.avatarPreset),
     x: requireFiniteNumber(player.x, "x"),
     y: requireFiniteNumber(player.y, "y")
   };
