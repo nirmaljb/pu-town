@@ -29,6 +29,16 @@ public final class ClientMessageDecoder {
         }
         String type = requiredText(root, "type");
         return switch (type) {
+            case "set_ready" -> {
+                requireOnly(root, Set.of("version", "type", "ready"));
+                if (!root.get("ready").isBoolean())
+                    throw new InvalidClientMessageException("malformed_message", "ready must be a boolean.");
+                yield new ClientMessage.SetReady(1, type, root.get("ready").asBoolean());
+            }
+            case "start_game" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.StartGame(1, type);
+            }
             case "ping" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.Ping(1, type);

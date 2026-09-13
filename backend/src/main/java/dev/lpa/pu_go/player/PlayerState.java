@@ -12,6 +12,12 @@ public class PlayerState {
     public void setAvatarPreset(String value) { avatarPreset = value; }
     public String getColour() { return colour; }
     public void setColour(String value) { colour = value; }
+    private boolean ready;
+    public boolean isReady() { return ready; }
+    public void setReady(boolean value) { ready = value; }
+    private Integer seat;
+    public Integer getSeat() { return seat; }
+    public void setSeat(Integer value) { seat = value; }
     private String roomId;
     private double x;
     private double y;

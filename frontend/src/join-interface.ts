@@ -1,3 +1,5 @@
+import { ROOM_CAPACITY } from "./meeting-area.js";
+import type { WorldState } from "./world-state.js";
 import { normalizeDisplayName } from "./protocol.js";
 import { ReconnectingGameClient, type ConnectionState } from "./reconnecting-game-client.js";
 
@@ -9,6 +11,8 @@ export class JoinInterface {
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
   #lastState: ConnectionState | null = null;
+  #world?: WorldState;
+  #lastWorld?: WorldState;
 
   constructor(private readonly client: ReconnectingGameClient) {
     this.#root.className = "interface";
@@ -33,15 +37,21 @@ export class JoinInterface {
           </div>
           <p class="entry-status" role="status" aria-live="polite"></p>
         </form>
-        <p class="footnote"><span>Up to 8 Players</span><span>Move with <span class="key-hint" aria-label="the arrow keys">↑ ← ↓ →</span></span></p>
+        <p class="footnote"><span>Up to 10 Players</span><span>Move with <span class="key-hint" aria-label="the arrow keys">↑ ← ↓ →</span></span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>
         <div class="room-code-label">Room Code <strong class="active-code"></strong></div>
         <button type="button" class="copy-code">Copy code</button>
+        <span class="occupancy"></span>
         <span class="room-status" role="status"></span>
         <button type="button" class="leave-room">Leave Room</button>
       </header>
+      <section class="lobby-controls" hidden aria-label="Lobby controls">
+        <div><strong>Gather in the Town Hall</strong><p class="host-guidance"></p></div>
+        <button type="button" class="ready-toggle" aria-pressed="false">Ready</button>
+        <button type="button" class="primary start-game">Start Game</button>
+      </section>
       <section class="connection-overlay" hidden aria-labelledby="connection-title">
         <div class="connection-card">
           <p class="eyebrow">Connection interrupted</p>
@@ -77,6 +87,11 @@ export class JoinInterface {
         this.element(".entry-status").textContent = error instanceof Error ? error.message : String(error);
       }
     });
+    this.element(".ready-toggle").addEventListener("click", () => {
+      const self = this.#world?.players.get(this.#world.selfPlayerId ?? "");
+      if (self) this.client.setReady(!self.ready);
+    });
+    this.element(".start-game").addEventListener("click", () => this.client.startGame());
     this.element(".leave-room").addEventListener("click", () => { this.client.leave(); this.render(); });
     this.element(".back").addEventListener("click", () => { this.client.cancel(); this.render(); });
     this.element(".retry").addEventListener("click", () => { this.client.retry(); this.render(); });
@@ -91,9 +106,25 @@ export class JoinInterface {
     this.render();
   }
 
-  render(): void {
+  render(world?: WorldState): void {
+    if (world) this.#world = world;
     const state = this.client.state;
-    if (state === this.#lastState) return;
+    if (state === this.#lastState && this.#world === this.#lastWorld) return;
+    this.#lastWorld = this.#world;
+    const lobby = this.#world?.phase === "lobby";
+    const host = this.#world?.hostPlayerId === this.#world?.selfPlayerId;
+    const self = this.#world?.players.get(this.#world.selfPlayerId ?? "");
+    this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
+    this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
+    this.element(".host-guidance").textContent = host
+      ? "You are the Host. Start whenever you like."
+      : "Waiting for the Host to start";
+    this.element<HTMLButtonElement>(".start-game").hidden = !host;
+    this.element<HTMLButtonElement>(".start-game").disabled = state.status !== "playing";
+    const ready = this.element<HTMLButtonElement>(".ready-toggle");
+    ready.disabled = state.status !== "playing";
+    ready.textContent = self?.ready ? "Not Ready" : "Ready";
+    ready.setAttribute("aria-pressed", String(self?.ready ?? false));
     const previous = this.#lastState;
     this.#lastState = state;
     const entry = state.status === "join" || state.status === "connecting";

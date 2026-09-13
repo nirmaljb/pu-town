@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Play starts after the server confirms membership. Use the arrow keys to move. Each Room supports eight Players with distinct colours. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -58,7 +58,9 @@ The `ws` URL query parameter configures the backend WebSocket endpoint, defaulti
 
 Create Room generates a six-character Room Code. Join Room requires an existing code. Empty Rooms expire five minutes after their last Player leaves or disconnects; server restart clears all Rooms.
 
-Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats detect ten seconds without a server response. Reconnection attempts last up to thirty seconds, after which Retry and Back to join are available. Rejoining gets a new Player ID, spawn position, a fresh random Avatar Preset and potentially a new colour; it can fail if the Room has expired or filled.
+Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats detect ten seconds without a server response. Reconnection attempts last up to thirty seconds, after which Retry and Back to join are available. Rejoining gets a new Player ID, a fresh random Avatar Preset and potentially a new colour. In a Lobby it takes the first empty chair as Not Ready; in a started Room it enters active play at the spawn position. Rejoining it can fail if the Room has expired or filled.
+
+The Lobby keeps Players stationary on both client and server. Departures free chairs without shifting other occupants. When the Host leaves or disconnects, the longest-present remaining Player becomes Host; a returning former Host does not reclaim that role. The Room Code and Leave control remain available in both phases. After the last departure a started Room resets to a fresh Lobby, preserving the five-minute empty-Room expiry.
 
 ## Character artwork
 

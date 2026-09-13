@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.List;
 
-public sealed interface ServerMessage permits ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
+public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerMoved, ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage {
     int version();
     String type();
@@ -13,7 +13,7 @@ public sealed interface ServerMessage permits ServerMessage.Pong, ServerMessage.
         public Pong() { this(1, "pong"); }
     }
 
-    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, double x, double y) {}
+    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, Integer seat, boolean ready, double x, double y) {}
 
     enum DepartureReason {
         LEFT("left"),
@@ -27,10 +27,17 @@ public sealed interface ServerMessage permits ServerMessage.Pong, ServerMessage.
         public String wireValue() { return wireValue; }
     }
 
-    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, List<PlayerView> players)
+    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String phase, String hostPlayerId, List<PlayerView> players)
             implements ServerMessage {
-        public RoomSnapshot(String selfPlayerId, String roomId, List<PlayerView> players) {
-            this(1, "room_snapshot", selfPlayerId, roomId, List.copyOf(players));
+        public RoomSnapshot(String selfPlayerId, String roomId, String phase, String hostPlayerId, List<PlayerView> players) {
+            this(1, "room_snapshot", selfPlayerId, roomId, phase, hostPlayerId, List.copyOf(players));
+        }
+    }
+
+    record RoomState(int version, String type, String phase, String hostPlayerId, List<PlayerView> players)
+            implements ServerMessage {
+        public RoomState(String phase, String hostPlayerId, List<PlayerView> players) {
+            this(1, "room_state", phase, hostPlayerId, List.copyOf(players));
         }
     }
 

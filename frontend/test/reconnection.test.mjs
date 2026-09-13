@@ -12,8 +12,8 @@ function setup() {
   }, inbox, () => now);
   return { client, sockets, inbox, advance(ms) { now += ms; client.update(); } };
 }
-const snapshot = { version: 1, type: "room_snapshot", roomId: "ABC234", selfPlayerId: "p",
-  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", x: 640, y: 360 }] };
+const snapshot = { version: 1, type: "room_snapshot", phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
+  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, x: 640, y: 360 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
   const { client, sockets } = setup();
@@ -165,4 +165,35 @@ test("incompatible server messages surface an entry error", () => {
   sockets[0].message({ version: 2, type: "pong" }); client.update();
   assert.equal(client.state.status, "join");
   assert.match(client.state.error, /protocol/);
+});
+
+test("Lobby movement freezes and recovery follows the server phase before sending controls", () => {
+  for (const phase of ["lobby", "playing"]) {
+    const { client, sockets, advance, inbox } = setup();
+    client.create("Alex"); sockets[0].open();
+    sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], seat: 0, ready: false }] });
+    client.update();
+    const count = sockets[0].sent.length;
+    client.move(650, 360);
+    assert.equal(sockets[0].sent.length, count);
+    client.setReady(true);
+    assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "set_ready", ready: true });
+    client.startGame();
+    assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "start_game");
+    sockets[0].disconnect(); advance(500); sockets[1].open();
+    sockets[1].message({ ...snapshot, phase, selfPlayerId: "new", hostPlayerId: "new",
+      players: [{ ...snapshot.players[0], playerId: "new", seat: phase === "lobby" ? 0 : null }] });
+    const before = sockets[1].sent.length;
+    client.move(650, 360);
+    assert.equal(sockets[1].sent.length, before);
+    client.update();
+    client.move(650, 360);
+    assert.equal(sockets[1].sent.length, before + (phase === "playing" ? 1 : 0));
+    assert.equal(inbox.drain().at(-1).phase, phase);
+    if (phase === "playing") {
+      const playingCount = sockets[1].sent.length;
+      client.setReady(true); client.startGame();
+      assert.equal(sockets[1].sent.length, playingCount);
+    }
+  }
 });

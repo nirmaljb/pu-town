@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { MeetingArea } from "./meeting-area.js";
 import { JoinInterface } from "./join-interface.js";
 import { AvatarReconciler, preloadAvatars } from "./avatar-reconciler.js";
 import { NetworkFrameBoundary } from "./network-frame-boundary.js";
@@ -9,6 +10,7 @@ import { emptyWorld } from "./world-state.js";
 
 export class PuTownScene extends Phaser.Scene {
   readonly #inbox = new NetworkInbox();
+  #meetingArea?: MeetingArea;
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #frameBoundary?: NetworkFrameBoundary;
@@ -32,6 +34,7 @@ export class PuTownScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor(0x182132);
+    this.#meetingArea = new MeetingArea(this);
     this.#avatarReconciler = new AvatarReconciler(this);
     this.#frameBoundary = new NetworkFrameBoundary(this.#inbox, emptyWorld(), this.#avatarReconciler);
     this.#cursors = this.input.keyboard?.createCursorKeys();
@@ -51,8 +54,10 @@ export class PuTownScene extends Phaser.Scene {
     // Network state is always applied before this frame reads controls or mutates Phaser objects.
     this.#client?.update();
     this.#frameBoundary?.beginFrame();
-    this.#interface?.render();
-    const playing = this.#client?.state.status === "playing";
+    const world = this.#frameBoundary?.world;
+    this.#interface?.render(world);
+    this.#meetingArea?.setVisible(world?.phase === "lobby");
+    const playing = this.#client?.state.status === "playing" && world?.phase === "playing";
     if (this.input.keyboard) this.input.keyboard.enabled = playing;
     if (!playing) {
       this.#avatarReconciler?.updateAnimations(time, null, true);
@@ -62,7 +67,6 @@ export class PuTownScene extends Phaser.Scene {
       if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
       return;
     }
-    const world = this.#frameBoundary?.world;
     const selfPlayerId = world?.selfPlayerId ?? null;
     const authoritativePlayer = selfPlayerId === null ? undefined : world?.players.get(selfPlayerId);
     if (selfPlayerId === null || authoritativePlayer === undefined || this.#cursors === undefined) return;

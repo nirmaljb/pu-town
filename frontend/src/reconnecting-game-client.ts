@@ -1,6 +1,6 @@
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { createRoom, joinRoom, type ClientMessage, type ServerMessage } from "./protocol.js";
+import { createRoom, joinRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 export type ConnectionState = Readonly<{
   status: "join" | "connecting" | "playing" | "reconnecting" | "failed" | "leaving";
@@ -9,6 +9,7 @@ export type ConnectionState = Readonly<{
 }>;
 
 export class ReconnectingGameClient {
+  #phase: RoomPhase | null = null;
   #socket: WebSocket | null = null;
   #transport: GameTransport | null = null;
   #intent: ClientMessage | null = null;
@@ -63,6 +64,7 @@ export class ReconnectingGameClient {
         }
         this.#state = { ...this.#state, error: message.message };
       }
+      if (message.type === "room_snapshot" || message.type === "room_state") this.#phase = message.phase;
       if (message.type === "room_snapshot" && this.#intent && "displayName" in this.#intent) {
         this.#intent = joinRoom(message.roomId, this.#intent.displayName);
         this.#state = { status: "playing", roomId: message.roomId, error: null };
@@ -99,6 +101,7 @@ export class ReconnectingGameClient {
   }
 
   private closeConnection(): void {
+    this.#phase = null;
     ++this.#generation;
     this.#socket?.close();
     this.#socket = null;
@@ -108,7 +111,17 @@ export class ReconnectingGameClient {
   }
 
   move(x: number, y: number): void {
-    if (this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(x, y);
+    if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(x, y);
+  }
+
+  setReady(ready: boolean): void { this.sendLobbyControl({ version: 1, type: "set_ready", ready }); }
+
+  startGame(): void { this.sendLobbyControl({ version: 1, type: "start_game" }); }
+
+  private sendLobbyControl(message: ClientMessage): void {
+    if (this.#phase === "lobby" && this.#state.status === "playing" && this.#socket?.readyState === 1) {
+      this.#socket.send(JSON.stringify(message));
+    }
   }
 
   leave(): void {

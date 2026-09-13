@@ -33,6 +33,9 @@ final class ConnectionOutbox {
         synchronized (messages) {
             if (movementPlayerId != null) {
                 for (int index = messages.size() - 1; index >= 0; index--) {
+                    // Structural state is an ordering barrier: never move a later position
+                    // before a snapshot or membership/phase transition.
+                    if (messages.get(index).movementPlayerId() == null) break;
                     if (movementPlayerId.equals(messages.get(index).movementPlayerId())) {
                         messages.set(index, new QueuedMessage(message, movementPlayerId));
                         scheduleDrain();

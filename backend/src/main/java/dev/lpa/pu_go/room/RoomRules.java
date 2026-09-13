@@ -10,6 +10,12 @@ public final class RoomRules {
     public static final double MAX_SPEED_PER_SECOND = 240;
     public static final double NETWORK_TOLERANCE = 32;
 
+    public static final int CAPACITY = 10;
+
+    // Seat zero is north; indices run clockwise around the open centre.
+    public static double seatX(int seat) { return Math.round(640 + 390 * Math.sin(seat * Math.PI / 5)); }
+    public static double seatY(int seat) { return Math.round(382 - 205 * Math.cos(seat * Math.PI / 5)); }
+
     private RoomRules() {}
 
     public static boolean acceptsMovement(PlayerState player, double x, double y, long nowNanos) {

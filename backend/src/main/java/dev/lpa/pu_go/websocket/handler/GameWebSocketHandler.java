@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
-    private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4");
+    private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
     private static final List<String> AVATAR_PRESETS = List.of("townsperson-1", "townsperson-2", "townsperson-3", "townsperson-4", "townsperson-5", "townsperson-6");
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -86,6 +86,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
                 else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
                 else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
+                else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
+                else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                 else if (incoming instanceof ClientMessage.MovePlayer move) handleMove(player, move);
             } catch (InvalidClientMessageException exception) {
                 deliver(new Delivery(player.getId(), new ServerMessage.ErrorMessage(exception.code(), exception.getMessage())));
@@ -102,7 +104,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
             }
-            if (!room.containsPlayer(player.getId()) && room.playerIdsSnapshot().size() >= 8) {
+            if (!room.containsPlayer(player.getId()) && room.playerIdsSnapshot().size() >= RoomRules.CAPACITY) {
                 deliver(error(player, "room_full", "Room is full"));
                 return null;
             }
@@ -119,8 +121,17 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 player.setColour(COLOURS.stream().filter(colour -> !usedColours.contains(colour)).findFirst().orElseThrow());
                 player.setAvatarPreset(AVATAR_PRESETS.get(ThreadLocalRandom.current().nextInt(AVATAR_PRESETS.size())));
                 player.setDisplayName(message.displayName());
-                player.setX(RoomRules.SPAWN_X);
-                player.setY(RoomRules.SPAWN_Y);
+                Integer seat = null;
+                if (room.getPhase().equals("lobby")) {
+                    var occupied = room.playerIdsSnapshot().stream().map(playersById::get)
+                            .map(PlayerState::getSeat).toList();
+                    seat = java.util.stream.IntStream.range(0, RoomRules.CAPACITY)
+                            .filter(index -> !occupied.contains(index)).findFirst().orElseThrow();
+                }
+                player.setReady(false);
+                player.setSeat(seat);
+                player.setX(seat == null ? RoomRules.SPAWN_X : RoomRules.seatX(seat));
+                player.setY(seat == null ? RoomRules.SPAWN_Y : RoomRules.seatY(seat));
                 player.setLastAcceptedMovementNanos(nanoTime.getAsLong());
                 room.addPlayer(player.getId());
                 List<String> existingPlayers = room.playerIdsSnapshot().stream()
@@ -133,7 +144,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     .map(this::viewOf)
                     .toList();
             pendingDeliveries.add(new Delivery(player.getId(),
-                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), snapshotPlayers)));
+                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), room.getPhase(), room.getHostPlayerId(), snapshotPlayers)));
             deliverAll(pendingDeliveries);
             return null;
         });
@@ -152,6 +163,60 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
+    private void handleReady(PlayerState player, ClientMessage.SetReady message) {
+        String roomId = player.getRoomId();
+        if (roomId == null) {
+            deliver(error(player, "not_in_room", "Join a Room before declaring Ready."));
+            return;
+        }
+        roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            if (!room.getPhase().equals("lobby")) {
+                deliver(error(player, "invalid_phase", "Readiness belongs to the Lobby."));
+            } else {
+                player.setReady(message.ready());
+                List<Delivery> deliveries = new ArrayList<>();
+                addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+                deliverAll(deliveries);
+            }
+            return null;
+        });
+    }
+
+    private void handleStart(PlayerState player) {
+        String roomId = player.getRoomId();
+        if (roomId == null) {
+            deliver(error(player, "not_in_room", "Join a Room before starting."));
+            return;
+        }
+        roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            if (!player.getId().equals(room.getHostPlayerId())) {
+                deliver(error(player, "not_host", "Only the Host can start the game."));
+            } else if (!room.getPhase().equals("lobby")) {
+                deliver(error(player, "invalid_phase", "The game has already started."));
+            } else {
+                room.startGame();
+                for (String id : room.playerIdsSnapshot()) {
+                    PlayerState member = playersById.get(id);
+                    member.setSeat(null);
+                    member.setX(RoomRules.SPAWN_X);
+                    member.setY(RoomRules.SPAWN_Y);
+                    member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
+                }
+                List<Delivery> deliveries = new ArrayList<>();
+                addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+                deliverAll(deliveries);
+            }
+            return null;
+        });
+    }
+
+    private ServerMessage.RoomState stateOf(Room room) {
+        return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(),
+                room.playerIdsSnapshot().stream().map(playersById::get).map(this::viewOf).toList());
+    }
+
     private void handleMove(PlayerState player, ClientMessage.MovePlayer message) {
         String roomId = player.getRoomId();
         if (roomId == null) {
@@ -159,6 +224,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         roomManager.serialized(List.of(roomId), () -> {
+            if (!roomManager.findRoom(roomId).getPhase().equals("playing")) {
+                deliver(error(player, "invalid_movement", "Players remain seated in the Lobby."));
+                return null;
+            }
             long now = nanoTime.getAsLong();
             if (!RoomRules.acceptsMovement(player, message.x(), message.y(), now)) {
                 deliver(error(player, "invalid_movement", "Position is outside the room or exceeds movement speed."));
@@ -199,11 +268,15 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private List<Delivery> endMembership(PlayerState player, String roomId,
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
         Room room = roomManager.findRoom(roomId);
+        boolean hostDeparted = player.getId().equals(room.getHostPlayerId());
         room.removePlayer(player.getId());
         roomManager.membershipEnded(room);
         List<Delivery> pendingDeliveries = new ArrayList<>();
         addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
                 new ServerMessage.PlayerLeft(player.getId(), reason));
+        if (hostDeparted && !room.playerIdsSnapshot().isEmpty()) {
+            addForPlayers(pendingDeliveries, room.playerIdsSnapshot(), stateOf(room));
+        }
         if (acknowledgeLeave) {
             pendingDeliveries.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
         }
@@ -212,7 +285,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getX(), player.getY()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.getX(), player.getY()
         );
     }
 

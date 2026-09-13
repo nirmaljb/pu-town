@@ -1,23 +1,33 @@
-import type { PlayerView, ServerMessage } from "./protocol.js";
+import type { PlayerView, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
+  phase: RoomPhase | null;
+  hostPlayerId: string | null;
   selfPlayerId: string | null;
   players: ReadonlyMap<string, PlayerView>;
   lastError: Readonly<{ code: string; message: string }> | null;
 }>;
 
 export function emptyWorld(): WorldState {
-  return { roomId: null, selfPlayerId: null, players: new Map(), lastError: null };
+  return { phase: null, hostPlayerId: null, roomId: null, selfPlayerId: null, players: new Map(), lastError: null };
 }
 
 export function reduceWorldEvent(world: WorldState, event: ServerMessage): WorldState {
   switch (event.type) {
+    case "room_state":
+      return {
+        ...world, phase: event.phase, hostPlayerId: event.hostPlayerId,
+        players: new Map(event.players.map(player => [player.playerId, player])),
+        lastError: null
+      };
     case "pong":
       return world;
     case "room_snapshot":
       return {
         roomId: event.roomId,
+        phase: event.phase,
+        hostPlayerId: event.hostPlayerId,
         selfPlayerId: event.selfPlayerId,
         players: new Map(event.players.map(player => [player.playerId, player])),
         lastError: null

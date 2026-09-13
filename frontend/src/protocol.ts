@@ -2,18 +2,23 @@ import { requireAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
 export const PROTOCOL_VERSION = 1 as const;
 
+export type RoomPhase = "lobby" | "playing";
+
 export type PlayerView = Readonly<{
   playerId: string;
   displayName: string;
   colour: string;
   avatarPreset: AvatarPreset;
+  seat: number | null;
+  ready: boolean;
   x: number;
   y: number;
 }>;
 
 export type ServerMessage =
+  | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
-  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
   | Readonly<{ version: 1; type: "player_moved"; playerId: string; x: number; y: number }>
   | Readonly<{ version: 1; type: "player_left"; playerId: string; reason: "left" | "disconnected" }>
@@ -21,6 +26,8 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "start_game" }>
+  | Readonly<{ version: 1; type: "set_ready"; ready: boolean }>
   | Readonly<{ version: 1; type: "create_room"; displayName: string }>
   | Readonly<{ version: 1; type: "ping" }>
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
@@ -70,16 +77,26 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type"]);
       return { version: 1, type };
     case "room_snapshot": {
-      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "players"]);
+      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "phase", "hostPlayerId", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1,
         type,
         selfPlayerId: requireNonEmptyString(message.selfPlayerId, "selfPlayerId"),
         roomId: requireNonEmptyString(message.roomId, "roomId"),
-        players: message.players.map(decodePlayer)
+        phase: requirePhase(message.phase),
+        hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
+        players: decodeRoomPlayers(message.players, requirePhase(message.phase))
       };
     }
+    case "room_state":
+      requireFields(message, ["version", "type", "phase", "hostPlayerId", "players"]);
+      if (!Array.isArray(message.players)) throw new Error("players must be an array");
+      return {
+        version: 1, type, phase: requirePhase(message.phase),
+        hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
+        players: decodeRoomPlayers(message.players, requirePhase(message.phase))
+      };
     case "player_joined":
       requireFields(message, ["version", "type", "player"]);
       return { version: 1, type, player: decodePlayer(message.player) };
@@ -122,12 +139,14 @@ export function decodeServerMessage(payload: string): ServerMessage {
 
 function decodePlayer(value: unknown): PlayerView {
   const player = requireRecord(value, "player");
-  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "x", "y"]);
+  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "seat", "ready", "x", "y"]);
   return {
     playerId: requireNonEmptyString(player.playerId, "playerId"),
     displayName: requireNonEmptyString(player.displayName, "displayName"),
     colour: requireColour(player.colour),
     avatarPreset: requireAvatarPreset(player.avatarPreset),
+    seat: requireSeat(player.seat),
+    ready: requireBoolean(player.ready),
     x: requireFiniteNumber(player.x, "x"),
     y: requireFiniteNumber(player.y, "y")
   };
@@ -161,4 +180,29 @@ function requireFiniteNumber(value: unknown, name: string): number {
 function requireColour(value: unknown): string {
   if (typeof value !== "string" || !/^#[0-9A-F]{6}$/.test(value)) throw new Error("Invalid Player Colour");
   return value;
+}
+
+
+function requirePhase(value: unknown): RoomPhase {
+  if (value !== "lobby" && value !== "playing") throw new Error("Invalid Room phase");
+  return value;
+}
+
+function requireSeat(value: unknown): number | null {
+  if (value === null) return null;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value >= 10) throw new Error("Invalid seat");
+  return value;
+}
+
+function requireBoolean(value: unknown): boolean {
+  if (typeof value !== "boolean") throw new Error("ready must be a boolean");
+  return value;
+}
+
+function decodeRoomPlayers(values: unknown[], phase: RoomPhase): PlayerView[] {
+  const players = values.map(decodePlayer);
+  if (players.some(player => (player.seat === null) !== (phase === "playing"))) {
+    throw new Error("Player seat does not match Room phase");
+  }
+  return players;
 }
