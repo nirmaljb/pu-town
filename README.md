@@ -66,6 +66,8 @@ The Lobby keeps Players stationary on both client and server. Departures free ch
 
 The six sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
 
+Lobby arrivals play a short sit-down transition, then hold a seated pose with pixel-drawn bent legs in their preset's trouser colours. The existing head and upper body keep their original proportions. Players already present appear seated immediately to newcomers; readiness changes do not replay sitting, and Start restores standing and walking immediately. See [the sitting animation specification](docs/sitting-animation-spec.md). While Vite is running, `/test/sitting-preview.html` provides a manual gallery of every preset and Facing, with replay and cancellation controls.
+
 [`frontend/public/assets/avatars/recipes.json`](frontend/public/assets/avatars/recipes.json) records the pinned upstream revision, ordered source layers, and exact palette substitutions. [`CREDITS.csv`](frontend/public/assets/avatars/CREDITS.csv) preserves the selected layers' authors, source URLs, and licenses. The game links to a readable credits page. Selected art is used under OGA-BY 3.0, with CC0 bob and long straight hairstyles.
 
 The server and frontend must be restarted/refreshed together for the updated Player View contract. Presets stay fixed for a Room Membership; duplicates are allowed and reconnect draws again. Sprites use feet-anchored coordinates and can clip at the existing room edges.

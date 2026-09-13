@@ -3,7 +3,7 @@ import { NetworkInbox } from "./network-inbox.js";
 import { emptyWorld, reduceWorldEvent, type WorldState } from "./world-state.js";
 
 export interface WorldReconciler {
-  reconcile(world: WorldState): void;
+  reconcile(world: WorldState, arrivals?: ReadonlySet<string>): void;
 }
 
 export class NetworkFrameBoundary {
@@ -33,7 +33,17 @@ export class NetworkFrameBoundary {
   beginFrame(): void {
     const events = this.inbox.drain();
     if (events.length === 0) return;
+    const arrivals = new Set<string>();
     for (const event of events) {
+      if (event.type === "room_snapshot") {
+        arrivals.clear();
+        if (event.selfPlayerId !== this.#world.selfPlayerId || event.roomId !== this.#world.roomId) {
+          arrivals.add(event.selfPlayerId);
+        }
+      } else if (event.type === "player_joined" && !this.#world.players.has(event.player.playerId)) {
+        arrivals.add(event.player.playerId);
+      } else if (event.type === "player_left") arrivals.delete(event.playerId);
+      else if (event.type === "room_left") arrivals.clear();
       const previousPhase = this.#world.phase;
       this.#world = reduceWorldEvent(this.#world, event);
       const player = this.#world.players.get(this.#world.selfPlayerId ?? "");
@@ -42,6 +52,6 @@ export class NetworkFrameBoundary {
         this.localMovement = new LocalMovement(player);
       } else this.localMovement.accept(player);
     }
-    this.view.reconcile(this.#world);
+    this.view.reconcile(this.#world, arrivals);
   }
 }

@@ -59,6 +59,10 @@ The in-world building containing the Meeting Area.
 The place inside the Town Hall where Players sit in a circle for the Lobby and future morning meetings.
 _Avoid_: Lobby, Room
 
+**Seat**:
+An allocated place for one Player in the Meeting Area. It remains theirs until their Room Membership ends or the game starts.
+_Avoid_: Spawn Point
+
 **Room Code**:
 A shareable code that identifies the room a player wants to join. Anyone with the code may join that room without approval.
 _Avoid_: Lobby code, invite link

@@ -160,3 +160,15 @@ Do not claim an integration path was verified if only unit tests ran.
 - A deployed HTTPS frontend must use a `wss://` endpoint and a matching backend origin allow-list.
 - Some generated files under `backend/target/` are tracked and may be stale. Never edit them or treat them as architectural evidence.
 - There is no `.env` configuration, database, authentication, chat implementation, or persistent player identity in the current codebase.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues for `nirmaljb/pu-town`.
+See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: root `CONTEXT.md` and `docs/adr/`.
+See `docs/agents/domain.md`.
