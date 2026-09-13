@@ -1,3 +1,4 @@
+import type { MovementState } from "./protocol.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
 import { createRoom, joinRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
@@ -110,8 +111,8 @@ export class ReconnectingGameClient {
     this.inbox.drain();
   }
 
-  move(x: number, y: number): void {
-    if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(x, y);
+  move(movement: MovementState): void {
+    if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(movement);
   }
 
   setReady(ready: boolean): void { this.sendLobbyControl({ version: 1, type: "set_ready", ready }); }

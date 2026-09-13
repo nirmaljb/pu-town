@@ -17,7 +17,7 @@ test("network events affect the world only when a game frame begins", () => {
     type: "room_snapshot", phase: "playing", hostPlayerId: "p",
     selfPlayerId: "player-1",
     roomId: "plaza",
-    players: [{ playerId: "player-1", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, x: 640, y: 360 }]
+    players: [{ playerId: "player-1", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }]
   });
 
   assert.equal(boundary.world.players.size, 0);
@@ -37,9 +37,9 @@ test("one frame drains queued events in transport order before reconciling once"
   });
 
   inbox.enqueue({ version: 1, type: "player_joined", player: {
-    playerId: "player-2", displayName: "Sam", colour: "#FF8066", avatarPreset: "townsperson-2", seat: null, ready: false, x: 640, y: 360
+    playerId: "player-2", displayName: "Sam", colour: "#FF8066", avatarPreset: "townsperson-2", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360
   }});
-  inbox.enqueue({ version: 1, type: "player_moved", playerId: "player-2", x: 650, y: 360 });
+  inbox.enqueue({ version: 1, type: "player_moved", playerId: "player-2", facing: "down", sequence: 1, epoch: 0, x: 650, y: 360 });
   inbox.enqueue({ version: 1, type: "player_left", playerId: "player-2", reason: "left" });
 
   boundary.beginFrame();
@@ -52,7 +52,7 @@ test("Lobby seats, readiness, Host succession and Start apply in order at frame 
   const inbox = new NetworkInbox();
   const views = [];
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world) { views.push(world); } });
-  const host = { playerId: "h", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: 0, ready: false, x: 640, y: 177 };
+  const host = { playerId: "h", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: 0, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 177 };
   const guest = { ...host, playerId: "g", colour: "#FF8066", seat: 1, x: 869, y: 216 };
   inbox.enqueue({ version: 1, type: "room_snapshot", roomId: "ABC234", selfPlayerId: "g", phase: "lobby", hostPlayerId: "h", players: [host, guest] });
   boundary.beginFrame();
@@ -72,4 +72,19 @@ test("Lobby seats, readiness, Host succession and Start apply in order at frame 
   assert.equal(boundary.world.selfPlayerId, "g");
   assert.equal(boundary.world.players.get("g").x, 640);
   assert.equal(views.length, 3);
+});
+
+test('correction followed by structural state in the same frame cannot hide a prediction reset', () => {
+  const inbox = new NetworkInbox();
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const player = { playerId: 'p', displayName: 'A', colour: '#4F8CFF', avatarPreset: 'townsperson-1', seat: null, ready: false, x: 640, y: 360, facing: 'down', sequence: 0, epoch: 0 };
+  inbox.enqueue({ version: 1, type: 'room_snapshot', selfPlayerId: 'p', roomId: 'ABC234', phase: 'playing', hostPlayerId: 'p', players: [player] });
+  boundary.beginFrame();
+  boundary.localMovement.advance(1, 0, 50);
+  boundary.localMovement.submission();
+  inbox.enqueue({ version: 1, type: 'movement_correction', playerId: 'p', x: 640, y: 360, facing: 'down', sequence: 1, epoch: 1 });
+  inbox.enqueue({ version: 1, type: 'room_state', phase: 'playing', hostPlayerId: 'p', players: [{ ...player, sequence: 1, epoch: 1 }] });
+  boundary.beginFrame();
+  assert.equal(boundary.localMovement.x, 640);
+  assert.equal(boundary.localMovement.facing, 'right');
 });

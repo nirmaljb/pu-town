@@ -1,7 +1,6 @@
 import Phaser from "phaser";
-import { meetingSeat } from "./meeting-area.js";
 import { AVATAR_PRESETS } from "./avatar-presets.js";
-import { AvatarMotion, DIRECTIONS } from "./avatar-motion.js";
+import { AvatarMotion, DIRECTIONS, type Direction } from "./avatar-motion.js";
 import type { WorldReconciler } from "./network-frame-boundary.js";
 import type { PlayerView } from "./protocol.js";
 import type { WorldState } from "./world-state.js";
@@ -13,8 +12,7 @@ type AvatarView = {
   label: Phaser.GameObjects.Text;
   readiness: Phaser.GameObjects.Text;
   seat: number | null;
-  authoritativeX: number;
-  authoritativeY: number;
+  facing: Direction;
 };
 
 export function preloadAvatars(scene: Phaser.Scene): void {
@@ -57,24 +55,23 @@ export class AvatarReconciler implements WorldReconciler {
       avatar.readiness.setVisible(seated).setText(
         (player.ready ? "✓ Ready" : "Not Ready") + (world.hostPlayerId === player.playerId ? " • Host" : "")
       ).setColor(player.ready ? "#b9f4c9" : "#fff0c9");
-      // Unrelated network events must not rewind the locally predicted position.
-      if (player.x !== avatar.authoritativeX || player.y !== avatar.authoritativeY) {
+      if (player.playerId !== world.selfPlayerId || world.phase !== "playing") {
         avatar.container.setPosition(player.x, player.y);
-        avatar.authoritativeX = player.x;
-        avatar.authoritativeY = player.y;
+        avatar.facing = player.facing;
       }
     }
   }
 
-  moveLocally(playerId: string, x: number, y: number): void {
-    this.#avatars.get(playerId)?.container.setPosition(x, y);
+  moveLocally(playerId: string, x: number, y: number, facing: Direction): void {
+    const avatar = this.#avatars.get(playerId);
+    if (avatar) { avatar.container.setPosition(x, y); avatar.facing = facing; }
   }
 
   updateAnimations(time: number, localPlayerId: string | null, frozen = false): void {
     for (const [playerId, avatar] of this.#avatars) {
       const { container, sprite, motion } = avatar;
       motion.update(container.x, container.y, time, playerId === localPlayerId, frozen || avatar.seat !== null);
-      if (avatar.seat !== null) motion.direction = meetingSeat(avatar.seat).facing;
+      motion.direction = avatar.facing;
       container.setDepth(container.y);
       if (motion.walking) sprite.play(`${sprite.texture.key}-walk-${motion.direction}`, true);
       else {
@@ -103,8 +100,7 @@ export class AvatarReconciler implements WorldReconciler {
       container: this.scene.add.container(player.x, player.y, [marker, sprite, label, readiness]),
       sprite, label, readiness, seat: null,
       motion: new AvatarMotion(player.x, player.y),
-      authoritativeX: player.x,
-      authoritativeY: player.y
+      facing: player.facing
     };
     this.#avatars.set(player.playerId, avatar);
     return avatar;

@@ -10,5 +10,5 @@ public sealed interface ClientMessage permits ClientMessage.SetReady, ClientMess
     record CreateRoom(int version, String type, String displayName) implements ClientMessage {}
     record JoinRoom(int version, String type, String roomId, String displayName) implements ClientMessage {}
     record LeaveRoom(int version, String type) implements ClientMessage {}
-    record MovePlayer(int version, String type, double x, double y) implements ClientMessage {}
+    record MovePlayer(int version, String type, double x, double y, String facing, long sequence, long epoch) implements ClientMessage {}
 }

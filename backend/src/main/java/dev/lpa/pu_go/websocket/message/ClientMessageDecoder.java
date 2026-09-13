@@ -57,12 +57,26 @@ public final class ClientMessageDecoder {
                 yield new ClientMessage.LeaveRoom(PROTOCOL_VERSION, type);
             }
             case "move_player" -> {
-                requireOnly(root, Set.of("version", "type", "x", "y"));
+                requireOnly(root, Set.of("version", "type", "x", "y", "facing", "sequence", "epoch"));
                 yield new ClientMessage.MovePlayer(PROTOCOL_VERSION, type,
-                        requiredNumber(root, "x"), requiredNumber(root, "y"));
+                        requiredNumber(root, "x"), requiredNumber(root, "y"), facing(root), counter(root, "sequence"), counter(root, "epoch"));
             }
             default -> throw new InvalidClientMessageException("unknown_message_type", "Unknown message type: " + type);
         };
+    }
+
+    private static String facing(JsonNode root) throws InvalidClientMessageException {
+        String facing = requiredText(root, "facing");
+        if (!Set.of("up", "down", "left", "right").contains(facing))
+            throw new InvalidClientMessageException("malformed_message", "Invalid Facing.");
+        return facing;
+    }
+
+    private static long counter(JsonNode root, String name) throws InvalidClientMessageException {
+        JsonNode value = root.get(name);
+        if (!value.isIntegralNumber() || !value.canConvertToLong() || value.asLong() < 0 || value.asLong() > 9_007_199_254_740_991L)
+            throw new InvalidClientMessageException("malformed_message", "Invalid movement counter.");
+        return value.asLong();
     }
 
     private static String displayName(JsonNode root) throws InvalidClientMessageException {

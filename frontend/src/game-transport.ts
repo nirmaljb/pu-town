@@ -1,3 +1,4 @@
+import type { MovementState } from "./protocol.js";
 import { NetworkInbox } from "./network-inbox.js";
 import {
   decodeServerMessage,
@@ -42,8 +43,8 @@ export class GameTransport {
     this.send(leaveRoom());
   }
 
-  move(x: number, y: number): void {
-    this.send(movePlayer(x, y));
+  move(movement: MovementState): void {
+    this.send(movePlayer(movement));
   }
 
   private send(message: ClientMessage): void {

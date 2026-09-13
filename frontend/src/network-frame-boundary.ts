@@ -1,3 +1,4 @@
+import { LocalMovement } from "./local-movement.js";
 import { NetworkInbox } from "./network-inbox.js";
 import { emptyWorld, reduceWorldEvent, type WorldState } from "./world-state.js";
 
@@ -7,6 +8,7 @@ export interface WorldReconciler {
 
 export class NetworkFrameBoundary {
   #world: WorldState;
+  localMovement: LocalMovement | null = null;
 
   constructor(
     private readonly inbox: NetworkInbox,
@@ -23,6 +25,7 @@ export class NetworkFrameBoundary {
   reset(): void {
     this.inbox.drain();
     this.#world = emptyWorld();
+    this.localMovement = null;
     this.view.reconcile(this.#world);
   }
 
@@ -30,7 +33,15 @@ export class NetworkFrameBoundary {
   beginFrame(): void {
     const events = this.inbox.drain();
     if (events.length === 0) return;
-    this.#world = events.reduce(reduceWorldEvent, this.#world);
+    for (const event of events) {
+      const previousPhase = this.#world.phase;
+      this.#world = reduceWorldEvent(this.#world, event);
+      const player = this.#world.players.get(this.#world.selfPlayerId ?? "");
+      if (!player || this.#world.phase !== "playing") this.localMovement = null;
+      else if (event.type === "room_snapshot" || previousPhase !== "playing" || !this.localMovement) {
+        this.localMovement = new LocalMovement(player);
+      } else this.localMovement.accept(player);
+    }
     this.view.reconcile(this.#world);
   }
 }

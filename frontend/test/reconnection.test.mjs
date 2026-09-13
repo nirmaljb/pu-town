@@ -13,7 +13,7 @@ function setup() {
   return { client, sockets, inbox, advance(ms) { now += ms; client.update(); } };
 }
 const snapshot = { version: 1, type: "room_snapshot", phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
-  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, x: 640, y: 360 }] };
+  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
   const { client, sockets } = setup();
@@ -24,7 +24,7 @@ test("initial create prevents duplicates and waits for membership confirmation",
   sockets[0].open();
   assert.deepEqual(JSON.parse(sockets[0].sent[0]), { version: 1, type: "create_room", displayName: "Alex" });
   assert.equal(client.state.status, "connecting");
-  client.move(650, 360);
+  client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
   assert.equal(sockets[0].sent.length, 1);
   sockets[0].message(snapshot);
   assert.equal(client.state.status, "connecting");
@@ -68,7 +68,7 @@ test("silent loss freezes after ten seconds and rejoin alone resumes play", () =
   advance(1);
   assert.equal(client.state.status, "reconnecting");
   const count = sockets[0].sent.length;
-  client.move(650, 360);
+  client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
   assert.equal(sockets[0].sent.length, count);
   advance(500);
   sockets[1].open();
@@ -128,7 +128,7 @@ test("room broadcasts do not conceal missing heartbeat responses", () => {
   const { client, sockets, advance } = setup();
   client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
   advance(5_000);
-  sockets[0].message({ version: 1, type: "player_moved", playerId: "other", x: 650, y: 360 });
+  sockets[0].message({ version: 1, type: "player_moved", playerId: "other", facing: "down", sequence: 1, epoch: 0, x: 650, y: 360 });
   client.update(); advance(5_000);
   assert.equal(client.state.status, "reconnecting");
 });
@@ -174,7 +174,7 @@ test("Lobby movement freezes and recovery follows the server phase before sendin
     sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], seat: 0, ready: false }] });
     client.update();
     const count = sockets[0].sent.length;
-    client.move(650, 360);
+    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
     assert.equal(sockets[0].sent.length, count);
     client.setReady(true);
     assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "set_ready", ready: true });
@@ -184,10 +184,10 @@ test("Lobby movement freezes and recovery follows the server phase before sendin
     sockets[1].message({ ...snapshot, phase, selfPlayerId: "new", hostPlayerId: "new",
       players: [{ ...snapshot.players[0], playerId: "new", seat: phase === "lobby" ? 0 : null }] });
     const before = sockets[1].sent.length;
-    client.move(650, 360);
+    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
     assert.equal(sockets[1].sent.length, before);
     client.update();
-    client.move(650, 360);
+    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
     assert.equal(sockets[1].sent.length, before + (phase === "playing" ? 1 : 0));
     assert.equal(inbox.drain().at(-1).phase, phase);
     if (phase === "playing") {

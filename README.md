@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Room using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Arrow-key input determines shared Facing, including when a boundary blocks movement, and standing retains it. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -99,7 +99,7 @@ java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
 
 ## Architecture
 
-The Phaser client applies local movement immediately, sends absolute positions over a versioned WebSocket protocol, and reconciles with authoritative server updates. The Spring Boot server owns room membership, validates movement, and broadcasts accepted state to players in the same room. All server state is currently held in memory.
+The Phaser client applies local movement immediately and sends absolute positions, retained Facing, and sequence/epoch counters over a versioned WebSocket protocol. Accepted echoes preserve newer prediction; explicit corrections reset rejected positions and invalidate outstanding movement. Losing focus clears controls, and restoration applies queued state before fresh input without catch-up movement. The Spring Boot server owns room membership, validates movement, and broadcasts accepted state to players in the same room. All server state is currently held in memory.
 
 Important project documentation:
 

@@ -1,0 +1,3 @@
+# Share retained Avatar Facing explicitly
+
+Facing will be retained in server-owned Player state and shared in movement updates and Player Views, rather than inferred independently from sampled positions on each client. Arrow-key input determines Facing even when Room bounds prevent displacement, while releasing input retains it; Lobby seating continues to determine inward Facing. This adds a coordinated client/server contract change, but position-only inference loses final turns through sampling and movement coalescing and cannot show the correct standing direction to later arrivals. Position validation remains server-authoritative, and animation timing remains client presentation state.

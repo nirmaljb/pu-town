@@ -1,18 +1,25 @@
+import { DIRECTIONS, type Direction } from "./avatar-motion.js";
 import { requireAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
 export const PROTOCOL_VERSION = 1 as const;
 
 export type RoomPhase = "lobby" | "playing";
 
-export type PlayerView = Readonly<{
+export type MovementState = Readonly<{
+  x: number;
+  y: number;
+  facing: Direction;
+  sequence: number;
+  epoch: number;
+}>;
+
+export type PlayerView = MovementState & Readonly<{
   playerId: string;
   displayName: string;
   colour: string;
   avatarPreset: AvatarPreset;
   seat: number | null;
   ready: boolean;
-  x: number;
-  y: number;
 }>;
 
 export type ServerMessage =
@@ -20,7 +27,8 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "pong" }>
   | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
-  | Readonly<{ version: 1; type: "player_moved"; playerId: string; x: number; y: number }>
+  | Readonly<{ version: 1; type: "player_moved"; playerId: string; x: number; y: number; facing: Direction; sequence: number; epoch: number }>
+  | Readonly<{ version: 1; type: "movement_correction"; playerId: string; x: number; y: number; facing: Direction; sequence: number; epoch: number }>
   | Readonly<{ version: 1; type: "player_left"; playerId: string; reason: "left" | "disconnected" }>
   | Readonly<{ version: 1; type: "room_left"; roomId: string }>
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
@@ -32,7 +40,7 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "ping" }>
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
   | Readonly<{ version: 1; type: "leave_room" }>
-  | Readonly<{ version: 1; type: "move_player"; x: number; y: number }>;
+  | Readonly<{ version: 1; type: "move_player"; x: number; y: number; facing: Direction; sequence: number; epoch: number }>;
 
 export function joinRoom(roomId: string, displayName: string): ClientMessage {
   requireNonEmptyString(roomId, "roomId");
@@ -55,10 +63,10 @@ export function leaveRoom(): ClientMessage {
   return { version: PROTOCOL_VERSION, type: "leave_room" };
 }
 
-export function movePlayer(x: number, y: number): ClientMessage {
+export function movePlayer({ x, y, facing, sequence, epoch }: MovementState): ClientMessage {
   requireFiniteNumber(x, "x");
   requireFiniteNumber(y, "y");
-  return { version: PROTOCOL_VERSION, type: "move_player", x, y };
+  return { version: PROTOCOL_VERSION, type: "move_player", x, y, facing: requireFacing(facing), sequence: requireCounter(sequence), epoch: requireCounter(epoch) };
 }
 
 export function decodeServerMessage(payload: string): ServerMessage {
@@ -101,13 +109,15 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type", "player"]);
       return { version: 1, type, player: decodePlayer(message.player) };
     case "player_moved":
-      requireFields(message, ["version", "type", "playerId", "x", "y"]);
+    case "movement_correction":
+      requireFields(message, ["version", "type", "playerId", "x", "y", "facing", "sequence", "epoch"]);
       return {
         version: 1,
         type,
         playerId: requireNonEmptyString(message.playerId, "playerId"),
         x: requireFiniteNumber(message.x, "x"),
-        y: requireFiniteNumber(message.y, "y")
+        y: requireFiniteNumber(message.y, "y"),
+        facing: requireFacing(message.facing), sequence: requireCounter(message.sequence), epoch: requireCounter(message.epoch)
       };
     case "player_left": {
       requireFields(message, ["version", "type", "playerId", "reason"]);
@@ -139,7 +149,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
 
 function decodePlayer(value: unknown): PlayerView {
   const player = requireRecord(value, "player");
-  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "seat", "ready", "x", "y"]);
+  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "seat", "ready", "x", "y", "facing", "sequence", "epoch"]);
   return {
     playerId: requireNonEmptyString(player.playerId, "playerId"),
     displayName: requireNonEmptyString(player.displayName, "displayName"),
@@ -148,7 +158,8 @@ function decodePlayer(value: unknown): PlayerView {
     seat: requireSeat(player.seat),
     ready: requireBoolean(player.ready),
     x: requireFiniteNumber(player.x, "x"),
-    y: requireFiniteNumber(player.y, "y")
+    y: requireFiniteNumber(player.y, "y"),
+    facing: requireFacing(player.facing), sequence: requireCounter(player.sequence), epoch: requireCounter(player.epoch)
   };
 }
 
@@ -205,4 +216,14 @@ function decodeRoomPlayers(values: unknown[], phase: RoomPhase): PlayerView[] {
     throw new Error("Player seat does not match Room phase");
   }
   return players;
+}
+
+function requireFacing(value: unknown): Direction {
+  if (!DIRECTIONS.includes(value as Direction)) throw new Error("Invalid Facing");
+  return value as Direction;
+}
+
+function requireCounter(value: unknown): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) throw new Error("Invalid movement counter");
+  return value;
 }

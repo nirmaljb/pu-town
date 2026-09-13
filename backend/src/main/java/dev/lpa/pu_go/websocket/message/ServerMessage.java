@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
-        ServerMessage.PlayerMoved, ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage {
+        ServerMessage.MovementCorrection, ServerMessage.PlayerMoved, ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage {
     int version();
     String type();
 
@@ -13,7 +13,7 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public Pong() { this(1, "pong"); }
     }
 
-    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, Integer seat, boolean ready, double x, double y) {}
+    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, Integer seat, boolean ready, double x, double y, String facing, long sequence, long epoch) {}
 
     enum DepartureReason {
         LEFT("left"),
@@ -45,8 +45,14 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public PlayerJoined(PlayerView player) { this(1, "player_joined", player); }
     }
 
-    record PlayerMoved(int version, String type, String playerId, double x, double y) implements ServerMessage {
-        public PlayerMoved(String playerId, double x, double y) { this(1, "player_moved", playerId, x, y); }
+    record PlayerMoved(int version, String type, String playerId, double x, double y, String facing, long sequence, long epoch) implements ServerMessage {
+        public PlayerMoved(String playerId, double x, double y, String facing, long sequence, long epoch) { this(1, "player_moved", playerId, x, y, facing, sequence, epoch); }
+    }
+
+    record MovementCorrection(int version, String type, String playerId, double x, double y, String facing, long sequence, long epoch) implements ServerMessage {
+        public MovementCorrection(String playerId, double x, double y, String facing, long sequence, long epoch) {
+            this(1, "movement_correction", playerId, x, y, facing, sequence, epoch);
+        }
     }
 
     record PlayerLeft(int version, String type, String playerId, DepartureReason reason) implements ServerMessage {

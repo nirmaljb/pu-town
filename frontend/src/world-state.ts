@@ -37,11 +37,12 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage): World
       players.set(event.player.playerId, event.player);
       return { ...world, players };
     }
+    case "movement_correction":
     case "player_moved": {
       const player = world.players.get(event.playerId);
       if (player === undefined) return world;
       const players = new Map(world.players);
-      players.set(event.playerId, { ...player, x: event.x, y: event.y });
+      players.set(event.playerId, { ...player, x: event.x, y: event.y, facing: event.facing, sequence: event.sequence, epoch: event.epoch });
       return { ...world, players };
     }
     case "player_left": {

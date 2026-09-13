@@ -24,6 +24,42 @@ class GameWebSocketHandlerTest {
     );
 
     @Test
+    void retainsFacingAndRejectsOutstandingMovementAfterCorrection() throws Exception {
+        var alex = connect("alex");
+        send(alex, """
+                {"version":1,"type":"create_room","displayName":"Alex"}
+                """);
+        String code = json(alex.payloads().get(0)).get("roomId").asText();
+        send(alex, """
+                {"version":1,"type":"start_game"}
+                """);
+        send(alex, """
+                {"version":1,"type":"move_player","x":640,"y":360,"facing":"left","sequence":1,"epoch":0}
+                """);
+        assertEquals("left", json(alex.payloads().get(2)).get("facing").asText());
+        send(alex, """
+                {"version":1,"type":"move_player","x":1200,"y":360,"facing":"right","sequence":2,"epoch":0}
+                """);
+        JsonNode correction = json(alex.payloads().get(3));
+        assertEquals("movement_correction", correction.get("type").asText());
+        assertEquals(640, correction.get("x").asDouble());
+        assertEquals(1, correction.get("epoch").asInt());
+        send(alex, """
+                {"version":1,"type":"move_player","x":650,"y":360,"facing":"up","sequence":3,"epoch":0}
+                """);
+        assertEquals("movement_correction", json(alex.payloads().get(4)).get("type").asText());
+        var sam = connect("sam");
+        join(sam, code);
+        JsonNode retained = json(sam.payloads().get(0)).get("players").get(0);
+        assertEquals(640, retained.get("x").asDouble());
+        assertEquals("left", retained.get("facing").asText());
+        send(alex, """
+                {"version":1,"type":"move_player","x":650,"y":360,"facing":"up","sequence":4,"epoch":1}
+                """);
+        assertEquals("up", json(sam.payloads().get(1)).get("facing").asText());
+    }
+
+    @Test
     void onlyCreateMakesRoomsAndJoinNormalizesCodes() throws Exception {
         RecordingWebSocketSession alex = connect("session-1");
         send(alex, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\"ABC234\",\"displayName\":\"Alex\"}");
@@ -88,7 +124,7 @@ class GameWebSocketHandlerTest {
         join(alex, code);
         join(alex, "AAAAAA".equals(code) ? "BBBBBB" : "AAAAAA");
         now.addAndGet(1_000_000_000L);
-        send(alex, "{\"version\":1,\"type\":\"move_player\",\"x\":650,\"y\":360}");
+        send(alex, "{\"version\":1,\"type\":\"move_player\",\"facing\":\"right\",\"sequence\":1,\"epoch\":0,\"x\":650,\"y\":360}");
         join(alex, code);
         JsonNode finalSnapshot = json(alex.payloads().get(alex.payloads().size() - 1));
         for (JsonNode player : finalSnapshot.get("players")) {
@@ -126,18 +162,18 @@ class GameWebSocketHandlerTest {
         send(session, "{\"version\":1,\"type\":\"start_game\"}");
         now.addAndGet(1_000_000_000L);
         send(session, """
-                {"version":1,"type":"move_player","x":700,"y":360}
+                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":700,"y":360}
                 """);
         send(session, """
-                {"version":1,"type":"move_player","x":1200,"y":360}
+                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":1200,"y":360}
                 """);
 
         JsonNode accepted = json(session.payloads().get(2));
         assertEquals("player_moved", accepted.get("type").asText());
         assertEquals(700, accepted.get("x").asDouble());
         JsonNode rejected = json(session.payloads().get(3));
-        assertEquals("error", rejected.get("type").asText());
-        assertEquals("invalid_movement", rejected.get("code").asText());
+        assertEquals("movement_correction", rejected.get("type").asText());
+        assertEquals(700, rejected.get("x").asDouble());
     }
 
     @Test
@@ -248,8 +284,8 @@ class GameWebSocketHandlerTest {
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
         assertEquals("lobby", latest(host).path("phase").asText());
         assertEquals("player-1", latest(host).path("hostPlayerId").asText());
-        send(host, "{\"version\":1,\"type\":\"move_player\",\"x\":650,\"y\":360}");
-        assertEquals("invalid_movement", latest(host).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"move_player\",\"facing\":\"right\",\"sequence\":1,\"epoch\":0,\"x\":650,\"y\":360}");
+        assertEquals("movement_correction", latest(host).path("type").asText());
         send(host, "{\"version\":1,\"type\":\"start_game\"}");
         assertEquals("room_state", latest(host).path("type").asText());
         assertEquals("playing", latest(host).path("phase").asText());
@@ -388,13 +424,13 @@ class GameWebSocketHandlerTest {
                 """));
         while (!tasks.isEmpty()) tasks.remove().run();
         serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","x":650,"y":360}
+                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":650,"y":360}
                 """));
         serial.handleMessage(host, new TextMessage("""
                 {"version":1,"type":"leave_room"}
                 """));
         serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","x":660,"y":360}
+                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":660,"y":360}
                 """));
         while (!tasks.isEmpty()) tasks.remove().run();
         assertEquals("player_moved", latest(guest).path("type").asText());

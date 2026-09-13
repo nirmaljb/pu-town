@@ -5,9 +5,9 @@ import { decodeServerMessage } from "../dist/protocol.js";
 
 test("the client accepts an explicit version 1 server message", () => {
   assert.deepEqual(decodeServerMessage(JSON.stringify({
-    version: 1, type: "player_moved", playerId: "player-1", x: 12, y: 24
+    version: 1, type: "player_moved", playerId: "player-1", facing: "down", sequence: 1, epoch: 0, x: 12, y: 24
   })), {
-    version: 1, type: "player_moved", playerId: "player-1", x: 12, y: 24
+    version: 1, type: "player_moved", playerId: "player-1", facing: "down", sequence: 1, epoch: 0, x: 12, y: 24
   });
 });
 
@@ -29,13 +29,13 @@ test("create, heartbeat and colour messages use strict schemas", async () => {
   assert.equal(createRoom("a".repeat(24)).displayName.length, 24);
   assert.deepEqual(decodeServerMessage('{"version":1,"type":"pong"}'), { version: 1, type: "pong" });
   assert.throws(() => decodeServerMessage('{"version":1,"type":"pong","x":1}'), /fields/);
-  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, x: 640, y: 360 };
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 };
   assert.equal(decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player })).player.colour, "#4F8CFF");
   assert.throws(() => decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player: { ...player, colour: "red" } })));
 });
 
 test("snapshots and join announcements require a known Avatar Preset", () => {
-  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-6", seat: null, ready: false, x: 640, y: 360 };
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-6", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 };
   for (const envelope of [
     p => ({ version: 1, type: "player_joined", player: p }),
     p => ({ version: 1, type: "room_snapshot", phase: "playing", hostPlayerId: "p", selfPlayerId: "p", roomId: "ABC234", players: [p] })
@@ -48,7 +48,7 @@ test("snapshots and join announcements require a known Avatar Preset", () => {
 });
 
 test("Lobby state validates phase, Host, seats and readiness strictly", () => {
-  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: 0, ready: false, x: 640, y: 177 };
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: 0, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 177 };
   const state = { version: 1, type: "room_state", phase: "lobby", hostPlayerId: "p", players: [player] };
   assert.deepEqual(decodeServerMessage(JSON.stringify(state)), state);
   for (const phase of [undefined, null, "morning", 1]) {
@@ -65,11 +65,20 @@ test("Lobby state validates phase, Host, seats and readiness strictly", () => {
 });
 
 test("Room state rejects seat assignments inconsistent with its phase", () => {
-  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, x: 640, y: 360 };
+  const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 };
   for (const type of ["room_state", "room_snapshot"]) {
     const envelope = { version: 1, type, phase: "lobby", hostPlayerId: "p", players: [player],
       ...(type === "room_snapshot" ? { roomId: "ABC234", selfPlayerId: "p" } : {}) };
     assert.throws(() => decodeServerMessage(JSON.stringify(envelope)), /seat/);
     assert.throws(() => decodeServerMessage(JSON.stringify({ ...envelope, phase: "playing", players: [{ ...player, seat: 0 }] })), /seat/);
+  }
+});
+
+
+test("movement carries strict retained Facing and acknowledgment coordinates", () => {
+  const event = { version: 1, type: "player_moved", playerId: "p", x: 640, y: 360, facing: "left", sequence: 3, epoch: 0 };
+  assert.deepEqual(decodeServerMessage(JSON.stringify(event)), event);
+  for (const patch of [{ facing: "north" }, { sequence: -1 }, { sequence: 1.5 }, { epoch: null }]) {
+    assert.throws(() => decodeServerMessage(JSON.stringify({ ...event, ...patch })));
   }
 });

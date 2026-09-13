@@ -128,6 +128,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     seat = java.util.stream.IntStream.range(0, RoomRules.CAPACITY)
                             .filter(index -> !occupied.contains(index)).findFirst().orElseThrow();
                 }
+                player.setMovementSequence(0);
+                player.setMovementEpoch(0);
+                player.setFacing(seat == null || seat == 0 ? "down" : seat < 5 ? "left" : seat == 5 ? "up" : "right");
                 player.setReady(false);
                 player.setSeat(seat);
                 player.setX(seat == null ? RoomRules.SPAWN_X : RoomRules.seatX(seat));
@@ -200,6 +203,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 for (String id : room.playerIdsSnapshot()) {
                     PlayerState member = playersById.get(id);
                     member.setSeat(null);
+                    member.setFacing("down");
                     member.setX(RoomRules.SPAWN_X);
                     member.setY(RoomRules.SPAWN_Y);
                     member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
@@ -224,25 +228,34 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         roomManager.serialized(List.of(roomId), () -> {
-            if (!roomManager.findRoom(roomId).getPhase().equals("playing")) {
-                deliver(error(player, "invalid_movement", "Players remain seated in the Lobby."));
+            if (message.epoch() != player.getMovementEpoch() || message.sequence() <= player.getMovementSequence()) {
+                correctMovement(player);
                 return null;
             }
+            player.setMovementSequence(message.sequence());
             long now = nanoTime.getAsLong();
-            if (!RoomRules.acceptsMovement(player, message.x(), message.y(), now)) {
-                deliver(error(player, "invalid_movement", "Position is outside the room or exceeds movement speed."));
+            if (!roomManager.findRoom(roomId).getPhase().equals("playing") ||
+                    !RoomRules.acceptsMovement(player, message.x(), message.y(), now)) {
+                player.setMovementEpoch(player.getMovementEpoch() + 1);
+                correctMovement(player);
                 return null;
             }
+            player.setFacing(message.facing());
             player.setX(message.x());
             player.setY(message.y());
             player.setLastAcceptedMovementNanos(now);
             Room room = roomManager.findRoom(roomId);
             List<Delivery> pendingDeliveries = new ArrayList<>();
             addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
-                    new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y()));
+                    new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()));
             deliverAll(pendingDeliveries);
             return null;
         });
+    }
+
+    private void correctMovement(PlayerState player) {
+        deliver(new Delivery(player.getId(), new ServerMessage.MovementCorrection(player.getId(),
+                player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch())));
     }
 
     @Override
@@ -285,7 +298,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.getX(), player.getY()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()
         );
     }
 
@@ -305,18 +318,17 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private void deliver(Delivery delivery) {
         ConnectionOutbox outbox = outboxes.get(delivery.playerId());
         if (outbox == null) return;
-        try {
-            TextMessage textMessage = new TextMessage(objectMapper.writeValueAsString(delivery.message()));
-            String movementPlayerId = delivery.message() instanceof ServerMessage.PlayerMoved moved
-                    ? moved.playerId() : null;
-            if (!outbox.enqueue(textMessage, movementPlayerId)) {
-                PlayerState player = playersById.get(delivery.playerId());
-                if (player != null && player.getSession().isOpen()) {
-                    player.getSession().close(CloseStatus.SESSION_NOT_RELIABLE);
-                }
+        TextMessage textMessage = new TextMessage(objectMapper.writeValueAsString(delivery.message()));
+        String movementPlayerId = delivery.message() instanceof ServerMessage.PlayerMoved moved
+                ? moved.playerId() : null;
+        if (!outbox.enqueue(textMessage, movementPlayerId)) {
+            PlayerState player = playersById.get(delivery.playerId());
+            if (player != null && player.getSession().isOpen()) {
+                outboundExecutor.execute(() -> {
+                    try { player.getSession().close(CloseStatus.SESSION_NOT_RELIABLE); }
+                    catch (IOException ignored) { /* Lifecycle cleanup follows closure. */ }
+                });
             }
-        } catch (IOException ignored) {
-            // The WebSocket lifecycle callback removes the disconnected player.
         }
     }
 

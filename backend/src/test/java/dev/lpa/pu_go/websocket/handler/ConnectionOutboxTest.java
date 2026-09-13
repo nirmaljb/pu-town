@@ -29,18 +29,18 @@ class ConnectionOutboxTest {
     }
 
     @Test
-    void aFullQueueDiscardsMovementBeforeStructuralEventsAndRejectsStructuralOverflow() {
+    void aFullQueuePreservesFinalMovementAndRejectsOverflow() {
         RecordingWebSocketSession session = new RecordingWebSocketSession("session-1");
         PausedExecutor executor = new PausedExecutor();
         ConnectionOutbox outbox = new ConnectionOutbox(session, executor, 2);
 
         assertTrue(outbox.enqueue(new TextMessage("joined"), null));
         assertTrue(outbox.enqueue(new TextMessage("move"), "player-1"));
-        assertTrue(outbox.enqueue(new TextMessage("left"), null));
+        assertFalse(outbox.enqueue(new TextMessage("left"), null));
         assertFalse(outbox.enqueue(new TextMessage("snapshot"), null));
         executor.runNext();
 
-        assertEquals(java.util.List.of("joined", "left"), session.payloads());
+        assertEquals(java.util.List.of("joined", "move"), session.payloads());
     }
 
     private static final class PausedExecutor implements Executor {

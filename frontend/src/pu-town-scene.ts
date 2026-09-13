@@ -5,7 +5,7 @@ import { AvatarReconciler, preloadAvatars } from "./avatar-reconciler.js";
 import { NetworkFrameBoundary } from "./network-frame-boundary.js";
 import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
-import { MOVEMENT_SEND_INTERVAL_MS, MOVEMENT_SPEED, ROOM_HEIGHT, ROOM_WIDTH } from "./room-rules.js";
+import { MOVEMENT_SEND_INTERVAL_MS } from "./room-rules.js";
 import { emptyWorld } from "./world-state.js";
 
 export class PuTownScene extends Phaser.Scene {
@@ -16,13 +16,9 @@ export class PuTownScene extends Phaser.Scene {
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  #localPlayerId: string | null = null;
-  #localX = 0;
-  #localY = 0;
-  #authoritativeX = 0;
-  #authoritativeY = 0;
   #lastMovementSentAt = 0;
-  #movementDirty = false;
+  #focused = true;
+  #restored = false;
 
   constructor() {
     super("pu-town");
@@ -44,7 +40,23 @@ export class PuTownScene extends Phaser.Scene {
     this.#client = new ReconnectingGameClient(() => new WebSocket(websocketUrl), this.#inbox);
     this.#interface = new JoinInterface(this.#client);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
+    const loseFocus = () => {
+      this.#focused = false;
+      if (this.#cursors) for (const key of Object.values(this.#cursors)) key.reset();
+    };
+    const restoreFocus = () => {
+      this.#focused = !document.hidden && document.hasFocus();
+      this.#restored = true;
+    };
+    const visibilityChanged = () => document.hidden ? loseFocus() : restoreFocus();
+    this.#focused = !document.hidden && document.hasFocus();
+    window.addEventListener("blur", loseFocus);
+    window.addEventListener("focus", restoreFocus);
+    document.addEventListener("visibilitychange", visibilityChanged);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      window.removeEventListener("blur", loseFocus);
+      window.removeEventListener("focus", restoreFocus);
+      document.removeEventListener("visibilitychange", visibilityChanged);
       this.#client?.stop();
       this.#interface?.destroy();
     });
@@ -58,53 +70,27 @@ export class PuTownScene extends Phaser.Scene {
     this.#interface?.render(world);
     this.#meetingArea?.setVisible(world?.phase === "lobby");
     const playing = this.#client?.state.status === "playing" && world?.phase === "playing";
-    if (this.input.keyboard) this.input.keyboard.enabled = playing;
+    const acceptsInput = playing && this.#focused && !this.#restored;
+    this.#restored = false;
+    if (this.input.keyboard) this.input.keyboard.enabled = acceptsInput;
+    if (!acceptsInput && this.#cursors) for (const key of Object.values(this.#cursors)) key.reset();
     if (!playing) {
       this.#avatarReconciler?.updateAnimations(time, null, true);
-      this.#movementDirty = false;
-      this.#localPlayerId = null;
-      if (this.#cursors) for (const key of Object.values(this.#cursors)) key.reset();
       if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
       return;
     }
-    const selfPlayerId = world?.selfPlayerId ?? null;
-    const authoritativePlayer = selfPlayerId === null ? undefined : world?.players.get(selfPlayerId);
-    if (selfPlayerId === null || authoritativePlayer === undefined || this.#cursors === undefined) return;
-
-    if (this.#localPlayerId !== selfPlayerId) {
-      this.#localPlayerId = selfPlayerId;
-      this.#localX = authoritativePlayer.x;
-      this.#localY = authoritativePlayer.y;
-    } else if (authoritativePlayer.x !== this.#authoritativeX || authoritativePlayer.y !== this.#authoritativeY) {
-      this.#localX = authoritativePlayer.x;
-      this.#localY = authoritativePlayer.y;
-    }
-    this.#authoritativeX = authoritativePlayer.x;
-    this.#authoritativeY = authoritativePlayer.y;
-
-    const horizontal = Number(this.#cursors.right.isDown) - Number(this.#cursors.left.isDown);
-    const vertical = Number(this.#cursors.down.isDown) - Number(this.#cursors.up.isDown);
-    if (horizontal === 0 && vertical === 0) {
-      this.#avatarReconciler?.updateAnimations(time, selfPlayerId);
-      if (this.#movementDirty) {
-        this.#client?.move(this.#localX, this.#localY);
-        this.#lastMovementSentAt = time;
-        this.#movementDirty = false;
-      }
-      return;
-    }
-    const magnitude = Math.hypot(horizontal, vertical);
-    const distance = MOVEMENT_SPEED * delta / 1_000;
-    this.#localX = Phaser.Math.Clamp(this.#localX + horizontal / magnitude * distance, 0, ROOM_WIDTH);
-    this.#localY = Phaser.Math.Clamp(this.#localY + vertical / magnitude * distance, 0, ROOM_HEIGHT);
-    this.#avatarReconciler?.moveLocally(selfPlayerId, this.#localX, this.#localY);
-    this.#avatarReconciler?.updateAnimations(time, selfPlayerId);
-    this.#movementDirty = true;
-
-    if (time - this.#lastMovementSentAt >= MOVEMENT_SEND_INTERVAL_MS) {
-      this.#client?.move(this.#localX, this.#localY);
+    const selfPlayerId = world?.selfPlayerId;
+    const movement = this.#frameBoundary?.localMovement;
+    if (!selfPlayerId || !movement || !this.#cursors) return;
+    const horizontal = acceptsInput ? Number(this.#cursors.right.isDown) - Number(this.#cursors.left.isDown) : 0;
+    const vertical = acceptsInput ? Number(this.#cursors.down.isDown) - Number(this.#cursors.up.isDown) : 0;
+    movement.advance(horizontal, vertical, delta);
+    this.#avatarReconciler?.moveLocally(selfPlayerId, movement.x, movement.y, movement.facing);
+    this.#avatarReconciler?.updateAnimations(time, selfPlayerId, !acceptsInput);
+    if (movement.dirty && ((horizontal === 0 && vertical === 0) || time - this.#lastMovementSentAt >= MOVEMENT_SEND_INTERVAL_MS)) {
+      const update = movement.submission();
+      this.#client?.move(update);
       this.#lastMovementSentAt = time;
-      this.#movementDirty = false;
     }
   }
 }

@@ -43,21 +43,11 @@ final class ConnectionOutbox {
                     }
                 }
             }
-            if (messages.size() == capacity && !discardOldestMovement()) return false;
+            if (messages.size() == capacity) return false;
             messages.add(new QueuedMessage(message, movementPlayerId));
         }
         scheduleDrain();
         return true;
-    }
-
-    private boolean discardOldestMovement() {
-        for (int index = 0; index < messages.size(); index++) {
-            if (messages.get(index).movementPlayerId() != null) {
-                messages.remove(index);
-                return true;
-            }
-        }
-        return false;
     }
 
     private void scheduleDrain() {

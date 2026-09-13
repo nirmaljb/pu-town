@@ -22,6 +22,15 @@ public class PlayerState {
     private double x;
     private double y;
     private long lastAcceptedMovementNanos;
+    private String facing = "down";
+    private long movementSequence;
+    private long movementEpoch;
+    public String getFacing() { return facing; }
+    public void setFacing(String value) { facing = value; }
+    public long getMovementSequence() { return movementSequence; }
+    public void setMovementSequence(long value) { movementSequence = value; }
+    public long getMovementEpoch() { return movementEpoch; }
+    public void setMovementEpoch(long value) { movementEpoch = value; }
 
     public PlayerState(String playerId, WebSocketSession session) {
         this.playerId = playerId;
