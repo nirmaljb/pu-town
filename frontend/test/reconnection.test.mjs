@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { NetworkInbox } from "../dist/network-inbox.js";
 import { ReconnectingGameClient } from "../dist/reconnecting-game-client.js";
 
-function setup() {
+function setup(storage) {
   let now = 0;
   const sockets = [];
   const inbox = new NetworkInbox();
   const client = new ReconnectingGameClient(() => {
     const socket = new FakeSocket(); sockets.push(socket); return socket;
-  }, inbox, () => now);
+  }, inbox, () => now, storage);
   return { client, sockets, inbox, elapse(ms) { now += ms; }, advance(ms) {
     while (ms > 0) { const step = Math.min(ms, 1_000); now += step; ms -= step; client.checkHealth(); }
     client.update();
@@ -42,7 +42,7 @@ class FakeSocket {
   send(payload) { this.sent.push(payload); }
   open() { this.readyState = 1; this.listeners.open.forEach(fn => fn()); }
   message(value) { this.listeners.message.forEach(fn => fn({ data: JSON.stringify(value) })); }
-  disconnect() { this.readyState = 3; this.listeners.close.forEach(fn => fn()); }
+  disconnect(code = 1006) { this.readyState = 3; this.listeners.close.forEach(fn => fn({ code })); }
   close() { this.disconnect(); }
 }
 
@@ -81,26 +81,24 @@ test("silent loss freezes after ten seconds and rejoin alone resumes play", () =
   assert.equal(client.state.status, "playing");
 });
 
-test("reconnect stops after thirty seconds, supports retry, and cancellation is final", () => {
-  const { client, sockets, advance, inbox } = setup();
+test("recovery retries beyond thirty seconds with capped delays and immediate foreground retry", () => {
+  const { client, sockets, elapse } = setup();
   client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
   sockets[0].disconnect();
+  for (const delay of [500, 1000, 2000, 4000, 5000, 5000, 5000, 5000, 5000]) {
+    const count = sockets.length;
+    elapse(delay - 1); client.update(); assert.equal(sockets.length, count);
+    elapse(1); client.update(); assert.equal(sockets.length, count + 1);
+    sockets.at(-1).disconnect();
+  }
   assert.equal(client.state.status, "reconnecting");
-  advance(29_999);
-  assert.equal(client.state.status, "reconnecting");
-  advance(1);
-  assert.equal(client.state.status, "failed");
-  client.retry();
-  assert.equal(client.state.status, "reconnecting");
-  const socket = sockets.at(-1);
+  const count = sockets.length;
+  client.checkHealth(true); client.update();
+  assert.equal(sockets.length, count + 1);
   client.cancel();
-  socket.open(); socket.message(snapshot); advance(40_000);
-  assert.equal(client.state.status, "join");
-  assert.equal(inbox.drain().length, 0);
-  assert.equal(socket.sent.length, 0);
 });
 
-test("server entry failures return to join and discard subsequent snapshots", () => {
+test("terminal recovery failures stop retries and discard subsequent snapshots", () => {
   for (const code of ["room_not_found", "room_full"]) {
     const { client, sockets, advance } = setup();
     client.join("ABC234", "Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
@@ -108,7 +106,7 @@ test("server entry failures return to join and discard subsequent snapshots", ()
     sockets[1].message({ version: 1, type: "error", code, message: code === "room_full" ? "Room is full" : "Room not found" });
     sockets[1].message(snapshot);
     client.update();
-    assert.equal(client.state.status, "join");
+    assert.equal(client.state.status, "failed");
     assert.match(client.state.error, /Room/);
     advance(40_000);
     assert.equal(sockets.length, 2);
@@ -272,4 +270,107 @@ test("real connection loss recovers the private membership and waits for its cur
   assert.equal(client.state.status, "reconnecting");
   client.update();
   assert.equal(client.state.status, "playing");
+});
+
+function memoryStorage() {
+  const values = new Map();
+  return { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
+}
+
+test("same-tab startup recovers a stored membership and Leave clears refresh intent", () => {
+  const storage = memoryStorage();
+  const first = setup(storage);
+  first.client.create("Alex"); first.sockets[0].open(); first.sockets[0].message(snapshot); first.client.update();
+  const refreshed = setup(storage);
+  assert.equal(refreshed.client.state.status, "reconnecting");
+  refreshed.sockets[0].open();
+  assert.equal(JSON.parse(refreshed.sockets[0].sent[0]).type, "recover_room");
+  refreshed.client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+  assert.equal(refreshed.sockets[0].sent.length, 1);
+  refreshed.sockets[0].message(snapshot); refreshed.client.update();
+  refreshed.client.leave();
+  assert.equal(setup(storage).sockets.length, 0);
+});
+
+test("displacement is terminal at the frame boundary and cannot restart takeover", () => {
+  const storage = memoryStorage();
+  const { client, sockets, advance, inbox } = setup(storage);
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(4001);
+  client.update();
+  assert.equal(client.state.status, "failed");
+  assert.match(client.state.error, /replaced/);
+  client.checkHealth(true); sockets[0].message(snapshot); sockets[0].disconnect(); advance(60_000);
+  assert.equal(client.state.status, "failed");
+  assert.equal(sockets.length, 1);
+  assert.equal(inbox.drain().length, 0);
+  assert.equal(setup(storage).sockets.length, 0);
+});
+
+test("expired recovery offers explicit fresh Join and never trusts a client expiry clock", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); elapse(900_000); client.update();
+  sockets[1].open(); sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
+  client.update();
+  assert.equal(client.state.status, "failed");
+  assert.equal(client.state.canJoinAgain, true);
+  assert.match(client.state.error, /expired/);
+  client.checkHealth(true); elapse(60_000); client.update(); assert.equal(sockets.length, 2);
+  client.joinAgain(); sockets[2].open();
+  assert.deepEqual(JSON.parse(sockets[2].sent[0]), { version: 1, type: "join_room", roomId: "ABC234", displayName: "Alex" });
+});
+
+test("Leave during recovery immediately abandons intent and releases a reachable reservation", () => {
+  const storage = memoryStorage();
+  const { client, sockets, inbox, advance } = setup(storage);
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect();
+  client.leave();
+  assert.equal(client.state.status, "join");
+  assert.equal(setup(storage).sockets.length, 0);
+  const release = sockets.at(-1); release.open();
+  assert.deepEqual(release.sent.map(value => JSON.parse(value).type), ["recover_room", "leave_room"]);
+  release.message(snapshot); release.message({ version: 1, type: "room_left", roomId: "ABC234" });
+  sockets[0].message(snapshot); sockets[0].disconnect(4001); advance(60_000);
+  assert.equal(client.state.status, "join");
+  assert.equal(inbox.drain().length, 0);
+  assert.equal(sockets.length, 2);
+});
+
+test("release timeout and late events cannot restart abandoned recovery", () => {
+  const { client, sockets, elapse, inbox } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); elapse(500); client.update();
+  const abandoned = sockets[1];
+  client.leave(); const release = sockets[2];
+  elapse(10_000); client.checkHealth();
+  release.open(); abandoned.open(); abandoned.message(snapshot); abandoned.disconnect(4001);
+  client.checkHealth(true); client.update();
+  assert.equal(client.state.status, "join");
+  assert.equal(release.sent.length, 0);
+  assert.equal(abandoned.sent.length, 0);
+  assert.equal(inbox.drain().length, 0);
+});
+
+test("invalid stored credentials do not create a membership", () => {
+  const storage = memoryStorage();
+  storage.setItem("pu-town.recovery", JSON.stringify({ roomId: "ABC234", displayName: "Alex", recoveryToken: "public-player-id" }));
+  const { client, sockets } = setup(storage);
+  assert.equal(client.state.status, "join");
+  assert.equal(sockets.length, 0);
+  assert.equal(storage.getItem("pu-town.recovery"), null);
+});
+
+test("explicit non-retryable recovery results remain terminal after foreground return", () => {
+  for (const code of ["connection_replaced", "invalid_phase", "recovery_expired", "room_not_found"]) {
+    const { client, sockets, advance } = setup();
+    client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+    sockets[0].disconnect(); advance(500); sockets[1].open();
+    sockets[1].message({ version: 1, type: "error", code, message: "Recovery cannot continue" });
+    client.update(); client.checkHealth(true); advance(200_000);
+    assert.equal(client.state.status, "failed");
+    assert.equal(sockets.length, 2);
+    if (code === "room_not_found") assert.match(client.state.error, /unavailable.*cannot continue/);
+  }
 });

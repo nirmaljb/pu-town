@@ -128,7 +128,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 7. The backend validates the position and broadcasts accepted movement to the Room.
 8. `avatar-reconciler.ts` brings Phaser objects into line with the authoritative world state.
 
-After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. An acknowledged Leave does not reconnect.
+After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect.
 
 ## Change rules and synchronization points
 

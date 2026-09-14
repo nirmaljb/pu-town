@@ -58,8 +58,8 @@ export class JoinInterface {
           <h2 id="connection-title">Reconnecting…</h2>
           <p class="connection-description" role="status">Movement is paused while we bring you back.</p>
           <div class="connection-actions">
-            <button type="button" class="primary retry">Retry</button>
-            <button type="button" class="back">Back to join</button>
+            <button type="button" class="primary retry">Join again</button>
+            <button type="button" class="back">Leave Room</button>
           </div>
         </div>
       </section>
@@ -93,8 +93,8 @@ export class JoinInterface {
     });
     this.element(".start-game").addEventListener("click", () => this.client.startGame());
     this.element(".leave-room").addEventListener("click", () => { this.client.leave(); this.render(); });
-    this.element(".back").addEventListener("click", () => { this.client.cancel(); this.render(); });
-    this.element(".retry").addEventListener("click", () => { this.client.retry(); this.render(); });
+    this.element(".back").addEventListener("click", () => { this.client.leave(); this.render(); });
+    this.element(".retry").addEventListener("click", () => { this.client.joinAgain(); this.render(); });
     this.element(".copy-code").addEventListener("click", () => {
       const code = this.client.state.roomId;
       if (!code) return;
@@ -139,14 +139,14 @@ export class JoinInterface {
     this.element(".entry-status").textContent = state.status === "connecting" ? "Connecting…" : state.error ?? "";
     this.element(".active-code").textContent = state.roomId ?? "";
     this.element(".room-status").textContent = state.status === "leaving" ? "Leaving…" : state.error ?? "";
-    this.element<HTMLButtonElement>(".leave-room").disabled = state.status !== "playing";
-    this.element(".retry").hidden = state.status !== "failed";
+    this.element<HTMLButtonElement>(".leave-room").disabled = state.status === "leaving";
+    this.element(".retry").hidden = !state.canJoinAgain;
     this.element("#connection-title").textContent = state.status === "failed" ? "Connection lost" : "Reconnecting…";
     this.element(".connection-description").textContent = state.status === "failed"
-      ? "We could not rejoin within 30 seconds. Try again or return to join."
+      ? (state.error ?? "Recovery cannot continue.") + (state.canJoinAgain ? ". Join again starts a new Player and appearance; a random preset may coincidentally match." : "")
       : "Movement is paused while we bring you back.";
     if (state.status === "join" && previous?.status !== "join") this.#name.focus();
-    if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(state.status === "failed" ? ".retry" : ".back").focus();
+    if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(state.canJoinAgain ? ".retry" : ".back").focus();
   }
 
   destroy(): void { this.#root.remove(); }

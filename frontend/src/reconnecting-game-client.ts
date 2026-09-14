@@ -1,12 +1,16 @@
 import type { MovementState } from "./protocol.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { createRoom, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { createRoom, decodeServerMessage, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
+
+const RECOVERY_KEY = "pu-town.recovery";
+type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 export type ConnectionState = Readonly<{
   status: "join" | "connecting" | "playing" | "reconnecting" | "failed" | "leaving";
   roomId: string | null;
   error: string | null;
+  canJoinAgain?: boolean;
 }>;
 
 export class ReconnectingGameClient {
@@ -14,6 +18,9 @@ export class ReconnectingGameClient {
   #socket: WebSocket | null = null;
   #transport: GameTransport | null = null;
   #intent: ClientMessage | null = null;
+  #displayName = "";
+  #displaced = false;
+  #release: { socket: WebSocket; deadline: number } | null = null;
   #generation = 0;
   #deadline = 0;
   #lastResponse = 0;
@@ -22,6 +29,8 @@ export class ReconnectingGameClient {
   #lastHealthCheck = 0;
   #suspensionGraceUsed = false;
   #retryAt = 0;
+  #retryDelay = 500;
+  #foregroundRetry = false;
   #attemptDeadline = 0;
   #messages: ServerMessage[] = [];
   #state: ConnectionState = { status: "join", roomId: null, error: null };
@@ -29,8 +38,24 @@ export class ReconnectingGameClient {
   constructor(
     private readonly createSocket: () => WebSocket,
     private readonly inbox: NetworkInbox,
-    private readonly now: () => number = Date.now
-  ) {}
+    private readonly now: () => number = Date.now,
+    private readonly storage?: RecoveryStorage
+  ) {
+    try {
+      const saved = JSON.parse(storage?.getItem(RECOVERY_KEY) ?? "null");
+      if (!saved) return;
+      if (typeof saved.displayName !== "string" || !/^[a-f0-9]{64}$/.test(saved.recoveryToken)) throw new Error("Invalid recovery intent");
+      this.#intent = recoverRoom(saved.roomId, saved.recoveryToken);
+      this.#displayName = saved.displayName;
+      this.#state = { status: "reconnecting", roomId: saved.roomId, error: null };
+      this.#retryDelay = 500;
+      this.openConnection();
+    } catch { this.clearStoredRecovery(); }
+  }
+
+  private clearStoredRecovery(): void {
+    try { this.storage?.removeItem(RECOVERY_KEY); } catch { /* Storage can be unavailable. */ }
+  }
 
   get state(): ConnectionState { return this.#state; }
 
@@ -40,6 +65,7 @@ export class ReconnectingGameClient {
   private start(intent: ClientMessage): void {
     if (this.#state.status !== "join") return;
     this.#intent = intent;
+    if ("displayName" in intent) this.#displayName = intent.displayName;
     this.#state = { status: "connecting", roomId: null, error: null };
     this.#deadline = this.now() + 10_000;
     this.openConnection();
@@ -47,14 +73,14 @@ export class ReconnectingGameClient {
 
   /** Process decoded lifecycle messages at the start of the game frame. */
   update(): void {
+    if (this.#displaced) {
+      this.#displaced = false;
+      this.failRecovery("Your connection was replaced by another tab.");
+      return;
+    }
     if (this.#state.status === "connecting" && this.now() >= this.#deadline) {
       this.cancel();
       this.#state = { ...this.#state, error: "Connection timed out. Please try again." };
-      return;
-    }
-    if (this.#state.status === "reconnecting" && this.now() >= this.#deadline) {
-      this.closeConnection();
-      this.#state = { ...this.#state, status: "failed", error: "Could not reconnect." };
       return;
     }
     if (this.#state.status === "leaving" && this.now() >= this.#deadline) { this.cancel(); return; }
@@ -63,6 +89,12 @@ export class ReconnectingGameClient {
       if (message.type === "error") {
         if (message.code === "recovery_in_use" && this.#state.status === "reconnecting") {
           this.disconnected();
+          return;
+        }
+        if (this.#state.status === "reconnecting") {
+          this.failRecovery(message.code === "room_not_found"
+            ? "The Room is unavailable. Recovery cannot continue; the server may have restarted."
+            : message.message, message.code === "recovery_expired");
           return;
         }
         if (this.#state.status !== "playing") {
@@ -75,6 +107,9 @@ export class ReconnectingGameClient {
       if (message.type === "room_snapshot" || message.type === "room_state") this.#phase = message.phase;
       if (message.type === "room_snapshot" && this.#intent && this.#state.status !== "leaving") {
         this.#intent = recoverRoom(message.roomId, message.recoveryToken);
+        try { this.storage?.setItem(RECOVERY_KEY, JSON.stringify({ roomId: message.roomId, recoveryToken: message.recoveryToken, displayName: this.#displayName })); }
+        catch { /* In-memory recovery still works when storage is unavailable. */ }
+        this.#retryDelay = 500;
         this.#state = { status: "playing", roomId: message.roomId, error: null };
         this.#lastResponse = this.now();
         this.#lastHealthCheck = this.now();
@@ -84,6 +119,10 @@ export class ReconnectingGameClient {
     }
     if (this.#healthFailed) this.disconnected();
     if (this.#state.status === "reconnecting") {
+      if (this.#foregroundRetry) {
+        this.#foregroundRetry = false;
+        if (!this.#socket) this.#retryAt = this.now();
+      }
       if (this.#socket && this.now() >= this.#attemptDeadline) this.disconnected();
       if (!this.#socket && this.now() >= this.#retryAt) this.openConnection();
     }
@@ -91,6 +130,12 @@ export class ReconnectingGameClient {
 
   /** Transport timer: records health without applying lifecycle or world events. */
   checkHealth(resuming = false): void {
+    if (this.#release && this.now() >= this.#release.deadline) {
+      const socket = this.#release.socket;
+      this.#release = null;
+      socket.close();
+    }
+    if (resuming && this.#state.status === "reconnecting") this.#foregroundRetry = true;
     const now = this.now();
     const delayed = now - this.#lastHealthCheck > 2_000;
     this.#lastHealthCheck = now;
@@ -110,6 +155,13 @@ export class ReconnectingGameClient {
     }
   }
 
+  private failRecovery(error: string, canJoinAgain = false): void {
+    this.closeConnection();
+    this.clearStoredRecovery();
+    this.#intent = null;
+    this.#state = { ...this.#state, status: "failed", error, canJoinAgain };
+  }
+
   private disconnected(): void {
     this.closeConnection();
     if (this.#state.status === "leaving") { this.cancel(); return; }
@@ -120,9 +172,10 @@ export class ReconnectingGameClient {
     }
     if (this.#state.status === "playing") {
       this.#state = { ...this.#state, status: "reconnecting", error: null };
-      this.#deadline = this.now() + 30_000;
+      this.#retryDelay = 500;
     }
-    this.#retryAt = this.now() + 500;
+    this.#retryAt = this.now() + this.#retryDelay;
+    this.#retryDelay = Math.min(this.#retryDelay * 2, 5_000);
   }
 
   private closeConnection(): void {
@@ -151,22 +204,65 @@ export class ReconnectingGameClient {
   }
 
   leave(): void {
+    if (this.#state.status === "reconnecting" || this.#state.status === "failed") {
+      const intent = this.#intent;
+      this.cancel();
+      if (intent?.type === "recover_room") this.releaseReservation(intent);
+      return;
+    }
     if (this.#state.status !== "playing") return;
+    this.clearStoredRecovery();
     this.#state = { ...this.#state, status: "leaving", error: null };
     this.#deadline = this.now() + 10_000;
     this.#transport?.leave();
   }
 
-  retry(): void {
-    if (this.#state.status !== "failed") return;
-    this.#state = { ...this.#state, status: "reconnecting", error: null };
-    this.#deadline = this.now() + 30_000;
-    this.openConnection();
+  /** A bounded, isolated release attempt cannot feed events back into the game. */
+  private releaseReservation(intent: ClientMessage): void {
+    let socket: WebSocket;
+    try { socket = this.createSocket(); } catch { return; }
+    this.#release = { socket, deadline: this.now() + 10_000 };
+    const finish = () => {
+      if (this.#release?.socket !== socket) return;
+      this.#release = null;
+      socket.close();
+    };
+    socket.addEventListener("open", () => {
+      if (this.#release?.socket !== socket) return;
+      try {
+        socket.send(JSON.stringify(intent));
+        socket.send(JSON.stringify({ version: 1, type: "leave_room" }));
+      } catch { finish(); }
+    });
+    socket.addEventListener("message", event => {
+      try {
+        const message = decodeServerMessage(String(event.data));
+        if (message.type === "room_left" || message.type === "error") finish();
+      } catch { finish(); }
+    });
+    socket.addEventListener("close", finish);
+    socket.addEventListener("error", finish);
   }
 
-  stop(): void { this.cancel(); }
+  joinAgain(): void {
+    if (!this.#state.canJoinAgain || !this.#state.roomId) return;
+    const roomId = this.#state.roomId;
+    const displayName = this.#displayName;
+    this.cancel();
+    this.join(roomId, displayName);
+  }
+
+  stop(): void {
+    const release = this.#release;
+    this.#release = null;
+    release?.socket.close();
+    this.cancel();
+  }
 
   cancel(): void {
+    this.#displaced = false;
+    this.#foregroundRetry = false;
+    this.clearStoredRecovery();
     this.closeConnection();
     this.#intent = null;
     this.#state = { status: "join", roomId: null, error: null };
@@ -192,8 +288,13 @@ export class ReconnectingGameClient {
       }
       this.#messages.push(message);
     }, () => generation === this.#generation);
-    socket.addEventListener("close", () => {
-      if (generation === this.#generation) this.disconnected();
+    socket.addEventListener("close", event => {
+      if (generation !== this.#generation) return;
+      if (event.code === 4001) {
+        this.closeConnection();
+        this.clearStoredRecovery();
+        this.#displaced = true;
+      } else this.disconnected();
     });
     socket.addEventListener("open", () => {
       if (generation === this.#generation && this.#intent) socket.send(JSON.stringify(this.#intent));

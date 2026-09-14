@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="/"><title>Recovery verification</title></head><body><div style="position:fixed;z-index:10000;top:80px;left:5px;background:white;color:black;font:12px monospace;max-width:470px"><button id="disconnect">Disconnect for 20 seconds</button><button id="expire">Disconnect for 125 seconds</button><button id="resume">Restore network</button><button id="duplicate">Duplicate this tab</button><pre id="evidence" style="max-height:140px;overflow:auto"></pre></div><div id="game"></div><script type="module">
+const output = document.querySelector('#evidence'); const records=[]; let active; let blockedUntil=0;
+function log(value) { records.push(new Date().toISOString()+' '+value); output.textContent=records.slice(-12).join('\n'); }
+const NativeSocket = window.WebSocket;
+window.WebSocket = class extends NativeSocket {
+ constructor(url) {
+  if(Date.now()<blockedUntil) throw new Error('Verification network interruption');
+  super(url); active=this;
+  this.addEventListener('message', e=> {const m=JSON.parse(e.data); delete m.recoveryToken; if(['room_snapshot','room_state','player_joined','player_left'].includes(m.type)) log(JSON.stringify(m));});
+  this.addEventListener('close',()=>log('socket closed'));
+ }
+};
+document.querySelector('#disconnect').onclick=()=>{blockedUntil=Date.now()+20000;active.close();log('network unavailable for20s');};
+document.querySelector('#expire').onclick=()=>{blockedUntil=Date.now()+125000;active.close();log('network unavailable for125s');};
+document.querySelector('#resume').onclick=()=>{blockedUntil=0;document.dispatchEvent(new Event('visibilitychange'));log('network restored');};
+document.querySelector('#duplicate').onclick=()=>window.open(location.href, '_blank');
+await import('/src/main.ts');
+</script></body></html>

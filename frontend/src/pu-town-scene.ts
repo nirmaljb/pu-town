@@ -37,7 +37,9 @@ export class PuTownScene extends Phaser.Scene {
 
     const parameters = new URLSearchParams(window.location.search);
     const websocketUrl = parameters.get("ws") || "ws://localhost:8080/ws/game";
-    this.#client = new ReconnectingGameClient(() => new WebSocket(websocketUrl), this.#inbox);
+    let recoveryStorage: Storage | undefined;
+    try { recoveryStorage = window.sessionStorage; } catch { /* In-memory recovery remains available. */ }
+    this.#client = new ReconnectingGameClient(() => new WebSocket(websocketUrl), this.#inbox, Date.now, recoveryStorage);
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     if (this.input.keyboard) this.input.keyboard.enabled = false;

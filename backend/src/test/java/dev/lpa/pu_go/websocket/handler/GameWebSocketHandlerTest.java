@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class GameWebSocketHandlerTest {
@@ -22,6 +23,114 @@ class GameWebSocketHandlerTest {
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
             new RoomManager(milliseconds::get), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
     );
+
+    @Test
+    void reachableRecoveryThenLeaveReleasesReservationWithoutRestoringIt() throws Exception {
+        var original = connect("release-original");
+        send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(original);
+        var observer = connect("release-observer");
+        join(observer, initial.path("roomId").asText());
+        handler.afterConnectionClosed(original, org.springframework.web.socket.CloseStatus.NORMAL);
+        var release = connect("release");
+        recover(release, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        send(release, "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals("room_left", latest(release).path("type").asText());
+        assertEquals(1, latest(observer).path("players").size());
+        handler.afterConnectionClosed(release, org.springframework.web.socket.CloseStatus.NORMAL);
+        var late = connect("release-late");
+        recover(late, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals("recovery_expired", latest(late).path("code").asText());
+    }
+
+    @Test
+    void recoveryBeforeGracePreservesHostAndSkipsDisconnectedSuccessors() throws Exception {
+        var host = connect("grace-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        var initial = latest(host);
+        var older = connect("older"); join(older, initial.path("roomId").asText());
+        var connected = connect("connected"); join(connected, initial.path("roomId").asText());
+        var connectedId = latest(connected).path("selfPlayerId");
+        handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.addAndGet(14_999);
+        var returning = connect("grace-return");
+        recover(returning, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals(initial.path("selfPlayerId"), latest(returning).path("hostPlayerId"));
+        handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
+        handler.afterConnectionClosed(older, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.addAndGet(15_000); handler.expireMemberships();
+        assertEquals(connectedId, latest(connected).path("hostPlayerId"));
+    }
+
+    @Test
+    void firstReturnAfterAllDisconnectedGetsHostAndRetainsLobbyState() throws Exception {
+        for (boolean hostFirst : List.of(true, false)) {
+            var host = connect("all-host-" + hostFirst);
+            send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+            var initial = latest(host);
+            var guest = connect("all-guest-" + hostFirst);
+            join(guest, initial.path("roomId").asText());
+            var guestSnapshot = latest(guest);
+            send(guest, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+            handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+            handler.afterConnectionClosed(guest, org.springframework.web.socket.CloseStatus.NORMAL);
+            milliseconds.addAndGet(15_000);
+            var first = connect("first-" + hostFirst);
+            var identity = hostFirst ? initial : guestSnapshot;
+            recover(first, initial.path("roomId").asText(), identity.path("recoveryToken").asText());
+            assertEquals(identity.path("selfPlayerId"), latest(first).path("hostPlayerId"));
+            assertEquals("lobby", latest(first).path("phase").asText());
+            assertTrue(latest(first).path("players").get(1).path("ready").asBoolean());
+            send(first, "{\"version\":1,\"type\":\"start_game\"}");
+            var second = connect("second-" + hostFirst);
+            var other = hostFirst ? guestSnapshot : initial;
+            recover(second, initial.path("roomId").asText(), other.path("recoveryToken").asText());
+            assertEquals(identity.path("selfPlayerId"), latest(second).path("hostPlayerId"));
+            assertEquals("playing", latest(second).path("phase").asText());
+            assertTrue(latest(second).path("players").get(0).path("seat").isNull());
+            assertTrue(latest(second).path("players").get(1).path("seat").isNull());
+        }
+    }
+
+    @Test
+    void hostKeepsAuthorityUntilExactGraceDeadlineAndReturningHostDoesNotReclaimIt() throws Exception {
+        var host = connect("host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        var initial = latest(host);
+        var observer = connect("observer");
+        send(observer, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\"" + initial.path("roomId").asText() + "\",\"displayName\":\"Observer\"}");
+        var observerId = latest(observer).path("selfPlayerId");
+        handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.addAndGet(14_999);
+        handler.expireMemberships();
+        assertEquals(initial.path("selfPlayerId"), latest(observer).path("hostPlayerId"));
+        milliseconds.incrementAndGet();
+        handler.expireMemberships();
+        assertEquals(observerId, latest(observer).path("hostPlayerId"));
+        var returning = connect("returning");
+        recover(returning, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals(observerId, latest(returning).path("hostPlayerId"));
+    }
+
+    @Test
+    void recoveryTakesOverAnActiveSocketAndRetiresItsAuthority() throws Exception {
+        var original = connect("original");
+        send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(original);
+        var replacement = connect("replacement");
+        recover(replacement, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals(initial.path("selfPlayerId"), latest(replacement).path("selfPlayerId"));
+        assertEquals(4001, original.closeStatus().getCode());
+        for (String payload : List.of(
+                "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}",
+                "{\"version\":1,\"type\":\"start_game\"}",
+                "{\"version\":1,\"type\":\"leave_room\"}")) send(original, payload);
+        handler.afterConnectionClosed(original, org.springframework.web.socket.CloseStatus.NORMAL);
+        send(replacement, "{\"version\":1,\"type\":\"set_ready\",\"ready\":false}");
+        assertEquals("lobby", latest(replacement).path("phase").asText());
+        assertEquals(1, latest(replacement).path("players").size());
+        assertFalse(latest(replacement).path("players").get(0).path("ready").asBoolean(true));
+    }
 
     @Test
     void closingDuringRecoveryAlwaysLeavesARecoverableDisconnectedMembership() throws Exception {
@@ -66,11 +175,12 @@ class GameWebSocketHandlerTest {
             a.get(5, java.util.concurrent.TimeUnit.SECONDS);
             b.get(5, java.util.concurrent.TimeUnit.SECONDS);
         } finally { executor.shutdownNow(); }
-        var winner = latest(one).path("type").asText().equals("room_snapshot") ? latest(one) : latest(two);
-        var loser = latest(one).path("type").asText().equals("error") ? latest(one) : latest(two);
-        assertEquals(initial.path("selfPlayerId"), winner.path("selfPlayerId"));
-        assertEquals(10, winner.path("players").size());
-        assertEquals("recovery_in_use", loser.path("code").asText());
+        for (var connection : List.of(one, two)) {
+            assertEquals(initial.path("selfPlayerId"), latest(connection).path("selfPlayerId"));
+            assertEquals(10, latest(connection).path("players").size());
+        }
+        assertTrue(one.isOpen() != two.isOpen());
+        assertEquals(4001, (one.isOpen() ? two : one).closeStatus().getCode());
     }
 
     @Test
@@ -458,7 +568,11 @@ class GameWebSocketHandlerTest {
             send(next, """
                     {"version":1,"type":"set_ready","ready":true}
                     """);
-            if (disconnect) handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+            if (disconnect) {
+                handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+                milliseconds.addAndGet(15_000);
+                handler.expireMemberships();
+            }
             else send(host, """
                     {"version":1,"type":"leave_room"}
                     """);
