@@ -386,3 +386,25 @@ test("a second abandoned membership closes the previous release attempt", () => 
   firstRelease.open();
   assert.equal(firstRelease.sent.length, 0);
 });
+
+test("a close following a terminal recovery error cannot erase the outcome before its frame", () => {
+  const { client, sockets, advance } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); advance(500); sockets[1].open();
+  sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
+  sockets[1].disconnect(); client.update(); advance(30_000);
+  assert.equal(client.state.status, "failed");
+  assert.equal(client.state.canJoinAgain, true);
+  assert.equal(sockets.length, 2);
+});
+
+test("foreground return immediately replaces an attempt that expired during suspension", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); elapse(500); client.update();
+  assert.equal(sockets.length, 2);
+  elapse(20_000); client.checkHealth(true); client.update();
+  assert.equal(sockets.length, 3);
+  assert.equal(sockets[1].readyState, 3);
+  assert.equal(client.state.status, "reconnecting");
+});

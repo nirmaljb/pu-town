@@ -25,6 +25,29 @@ class GameWebSocketHandlerTest {
     );
 
     @Test
+    void simultaneousReturnsAfterHostGracePublishOneAuthority() throws Exception {
+        var host = connect("race-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        var hostSnapshot = latest(host);
+        var guest = connect("race-guest"); join(guest, hostSnapshot.path("roomId").asText());
+        var guestSnapshot = latest(guest);
+        handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+        handler.afterConnectionClosed(guest, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.addAndGet(15_000);
+        var first = connect("race-first"); var second = connect("race-second");
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        var barrier = new java.util.concurrent.CyclicBarrier(2);
+        try {
+            var a = executor.submit(() -> { barrier.await(); recover(first, hostSnapshot.path("roomId").asText(), hostSnapshot.path("recoveryToken").asText()); return null; });
+            var b = executor.submit(() -> { barrier.await(); recover(second, guestSnapshot.path("roomId").asText(), guestSnapshot.path("recoveryToken").asText()); return null; });
+            a.get(5, java.util.concurrent.TimeUnit.SECONDS); b.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } finally { executor.shutdownNow(); }
+        assertEquals(latest(first).path("hostPlayerId"), latest(second).path("hostPlayerId"));
+        assertEquals(2, latest(first).path("players").size());
+        assertTrue(List.of(hostSnapshot.path("selfPlayerId"), guestSnapshot.path("selfPlayerId")).contains(latest(first).path("hostPlayerId")));
+    }
+
+    @Test
     void reachableRecoveryThenLeaveReleasesReservationWithoutRestoringIt() throws Exception {
         var original = connect("release-original");
         send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
@@ -122,6 +145,7 @@ class GameWebSocketHandlerTest {
         assertEquals(initial.path("selfPlayerId"), latest(replacement).path("selfPlayerId"));
         assertEquals(4001, original.closeStatus().getCode());
         for (String payload : List.of(
+                "{\"version\":1,\"type\":\"move_player\",\"x\":650,\"y\":360,\"facing\":\"right\",\"sequence\":1,\"epoch\":0}",
                 "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}",
                 "{\"version\":1,\"type\":\"start_game\"}",
                 "{\"version\":1,\"type\":\"leave_room\"}")) send(original, payload);

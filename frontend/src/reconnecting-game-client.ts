@@ -119,11 +119,11 @@ export class ReconnectingGameClient {
     }
     if (this.#healthFailed) this.disconnected();
     if (this.#state.status === "reconnecting") {
+      if (this.#socket && this.now() >= this.#attemptDeadline) this.disconnected();
       if (this.#foregroundRetry) {
         this.#foregroundRetry = false;
         if (!this.#socket) this.#retryAt = this.now();
       }
-      if (this.#socket && this.now() >= this.#attemptDeadline) this.disconnected();
       if (!this.#socket && this.now() >= this.#retryAt) this.openConnection();
     }
   }
@@ -219,6 +219,9 @@ export class ReconnectingGameClient {
 
   /** A bounded, isolated release attempt cannot feed events back into the game. */
   private releaseReservation(intent: ClientMessage): void {
+    const previous = this.#release;
+    this.#release = null;
+    previous?.socket.close();
     let socket: WebSocket;
     try { socket = this.createSocket(); } catch { return; }
     this.#release = { socket, deadline: this.now() + 10_000 };
@@ -294,7 +297,14 @@ export class ReconnectingGameClient {
         this.closeConnection();
         this.clearStoredRecovery();
         this.#displaced = true;
-      } else this.disconnected();
+      } else {
+        const terminal = this.#state.status === "reconnecting"
+          ? this.#messages.find(message => message.type === "error" && message.code !== "recovery_in_use")
+          : undefined;
+        this.disconnected();
+        // Socket closure must not erase a terminal result awaiting its frame.
+        if (terminal) this.#messages.push(terminal);
+      }
     });
     socket.addEventListener("open", () => {
       if (generation === this.#generation && this.#intent) socket.send(JSON.stringify(this.#intent));
