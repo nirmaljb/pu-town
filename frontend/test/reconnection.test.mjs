@@ -374,3 +374,15 @@ test("explicit non-retryable recovery results remain terminal after foreground r
     if (code === "room_not_found") assert.match(client.state.error, /unavailable.*cannot continue/);
   }
 });
+
+test("a second abandoned membership closes the previous release attempt", () => {
+  const { client, sockets } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); client.leave(); const firstRelease = sockets[1];
+  client.join("BCD234", "Alex"); sockets[2].open();
+  sockets[2].message({ ...snapshot, roomId: "BCD234" }); client.update();
+  sockets[2].disconnect(); client.leave();
+  assert.equal(firstRelease.readyState, 3);
+  firstRelease.open();
+  assert.equal(firstRelease.sent.length, 0);
+});
