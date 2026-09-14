@@ -38,6 +38,7 @@ export class PuTownScene extends Phaser.Scene {
     const parameters = new URLSearchParams(window.location.search);
     const websocketUrl = parameters.get("ws") || "ws://localhost:8080/ws/game";
     this.#client = new ReconnectingGameClient(() => new WebSocket(websocketUrl), this.#inbox);
+    const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
     const loseFocus = () => {
@@ -48,7 +49,13 @@ export class PuTownScene extends Phaser.Scene {
       this.#focused = !document.hidden && document.hasFocus();
       this.#restored = true;
     };
-    const visibilityChanged = () => document.hidden ? loseFocus() : restoreFocus();
+    const visibilityChanged = () => {
+      if (document.hidden) loseFocus();
+      else {
+        this.#client?.checkHealth(true);
+        restoreFocus();
+      }
+    };
     this.#focused = !document.hidden && document.hasFocus();
     window.addEventListener("blur", loseFocus);
     window.addEventListener("focus", restoreFocus);
@@ -57,6 +64,7 @@ export class PuTownScene extends Phaser.Scene {
       window.removeEventListener("blur", loseFocus);
       window.removeEventListener("focus", restoreFocus);
       document.removeEventListener("visibilitychange", visibilityChanged);
+      window.clearInterval(healthTimer);
       this.#client?.stop();
       this.#interface?.destroy();
     });

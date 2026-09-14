@@ -91,7 +91,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/main.ts` — Phaser game bootstrap and canvas sizing.
 - `frontend/src/pu-town-scene.ts` — scene lifecycle, URL configuration, controls, local movement, and movement-send cadence.
 - `frontend/src/protocol.ts` — client message builders, server message types, and strict decoding.
-- `frontend/src/reconnecting-game-client.ts` — entry deadlines, heartbeat, reconnection, and retained join intent.
+- `frontend/src/reconnecting-game-client.ts` — entry deadlines, transport-timer heartbeat health, frame-applied timeout effects, reconnection, and retained join intent.
 - `frontend/src/join-interface.ts` — entry form, remembered Display Name, Room Code controls, and reconnect overlay.
 - `frontend/src/game-transport.ts` — WebSocket serialization and inbound-event handoff.
 - `frontend/src/network-inbox.ts` — queue of decoded server events.
@@ -139,6 +139,7 @@ After an unexpected disconnect, the active client reconnects and rejoins its pre
 - Apply server events through the inbox/frame-boundary path; do not mutate Phaser objects directly from WebSocket callbacks.
 - Preserve per-room serialization and non-blocking outbound delivery. Do not perform socket writes while holding room locks.
 - Preserve reconnect semantics: Disconnect and Leave are different domain transitions.
+- Transport health checks run independently of Phaser frames. Suspension gets one fresh heartbeat deadline; only a pong renews that allowance. Apply detected health failure at a frame boundary.
 - Avoid adding implementation details to `CONTEXT.md`; add or revise terms only when the domain language changes.
 
 ## Verification expectations

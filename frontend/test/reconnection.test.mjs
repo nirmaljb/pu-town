@@ -10,7 +10,10 @@ function setup() {
   const client = new ReconnectingGameClient(() => {
     const socket = new FakeSocket(); sockets.push(socket); return socket;
   }, inbox, () => now);
-  return { client, sockets, inbox, advance(ms) { now += ms; client.update(); } };
+  return { client, sockets, inbox, elapse(ms) { now += ms; }, advance(ms) {
+    while (ms > 0) { const step = Math.min(ms, 1_000); now += step; ms -= step; client.checkHealth(); }
+    client.update();
+  } };
 }
 const snapshot = { version: 1, type: "room_snapshot", phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
   players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }] };
@@ -196,4 +199,62 @@ test("Lobby movement freezes and recovery follows the server phase before sendin
       assert.equal(sockets[1].sent.length, playingCount);
     }
   }
+});
+
+test("heartbeat continues while game frames are paused", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  for (let i = 0; i < 24; i++) {
+    elapse(5_000); client.checkHealth();
+    assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "ping");
+    sockets[0].message({ version: 1, type: "pong" });
+  }
+  client.update();
+  assert.equal(client.state.status, "playing");
+  assert.equal(sockets.length, 1);
+});
+
+test("a suspended transport timer gets one fresh deadline, then detects silent loss", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  elapse(60_000); client.checkHealth(); client.update();
+  assert.equal(client.state.status, "playing");
+  assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "ping");
+  for (let i = 0; i < 9; i++) { elapse(1_000); client.checkHealth(); client.update(); }
+  assert.equal(client.state.status, "playing");
+  elapse(1_000); client.checkHealth();
+  assert.equal(client.state.status, "playing", "lifecycle waits for the frame boundary");
+  client.update();
+  assert.equal(client.state.status, "reconnecting");
+});
+
+test("foreground checks cannot indefinitely postpone a missing pong", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  elapse(5_000); client.checkHealth(true);
+  for (let i = 0; i < 9; i++) { elapse(1_000); client.checkHealth(true); client.update(); }
+  assert.equal(client.state.status, "playing");
+  elapse(1_000); client.checkHealth(true); client.update();
+  assert.equal(client.state.status, "reconnecting");
+});
+
+test("a fresh pong after suspended return keeps the existing connection", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  elapse(120_000); client.checkHealth(true);
+  sockets[0].message({ version: 1, type: "pong" }); client.update();
+  assert.equal(client.state.status, "playing");
+  assert.equal(sockets.length, 1);
+  assert.equal(client.state.roomId, snapshot.roomId);
+});
+
+test("a shorter timer suspension crossing the pong deadline checks the healthy socket first", () => {
+  const { client, sockets, elapse } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  for (let i = 0; i < 4; i++) { elapse(1_000); client.checkHealth(); }
+  elapse(9_000); client.checkHealth(); client.update();
+  assert.equal(client.state.status, "playing");
+  assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "ping");
+  sockets[0].message({ version: 1, type: "pong" }); client.update();
+  assert.equal(sockets.length, 1);
 });

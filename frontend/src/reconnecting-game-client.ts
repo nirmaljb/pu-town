@@ -18,6 +18,9 @@ export class ReconnectingGameClient {
   #deadline = 0;
   #lastResponse = 0;
   #nextPing = 0;
+  #healthFailed = false;
+  #lastHealthCheck = 0;
+  #suspensionGraceUsed = false;
   #retryAt = 0;
   #attemptDeadline = 0;
   #messages: ServerMessage[] = [];
@@ -70,19 +73,36 @@ export class ReconnectingGameClient {
         this.#intent = joinRoom(message.roomId, this.#intent.displayName);
         this.#state = { status: "playing", roomId: message.roomId, error: null };
         this.#lastResponse = this.now();
+        this.#lastHealthCheck = this.now();
+        this.#suspensionGraceUsed = false;
         this.#nextPing = this.now() + 5_000;
       }
     }
-    if (this.#state.status === "playing") {
-      if (this.now() - this.#lastResponse >= 10_000) this.disconnected();
+    if (this.#healthFailed) this.disconnected();
+    if (this.#state.status === "reconnecting") {
+      if (this.#socket && this.now() >= this.#attemptDeadline) this.disconnected();
+      if (!this.#socket && this.now() >= this.#retryAt) this.openConnection();
+    }
+  }
+
+  /** Transport timer: records health without applying lifecycle or world events. */
+  checkHealth(resuming = false): void {
+    const now = this.now();
+    const delayed = now - this.#lastHealthCheck > 2_000;
+    this.#lastHealthCheck = now;
+    if (this.#state.status === "playing" && !this.#healthFailed) {
+      // A paused timer must give the socket a chance to answer. Only a pong
+      // renews this allowance, so repeated focus changes cannot hide failure.
+      if ((resuming || delayed) && !this.#suspensionGraceUsed) {
+        this.#suspensionGraceUsed = true;
+        this.#lastResponse = now;
+        this.#nextPing = now;
+      }
+      if (this.now() - this.#lastResponse >= 10_000) this.#healthFailed = true;
       else if (this.now() >= this.#nextPing) {
         this.#socket?.send(JSON.stringify({ version: 1, type: "ping" }));
         this.#nextPing = this.now() + 5_000;
       }
-    }
-    if (this.#state.status === "reconnecting") {
-      if (this.#socket && this.now() >= this.#attemptDeadline) this.disconnected();
-      if (!this.#socket && this.now() >= this.#retryAt) this.openConnection();
     }
   }
 
@@ -103,6 +123,7 @@ export class ReconnectingGameClient {
 
   private closeConnection(): void {
     this.#phase = null;
+    this.#healthFailed = false;
     ++this.#generation;
     this.#socket?.close();
     this.#socket = null;
@@ -160,7 +181,11 @@ export class ReconnectingGameClient {
     this.#transport = new GameTransport(socket, this.inbox, error => {
       this.#messages.push({ version: 1, type: "error", code: "invalid_server_message", message: error.message });
     }, message => {
-      if (message.type === "pong") this.#lastResponse = this.now();
+      if (message.type === "pong") {
+        this.#lastResponse = this.now();
+        this.#suspensionGraceUsed = false;
+        return;
+      }
       this.#messages.push(message);
     }, () => generation === this.#generation);
     socket.addEventListener("close", () => {
