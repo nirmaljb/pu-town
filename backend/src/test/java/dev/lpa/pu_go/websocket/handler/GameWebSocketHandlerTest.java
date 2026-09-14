@@ -24,6 +24,60 @@ class GameWebSocketHandlerTest {
     );
 
     @Test
+    void invalidRecoveryCannotExtendExpiryAndLateSocketsCannotRemoveRecovery() throws Exception {
+        var original = connect("original");
+        send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(original);
+        String code = initial.path("roomId").asText();
+        String token = initial.path("recoveryToken").asText();
+        handler.afterConnectionClosed(original, org.springframework.web.socket.CloseStatus.NORMAL);
+        var invalid = connect("invalid");
+        milliseconds.set(119_999);
+        recover(invalid, code, "0".repeat(64));
+        assertEquals("recovery_expired", latest(invalid).path("code").asText());
+        var returning = connect("returning");
+        recover(returning, code, token);
+        assertEquals(initial.path("selfPlayerId"), latest(returning).path("selfPlayerId"));
+        handler.afterConnectionClosed(original, org.springframework.web.socket.CloseStatus.NORMAL);
+        send(original, "{\"version\":1,\"type\":\"leave_room\"}");
+        send(returning, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        org.junit.jupiter.api.Assertions.assertTrue(latest(returning).path("players").get(0).path("ready").asBoolean());
+        handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.set(239_999);
+        recover(invalid, code, token);
+        assertEquals("recovery_expired", latest(invalid).path("code").asText());
+        milliseconds.set(539_999);
+        join(invalid, code);
+        assertEquals("room_not_found", latest(invalid).path("code").asText());
+    }
+
+    private void recover(RecordingWebSocketSession session, String code, String token) throws Exception {
+        send(session, "{\"version\":1,\"type\":\"recover_room\",\"roomId\":\"" + code + "\",\"recoveryToken\":\"" + token + "\"}");
+    }
+
+    @Test
+    void disconnectReservesAndRecoversTheSamePrivateMembership() throws Exception {
+        var alex = connect("alex");
+        send(alex, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(alex);
+        String code = initial.path("roomId").asText();
+        String credential = initial.path("recoveryToken").asText();
+        org.junit.jupiter.api.Assertions.assertTrue(credential.length() >= 32);
+        var observer = connect("observer");
+        join(observer, code);
+        assertFalse(observer.payloads().toString().contains(credential));
+        handler.afterConnectionClosed(alex, org.springframework.web.socket.CloseStatus.NORMAL);
+        assertEquals("room_state", latest(observer).path("type").asText());
+        assertFalse(latest(observer).path("players").get(0).path("connected").asBoolean(true));
+        var returning = connect("returning");
+        send(returning, "{\"version\":1,\"type\":\"recover_room\",\"roomId\":\"" + code + "\",\"recoveryToken\":\"" + credential + "\"}");
+        assertEquals(initial.path("selfPlayerId"), latest(returning).path("selfPlayerId"));
+        assertEquals(initial.path("players").get(0), latest(returning).path("players").get(0));
+        assertEquals(2, latest(observer).path("players").size());
+        org.junit.jupiter.api.Assertions.assertTrue(latest(observer).path("players").get(0).path("connected").asBoolean());
+    }
+
+    @Test
     void retainsFacingAndRejectsOutstandingMovementAfterCorrection() throws Exception {
         var alex = connect("alex");
         send(alex, """
@@ -219,7 +273,7 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void roomHasTenDistinctColoursAndDisconnectFreesASeat() throws Exception {
+    void roomReservesAllTenDistinctColoursUntilExactDisconnectExpiry() throws Exception {
         RecordingWebSocketSession first = connect("first");
         send(first, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
         String code = json(first.payloads().get(0)).get("roomId").asText();
@@ -238,7 +292,13 @@ class GameWebSocketHandlerTest {
         assertEquals("room_full", json(eleventh.payloads().get(0)).get("code").asText());
         handler.afterConnectionClosed(first, org.springframework.web.socket.CloseStatus.NORMAL);
         join(eleventh, code);
-        var recovered = json(eleventh.payloads().get(1)).get("players");
+        assertEquals("room_full", latest(eleventh).path("code").asText());
+        milliseconds.set(119_999);
+        join(eleventh, code);
+        assertEquals("room_full", latest(eleventh).path("code").asText());
+        milliseconds.set(120_000);
+        join(eleventh, code);
+        var recovered = latest(eleventh).get("players");
         assertEquals(10, recovered.size());
         assertEquals(1, recovered.get(0).path("seat").asInt(-1));
         assertEquals(0, recovered.get(9).path("seat").asInt(-1));

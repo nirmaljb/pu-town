@@ -13,10 +13,11 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public Pong() { this(1, "pong"); }
     }
 
-    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, Integer seat, boolean ready, double x, double y, String facing, long sequence, long epoch) {}
+    record PlayerView(String playerId, String displayName, String colour, String avatarPreset, Integer seat, boolean ready, boolean connected, double x, double y, String facing, long sequence, long epoch) {}
 
     enum DepartureReason {
         LEFT("left"),
+        EXPIRED("expired"),
         DISCONNECTED("disconnected");
 
         private final String wireValue;
@@ -27,10 +28,10 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public String wireValue() { return wireValue; }
     }
 
-    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String phase, String hostPlayerId, List<PlayerView> players)
+    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players)
             implements ServerMessage {
-        public RoomSnapshot(String selfPlayerId, String roomId, String phase, String hostPlayerId, List<PlayerView> players) {
-            this(1, "room_snapshot", selfPlayerId, roomId, phase, hostPlayerId, List.copyOf(players));
+        public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players) {
+            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, List.copyOf(players));
         }
     }
 

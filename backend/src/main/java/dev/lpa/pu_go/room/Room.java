@@ -8,6 +8,7 @@ public class Room {
     private final String roomId;
     private String phase = "lobby";
     private String hostPlayerId;
+    public void setHostPlayerId(String value) { hostPlayerId = value; }
     public String getPhase() { return phase; }
     public String getHostPlayerId() { return hostPlayerId; }
     public void startGame() { phase = "playing"; }

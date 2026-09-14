@@ -26,6 +26,10 @@ public class RoomManager {
         for (int i = 0; i < locks.length; i++) locks[i] = new ReentrantLock();
     }
 
+    public java.util.List<String> roomIdsSnapshot() { return java.util.List.copyOf(rooms.keySet()); }
+
+    public long currentTimeMillis() { return milliseconds.getAsLong(); }
+
     public Room createRoom() {
         while (true) {
             StringBuilder code = new StringBuilder();

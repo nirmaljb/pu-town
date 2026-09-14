@@ -83,6 +83,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     Room room = roomManager.createRoom();
                     handleJoin(player, new ClientMessage.JoinRoom(1, "join_room", room.getRoomId(), create.displayName()));
                 }
+                else if (incoming instanceof ClientMessage.RecoverRoom recover) handleRecovery(player, recover);
                 else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
                 else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
                 else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
@@ -95,11 +96,62 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 1_000)
+    public void expireMemberships() {
+        for (String code : roomManager.roomIdsSnapshot()) {
+            roomManager.serialized(List.of(code), () -> findCurrentRoom(code));
+        }
+    }
+
+    /** Room lock is held; expiry and recovery share the same ordering boundary. */
+    private Room findCurrentRoom(String code) {
+        Room room = roomManager.findRoom(code);
+        if (room == null) return null;
+        var expired = room.playerIdsSnapshot().stream().map(playersById::get)
+                .filter(member -> member.getDisconnectedUntil() != null
+                        && roomManager.currentTimeMillis() >= member.getDisconnectedUntil())
+                .sorted(java.util.Comparator.comparingLong(PlayerState::getDisconnectedUntil)).toList();
+        for (PlayerState member : expired) {
+            long endedAt = member.getDisconnectedUntil();
+            deliverAll(endMembership(member, code, ServerMessage.DepartureReason.EXPIRED, false));
+            member.setRoomId(null);
+            member.setRecoveryToken(null);
+            playersById.remove(member.getId(), member);
+            if (room.playerIdsSnapshot().isEmpty()) room.setEmptySince(endedAt);
+        }
+        return roomManager.findRoom(code);
+    }
+
+    private void handleRecovery(PlayerState connection, ClientMessage.RecoverRoom message) {
+        roomManager.serialized(List.of(message.roomId()), () -> {
+            Room room = findCurrentRoom(message.roomId());
+            if (room == null) { deliver(error(connection, "room_not_found", "Room not found")); return null; }
+            PlayerState member = room.playerIdsSnapshot().stream().map(playersById::get)
+                    .filter(candidate -> message.recoveryToken().equals(candidate.getRecoveryToken())).findFirst().orElse(null);
+            if (member == null) { deliver(error(connection, "recovery_expired", "Your place in the Room expired")); return null; }
+            if (member.isConnected()) { deliver(error(connection, "recovery_in_use", "The previous connection is still active.")); return null; }
+            if (connection.getRoomId() != null) { deliver(error(connection, "invalid_phase", "Leave before recovering another membership.")); return null; }
+            ConnectionOutbox outbox = outboxes.remove(connection.getId());
+            playersById.remove(connection.getId());
+            member.setSession(connection.getSession());
+            member.setDisconnectedUntil(null);
+            member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
+            playersBySession.put(member.getSession().getId(), member);
+            outboxes.put(member.getId(), outbox);
+            deliver(new Delivery(member.getId(), new ServerMessage.RoomSnapshot(member.getId(), message.roomId(),
+                    member.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), stateOf(room).players())));
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot().stream().filter(id -> !id.equals(member.getId())).toList(), stateOf(room));
+            deliverAll(deliveries);
+            return null;
+        });
+    }
+
     private void handleJoin(PlayerState player, ClientMessage.JoinRoom message) {
         String oldRoomId = player.getRoomId();
         List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
         roomManager.serialized(involvedRooms, () -> {
-            Room room = roomManager.findRoom(message.roomId());
+            Room room = findCurrentRoom(message.roomId());
             if (room == null) {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
@@ -128,6 +180,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     seat = java.util.stream.IntStream.range(0, RoomRules.CAPACITY)
                             .filter(index -> !occupied.contains(index)).findFirst().orElseThrow();
                 }
+                player.setRecoveryToken((UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", ""));
                 player.setMovementSequence(0);
                 player.setMovementEpoch(0);
                 player.setFacing(seat == null || seat == 0 ? "down" : seat < 5 ? "left" : seat == 5 ? "up" : "right");
@@ -143,11 +196,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
             List<ServerMessage.PlayerView> snapshotPlayers = room.playerIdsSnapshot().stream()
                     .map(playersById::get)
-                    .filter(candidate -> candidate != null && candidate.getSession().isOpen())
+                    .filter(java.util.Objects::nonNull)
                     .map(this::viewOf)
                     .toList();
             pendingDeliveries.add(new Delivery(player.getId(),
-                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), room.getPhase(), room.getHostPlayerId(), snapshotPlayers)));
+                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), snapshotPlayers)));
             deliverAll(pendingDeliveries);
             return null;
         });
@@ -271,8 +324,15 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
             roomManager.serialized(List.of(roomId), () -> {
-                deliverAll(endMembership(player, roomId, ServerMessage.DepartureReason.DISCONNECTED, false));
-                playersById.remove(player.getId());
+                player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);
+                Room room = roomManager.findRoom(roomId);
+                if (player.getId().equals(room.getHostPlayerId())) {
+                    room.playerIdsSnapshot().stream().map(playersById::get).filter(PlayerState::isConnected)
+                            .findFirst().ifPresent(successor -> room.setHostPlayerId(successor.getId()));
+                }
+                List<Delivery> deliveries = new ArrayList<>();
+                addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+                deliverAll(deliveries);
                 return null;
             });
         }
@@ -298,7 +358,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.isConnected(), player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()
         );
     }
 

@@ -47,6 +47,14 @@ public final class ClientMessageDecoder {
                 requireOnly(root, Set.of("version", "type", "displayName"));
                 yield new ClientMessage.CreateRoom(PROTOCOL_VERSION, type, displayName(root));
             }
+            case "recover_room" -> {
+                requireOnly(root, Set.of("version", "type", "roomId", "recoveryToken"));
+                String token = requiredText(root, "recoveryToken");
+                if (!token.matches("[0-9a-f]{64}"))
+                    throw new InvalidClientMessageException("malformed_message", "Invalid recovery credential.");
+                yield new ClientMessage.RecoverRoom(1, type,
+                        requiredText(root, "roomId").strip().toUpperCase(java.util.Locale.ROOT), token);
+            }
             case "join_room" -> {
                 requireOnly(root, Set.of("version", "type", "roomId", "displayName"));
                 yield new ClientMessage.JoinRoom(PROTOCOL_VERSION, type,

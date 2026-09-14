@@ -82,3 +82,11 @@ test("movement carries strict retained Facing and acknowledgment coordinates", (
     assert.throws(() => decodeServerMessage(JSON.stringify({ ...event, ...patch })));
   }
 });
+
+test("recovery snapshots require a private credential and explicit connected presence", async () => {
+  const { recoverRoom } = await import("../dist/protocol.js");
+  assert.deepEqual(recoverRoom("ABC234", "a".repeat(64)), {
+    version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64)
+  });
+  assert.throws(() => recoverRoom("ABC234", "player-1"));
+});
