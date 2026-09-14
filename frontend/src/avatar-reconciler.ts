@@ -19,6 +19,7 @@ type AvatarView = {
   readiness: Phaser.GameObjects.Text;
   seat: number | null;
   facing: Direction;
+  connected: boolean;
 };
 
 export function preloadAvatars(scene: Phaser.Scene): void {
@@ -53,12 +54,14 @@ export class AvatarReconciler implements WorldReconciler {
     }
     for (const player of world.players.values()) {
       const avatar = this.#avatars.get(player.playerId) ?? this.createAvatar(player);
+      avatar.connected = player.connected;
+      avatar.container.setAlpha(player.connected ? 1 : 0.5);
       avatar.seat = world.phase === "lobby" ? player.seat : null;
       avatar.seating.reconcile(avatar.seat, arrivals.has(player.playerId), this.scene.time.now);
       const seated = avatar.seat !== null;
       avatar.label.setY(seated ? -66 : -62);
-      avatar.readiness.setVisible(seated).setText(
-        (player.ready ? "✓ Ready" : "Not Ready") + (world.hostPlayerId === player.playerId ? " • Host" : "")
+      avatar.readiness.setVisible(seated || !player.connected).setText(
+        !player.connected ? "Reconnecting…" : (player.ready ? "✓ Ready" : "Not Ready") + (world.hostPlayerId === player.playerId ? " • Host" : "")
       ).setColor(player.ready ? "#b9f4c9" : "#fff0c9");
       if (player.playerId !== world.selfPlayerId || world.phase !== "playing") {
         avatar.container.setPosition(player.x, player.y);
@@ -75,7 +78,7 @@ export class AvatarReconciler implements WorldReconciler {
   updateAnimations(time: number, localPlayerId: string | null, frozen = false): void {
     for (const [playerId, avatar] of this.#avatars) {
       const { container, sprite, motion } = avatar;
-      motion.update(container.x, container.y, time, playerId === localPlayerId, frozen || avatar.seat !== null);
+      motion.update(container.x, container.y, time, playerId === localPlayerId, frozen || !avatar.connected || avatar.seat !== null);
       motion.direction = avatar.facing;
       container.setDepth(container.y);
       const sitting = avatar.seating.progress(time);
@@ -125,6 +128,7 @@ export class AvatarReconciler implements WorldReconciler {
       sprite, legs, label, readiness, seat: null, seating: new AvatarSeating(),
       poseKey: "", preset: player.avatarPreset,
       motion: new AvatarMotion(player.x, player.y),
+      connected: player.connected,
       facing: player.facing
     };
     this.#avatars.set(player.playerId, avatar);

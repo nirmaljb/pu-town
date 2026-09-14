@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Preserve Room Membership across temporary connection loss
@@ -8,7 +8,7 @@ The agreed design direction is to retain Player identity and Avatar Preset throu
 
 Recover an existing membership after connection loss rather than assigning a new Player ID and random Avatar Preset. This trades temporary retention of disconnected memberships for continuity. Merely remembering appearance would still reset other membership state, and correcting false heartbeat timeouts alone would not cover real connection loss. Connection health checks must tolerate a suspended game loop while preserving frame-boundary application of shared world state.
 
-This proposal revises ADR 006's new-membership-on-reconnect decision and will require synchronized lifecycle and protocol documentation. CONTEXT.md records the agreed target vocabulary; implementation and the current protocol still use the old lifecycle. No runtime behavior has changed.
+This decision revises ADR 006's new-membership-on-reconnect policy. Issues #2 and #3 implement independent heartbeat health and credential-based 120-second membership retention, including disconnected presence and current snapshots. The remaining policies below are accepted follow-up scope: #4 adds refresh/takeover, #5 adds Host grace, and #6 adds full recovery/Leave UX. Until those slices land, Host succession is immediate when a connected successor exists, recovery credentials live in memory, and the client retains its thirty-second retry budget.
 
 After the server detects connection loss, reserve the membership and its capacity for two minutes. Recovery within that window preserves Player ID, Avatar Preset, Colour, Seat, readiness, last server-accepted position, and Facing, subject to subsequent Room events. Starting the game during an absence moves the retained Player into active play along with the Room; recovery does not restore an obsolete Lobby state. Expiry releases the membership's place.
 
@@ -26,6 +26,6 @@ Leave Room is available during recovery. It immediately stops local retries and 
 
 Transport health bookkeeping must not depend on Phaser frames advancing. Returning from suspension must allow a fresh health check with a fresh response deadline rather than closing a socket solely because the game loop paused. Shared state, connection lifecycle effects, and Avatar reconciliation still apply at frame boundaries. Recovery returns a current Room Snapshot, discards stale local prediction, and fences movement from retired connections. Recovery and expiry must preserve per-room serialization and bounded asynchronous outbound delivery.
 
-Implementation must synchronize the Java and TypeScript protocol contracts, protocol documentation, README, repository operational guidance, and affected ADRs. Verification must cover background-tab return, refresh, genuine network loss, takeover, expiry, Host succession, all-disconnected Rooms, and Leave during recovery, including relevant two-client browser paths. The tab-suspension trigger has been identified from code but has not yet been reproduced in a browser.
+Implementation must synchronize the Java and TypeScript protocol contracts, protocol documentation, README, repository operational guidance, and affected ADRs. Verification must cover background-tab return, refresh, genuine network loss, takeover, expiry, Host succession, all-disconnected Rooms, and Leave during recovery, including relevant two-client browser paths. The suspended-frame trigger was reproduced in two actual browser clients; see ../verification/issue-2.md for evidence and limits.
 
-All interview decisions are recorded; this ADR remains proposed pending confirmation of the complete design. No implementation is authorized by this brainstorming document alone.
+The parent GitHub issue #1 and its ready-for-agent implementation tickets record the accepted design and verification requirements.

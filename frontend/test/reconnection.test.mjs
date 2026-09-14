@@ -15,8 +15,8 @@ function setup() {
     client.update();
   } };
 }
-const snapshot = { version: 1, type: "room_snapshot", phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
-  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }] };
+const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
+  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
   const { client, sockets } = setup();
@@ -75,7 +75,7 @@ test("silent loss freezes after ten seconds and rejoin alone resumes play", () =
   assert.equal(sockets[0].sent.length, count);
   advance(500);
   sockets[1].open();
-  assert.deepEqual(JSON.parse(sockets[1].sent[0]), { version: 1, type: "join_room", roomId: "ABC234", displayName: "Alex" });
+  assert.deepEqual(JSON.parse(sockets[1].sent[0]), { version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64) });
   assert.equal(client.state.status, "reconnecting");
   sockets[1].message({ ...snapshot, selfPlayerId: "new" }); client.update();
   assert.equal(client.state.status, "playing");
@@ -257,4 +257,19 @@ test("a shorter timer suspension crossing the pong deadline checks the healthy s
   assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "ping");
   sockets[0].message({ version: 1, type: "pong" }); client.update();
   assert.equal(sockets.length, 1);
+});
+
+test("real connection loss recovers the private membership and waits for its current snapshot", () => {
+  const { client, sockets, advance } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  sockets[0].disconnect(); advance(500); sockets[1].open();
+  assert.deepEqual(JSON.parse(sockets[1].sent[0]), {
+    version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64)
+  });
+  client.move({ x: 650, y: 360, facing: "right", sequence: 9, epoch: 0 });
+  assert.equal(sockets[1].sent.length, 1);
+  sockets[1].message(snapshot);
+  assert.equal(client.state.status, "reconnecting");
+  client.update();
+  assert.equal(client.state.status, "playing");
 });

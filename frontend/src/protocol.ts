@@ -20,20 +20,22 @@ export type PlayerView = MovementState & Readonly<{
   avatarPreset: AvatarPreset;
   seat: number | null;
   ready: boolean;
+  connected: boolean;
 }>;
 
 export type ServerMessage =
   | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
-  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
   | Readonly<{ version: 1; type: "player_moved"; playerId: string; x: number; y: number; facing: Direction; sequence: number; epoch: number }>
   | Readonly<{ version: 1; type: "movement_correction"; playerId: string; x: number; y: number; facing: Direction; sequence: number; epoch: number }>
-  | Readonly<{ version: 1; type: "player_left"; playerId: string; reason: "left" | "disconnected" }>
+  | Readonly<{ version: 1; type: "player_left"; playerId: string; reason: "left" | "disconnected" | "expired" }>
   | Readonly<{ version: 1; type: "room_left"; roomId: string }>
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "recover_room"; roomId: string; recoveryToken: string }>
   | Readonly<{ version: 1; type: "start_game" }>
   | Readonly<{ version: 1; type: "set_ready"; ready: boolean }>
   | Readonly<{ version: 1; type: "create_room"; displayName: string }>
@@ -41,6 +43,15 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
   | Readonly<{ version: 1; type: "leave_room" }>
   | Readonly<{ version: 1; type: "move_player"; x: number; y: number; facing: Direction; sequence: number; epoch: number }>;
+
+export function recoverRoom(roomId: string, recoveryToken: string): ClientMessage {
+  return { version: 1, type: "recover_room", roomId: requireNonEmptyString(roomId, "roomId").trim().toUpperCase(), recoveryToken: requireRecoveryToken(recoveryToken) };
+}
+
+function requireRecoveryToken(value: unknown): string {
+  if (typeof value !== "string" || !/^[0-9a-f]{64}$/.test(value)) throw new Error("Invalid recovery credential");
+  return value;
+}
 
 export function joinRoom(roomId: string, displayName: string): ClientMessage {
   requireNonEmptyString(roomId, "roomId");
@@ -85,12 +96,13 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type"]);
       return { version: 1, type };
     case "room_snapshot": {
-      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "phase", "hostPlayerId", "players"]);
+      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "recoveryToken", "phase", "hostPlayerId", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1,
         type,
         selfPlayerId: requireNonEmptyString(message.selfPlayerId, "selfPlayerId"),
+        recoveryToken: requireRecoveryToken(message.recoveryToken),
         roomId: requireNonEmptyString(message.roomId, "roomId"),
         phase: requirePhase(message.phase),
         hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
@@ -121,8 +133,8 @@ export function decodeServerMessage(payload: string): ServerMessage {
       };
     case "player_left": {
       requireFields(message, ["version", "type", "playerId", "reason"]);
-      if (message.reason !== "left" && message.reason !== "disconnected") {
-        throw new Error("reason must be left or disconnected");
+      if (message.reason !== "left" && message.reason !== "disconnected" && message.reason !== "expired") {
+        throw new Error("Invalid departure reason");
       }
       return {
         version: 1,
@@ -149,7 +161,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
 
 function decodePlayer(value: unknown): PlayerView {
   const player = requireRecord(value, "player");
-  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "seat", "ready", "x", "y", "facing", "sequence", "epoch"]);
+  requireFields(player, ["playerId", "displayName", "colour", "avatarPreset", "seat", "ready", "connected", "x", "y", "facing", "sequence", "epoch"]);
   return {
     playerId: requireNonEmptyString(player.playerId, "playerId"),
     displayName: requireNonEmptyString(player.displayName, "displayName"),
@@ -157,6 +169,7 @@ function decodePlayer(value: unknown): PlayerView {
     avatarPreset: requireAvatarPreset(player.avatarPreset),
     seat: requireSeat(player.seat),
     ready: requireBoolean(player.ready),
+    connected: requireBoolean(player.connected),
     x: requireFiniteNumber(player.x, "x"),
     y: requireFiniteNumber(player.y, "y"),
     facing: requireFacing(player.facing), sequence: requireCounter(player.sequence), epoch: requireCounter(player.epoch)

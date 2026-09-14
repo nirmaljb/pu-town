@@ -91,7 +91,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/main.ts` — Phaser game bootstrap and canvas sizing.
 - `frontend/src/pu-town-scene.ts` — scene lifecycle, URL configuration, controls, local movement, and movement-send cadence.
 - `frontend/src/protocol.ts` — client message builders, server message types, and strict decoding.
-- `frontend/src/reconnecting-game-client.ts` — entry deadlines, transport-timer heartbeat health, frame-applied timeout effects, reconnection, and retained join intent.
+- `frontend/src/reconnecting-game-client.ts` — entry deadlines, transport-timer heartbeat health, frame-applied timeout effects, reconnection, and retained recovery intent.
 - `frontend/src/join-interface.ts` — entry form, remembered Display Name, Room Code controls, and reconnect overlay.
 - `frontend/src/game-transport.ts` — WebSocket serialization and inbound-event handoff.
 - `frontend/src/network-inbox.ts` — queue of decoded server events.
@@ -121,14 +121,14 @@ The client accepts this infrastructure query parameter (room/name options are ig
 
 1. `main.ts` starts the Phaser scene.
 2. `pu-town-scene.ts` reads the WebSocket endpoint option and presents the join interface; submitting it opens the WebSocket and requests Room creation or Join.
-3. The backend issues a new Player ID for the connection and returns a Room Snapshot.
+3. The backend establishes a Room Membership and returns a Room Snapshot with its Player ID and private recovery credential. Recovery returns the existing membership’s identity and current state.
 4. `game-transport.ts` decodes server messages into `network-inbox.ts`.
 5. `network-frame-boundary.ts` applies queued events to `world-state.ts` before the frame reads input or mutates Phaser objects.
 6. The scene moves the local Avatar immediately and periodically submits its absolute position.
 7. The backend validates the position and broadcasts accepted movement to the Room.
 8. `avatar-reconciler.ts` brings Phaser objects into line with the authoritative world state.
 
-After an unexpected disconnect, the active client reconnects and rejoins its previous Room with a newly issued Player ID. An acknowledged Leave does not reconnect.
+After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. An acknowledged Leave does not reconnect.
 
 ## Change rules and synchronization points
 

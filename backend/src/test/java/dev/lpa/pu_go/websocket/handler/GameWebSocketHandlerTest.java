@@ -24,6 +24,56 @@ class GameWebSocketHandlerTest {
     );
 
     @Test
+    void closingDuringRecoveryAlwaysLeavesARecoverableDisconnectedMembership() throws Exception {
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            for (int attempt = 0; attempt < 100; attempt++) {
+                var original = connect("original-" + attempt);
+                send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+                var initial = latest(original);
+                String code = initial.path("roomId").asText();
+                String token = initial.path("recoveryToken").asText();
+                handler.afterConnectionClosed(original, org.springframework.web.socket.CloseStatus.NORMAL);
+                var returning = connect("returning-" + attempt);
+                var barrier = new java.util.concurrent.CyclicBarrier(2);
+                var recovery = executor.submit(() -> { barrier.await(); recover(returning, code, token); return null; });
+                var close = executor.submit(() -> { barrier.await(); handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL); return null; });
+                recovery.get(5, java.util.concurrent.TimeUnit.SECONDS);
+                close.get(5, java.util.concurrent.TimeUnit.SECONDS);
+                var retry = connect("retry-" + attempt);
+                recover(retry, code, token);
+                assertEquals(initial.path("selfPlayerId"), latest(retry).path("selfPlayerId"));
+            }
+        } finally { executor.shutdownNow(); }
+    }
+
+    @Test
+    void simultaneousRecoveryUsesOneReservedPlaceInAFullRoom() throws Exception {
+        var host = connect("host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(host);
+        String code = initial.path("roomId").asText();
+        String token = initial.path("recoveryToken").asText();
+        for (int i = 0; i < 9; i++) join(connect("guest-" + i), code);
+        handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+        var one = connect("one");
+        var two = connect("two");
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        var barrier = new java.util.concurrent.CyclicBarrier(2);
+        try {
+            var a = executor.submit(() -> { barrier.await(); recover(one, code, token); return null; });
+            var b = executor.submit(() -> { barrier.await(); recover(two, code, token); return null; });
+            a.get(5, java.util.concurrent.TimeUnit.SECONDS);
+            b.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } finally { executor.shutdownNow(); }
+        var winner = latest(one).path("type").asText().equals("room_snapshot") ? latest(one) : latest(two);
+        var loser = latest(one).path("type").asText().equals("error") ? latest(one) : latest(two);
+        assertEquals(initial.path("selfPlayerId"), winner.path("selfPlayerId"));
+        assertEquals(10, winner.path("players").size());
+        assertEquals("recovery_in_use", loser.path("code").asText());
+    }
+
+    @Test
     void invalidRecoveryCannotExtendExpiryAndLateSocketsCannotRemoveRecovery() throws Exception {
         var original = connect("original");
         send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
@@ -255,7 +305,7 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void disconnectEndsMembershipAndNotifiesRemainingPlayers() throws Exception {
+    void disconnectRetainsMembershipAndNotifiesRemainingPlayers() throws Exception {
         RecordingWebSocketSession alex = connect("session-1");
         send(alex, """
                 {"version":1,"type":"create_room","displayName":"Alex"}
@@ -268,8 +318,9 @@ class GameWebSocketHandlerTest {
         handler.afterConnectionClosed(sam, org.springframework.web.socket.CloseStatus.NORMAL);
 
         JsonNode left = json(alex.payloads().get(2));
-        assertEquals("player_left", left.get("type").asText());
-        assertEquals("disconnected", left.get("reason").asText());
+        assertEquals("room_state", left.get("type").asText());
+        assertEquals(2, left.path("players").size());
+        assertFalse(left.path("players").get(1).path("connected").asBoolean(true));
     }
 
     @Test
@@ -417,10 +468,12 @@ class GameWebSocketHandlerTest {
             join(returning, code);
             var snapshot = latest(returning);
             assertEquals(nextId, snapshot.path("hostPlayerId").asText());
-            assertEquals(1, snapshot.path("players").get(0).path("seat").asInt());
-            org.junit.jupiter.api.Assertions.assertTrue(snapshot.path("players").get(0).path("ready").asBoolean());
-            assertEquals(0, snapshot.path("players").get(2).path("seat").asInt());
-            assertFalse(snapshot.path("players").get(2).path("ready").asBoolean(true));
+            int successorIndex = disconnect ? 1 : 0;
+            int newcomerIndex = disconnect ? 3 : 2;
+            assertEquals(1, snapshot.path("players").get(successorIndex).path("seat").asInt());
+            org.junit.jupiter.api.Assertions.assertTrue(snapshot.path("players").get(successorIndex).path("ready").asBoolean());
+            assertEquals(disconnect ? 3 : 0, snapshot.path("players").get(newcomerIndex).path("seat").asInt());
+            assertFalse(snapshot.path("players").get(newcomerIndex).path("ready").asBoolean(true));
             send(returning, """
                     {"version":1,"type":"start_game"}
                     """);

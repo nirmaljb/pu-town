@@ -1,7 +1,7 @@
 import type { MovementState } from "./protocol.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { createRoom, joinRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { createRoom, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 export type ConnectionState = Readonly<{
   status: "join" | "connecting" | "playing" | "reconnecting" | "failed" | "leaving";
@@ -61,6 +61,10 @@ export class ReconnectingGameClient {
     for (const message of this.#messages.splice(0)) {
       if (message.type === "room_left" && this.#state.status === "leaving") { this.cancel(); return; }
       if (message.type === "error") {
+        if (message.code === "recovery_in_use" && this.#state.status === "reconnecting") {
+          this.disconnected();
+          return;
+        }
         if (this.#state.status !== "playing") {
           this.cancel();
           this.#state = { ...this.#state, error: message.message };
@@ -69,8 +73,8 @@ export class ReconnectingGameClient {
         this.#state = { ...this.#state, error: message.message };
       }
       if (message.type === "room_snapshot" || message.type === "room_state") this.#phase = message.phase;
-      if (message.type === "room_snapshot" && this.#intent && "displayName" in this.#intent) {
-        this.#intent = joinRoom(message.roomId, this.#intent.displayName);
+      if (message.type === "room_snapshot" && this.#intent && this.#state.status !== "leaving") {
+        this.#intent = recoverRoom(message.roomId, message.recoveryToken);
         this.#state = { status: "playing", roomId: message.roomId, error: null };
         this.#lastResponse = this.now();
         this.#lastHealthCheck = this.now();

@@ -73,10 +73,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        PlayerState player = playersBySession.get(session.getId());
-        if (player == null) return;
-        synchronized (player) {
-            if (playersBySession.get(session.getId()) != player) return;
+        synchronized (session) {
+            PlayerState player = playersBySession.get(session.getId());
+            if (player == null) return;
             try {
                 ClientMessage incoming = decoder.decode(message.getPayload());
                 if (incoming instanceof ClientMessage.CreateRoom create) {
@@ -99,12 +98,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 1_000)
     public void expireMemberships() {
         for (String code : roomManager.roomIdsSnapshot()) {
-            roomManager.serialized(List.of(code), () -> findCurrentRoom(code));
+            roomManager.serialized(List.of(code), () -> expireMembershipsAndFindRoom(code));
         }
     }
 
     /** Room lock is held; expiry and recovery share the same ordering boundary. */
-    private Room findCurrentRoom(String code) {
+    private Room expireMembershipsAndFindRoom(String code) {
         Room room = roomManager.findRoom(code);
         if (room == null) return null;
         var expired = room.playerIdsSnapshot().stream().map(playersById::get)
@@ -124,7 +123,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private void handleRecovery(PlayerState connection, ClientMessage.RecoverRoom message) {
         roomManager.serialized(List.of(message.roomId()), () -> {
-            Room room = findCurrentRoom(message.roomId());
+            Room room = expireMembershipsAndFindRoom(message.roomId());
             if (room == null) { deliver(error(connection, "room_not_found", "Room not found")); return null; }
             PlayerState member = room.playerIdsSnapshot().stream().map(playersById::get)
                     .filter(candidate -> message.recoveryToken().equals(candidate.getRecoveryToken())).findFirst().orElse(null);
@@ -151,7 +150,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String oldRoomId = player.getRoomId();
         List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
         roomManager.serialized(involvedRooms, () -> {
-            Room room = findCurrentRoom(message.roomId());
+            Room room = expireMembershipsAndFindRoom(message.roomId());
             if (room == null) {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
@@ -313,10 +312,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        PlayerState player = playersBySession.get(session.getId());
-        if (player == null) return;
-        synchronized (player) {
-            if (!playersBySession.remove(session.getId(), player)) return;
+        synchronized (session) {
+            PlayerState player = playersBySession.remove(session.getId());
+            if (player == null) return;
             outboxes.remove(player.getId());
             String roomId = player.getRoomId();
             if (roomId == null) {
@@ -384,8 +382,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (!outbox.enqueue(textMessage, movementPlayerId)) {
             PlayerState player = playersById.get(delivery.playerId());
             if (player != null && player.getSession().isOpen()) {
+                WebSocketSession failedSession = player.getSession();
                 outboundExecutor.execute(() -> {
-                    try { player.getSession().close(CloseStatus.SESSION_NOT_RELIABLE); }
+                    try { failedSession.close(CloseStatus.SESSION_NOT_RELIABLE); }
                     catch (IOException ignored) { /* Lifecycle cleanup follows closure. */ }
                 });
             }
