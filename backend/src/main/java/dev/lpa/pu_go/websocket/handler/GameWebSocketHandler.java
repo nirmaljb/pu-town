@@ -191,6 +191,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
             }
+            if (!room.containsPlayer(player.getId()) && !room.getPhase().equals("lobby")) {
+                deliver(error(player, "invalid_phase", "Game already started"));
+                return null;
+            }
             if (!room.containsPlayer(player.getId()) && room.playerIdsSnapshot().size() >= RoomRules.CAPACITY) {
                 deliver(error(player, "room_full", "Room is full"));
                 return null;

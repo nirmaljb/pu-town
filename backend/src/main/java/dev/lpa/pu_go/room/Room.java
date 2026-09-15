@@ -24,7 +24,6 @@ public class Room {
     public void addPlayer(String playerId) { playerIds.add(playerId); if (hostPlayerId == null) hostPlayerId = playerId; }
     public void removePlayer(String playerId) {
         playerIds.remove(playerId);
-        if (playerIds.isEmpty()) phase = "lobby";
         if (playerId.equals(hostPlayerId)) hostPlayerId = playerIds.stream().findFirst().orElse(null);
     }
     public boolean containsPlayer(String playerId) { return playerIds.contains(playerId); }

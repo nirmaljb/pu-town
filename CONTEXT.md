@@ -64,7 +64,7 @@ An allocated place for one Player in the Meeting Area. It remains theirs until t
 _Avoid_: Spawn Point
 
 **Room Code**:
-A shareable code that identifies the room a player wants to join. Anyone with the code may join that room without approval.
+A shareable code that identifies the Room a Player wants to join. Anyone with the code may join while the Room is a Lobby; a started game admits no new Players.
 _Avoid_: Lobby code, invite link
 
 **Spawn Point**:
@@ -72,7 +72,7 @@ A valid in-room position at which a player may begin a room membership.
 _Avoid_: Starting tile
 
 **Join**:
-The transition by which a connected player becomes a member of a room and receives that room's current state.
+The transition by which a connected Player begins a new Room Membership in a Lobby and receives that Room's current state. Joining is unavailable after the game starts; recovering an existing membership is Reconnect.
 _Avoid_: Connect
 
 **Room Membership**:

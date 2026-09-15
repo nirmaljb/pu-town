@@ -56,7 +56,10 @@ public class RoomManager {
     }
 
     public void membershipEnded(Room room) {
-        if (room.playerIdsSnapshot().isEmpty()) room.setEmptySince(milliseconds.getAsLong());
+        if (room.playerIdsSnapshot().isEmpty()) {
+            if (room.getPhase().equals("playing")) rooms.remove(room.getRoomId(), room);
+            else room.setEmptySince(milliseconds.getAsLong());
+        }
     }
 
     @Scheduled(fixedDelay = 30_000)

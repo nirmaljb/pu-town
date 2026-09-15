@@ -287,11 +287,11 @@ class GameWebSocketHandlerTest {
                 """);
         assertEquals("movement_correction", json(alex.payloads().get(4)).get("type").asText());
         var sam = connect("sam");
-        join(sam, code);
+        recover(sam, code, json(alex.payloads().get(0)).path("recoveryToken").asText());
         JsonNode retained = json(sam.payloads().get(0)).get("players").get(0);
         assertEquals(640, retained.get("x").asDouble());
         assertEquals("left", retained.get("facing").asText());
-        send(alex, """
+        send(sam, """
                 {"version":1,"type":"move_player","x":650,"y":360,"facing":"up","sequence":4,"epoch":1}
                 """);
         assertEquals("up", json(sam.payloads().get(1)).get("facing").asText());
@@ -572,8 +572,8 @@ class GameWebSocketHandlerTest {
         assertEquals("invalid_phase", latest(guest).path("code").asText());
         var late = connect("late");
         join(late, code);
-        assertEquals("playing", latest(late).path("phase").asText());
-        org.junit.jupiter.api.Assertions.assertTrue(latest(late).path("players").get(2).path("seat").isNull());
+        assertEquals("invalid_phase", latest(late).path("code").asText());
+        assertEquals("Game already started", latest(late).path("message").asText());
     }
 
     @Test
@@ -624,33 +624,31 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void emptyStartedRoomResetsAndExpiresFromItsFinalDeparture() throws Exception {
-        var host = connect("host");
-        send(host, """
-                {"version":1,"type":"create_room","displayName":"Alex"}
-                """);
-        String code = latest(host).path("roomId").asText();
-        send(host, """
-                {"version":1,"type":"set_ready","ready":true}
-                """);
-        send(host, """
-                {"version":1,"type":"start_game"}
-                """);
-        handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
-        milliseconds.set(299_999);
-        var returning = connect("returning");
-        join(returning, code);
-        var fresh = latest(returning);
-        assertEquals("lobby", fresh.path("phase").asText());
-        assertEquals(fresh.path("selfPlayerId"), fresh.path("hostPlayerId"));
-        assertEquals(0, fresh.path("players").get(0).path("seat").asInt(-1));
-        assertFalse(fresh.path("players").get(0).path("ready").asBoolean(true));
-        send(returning, """
-                {"version":1,"type":"leave_room"}
-                """);
-        milliseconds.addAndGet(300_000);
-        join(returning, code);
-        assertEquals("room_not_found", latest(returning).path("code").asText());
+    void startedRoomRemainsRecoverableUntilFinalMembershipEndsThenIsRemoved() throws Exception {
+        for (boolean expire : List.of(false, true)) {
+            var host = connect("host-" + expire);
+            send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+            var initial = latest(host);
+            String code = initial.path("roomId").asText();
+            send(host, "{\"version\":1,\"type\":\"start_game\"}");
+            handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
+            milliseconds.addAndGet(119_999);
+            var returning = connect("returning-" + expire);
+            recover(returning, code, initial.path("recoveryToken").asText());
+            assertEquals("playing", latest(returning).path("phase").asText());
+            assertEquals(initial.path("selfPlayerId"), latest(returning).path("selfPlayerId"));
+            if (expire) {
+                handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
+                milliseconds.addAndGet(120_000);
+                handler.expireMemberships();
+            } else {
+                send(returning, "{\"version\":1,\"type\":\"leave_room\"}");
+                assertEquals("room_left", latest(returning).path("type").asText());
+            }
+            var newcomer = connect("newcomer-" + expire);
+            join(newcomer, code);
+            assertEquals("room_not_found", latest(newcomer).path("code").asText());
+        }
     }
 
     @Test
