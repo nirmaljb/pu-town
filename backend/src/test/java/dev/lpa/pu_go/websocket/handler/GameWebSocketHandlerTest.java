@@ -624,6 +624,42 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
+    void rejectedStartedRoomEntryPreservesMembershipAndCannotBypassLeaveOrExpiry() throws Exception {
+        var host = connect("closed-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        String code = latest(host).path("roomId").asText();
+        var guest = connect("closed-guest");
+        join(guest, code);
+        var initial = latest(guest);
+        handler.afterConnectionClosed(guest, org.springframework.web.socket.CloseStatus.NORMAL);
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        var returning = connect("closed-return");
+        recover(returning, code, initial.path("recoveryToken").asText());
+        var recovered = latest(returning);
+        assertEquals("playing", recovered.path("phase").asText());
+        assertEquals(initial.path("selfPlayerId"), recovered.path("selfPlayerId"));
+        assertEquals(initial.path("players").get(1).path("avatarPreset"), recovered.path("players").get(1).path("avatarPreset"));
+        join(returning, code);
+        assertEquals(recovered, latest(returning));
+        handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
+        milliseconds.addAndGet(120_000);
+        var expired = connect("closed-expired");
+        recover(expired, code, initial.path("recoveryToken").asText());
+        assertEquals("recovery_expired", latest(expired).path("code").asText());
+        join(expired, code);
+        assertEquals("invalid_phase", latest(expired).path("code").asText());
+        send(expired, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Other\"}");
+        var otherRoom = latest(expired);
+        join(expired, code);
+        assertEquals("invalid_phase", latest(expired).path("code").asText());
+        join(expired, otherRoom.path("roomId").asText());
+        assertEquals(otherRoom, latest(expired));
+        send(host, "{\"version\":1,\"type\":\"leave_room\"}");
+        join(host, code);
+        assertEquals("room_not_found", latest(host).path("code").asText());
+    }
+
+    @Test
     void startedRoomRemainsRecoverableUntilFinalMembershipEndsThenIsRemoved() throws Exception {
         for (boolean expire : List.of(false, true)) {
             var host = connect("host-" + expire);

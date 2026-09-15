@@ -10,7 +10,6 @@ export type ConnectionState = Readonly<{
   status: "join" | "connecting" | "playing" | "reconnecting" | "failed" | "leaving";
   roomId: string | null;
   error: string | null;
-  canJoinAgain?: boolean;
 }>;
 
 export class ReconnectingGameClient {
@@ -94,7 +93,7 @@ export class ReconnectingGameClient {
         if (this.#state.status === "reconnecting") {
           this.failRecovery(message.code === "room_not_found"
             ? "The Room is unavailable. Recovery cannot continue; the server may have restarted."
-            : message.message, message.code === "recovery_expired");
+            : message.message);
           return;
         }
         if (this.#state.status !== "playing") {
@@ -155,11 +154,11 @@ export class ReconnectingGameClient {
     }
   }
 
-  private failRecovery(error: string, canJoinAgain = false): void {
+  private failRecovery(error: string): void {
     this.closeConnection();
     this.clearStoredRecovery();
     this.#intent = null;
-    this.#state = { ...this.#state, status: "failed", error, canJoinAgain };
+    this.#state = { ...this.#state, status: "failed", error };
   }
 
   private disconnected(): void {
@@ -245,14 +244,6 @@ export class ReconnectingGameClient {
     });
     socket.addEventListener("close", finish);
     socket.addEventListener("error", finish);
-  }
-
-  joinAgain(): void {
-    if (!this.#state.canJoinAgain || !this.#state.roomId) return;
-    const roomId = this.#state.roomId;
-    const displayName = this.#displayName;
-    this.cancel();
-    this.join(roomId, displayName);
   }
 
   stop(): void {

@@ -35,7 +35,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 
 The server randomly assigns an Avatar Preset when a new Room Membership begins, including Create Room and fresh Join. Recovery retains the assignment. Duplicates are allowed. The assignment remains unchanged during movement, repeated Join to the same Room, and failed room switches. Room Snapshots and join announcements carry the same assignment to all observers. A new membership draws again and may receive the same preset. Player Colour remains the distinct marker underneath the character.
 
-`Facing` is exactly `"up"`, `"left"`, `"down"`, or `"right"`. The server retains it alongside position and sends it in Player Views and movement responses. Arrow-key input determines local Facing, even against Room bounds, with vertical preference for diagonals. Releasing input retains Facing. Remote Facing comes from shared state. Seated Lobby Avatars face inward: seat 0 down, seats 1–4 left, seat 5 up, seats 6–9 right. Start and active-play Join face down. Walking is presentation state: local animation stops when displacement stops; remote animation stops after 150 ms without position change. Positions mark Avatar feet; artwork may clip at the unchanged Room bounds.
+`Facing` is exactly `"up"`, `"left"`, `"down"`, or `"right"`. The server retains it alongside position and sends it in Player Views and movement responses. Arrow-key input determines local Facing, even against Room bounds, with vertical preference for diagonals. Releasing input retains Facing. Remote Facing comes from shared state. Seated Lobby Avatars face inward: seat 0 down, seats 1–4 left, seat 5 up, seats 6–9 right. Start faces down. Walking is presentation state: local animation stops when displacement stops; remote animation stops after 150 ms without position change. Positions mark Avatar feet; artwork may clip at the unchanged Room bounds.
 
 ## Movement acknowledgment and recovery
 
@@ -49,7 +49,7 @@ Corrections and structural Room events are ordering barriers for movement coales
 
 On blur or visibility loss the client clears held arrow controls. Restoring focus applies queued lifecycle and world events before accepting fresh input, skips input for the restoration frame, and uses existing heartbeat/Reconnect deadlines. Frame movement is capped at 50 ms, so a delayed frame cannot produce background catch-up displacement.
 
-A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership’s Player ID. A successful Join to active play places the Player at `(640, 360)` in a `1280 × 720` Room; Lobby membership uses the assigned chair position below. Movement must remain within those bounds and may cover at most `240` units per second since the last accepted position, plus `32` units of network tolerance.
+A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership’s Player ID. Start places retained Players at `(640, 360)` in a `1280 × 720` Room; new membership is allowed only in the Lobby and uses the assigned chair position below. Movement must remain within those bounds and may cover at most `240` units per second since the last accepted position, plus `32` units of network tolerance.
 
 Current error codes are `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `invalid_phase`, `recovery_expired`, and `recovery_in_use`.
 
@@ -58,9 +58,11 @@ Current error codes are `malformed_message`, `unsupported_version`, `unknown_mes
 
 Only `create_room` creates a Room. It generates a collision-checked code from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, six characters long. The `roomId` wire field carries this Room Code. Both creation and joining return `room_snapshot` on success. Join trims and uppercases its code; unknown or expired codes return `room_not_found` (“Room not found”). Names are trimmed and must contain 1–24 Unicode code points; duplicate names are allowed.
 
+A fresh `join_room` to a started Room returns `invalid_phase` (“Game already started”), before capacity checks or ending any existing membership. Repeated Join by an existing member of that same Room remains idempotent; recovery uses `recover_room`.
+
 Rooms allow at most ten current memberships; further joins return `room_full` (“Room is full”). Failed transitions preserve any existing membership. Colours are assigned from `#4F8CFF`, `#FF8066`, `#FFD166`, `#65D6A4`, `#C792EA`, `#56DDE0`, `#F48FB1`, `#D6D3C4`, `#F29F38`, and `#A5CF45`, without duplicates in a Room. Leave releases a slot and colour immediately. Disconnect reserves both until recovery or membership expiry.
 
-Empty Rooms expire five minutes after the last departure. Join checks expiry synchronously; a periodic sweep removes unused expired Rooms. Restart clears all Rooms. Reconnect uses `recover_room`, never fresh Join or Create. Reserved capacity remains available to the recovering membership even in a full Room.
+Empty Lobbies expire five minutes after the last membership ends. A started Room is removed immediately when its final membership ends through Leave or expiry; it never resets to a Lobby. Join checks expiry synchronously; a periodic sweep removes unused expired Rooms. Restart clears all Rooms. Reconnect uses `recover_room`, never fresh Join or Create. Reserved capacity remains available to the recovering membership even in a full Room.
 
 ## Heartbeat and client deadlines
 
@@ -80,7 +82,7 @@ On Host Leave or expiry, the longest-present connected membership becomes Host i
 
 `room_state` replaces the current shared phase, Host and Player Views, preserving the recipient's Room Code and self Player ID. It is a structural, non-coalesced event, not a new membership confirmation. Movement coalescing never crosses a structural event. Clients apply these updates through the inbox at frame boundaries before rendering controls or moving Avatars.
 
-Fresh arrivals and recovering Players follow the phase in their Room Snapshot. Fresh Join uses ordinary ten-Player capacity and initialization. Recovery preserves identity, appearance, colour, readiness, position and Facing, subject to subsequent Room transitions. Start includes reserved memberships. Only the end of the final membership resets the Room to an empty Lobby and starts five-minute empty-Room expiry; merely losing every connection does not reset it.
+Fresh Join is restricted to the Lobby and uses ordinary ten-Player capacity and initialization. Recovering Players follow the current phase in their Room Snapshot. Recovery preserves identity, appearance, colour, readiness, position and Facing, subject to subsequent Room transitions. Start includes reserved memberships. The end of the final membership removes a started Room; a never-started Room instead begins five-minute empty-Lobby expiry. Recoverable disconnected memberships keep either phase alive even with no connected Players.
 
 ## Membership recovery foundation
 
@@ -90,7 +92,7 @@ A server-detected Disconnect reserves membership for exactly 120 seconds. Recove
 
 Disconnect and recovery broadcast structural `room_state` events carrying connected presence. Expiry broadcasts `player_left` with reason `expired`. Recovery replaces the connection binding, preserves authoritative movement counters, resets the movement-validation clock, and returns a complete snapshot. Clients discard prediction and initialize counters from that snapshot before sending movement. Retired socket callbacks cannot end the recovered membership.
 
-Expired recovery offers explicit Join again, which uses fresh `join_room` with the retained Display Name and Room Code, and explains the new Player/appearance. It never creates a Room. `room_not_found` explains that recovery cannot continue. Other explicit non-retryable recovery errors are terminal.
+Expired recovery shows “Your place in the Room expired” and “Back to lobby selection” in either phase. The action clears recovery intent and returns to the normal Create Room / Join Lobby form without sending Join or Create. Joining through that form begins a new membership only if the Room is still a Lobby; it cannot restore the expired membership. `room_not_found` explains that recovery cannot continue. Other explicit non-retryable recovery errors are terminal.
 
 Leave during recovery clears local intent immediately. A separate socket makes one bounded ten-second attempt, sending `recover_room` followed by `leave_room` in WebSocket order, then closing on `room_left`, error, or timeout. It never forwards snapshots into the game or starts retries; unreachable reservations expire naturally. Acknowledged intentional Leave still ends membership without reconnecting. Server restart clears Rooms and recovery state.
 

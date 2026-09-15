@@ -307,21 +307,27 @@ test("displacement is terminal at the frame boundary and cannot restart takeover
   assert.equal(setup(storage).sockets.length, 0);
 });
 
-test("expired recovery returns to selection without a fresh Join or a client expiry clock", () => {
-  const { client, sockets, elapse } = setup();
-  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
-  sockets[0].disconnect(); elapse(900_000); client.update();
-  sockets[1].open(); sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
-  client.update();
-  assert.equal(client.state.status, "failed");
-  assert.equal(client.state.canJoinAgain, undefined);
-  assert.match(client.state.error, /expired/);
-  client.checkHealth(true); elapse(60_000); client.update(); assert.equal(sockets.length, 2);
-  client.leave();
-  assert.equal(client.state.status, "join");
-  assert.equal(client.state.roomId, null);
-  client.checkHealth(true); elapse(60_000); client.update();
-  assert.equal(sockets.length, 2);
+test("expired recovery in either phase clears refresh intent and returns to selection without joining", () => {
+  for (const phase of ["lobby", "playing"]) {
+    const storage = memoryStorage();
+    const { client, sockets, elapse } = setup(storage);
+    client.create("Alex"); sockets[0].open();
+    sockets[0].message({ ...snapshot, phase, players: [{ ...snapshot.players[0], seat: phase === "lobby" ? 0 : null }] });
+    client.update();
+    sockets[0].disconnect(); elapse(900_000); client.update();
+    sockets[1].open(); sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
+    client.update();
+    assert.equal(client.state.status, "failed");
+    assert.equal(client.state.error, "Your place in the Room expired");
+    assert.equal(storage.getItem("pu-town.recovery"), null);
+    client.checkHealth(true); elapse(60_000); client.update(); assert.equal(sockets.length, 2);
+    client.leave();
+    assert.equal(client.state.status, "join");
+    assert.equal(client.state.roomId, null);
+    client.checkHealth(true); elapse(60_000); client.update();
+    assert.equal(sockets.length, 2);
+    assert.equal(setup(storage).sockets.length, 0);
+  }
 });
 
 test("Leave during recovery immediately abandons intent and releases a reachable reservation", () => {
@@ -397,7 +403,7 @@ test("a close following a terminal recovery error cannot erase the outcome befor
   sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
   sockets[1].disconnect(); client.update(); advance(30_000);
   assert.equal(client.state.status, "failed");
-  assert.equal(client.state.canJoinAgain, undefined);
+  assert.equal(client.state.error, "Your place in the Room expired");
   assert.equal(sockets.length, 2);
 });
 

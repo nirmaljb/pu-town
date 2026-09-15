@@ -1,6 +1,6 @@
 # Explicit Room creation and expiring Room Codes
 
-Only Create Room allocates a Room; Join uses a server-generated six-character code and never implicitly creates one. Codes are collision-checked against the registry. Empty Rooms stay available for five minutes for fresh Join, then expire. As revised by ADR 0008, Disconnect reserves membership before the Room can become empty. This intentionally trades permanent codes for bounded idle state. An expiry check during Join enforces the deadline even between cleanup sweeps.
+Only Create Room allocates a Room; Join uses a server-generated six-character code and never implicitly creates one. Codes are collision-checked against the registry. As revised by ADR 0009, only Lobbies accept fresh Join. Empty Lobbies stay available for five minutes, then expire; started Rooms are removed when their final membership ends. As revised by ADR 0008, Disconnect reserves membership before the Room can become empty. This intentionally trades permanent codes for bounded idle state. An expiry check during Join enforces the deadline even between cleanup sweeps.
 
 Room transitions and expiry share stable, ordered striped locks. This prevents deletion and code reuse from creating two lock identities for the same code, without retaining a lock for every expired Room. Hash collisions can serialize unrelated Rooms; socket delivery remains asynchronous through bounded outboxes.
 
