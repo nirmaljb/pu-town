@@ -50,7 +50,7 @@ Corrections and structural Room events are ordering barriers for movement coales
 
 On blur or visibility loss the client clears held arrow controls. Restoring focus applies queued lifecycle and world events before accepting fresh input, skips input for the restoration frame, and uses existing heartbeat/Reconnect deadlines. Frame movement is capped at 50 ms, so a delayed frame cannot produce background catch-up displacement.
 
-A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership’s Player ID. Start places retained Players at `(640, 360)` in a `1280 × 720` Room; new membership is allowed only in the Lobby and uses the assigned chair position below. Movement must remain within those bounds and may cover at most `240` units per second since the last accepted position, plus `32` units of network tolerance.
+A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership’s Player ID. Start places retained Players on a `72`-unit ring around `(640, 360)` in a `1280 × 720` Room, one standing position each in Player View order, so duplicate appearances stay individually visible; new membership is allowed only in the Lobby and uses the assigned chair position below. Movement must remain within those bounds and may cover at most `240` units per second since the last accepted position, plus `32` units of network tolerance.
 
 Current error codes are `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `invalid_phase`, `invalid_avatar_preset`, `recovery_expired`, and `recovery_in_use`.
 

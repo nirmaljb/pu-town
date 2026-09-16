@@ -57,8 +57,13 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self.respond(404, {'error': 'Not found'})
             self.respond(200, result)
-        except (ValueError, KeyError, TypeError, OSError) as error:
+        except (ValueError, TypeError) as error:
             self.respond(400, {'error': str(error)})
+        except KeyError as error:
+            self.respond(400, {'error': f'The request is missing {error}.'})
+        except OSError:
+            # Never echo filesystem paths back into the editor; they are not actionable.
+            self.respond(400, {'error': 'The draft library could not be read. Check the editor console.'})
 
 if __name__ == '__main__':
     print('Avatar workshop: http://localhost:5174 (Ctrl+C to stop)', flush=True)

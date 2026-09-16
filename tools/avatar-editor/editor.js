@@ -57,6 +57,8 @@ function renderParts() {
   for (const [slot, parts] of Object.entries(catalogue.slots)) {
     const label = document.createElement('label'); label.textContent = slot[0].toUpperCase() + slot.slice(1);
     const partSelect = document.createElement('select');
+    // The wrapping label names both controls at once, so each select names itself.
+    partSelect.setAttribute('aria-label', slot + ' part');
     for (const [id, part] of Object.entries(parts)) {
       // Restrict clothing to the current body's compatible proportions.
       const body = current.parts.body.part.split('/').at(-1);

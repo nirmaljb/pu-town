@@ -17,7 +17,12 @@ const game = new Phaser.Game({
 });
 
 
-// The Lobby leaves room beside the Meeting Area for the character panel.
-const resize = new ResizeObserver(() => game.scale.refresh());
-resize.observe(document.getElementById("game")!);
+// The Lobby leaves room beside the Meeting Area for the character panel. Phaser sizes its own
+// parent from the stage, so the Room is refitted from the stage's measured box rather than the window.
+const stage = document.getElementById("stage")!;
+const resize = new ResizeObserver(() => {
+  game.scale.setParentSize(stage.clientWidth, stage.clientHeight);
+  game.scale.refresh();
+});
+resize.observe(stage);
 game.events.once(Phaser.Core.Events.DESTROY, () => resize.disconnect());

@@ -312,12 +312,13 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 deliver(error(player, "invalid_phase", "The game has already started."));
             } else {
                 room.startGame();
-                for (String id : room.playerIdsSnapshot()) {
-                    PlayerState member = playersById.get(id);
+                List<String> starting = room.playerIdsSnapshot();
+                for (int index = 0; index < starting.size(); index++) {
+                    PlayerState member = playersById.get(starting.get(index));
                     member.setSeat(null);
                     member.setFacing("down");
-                    member.setX(RoomRules.SPAWN_X);
-                    member.setY(RoomRules.SPAWN_Y);
+                    member.setX(RoomRules.spawnX(index));
+                    member.setY(RoomRules.spawnY(index));
                     member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
                 }
                 List<Delivery> deliveries = new ArrayList<>();

@@ -137,7 +137,7 @@ export class JoinInterface {
     this.element(".entry-panel").hidden = !entry;
     this.element(".room-bar").hidden = entry;
     this.element(".connection-overlay").hidden = !interrupted;
-    document.getElementById("game")!.style.visibility = entry ? "hidden" : "visible";
+    document.getElementById("stage")!.style.visibility = entry ? "hidden" : "visible";
     for (const control of Array.from(this.#form.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button"))) {
       control.disabled = state.status === "connecting";
     }

@@ -12,6 +12,38 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent
 SLOTS = ('body', 'footwear', 'bottom', 'top', 'face', 'hair')
 
+# Published names are Player-facing in every Room, so authoring refuses slurs outright.
+# The list is curated and deliberately small. Matching folds away padding, punctuation and
+# digit substitutions, and tolerates repeated letters ("niiiggga"), while keeping the two
+# tiers apart so ordinary names survive: terms that never occur inside innocent words are
+# refused anywhere in the name, the rest only as whole words (Cocoon, Niger, Scunthorpe).
+SLURS_ANYWHERE = ('nigger', 'nigga', 'faggot', 'wetback', 'raghead', 'towelhead', 'tranny')
+SLURS_AS_WORDS = ('coon', 'spic', 'kike', 'gook', 'paki', 'chink', 'dyke', 'retard')
+LEET = str.maketrans({'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b', '$': 's', '@': 'a', '!': 'i'})
+
+
+def stretched(word):
+    """A pattern matching the word however often its letters are repeated."""
+    return re.compile(''.join(letter + '+' for letter in word))
+
+
+ANYWHERE = tuple(stretched(word) for word in SLURS_ANYWHERE)
+AS_WORDS = tuple(stretched(word) for word in SLURS_AS_WORDS)
+
+
+def clean_name(name):
+    """Return the trimmed Player-facing name, or explain why it cannot be used."""
+    if not isinstance(name, str) or not 1 <= len(name.strip()) <= 24:
+        raise ValueError('Give the preset a name of 1\u201324 characters.')
+    name = name.strip()
+    folded = name.lower().translate(LEET)
+    letters = re.sub(r'[^a-z]', '', folded)
+    words = [word for word in re.split(r'[^a-z]+', folded) if word]
+    if any(pattern.search(letters) for pattern in ANYWHERE) or any(
+            pattern.fullmatch(word) for pattern in AS_WORDS for word in words):
+        raise ValueError('Choose a different name: this one reads as a slur to every Player in the Room.')
+    return name
+
 
 def write_json(path, value):
     """Replace a complete file atomically, after all validation/composition succeeds."""
@@ -48,22 +80,23 @@ class Authoring:
         return self.drafts / (identity + '.json')
 
     def open(self, identity):
-        return json.loads(self.draft_path(identity).read_text())
+        path = self.draft_path(identity)
+        if not path.is_file():
+            raise ValueError(f'No saved design called {identity}. Open a draft from the library, or save it first.')
+        return json.loads(path.read_text())
 
     def library(self):
         return [json.loads(path.read_text()) for path in sorted(self.drafts.glob('*.json'))]
 
     def save(self, design):
         identity = design.get('id') or 'avatar-' + uuid.uuid4().hex
-        name = design.get('name')
-        if not isinstance(name, str) or not 1 <= len(name.strip()) <= 24:
-            raise ValueError('Give the preset a name of 1–24 characters.')
+        name = clean_name(design.get('name'))
         parts = design.get('parts')
         if not isinstance(parts, dict) or set(parts) - set(SLOTS):
             raise ValueError('Use the supported body, footwear, bottom, top, face and hair slots.')
         # Incomplete recipes may be saved as drafts; publication requires completeness.
         self.layers(parts, complete=False)
-        saved = {'id': identity, 'name': name.strip(), 'parts': parts}
+        saved = {'id': identity, 'name': name, 'parts': parts}
         write_json(self.draft_path(identity), saved)
         return saved
 
@@ -74,7 +107,10 @@ class Authoring:
         return self.save(design)
 
     def delete(self, identity):
-        self.draft_path(identity).unlink()
+        path = self.draft_path(identity)
+        if not path.is_file():
+            raise ValueError(f'No saved design called {identity}. The draft library is unchanged.')
+        path.unlink()
 
     def publish(self, identities):
         if not isinstance(identities, list) or len(identities) != 10:
@@ -84,9 +120,12 @@ class Authoring:
         presets = []
         for identity in identities:
             design = self.open(identity)
-            if not isinstance(design.get('name'), str) or not 1 <= len(design['name'].strip()) <= 24:
-                raise ValueError(f'Give {identity} a name of 1–24 characters.')
-            presets.append({'id': identity, 'name': design['name'], **self.preview(design)})
+            try:
+                # Drafts predating name validation are caught here, at the Player-facing boundary.
+                name = clean_name(design.get('name'))
+            except ValueError as problem:
+                raise ValueError(f'{identity}: {problem}') from problem
+            presets.append({'id': identity, 'name': name, **self.preview(design)})
         collection = {'version': 1, 'presets': presets}
         write_json(self.publication, collection)
         return collection

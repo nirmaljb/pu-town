@@ -83,6 +83,32 @@ class AuthoringBoundary(unittest.TestCase):
             self.editor.save(design)
         self.assertEqual(before, self.publication.read_bytes())
 
+    def test_player_facing_names_are_refused_when_they_read_as_a_slur(self):
+        designs = [self.editor.save({'name': 'Design ' + str(i), 'parts': self.example['parts']}) for i in range(10)]
+        order = [d['id'] for d in designs]
+        self.editor.publish(order)
+        published = self.publication.read_bytes()
+        for refused in ('Nigga', ' n i g g a ', 'N1gg4', 'niiiggga', 'Retard', 'f-a-g-g-o-t'):
+            with self.assertRaisesRegex(ValueError, 'slur'):
+                self.editor.save({'name': refused, 'parts': self.example['parts']})
+        self.assertEqual(10, len(self.editor.library()))
+        # A draft written before validation existed is still stopped at the publication boundary.
+        smuggled = json.loads((self.drafts / (order[0] + '.json')).read_text())
+        smuggled['name'] = 'Nigga'
+        (self.drafts / (order[0] + '.json')).write_text(json.dumps(smuggled))
+        with self.assertRaisesRegex(ValueError, 'slur'):
+            self.editor.publish(order)
+        self.assertEqual(published, self.publication.read_bytes())
+        for allowed in ('Rowan', 'Niger Delta', 'Scunthorpe', 'Cocoon', 'Retardant'):
+            self.assertEqual(allowed, self.editor.save({'name': allowed, 'parts': self.example['parts']})['name'])
+
+    def test_unknown_designs_report_actionable_problems_and_leave_the_library_intact(self):
+        saved = self.editor.save({'name': 'Orchard', 'parts': self.example['parts']})
+        for missing in (self.editor.open, self.editor.duplicate, self.editor.delete):
+            with self.assertRaisesRegex(ValueError, 'No saved design'):
+                missing('avatar-does-not-exist')
+        self.assertEqual([saved['id']], [d['id'] for d in self.editor.library()])
+
     def test_initial_collection_recreates_six_and_contains_ten_complete_distinct_appearances(self):
         released = json.loads((ROOT.parents[1] / 'frontend/src/published-avatars.json').read_text())['presets']
         self.assertEqual(10, len(released))

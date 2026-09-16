@@ -1,6 +1,7 @@
 package dev.lpa.pu_go.websocket.handler;
 
 import dev.lpa.pu_go.room.RoomManager;
+import dev.lpa.pu_go.room.RoomRules;
 import dev.lpa.pu_go.websocket.support.RecordingWebSocketSession;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.TextMessage;
@@ -23,6 +24,12 @@ class GameWebSocketHandlerTest {
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
             new RoomManager(milliseconds::get), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
     );
+
+    // Start rings the Room centre, so movement tests start from their own standing position.
+    private static final int FIRST_X = (int) RoomRules.spawnX(0);
+    private static final int FIRST_Y = (int) RoomRules.spawnY(0);
+    private static final int SECOND_X = (int) RoomRules.spawnX(1);
+    private static final int SECOND_Y = (int) RoomRules.spawnY(1);
 
     @Test
     void invalidSelectionsNeverChangeMembershipAndRetiredSocketsHaveNoAuthority() throws Exception {
@@ -374,28 +381,28 @@ class GameWebSocketHandlerTest {
                 {"version":1,"type":"start_game"}
                 """);
         send(alex, """
-                {"version":1,"type":"move_player","x":640,"y":360,"facing":"left","sequence":1,"epoch":0}
-                """);
+                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"left","sequence":1,"epoch":0}
+                """.formatted(FIRST_X, FIRST_Y));
         assertEquals("left", json(alex.payloads().get(2)).get("facing").asText());
         send(alex, """
-                {"version":1,"type":"move_player","x":1200,"y":360,"facing":"right","sequence":2,"epoch":0}
-                """);
+                {"version":1,"type":"move_player","x":1200,"y":%d,"facing":"right","sequence":2,"epoch":0}
+                """.formatted(FIRST_Y));
         JsonNode correction = json(alex.payloads().get(3));
         assertEquals("movement_correction", correction.get("type").asText());
-        assertEquals(640, correction.get("x").asDouble());
+        assertEquals(FIRST_X, correction.get("x").asDouble());
         assertEquals(1, correction.get("epoch").asInt());
         send(alex, """
-                {"version":1,"type":"move_player","x":650,"y":360,"facing":"up","sequence":3,"epoch":0}
-                """);
+                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"up","sequence":3,"epoch":0}
+                """.formatted(FIRST_X + 10, FIRST_Y));
         assertEquals("movement_correction", json(alex.payloads().get(4)).get("type").asText());
         var sam = connect("sam");
         recover(sam, code, json(alex.payloads().get(0)).path("recoveryToken").asText());
         JsonNode retained = json(sam.payloads().get(0)).get("players").get(0);
-        assertEquals(640, retained.get("x").asDouble());
+        assertEquals(FIRST_X, retained.get("x").asDouble());
         assertEquals("left", retained.get("facing").asText());
         send(sam, """
-                {"version":1,"type":"move_player","x":650,"y":360,"facing":"up","sequence":4,"epoch":1}
-                """);
+                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"up","sequence":4,"epoch":1}
+                """.formatted(FIRST_X + 10, FIRST_Y));
         assertEquals("up", json(sam.payloads().get(1)).get("facing").asText());
     }
 
@@ -811,17 +818,17 @@ class GameWebSocketHandlerTest {
                 """));
         while (!tasks.isEmpty()) tasks.remove().run();
         serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":650,"y":360}
-                """));
+                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":%d,"y":%d}
+                """.formatted(SECOND_X + 10, SECOND_Y)));
         serial.handleMessage(host, new TextMessage("""
                 {"version":1,"type":"leave_room"}
                 """));
         serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":660,"y":360}
-                """));
+                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":%d,"y":%d}
+                """.formatted(SECOND_X + 20, SECOND_Y)));
         while (!tasks.isEmpty()) tasks.remove().run();
         assertEquals("player_moved", latest(guest).path("type").asText());
-        assertEquals(660, latest(guest).path("x").asDouble());
+        assertEquals(SECOND_X + 20, latest(guest).path("x").asDouble());
     }
 
     @Test
@@ -870,6 +877,29 @@ class GameWebSocketHandlerTest {
                 {"version":1,"type":"set_ready","ready":true}
                 """);
         assertEquals("not_in_room", latest(player).path("code").asText());
+    }
+
+    @Test
+    void startPlacesEveryPlayerAtItsOwnStandingPositionInsideTheRoom() throws Exception {
+        var alex = connect("alex");
+        send(alex, """
+                {"version":1,"type":"create_room","displayName":"Alex"}
+                """);
+        String code = json(alex.payloads().get(0)).get("roomId").asText();
+        for (int guest = 0; guest < 4; guest++) join(connect("guest-" + guest), code);
+        send(alex, """
+                {"version":1,"type":"start_game"}
+                """);
+        JsonNode players = latest(alex).path("players");
+        assertEquals(5, players.size());
+        var places = new java.util.HashSet<String>();
+        for (JsonNode player : players) {
+            assertTrue(player.path("x").asDouble() >= 0 && player.path("x").asDouble() <= RoomRules.WIDTH);
+            assertTrue(player.path("y").asDouble() >= 0 && player.path("y").asDouble() <= RoomRules.HEIGHT);
+            places.add(player.path("x").asText() + "," + player.path("y").asText());
+        }
+        // Duplicate appearances stay individually visible because nobody shares a standing position.
+        assertEquals(5, places.size());
     }
 
     private JsonNode latest(RecordingWebSocketSession session) throws Exception {

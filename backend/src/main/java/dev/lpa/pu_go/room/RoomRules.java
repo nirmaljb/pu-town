@@ -7,6 +7,7 @@ public final class RoomRules {
     public static final double HEIGHT = 720;
     public static final double SPAWN_X = WIDTH / 2;
     public static final double SPAWN_Y = HEIGHT / 2;
+    public static final double SPAWN_RADIUS = 72;
     public static final double MAX_SPEED_PER_SECOND = 240;
     public static final double NETWORK_TOLERANCE = 32;
 
@@ -15,6 +16,10 @@ public final class RoomRules {
     // Seat zero is north; indices run clockwise around the open centre.
     public static double seatX(int seat) { return Math.round(640 + 390 * Math.sin(seat * Math.PI / 5)); }
     public static double seatY(int seat) { return Math.round(382 - 205 * Math.cos(seat * Math.PI / 5)); }
+
+    // Standing positions ring the centre so duplicate appearances stay individually visible at Start.
+    public static double spawnX(int index) { return Math.round(SPAWN_X + SPAWN_RADIUS * Math.sin(index * Math.PI / 5)); }
+    public static double spawnY(int index) { return Math.round(SPAWN_Y - SPAWN_RADIUS * Math.cos(index * Math.PI / 5)); }
 
     private RoomRules() {}
 
