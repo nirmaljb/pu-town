@@ -44,7 +44,7 @@ function renderCollection() {
     remove.onclick = () => { order = order.filter(value => value !== id); renderLibrary(); }; li.append(remove);
     $('#collection').append(li);
   });
-  $('#count').textContent = `${order.length} / 10 saved designs selected`;
+  $('#count').textContent = `${order.length} selected` + (order.length ? '' : ' \u2014 select at least one');
 }
 function canDiscard() { return !dirty || confirm('Discard unsaved changes to this draft?'); }
 function openDraft(draft) {
@@ -124,7 +124,7 @@ $('#delete').onclick = action(async () => {
 $('#publish').onclick = action(async () => {
   if (dirty) throw new Error('Save or reopen the current draft before publishing saved designs.');
   $('#publish').disabled = true;
-  try { await api('publish', { ids: order }); $('#publication-status').textContent = 'Collection published for the next release.'; }
+  try { await api('publish', { ids: order }); $('#publication-status').textContent = 'Published. Rooms created from now on offer this collection.'; }
   finally { $('#publish').disabled = false; }
 });
 window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });

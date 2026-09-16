@@ -30,7 +30,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `room_left` | `roomId: string` |
 | `error` | `code: string`, `message: string` |
 
-`PlayerView` contains exactly `playerId`, `displayName`, `colour`, `avatarPreset`, `seat`, `ready`, `connected`, `x`, `y`, `facing`, `sequence`, and `epoch`. `colour` is an uppercase six-digit hex colour prefixed by `#`. `avatarPreset` is an identifier in the released `frontend/src/published-avatars.json` collection, packaged unchanged by both builds. The initial ten are `townsperson-1` through `townsperson-10`; names and published order are frontend presentation data, independent of identity. Unpublished draft IDs are never valid.
+`PlayerView` contains exactly `playerId`, `displayName`, `colour`, `avatarPreset`, `seat`, `ready`, `connected`, `x`, `y`, `facing`, `sequence`, and `epoch`. `colour` is an uppercase six-digit hex colour prefixed by `#`. `avatarPreset` is an identifier in the Published Avatar Collection the Room pinned when it was created, served over HTTP by `GET /rooms/{roomCode}/avatars` (below). Identifiers match `[a-z0-9][a-z0-9-]{0,63}`; names and published order are presentation data carried with the collection, independent of identity. Membership is the server's to enforce against the Room's own collection: a client decoding a Player View checks the identifier's form only, because a Room Snapshot can arrive before that Room's collection has been fetched. Identifiers outside the Room's collection, including unpublished draft IDs, are never valid.
 
 `seat` is an integer from 0 through 9 in a Lobby and `null` during active play. `ready` and `connected` are booleans. Disconnected memberships remain in Player Views with `connected: false`; clients freeze and subdue their Avatars and show “Reconnecting…”.
 
@@ -79,7 +79,7 @@ Creation enters `lobby`; the first membership is Host. Each new Lobby membership
 
 `select_avatar` selects only the sending Player’s own membership; it accepts no Player ID or Room Code. Exact fields are `version`, `type`, and `avatarPreset`. Missing, empty, non-string or extra fields return `malformed_message`; unsupported versions return `unsupported_version`. An unjoined connection receives `not_in_room`, active play receives `invalid_phase`, and a non-published ID in the Lobby receives `invalid_avatar_preset`. Rejections do not mutate state. Accepted requests broadcast complete structural `room_state` through the bounded outboxes. Repeated changes and duplicate selections are allowed, preserving Player ID, Display Name, Colour, Seat, Facing, readiness and movement counters.
 
-Previewing is private and sends nothing; Use character sends the request without an optimistic shared-state change. Selection and Start use the same Room serialization: selection first is retained by Start; Start first rejects the selection. Private previews cannot override the accepted choice. Clients apply the resulting Room State at the next game-frame boundary and update existing Avatar textures and seated artwork without replaying arrivals. Recovery and takeover keep the accepted selection, including after Start; retired sockets cannot select. Leave/expiry end it, and a new membership draws randomly without a cross-Room preference.
+Choosing a character in the chooser sends the request immediately, without an optimistic shared-state change; there is no separate confirming action. Selection and Start use the same Room serialization: selection first is retained by Start; Start first rejects the selection. A pending request cannot override the accepted choice. Clients apply the resulting Room State at the next game-frame boundary and update existing Avatar textures and seated artwork without replaying arrivals. Recovery and takeover keep the accepted selection, including after Start; retired sockets cannot select. Leave/expiry end it, and a new membership draws randomly without a cross-Room preference.
 
 Only the current Host can `start_game` in the Lobby. There is deliberately no occupancy or readiness gate: one through ten Players can start, even all Not Ready. Non-Hosts receive `not_host`, unjoined connections receive `not_in_room`, and a Host attempting to restart active play receives `invalid_phase`. Start atomically changes phase to `playing`, clears seat assignments, places all current Players at the active spawn, resets their movement-validation clocks, and broadcasts `room_state`. Readiness remains informational membership state but cannot change during active play.
 
@@ -104,6 +104,16 @@ Leave during recovery clears local intent immediately. A separate socket makes o
 These changes extend protocol v1 for the coordinated local client/server release; older clients lacking Facing, movement counters/corrections, phase, Host, seat or readiness decoding must be updated together with the server.
 
 
-## Collection releases
+## The Published Avatar Collection
 
-The developer editor validates exactly ten distinct complete compatible saved recipes before atomically replacing the release artifact. Both builds consume that artifact; source layers, drafts and authoring endpoints are absent from the Player build. Publishing has no runtime server endpoint and does not mutate live Rooms. A changed collection requires a coordinated frontend/backend build, backend restart (which clears Rooms), and client refresh.
+`GET /rooms/{roomCode}/avatars` returns the collection a Room pinned at creation. The Room Code is trimmed and uppercased as Join trims it. An unknown, expired or never-created code returns `404` with no body. A successful response is:
+
+```json
+{ "version": 1, "collectionId": "8f2a1c09b4d7e615", "presets": [ { "id": "townsperson-1", "name": "Rowan", "sprite": "data:image/png;base64,…", "seatedSprite": "data:image/png;base64,…" } ] }
+```
+
+A collection holds at least one preset and has no upper bound. `collectionId` is derived from the publication's content, so two Rooms pinning the same publication report the same identifier. Both artwork fields are inline `data:image/png;base64,` sprite sheets: `sprite` is four rows of nine 64×64 frames, `seatedSprite` four rows of eleven. Browser origins are allowed as for the WebSocket endpoint.
+
+Clients fetch this on join, keyed to the Room they are entering, and create every texture and walk animation before rendering the Room. At page load a client does not yet know which Room it will enter, so it cannot know which collection it needs. Reconnect keeps the collection its membership already has.
+
+The developer editor validates distinct complete compatible saved recipes before atomically replacing the publication file, which the backend reads. Source layers, drafts and authoring endpoints are absent from the Player build. Publishing takes effect for Rooms created from then on, with no rebuild and no restart; a running Room keeps the collection it was created with, and superseded collections stay in memory only while some Room still references one.

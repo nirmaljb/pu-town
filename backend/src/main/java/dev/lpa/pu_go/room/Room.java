@@ -1,11 +1,15 @@
 package dev.lpa.pu_go.room;
 
+import dev.lpa.pu_go.avatar.AvatarCollection;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public class Room {
     private final String roomId;
+    // Pinned at creation: Publishing reaches later Rooms, never this one.
+    private final AvatarCollection avatarCollection;
     private String phase = "lobby";
     private String hostPlayerId;
     public void setHostPlayerId(String value) { hostPlayerId = value; }
@@ -17,9 +21,13 @@ public class Room {
     public void setEmptySince(long value) { emptySince = value; }
     private final Set<String> playerIds = new LinkedHashSet<>();
 
-    public Room(String roomId) { this.roomId = roomId; }
+    public Room(String roomId, AvatarCollection avatarCollection) {
+        this.roomId = roomId;
+        this.avatarCollection = avatarCollection;
+    }
 
     public String getRoomId() { return roomId; }
+    public AvatarCollection getAvatarCollection() { return avatarCollection; }
     public List<String> playerIdsSnapshot() { return List.copyOf(playerIds); }
     public void addPlayer(String playerId) { playerIds.add(playerId); if (hostPlayerId == null) hostPlayerId = playerId; }
     public void removePlayer(String playerId) {

@@ -1,5 +1,7 @@
 package dev.lpa.pu_go.room;
 
+import dev.lpa.pu_go.avatar.AvatarCollections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
 import java.security.SecureRandom;
@@ -18,11 +20,14 @@ public class RoomManager {
     private final ReentrantLock[] locks = new ReentrantLock[256];
     private final SecureRandom random = new SecureRandom();
     private final LongSupplier milliseconds;
+    private final AvatarCollections avatarCollections;
 
-    public RoomManager() { this(System::currentTimeMillis); }
+    @Autowired
+    public RoomManager(AvatarCollections avatarCollections) { this(System::currentTimeMillis, avatarCollections); }
 
-    public RoomManager(LongSupplier milliseconds) {
+    public RoomManager(LongSupplier milliseconds, AvatarCollections avatarCollections) {
         this.milliseconds = milliseconds;
+        this.avatarCollections = avatarCollections;
         for (int i = 0; i < locks.length; i++) locks[i] = new ReentrantLock();
     }
 
@@ -31,12 +36,14 @@ public class RoomManager {
     public long currentTimeMillis() { return milliseconds.getAsLong(); }
 
     public Room createRoom() {
+        // Resolved once, before the code is settled, so every attempt pins the same collection.
+        var collection = avatarCollections.current();
         while (true) {
             StringBuilder code = new StringBuilder();
             for (int i = 0; i < 6; i++) code.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));
             String roomId = code.toString();
             Room created = serialized(java.util.List.of(roomId), () -> {
-                Room room = new Room(roomId);
+                Room room = new Room(roomId, collection);
                 room.setEmptySince(milliseconds.getAsLong());
                 return rooms.putIfAbsent(roomId, room) == null ? room : null;
             });

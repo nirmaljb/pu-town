@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { NetworkInbox } from "../dist/network-inbox.js";
 import { ReconnectingGameClient } from "../dist/reconnecting-game-client.js";
+import { setActiveAvatarCollection } from "../dist/avatar-presets.js";
 
 function setup(storage) {
   let now = 0;
@@ -419,6 +420,9 @@ test("foreground return immediately replaces an attempt that expired during susp
 });
 
 test('selection sends only in a confirmed Lobby and recovery takes appearance from the server', () => {
+  // The Room's collection is active by the time the chooser can be used.
+  setActiveAvatarCollection({ collectionId: 'test', presets: ['townsperson-9', 'townsperson-10'].map(id =>
+    ({ id, name: id, sprite: 'data:image/png;base64,', seatedSprite: 'data:image/png;base64,' })) });
   const storage = new Map();
   const sessionStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
   const first = setup(sessionStorage);

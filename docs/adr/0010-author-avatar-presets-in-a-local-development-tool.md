@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded in part by ADR-0011
 ---
 
 # Author Avatar Presets in a local development tool

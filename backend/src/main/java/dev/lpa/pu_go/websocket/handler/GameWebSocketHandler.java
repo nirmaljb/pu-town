@@ -27,14 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
-    private static final List<String> AVATAR_PRESETS = dev.lpa.pu_go.player.PublishedAvatars.IDS;
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -211,7 +209,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 var usedColours = room.playerIdsSnapshot().stream().map(playersById::get)
                         .filter(java.util.Objects::nonNull).map(PlayerState::getColour).toList();
                 player.setColour(COLOURS.stream().filter(colour -> !usedColours.contains(colour)).findFirst().orElseThrow());
-                player.setAvatarPreset(AVATAR_PRESETS.get(ThreadLocalRandom.current().nextInt(AVATAR_PRESETS.size())));
+                player.setAvatarPreset(room.getAvatarCollection().randomId());
                 player.setDisplayName(message.displayName());
                 Integer seat = null;
                 if (room.getPhase().equals("lobby")) {
@@ -268,7 +266,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Room room = roomManager.findRoom(player.getRoomId());
         if (!room.getPhase().equals("lobby")) {
             deliver(error(player, "invalid_phase", "Avatar selection belongs to the Lobby."));
-        } else if (!AVATAR_PRESETS.contains(message.avatarPreset())) {
+        } else if (!room.getAvatarCollection().contains(message.avatarPreset())) {
             deliver(error(player, "invalid_avatar_preset", "Choose an Avatar Preset from the published collection."));
         } else {
             player.setAvatarPreset(message.avatarPreset());

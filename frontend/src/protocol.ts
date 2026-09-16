@@ -1,5 +1,5 @@
 import { DIRECTIONS, type Direction } from "./avatar-motion.js";
-import { requireAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
+import { requireAvatarPreset, requireSelectableAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
 export const PROTOCOL_VERSION = 1 as const;
 
@@ -244,5 +244,5 @@ function requireCounter(value: unknown): number {
 
 
 export function selectAvatar(avatarPreset: string): ClientMessage {
-  return { version: 1, type: "select_avatar", avatarPreset: requireAvatarPreset(avatarPreset) };
+  return { version: 1, type: "select_avatar", avatarPreset: requireSelectableAvatarPreset(avatarPreset) };
 }

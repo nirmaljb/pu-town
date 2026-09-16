@@ -1,5 +1,5 @@
 import type Phaser from "phaser";
-import { AVATAR_PRESETS, PUBLISHED_AVATARS } from "./avatar-presets.js";
+import type { AvatarCollection } from "./avatar-presets.js";
 import { AvatarMotion, DIRECTIONS, type Direction } from "./avatar-motion.js";
 import { AvatarSeating } from "./avatar-seating.js";
 import type { WorldReconciler } from "./network-frame-boundary.js";
@@ -20,29 +20,59 @@ type AvatarView = {
   connected: boolean;
 };
 
-export function preloadAvatars(scene: Phaser.Scene): void {
-  for (const preset of PUBLISHED_AVATARS) {
+let loaded: AvatarCollection | null = null;
+
+/**
+ * Creates every texture and walk animation in a Room's pinned collection. The scene waits
+ * on this before it renders the Room, so nothing downstream loads artwork on demand.
+ */
+export function loadAvatarCollection(scene: Phaser.Scene, collection: AvatarCollection): Promise<void> {
+  if (loaded?.collectionId === collection.collectionId) return Promise.resolve();
+  releaseAvatarCollection(scene);
+  for (const preset of collection.presets) {
     scene.load.spritesheet(preset.id, preset.sprite, { frameWidth: 64, frameHeight: 64 });
     scene.load.spritesheet(`${preset.id}-seated`, preset.seatedSprite, { frameWidth: 64, frameHeight: 64 });
   }
+  return new Promise((resolve, reject) => {
+    scene.load.once("complete", () => {
+      const incomplete = collection.presets.find(preset =>
+        !scene.textures.exists(preset.id) || !scene.textures.exists(`${preset.id}-seated`));
+      if (incomplete) {
+        releaseAvatarCollection(scene);
+        reject(new Error(`Avatar Preset artwork could not be decoded: ${incomplete.id}`));
+        return;
+      }
+      for (const preset of collection.presets) {
+        DIRECTIONS.forEach((direction, row) => {
+          scene.anims.create({
+            key: `${preset.id}-walk-${direction}`,
+            frames: scene.anims.generateFrameNumbers(preset.id, { start: row * 9 + 1, end: row * 9 + 8 }),
+            frameRate: 10,
+            repeat: -1
+          });
+        });
+      }
+      loaded = collection;
+      resolve();
+    });
+    scene.load.start();
+  });
+}
+
+/** Presets are only unique within a collection, so superseded artwork must go first. */
+function releaseAvatarCollection(scene: Phaser.Scene): void {
+  for (const preset of loaded?.presets ?? []) {
+    for (const direction of DIRECTIONS) scene.anims.remove(`${preset.id}-walk-${direction}`);
+    scene.textures.remove(preset.id);
+    scene.textures.remove(`${preset.id}-seated`);
+  }
+  loaded = null;
 }
 
 export class AvatarReconciler implements WorldReconciler {
   readonly #avatars = new Map<string, AvatarView>();
 
-  constructor(private readonly scene: Phaser.Scene) {
-    for (const preset of AVATAR_PRESETS) {
-      DIRECTIONS.forEach((direction, row) => {
-        const key = `${preset}-walk-${direction}`;
-        if (!scene.anims.exists(key)) scene.anims.create({
-          key,
-          frames: scene.anims.generateFrameNumbers(preset, { start: row * 9 + 1, end: row * 9 + 8 }),
-          frameRate: 10,
-          repeat: -1
-        });
-      });
-    }
-  }
+  constructor(private readonly scene: Phaser.Scene) {}
 
   reconcile(world: WorldState, arrivals: ReadonlySet<string> = new Set()): void {
     for (const [playerId, avatar] of this.#avatars) {

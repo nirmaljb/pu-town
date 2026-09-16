@@ -192,15 +192,16 @@ export class ReconnectingGameClient {
     if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(movement);
   }
 
-  selectAvatar(avatarPreset: string): void { this.sendLobbyControl(selectAvatar(avatarPreset)); }
+  selectAvatar(avatarPreset: string): void { this.sendLobbyControl(() => selectAvatar(avatarPreset)); }
 
-  setReady(ready: boolean): void { this.sendLobbyControl({ version: 1, type: "set_ready", ready }); }
+  setReady(ready: boolean): void { this.sendLobbyControl(() => ({ version: 1, type: "set_ready", ready })); }
 
-  startGame(): void { this.sendLobbyControl({ version: 1, type: "start_game" }); }
+  startGame(): void { this.sendLobbyControl(() => ({ version: 1, type: "start_game" })); }
 
-  private sendLobbyControl(message: ClientMessage): void {
+  /** Built only when it will be sent, so a control outside a Lobby is ignored, not validated. */
+  private sendLobbyControl(build: () => ClientMessage): void {
     if (this.#phase === "lobby" && this.#state.status === "playing" && this.#socket?.readyState === 1) {
-      this.#socket.send(JSON.stringify(message));
+      this.#socket.send(JSON.stringify(build()));
     }
   }
 
@@ -246,6 +247,12 @@ export class ReconnectingGameClient {
     });
     socket.addEventListener("close", finish);
     socket.addEventListener("error", finish);
+  }
+
+  /** Entry could not be completed outside the socket's own lifecycle. */
+  abandon(error: string): void {
+    this.cancel();
+    this.#state = { ...this.#state, error };
   }
 
   stop(): void {

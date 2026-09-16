@@ -51,8 +51,8 @@ class AuthoringBoundary(unittest.TestCase):
         collection = json.loads(published)['presets']
         self.assertEqual(order, [p['id'] for p in collection])
         self.assertEqual('Design 9', collection[0]['name'])
-        for invalid in (order[:9], [d['id'] for d in designs], order[:9] + [order[0]]):
-            with self.assertRaisesRegex(ValueError, 'ten|distinct'):
+        for invalid in ([], order[:9] + [order[0]], [None]):
+            with self.assertRaisesRegex(ValueError, 'at least one|distinct'):
                 self.editor.publish(invalid)
             self.assertEqual(published, self.publication.read_bytes())
         design = self.editor.open(order[0])
@@ -67,6 +67,14 @@ class AuthoringBoundary(unittest.TestCase):
             self.editor.publish(order)
         self.assertEqual(published, self.publication.read_bytes())
         self.assertEqual('Renamed', self.editor.open(order[0])['name'])
+
+    def test_a_collection_holds_at_least_one_preset_and_has_no_upper_bound(self):
+        designs = [self.editor.save({'name': 'Design ' + str(i), 'parts': self.example['parts']}) for i in range(12)]
+        single = self.editor.publish([designs[0]['id']])
+        self.assertEqual([designs[0]['id']], [p['id'] for p in single['presets']])
+        every = self.editor.publish([d['id'] for d in designs])
+        self.assertEqual(12, len(every['presets']))
+        self.assertEqual(every, json.loads(self.publication.read_text()))
 
     def test_missing_or_incompatible_artwork_cannot_replace_the_publication(self):
         designs = [self.editor.save({'name': 'Design ' + str(i), 'parts': self.example['parts']}) for i in range(10)]
@@ -83,24 +91,24 @@ class AuthoringBoundary(unittest.TestCase):
             self.editor.save(design)
         self.assertEqual(before, self.publication.read_bytes())
 
-    def test_player_facing_names_are_refused_when_they_read_as_a_slur(self):
+    def test_player_facing_names_are_bounded_but_not_judged_by_the_tool(self):
         designs = [self.editor.save({'name': 'Design ' + str(i), 'parts': self.example['parts']}) for i in range(10)]
         order = [d['id'] for d in designs]
         self.editor.publish(order)
         published = self.publication.read_bytes()
-        for refused in ('Nigga', ' n i g g a ', 'N1gg4', 'niiiggga', 'Retard', 'f-a-g-g-o-t'):
-            with self.assertRaisesRegex(ValueError, 'slur'):
+        for refused in ('', '   ', None, 5, 'N' * 25):
+            with self.assertRaisesRegex(ValueError, '1\u201324 characters'):
                 self.editor.save({'name': refused, 'parts': self.example['parts']})
         self.assertEqual(10, len(self.editor.library()))
-        # A draft written before validation existed is still stopped at the publication boundary.
+        # A draft whose name was saved before the rule is still stopped at the publication boundary.
         smuggled = json.loads((self.drafts / (order[0] + '.json')).read_text())
-        smuggled['name'] = 'Nigga'
+        smuggled['name'] = 'N' * 25
         (self.drafts / (order[0] + '.json')).write_text(json.dumps(smuggled))
-        with self.assertRaisesRegex(ValueError, 'slur'):
+        with self.assertRaisesRegex(ValueError, '1\u201324 characters'):
             self.editor.publish(order)
         self.assertEqual(published, self.publication.read_bytes())
-        for allowed in ('Rowan', 'Niger Delta', 'Scunthorpe', 'Cocoon', 'Retardant'):
-            self.assertEqual(allowed, self.editor.save({'name': allowed, 'parts': self.example['parts']})['name'])
+        for allowed in ('Rowan', ' Mira ', 'N' * 24, 'Scunthorpe'):
+            self.assertEqual(allowed.strip(), self.editor.save({'name': allowed, 'parts': self.example['parts']})['name'])
 
     def test_unknown_designs_report_actionable_problems_and_leave_the_library_intact(self):
         saved = self.editor.save({'name': 'Orchard', 'parts': self.example['parts']})
@@ -109,11 +117,12 @@ class AuthoringBoundary(unittest.TestCase):
                 missing('avatar-does-not-exist')
         self.assertEqual([saved['id']], [d['id'] for d in self.editor.library()])
 
-    def test_initial_collection_recreates_six_and_contains_ten_complete_distinct_appearances(self):
-        released = json.loads((ROOT.parents[1] / 'frontend/src/published-avatars.json').read_text())['presets']
-        self.assertEqual(10, len(released))
-        self.assertEqual(10, len({p['id'] for p in released}))
-        self.assertEqual(10, len({p['sprite'] for p in released}))
+    def test_shipped_collection_recreates_its_references_and_holds_complete_distinct_appearances(self):
+        released = json.loads((ROOT.parents[1] / 'backend/data/published-avatars.json').read_text())['presets']
+        self.assertGreaterEqual(len(released), 1)
+        self.assertEqual(len(released), len({p['id'] for p in released}))
+        self.assertEqual(len(released), len({p['sprite'] for p in released}))
+        self.assertTrue(all(1 <= len(p['name']) <= 24 for p in released))
         for preset in released:
             standing = Image.open(io.BytesIO(base64.b64decode(preset['sprite'].split(',')[1]))).convert('RGBA')
             sitting = Image.open(io.BytesIO(base64.b64decode(preset['seatedSprite'].split(',')[1]))).convert('RGBA')

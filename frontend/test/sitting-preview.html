@@ -7,42 +7,55 @@
 body { margin: 0; background: #302820; color: #fff0c9; font: 16px sans-serif; }
 nav { padding: 12px; } button { margin-right: 12px; padding: 8px; }
 </style>
-<nav><button id="sit">Replay arrivals</button><button id="start">Start / cancel sitting</button>All ten presets × up, left, down, right (top to bottom)</nav>
+<nav><button id="sit">Replay arrivals</button><button id="start">Start / cancel sitting</button><span id="caption"></span></nav>
 <div id="gallery"></div>
 <script type="module">
 import Phaser from 'phaser';
-import { AvatarReconciler, preloadAvatars } from '/src/avatar-reconciler.ts';
-import { AVATAR_PRESETS } from '/src/avatar-presets.ts';
+import { AvatarReconciler, loadAvatarCollection } from '/src/avatar-reconciler.ts';
+import { fetchAvatarCollection } from '/src/avatar-presets.ts';
 import { DIRECTIONS } from '/src/avatar-motion.ts';
 import { emptyWorld } from '/src/world-state.ts';
 
-let view, world;
-const game = new Phaser.Game({
-  type: Phaser.AUTO, width: 2100, height: 640, pixelArt: true, parent: 'gallery',
-  backgroundColor: '#594632',
-  scene: {
-    preload() { preloadAvatars(this); },
-    create() {
-      view = new AvatarReconciler(this);
-      const players = new Map();
-      DIRECTIONS.forEach((facing, row) => AVATAR_PRESETS.forEach((avatarPreset, col) => {
-        const playerId = `${row}-${col}`;
-        players.set(playerId, { playerId, avatarPreset, displayName: `${col + 1} · ${facing}`,
-          colour: '#FFD166', facing, seat: col, ready: false,
-          x: 110 + col * 210, y: 110 + row * 160, sequence: 0, epoch: 0 });
-      }));
-      world = { ...emptyWorld(), phase: 'lobby', players };
-      view.reconcile(world);
-      // Enlarge the actual rendered components for pixel-level artwork inspection.
-      this.children.list.filter(child => child.type === 'Container').forEach(child => child.setScale(1.5));
-      document.querySelector('#sit').onclick = () => {
-        view.reconcile({ ...world, phase: 'playing' });
-        view.reconcile(world, new Set(players.keys()));
-      };
-      document.querySelector('#start').onclick = () => view.reconcile({ ...world, phase: 'playing' });
-    },
-    update(time) { view?.updateAnimations(time, null, true); }
-  }
-});
+// Artwork belongs to a Room's pinned collection, so this page reads one the same way the
+// game does. Create a Room in the client, then open this page with ?room=ITS-CODE.
+const parameters = new URLSearchParams(location.search);
+const roomCode = parameters.get('room');
+const websocketUrl = parameters.get('ws') || 'ws://localhost:8080/ws/game';
+const caption = document.querySelector('#caption');
+if (!roomCode) {
+  caption.textContent = 'Add ?room=CODE for a Room whose collection you want to inspect.';
+} else {
+  const collection = await fetchAvatarCollection(websocketUrl, roomCode.trim().toUpperCase());
+  const presets = collection.presets;
+  caption.textContent = `${presets.length} presets × up, left, down, right (top to bottom)`;
+  let view, world;
+  new Phaser.Game({
+    type: Phaser.AUTO, width: 110 + presets.length * 210, height: 640, pixelArt: true, parent: 'gallery',
+    backgroundColor: '#594632',
+    scene: {
+      async create() {
+        await loadAvatarCollection(this, collection);
+        view = new AvatarReconciler(this);
+        const players = new Map();
+        DIRECTIONS.forEach((facing, row) => presets.forEach((preset, col) => {
+          const playerId = `${row}-${col}`;
+          players.set(playerId, { playerId, avatarPreset: preset.id, displayName: `${preset.name} · ${facing}`,
+            colour: '#FFD166', facing, seat: col, ready: false,
+            x: 110 + col * 210, y: 110 + row * 160, sequence: 0, epoch: 0 });
+        }));
+        world = { ...emptyWorld(), phase: 'lobby', players };
+        view.reconcile(world);
+        // Enlarge the actual rendered components for pixel-level artwork inspection.
+        this.children.list.filter(child => child.type === 'Container').forEach(child => child.setScale(1.5));
+        document.querySelector('#sit').onclick = () => {
+          view.reconcile({ ...world, phase: 'playing' });
+          view.reconcile(world, new Set(players.keys()));
+        };
+        document.querySelector('#start').onclick = () => view.reconcile({ ...world, phase: 'playing' });
+      },
+      update(time) { view?.updateAnimations(time, null, true); }
+    }
+  });
+}
 </script>
 </html>

@@ -1,5 +1,7 @@
 package dev.lpa.pu_go.websocket.handler;
 
+import dev.lpa.pu_go.avatar.AvatarCollection;
+import dev.lpa.pu_go.avatar.AvatarPreset;
 import dev.lpa.pu_go.room.RoomManager;
 import dev.lpa.pu_go.room.RoomRules;
 import dev.lpa.pu_go.websocket.support.RecordingWebSocketSession;
@@ -21,8 +23,14 @@ class GameWebSocketHandlerTest {
     private final AtomicLong now = new AtomicLong(1_000_000_000L);
     private final java.util.concurrent.atomic.AtomicInteger playerIds = new java.util.concurrent.atomic.AtomicInteger();
     private final AtomicLong milliseconds = new AtomicLong();
+    // Rooms pin a collection at creation; the handler's behaviour does not depend on which.
+    private static final AvatarCollection COLLECTION = new AvatarCollection("test0001",
+            java.util.stream.IntStream.rangeClosed(1, 10)
+                    .mapToObj(number -> new AvatarPreset("townsperson-" + number, "Name " + number,
+                            "data:image/png;base64,iVBORw0KGgo=", "data:image/png;base64,iVBORw0KGgo="))
+                    .toList());
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
-            new RoomManager(milliseconds::get), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
+            new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
     );
 
     // Start rings the Room centre, so movement tests start from their own standing position.
@@ -70,7 +78,7 @@ class GameWebSocketHandlerTest {
         send(returned, "{\"version\":1,\"type\":\"leave_room\"}");
         var fresh = connect("selected-fresh"); join(fresh, initial.path("roomId").asText());
         assertFalse(initial.path("selfPlayerId").equals(latest(fresh).path("selfPlayerId")));
-        assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(latest(fresh).path("players").get(1).path("avatarPreset").asText()));
+        assertTrue(COLLECTION.ids().contains(latest(fresh).path("players").get(1).path("avatarPreset").asText()));
         recover(returned, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
         assertEquals("recovery_expired", latest(returned).path("code").asText());
     }
@@ -453,7 +461,7 @@ class GameWebSocketHandlerTest {
         JsonNode initial = json(alex.payloads().get(0));
         String code = initial.get("roomId").asText();
         String alexPreset = initial.get("players").get(0).get("avatarPreset").asText();
-        org.junit.jupiter.api.Assertions.assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(alexPreset));
+        org.junit.jupiter.api.Assertions.assertTrue(COLLECTION.ids().contains(alexPreset));
 
         var sam = connect("sam");
         join(sam, code);
@@ -463,7 +471,7 @@ class GameWebSocketHandlerTest {
             String expected = player.get("playerId").asText().equals("player-1")
                     ? alexPreset : announcement.get("avatarPreset").asText();
             assertEquals(expected, player.get("avatarPreset").asText());
-            org.junit.jupiter.api.Assertions.assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(expected));
+            org.junit.jupiter.api.Assertions.assertTrue(COLLECTION.ids().contains(expected));
         }
 
         send(alex, "{\"version\":1,\"type\":\"start_game\"}");
@@ -799,7 +807,7 @@ class GameWebSocketHandlerTest {
     @Test
     void queuedMovementCannotOvertakeHostSuccessionState() throws Exception {
         var tasks = new java.util.ArrayDeque<Runnable>();
-        var serial = new GameWebSocketHandler(new RoomManager(milliseconds::get), tasks::add,
+        var serial = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), tasks::add,
                 () -> "queued-" + playerIds.incrementAndGet(), now::get);
         var host = new RecordingWebSocketSession("queued-host");
         var guest = new RecordingWebSocketSession("queued-guest");

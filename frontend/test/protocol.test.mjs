@@ -2,6 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { decodeServerMessage } from "../dist/protocol.js";
+import { decodeAvatarCollection, setActiveAvatarCollection } from "../dist/avatar-presets.js";
+
+const ARTWORK = "data:image/png;base64,iVBORw0KGgo=";
+const collectionOf = (...ids) => ({
+  version: 1,
+  collectionId: "collection-" + ids.join("-"),
+  presets: ids.map(id => ({ id, name: "Name " + id, sprite: ARTWORK, seatedSprite: ARTWORK }))
+});
 
 test("the client accepts an explicit version 1 server message", () => {
   assert.deepEqual(decodeServerMessage(JSON.stringify({
@@ -34,16 +42,19 @@ test("create, heartbeat and colour messages use strict schemas", async () => {
   assert.throws(() => decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player: { ...player, colour: "red" } })));
 });
 
-test("snapshots and join announcements require a known Avatar Preset", () => {
+test("snapshots and join announcements require a well-formed Avatar Preset identifier", () => {
   const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-6", connected: true, seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 };
   for (const envelope of [
     p => ({ version: 1, type: "player_joined", player: p }),
     p => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", selfPlayerId: "p", roomId: "ABC234", players: [p] })
   ]) {
     assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope(player))));
-    for (const avatarPreset of [undefined, null, 1, "", "unpublished-draft", "../../image"]) {
+    // A snapshot can arrive before the Room's collection does, so membership is the
+    // server's to enforce; the wire still refuses anything that is not an identifier.
+    for (const avatarPreset of [undefined, null, 1, "", "../../image", "Townsperson-1", "-leading", "a".repeat(65)]) {
       assert.throws(() => decodeServerMessage(JSON.stringify(envelope({ ...player, avatarPreset }))));
     }
+    assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope({ ...player, avatarPreset: "unpublished-draft" }))));
   }
 });
 
@@ -102,15 +113,66 @@ test("recovery snapshots require a private credential and explicit connected pre
 });
 
 
-test("the released ten presets decode and selection addresses only the sending Player", async () => {
+test("selection addresses only the sending Player and only the Room's own collection", async () => {
   const { selectAvatar } = await import('../dist/protocol.js');
-  const { PUBLISHED_AVATARS } = await import('../dist/avatar-presets.js');
-  assert.equal(PUBLISHED_AVATARS.length, 10);
-  for (const preset of PUBLISHED_AVATARS) {
+  const collection = decodeAvatarCollection(collectionOf('townsperson-1', 'townsperson-2'));
+  setActiveAvatarCollection(collection);
+  for (const preset of collection.presets) {
     assert.deepEqual(selectAvatar(preset.id), { version: 1, type: 'select_avatar', avatarPreset: preset.id });
     const player = { playerId: 'p', displayName: 'Alex', colour: '#4F8CFF', avatarPreset: preset.id,
       connected: true, seat: 0, ready: true, facing: 'down', sequence: 0, epoch: 0, x: 640, y: 177 };
     assert.equal(decodeServerMessage(JSON.stringify({version: 1, type: 'player_joined', player})).player.avatarPreset, preset.id);
   }
+  // A preset another Room published is as unaskable as one that was never published.
+  assert.throws(() => selectAvatar('townsperson-3'), /Avatar Preset/);
   assert.throws(() => selectAvatar('unpublished-draft'), /Avatar Preset/);
+  setActiveAvatarCollection(null);
+  assert.throws(() => selectAvatar('townsperson-1'), /Avatar Preset/);
+});
+
+test("a Room's collection is decoded strictly and its artwork must be inline", () => {
+  const collection = decodeAvatarCollection(collectionOf('townsperson-1', 'townsperson-2'));
+  assert.equal(collection.collectionId, 'collection-townsperson-1-townsperson-2');
+  assert.deepEqual(collection.presets.map(preset => preset.id), ['townsperson-1', 'townsperson-2']);
+  assert.equal(collection.presets[0].name, 'Name townsperson-1');
+  const single = decodeAvatarCollection(collectionOf('townsperson-1'));
+  assert.equal(single.presets.length, 1);
+  const many = decodeAvatarCollection(collectionOf(...Array.from({ length: 24 }, (_, index) => 'townsperson-' + (index + 1))));
+  assert.equal(many.presets.length, 24);
+  // Names are bounded in code points, as Display Names are, so the editor and the client agree.
+  const emoji = '\u{1F600}'.repeat(24);
+  const named = collectionOf('townsperson-1');
+  named.presets[0].name = emoji;
+  assert.equal(decodeAvatarCollection(named).presets[0].name, emoji);
+  const valid = collectionOf('townsperson-1');
+  for (const refused of [
+    null, {}, { ...valid, version: 2 }, { ...valid, collectionId: '' }, { ...valid, presets: [] },
+    { ...valid, presets: [...valid.presets, ...valid.presets] },
+    { ...valid, presets: [{ ...valid.presets[0], name: '' }] },
+    { ...valid, presets: [{ ...valid.presets[0], name: 'N'.repeat(25) }] },
+    { ...valid, presets: [{ ...valid.presets[0], name: '\u{1F600}'.repeat(25) }] },
+    { ...valid, presets: [{ ...valid.presets[0], id: 'Townsperson 1' }] },
+    { ...valid, presets: [{ ...valid.presets[0], sprite: '/assets/townsperson-1.png' }] },
+    { ...valid, presets: [{ ...valid.presets[0], seatedSprite: 'https://example.invalid/legs.png' }] }
+  ]) {
+    assert.throws(() => decodeAvatarCollection(refused), undefined, JSON.stringify(refused));
+  }
+});
+
+test("the collection endpoint sits beside the game WebSocket", async () => {
+  const { avatarCollectionUrl, fetchAvatarCollection } = await import('../dist/avatar-presets.js');
+  assert.equal(avatarCollectionUrl('ws://localhost:8080/ws/game', 'ABC234'), 'http://localhost:8080/rooms/ABC234/avatars');
+  assert.equal(avatarCollectionUrl('wss://town.example/ws/game?x=1', 'ABC234'), 'https://town.example/rooms/ABC234/avatars');
+  const requested = [];
+  const fetched = await fetchAvatarCollection('ws://localhost:8080/ws/game', 'ABC234', async (url, init) => {
+    requested.push([url, init]);
+    return { ok: true, status: 200, json: async () => collectionOf('townsperson-1') };
+  });
+  assert.deepEqual(requested.map(([url]) => url), ['http://localhost:8080/rooms/ABC234/avatars']);
+  // Entry must not stall behind a Room whose collection never arrives.
+  assert.ok(requested[0][1].signal instanceof AbortSignal, 'the fetch carries a deadline');
+  assert.deepEqual(fetched.presets.map(preset => preset.id), ['townsperson-1']);
+  await assert.rejects(
+    fetchAvatarCollection('ws://localhost:8080/ws/game', 'ZZZZZZ', async () => ({ ok: false, status: 404 })),
+    /unavailable \(404\)/);
 });

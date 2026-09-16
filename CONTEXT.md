@@ -29,7 +29,11 @@ A developer-designed, ready-made cosmetic appearance for a Player's Avatar, sele
 _Avoid_: Player, Player ID
 
 **Published Avatar Collection**:
-The shared set of exactly ten Avatar Presets offered to Players in every Room's Lobby. Other designs remain drafts unavailable for Player selection.
+The set of Avatar Presets a Room offers its Players in the Lobby. A Room keeps the collection it was created with, so Publishing changes what later Rooms offer and never what a running Room offers. Other designs remain drafts unavailable for Player selection.
+
+**Publish**:
+The developer act of releasing a set of saved designs as the Published Avatar Collection for Rooms created from then on.
+_Avoid_: Save, deploy
 
 **Player Colour**:
 A visual marker assigned to a Player that is distinct from those of other current Players in the same Room. It stays with the Room Membership and does not determine Player identity.

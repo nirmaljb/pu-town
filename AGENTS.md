@@ -101,8 +101,8 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/world-state.ts` — pure client world state and event reducer.
 - `frontend/src/avatar-reconciler.ts` — creates, moves, and removes Phaser avatars to match world state.
 - `frontend/src/room-rules.ts` — client copies of shared room dimensions and movement values.
-- `frontend/src/avatar-chooser.ts` — private Lobby preview and explicit selection request.
-- `frontend/src/published-avatars.json` — atomic release collection consumed by frontend and backend.
+- `frontend/src/avatar-chooser.ts` — Lobby chooser; clicking a character requests it from the Room.
+- `frontend/src/avatar-presets.ts` — the active Room collection, its strict decoding, and the join-time fetch.
 - `tools/avatar-editor/` — local Python/Pillow workshop, curated sources and project-backed drafts; excluded from Player builds.
 - `frontend/src/style.css` — page and game-container presentation.
 - `frontend/test/` — protocol, frame-boundary, and reconnection tests.
@@ -112,7 +112,9 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `backend/src/main/java/dev/lpa/pu_go/PUtown.java` — Spring Boot entry point.
 - `backend/src/main/java/dev/lpa/pu_go/health/HealthController.java` — health endpoint.
 - `backend/src/main/java/dev/lpa/pu_go/player/PlayerState.java` — state for one connected player.
-- `backend/src/main/java/dev/lpa/pu_go/room/Room.java` — membership container for one room.
+- `backend/src/main/java/dev/lpa/pu_go/room/Room.java` — membership container and pinned Avatar Collection for one room.
+- `backend/src/main/java/dev/lpa/pu_go/avatar/` — publication loading, per-Room collections, and the collection endpoint.
+- `backend/data/published-avatars.json` — the publication the authoring tool writes and the backend reads.
 - `backend/src/main/java/dev/lpa/pu_go/room/RoomManager.java` — room registry and deterministic per-room locking.
 - `backend/src/main/java/dev/lpa/pu_go/room/RoomRules.java` — authoritative spawn, bounds, speed, and tolerance values.
 - `backend/src/main/java/dev/lpa/pu_go/websocket/config/WebSocketConfig.java` — WebSocket route and allowed browser origins.
@@ -135,13 +137,13 @@ The client accepts this infrastructure query parameter (room/name options are ig
 
 After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect. Started Rooms reject new memberships, including fresh Join after Leave or expiry; valid recovery still follows the current phase. Expired recovery returns to lobby selection without a Join again shortcut. Final Leave or expiry removes a started Room immediately, while recoverable disconnected memberships keep it alive. Never-started empty Lobbies retain their five-minute lifetime.
 
-Lobby Avatar selection is cosmetic and optional: ten named published choices, private browsing, explicit Use character, and server-accepted structural Room State. Selection shares the Start lock, does not change Ready, and updates existing seated Avatars without replaying arrivals. Recovery preserves accepted selection; Leave ends it. The editor publishes a single complete artifact for coordinated builds and backend restart; never make drafts or authoring endpoints available in the Player app.
+Lobby Avatar selection is cosmetic and optional: the Room's pinned collection of named published choices, requested by clicking one, and accepted through structural Room State. Selection shares the Start lock, does not change Ready, and updates existing seated Avatars without replaying arrivals. Recovery preserves accepted selection; Leave ends it. A client fetches the Room's collection over HTTP on join and creates every texture and walk animation before the scene renders the Room. Publishing reaches Rooms created from then on, without a rebuild or restart; never make drafts or authoring endpoints available in the Player app.
 
 ## Change rules and synchronization points
 
 - Treat files under `backend/src/` and `frontend/src/` as authoritative source. Do not infer current behavior from generated `backend/target/` or `frontend/dist/` files.
-- Both builds consume `frontend/src/published-avatars.json`; never hard-code a second catalogue. Publish validates ten complete distinct designs before atomic replacement. Run the authoring boundary suite through `npm test`; draft edits must not mutate publication.
-- The protocol is represented in Java message/decoder code, TypeScript protocol code, and `docs/websocket-protocol-v1.md`. Keep all three synchronized.
+- The backend is the single reader of the publication file; never hard-code a second catalogue, and never reintroduce a build-time copy into either bundle. Publish validates at least one complete distinct design before atomic replacement. Run the authoring boundary suite through `npm test`; draft edits must not mutate publication.
+- The protocol is represented in Java message/decoder code, TypeScript protocol code, and `docs/websocket-protocol-v1.md`. Keep all three synchronized. The collection endpoint's payload shape is part of that contract: `AvatarCollectionController` and `avatar-presets.ts` must agree.
 - Room dimensions and movement speed are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`. Keep shared values synchronized. The backend remains authoritative and additionally owns spawn and movement tolerance.
 - Preserve strict message decoding: unknown fields, unsupported versions, malformed payloads, and invalid movement should remain explicit errors.
 - Apply server events through the inbox/frame-boundary path; do not mutate Phaser objects directly from WebSocket callbacks.
@@ -163,7 +165,7 @@ Do not claim an integration path was verified if only unit tests ran.
 
 ## Current limitations and hazards
 
-- `WebSocketConfig.java` accepts browser origins only from `http://localhost:5173` and `https://localhost:5173`. Vite falling back to another port will break the connection.
+- `WebSocketConfig.java` and `AvatarCollectionController` accept browser origins only from `http://localhost:5173` and `https://localhost:5173`. Vite falling back to another port will break both the connection and the collection fetch.
 - Rooms and player state live only in one backend process. Multiple server instances do not share state or coordinate rooms.
 - Production hosting, TLS termination, reverse-proxy configuration, and deployment automation are absent.
 - A deployed HTTPS frontend must use a `wss://` endpoint and a matching backend origin allow-list.

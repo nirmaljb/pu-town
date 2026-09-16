@@ -1,4 +1,5 @@
 import { AvatarChooser } from "./avatar-chooser.js";
+import type { AvatarCollection } from "./avatar-presets.js";
 import { ROOM_CAPACITY } from "./meeting-area.js";
 import type { WorldState } from "./world-state.js";
 import { normalizeDisplayName } from "./protocol.js";
@@ -106,6 +107,10 @@ export class JoinInterface {
       );
     });
     this.render();
+  }
+
+  setAvatarCollection(collection: AvatarCollection): void {
+    this.#chooser.setCollection(collection);
   }
 
   render(world?: WorldState): void {

@@ -12,37 +12,14 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent
 SLOTS = ('body', 'footwear', 'bottom', 'top', 'face', 'hair')
 
-# Published names are Player-facing in every Room, so authoring refuses slurs outright.
-# The list is curated and deliberately small. Matching folds away padding, punctuation and
-# digit substitutions, and tolerates repeated letters ("niiiggga"), while keeping the two
-# tiers apart so ordinary names survive: terms that never occur inside innocent words are
-# refused anywhere in the name, the rest only as whole words (Cocoon, Niger, Scunthorpe).
-SLURS_ANYWHERE = ('nigger', 'nigga', 'faggot', 'wetback', 'raghead', 'towelhead', 'tranny')
-SLURS_AS_WORDS = ('coon', 'spic', 'kike', 'gook', 'paki', 'chink', 'dyke', 'retard')
-LEET = str.maketrans({'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b', '$': 's', '@': 'a', '!': 'i'})
-
-
-def stretched(word):
-    """A pattern matching the word however often its letters are repeated."""
-    return re.compile(''.join(letter + '+' for letter in word))
-
-
-ANYWHERE = tuple(stretched(word) for word in SLURS_ANYWHERE)
-AS_WORDS = tuple(stretched(word) for word in SLURS_AS_WORDS)
-
 
 def clean_name(name):
     """Return the trimmed Player-facing name, or explain why it cannot be used."""
     if not isinstance(name, str) or not 1 <= len(name.strip()) <= 24:
         raise ValueError('Give the preset a name of 1\u201324 characters.')
-    name = name.strip()
-    folded = name.lower().translate(LEET)
-    letters = re.sub(r'[^a-z]', '', folded)
-    words = [word for word in re.split(r'[^a-z]+', folded) if word]
-    if any(pattern.search(letters) for pattern in ANYWHERE) or any(
-            pattern.fullmatch(word) for pattern in AS_WORDS for word in words):
-        raise ValueError('Choose a different name: this one reads as a slur to every Player in the Room.')
-    return name
+    # Names reach every Player through their own chooser. Judging their content is the
+    # developer's, not the tool's: a blocklist refused ordinary names and missed real ones.
+    return name.strip()
 
 
 def write_json(path, value):
@@ -68,7 +45,7 @@ def data_url(image):
 
 
 class Authoring:
-    def __init__(self, drafts=ROOT / 'drafts', publication=ROOT.parents[1] / 'frontend/src/published-avatars.json', catalogue=ROOT / 'catalogue.json', sources=ROOT / 'sources'):
+    def __init__(self, drafts=ROOT / 'drafts', publication=ROOT.parents[1] / 'backend/data/published-avatars.json', catalogue=ROOT / 'catalogue.json', sources=ROOT / 'sources'):
         self.drafts = Path(drafts)
         self.publication = Path(publication)
         self.catalogue = json.loads(Path(catalogue).read_text())
@@ -113,15 +90,15 @@ class Authoring:
         path.unlink()
 
     def publish(self, identities):
-        if not isinstance(identities, list) or len(identities) != 10:
-            raise ValueError('Select exactly ten saved designs to publish.')
-        if any(not isinstance(identity, str) for identity in identities) or len(set(identities)) != 10:
-            raise ValueError('Select ten distinct saved designs; remove duplicate entries.')
+        if not isinstance(identities, list) or not identities:
+            raise ValueError('Select at least one saved design to publish.')
+        if any(not isinstance(identity, str) for identity in identities) or len(set(identities)) != len(identities):
+            raise ValueError('Select distinct saved designs; remove duplicate entries.')
         presets = []
         for identity in identities:
             design = self.open(identity)
             try:
-                # Drafts predating name validation are caught here, at the Player-facing boundary.
+                # Drafts saved before the name rule are caught here, at the Player-facing boundary.
                 name = clean_name(design.get('name'))
             except ValueError as problem:
                 raise ValueError(f'{identity}: {problem}') from problem

@@ -1,0 +1,30 @@
+{
+  "id": "avatar-82bd4338842a484eb2f3bd81ead51ad7",
+  "name": "Rowan",
+  "parts": {
+    "body": {
+      "part": "body/bodies/male",
+      "colour": "brown"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/male",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/male",
+      "colour": "navy"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/male",
+      "colour": "forest"
+    },
+    "face": {
+      "part": "head/heads/human/male",
+      "colour": "brown"
+    },
+    "hair": {
+      "part": "hair/plain/adult",
+      "colour": "ginger"
+    }
+  }
+}
