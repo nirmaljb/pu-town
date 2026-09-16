@@ -1,7 +1,7 @@
 import type { MovementState } from "./protocol.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { createRoom, decodeServerMessage, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -191,6 +191,8 @@ export class ReconnectingGameClient {
   move(movement: MovementState): void {
     if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(movement);
   }
+
+  selectAvatar(avatarPreset: string): void { this.sendLobbyControl(selectAvatar(avatarPreset)); }
 
   setReady(ready: boolean): void { this.sendLobbyControl({ version: 1, type: "set_ready", ready }); }
 

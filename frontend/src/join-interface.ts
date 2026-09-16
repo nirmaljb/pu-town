@@ -1,3 +1,4 @@
+import { AvatarChooser } from "./avatar-chooser.js";
 import { ROOM_CAPACITY } from "./meeting-area.js";
 import type { WorldState } from "./world-state.js";
 import { normalizeDisplayName } from "./protocol.js";
@@ -7,6 +8,7 @@ const NAME_KEY = "pu-town.display-name";
 
 export class JoinInterface {
   readonly #root = document.createElement("div");
+  readonly #chooser: AvatarChooser;
   readonly #form: HTMLFormElement;
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
@@ -63,6 +65,8 @@ export class JoinInterface {
         </div>
       </section>
       <a class="art-credits" href="assets/avatars/credits.html" target="_blank" rel="noopener">Character art credits</a>`;
+    this.#chooser = new AvatarChooser(id => this.client.selectAvatar(id));
+    this.#root.insertBefore(this.#chooser.element, this.element(".connection-overlay"));
     document.body.append(this.#root);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");
@@ -112,6 +116,9 @@ export class JoinInterface {
     const lobby = this.#world?.phase === "lobby";
     const host = this.#world?.hostPlayerId === this.#world?.selfPlayerId;
     const self = this.#world?.players.get(this.#world.selfPlayerId ?? "");
+    const choosing = lobby && state.status === "playing";
+    this.#chooser.render(self, choosing);
+    document.body.classList.toggle("in-lobby", Boolean(lobby && state.status !== "join" && state.status !== "connecting"));
     this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
     this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
     this.element(".host-guidance").textContent = host
@@ -147,7 +154,7 @@ export class JoinInterface {
     if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(".back").focus();
   }
 
-  destroy(): void { this.#root.remove(); }
+  destroy(): void { this.#root.remove(); document.body.classList.remove("in-lobby"); }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {
     return this.#root.querySelector<T>(selector)!;

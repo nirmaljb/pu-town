@@ -1,8 +1,7 @@
-import Phaser from "phaser";
-import { AVATAR_PRESETS } from "./avatar-presets.js";
+import type Phaser from "phaser";
+import { AVATAR_PRESETS, PUBLISHED_AVATARS } from "./avatar-presets.js";
 import { AvatarMotion, DIRECTIONS, type Direction } from "./avatar-motion.js";
 import { AvatarSeating } from "./avatar-seating.js";
-import { drawSeatedLegs } from "./seated-pose.js";
 import type { WorldReconciler } from "./network-frame-boundary.js";
 import type { PlayerView } from "./protocol.js";
 import type { WorldState } from "./world-state.js";
@@ -12,8 +11,7 @@ type AvatarView = {
   sprite: Phaser.GameObjects.Sprite;
   motion: AvatarMotion;
   seating: AvatarSeating;
-  legs: Phaser.GameObjects.Graphics;
-  poseKey: string;
+  legs: Phaser.GameObjects.Sprite;
   preset: PlayerView["avatarPreset"];
   label: Phaser.GameObjects.Text;
   readiness: Phaser.GameObjects.Text;
@@ -23,8 +21,9 @@ type AvatarView = {
 };
 
 export function preloadAvatars(scene: Phaser.Scene): void {
-  for (const preset of AVATAR_PRESETS) {
-    scene.load.spritesheet(preset, `assets/avatars/${preset}.png`, { frameWidth: 64, frameHeight: 64 });
+  for (const preset of PUBLISHED_AVATARS) {
+    scene.load.spritesheet(preset.id, preset.sprite, { frameWidth: 64, frameHeight: 64 });
+    scene.load.spritesheet(`${preset.id}-seated`, preset.seatedSprite, { frameWidth: 64, frameHeight: 64 });
   }
 }
 
@@ -54,6 +53,11 @@ export class AvatarReconciler implements WorldReconciler {
     }
     for (const player of world.players.values()) {
       const avatar = this.#avatars.get(player.playerId) ?? this.createAvatar(player);
+      if (avatar.preset !== player.avatarPreset) {
+        avatar.sprite.stop().setTexture(player.avatarPreset, DIRECTIONS.indexOf(player.facing) * 9);
+        avatar.legs.setTexture(`${player.avatarPreset}-seated`);
+        avatar.preset = player.avatarPreset;
+      }
       avatar.connected = player.connected;
       avatar.container.setAlpha(player.connected ? 1 : 0.5);
       avatar.seat = world.phase === "lobby" ? player.seat : null;
@@ -90,11 +94,7 @@ export class AvatarReconciler implements WorldReconciler {
         if (bent) sprite.setCrop(0, 0, 64, 42);
         else sprite.setCrop();
         avatar.legs.setVisible(bent);
-        const poseKey = `${avatar.facing}-${lowering}`;
-        if (avatar.poseKey !== poseKey) {
-          drawSeatedLegs(avatar.legs, avatar.preset, avatar.facing, lowering);
-          avatar.poseKey = poseKey;
-        }
+        avatar.legs.setFrame(DIRECTIONS.indexOf(avatar.facing) * 11 + lowering);
         continue;
       }
       sprite.setCrop().setY(0);
@@ -112,7 +112,7 @@ export class AvatarReconciler implements WorldReconciler {
     const marker = this.scene.add.ellipse(0, 0, 28, 10, colour, 0.35).setStrokeStyle(2, colour);
     // LPC feet sit near pixel 56 in a 64px cell. World coordinates mark the feet.
     const sprite = this.scene.add.sprite(0, 0, player.avatarPreset, 18).setOrigin(0.5, 56 / 64);
-    const legs = this.scene.add.graphics().setVisible(false);
+    const legs = this.scene.add.sprite(0, 0, `${player.avatarPreset}-seated`, 0).setOrigin(0.5, 40 / 64).setVisible(false);
     const label = this.scene.add.text(0, -62, player.displayName, {
       color: "#ffffff", fontFamily: "sans-serif", fontSize: "14px",
       stroke: "#101725", strokeThickness: 3, backgroundColor: "#302820", padding: { x: 5, y: 3 }
@@ -126,7 +126,7 @@ export class AvatarReconciler implements WorldReconciler {
     const avatar: AvatarView = {
       container: this.scene.add.container(player.x, player.y, [marker, legs, sprite, label, readiness]),
       sprite, legs, label, readiness, seat: null, seating: new AvatarSeating(),
-      poseKey: "", preset: player.avatarPreset,
+      preset: player.avatarPreset,
       motion: new AvatarMotion(player.x, player.y),
       connected: player.connected,
       facing: player.facing

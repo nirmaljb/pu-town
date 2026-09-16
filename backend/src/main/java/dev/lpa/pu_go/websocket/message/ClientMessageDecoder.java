@@ -29,6 +29,10 @@ public final class ClientMessageDecoder {
         }
         String type = requiredText(root, "type");
         return switch (type) {
+            case "select_avatar" -> {
+                requireOnly(root, Set.of("version", "type", "avatarPreset"));
+                yield new ClientMessage.SelectAvatar(1, type, requiredText(root, "avatarPreset"));
+            }
             case "set_ready" -> {
                 requireOnly(root, Set.of("version", "type", "ready"));
                 if (!root.get("ready").isBoolean())

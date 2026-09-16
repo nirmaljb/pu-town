@@ -417,3 +417,37 @@ test("foreground return immediately replaces an attempt that expired during susp
   assert.equal(sockets[1].readyState, 3);
   assert.equal(client.state.status, "reconnecting");
 });
+
+test('selection sends only in a confirmed Lobby and recovery takes appearance from the server', () => {
+  const storage = new Map();
+  const sessionStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
+  const first = setup(sessionStorage);
+  first.client.selectAvatar('townsperson-10');
+  assert.equal(first.sockets.length, 0);
+  first.client.create('Alex'); first.sockets[0].open();
+  const lobby = { ...snapshot, phase: 'lobby', players: [{ ...snapshot.players[0], seat: 0 }] };
+  first.sockets[0].message(lobby); first.client.update(); first.inbox.drain();
+  first.client.selectAvatar('townsperson-10');
+  assert.deepEqual(JSON.parse(first.sockets[0].sent.at(-1)), { version: 1, type: 'select_avatar', avatarPreset: 'townsperson-10' });
+  assert.equal(first.inbox.drain().length, 0, 'request does not optimistically replace shared appearance');
+  const accepted = { ...lobby, type: 'room_state', players: [{ ...lobby.players[0], avatarPreset: 'townsperson-10', ready: true }] };
+  delete accepted.recoveryToken; delete accepted.roomId; delete accepted.selfPlayerId;
+  first.sockets[0].message(accepted); first.client.update();
+  assert.equal(first.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  first.sockets[0].disconnect(); first.client.update(); first.advance(500); first.sockets[1].open();
+  const playing = { ...snapshot, players: [{ ...snapshot.players[0], avatarPreset: 'townsperson-10', ready: true }] };
+  first.sockets[1].message(playing); first.client.update();
+  assert.equal(first.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  const count = first.sockets[1].sent.length;
+  first.client.selectAvatar('townsperson-9');
+  assert.equal(first.sockets[1].sent.length, count, 'Start prevents further submission');
+  const refresh = setup(sessionStorage); refresh.sockets[0].open();
+  assert.equal(JSON.parse(refresh.sockets[0].sent[0]).type, 'recover_room');
+  assert.ok(![...storage.values()][0].includes('townsperson'), 'no appearance preference stored');
+  refresh.sockets[0].message(playing); refresh.client.update();
+  assert.equal(refresh.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  refresh.client.leave(); refresh.sockets[0].message({ version: 1, type: 'room_left', roomId: 'ABC234' }); refresh.client.update();
+  assert.equal(storage.size, 0);
+  refresh.client.create('Alex'); refresh.sockets[1].open();
+  assert.equal(JSON.parse(refresh.sockets[1].sent[0]).type, 'create_room');
+});

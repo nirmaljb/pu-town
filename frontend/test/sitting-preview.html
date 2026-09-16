@@ -7,7 +7,7 @@
 body { margin: 0; background: #302820; color: #fff0c9; font: 16px sans-serif; }
 nav { padding: 12px; } button { margin-right: 12px; padding: 8px; }
 </style>
-<nav><button id="sit">Replay arrivals</button><button id="start">Start / cancel sitting</button>All six presets × up, left, down, right (top to bottom)</nav>
+<nav><button id="sit">Replay arrivals</button><button id="start">Start / cancel sitting</button>All ten presets × up, left, down, right (top to bottom)</nav>
 <div id="gallery"></div>
 <script type="module">
 import Phaser from 'phaser';
@@ -18,7 +18,7 @@ import { emptyWorld } from '/src/world-state.ts';
 
 let view, world;
 const game = new Phaser.Game({
-  type: Phaser.AUTO, width: 1280, height: 640, pixelArt: true, parent: 'gallery',
+  type: Phaser.AUTO, width: 2100, height: 640, pixelArt: true, parent: 'gallery',
   backgroundColor: '#594632',
   scene: {
     preload() { preloadAvatars(this); },

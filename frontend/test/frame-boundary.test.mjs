@@ -107,3 +107,23 @@ test("disconnected presence stays in the world and recovery discards stale local
   assert.equal(boundary.localMovement.submission().sequence, 8);
   assert.equal(boundary.localMovement.submission().epoch, 2);
 });
+
+test('accepted appearance replaces existing Player only at the frame boundary and precedes Start', () => {
+  const inbox = new NetworkInbox();
+  const frames = [];
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world, arrivals) { frames.push({world, arrivals}); } });
+  const player = { playerId: 'p', displayName: 'Alex', colour: '#4F8CFF', avatarPreset: 'townsperson-1', connected: true,
+    seat: 0, ready: true, facing: 'left', sequence: 0, epoch: 0, x: 640, y: 177 };
+  inbox.enqueue({ version: 1, type: 'room_snapshot', recoveryToken: 'a'.repeat(64), roomId: 'ABC234', selfPlayerId: 'p', phase: 'lobby', hostPlayerId: 'p', players: [player] });
+  boundary.beginFrame();
+  const chosen = { ...player, avatarPreset: 'townsperson-10' };
+  inbox.enqueue({ version: 1, type: 'room_state', phase: 'lobby', hostPlayerId: 'p', players: [chosen] });
+  assert.equal(boundary.world.players.get('p').avatarPreset, 'townsperson-1');
+  boundary.beginFrame();
+  assert.deepEqual(boundary.world.players.get('p'), chosen);
+  assert.equal(frames.at(-1).arrivals.size, 0, 'appearance is not a membership arrival');
+  inbox.enqueue({ version: 1, type: 'room_state', phase: 'playing', hostPlayerId: 'p', players: [{ ...chosen, seat: null, facing: 'down', x: 640, y: 360 }] });
+  boundary.beginFrame();
+  assert.equal(boundary.world.players.get('p').avatarPreset, 'townsperson-10');
+  assert.equal(boundary.world.phase, 'playing');
+});

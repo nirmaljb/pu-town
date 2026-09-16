@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of six randomly assigned LPC character presets with varied masculine and feminine appearances, skin tones, hairstyles, and clothing. Arrow-key input determines shared Facing, including when a boundary blocks movement, and standing retains it. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of ten randomly assigned published LPC Avatar Presets. In the Lobby, the character panel beside the Meeting Area shows ten named thumbnails in published order. Click to preview privately, then Use character to share the selection with the Room. Choices can repeat and do not change Ready; Start locks the last server-accepted choice. Arrow-key input determines shared Facing, including when a boundary blocks movement, and standing retains it. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -66,17 +66,33 @@ The Lobby keeps Players stationary on both client and server. Leave and expiry f
 
 ## Character artwork
 
-The six sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
+The ten published sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
 
-Lobby arrivals play a short sit-down transition, then hold a seated pose with pixel-drawn bent legs in their preset's trouser colours. The existing head and upper body keep their original proportions. Players already present appear seated immediately to newcomers; readiness changes do not replay sitting, and Start restores standing and walking immediately. See [the sitting animation specification](docs/sitting-animation-spec.md). While Vite is running, `/test/sitting-preview.html` provides a manual gallery of every preset and Facing, with replay and cancellation controls.
+Lobby arrivals play a short sit-down transition, then hold a seated pose with generated bent legs and shoes in their recipe’s trouser and footwear colours. The existing head and upper body keep their original proportions. Players already present appear seated immediately to newcomers; readiness changes do not replay sitting, and Start restores standing and walking immediately. See [the sitting animation specification](docs/sitting-animation-spec.md). While Vite is running, `/test/sitting-preview.html` provides a manual gallery of every preset and Facing, with replay and cancellation controls.
 
-[`frontend/public/assets/avatars/recipes.json`](frontend/public/assets/avatars/recipes.json) records the pinned upstream revision, ordered source layers, and exact palette substitutions. [`CREDITS.csv`](frontend/public/assets/avatars/CREDITS.csv) preserves the selected layers' authors, source URLs, and licenses. The game links to a readable credits page. Selected art is used under OGA-BY 3.0, with CC0 bob and long straight hairstyles.
+The project-local [Avatar workshop](tools/avatar-editor/README.md) contains curated source layers, editable recipes for all ten initial designs, and the original pinned LPC source revision. [`CREDITS.csv`](frontend/public/assets/avatars/CREDITS.csv) and the in-game credits page preserve source authors, URLs, and licenses. Selected art uses OGA-BY 3.0, with CC0 bob and long straight hairstyles.
 
-The server and frontend must be restarted/refreshed together for the updated connected-presence and private snapshot recovery contract. Presets stay fixed for a Room Membership; duplicates are allowed and recovery preserves the preset. Sprites use feet-anchored coordinates and can clip at the existing room edges.
+### Local Avatar workshop
+
+Python 3.10+ and Pillow are required for authoring and its automated suite:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r tools/avatar-editor/requirements.txt
+cd frontend
+npm run avatars
+```
+
+Open [http://localhost:5174](http://localhost:5174). Create, name, compose and save drafts; reopen them from the library, duplicate variants, or delete drafts. Supported clothing parts follow the selected body proportions. Skin, hair, face, top, bottom and footwear controls drive standing, walking and seated previews in all four directions. Draft saves never publish. Check ten designs in the library, arrange their order, then explicitly Publish collection. Failed validation leaves the last publication intact; deleting or editing drafts cannot mutate it.
+
+The publication is one atomic [`published-avatars.json`](frontend/src/published-avatars.json) artifact with stable IDs, names, ordered sprite sheets and seated artwork. Vite bundles it into the Player app; Maven packages the same file for server assignment and selection validation. The editor, endpoints, source layers and unpublished drafts are outside the Player build. Publication prepares the next release: build frontend and backend together, restart the backend (clearing its in-memory Rooms), and refresh clients. It does not update running Rooms. Never deploy only one side of a changed collection.
+
+Accepted choices belong to Room Membership, survive Disconnect and same-tab refresh, and are locked at Start. Leave ends the choice; fresh membership draws again and may receive the same preset. Sprites use feet-anchored coordinates and can clip at the existing room edges.
 
 ## Tests and builds
 
-Run the frontend checks:
+With the Python environment above active, run the frontend checks (including the authoring boundary suite):
 
 ```sh
 cd frontend

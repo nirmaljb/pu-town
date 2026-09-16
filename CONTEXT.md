@@ -25,8 +25,11 @@ The direction an Avatar is looking, retained when it stops moving.
 _Avoid_: Position, movement
 
 **Avatar Preset**:
-A ready-made character appearance assigned to a player's avatar for a room membership. Multiple players may share a preset; it does not determine player identity or gender.
+A developer-designed, ready-made cosmetic appearance for a Player's Avatar, selectable from the Published Avatar Collection in the Lobby. Multiple Players may share a preset; it does not determine Player identity, gender, abilities, or gameplay role.
 _Avoid_: Player, Player ID
+
+**Published Avatar Collection**:
+The shared set of exactly ten Avatar Presets offered to Players in every Room's Lobby. Other designs remain drafts unavailable for Player selection.
 
 **Player Colour**:
 A visual marker assigned to a Player that is distinct from those of other current Players in the same Room. It stays with the Room Membership and does not determine Player identity.

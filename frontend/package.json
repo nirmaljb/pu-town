@@ -7,7 +7,8 @@
     "build:test": "tsc",
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build:test && node --test test/*.test.mjs"
+    "test": "npm run build:test && node --test test/*.test.mjs",
+    "avatars": "python3 ../tools/avatar-editor/server.py"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

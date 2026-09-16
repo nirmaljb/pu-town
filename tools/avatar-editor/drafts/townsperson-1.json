@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-1",
+  "name": "Rowan",
+  "parts": {
+    "body": {
+      "part": "body/bodies/male",
+      "colour": "light"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/male",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/male",
+      "colour": "navy"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/male",
+      "colour": "forest"
+    },
+    "face": {
+      "part": "head/heads/human/male",
+      "colour": "light"
+    },
+    "hair": {
+      "part": "hair/plain/adult",
+      "colour": "ginger"
+    }
+  }
+}

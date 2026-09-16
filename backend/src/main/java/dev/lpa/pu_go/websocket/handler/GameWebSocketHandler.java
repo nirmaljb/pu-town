@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
-    private static final List<String> AVATAR_PRESETS = List.of("townsperson-1", "townsperson-2", "townsperson-3", "townsperson-4", "townsperson-5", "townsperson-6");
+    private static final List<String> AVATAR_PRESETS = dev.lpa.pu_go.player.PublishedAvatars.IDS;
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -91,6 +91,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
                     else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
                     else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
+                    else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                     else if (incoming instanceof ClientMessage.MovePlayer move) handleMove(player, move);
@@ -256,6 +257,25 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             deliverAll(endMembership(player, roomId, ServerMessage.DepartureReason.LEFT, true));
             return null;
         });
+    }
+
+    // Called under the same per-Room serialization as Start and recovery.
+    private void handleAvatarSelection(PlayerState player, ClientMessage.SelectAvatar message) {
+        if (player.getRoomId() == null) {
+            deliver(error(player, "not_in_room", "Join a Room before choosing an Avatar Preset."));
+            return;
+        }
+        Room room = roomManager.findRoom(player.getRoomId());
+        if (!room.getPhase().equals("lobby")) {
+            deliver(error(player, "invalid_phase", "Avatar selection belongs to the Lobby."));
+        } else if (!AVATAR_PRESETS.contains(message.avatarPreset())) {
+            deliver(error(player, "invalid_avatar_preset", "Choose an Avatar Preset from the published collection."));
+        } else {
+            player.setAvatarPreset(message.avatarPreset());
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+            deliverAll(deliveries);
+        }
     }
 
     private void handleReady(PlayerState player, ClientMessage.SetReady message) {

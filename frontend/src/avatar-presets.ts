@@ -1,9 +1,13 @@
-export const AVATAR_PRESETS = ["townsperson-1", "townsperson-2", "townsperson-3", "townsperson-4", "townsperson-5", "townsperson-6"] as const;
-export type AvatarPreset = typeof AVATAR_PRESETS[number];
+import collection from "./published-avatars.json" with { type: "json" };
+
+/** Release artifact shared with the backend; drafts never enter this catalogue. */
+export const PUBLISHED_AVATARS = collection.presets;
+export const AVATAR_PRESETS: readonly string[] = PUBLISHED_AVATARS.map(preset => preset.id);
+export type AvatarPreset = string;
 
 export function requireAvatarPreset(value: unknown): AvatarPreset {
-  if (typeof value !== "string" || !AVATAR_PRESETS.includes(value as AvatarPreset)) {
+  if (typeof value !== "string" || !AVATAR_PRESETS.includes(value)) {
     throw new Error("Invalid Avatar Preset");
   }
-  return value as AvatarPreset;
+  return value;
 }

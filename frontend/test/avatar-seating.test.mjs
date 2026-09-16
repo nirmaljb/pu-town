@@ -86,3 +86,17 @@ test('a delayed frame settles sitting without a repeated transition', () => {
   pose.reconcile(0, false, 30_100);
   assert.equal(pose.progress(30_100), 1);
 });
+
+test('changing appearance while seated preserves sit progress and Start restores standing', () => {
+  const l = lobby();
+  l.frame([snapshot()], 0);
+  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host',
+    players: [player('host', 0), { ...player('self', 1), avatarPreset: 'townsperson-10', ready: true }] }], 100);
+  assert.equal(l.poses.get('self').progress(210), 0.5);
+  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host',
+    players: [player('host', 0), { ...player('self', 1), avatarPreset: 'townsperson-9', ready: true }] }], 500);
+  assert.equal(l.poses.get('self').progress(500), 1);
+  l.frame([{ type: 'room_state', phase: 'playing', hostPlayerId: 'host',
+    players: [{ ...player('self', null), avatarPreset: 'townsperson-9' }] }], 550);
+  assert.equal(l.poses.get('self').progress(550), null);
+});

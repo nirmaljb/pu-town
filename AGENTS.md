@@ -40,6 +40,7 @@ Required tools:
 - JDK 17 with `java` and `javac`
 - Node.js `^20.19.0` or `>=22.12.0`
 - npm
+- Python 3.10+ with `tools/avatar-editor/requirements.txt` installed for authoring and frontend tests
 
 There is no root-level combined command. Run each component from its own directory.
 
@@ -65,6 +66,7 @@ The backend defaults to port `8080`:
 cd frontend
 npm ci
 npm run dev
+npm run avatars # optional local authoring workshop on 5174
 npm test
 npm run typecheck
 npm run build
@@ -99,6 +101,9 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/world-state.ts` — pure client world state and event reducer.
 - `frontend/src/avatar-reconciler.ts` — creates, moves, and removes Phaser avatars to match world state.
 - `frontend/src/room-rules.ts` — client copies of shared room dimensions and movement values.
+- `frontend/src/avatar-chooser.ts` — private Lobby preview and explicit selection request.
+- `frontend/src/published-avatars.json` — atomic release collection consumed by frontend and backend.
+- `tools/avatar-editor/` — local Python/Pillow workshop, curated sources and project-backed drafts; excluded from Player builds.
 - `frontend/src/style.css` — page and game-container presentation.
 - `frontend/test/` — protocol, frame-boundary, and reconnection tests.
 
@@ -130,9 +135,12 @@ The client accepts this infrastructure query parameter (room/name options are ig
 
 After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect. Started Rooms reject new memberships, including fresh Join after Leave or expiry; valid recovery still follows the current phase. Expired recovery returns to lobby selection without a Join again shortcut. Final Leave or expiry removes a started Room immediately, while recoverable disconnected memberships keep it alive. Never-started empty Lobbies retain their five-minute lifetime.
 
+Lobby Avatar selection is cosmetic and optional: ten named published choices, private browsing, explicit Use character, and server-accepted structural Room State. Selection shares the Start lock, does not change Ready, and updates existing seated Avatars without replaying arrivals. Recovery preserves accepted selection; Leave ends it. The editor publishes a single complete artifact for coordinated builds and backend restart; never make drafts or authoring endpoints available in the Player app.
+
 ## Change rules and synchronization points
 
 - Treat files under `backend/src/` and `frontend/src/` as authoritative source. Do not infer current behavior from generated `backend/target/` or `frontend/dist/` files.
+- Both builds consume `frontend/src/published-avatars.json`; never hard-code a second catalogue. Publish validates ten complete distinct designs before atomic replacement. Run the authoring boundary suite through `npm test`; draft edits must not mutate publication.
 - The protocol is represented in Java message/decoder code, TypeScript protocol code, and `docs/websocket-protocol-v1.md`. Keep all three synchronized.
 - Room dimensions and movement speed are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`. Keep shared values synchronized. The backend remains authoritative and additionally owns spawn and movement tolerance.
 - Preserve strict message decoding: unknown fields, unsupported versions, malformed payloads, and invalid movement should remain explicit errors.

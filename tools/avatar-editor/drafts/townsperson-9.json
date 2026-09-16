@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-9",
+  "name": "Fern",
+  "parts": {
+    "body": {
+      "part": "body/bodies/female",
+      "colour": "olive"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/thin",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/thin",
+      "colour": "navy"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/female",
+      "colour": "rose"
+    },
+    "face": {
+      "part": "head/heads/human/female",
+      "colour": "olive"
+    },
+    "hair": {
+      "part": "hair/bob/adult",
+      "colour": "black"
+    }
+  }
+}

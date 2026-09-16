@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-2",
+  "name": "Mira",
+  "parts": {
+    "body": {
+      "part": "body/bodies/female",
+      "colour": "bronze"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/thin",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/thin",
+      "colour": "charcoal"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/female",
+      "colour": "rose"
+    },
+    "face": {
+      "part": "head/heads/human/female",
+      "colour": "bronze"
+    },
+    "hair": {
+      "part": "hair/curly_long/adult",
+      "colour": "black"
+    }
+  }
+}

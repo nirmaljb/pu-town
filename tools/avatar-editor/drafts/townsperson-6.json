@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-6",
+  "name": "Hazel",
+  "parts": {
+    "body": {
+      "part": "body/bodies/female",
+      "colour": "amber"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/thin",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/thin",
+      "colour": "brown"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/female",
+      "colour": "teal"
+    },
+    "face": {
+      "part": "head/heads/human/female",
+      "colour": "amber"
+    },
+    "hair": {
+      "part": "hair/long_straight/adult",
+      "colour": "chestnut"
+    }
+  }
+}

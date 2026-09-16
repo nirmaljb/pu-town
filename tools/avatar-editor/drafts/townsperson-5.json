@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-5",
+  "name": "Jules",
+  "parts": {
+    "body": {
+      "part": "body/bodies/male",
+      "colour": "taupe"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/male",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/male",
+      "colour": "charcoal"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/male",
+      "colour": "maroon"
+    },
+    "face": {
+      "part": "head/heads/human/male",
+      "colour": "taupe"
+    },
+    "hair": {
+      "part": "hair/curly_short2/adult",
+      "colour": "gray"
+    }
+  }
+}

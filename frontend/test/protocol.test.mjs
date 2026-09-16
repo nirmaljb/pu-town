@@ -41,7 +41,7 @@ test("snapshots and join announcements require a known Avatar Preset", () => {
     p => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", selfPlayerId: "p", roomId: "ABC234", players: [p] })
   ]) {
     assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope(player))));
-    for (const avatarPreset of [undefined, null, 1, "", "townsperson-7", "../../image"]) {
+    for (const avatarPreset of [undefined, null, 1, "", "unpublished-draft", "../../image"]) {
       assert.throws(() => decodeServerMessage(JSON.stringify(envelope({ ...player, avatarPreset }))));
     }
   }
@@ -99,4 +99,18 @@ test("recovery snapshots require a private credential and explicit connected pre
     assert.throws(() => decodeServerMessage(JSON.stringify({ ...snapshot, players: [{ ...player, connected }] })));
   }
   assert.throws(() => decodeServerMessage(JSON.stringify({ version: 1, type: "player_joined", player: { ...player, recoveryToken: "a".repeat(64) } })));
+});
+
+
+test("the released ten presets decode and selection addresses only the sending Player", async () => {
+  const { selectAvatar } = await import('../dist/protocol.js');
+  const { PUBLISHED_AVATARS } = await import('../dist/avatar-presets.js');
+  assert.equal(PUBLISHED_AVATARS.length, 10);
+  for (const preset of PUBLISHED_AVATARS) {
+    assert.deepEqual(selectAvatar(preset.id), { version: 1, type: 'select_avatar', avatarPreset: preset.id });
+    const player = { playerId: 'p', displayName: 'Alex', colour: '#4F8CFF', avatarPreset: preset.id,
+      connected: true, seat: 0, ready: true, facing: 'down', sequence: 0, epoch: 0, x: 640, y: 177 };
+    assert.equal(decodeServerMessage(JSON.stringify({version: 1, type: 'player_joined', player})).player.avatarPreset, preset.id);
+  }
+  assert.throws(() => selectAvatar('unpublished-draft'), /Avatar Preset/);
 });

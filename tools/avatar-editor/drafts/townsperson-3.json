@@ -1,0 +1,30 @@
+{
+  "id": "townsperson-3",
+  "name": "Ash",
+  "parts": {
+    "body": {
+      "part": "body/bodies/male",
+      "colour": "brown"
+    },
+    "footwear": {
+      "part": "feet/shoes/basic/male",
+      "colour": "black"
+    },
+    "bottom": {
+      "part": "legs/pants/male",
+      "colour": "walnut"
+    },
+    "top": {
+      "part": "torso/clothes/shortsleeve/tshirt/male",
+      "colour": "sky"
+    },
+    "face": {
+      "part": "head/heads/human/male",
+      "colour": "brown"
+    },
+    "hair": {
+      "part": "hair/curly_short/adult",
+      "colour": "black"
+    }
+  }
+}

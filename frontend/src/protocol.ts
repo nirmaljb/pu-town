@@ -35,6 +35,7 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "select_avatar"; avatarPreset: AvatarPreset }>
   | Readonly<{ version: 1; type: "recover_room"; roomId: string; recoveryToken: string }>
   | Readonly<{ version: 1; type: "start_game" }>
   | Readonly<{ version: 1; type: "set_ready"; ready: boolean }>
@@ -239,4 +240,9 @@ function requireFacing(value: unknown): Direction {
 function requireCounter(value: unknown): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) throw new Error("Invalid movement counter");
   return value;
+}
+
+
+export function selectAvatar(avatarPreset: string): ClientMessage {
+  return { version: 1, type: "select_avatar", avatarPreset: requireAvatarPreset(avatarPreset) };
 }

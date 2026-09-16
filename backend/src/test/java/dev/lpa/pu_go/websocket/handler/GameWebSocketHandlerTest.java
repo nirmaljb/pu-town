@@ -25,6 +25,108 @@ class GameWebSocketHandlerTest {
     );
 
     @Test
+    void invalidSelectionsNeverChangeMembershipAndRetiredSocketsHaveNoAuthority() throws Exception {
+        var original = connect("reject-selection");
+        select(original, "townsperson-10");
+        assertEquals("not_in_room", latest(original).path("code").asText());
+        send(original, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
+        var initial = latest(original);
+        var observer = connect("reject-observer"); join(observer, initial.path("roomId").asText());
+        select(original, "townsperson-10");
+        var accepted = latest(observer);
+        for (String request : List.of(
+                "{\"version\":1,\"type\":\"select_avatar\"}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":null}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":5}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":\"\"}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":\"townsperson-1\",\"playerId\":\"other\"}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":\"townsperson-1\",\"roomId\":\"OTHER1\"}")) {
+            send(original, request);
+            assertEquals("malformed_message", latest(original).path("code").asText());
+            assertEquals(accepted, latest(observer));
+        }
+        select(original, "unpublished-draft");
+        assertEquals("invalid_avatar_preset", latest(original).path("code").asText());
+        assertEquals(accepted, latest(observer));
+        send(original, "{\"version\":2,\"type\":\"select_avatar\",\"avatarPreset\":\"townsperson-1\"}");
+        assertEquals("unsupported_version", latest(original).path("code").asText());
+        var takeover = connect("selected-takeover");
+        recover(takeover, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals("townsperson-10", latest(takeover).path("players").get(0).path("avatarPreset").asText());
+        var takenOver = latest(observer);
+        select(original, "townsperson-1");
+        assertEquals(takenOver, latest(observer));
+        handler.afterConnectionClosed(takeover, org.springframework.web.socket.CloseStatus.NORMAL);
+        var returned = connect("selected-returned");
+        recover(returned, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals("townsperson-10", latest(returned).path("players").get(0).path("avatarPreset").asText());
+        send(returned, "{\"version\":1,\"type\":\"leave_room\"}");
+        var fresh = connect("selected-fresh"); join(fresh, initial.path("roomId").asText());
+        assertFalse(initial.path("selfPlayerId").equals(latest(fresh).path("selfPlayerId")));
+        assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(latest(fresh).path("players").get(1).path("avatarPreset").asText()));
+        recover(returned, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals("recovery_expired", latest(returned).path("code").asText());
+    }
+
+    @Test
+    void simultaneousSelectionAndStartHaveOneConsistentRoomOrder() throws Exception {
+        var host = connect("selection-race-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        var initial = latest(host);
+        var guest = connect("selection-race-guest"); join(guest, initial.path("roomId").asText());
+        select(guest, "townsperson-1");
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        var barrier = new java.util.concurrent.CyclicBarrier(2);
+        try {
+            var start = executor.submit(() -> { barrier.await(); send(host, "{\"version\":1,\"type\":\"start_game\"}"); return null; });
+            var selection = executor.submit(() -> { barrier.await(); select(guest, "townsperson-10"); return null; });
+            start.get(5, java.util.concurrent.TimeUnit.SECONDS); selection.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } finally { executor.shutdownNow(); }
+        var started = latest(host);
+        assertEquals("playing", started.path("phase").asText());
+        boolean rejected = latest(guest).path("type").asText().equals("error");
+        assertEquals(rejected ? "townsperson-1" : "townsperson-10", started.path("players").get(1).path("avatarPreset").asText());
+        if (rejected) assertEquals("invalid_phase", latest(guest).path("code").asText());
+        else assertEquals(started, latest(guest));
+    }
+
+    @Test
+    void lobbySelectionsAreSharedCosmeticsAndStartLocksTheLastAcceptedChoice() throws Exception {
+        var host = connect("select-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        var initial = latest(host);
+        var guest = connect("select-guest"); join(guest, initial.path("roomId").asText());
+        var other = connect("select-other");
+        send(other, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Other\"}");
+        var otherBefore = latest(other);
+        send(host, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        var before = latest(host).path("players").get(0);
+        select(host, "townsperson-10");
+        assertEquals("room_state", latest(host).path("type").asText());
+        assertEquals(latest(host), latest(guest));
+        var selected = latest(host).path("players").get(0);
+        assertEquals("townsperson-10", selected.path("avatarPreset").asText());
+        for (String field : List.of("playerId", "displayName", "colour", "seat", "ready", "connected", "x", "y", "facing", "sequence", "epoch"))
+            assertEquals(before.path(field), selected.path(field), field);
+        select(guest, "townsperson-10");
+        assertEquals("townsperson-10", latest(host).path("players").get(1).path("avatarPreset").asText());
+        select(host, "townsperson-8");
+        assertEquals(otherBefore, latest(other));
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        assertEquals("townsperson-8", latest(guest).path("players").get(0).path("avatarPreset").asText());
+        select(host, "townsperson-9");
+        assertEquals("invalid_phase", latest(host).path("code").asText());
+        var recovered = connect("select-recovered");
+        recover(recovered, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
+        assertEquals("playing", latest(recovered).path("phase").asText());
+        assertEquals("townsperson-8", latest(recovered).path("players").get(0).path("avatarPreset").asText());
+    }
+
+    private void select(RecordingWebSocketSession session, String preset) throws Exception {
+        send(session, "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":\"" + preset + "\"}");
+    }
+
+    @Test
     void simultaneousReturnsAfterHostGracePublishOneAuthority() throws Exception {
         var host = connect("race-host");
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
@@ -344,7 +446,7 @@ class GameWebSocketHandlerTest {
         JsonNode initial = json(alex.payloads().get(0));
         String code = initial.get("roomId").asText();
         String alexPreset = initial.get("players").get(0).get("avatarPreset").asText();
-        org.junit.jupiter.api.Assertions.assertTrue(alexPreset.matches("townsperson-[1-6]"));
+        org.junit.jupiter.api.Assertions.assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(alexPreset));
 
         var sam = connect("sam");
         join(sam, code);
@@ -354,7 +456,7 @@ class GameWebSocketHandlerTest {
             String expected = player.get("playerId").asText().equals("player-1")
                     ? alexPreset : announcement.get("avatarPreset").asText();
             assertEquals(expected, player.get("avatarPreset").asText());
-            org.junit.jupiter.api.Assertions.assertTrue(expected.matches("townsperson-[1-6]"));
+            org.junit.jupiter.api.Assertions.assertTrue(dev.lpa.pu_go.player.PublishedAvatars.IDS.contains(expected));
         }
 
         send(alex, "{\"version\":1,\"type\":\"start_game\"}");
