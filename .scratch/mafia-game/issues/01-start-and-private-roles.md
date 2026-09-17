@@ -1,0 +1,25 @@
+## Parent
+
+https://github.com/nirmaljb/pu-town/issues/12
+
+## What to build
+
+Ten connected, Ready Players can start from the existing Lobby, keep their Seats and appearance, privately discover their randomly assigned Roles, and enter the first Night. Reconnect preserves the assignment rather than dealing again.
+
+Each slice includes its relevant server behavior, explicit protocol contract, client UI/state, documentation, and tests. Preserve per-Room serialization, bounded asynchronous delivery, strict decoding, and frame-boundary application. Use the approved WebSocket behavior seam, focused frontend tests, and browser verification; do not defer privacy or recovery of this slice's own state to a later ticket.
+
+## Acceptance criteria
+
+- [ ] Only the Host can Start with exactly ten connected, Ready Players; incomplete, unready, and disconnected groups receive a clear rejection without a partial Start.
+- [ ] Assign exactly three Mafia, five Villagers, one Doctor, and one Sheriff independently of cosmetics and Seat order. Repeated Start cannot reassign Roles.
+- [ ] Privately show each Player their Role and Faction for eight seconds; Mafia also learn their teammates. Unauthorized payloads contain no other hidden Roles.
+- [ ] Preserve Player identity, Avatar Preset, Player Colour, and Seat. Show the circular Meeting Area throughout; reject movement rather than returning to free movement.
+- [ ] Create the original Game Roster independently of Room Membership so later departure cannot erase original identity, Role, or Seat association. Forfeit consequences are added by ticket 08.
+- [ ] After the reveal, enter the first Night and display its 90-second deadline and the Villager sleep screen. Ticket 02 completes the repeating phase cycle.
+- [ ] Recovery and takeover restore the current Role, phase, and Seat privately; retired sockets cannot act. Fresh Join after Start remains prohibited.
+- [ ] Verify through ten recording WebSocket participants, private-payload assertions, focused frontend protocol/frame/seating/reconnect checks, and a ten-client browser demonstration. Update affected Start documentation and run the full affected checks.
+
+## Blocked by
+
+None (can start immediately).
+

@@ -1,0 +1,26 @@
+## Parent
+
+https://github.com/nirmaljb/pu-town/issues/12
+
+## What to build
+
+Living Mafia can privately preview and confirm Night targets, see teammates' accepted votes, and eliminate one target when a strict majority agrees. The victim becomes a seated spectator and survivors see the appropriate Night announcement.
+
+Each slice includes its relevant server behavior, explicit protocol contract, client UI/state, documentation, and tests. Preserve per-Room serialization, bounded asynchronous delivery, strict decoding, and frame-boundary application. Use the approved WebSocket behavior seam, focused frontend tests, and browser verification; do not defer privacy or recovery of this slice's own state to a later ticket.
+
+## Acceptance criteria
+
+- [ ] Only living Mafia may target a living Village Player during Night. Identify targets by Player ID even when names or Avatars match.
+- [ ] Clicking a target previews locally; Confirm vote commits once. Peers see only accepted votes, and only living Mafia receive the shared Mafia vote view.
+- [ ] Lock accepted votes until the next Night, including across Reconnect; reject changes, withdrawals, second choices, wrong-role requests, and stale or late submissions.
+- [ ] Require more than half of living Mafia to agree: two of three, two of two, or one of one. Count disconnected living Mafia. No majority or missing votes can mean no attack; at most one Player is attacked.
+- [ ] At Night resolution, eliminate the selected victim; Doctor prevention is added in ticket 04. Do not publicly reveal the victim's Role or privately disclose attacker identities.
+- [ ] Show the victim exactly 'You were killed by the mafias'. Publicly announce the victim or that nobody died, with the six-second outcome presentation.
+- [ ] Retain an eliminated Player's membership and dimmed seated Avatar marked Eliminated. Disable targeting and all gameplay actions for eliminated Players; allow them to watch public proceedings.
+- [ ] Recovery restores the living/eliminated state, accepted vote, and permitted private view. Night results and structural state apply only at frame boundaries.
+- [ ] Verify majority and privacy behavior, spectator restrictions, deadline races, duplicate-name targeting, and lock recovery at the message boundary plus UI demonstrations. Run full affected checks and update the contract.
+
+## Blocked by
+
+- Draft ticket 02: Advance Nights and Meetings automatically with visible countdowns
+

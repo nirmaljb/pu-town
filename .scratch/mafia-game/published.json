@@ -1,0 +1,93 @@
+{
+  "1": {
+    "number": 13,
+    "url": "https://github.com/nirmaljb/pu-town/issues/13",
+    "title": "Start a seated ten-Player Game with private Roles",
+    "localBlockers": [],
+    "id": 5490193385,
+    "verified": true
+  },
+  "2": {
+    "number": 14,
+    "url": "https://github.com/nirmaljb/pu-town/issues/14",
+    "title": "Advance Nights and Meetings automatically with visible countdowns",
+    "localBlockers": [
+      1
+    ],
+    "id": 5490193763,
+    "verified": true
+  },
+  "3": {
+    "number": 15,
+    "url": "https://github.com/nirmaljb/pu-town/issues/15",
+    "title": "Confirm Mafia Night votes and eliminate the majority target",
+    "localBlockers": [
+      2
+    ],
+    "id": 5490194526,
+    "verified": true
+  },
+  "4": {
+    "number": 16,
+    "url": "https://github.com/nirmaljb/pu-town/issues/16",
+    "title": "Protect a Night target as Doctor with consecutive-Night limits",
+    "localBlockers": [
+      3
+    ],
+    "id": 5490195043,
+    "verified": true
+  },
+  "5": {
+    "number": 17,
+    "url": "https://github.com/nirmaljb/pu-town/issues/17",
+    "title": "Investigate a Night target as Sheriff and retain private results",
+    "localBlockers": [
+      3
+    ],
+    "id": 5490196048,
+    "verified": true
+  },
+  "6": {
+    "number": 18,
+    "url": "https://github.com/nirmaljb/pu-town/issues/18",
+    "title": "Vote during Meetings and reveal an eliminated Player's Faction",
+    "localBlockers": [
+      3
+    ],
+    "id": 5490196642,
+    "verified": true
+  },
+  "7": {
+    "number": 19,
+    "url": "https://github.com/nirmaljb/pu-town/issues/19",
+    "title": "Discuss Meetings publicly and Mafia Nights privately",
+    "localBlockers": [
+      6
+    ],
+    "id": 5490197485,
+    "verified": true
+  },
+  "8": {
+    "number": 20,
+    "url": "https://github.com/nirmaljb/pu-town/issues/20",
+    "title": "Forfeit departed Players without losing the Game Roster",
+    "localBlockers": [
+      4,
+      5,
+      6
+    ],
+    "id": 5490198105,
+    "verified": true
+  },
+  "9": {
+    "number": 21,
+    "url": "https://github.com/nirmaljb/pu-town/issues/21",
+    "title": "Finish the Game with faction victory and the complete Role reveal",
+    "localBlockers": [
+      7,
+      8
+    ],
+    "id": 5490199083,
+    "verified": true
+  }
+}
