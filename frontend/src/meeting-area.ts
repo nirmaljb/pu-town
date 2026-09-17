@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import type { Direction } from "./avatar-motion.js";
+import type { Direction } from "./avatar-facing.js";
 
 export const ROOM_CAPACITY = 10;
 

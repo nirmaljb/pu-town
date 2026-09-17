@@ -1,6 +1,6 @@
 # PU Town
 
-PU Town is a small shared top-down game world. Players join isolated rooms, see one another in real time, and move Phaser-rendered avatars while a Spring Boot server validates and broadcasts their positions.
+PU Town is a ten-Player social deduction game. Players gather in an isolated Room, take a seat around a Town Hall table, and play a full Mafia Game: three Mafia against seven Villagers, with a Doctor and a Sheriff among them. A Spring Boot server owns the Roles, the clock and every result, and tells each Player only what they are entitled to know.
 
 The project currently targets local development. It consists of two processes:
 
@@ -42,7 +42,11 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. The creator is Host and can Start Game even alone or with unready Players; other Players wait for the Host. Start takes everyone into the existing playable world, where the arrow keys move. Each Room supports ten Players with distinct colours; an eleventh Join receives “Room is full”. Players receive one of ten randomly assigned published LPC Avatar Presets. In the Lobby, the character panel beside the Meeting Area shows ten named thumbnails in published order. Click to preview privately, then Use character to share the selection with the Room. Choices can repeat and do not change Ready; Start locks the last server-accepted choice. Arrow-key input determines shared Facing, including when a boundary blocks movement, and standing retains it. Characters walk in four directions; a coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; nobody walks.
+
+The creator is Host. Start Game needs a full table: all ten Players present, connected and Ready, and the Host is told which of those is missing until it is. An eleventh Join receives “Room is full”, and a started Room accepts no new Players.
+
+Players receive one of ten randomly assigned published LPC Avatar Presets. In the Lobby, the character panel beside the Meeting Area shows ten named thumbnails in published order. Click to preview privately, then Use character to share the selection with the Room. Choices can repeat and do not change Ready; Start locks the last server-accepted choice. A coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
 To verify the backend is running, request [http://localhost:8080/health](http://localhost:8080/health). It should return:
 
@@ -52,23 +56,41 @@ To verify the backend is running, request [http://localhost:8080/health](http://
 
 Vite may choose another port when `5173` is unavailable, but the backend currently accepts WebSocket connections only from `http://localhost:5173` and `https://localhost:5173`. Free port `5173` before starting the frontend.
 
+## The Game
+
+Start deals three Mafia, five Villagers, one Doctor and one Sheriff. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
+
+| Phase | Length | What you do |
+| --- | --- | --- |
+| Night | 90 s | Mafia agree a target and talk on a private channel; the Doctor protects someone; the Sheriff investigates someone. |
+| Night result | 6 s | Who died, or that the Night passed quietly. |
+| Discussion | 120 s | Everyone living talks in public chat. |
+| Voting | 30 s | One vote each, or Skip. |
+| Voting result | 6 s | The result, with every vote shown. |
+
+Phases end on their own deadline, never on everyone having acted, so nobody can hurry or stall a Night. Choices are final once confirmed, and the Mafia see each other's votes as they are cast. A Player dies at Night only if a majority of the living Mafia named them and the Doctor did not protect them; the Doctor cannot protect the same Player two Nights running and may protect themselves. The Sheriff learns only whether the investigated Player is Mafia, and keeps every past result. A successful protection, a split vote and an idle Night look identical from outside.
+
+A Meeting eliminates a Player only on a majority of the living, and reveals only their Faction. The Village wins when no Mafia is living; the Mafia win when they are at least as many as the Village. The Game then ends at once and every Role is revealed, including for Players who died or left.
+
+Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their locked choice, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
+
 ## Client options
 
 The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to `ws://localhost:8080/ws/game`. The former `room` and `name` parameters are ignored.
 
 Create Room generates a six-character Room Code. Join Lobby requires an existing code. Only Lobbies accept new memberships; a started game returns “Game already started”. Empty Lobbies expire five minutes after their final membership ends; started Rooms are removed immediately when their final membership ends; Disconnect reserves membership for two minutes and does not immediately empty a Room; server restart clears all Rooms.
 
-Initial entry times out after ten seconds. During connection loss, movement freezes and a reconnecting overlay appears. Heartbeats run independently of game frames and detect ten seconds without a pong. Returning from suspension gives the socket one fresh heartbeat deadline; a healthy tab switch preserves the Player ID and Avatar Preset. Lifecycle effects still apply at game-frame boundaries. Recovery retries use increasing delays capped at five seconds and continue until the server confirms recovery or returns a terminal result. Returning to a visible tab makes a pending retry immediate. Recovery uses a private credential stored in sessionStorage for refresh in the same tab; it retains Player ID, Avatar Preset, Colour, Seat, readiness, and the last accepted position and Facing. Other Players see a subdued Avatar labelled “Reconnecting…” until recovery or expiry. A valid replacement atomically takes over; the displaced tab shows that its connection was replaced and stops retrying. Ordinary new tabs join independently. Duplicated tabs that inherit the credential follow the takeover rule. Storage-disabled browsers retain in-memory recovery only.
+Initial entry times out after ten seconds. During connection loss, controls stop and a reconnecting overlay appears. Heartbeats run independently of game frames and detect ten seconds without a pong. Returning from suspension gives the socket one fresh heartbeat deadline; a healthy tab switch preserves the Player ID and Avatar Preset. Lifecycle effects still apply at game-frame boundaries. Recovery retries use increasing delays capped at five seconds and continue until the server confirms recovery or returns a terminal result. Returning to a visible tab makes a pending retry immediate. Recovery uses a private credential stored in sessionStorage for refresh in the same tab; it retains Player ID, Avatar Preset, Colour, Seat, readiness, and — in a Game — the Role, the locked choices, the Sheriff's results and the chat that Player may read. Other Players see a subdued Avatar labelled “Reconnecting…” until recovery or expiry. A valid replacement atomically takes over; the displaced tab shows that its connection was replaced and stops retrying. Ordinary new tabs join independently. Duplicated tabs that inherit the credential follow the takeover rule. Storage-disabled browsers retain in-memory recovery only.
 
 Expired recovery shows “Your place in the Room expired” and “Back to lobby selection”, which clears recovery intent and returns to the Create Room / Join Lobby form without sending a fresh Join. A later Join from that form requires a Room still in its Lobby and begins a new membership. An unavailable Room produces a terminal explanation rather than creating a replacement Room. Leave Room during recovery immediately clears intent and returns to entry, with one bounded attempt to recover and Leave the reservation when reachable; otherwise it expires naturally. Closing/reopening tabs and cross-device recovery are not guaranteed.
 
-The Lobby keeps Players stationary on both client and server. Leave and expiry free chairs without shifting other occupants; Disconnect reserves the chair. When the Host leaves or expires, the longest-present connected Player becomes Host if available. A disconnected Host retains authority for fifteen seconds. At the deadline it transfers to the longest-present connected Player; if none is connected, the first returning Player becomes Host. A returning former Host does not reclaim transferred authority. The Room Code and Leave control remain available in both phases. A started Room is removed after its final membership ends through Leave or expiry. Recoverable disconnected memberships keep it alive, even when nobody is connected; it never resets to a Lobby.
+Players are stationary on both client and server. Leave and expiry free chairs without shifting other occupants; Disconnect reserves the chair. When the Host leaves or expires, the longest-present connected Player becomes Host if available. A disconnected Host retains authority for fifteen seconds. At the deadline it transfers to the longest-present connected Player; if none is connected, the first returning Player becomes Host. A returning former Host does not reclaim transferred authority. The Room Code and Leave control remain available in both phases. A started Room is removed after its final membership ends through Leave or expiry. Recoverable disconnected memberships keep it alive, even when nobody is connected; it never resets to a Lobby.
 
 ## Character artwork
 
 The ten published sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
 
-Lobby arrivals play a short sit-down transition, then hold a seated pose with generated bent legs and shoes in their recipe’s trouser and footwear colours. The existing head and upper body keep their original proportions. Players already present appear seated immediately to newcomers; readiness changes do not replay sitting, and Start restores standing and walking immediately. See [the sitting animation specification](docs/sitting-animation-spec.md). While Vite is running, `/test/sitting-preview.html` provides a manual gallery of every preset and Facing, with replay and cancellation controls.
+Lobby arrivals play a short sit-down transition, then hold a seated pose with generated bent legs and shoes in their recipe’s trouser and footwear colours. The existing head and upper body keep their original proportions. Players already present appear seated immediately to newcomers; readiness changes do not replay sitting, and Start leaves everyone seated exactly where they were. See [the sitting animation specification](docs/sitting-animation-spec.md). While Vite is running, `/test/sitting-preview.html` provides a manual gallery of every preset and Facing, with replay and cancellation controls.
 
 The project-local [Avatar workshop](tools/avatar-editor/README.md) contains curated source layers, editable recipes for all ten initial designs, and the original pinned LPC source revision. [`CREDITS.csv`](frontend/public/assets/avatars/CREDITS.csv) and the in-game credits page preserve source authors, URLs, and licenses. Selected art uses OGA-BY 3.0, with CC0 bob and long straight hairstyles.
 
@@ -121,13 +143,13 @@ java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
 
 ## Architecture
 
-The Phaser client applies local movement immediately and sends absolute positions, retained Facing, and sequence/epoch counters over a versioned WebSocket protocol. Accepted echoes preserve newer prediction; explicit corrections reset rejected positions and invalidate outstanding movement. Losing focus clears controls, and restoration applies queued state before fresh input without catch-up movement. The Spring Boot server owns room membership, validates movement, and broadcasts accepted state to players in the same room. All server state is currently held in memory.
+The Phaser client applies every server event at a game-frame boundary and renders from that state alone; it predicts nothing. The Spring Boot server owns Room membership, the Game's Roles, its clock and every result, and builds a separate view for each recipient — a Player is never sent a Role, a Mafia vote or a private chat they are not entitled to, so concealment never depends on the client. Accepted choices update only the Players whose authorized view actually changed, so a timed phase cannot leak hidden activity through its own countdown. All server state is currently held in memory.
 
 Important project documentation:
 
 - [`CONTEXT.md`](CONTEXT.md) defines the project's canonical domain language.
 - [`docs/websocket-protocol-v1.md`](docs/websocket-protocol-v1.md) defines the WebSocket wire contract.
-- [`docs/adr/`](docs/adr/) records the architectural decisions behind movement validation, protocol versioning, frame-boundary updates, and room event serialization.
+- [`docs/adr/`](docs/adr/) records the architectural decisions behind protocol versioning, frame-boundary updates, Room event serialization, permanent seating, the retained Game Roster, and per-recipient Game state.
 - [`AGENTS.md`](AGENTS.md) provides repository guidance for coding agents and contributors working on the codebase.
 
 ## Deployment status

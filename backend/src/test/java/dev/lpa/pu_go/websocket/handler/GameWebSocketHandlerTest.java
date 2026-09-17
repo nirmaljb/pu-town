@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class GameWebSocketHandlerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final AtomicLong now = new AtomicLong(1_000_000_000L);
     private final java.util.concurrent.atomic.AtomicInteger playerIds = new java.util.concurrent.atomic.AtomicInteger();
     private final AtomicLong milliseconds = new AtomicLong();
     // Rooms pin a collection at creation; the handler's behaviour does not depend on which.
@@ -29,15 +28,11 @@ class GameWebSocketHandlerTest {
                     .mapToObj(number -> new AvatarPreset("townsperson-" + number, "Name " + number,
                             "data:image/png;base64,iVBORw0KGgo=", "data:image/png;base64,iVBORw0KGgo="))
                     .toList());
+    // Seat order decides Roles only because this assignment is the identity; the real one shuffles.
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
-            new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run, () -> "player-" + playerIds.incrementAndGet(), now::get
+            new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
+            () -> "player-" + playerIds.incrementAndGet(), java.util.function.UnaryOperator.identity()
     );
-
-    // Start rings the Room centre, so movement tests start from their own standing position.
-    private static final int FIRST_X = (int) RoomRules.spawnX(0);
-    private static final int FIRST_Y = (int) RoomRules.spawnY(0);
-    private static final int SECOND_X = (int) RoomRules.spawnX(1);
-    private static final int SECOND_Y = (int) RoomRules.spawnY(1);
 
     @Test
     void invalidSelectionsNeverChangeMembershipAndRetiredSocketsHaveNoAuthority() throws Exception {
@@ -90,6 +85,7 @@ class GameWebSocketHandlerTest {
         var initial = latest(host);
         var guest = connect("selection-race-guest"); join(guest, initial.path("roomId").asText());
         select(guest, "townsperson-1");
+        readyTen(host, initial.path("roomId").asText(), "selection-race", guest);
         var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
         var barrier = new java.util.concurrent.CyclicBarrier(2);
         try {
@@ -97,12 +93,12 @@ class GameWebSocketHandlerTest {
             var selection = executor.submit(() -> { barrier.await(); select(guest, "townsperson-10"); return null; });
             start.get(5, java.util.concurrent.TimeUnit.SECONDS); selection.get(5, java.util.concurrent.TimeUnit.SECONDS);
         } finally { executor.shutdownNow(); }
-        var started = latest(host);
+        var started = latestOfType(host, "room_state");
         assertEquals("playing", started.path("phase").asText());
         boolean rejected = latest(guest).path("type").asText().equals("error");
         assertEquals(rejected ? "townsperson-1" : "townsperson-10", started.path("players").get(1).path("avatarPreset").asText());
         if (rejected) assertEquals("invalid_phase", latest(guest).path("code").asText());
-        else assertEquals(started, latest(guest));
+        else assertEquals(started, latestOfType(guest, "room_state"));
     }
 
     @Test
@@ -121,20 +117,20 @@ class GameWebSocketHandlerTest {
         assertEquals(latest(host), latest(guest));
         var selected = latest(host).path("players").get(0);
         assertEquals("townsperson-10", selected.path("avatarPreset").asText());
-        for (String field : List.of("playerId", "displayName", "colour", "seat", "ready", "connected", "x", "y", "facing", "sequence", "epoch"))
+        for (String field : List.of("playerId", "displayName", "colour", "seat", "ready", "connected", "x", "y", "facing"))
             assertEquals(before.path(field), selected.path(field), field);
         select(guest, "townsperson-10");
         assertEquals("townsperson-10", latest(host).path("players").get(1).path("avatarPreset").asText());
         select(host, "townsperson-8");
         assertEquals(otherBefore, latest(other));
-        send(host, "{\"version\":1,\"type\":\"start_game\"}");
-        assertEquals("townsperson-8", latest(guest).path("players").get(0).path("avatarPreset").asText());
+        startGame(host, initial.path("roomId").asText(), "select", guest);
+        assertEquals("townsperson-8", latestOfType(guest, "room_state").path("players").get(0).path("avatarPreset").asText());
         select(host, "townsperson-9");
         assertEquals("invalid_phase", latest(host).path("code").asText());
         var recovered = connect("select-recovered");
         recover(recovered, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
-        assertEquals("playing", latest(recovered).path("phase").asText());
-        assertEquals("townsperson-8", latest(recovered).path("players").get(0).path("avatarPreset").asText());
+        assertEquals("playing", json(recovered.payloads().get(0)).path("phase").asText());
+        assertEquals("townsperson-8", json(recovered.payloads().get(0)).path("players").get(0).path("avatarPreset").asText());
     }
 
     private void select(RecordingWebSocketSession session, String preset) throws Exception {
@@ -198,7 +194,7 @@ class GameWebSocketHandlerTest {
         assertEquals(initial.path("selfPlayerId"), latest(returning).path("hostPlayerId"));
         handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
         handler.afterConnectionClosed(older, org.springframework.web.socket.CloseStatus.NORMAL);
-        milliseconds.addAndGet(15_000); handler.expireMemberships();
+        milliseconds.addAndGet(15_000); handler.settleRooms();
         assertEquals(connectedId, latest(connected).path("hostPlayerId"));
     }
 
@@ -221,14 +217,16 @@ class GameWebSocketHandlerTest {
             assertEquals(identity.path("selfPlayerId"), latest(first).path("hostPlayerId"));
             assertEquals("lobby", latest(first).path("phase").asText());
             assertTrue(latest(first).path("players").get(1).path("ready").asBoolean());
+            // The returning Host holds authority, but a reserved Room is not a startable one.
             send(first, "{\"version\":1,\"type\":\"start_game\"}");
+            assertEquals("start_blocked", latest(first).path("code").asText());
             var second = connect("second-" + hostFirst);
             var other = hostFirst ? guestSnapshot : initial;
             recover(second, initial.path("roomId").asText(), other.path("recoveryToken").asText());
             assertEquals(identity.path("selfPlayerId"), latest(second).path("hostPlayerId"));
-            assertEquals("playing", latest(second).path("phase").asText());
-            assertTrue(latest(second).path("players").get(0).path("seat").isNull());
-            assertTrue(latest(second).path("players").get(1).path("seat").isNull());
+            assertEquals("lobby", latest(second).path("phase").asText());
+            assertEquals(0, latest(second).path("players").get(0).path("seat").asInt());
+            assertEquals(1, latest(second).path("players").get(1).path("seat").asInt());
         }
     }
 
@@ -242,10 +240,10 @@ class GameWebSocketHandlerTest {
         var observerId = latest(observer).path("selfPlayerId");
         handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
         milliseconds.addAndGet(14_999);
-        handler.expireMemberships();
+        handler.settleRooms();
         assertEquals(initial.path("selfPlayerId"), latest(observer).path("hostPlayerId"));
         milliseconds.incrementAndGet();
-        handler.expireMemberships();
+        handler.settleRooms();
         assertEquals(observerId, latest(observer).path("hostPlayerId"));
         var returning = connect("returning");
         recover(returning, initial.path("roomId").asText(), initial.path("recoveryToken").asText());
@@ -262,7 +260,7 @@ class GameWebSocketHandlerTest {
         assertEquals(initial.path("selfPlayerId"), latest(replacement).path("selfPlayerId"));
         assertEquals(4001, original.closeStatus().getCode());
         for (String payload : List.of(
-                "{\"version\":1,\"type\":\"move_player\",\"x\":650,\"y\":360,\"facing\":\"right\",\"sequence\":1,\"epoch\":0}",
+                "{\"version\":1,\"type\":\"select_avatar\",\"avatarPreset\":\"townsperson-4\"}",
                 "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}",
                 "{\"version\":1,\"type\":\"start_game\"}",
                 "{\"version\":1,\"type\":\"leave_room\"}")) send(original, payload);
@@ -379,39 +377,29 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void retainsFacingAndRejectsOutstandingMovementAfterCorrection() throws Exception {
+    void seatedPlayersKeepTheirPlaceAndTheProtocolNoLongerCarriesMovement() throws Exception {
         var alex = connect("alex");
         send(alex, """
                 {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
-        String code = json(alex.payloads().get(0)).get("roomId").asText();
+        var initial = latest(alex);
+        String code = initial.path("roomId").asText();
+        startGame(alex, code, "seated");
+        // Movement left the protocol with free movement, so a request to move is unknown.
         send(alex, """
-                {"version":1,"type":"start_game"}
+                {"version":1,"type":"move_player","x":700,"y":400,"facing":"left"}
                 """);
-        send(alex, """
-                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"left","sequence":1,"epoch":0}
-                """.formatted(FIRST_X, FIRST_Y));
-        assertEquals("left", json(alex.payloads().get(2)).get("facing").asText());
-        send(alex, """
-                {"version":1,"type":"move_player","x":1200,"y":%d,"facing":"right","sequence":2,"epoch":0}
-                """.formatted(FIRST_Y));
-        JsonNode correction = json(alex.payloads().get(3));
-        assertEquals("movement_correction", correction.get("type").asText());
-        assertEquals(FIRST_X, correction.get("x").asDouble());
-        assertEquals(1, correction.get("epoch").asInt());
-        send(alex, """
-                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"up","sequence":3,"epoch":0}
-                """.formatted(FIRST_X + 10, FIRST_Y));
-        assertEquals("movement_correction", json(alex.payloads().get(4)).get("type").asText());
+        assertEquals("unknown_message_type", latest(alex).path("code").asText());
+        JsonNode seated = latestOfType(alex, "room_state").path("players").get(0);
+        assertEquals(RoomRules.seatX(0), seated.path("x").asDouble());
+        assertEquals(RoomRules.seatY(0), seated.path("y").asDouble());
+        assertEquals(RoomRules.seatFacing(0), seated.path("facing").asText());
         var sam = connect("sam");
-        recover(sam, code, json(alex.payloads().get(0)).path("recoveryToken").asText());
-        JsonNode retained = json(sam.payloads().get(0)).get("players").get(0);
-        assertEquals(FIRST_X, retained.get("x").asDouble());
-        assertEquals("left", retained.get("facing").asText());
-        send(sam, """
-                {"version":1,"type":"move_player","x":%d,"y":%d,"facing":"up","sequence":4,"epoch":1}
-                """.formatted(FIRST_X + 10, FIRST_Y));
-        assertEquals("up", json(sam.payloads().get(1)).get("facing").asText());
+        recover(sam, code, initial.path("recoveryToken").asText());
+        JsonNode retained = json(sam.payloads().get(0)).path("players").get(0);
+        assertEquals(RoomRules.seatX(0), retained.path("x").asDouble());
+        assertEquals(RoomRules.seatFacing(0), retained.path("facing").asText());
+        assertEquals(0, retained.path("seat").asInt());
     }
 
     @Test
@@ -474,18 +462,15 @@ class GameWebSocketHandlerTest {
             org.junit.jupiter.api.Assertions.assertTrue(COLLECTION.ids().contains(expected));
         }
 
-        send(alex, "{\"version\":1,\"type\":\"start_game\"}");
         // Repeated Join is idempotent; failed room switches keep the current appearance.
         join(alex, code);
         join(alex, "AAAAAA".equals(code) ? "BBBBBB" : "AAAAAA");
-        now.addAndGet(1_000_000_000L);
-        send(alex, "{\"version\":1,\"type\":\"move_player\",\"facing\":\"right\",\"sequence\":1,\"epoch\":0,\"x\":650,\"y\":360}");
         join(alex, code);
-        JsonNode finalSnapshot = json(alex.payloads().get(alex.payloads().size() - 1));
+        JsonNode finalSnapshot = latest(alex);
         for (JsonNode player : finalSnapshot.get("players")) {
             if (player.get("playerId").asText().equals("player-1")) {
                 assertEquals(alexPreset, player.get("avatarPreset").asText());
-                assertEquals(650, player.get("x").asDouble());
+                assertEquals(RoomRules.seatX(0), player.get("x").asDouble());
             }
         }
     }
@@ -505,30 +490,6 @@ class GameWebSocketHandlerTest {
         assertEquals(List.of("malformed_message", "unsupported_version", "malformed_message"),
                 session.payloads().stream().map(this::jsonUnchecked)
                         .map(node -> node.get("code").asText()).toList());
-    }
-
-    @Test
-    void onlyFiniteInBoundsPlausibleMovementBecomesAuthoritative() throws Exception {
-        RecordingWebSocketSession session = connect("session-1");
-        send(session, """
-                {"version":1,"type":"create_room","displayName":"Alex"}
-                """);
-
-        send(session, "{\"version\":1,\"type\":\"start_game\"}");
-        now.addAndGet(1_000_000_000L);
-        send(session, """
-                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":700,"y":360}
-                """);
-        send(session, """
-                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":1200,"y":360}
-                """);
-
-        JsonNode accepted = json(session.payloads().get(2));
-        assertEquals("player_moved", accepted.get("type").asText());
-        assertEquals(700, accepted.get("x").asDouble());
-        JsonNode rejected = json(session.payloads().get(3));
-        assertEquals("movement_correction", rejected.get("type").asText());
-        assertEquals(700, rejected.get("x").asDouble());
     }
 
     @Test
@@ -641,23 +602,22 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void creatorWaitsInLobbyAndCanStartAlone() throws Exception {
+    void creatorWaitsInLobbyAndCannotStartAlone() throws Exception {
         var host = connect("host");
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
         assertEquals("lobby", latest(host).path("phase").asText());
         assertEquals("player-1", latest(host).path("hostPlayerId").asText());
-        send(host, "{\"version\":1,\"type\":\"move_player\",\"facing\":\"right\",\"sequence\":1,\"epoch\":0,\"x\":650,\"y\":360}");
-        assertEquals("movement_correction", latest(host).path("type").asText());
         send(host, "{\"version\":1,\"type\":\"start_game\"}");
-        assertEquals("room_state", latest(host).path("type").asText());
-        assertEquals("playing", latest(host).path("phase").asText());
-        assertEquals(640, latest(host).path("players").get(0).path("x").asDouble());
+        assertEquals("start_blocked", latest(host).path("code").asText());
+        String code = json(host.payloads().get(0)).path("roomId").asText();
+        startGame(host, code, "alone");
+        assertEquals("playing", latestOfType(host, "room_state").path("phase").asText());
         send(host, "{\"version\":1,\"type\":\"start_game\"}");
         assertEquals("invalid_phase", latest(host).path("code").asText());
     }
 
     @Test
-    void readinessIsSharedAndDoesNotGateHostStart() throws Exception {
+    void readinessIsSharedAndOnlyTheHostCanStartAReadyRoom() throws Exception {
         var host = connect("host");
         send(host, """
                 {"version":1,"type":"create_room","displayName":"Alex"}
@@ -678,11 +638,9 @@ class GameWebSocketHandlerTest {
             assertEquals(ready, latest(host).path("players").get(1).path("ready").asBoolean());
             assertEquals(latest(host), latest(guest));
         }
-        send(host, """
-                {"version":1,"type":"start_game"}
-                """);
-        assertEquals("playing", latest(host).path("phase").asText());
-        assertEquals(latest(host), latest(guest));
+        startGame(host, code, "ready", guest);
+        assertEquals("playing", latestOfType(host, "room_state").path("phase").asText());
+        assertEquals(latestOfType(host, "room_state"), latestOfType(guest, "room_state"));
         send(guest, """
                 {"version":1,"type":"set_ready","ready":true}
                 """);
@@ -712,7 +670,7 @@ class GameWebSocketHandlerTest {
             if (disconnect) {
                 handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
                 milliseconds.addAndGet(15_000);
-                handler.expireMemberships();
+                handler.settleRooms();
             }
             else send(host, """
                     {"version":1,"type":"leave_room"}
@@ -736,7 +694,7 @@ class GameWebSocketHandlerTest {
             send(next, """
                     {"version":1,"type":"start_game"}
                     """);
-            assertEquals("playing", latest(third).path("phase").asText());
+            assertEquals("start_blocked", latest(next).path("code").asText());
         }
     }
 
@@ -747,17 +705,17 @@ class GameWebSocketHandlerTest {
         String code = latest(host).path("roomId").asText();
         var guest = connect("closed-guest");
         join(guest, code);
-        var initial = latest(guest);
+        var initial = json(guest.payloads().get(0));
+        var members = startGame(host, code, "closed", guest);
         handler.afterConnectionClosed(guest, org.springframework.web.socket.CloseStatus.NORMAL);
-        send(host, "{\"version\":1,\"type\":\"start_game\"}");
         var returning = connect("closed-return");
         recover(returning, code, initial.path("recoveryToken").asText());
-        var recovered = latest(returning);
+        var recovered = json(returning.payloads().get(0));
         assertEquals("playing", recovered.path("phase").asText());
         assertEquals(initial.path("selfPlayerId"), recovered.path("selfPlayerId"));
         assertEquals(initial.path("players").get(1).path("avatarPreset"), recovered.path("players").get(1).path("avatarPreset"));
         join(returning, code);
-        assertEquals(recovered, latest(returning));
+        assertEquals(recovered, json(returning.payloads().get(returning.payloads().size() - 3)));
         handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
         milliseconds.addAndGet(120_000);
         var expired = connect("closed-expired");
@@ -771,7 +729,8 @@ class GameWebSocketHandlerTest {
         assertEquals("invalid_phase", latest(expired).path("code").asText());
         join(expired, otherRoom.path("roomId").asText());
         assertEquals(otherRoom, latest(expired));
-        send(host, "{\"version\":1,\"type\":\"leave_room\"}");
+        // A started Room disappears only when its final Room Membership ends.
+        for (var member : members) send(member, "{\"version\":1,\"type\":\"leave_room\"}");
         join(host, code);
         assertEquals("room_not_found", latest(host).path("code").asText());
     }
@@ -783,17 +742,18 @@ class GameWebSocketHandlerTest {
             send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Alex\"}");
             var initial = latest(host);
             String code = initial.path("roomId").asText();
-            send(host, "{\"version\":1,\"type\":\"start_game\"}");
+            var members = startGame(host, code, "recoverable-" + expire);
             handler.afterConnectionClosed(host, org.springframework.web.socket.CloseStatus.NORMAL);
             milliseconds.addAndGet(119_999);
             var returning = connect("returning-" + expire);
             recover(returning, code, initial.path("recoveryToken").asText());
-            assertEquals("playing", latest(returning).path("phase").asText());
-            assertEquals(initial.path("selfPlayerId"), latest(returning).path("selfPlayerId"));
+            assertEquals("playing", json(returning.payloads().get(0)).path("phase").asText());
+            assertEquals(initial.path("selfPlayerId"), json(returning.payloads().get(0)).path("selfPlayerId"));
+            for (var member : members.subList(1, members.size())) send(member, "{\"version\":1,\"type\":\"leave_room\"}");
             if (expire) {
                 handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
                 milliseconds.addAndGet(120_000);
-                handler.expireMemberships();
+                handler.settleRooms();
             } else {
                 send(returning, "{\"version\":1,\"type\":\"leave_room\"}");
                 assertEquals("room_left", latest(returning).path("type").asText());
@@ -805,10 +765,10 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void queuedMovementCannotOvertakeHostSuccessionState() throws Exception {
+    void queuedRoomEventsReachASlowConnectionInTheOrderTheRoomCreatedThem() throws Exception {
         var tasks = new java.util.ArrayDeque<Runnable>();
         var serial = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), tasks::add,
-                () -> "queued-" + playerIds.incrementAndGet(), now::get);
+                () -> "queued-" + playerIds.incrementAndGet(), java.util.function.UnaryOperator.identity());
         var host = new RecordingWebSocketSession("queued-host");
         var guest = new RecordingWebSocketSession("queued-guest");
         serial.afterConnectionEstablished(host);
@@ -821,22 +781,17 @@ class GameWebSocketHandlerTest {
         serial.handleMessage(guest, new TextMessage("""
                 {"version":1,"type":"join_room","roomId":"%s","displayName":"Sam"}
                 """.formatted(code)));
-        serial.handleMessage(host, new TextMessage("""
-                {"version":1,"type":"start_game"}
-                """));
-        while (!tasks.isEmpty()) tasks.remove().run();
         serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","facing":"right","sequence":1,"epoch":0,"x":%d,"y":%d}
-                """.formatted(SECOND_X + 10, SECOND_Y)));
+                {"version":1,"type":"set_ready","ready":true}
+                """));
         serial.handleMessage(host, new TextMessage("""
                 {"version":1,"type":"leave_room"}
                 """));
-        serial.handleMessage(guest, new TextMessage("""
-                {"version":1,"type":"move_player","facing":"right","sequence":2,"epoch":0,"x":%d,"y":%d}
-                """.formatted(SECOND_X + 20, SECOND_Y)));
         while (!tasks.isEmpty()) tasks.remove().run();
-        assertEquals("player_moved", latest(guest).path("type").asText());
-        assertEquals(SECOND_X + 20, latest(guest).path("x").asDouble());
+        assertEquals(List.of("room_snapshot", "room_state", "player_left", "room_state"),
+                guest.payloads().stream().map(this::jsonUnchecked).map(node -> node.path("type").asText()).toList());
+        assertEquals(json(guest.payloads().get(0)).path("selfPlayerId").asText(),
+                latest(guest).path("hostPlayerId").asText());
     }
 
     @Test
@@ -850,14 +805,12 @@ class GameWebSocketHandlerTest {
             var guest = connect("ordered-guest-" + startFirst);
             join(guest, code);
             String guestId = latest(guest).path("selfPlayerId").asText();
-            if (startFirst) send(host, """
-                    {"version":1,"type":"start_game"}
-                    """);
+            if (startFirst) startGame(host, code, "ordered-" + startFirst, guest);
             send(host, """
                     {"version":1,"type":"leave_room"}
                     """);
-            assertEquals(guestId, latest(guest).path("hostPlayerId").asText());
-            assertEquals(startFirst ? "playing" : "lobby", latest(guest).path("phase").asText());
+            assertEquals(guestId, latestOfType(guest, "room_state").path("hostPlayerId").asText());
+            assertEquals(startFirst ? "playing" : "lobby", latestOfType(guest, "room_state").path("phase").asText());
             send(host, """
                     {"version":1,"type":"start_game"}
                     """);
@@ -865,8 +818,7 @@ class GameWebSocketHandlerTest {
             send(guest, """
                     {"version":1,"type":"start_game"}
                     """);
-            assertEquals(startFirst ? "invalid_phase" : "room_state",
-                    latest(guest).path(startFirst ? "code" : "type").asText());
+            assertEquals(startFirst ? "invalid_phase" : "start_blocked", latest(guest).path("code").asText());
         }
     }
 
@@ -888,30 +840,59 @@ class GameWebSocketHandlerTest {
     }
 
     @Test
-    void startPlacesEveryPlayerAtItsOwnStandingPositionInsideTheRoom() throws Exception {
+    void startRetainsEverySeatAndItsInwardFacing() throws Exception {
         var alex = connect("alex");
         send(alex, """
                 {"version":1,"type":"create_room","displayName":"Alex"}
                 """);
-        String code = json(alex.payloads().get(0)).get("roomId").asText();
-        for (int guest = 0; guest < 4; guest++) join(connect("guest-" + guest), code);
-        send(alex, """
-                {"version":1,"type":"start_game"}
-                """);
-        JsonNode players = latest(alex).path("players");
-        assertEquals(5, players.size());
+        String code = latest(alex).path("roomId").asText();
+        startGame(alex, code, "seating");
+        JsonNode players = latestOfType(alex, "room_state").path("players");
+        assertEquals(RoomRules.CAPACITY, players.size());
         var places = new java.util.HashSet<String>();
-        for (JsonNode player : players) {
-            assertTrue(player.path("x").asDouble() >= 0 && player.path("x").asDouble() <= RoomRules.WIDTH);
-            assertTrue(player.path("y").asDouble() >= 0 && player.path("y").asDouble() <= RoomRules.HEIGHT);
+        for (int seat = 0; seat < RoomRules.CAPACITY; seat++) {
+            JsonNode player = players.get(seat);
+            assertEquals(seat, player.path("seat").asInt());
+            assertEquals(RoomRules.seatX(seat), player.path("x").asDouble());
+            assertEquals(RoomRules.seatY(seat), player.path("y").asDouble());
+            assertEquals(RoomRules.seatFacing(seat), player.path("facing").asText());
             places.add(player.path("x").asText() + "," + player.path("y").asText());
         }
-        // Duplicate appearances stay individually visible because nobody shares a standing position.
-        assertEquals(5, places.size());
+        // Duplicate appearances stay individually recognizable because nobody shares a Seat.
+        assertEquals(RoomRules.CAPACITY, places.size());
     }
 
     private JsonNode latest(RecordingWebSocketSession session) throws Exception {
         return json(session.payloads().get(session.payloads().size() - 1));
+    }
+
+    /** A started Room publishes private Game state too, so structural checks name their type. */
+    private JsonNode latestOfType(RecordingWebSocketSession session, String type) {
+        return session.payloads().stream().map(this::jsonUnchecked)
+                .filter(node -> node.path("type").asText().equals(type))
+                .reduce((first, second) -> second).orElseThrow();
+    }
+
+    /** Start needs exactly ten connected, Ready Players; tests fill the Lobby through this. */
+    private List<RecordingWebSocketSession> readyTen(RecordingWebSocketSession host, String code, String label,
+                                                     RecordingWebSocketSession... alreadyJoined) throws Exception {
+        var members = new java.util.ArrayList<RecordingWebSocketSession>();
+        members.add(host);
+        members.addAll(List.of(alreadyJoined));
+        for (int seat = members.size(); seat < RoomRules.CAPACITY; seat++) {
+            var guest = connect(label + "-seat-" + seat);
+            join(guest, code);
+            members.add(guest);
+        }
+        for (var member : members) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        return List.copyOf(members);
+    }
+
+    private List<RecordingWebSocketSession> startGame(RecordingWebSocketSession host, String code, String label,
+                                                      RecordingWebSocketSession... alreadyJoined) throws Exception {
+        var members = readyTen(host, code, label, alreadyJoined);
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        return members;
     }
 
     private void join(RecordingWebSocketSession session, String code) throws Exception {

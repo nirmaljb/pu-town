@@ -1,7 +1,6 @@
-import type { MovementState } from "./protocol.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { selectAvatar, createRoom, decodeServerMessage, joinRoom, recoverRoom, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightAction, recoverRoom, sendChat, type ChatChannel, type ClientMessage, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -188,19 +187,32 @@ export class ReconnectingGameClient {
     this.inbox.drain();
   }
 
-  move(movement: MovementState): void {
-    if (this.#phase === "playing" && this.#state.status === "playing" && this.#socket?.readyState === 1) this.#transport?.move(movement);
+  /** A confirmed Night choice. The server owns the phase, Role and lock checks. */
+  nightAction(type: "mafia_vote" | "protect" | "investigate", round: number, targetPlayerId: string): void {
+    this.sendControl("playing", () => nightAction(type, round, targetPlayerId));
   }
 
-  selectAvatar(avatarPreset: string): void { this.sendLobbyControl(() => selectAvatar(avatarPreset)); }
+  meetingVote(round: number, targetPlayerId: string | null): void {
+    this.sendControl("playing", () => meetingVote(round, targetPlayerId));
+  }
 
-  setReady(ready: boolean): void { this.sendLobbyControl(() => ({ version: 1, type: "set_ready", ready })); }
+  chat(channel: ChatChannel, text: string): void {
+    this.sendControl("playing", () => sendChat(channel, text));
+  }
 
-  startGame(): void { this.sendLobbyControl(() => ({ version: 1, type: "start_game" })); }
+  selectAvatar(avatarPreset: string): void { this.sendControl("lobby", () => selectAvatar(avatarPreset)); }
 
-  /** Built only when it will be sent, so a control outside a Lobby is ignored, not validated. */
-  private sendLobbyControl(build: () => ClientMessage): void {
-    if (this.#phase === "lobby" && this.#state.status === "playing" && this.#socket?.readyState === 1) {
+  setReady(ready: boolean): void { this.sendControl("lobby", () => ({ version: 1, type: "set_ready", ready })); }
+
+  startGame(): void { this.sendControl("lobby", () => ({ version: 1, type: "start_game" })); }
+
+  /**
+   * Built only when it will be sent, so a control offered outside its own phase is ignored
+   * rather than submitted and rejected. The phase is the one the server last published and
+   * this client has applied, not one the caller believes it is in.
+   */
+  private sendControl(phase: RoomPhase, build: () => ClientMessage): void {
+    if (this.#phase === phase && this.#state.status === "playing" && this.#socket?.readyState === 1) {
       this.#socket.send(JSON.stringify(build()));
     }
   }

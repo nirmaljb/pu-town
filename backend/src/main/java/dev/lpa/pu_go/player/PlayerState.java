@@ -23,22 +23,16 @@ public class PlayerState {
     private boolean ready;
     public boolean isReady() { return ready; }
     public void setReady(boolean value) { ready = value; }
-    private Integer seat;
-    public Integer getSeat() { return seat; }
-    public void setSeat(Integer value) { seat = value; }
+    // A Seat is taken on joining and held until the Membership ends, Game included.
+    private int seat;
+    public int getSeat() { return seat; }
+    public void setSeat(int value) { seat = value; }
     private String roomId;
     private double x;
     private double y;
-    private long lastAcceptedMovementNanos;
     private String facing = "down";
-    private long movementSequence;
-    private long movementEpoch;
     public String getFacing() { return facing; }
     public void setFacing(String value) { facing = value; }
-    public long getMovementSequence() { return movementSequence; }
-    public void setMovementSequence(long value) { movementSequence = value; }
-    public long getMovementEpoch() { return movementEpoch; }
-    public void setMovementEpoch(long value) { movementEpoch = value; }
 
     public PlayerState(String playerId, WebSocketSession session) {
         this.playerId = playerId;
@@ -55,8 +49,4 @@ public class PlayerState {
     public void setX(double x) { this.x = x; }
     public double getY() { return y; }
     public void setY(double y) { this.y = y; }
-    public long getLastAcceptedMovementNanos() { return lastAcceptedMovementNanos; }
-    public void setLastAcceptedMovementNanos(long lastAcceptedMovementNanos) {
-        this.lastAcceptedMovementNanos = lastAcceptedMovementNanos;
-    }
 }

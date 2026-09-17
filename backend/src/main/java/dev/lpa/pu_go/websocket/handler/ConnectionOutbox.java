@@ -9,13 +9,19 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A bounded, ordered outbound queue drained off the Room lock. Every event a Game publishes
+ * is structural or a chat message, so nothing here is replaceable: an overflowing queue
+ * refuses the event and its connection is closed, leaving Reconnect to deliver a fresh
+ * Room Snapshot and authorized Game state.
+ */
 final class ConnectionOutbox {
     static final int DEFAULT_CAPACITY = 256;
 
     private final WebSocketSession session;
     private final Executor executor;
     private final int capacity;
-    private final List<QueuedMessage> messages = new ArrayList<>();
+    private final List<TextMessage> messages = new ArrayList<>();
     private final AtomicBoolean draining = new AtomicBoolean();
 
     ConnectionOutbox(WebSocketSession session, Executor executor) {
@@ -29,22 +35,10 @@ final class ConnectionOutbox {
         this.capacity = capacity;
     }
 
-    boolean enqueue(TextMessage message, String movementPlayerId) {
+    boolean enqueue(TextMessage message) {
         synchronized (messages) {
-            if (movementPlayerId != null) {
-                for (int index = messages.size() - 1; index >= 0; index--) {
-                    // Structural state is an ordering barrier: never move a later position
-                    // before a snapshot or membership/phase transition.
-                    if (messages.get(index).movementPlayerId() == null) break;
-                    if (movementPlayerId.equals(messages.get(index).movementPlayerId())) {
-                        messages.set(index, new QueuedMessage(message, movementPlayerId));
-                        scheduleDrain();
-                        return true;
-                    }
-                }
-            }
             if (messages.size() == capacity) return false;
-            messages.add(new QueuedMessage(message, movementPlayerId));
+            messages.add(message);
         }
         scheduleDrain();
         return true;
@@ -57,12 +51,12 @@ final class ConnectionOutbox {
     private void drain() {
         try {
             while (session.isOpen()) {
-                QueuedMessage next;
+                TextMessage next;
                 synchronized (messages) {
                     if (messages.isEmpty()) return;
                     next = messages.remove(0);
                 }
-                session.sendMessage(next.message());
+                session.sendMessage(next);
             }
         } catch (IOException ignored) {
             // The WebSocket lifecycle callback removes the disconnected player.
@@ -73,6 +67,4 @@ final class ConnectionOutbox {
             }
         }
     }
-
-    private record QueuedMessage(TextMessage message, String movementPlayerId) {}
 }

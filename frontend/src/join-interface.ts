@@ -40,7 +40,7 @@ export class JoinInterface {
           </div>
           <p class="entry-status" role="status" aria-live="polite"></p>
         </form>
-        <p class="footnote"><span>Up to 10 Players</span><span>Move with <span class="key-hint" aria-label="the arrow keys">↑ ← ↓ →</span></span></p>
+        <p class="footnote"><span>Exactly 10 Players</span><span>Three Mafia against the Village</span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>
@@ -59,7 +59,7 @@ export class JoinInterface {
         <div class="connection-card">
           <p class="eyebrow">Connection interrupted</p>
           <h2 id="connection-title">Reconnecting…</h2>
-          <p class="connection-description" role="status">Movement is paused while we bring you back.</p>
+          <p class="connection-description" role="status">Your place is held while we bring you back.</p>
           <div class="connection-actions">
             <button type="button" class="primary back">Leave Room</button>
           </div>
@@ -126,11 +126,16 @@ export class JoinInterface {
     document.body.classList.toggle("in-lobby", Boolean(lobby && state.status !== "join" && state.status !== "connecting"));
     this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
     this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
+    const gathered = this.#world?.players.size ?? 0;
+    const waiting = [...(this.#world?.players.values() ?? [])].filter(player => !player.ready || !player.connected).length;
     this.element(".host-guidance").textContent = host
-      ? "You are the Host. Start whenever you like."
+      ? gathered < ROOM_CAPACITY
+        ? `You are the Host. ${ROOM_CAPACITY - gathered} more ${ROOM_CAPACITY - gathered === 1 ? "Player" : "Players"} needed.`
+        : waiting > 0 ? `You are the Host. Waiting for ${waiting} to be Ready and connected.` : "You are the Host. Everyone is Ready."
       : "Waiting for the Host to start";
     this.element<HTMLButtonElement>(".start-game").hidden = !host;
-    this.element<HTMLButtonElement>(".start-game").disabled = state.status !== "playing";
+    this.element<HTMLButtonElement>(".start-game").disabled =
+      state.status !== "playing" || gathered < ROOM_CAPACITY || waiting > 0;
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
     ready.textContent = self?.ready ? "Not Ready" : "Ready";
@@ -154,7 +159,7 @@ export class JoinInterface {
     this.element("#connection-title").textContent = state.status === "failed" ? "Connection lost" : "Reconnecting…";
     this.element(".connection-description").textContent = state.status === "failed"
       ? state.error ?? "Recovery cannot continue."
-      : "Movement is paused while we bring you back.";
+      : "Your place is held while we bring you back.";
     if (state.status === "join" && previous?.status !== "join") this.#name.focus();
     if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(".back").focus();
   }

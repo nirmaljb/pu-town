@@ -17,7 +17,7 @@ function setup(storage) {
   } };
 }
 const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
-  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: null, ready: false, facing: "down", sequence: 0, epoch: 0, x: 640, y: 360 }] };
+  players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: 0, ready: false, facing: "up", x: 640, y: 177 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
   const { client, sockets } = setup();
@@ -28,7 +28,7 @@ test("initial create prevents duplicates and waits for membership confirmation",
   sockets[0].open();
   assert.deepEqual(JSON.parse(sockets[0].sent[0]), { version: 1, type: "create_room", displayName: "Alex" });
   assert.equal(client.state.status, "connecting");
-  client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+  client.chat("public", "Anyone there?");
   assert.equal(sockets[0].sent.length, 1);
   sockets[0].message(snapshot);
   assert.equal(client.state.status, "connecting");
@@ -72,7 +72,7 @@ test("silent loss freezes after ten seconds and rejoin alone resumes play", () =
   advance(1);
   assert.equal(client.state.status, "reconnecting");
   const count = sockets[0].sent.length;
-  client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+  client.meetingVote(1, "p");
   assert.equal(sockets[0].sent.length, count);
   advance(500);
   sockets[1].open();
@@ -130,7 +130,7 @@ test("room broadcasts do not conceal missing heartbeat responses", () => {
   const { client, sockets, advance } = setup();
   client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
   advance(5_000);
-  sockets[0].message({ version: 1, type: "player_moved", playerId: "other", facing: "down", sequence: 1, epoch: 0, x: 650, y: 360 });
+  sockets[0].message({ version: 1, type: "chat_message", channel: "public", round: 1, senderPlayerId: "other", senderName: "Sam", text: "Still here." });
   client.update(); advance(5_000);
   assert.equal(client.state.status, "reconnecting");
 });
@@ -169,14 +169,17 @@ test("incompatible server messages surface an entry error", () => {
   assert.match(client.state.error, /protocol/);
 });
 
-test("Lobby movement freezes and recovery follows the server phase before sending controls", () => {
+test("Lobby and Game controls each belong to one phase, and recovery follows the server's", () => {
   for (const phase of ["lobby", "playing"]) {
     const { client, sockets, advance, inbox } = setup();
     client.create("Alex"); sockets[0].open();
-    sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], seat: 0, ready: false }] });
+    sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], ready: false }] });
     client.update();
     const count = sockets[0].sent.length;
-    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+    // A Night choice has no meaning before the Game is dealt, so it is never submitted.
+    client.nightAction("mafia_vote", 1, "p");
+    client.meetingVote(1, null);
+    client.chat("public", "Too early.");
     assert.equal(sockets[0].sent.length, count);
     client.setReady(true);
     assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "set_ready", ready: true });
@@ -184,18 +187,22 @@ test("Lobby movement freezes and recovery follows the server phase before sendin
     assert.equal(JSON.parse(sockets[0].sent.at(-1)).type, "start_game");
     sockets[0].disconnect(); advance(500); sockets[1].open();
     sockets[1].message({ ...snapshot, phase, selfPlayerId: "new", hostPlayerId: "new",
-      players: [{ ...snapshot.players[0], playerId: "new", seat: phase === "lobby" ? 0 : null }] });
+      players: [{ ...snapshot.players[0], playerId: "new" }] });
     const before = sockets[1].sent.length;
-    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
-    assert.equal(sockets[1].sent.length, before);
+    client.chat("public", "Back.");
+    assert.equal(sockets[1].sent.length, before, "the recovered phase is not known until its frame");
     client.update();
-    client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+    client.chat("public", "Back.");
     assert.equal(sockets[1].sent.length, before + (phase === "playing" ? 1 : 0));
     assert.equal(inbox.drain().at(-1).phase, phase);
     if (phase === "playing") {
+      assert.deepEqual(JSON.parse(sockets[1].sent.at(-1)), { version: 1, type: "send_chat", channel: "public", text: "Back." });
       const playingCount = sockets[1].sent.length;
-      client.setReady(true); client.startGame();
-      assert.equal(sockets[1].sent.length, playingCount);
+      client.setReady(true); client.startGame(); client.selectAvatar("townsperson-1");
+      assert.equal(sockets[1].sent.length, playingCount, "Start closes the Lobby's own controls");
+      client.nightAction("investigate", 2, "p");
+      client.meetingVote(2, null);
+      assert.deepEqual(sockets[1].sent.slice(playingCount).map(value => JSON.parse(value).type), ["investigate", "meeting_vote"]);
     }
   }
 });
@@ -265,7 +272,7 @@ test("real connection loss recovers the private membership and waits for its cur
   assert.deepEqual(JSON.parse(sockets[1].sent[0]), {
     version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64)
   });
-  client.move({ x: 650, y: 360, facing: "right", sequence: 9, epoch: 0 });
+  client.nightAction("mafia_vote", 1, "p");
   assert.equal(sockets[1].sent.length, 1);
   sockets[1].message(snapshot);
   assert.equal(client.state.status, "reconnecting");
@@ -286,7 +293,7 @@ test("same-tab startup recovers a stored membership and Leave clears refresh int
   assert.equal(refreshed.client.state.status, "reconnecting");
   refreshed.sockets[0].open();
   assert.equal(JSON.parse(refreshed.sockets[0].sent[0]).type, "recover_room");
-  refreshed.client.move({ x: 650, y: 360, facing: "right", sequence: 1, epoch: 0 });
+  refreshed.client.chat("public", "Back.");
   assert.equal(refreshed.sockets[0].sent.length, 1);
   refreshed.sockets[0].message(snapshot); refreshed.client.update();
   refreshed.client.leave();
@@ -313,7 +320,7 @@ test("expired recovery in either phase clears refresh intent and returns to sele
     const storage = memoryStorage();
     const { client, sockets, elapse } = setup(storage);
     client.create("Alex"); sockets[0].open();
-    sockets[0].message({ ...snapshot, phase, players: [{ ...snapshot.players[0], seat: phase === "lobby" ? 0 : null }] });
+    sockets[0].message({ ...snapshot, phase, players: [{ ...snapshot.players[0] }] });
     client.update();
     sockets[0].disconnect(); elapse(900_000); client.update();
     sockets[1].open(); sockets[1].message({ version: 1, type: "error", code: "recovery_expired", message: "Your place in the Room expired" });
@@ -429,7 +436,7 @@ test('selection sends only in a confirmed Lobby and recovery takes appearance fr
   first.client.selectAvatar('townsperson-10');
   assert.equal(first.sockets.length, 0);
   first.client.create('Alex'); first.sockets[0].open();
-  const lobby = { ...snapshot, phase: 'lobby', players: [{ ...snapshot.players[0], seat: 0 }] };
+  const lobby = { ...snapshot, phase: 'lobby' };
   first.sockets[0].message(lobby); first.client.update(); first.inbox.drain();
   first.client.selectAvatar('townsperson-10');
   assert.deepEqual(JSON.parse(first.sockets[0].sent.at(-1)), { version: 1, type: 'select_avatar', avatarPreset: 'townsperson-10' });

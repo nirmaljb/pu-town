@@ -6,7 +6,7 @@ import { NetworkInbox } from '../dist/network-inbox.js';
 import { emptyWorld } from '../dist/world-state.js';
 
 const player = (id, seat) => ({ playerId: id, displayName: id, colour: '#4F8CFF', avatarPreset: 'townsperson-1',
-  seat, ready: false, facing: 'down', x: 640, y: 177, sequence: 0, epoch: 0 });
+  seat, ready: false, facing: 'down', x: 640, y: 177 });
 
 function lobby() {
   const inbox = new NetworkInbox();
@@ -17,7 +17,7 @@ function lobby() {
       for (const id of poses.keys()) if (!world.players.has(id)) poses.delete(id);
       for (const p of world.players.values()) {
         const pose = poses.get(p.playerId) ?? new AvatarSeating();
-        pose.reconcile(world.phase === 'lobby' ? p.seat : null, arrivals.has(p.playerId), time);
+        pose.reconcile(p.seat, arrivals.has(p.playerId), time);
         poses.set(p.playerId, pose);
       }
     }
@@ -55,16 +55,19 @@ test('readiness, Host changes and repeated snapshots never restart sitting', () 
   assert.equal(l.poses.get('self').progress(500), 1);
 });
 
-test('Start cancels unfinished sitting, including Join and Start in one frame', () => {
+test('Start keeps every Player in the Seat the Lobby gave them', () => {
   const start = { type: 'room_state', phase: 'playing', hostPlayerId: 'host',
-    players: [player('host', null), player('self', null)] };
+    players: [player('host', 0), player('self', 1)] };
   const l = lobby();
   l.frame([snapshot()], 0);
+  // Sitting that began in the Lobby finishes on its own clock; Start does not interrupt it.
   l.frame([start], 100);
-  assert.equal(l.poses.get('self').progress(100), null);
+  assert.equal(l.poses.get('self').progress(210), 0.5);
+  assert.equal(l.poses.get('self').progress(420), 1);
   const batched = lobby();
   batched.frame([snapshot(), start], 0);
-  assert.equal(batched.poses.get('self').progress(0), null);
+  assert.equal(batched.poses.get('self').progress(0), 0);
+  assert.equal(batched.poses.get('self').progress(SIT_DURATION_MS), 1);
 });
 
 test('Leave destroys pending seating and reconnect animates only the new membership', () => {
@@ -87,7 +90,7 @@ test('a delayed frame settles sitting without a repeated transition', () => {
   assert.equal(pose.progress(30_100), 1);
 });
 
-test('changing appearance while seated preserves sit progress and Start restores standing', () => {
+test('changing appearance while seated preserves sit progress across Start', () => {
   const l = lobby();
   l.frame([snapshot()], 0);
   l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host',
@@ -97,6 +100,6 @@ test('changing appearance while seated preserves sit progress and Start restores
     players: [player('host', 0), { ...player('self', 1), avatarPreset: 'townsperson-9', ready: true }] }], 500);
   assert.equal(l.poses.get('self').progress(500), 1);
   l.frame([{ type: 'room_state', phase: 'playing', hostPlayerId: 'host',
-    players: [{ ...player('self', null), avatarPreset: 'townsperson-9' }] }], 550);
-  assert.equal(l.poses.get('self').progress(550), null);
+    players: [{ ...player('self', 1), avatarPreset: 'townsperson-9' }] }], 550);
+  assert.equal(l.poses.get('self').progress(550), 1);
 });

@@ -14,33 +14,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConnectionOutboxTest {
     @Test
-    void structuralEventsKeepOrderWhileQueuedMovementForOnePlayerIsCoalesced() {
+    void queuedEventsReachTheConnectionInTheOrderTheRoomCreatedThem() {
         RecordingWebSocketSession session = new RecordingWebSocketSession("session-1");
         PausedExecutor executor = new PausedExecutor();
         ConnectionOutbox outbox = new ConnectionOutbox(session, executor, 4);
 
-        outbox.enqueue(new TextMessage("joined"), null);
-        outbox.enqueue(new TextMessage("move-1"), "player-1");
-        outbox.enqueue(new TextMessage("move-2"), "player-1");
-        outbox.enqueue(new TextMessage("left"), null);
+        outbox.enqueue(new TextMessage("joined"));
+        outbox.enqueue(new TextMessage("night"));
+        outbox.enqueue(new TextMessage("chat"));
+        outbox.enqueue(new TextMessage("left"));
         executor.runNext();
 
-        assertEquals(java.util.List.of("joined", "move-2", "left"), session.payloads());
+        assertEquals(java.util.List.of("joined", "night", "chat", "left"), session.payloads());
     }
 
     @Test
-    void aFullQueuePreservesFinalMovementAndRejectsOverflow() {
+    void aFullQueueRefusesFurtherEventsWithoutEvictingEarlierOnes() {
         RecordingWebSocketSession session = new RecordingWebSocketSession("session-1");
         PausedExecutor executor = new PausedExecutor();
         ConnectionOutbox outbox = new ConnectionOutbox(session, executor, 2);
 
-        assertTrue(outbox.enqueue(new TextMessage("joined"), null));
-        assertTrue(outbox.enqueue(new TextMessage("move"), "player-1"));
-        assertFalse(outbox.enqueue(new TextMessage("left"), null));
-        assertFalse(outbox.enqueue(new TextMessage("snapshot"), null));
+        assertTrue(outbox.enqueue(new TextMessage("joined")));
+        assertTrue(outbox.enqueue(new TextMessage("chat")));
+        assertFalse(outbox.enqueue(new TextMessage("left")));
+        assertFalse(outbox.enqueue(new TextMessage("game_state")));
         executor.runNext();
 
-        assertEquals(java.util.List.of("joined", "move"), session.payloads());
+        assertEquals(java.util.List.of("joined", "chat"), session.payloads());
     }
 
     private static final class PausedExecutor implements Executor {

@@ -1,11 +1,11 @@
 # PU Town
 
-PU Town is a shared top-down game world in which players occupy isolated rooms and see one another move in real time.
+PU Town is a social deduction game in which Players occupy isolated Rooms, gather around one table, and play out a Game of Mafia against the Village in real time.
 
 ## Language
 
 **Player**:
-An active participant in the game world.
+A participant in the game world, including one who has been eliminated from the current Game.
 _Avoid_: User, avatar
 
 **Player ID**:
@@ -44,7 +44,7 @@ An isolated multiplayer space whose state is shared only among its current playe
 _Avoid_: Lobby, channel
 
 **Room Snapshot**:
-The complete set of current players and their positions sent to one player after they join or rejoin a room.
+The current Room state a Player receives on Join or Reconnect, including the public information and private information they are entitled to know.
 _Avoid_: Initial state, player list
 
 **Lobby**:
@@ -63,12 +63,60 @@ _Avoid_: Connected, joined
 The in-world building containing the Meeting Area.
 
 **Meeting Area**:
-The place inside the Town Hall where Players sit in a circle for the Lobby and future morning meetings.
+The place inside the Town Hall where Players sit in a circle for the Lobby and Meetings.
 _Avoid_: Lobby, Room
 
 **Seat**:
-An allocated place for one Player in the Meeting Area. It remains theirs until their Room Membership ends or the game starts.
+An allocated place for one Player in the Meeting Area, retained from the Lobby into the Game.
 _Avoid_: Spawn Point
+
+**Game**:
+A contest within a Room between the Mafia and Village factions, beginning with role assignment and ending with a faction's victory.
+_Avoid_: Room, Lobby
+
+**Game Roster**:
+The record of a Game's original Players and their participation, including those who have been eliminated or forfeited. Leaving the Room does not erase a Player from this record.
+_Avoid_: Current Room Memberships
+
+**Faction**:
+The side a Player belongs to in a Game: Mafia or Village.
+_Avoid_: Role
+
+**Role**:
+A Player's assigned identity and abilities within a Game: Mafia, Villager, Doctor, or Sheriff. It is independent of their Avatar Preset.
+_Avoid_: Faction, Avatar Preset
+
+**Mafia**:
+The faction whose members know one another and collectively choose a Night attack; also the Role held by each member of that faction.
+
+**Village**:
+The faction comprising Villagers, the Doctor, and the Sheriff.
+_Avoid_: Villager when referring to the entire faction
+
+**Villager**:
+A Village Role with no special Night action.
+_Avoid_: Village when referring to this Role
+
+**Doctor**:
+The Village Role that can protect one living Player from a Night attack, including themselves, but cannot protect the same Player on consecutive Nights.
+
+**Sheriff**:
+The Village Role that can investigate another living Player at Night to learn whether they belong to the Mafia faction.
+
+**Night**:
+The Game phase in which living Mafia privately discuss and choose an attack, the Doctor chooses protection, and the Sheriff chooses an investigation.
+
+**Meeting**:
+The Game phase in which living Players discuss publicly and then vote on whether to eliminate a Player.
+_Avoid_: Lobby
+
+**Elimination**:
+The loss of a Player's ability to act, chat, or vote in the current Game. Elimination alone does not end Room Membership; the Player may remain to watch public proceedings.
+_Avoid_: Leave, Disconnect
+
+**Forfeit**:
+A living Player's removal from active Game participation because they Leave or their recovery window expires.
+_Avoid_: Disconnect
 
 **Room Code**:
 A shareable code that identifies the Room a Player wants to join. Anyone with the code may join while the Room is a Lobby; a started game admits no new Players.

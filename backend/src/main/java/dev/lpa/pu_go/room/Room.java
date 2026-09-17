@@ -1,6 +1,7 @@
 package dev.lpa.pu_go.room;
 
 import dev.lpa.pu_go.avatar.AvatarCollection;
+import dev.lpa.pu_go.game.Game;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,11 +12,13 @@ public class Room {
     // Pinned at creation: Publishing reaches later Rooms, never this one.
     private final AvatarCollection avatarCollection;
     private String phase = "lobby";
+    private Game game;
     private String hostPlayerId;
     public void setHostPlayerId(String value) { hostPlayerId = value; }
     public String getPhase() { return phase; }
     public String getHostPlayerId() { return hostPlayerId; }
-    public void startGame() { phase = "playing"; }
+    public Game getGame() { return game; }
+    public void startGame(Game startedGame) { phase = "playing"; game = startedGame; }
     private long emptySince;
     public long getEmptySince() { return emptySince; }
     public void setEmptySince(long value) { emptySince = value; }

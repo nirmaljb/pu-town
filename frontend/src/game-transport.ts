@@ -1,10 +1,8 @@
-import type { MovementState } from "./protocol.js";
 import { NetworkInbox } from "./network-inbox.js";
 import {
   decodeServerMessage,
   joinRoom,
   leaveRoom,
-  movePlayer,
   type ClientMessage,
   type ServerMessage
 } from "./protocol.js";
@@ -41,10 +39,6 @@ export class GameTransport {
 
   leave(): void {
     this.send(leaveRoom());
-  }
-
-  move(movement: MovementState): void {
-    this.send(movePlayer(movement));
   }
 
   private send(message: ClientMessage): void {

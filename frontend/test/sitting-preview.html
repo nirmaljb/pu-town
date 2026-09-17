@@ -13,7 +13,7 @@ nav { padding: 12px; } button { margin-right: 12px; padding: 8px; }
 import Phaser from 'phaser';
 import { AvatarReconciler, loadAvatarCollection } from '/src/avatar-reconciler.ts';
 import { fetchAvatarCollection } from '/src/avatar-presets.ts';
-import { DIRECTIONS } from '/src/avatar-motion.ts';
+import { DIRECTIONS } from '/src/avatar-facing.ts';
 import { emptyWorld } from '/src/world-state.ts';
 
 // Artwork belongs to a Room's pinned collection, so this page reads one the same way the
@@ -41,7 +41,7 @@ if (!roomCode) {
           const playerId = `${row}-${col}`;
           players.set(playerId, { playerId, avatarPreset: preset.id, displayName: `${preset.name} · ${facing}`,
             colour: '#FFD166', facing, seat: col, ready: false,
-            x: 110 + col * 210, y: 110 + row * 160, sequence: 0, epoch: 0 });
+            x: 110 + col * 210, y: 110 + row * 160 });
         }));
         world = { ...emptyWorld(), phase: 'lobby', players };
         view.reconcile(world);

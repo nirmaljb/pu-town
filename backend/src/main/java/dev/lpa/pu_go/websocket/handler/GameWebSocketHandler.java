@@ -1,5 +1,10 @@
 package dev.lpa.pu_go.websocket.handler;
 
+import dev.lpa.pu_go.game.ChatEntry;
+import dev.lpa.pu_go.game.Game;
+import dev.lpa.pu_go.game.NightChoice;
+import dev.lpa.pu_go.game.Participant;
+import dev.lpa.pu_go.game.Role;
 import dev.lpa.pu_go.player.PlayerState;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
@@ -18,21 +23,30 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.LongSupplier;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
+    /** The fixed distribution: three Mafia against five Villagers, one Doctor and one Sheriff. */
+    static final List<Role> ROLE_DISTRIBUTION = List.of(Role.MAFIA, Role.MAFIA, Role.MAFIA,
+            Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.DOCTOR, Role.SHERIFF);
+
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -41,19 +55,26 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, ConnectionOutbox> outboxes = new ConcurrentHashMap<>();
     private final Executor outboundExecutor;
     private final Supplier<String> playerIdSupplier;
-    private final LongSupplier nanoTime;
+    private final UnaryOperator<List<Role>> roleAssignment;
 
     @Autowired
     public GameWebSocketHandler(RoomManager roomManager) {
-        this(roomManager, Executors.newCachedThreadPool(), () -> UUID.randomUUID().toString(), System::nanoTime);
+        this(roomManager, Executors.newCachedThreadPool(), () -> UUID.randomUUID().toString(), GameWebSocketHandler::shuffleRoles);
     }
 
     GameWebSocketHandler(RoomManager roomManager, Executor outboundExecutor,
-                         Supplier<String> playerIdSupplier, LongSupplier nanoTime) {
+                         Supplier<String> playerIdSupplier, UnaryOperator<List<Role>> roleAssignment) {
         this.roomManager = roomManager;
         this.outboundExecutor = outboundExecutor;
         this.playerIdSupplier = playerIdSupplier;
-        this.nanoTime = nanoTime;
+        this.roleAssignment = roleAssignment;
+    }
+
+    /** Roles are drawn independently of Seat order, Display Names and Avatar Presets. */
+    private static List<Role> shuffleRoles(List<Role> distribution) {
+        List<Role> shuffled = new ArrayList<>(distribution);
+        Collections.shuffle(shuffled, new SecureRandom());
+        return shuffled;
     }
 
     @PreDestroy
@@ -84,7 +105,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 if (incoming instanceof ClientMessage.RecoverRoom recover) rooms.add(recover.roomId());
                 roomManager.serialized(rooms, () -> {
                     if (playersBySession.get(session.getId()) != player || player.getSession() != session) return null;
-                    if (player.getRoomId() != null) expireMembershipsAndFindRoom(player.getRoomId());
+                    if (player.getRoomId() != null) settleRoom(player.getRoomId());
                     if (incoming instanceof ClientMessage.RecoverRoom recover) handleRecovery(player, recover);
                     else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
                     else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
@@ -92,7 +113,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
-                    else if (incoming instanceof ClientMessage.MovePlayer move) handleMove(player, move);
+                    else if (incoming instanceof ClientMessage.NightAction action) handleNightAction(player, action);
+                    else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
+                    else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
                 });
             } catch (InvalidClientMessageException exception) {
@@ -105,28 +128,47 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 1_000)
-    public void expireMemberships() {
+    /**
+     * Membership expiry and Game phase deadlines advance without client frames, tab focus,
+     * Host connectivity, or incoming Player actions.
+     */
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 200)
+    public void settleRooms() {
         for (String code : roomManager.roomIdsSnapshot()) {
-            roomManager.serialized(List.of(code), () -> expireMembershipsAndFindRoom(code));
+            roomManager.serialized(List.of(code), () -> settleRoom(code));
         }
     }
 
-    /** Room lock is held; expiry and recovery share the same ordering boundary. */
-    private Room expireMembershipsAndFindRoom(String code) {
+    /**
+     * Room lock is held. Membership expiry and Game phase deadlines are applied in the order
+     * their deadlines fell due, so recovery, Forfeit and resolution share one consistent order.
+     */
+    private Room settleRoom(String code) {
         Room room = roomManager.findRoom(code);
         if (room == null) return null;
-        var expired = room.playerIdsSnapshot().stream().map(playersById::get)
-                .filter(member -> member.getDisconnectedUntil() != null
-                        && roomManager.currentTimeMillis() >= member.getDisconnectedUntil())
-                .sorted(java.util.Comparator.comparingLong(PlayerState::getDisconnectedUntil)).toList();
-        for (PlayerState member : expired) {
-            long endedAt = member.getDisconnectedUntil();
-            deliverAll(endMembership(member, code, ServerMessage.DepartureReason.EXPIRED, false));
-            member.setRoomId(null);
-            member.setRecoveryToken(null);
-            playersById.remove(member.getId(), member);
-            if (room.playerIdsSnapshot().isEmpty()) room.setEmptySince(endedAt);
+        while (!room.playerIdsSnapshot().isEmpty()) {
+            long now = roomManager.currentTimeMillis();
+            PlayerState expiring = room.playerIdsSnapshot().stream().map(playersById::get)
+                    .filter(Objects::nonNull)
+                    .filter(member -> member.getDisconnectedUntil() != null && now >= member.getDisconnectedUntil())
+                    .min(Comparator.comparingLong(PlayerState::getDisconnectedUntil)).orElse(null);
+            Game game = room.getGame();
+            Long phaseDeadline = game == null ? null : game.phaseDeadline();
+            boolean phaseDue = phaseDeadline != null && now >= phaseDeadline;
+            if (expiring == null && !phaseDue) break;
+            if (expiring != null && (!phaseDue || expiring.getDisconnectedUntil() <= phaseDeadline)) {
+                long endedAt = expiring.getDisconnectedUntil();
+                deliverAll(endMembership(expiring, code, ServerMessage.DepartureReason.EXPIRED, false));
+                expiring.setRoomId(null);
+                expiring.setRecoveryToken(null);
+                playersById.remove(expiring.getId(), expiring);
+                if (room.playerIdsSnapshot().isEmpty()) room.setEmptySince(endedAt);
+            } else {
+                game.advance();
+                List<Delivery> deliveries = new ArrayList<>();
+                addGameState(deliveries, room);
+                deliverAll(deliveries);
+            }
         }
         transferDisconnectedHost(room);
         return roomManager.findRoom(code);
@@ -151,7 +193,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private void handleRecovery(PlayerState connection, ClientMessage.RecoverRoom message) {
         roomManager.serialized(List.of(message.roomId()), () -> {
-            Room room = expireMembershipsAndFindRoom(message.roomId());
+            Room room = settleRoom(message.roomId());
             if (room == null) { deliver(error(connection, "room_not_found", "Room not found")); return null; }
             PlayerState member = room.playerIdsSnapshot().stream().map(playersById::get)
                     .filter(candidate -> message.recoveryToken().equals(candidate.getRecoveryToken())).findFirst().orElse(null);
@@ -165,7 +207,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             member.setSession(connection.getSession());
             member.setDisconnectedUntil(null);
             if (firstReturnAfterGrace) room.setHostPlayerId(member.getId());
-            member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
             playersBySession.put(member.getSession().getId(), member);
             outboxes.put(member.getId(), outbox);
             if (retiredSession.isOpen()) outboundExecutor.execute(() -> {
@@ -175,6 +216,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             deliver(new Delivery(member.getId(), new ServerMessage.RoomSnapshot(member.getId(), message.roomId(),
                     member.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), stateOf(room).players())));
             List<Delivery> deliveries = new ArrayList<>();
+            addPrivateGameEntry(deliveries, room, member.getId());
             addForPlayers(deliveries, room.playerIdsSnapshot().stream().filter(id -> !id.equals(member.getId())).toList(), stateOf(room));
             deliverAll(deliveries);
             return null;
@@ -185,7 +227,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String oldRoomId = player.getRoomId();
         List<String> involvedRooms = oldRoomId == null ? List.of(message.roomId()) : List.of(oldRoomId, message.roomId());
         roomManager.serialized(involvedRooms, () -> {
-            Room room = expireMembershipsAndFindRoom(message.roomId());
+            Room room = settleRoom(message.roomId());
             if (room == null) {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
@@ -207,26 +249,20 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             player.setRoomId(message.roomId());
             if (!alreadyJoined) {
                 var usedColours = room.playerIdsSnapshot().stream().map(playersById::get)
-                        .filter(java.util.Objects::nonNull).map(PlayerState::getColour).toList();
+                        .filter(Objects::nonNull).map(PlayerState::getColour).toList();
                 player.setColour(COLOURS.stream().filter(colour -> !usedColours.contains(colour)).findFirst().orElseThrow());
                 player.setAvatarPreset(room.getAvatarCollection().randomId());
                 player.setDisplayName(message.displayName());
-                Integer seat = null;
-                if (room.getPhase().equals("lobby")) {
-                    var occupied = room.playerIdsSnapshot().stream().map(playersById::get)
-                            .map(PlayerState::getSeat).toList();
-                    seat = java.util.stream.IntStream.range(0, RoomRules.CAPACITY)
-                            .filter(index -> !occupied.contains(index)).findFirst().orElseThrow();
-                }
+                var occupied = room.playerIdsSnapshot().stream().map(playersById::get)
+                        .map(PlayerState::getSeat).toList();
+                int seat = java.util.stream.IntStream.range(0, RoomRules.CAPACITY)
+                        .filter(index -> !occupied.contains(index)).findFirst().orElseThrow();
                 player.setRecoveryToken((UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", ""));
-                player.setMovementSequence(0);
-                player.setMovementEpoch(0);
-                player.setFacing(seat == null || seat == 0 ? "down" : seat < 5 ? "left" : seat == 5 ? "up" : "right");
+                player.setFacing(RoomRules.seatFacing(seat));
                 player.setReady(false);
                 player.setSeat(seat);
-                player.setX(seat == null ? RoomRules.SPAWN_X : RoomRules.seatX(seat));
-                player.setY(seat == null ? RoomRules.SPAWN_Y : RoomRules.seatY(seat));
-                player.setLastAcceptedMovementNanos(nanoTime.getAsLong());
+                player.setX(RoomRules.seatX(seat));
+                player.setY(RoomRules.seatY(seat));
                 room.addPlayer(player.getId());
                 List<String> existingPlayers = room.playerIdsSnapshot().stream()
                         .filter(playerId -> !playerId.equals(player.getId())).toList();
@@ -234,14 +270,26 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
             List<ServerMessage.PlayerView> snapshotPlayers = room.playerIdsSnapshot().stream()
                     .map(playersById::get)
-                    .filter(java.util.Objects::nonNull)
+                    .filter(Objects::nonNull)
                     .map(this::viewOf)
                     .toList();
             pendingDeliveries.add(new Delivery(player.getId(),
                     new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), snapshotPlayers)));
+            addPrivateGameEntry(pendingDeliveries, room, player.getId());
             deliverAll(pendingDeliveries);
             return null;
         });
+    }
+
+    /** A Room Snapshot is followed by exactly the Game state and history its recipient may read. */
+    private void addPrivateGameEntry(Collection<Delivery> deliveries, Room room, String playerId) {
+        Game game = room.getGame();
+        if (game == null || game.participant(playerId) == null) return;
+        deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+        deliveries.add(new Delivery(playerId, new ServerMessage.ChatHistory(game.historyFor(playerId).stream()
+                .map(entry -> new ServerMessage.ChatView(entry.channel(), entry.round(),
+                        entry.senderPlayerId(), entry.senderName(), entry.text()))
+                .toList())));
     }
 
     private void handleLeave(PlayerState player) {
@@ -306,25 +354,120 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             Room room = roomManager.findRoom(roomId);
             if (!player.getId().equals(room.getHostPlayerId())) {
                 deliver(error(player, "not_host", "Only the Host can start the game."));
-            } else if (!room.getPhase().equals("lobby")) {
-                deliver(error(player, "invalid_phase", "The game has already started."));
-            } else {
-                room.startGame();
-                List<String> starting = room.playerIdsSnapshot();
-                for (int index = 0; index < starting.size(); index++) {
-                    PlayerState member = playersById.get(starting.get(index));
-                    member.setSeat(null);
-                    member.setFacing("down");
-                    member.setX(RoomRules.spawnX(index));
-                    member.setY(RoomRules.spawnY(index));
-                    member.setLastAcceptedMovementNanos(nanoTime.getAsLong());
-                }
-                List<Delivery> deliveries = new ArrayList<>();
-                addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
-                deliverAll(deliveries);
+                return null;
             }
+            if (!room.getPhase().equals("lobby")) {
+                deliver(error(player, "invalid_phase", "The game has already started."));
+                return null;
+            }
+            List<PlayerState> members = room.playerIdsSnapshot().stream().map(playersById::get)
+                    .filter(Objects::nonNull).sorted(Comparator.comparingInt(PlayerState::getSeat)).toList();
+            String blocked = startBlockedReason(members);
+            if (blocked != null) {
+                deliver(error(player, "start_blocked", blocked));
+                return null;
+            }
+            List<Role> roles = roleAssignment.apply(ROLE_DISTRIBUTION);
+            if (roles.size() != members.size()) throw new IllegalStateException("Role assignment must cover every Player");
+            List<Participant> roster = new ArrayList<>();
+            for (int index = 0; index < members.size(); index++) {
+                PlayerState member = members.get(index);
+                roster.add(new Participant(member.getId(), member.getDisplayName(), member.getColour(),
+                        member.getAvatarPreset(), member.getSeat(), roles.get(index)));
+            }
+            room.startGame(new Game(roster, roomManager.currentTimeMillis()));
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+            addGameState(deliveries, room);
+            deliverAll(deliveries);
             return null;
         });
+    }
+
+    private static String startBlockedReason(List<PlayerState> members) {
+        if (members.size() != RoomRules.CAPACITY)
+            return "All " + RoomRules.CAPACITY + " Players must be in the Room to start.";
+        if (members.stream().anyMatch(member -> !member.isConnected()))
+            return "Every Player must be connected to start.";
+        if (members.stream().anyMatch(member -> !member.isReady()))
+            return "Every Player must be Ready to start.";
+        return null;
+    }
+
+    private void handleNightAction(PlayerState player, ClientMessage.NightAction message) {
+        withGame(player, (room, game) -> {
+            Game.Rejection rejection = switch (message.choice()) {
+                case MAFIA_VOTE -> game.submitMafiaVote(player.getId(), message.round(), message.targetPlayerId());
+                case PROTECT -> game.submitProtection(player.getId(), message.round(), message.targetPlayerId());
+                case INVESTIGATE -> game.submitInvestigation(player.getId(), message.round(), message.targetPlayerId());
+            };
+            if (rejection != null) {
+                deliver(error(player, rejection.code(), rejection.message()));
+                return;
+            }
+            // Only the recipients whose authorized view changed are told, so a timed phase
+            // never signals hidden Role activity to anyone else.
+            List<String> recipients = message.choice() == NightChoice.MAFIA_VOTE
+                    ? livingMafiaMembers(room, game) : List.of(player.getId());
+            List<Delivery> deliveries = new ArrayList<>();
+            addGameStateFor(deliveries, room, recipients);
+            deliverAll(deliveries);
+        });
+    }
+
+    private void handleMeetingVote(PlayerState player, ClientMessage.MeetingVote message) {
+        withGame(player, (room, game) -> {
+            Game.Rejection rejection = game.submitBallot(player.getId(), message.round(), message.targetPlayerId());
+            if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
+            else {
+                List<Delivery> deliveries = new ArrayList<>();
+                addGameStateFor(deliveries, room, List.of(player.getId()));
+                deliverAll(deliveries);
+            }
+        });
+    }
+
+    private void handleChat(PlayerState player, ClientMessage.SendChat message) {
+        withGame(player, (room, game) -> {
+            Game.Rejection rejection = game.submitChat(player.getId(), message.channel(), message.text());
+            if (rejection != null) {
+                deliver(error(player, rejection.code(), rejection.message()));
+                return;
+            }
+            ChatEntry entry = game.lastChatEntry();
+            List<Delivery> deliveries = new ArrayList<>();
+            for (String memberId : room.playerIdsSnapshot()) {
+                if (game.participant(memberId) != null && entry.isReadableBy(memberId)) {
+                    deliveries.add(new Delivery(memberId, new ServerMessage.ChatMessage(entry.channel(),
+                            entry.round(), entry.senderPlayerId(), entry.senderName(), entry.text())));
+                }
+            }
+            deliverAll(deliveries);
+        });
+    }
+
+    private void withGame(PlayerState player, BiConsumer<Room, Game> action) {
+        String roomId = player.getRoomId();
+        if (roomId == null) {
+            deliver(error(player, "not_in_room", "Join a Room first."));
+            return;
+        }
+        roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            Game game = room == null ? null : room.getGame();
+            if (game == null) deliver(error(player, "invalid_phase", "The Game has not started."));
+            else if (game.participant(player.getId()) == null)
+                deliver(error(player, "invalid_action", "You are not a participant in this Game."));
+            else action.accept(room, game);
+            return null;
+        });
+    }
+
+    private List<String> livingMafiaMembers(Room room, Game game) {
+        return room.playerIdsSnapshot().stream().filter(memberId -> {
+            Participant participant = game.participant(memberId);
+            return participant != null && participant.isLiving() && participant.role() == Role.MAFIA;
+        }).toList();
     }
 
     private ServerMessage.RoomState stateOf(Room room) {
@@ -332,41 +475,57 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 room.playerIdsSnapshot().stream().map(playersById::get).map(this::viewOf).toList());
     }
 
-    private void handleMove(PlayerState player, ClientMessage.MovePlayer message) {
-        String roomId = player.getRoomId();
-        if (roomId == null) {
-            deliver(error(player, "not_in_room", "Join a room before moving."));
-            return;
-        }
-        roomManager.serialized(List.of(roomId), () -> {
-            if (message.epoch() != player.getMovementEpoch() || message.sequence() <= player.getMovementSequence()) {
-                correctMovement(player);
-                return null;
-            }
-            player.setMovementSequence(message.sequence());
-            long now = nanoTime.getAsLong();
-            if (!roomManager.findRoom(roomId).getPhase().equals("playing") ||
-                    !RoomRules.acceptsMovement(player, message.x(), message.y(), now)) {
-                player.setMovementEpoch(player.getMovementEpoch() + 1);
-                correctMovement(player);
-                return null;
-            }
-            player.setFacing(message.facing());
-            player.setX(message.x());
-            player.setY(message.y());
-            player.setLastAcceptedMovementNanos(now);
-            Room room = roomManager.findRoom(roomId);
-            List<Delivery> pendingDeliveries = new ArrayList<>();
-            addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
-                    new ServerMessage.PlayerMoved(player.getId(), message.x(), message.y(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()));
-            deliverAll(pendingDeliveries);
-            return null;
-        });
+    private void addGameState(Collection<Delivery> deliveries, Room room) {
+        addGameStateFor(deliveries, room, room.playerIdsSnapshot());
     }
 
-    private void correctMovement(PlayerState player) {
-        deliver(new Delivery(player.getId(), new ServerMessage.MovementCorrection(player.getId(),
-                player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch())));
+    private void addGameStateFor(Collection<Delivery> deliveries, Room room, Collection<String> playerIds) {
+        Game game = room.getGame();
+        if (game == null) return;
+        for (String playerId : playerIds) {
+            if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+        }
+    }
+
+    /** Builds one recipient's complete authorized view; nothing here is merely hidden in the client. */
+    private ServerMessage.GameState gameStateFor(Game game, String playerId) {
+        Participant self = game.participant(playerId);
+        List<ServerMessage.RosterView> roster = game.roster().stream()
+                .map(member -> new ServerMessage.RosterView(member.playerId(), member.displayName(), member.colour(),
+                        member.avatarPreset(), member.seat(), member.status()))
+                .toList();
+        Game.Outcome outcome = game.outcome();
+        List<Game.Ballot> revealed = game.revealedBallots();
+        List<ServerMessage.RoleView> roles = game.isFinished()
+                ? game.roster().stream().map(member -> new ServerMessage.RoleView(member.playerId(), member.role())).toList()
+                : null;
+        return new ServerMessage.GameState(game.phase().wireValue(), game.round(),
+                game.remainingMillis(roomManager.currentTimeMillis()), roster,
+                outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.victimPlayerId(),
+                        outcome.eliminatedPlayerId(), outcome.eliminatedMafia()),
+                revealed == null ? null : revealed.stream().map(GameWebSocketHandler::ballotView).toList(),
+                game.winner(), roles, selfViewOf(game, self));
+    }
+
+    private static ServerMessage.BallotView ballotView(Game.Ballot ballot) {
+        return new ServerMessage.BallotView(ballot.voterPlayerId(), ballot.targetPlayerId());
+    }
+
+    private static ServerMessage.SelfView selfViewOf(Game game, Participant self) {
+        boolean mafia = self.role() == Role.MAFIA;
+        boolean livingMafia = mafia && self.isLiving();
+        boolean doctor = self.role() == Role.DOCTOR && self.isLiving();
+        boolean sheriff = self.role() == Role.SHERIFF;
+        return new ServerMessage.SelfView(self.role(), self.role().faction(), self.status(), self.killedByMafia(),
+                mafia ? game.mafiaTeam() : null,
+                livingMafia ? game.mafiaVotesView().stream().map(GameWebSocketHandler::ballotView).toList() : null,
+                livingMafia ? game.acceptedMafiaVote(self.playerId()) : null,
+                doctor ? game.acceptedProtection() : null,
+                doctor ? game.blockedProtection() : null,
+                sheriff && self.isLiving() ? game.acceptedInvestigation() : null,
+                sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
+                        result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
+                game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()));
     }
 
     @Override
@@ -396,6 +555,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
         Room room = roomManager.findRoom(roomId);
         boolean hostDeparted = player.getId().equals(room.getHostPlayerId());
+        Game game = room.getGame();
+        // Leave and expiry end participation; the Game Roster entry and its Seat remain.
+        if (game != null) game.forfeit(player.getId());
         room.removePlayer(player.getId());
         if (hostDeparted) room.playerIdsSnapshot().stream().map(playersById::get)
                 .filter(PlayerState::isConnected).findFirst()
@@ -407,6 +569,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (hostDeparted && !room.playerIdsSnapshot().isEmpty()) {
             addForPlayers(pendingDeliveries, room.playerIdsSnapshot(), stateOf(room));
         }
+        if (game != null) addGameState(pendingDeliveries, room);
         if (acknowledgeLeave) {
             pendingDeliveries.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
         }
@@ -415,7 +578,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private ServerMessage.PlayerView viewOf(PlayerState player) {
         return new ServerMessage.PlayerView(
-                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), player.isReady(), player.isConnected(), player.getX(), player.getY(), player.getFacing(), player.getMovementSequence(), player.getMovementEpoch()
+                player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(),
+                player.getSeat(), player.isReady(), player.isConnected(), player.getX(), player.getY(), player.getFacing()
         );
     }
 
@@ -436,9 +600,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         ConnectionOutbox outbox = outboxes.get(delivery.playerId());
         if (outbox == null) return;
         TextMessage textMessage = new TextMessage(objectMapper.writeValueAsString(delivery.message()));
-        String movementPlayerId = delivery.message() instanceof ServerMessage.PlayerMoved moved
-                ? moved.playerId() : null;
-        if (!outbox.enqueue(textMessage, movementPlayerId)) {
+        if (!outbox.enqueue(textMessage)) {
             PlayerState player = playersById.get(delivery.playerId());
             if (player != null && player.getSession().isOpen()) {
                 WebSocketSession failedSession = player.getSession();
