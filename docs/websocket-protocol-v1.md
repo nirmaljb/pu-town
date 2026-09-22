@@ -173,13 +173,13 @@ For the same reason an accepted choice updates only the recipients whose authori
 
 The Game Roster outlives Room Membership. When a Membership ends through Leave or recovery expiry, a living Participant Forfeits: their status becomes `left`, their own pending Night choice or ballot is withdrawn, and they stop counting toward every majority and toward victory. A choice aimed at them stays locked and simply cannot take effect, because a Player who is not living can never be a target at resolution. A Disconnect alone forfeits nothing — the Participant stays `living` for the whole recovery reservation, remains in every denominator, and their locked choice survives their return.
 
-Roster entries remain in `players` with their Seat and Display Name after the Membership ends, so the table never renumbers and a departure is visible as a departure.
+Roster entries remain in `players` with their Seat and Display Name after the Membership ends, so the table never renumbers and a departure is visible as a departure. Only a living Participant Forfeits, so an Eliminated Player who leaves stays `eliminated`; a client shows any roster entry without a current Room Membership as an empty Seat marked Left.
 
 Victory is checked after every elimination and every Forfeit. The Village wins when no Mafia is living; the Mafia win when living Mafia are at least as many as living Village.
 
-A victory decided by an Elimination is announced before it ends the Game: the Night Result or Voting Result phase runs in full, so the Players see who died and, for a Meeting, how everyone voted, and the Game enters `finished` at that phase's own deadline. A Forfeit belongs to no phase, so a victory it decides enters `finished` at once, mid-phase.
+A victory decided by an Elimination is announced before it ends the Game: the Night Result or Voting Result phase runs in full, so the Players see who died and, for a Meeting, how everyone voted, and the Game enters `finished` at that phase's own deadline. A Forfeit belongs to no phase, so a victory it decides enters `finished` at once, mid-phase. A Forfeit during a Night Result or Voting Result whose Elimination already decided the Game still counts, but it does not cut that announcement short.
 
-Once `finished`, `winner` carries the Faction and `roles` reveals every Participant's Role, including those who were eliminated or left. `remainingMs` is `null` and the Game state no longer changes.
+Once `finished`, `winner` carries the Faction and `roles` reveals every Participant's Role, including those who were eliminated or left. `remainingMs` is `null` and the Game state no longer changes: a later Leave or expiry ends only the Membership and forfeits nothing.
 
 ## Membership recovery foundation
 

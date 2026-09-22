@@ -20,6 +20,10 @@ const ROLE_BRIEFS: Record<Role, string> = {
   sheriff: "Investigate one other living Player each Night to learn whether they are Mafia."
 };
 
+function capitalized(role: Role): string {
+  return role[0]!.toUpperCase() + role.slice(1);
+}
+
 type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerId: string | null }>;
 
 type Choice = "mafia_vote" | "protect" | "investigate" | "meeting_vote";
@@ -102,6 +106,12 @@ export class GameInterface {
           <p class="sleep-note">Close your eyes. You have no Night action.</p>
         </div>
       </section>
+      <section class="outcome-reveal" hidden aria-live="polite">
+        <div class="outcome-card">
+          <h2 class="outcome-headline"></h2>
+          <p class="outcome-verdict"></p>
+        </div>
+      </section>
       <aside class="game-panel" hidden aria-label="Game controls">
         <div class="role-card">
           <p class="eyebrow role-faction"></p>
@@ -151,6 +161,7 @@ export class GameInterface {
     this.element(".game-panel").hidden = !active;
     if (!game || !world) {
       this.element(".sleep-veil").hidden = true;
+      this.element(".outcome-reveal").hidden = true;
       this.#lastGame = null;
       this.#renderedChat = 0;
       this.#rendered = null;
@@ -171,6 +182,7 @@ export class GameInterface {
       this.renderRole(game, world);
       this.renderAction(game, world);
       this.renderResults(game);
+      this.renderOutcome(game);
     }
     this.renderChat(game, world);
   }
@@ -191,31 +203,58 @@ export class GameInterface {
   }
 
   private announcement(game: GameView): string {
-    const outcome = game.outcome;
     if (game.phase === "finished") {
       return game.winner === "mafia" ? "The Mafia win." : "The Village wins.";
     }
-    if (!outcome) return "";
+    const outcome = this.outcomeText(game);
+    return outcome === null ? "" : [outcome.headline, outcome.verdict].filter(Boolean).join(" ");
+  }
+
+  /**
+   * A Night names its victim but never their Role; a Meeting reveals only Mafia or not Mafia.
+   * No death reads the same whether nobody was attacked or the Doctor saved them.
+   */
+  private outcomeText(game: GameView): Readonly<{ headline: string; verdict: string; mafia: boolean | null }> | null {
+    const outcome = game.outcome;
+    if (!outcome) return null;
     if (outcome.kind === "night") {
-      return outcome.victimPlayerId === null
-        ? "Nobody died last night."
-        : `${this.nameOf(game, outcome.victimPlayerId)} did not survive the night.`;
+      return {
+        headline: outcome.victimPlayerId === null
+          ? "Nobody died last night."
+          : `${this.nameOf(game, outcome.victimPlayerId)} did not survive the night.`,
+        verdict: "", mafia: null
+      };
     }
-    if (outcome.eliminatedPlayerId === null) return "The town could not agree. Nobody was eliminated.";
-    return `${this.nameOf(game, outcome.eliminatedPlayerId)} was eliminated. They were `
-      + (outcome.eliminatedMafia ? "Mafia." : "not Mafia.");
+    if (outcome.eliminatedPlayerId === null) {
+      return { headline: "The town could not agree. Nobody was eliminated.", verdict: "", mafia: null };
+    }
+    return {
+      headline: `${this.nameOf(game, outcome.eliminatedPlayerId)} was eliminated.`,
+      verdict: outcome.eliminatedMafia ? "They were Mafia." : "They were not Mafia.",
+      mafia: outcome.eliminatedMafia
+    };
+  }
+
+  private renderOutcome(game: GameView): void {
+    const reveal = this.element(".outcome-reveal");
+    const outcome = game.phase === "night_result" || game.phase === "voting_result" ? this.outcomeText(game) : null;
+    reveal.hidden = outcome === null;
+    if (outcome === null) return;
+    reveal.dataset.verdict = outcome.mafia === null ? "" : outcome.mafia ? "mafia" : "not-mafia";
+    this.element(".outcome-headline").textContent = outcome.headline;
+    this.element(".outcome-verdict").textContent = outcome.verdict;
   }
 
   private renderRole(game: GameView, world: WorldState): void {
     const self = game.self;
     this.element(".role-faction").textContent = self.faction === "mafia" ? "Mafia" : "Village";
-    this.element(".role-name").textContent = self.role[0]!.toUpperCase() + self.role.slice(1);
+    this.element(".role-name").textContent = capitalized(self.role);
     this.element(".role-brief").textContent = ROLE_BRIEFS[self.role];
     const team = self.mafiaTeam?.filter(playerId => playerId !== world.selfPlayerId) ?? [];
     this.element(".role-team").textContent = team.length === 0
       ? "" : `Your team: ${team.map(playerId => this.nameOf(game, playerId)).join(", ")}`;
     this.element(".role-notice").textContent = self.killedByMafia
-      ? "The Mafia killed you in the night."
+      ? "You were killed by the mafias"
       : self.status === "eliminated" ? "You were eliminated. You can watch, but not act." : "";
   }
 
@@ -321,8 +360,11 @@ export class GameInterface {
         `${this.nameOf(game, ballot.voterPlayerId)} → ${ballot.targetPlayerId === null ? "Skip" : this.nameOf(game, ballot.targetPlayerId)}`)));
     }
     if (game.roles) {
-      parts.push(this.list("Everyone's Role", game.roles.map(reveal =>
-        `${this.nameOf(game, reveal.playerId)} — ${reveal.role}`)));
+      parts.push(this.list("Everyone's Role", game.roles.map(reveal => {
+        const status = game.players.find(entry => entry.playerId === reveal.playerId)?.status;
+        const fate = status === "eliminated" ? " (eliminated)" : status === "left" ? " (left)" : "";
+        return `${this.nameOf(game, reveal.playerId)} — ${capitalized(reveal.role)}${fate}`;
+      })));
     }
     panel.hidden = parts.length === 0;
     panel.replaceChildren(...parts);

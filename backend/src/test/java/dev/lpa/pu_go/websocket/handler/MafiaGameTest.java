@@ -739,6 +739,45 @@ class MafiaGameTest {
         assertEquals(RoomRules.CAPACITY, game(0).path("roles").size());
     }
 
+    @Test
+    void departuresAfterTheGameEndsNeverChangeTheFinalResult() throws Exception {
+        startTable("final-stable");
+        advance(REVEAL);
+        for (int seat = 3; seat <= 6; seat++) send(table.get(seat), "{\"version\":1,\"type\":\"leave_room\"}");
+        JsonNode finished = game(0);
+        assertEquals("finished", finished.path("phase").asText());
+        // A winning Player leaving the finished Game is a Leave, not a Forfeit.
+        send(table.get(7), "{\"version\":1,\"type\":\"leave_room\"}");
+        handler.afterConnectionClosed(table.get(8), CloseStatus.NORMAL);
+        advance(120_000);
+        JsonNode after = game(0);
+        assertEquals(finished.path("players"), after.path("players"));
+        assertEquals("living", after.path("players").get(7).path("status").asText());
+        assertEquals(finished.path("roles"), after.path("roles"));
+        assertEquals("mafia", after.path("winner").asText());
+    }
+
+    @Test
+    void aForfeitDuringADecidingNightResultLetsTheAnnouncementRunInFull() throws Exception {
+        startTable("result-runs");
+        advance(REVEAL);
+        for (int round = 1; round <= 4; round++) {
+            act(0, "mafia_vote", round, 2 + round);
+            act(1, "mafia_vote", round, 2 + round);
+            if (round < 4) advance(NIGHT + NIGHT_RESULT + DISCUSSION + VOTING + VOTING_RESULT);
+        }
+        advance(NIGHT);
+        assertEquals("mafia", game(0).path("winner").asText());
+        send(table.get(8), "{\"version\":1,\"type\":\"leave_room\"}");
+        JsonNode announcing = game(0);
+        assertEquals("night_result", announcing.path("phase").asText());
+        assertEquals("player-7", announcing.path("outcome").path("victimPlayerId").asText());
+        assertTrue(announcing.path("roles").isNull(), "roles revealed before the result ended");
+        advance(NIGHT_RESULT);
+        assertEquals("finished", game(0).path("phase").asText());
+        assertEquals("mafia", game(0).path("winner").asText());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private final List<String> tokens = new ArrayList<>();

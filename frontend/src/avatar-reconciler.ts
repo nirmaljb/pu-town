@@ -73,15 +73,17 @@ export class AvatarReconciler implements WorldReconciler {
         playerId: player.playerId, displayName: player.displayName, colour: player.colour,
         avatarPreset: player.avatarPreset, seat: player.seat, status: "living" as const
       }));
-    const seated = roster.filter(entry => entry.status !== "left");
-    const present = new Set(seated.map(entry => entry.playerId));
+    // Only a living Participant Forfeits, so an Eliminated Player who leaves, or anyone
+    // leaving a finished Game, keeps their status; the ended Membership is what empties the Seat.
+    const departed = new Set(roster.filter(entry => entry.status === "left" || !world.players.has(entry.playerId))
+      .map(entry => entry.playerId));
+    const present = new Set(roster.filter(entry => !departed.has(entry.playerId)).map(entry => entry.playerId));
     for (const [playerId, avatar] of this.#avatars) {
       if (!present.has(playerId)) {
         avatar.container.destroy(true);
         this.#avatars.delete(playerId);
       }
     }
-    const departed = new Set(roster.filter(entry => entry.status === "left").map(entry => entry.playerId));
     for (const [playerId, marker] of this.#emptySeats) {
       if (!departed.has(playerId)) {
         marker.destroy();
@@ -89,7 +91,7 @@ export class AvatarReconciler implements WorldReconciler {
       }
     }
     for (const entry of roster) {
-      if (entry.status === "left") {
+      if (departed.has(entry.playerId)) {
         this.markSeatLeft(entry);
         continue;
       }

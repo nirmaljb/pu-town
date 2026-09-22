@@ -192,8 +192,12 @@ public final class Game {
      * already eliminated one only stops being a current Room Member.
      */
     public void forfeit(String playerId) {
+        // A finished Game is final: later departures end Memberships, never the result.
+        if (phase == GamePhase.FINISHED) return;
         Participant participant = participants.get(playerId);
         if (participant == null || participant.status() != ParticipantStatus.LIVING) return;
+        // An Elimination may already have decided the Game; its result phase still runs in full.
+        boolean undecided = winner == null;
         participant.setStatus(ParticipantStatus.LEFT);
         // The departing actor's own pending choices go; choices aimed at them stay locked
         // and simply become ineffective at resolution.
@@ -202,7 +206,7 @@ public final class Game {
         if (participant.role() == Role.DOCTOR) protection = null;
         if (participant.role() == Role.SHERIFF) investigation = null;
         checkVictory();
-        if (winner != null && phase != GamePhase.FINISHED) finish();
+        if (undecided && winner != null) finish();
     }
 
     // ----- resolution --------------------------------------------------------------------
