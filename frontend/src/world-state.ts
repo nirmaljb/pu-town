@@ -1,4 +1,4 @@
-import type { ChatEntry, GameView, PlayerView, RoomPhase, ServerMessage } from "./protocol.js";
+import type { ChatEntry, FieldView, GameView, PlayerView, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
@@ -7,6 +7,8 @@ export type WorldState = Readonly<{
   selfPlayerId: string | null;
   players: ReadonlyMap<string, PlayerView>;
   game: GameView | null;
+  /** The part of the town this recipient can see, only while the Game Roams. */
+  field: FieldView | null;
   chat: readonly ChatEntry[];
   lastError: Readonly<{ code: string; message: string }> | null;
 }>;
@@ -14,7 +16,7 @@ export type WorldState = Readonly<{
 export function emptyWorld(): WorldState {
   return {
     phase: null, hostPlayerId: null, roomId: null, selfPlayerId: null,
-    players: new Map(), game: null, chat: [], lastError: null
+    players: new Map(), game: null, field: null, chat: [], lastError: null
   };
 }
 
@@ -38,11 +40,19 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage): World
         players: new Map(event.players.map(player => [player.playerId, player])),
         // A Room Snapshot is followed by the recipient's own Game state and history.
         game: world.roomId === event.roomId ? world.game : null,
+        field: world.roomId === event.roomId ? world.field : null,
         chat: world.roomId === event.roomId ? world.chat : []
       };
     case "game_state": {
       const { version, type, ...game } = event;
-      return { ...world, game };
+      // A field belongs to one Roam; leaving it, or a new one beginning, discards the old view.
+      const field = game.phase === "roam" && world.field?.round === game.round ? world.field : null;
+      return { ...world, game, field };
+    }
+    case "field_state": {
+      const { version, type, ...field } = event;
+      if (world.game?.phase !== "roam" || world.game.round !== field.round) return world;
+      return { ...world, field };
     }
     case "chat_history":
       return { ...world, chat: event.messages };

@@ -1,5 +1,6 @@
 package dev.lpa.pu_go.websocket.message;
 
+import dev.lpa.pu_go.game.Ability;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -43,10 +44,23 @@ public final class ClientMessageDecoder {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.StartGame(1, type);
             }
-            case "mafia_vote", "protect", "investigate" -> {
-                requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));
-                yield new ClientMessage.NightAction(1, type, dev.lpa.pu_go.game.NightChoice.ofWireValue(type),
-                        round(root), requiredText(root, "targetPlayerId"));
+            case "move" -> {
+                requireOnly(root, Set.of("version", "type", "x", "y", "facing"));
+                String facing = requiredText(root, "facing");
+                if (!FACINGS.contains(facing))
+                    throw new InvalidClientMessageException("malformed_message", "facing must be up, left, down or right.");
+                yield new ClientMessage.Move(1, type, coordinate(root, "x"), coordinate(root, "y"), facing);
+            }
+            case "use_ability" -> {
+                requireOnly(root, Set.of("version", "type", "ability", "round", "targetPlayerId"));
+                Ability ability = Ability.ofWireValue(requiredText(root, "ability"));
+                if (ability == null) throw new InvalidClientMessageException("malformed_message", "Unknown ability.");
+                JsonNode target = root.get("targetPlayerId");
+                boolean named = target.isTextual() && !target.asText().isBlank();
+                if (ability.targeted() ? !named : !target.isNull())
+                    throw new InvalidClientMessageException("malformed_message",
+                            ability.targeted() ? "This ability needs a targetPlayerId." : "This ability takes no target.");
+                yield new ClientMessage.UseAbility(1, type, ability, round(root), named ? target.asText() : null);
             }
             case "meeting_vote" -> {
                 requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));
@@ -90,6 +104,15 @@ public final class ClientMessageDecoder {
             }
             default -> throw new InvalidClientMessageException("unknown_message_type", "Unknown message type: " + type);
         };
+    }
+
+    private static final Set<String> FACINGS = Set.of("up", "left", "down", "right");
+
+    private static double coordinate(JsonNode root, String name) throws InvalidClientMessageException {
+        JsonNode value = root.get(name);
+        if (value == null || !value.isNumber() || !Double.isFinite(value.asDouble()))
+            throw new InvalidClientMessageException("malformed_message", name + " must be a finite number.");
+        return value.asDouble();
     }
 
     private static int round(JsonNode root) throws InvalidClientMessageException {

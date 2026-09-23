@@ -18,13 +18,17 @@ export type PlayerView = Readonly<{
   facing: Direction;
 }>;
 
-export const GAME_PHASES = ["role_reveal", "night", "night_result", "discussion", "voting", "voting_result", "finished"] as const;
+export const GAME_PHASES = ["role_reveal", "roam", "meeting_call", "discussion", "voting", "voting_result", "finished"] as const;
 export type GamePhase = typeof GAME_PHASES[number];
 export const ROLES = ["mafia", "villager", "doctor", "sheriff"] as const;
 export type Role = typeof ROLES[number];
 export type Faction = "mafia" | "village";
 export type ParticipantStatus = "living" | "eliminated" | "left";
 export type ChatChannel = "public" | "mafia";
+export const ABILITIES = ["kill", "vanish", "shield", "scan", "report", "emergency"] as const;
+export type Ability = typeof ABILITIES[number];
+/** Only these name a target Player; the rest are sent with a null target. */
+export const TARGETED_ABILITIES: readonly Ability[] = ["kill", "shield", "scan"];
 export const MAX_CHAT_CHARACTERS = 240;
 
 /** One Game Roster entry: it outlives the Room Membership that created it. */
@@ -40,9 +44,15 @@ export type RosterEntry = Readonly<{
 /** An accepted Mafia vote or a disclosed Meeting ballot. A null target is an explicit Skip. */
 export type Ballot = Readonly<{ voterPlayerId: string; targetPlayerId: string | null }>;
 
+/**
+ * A Meeting Call (report, emergency or timeout) names its caller, the reported Body and every
+ * death since the last Meeting; a Meeting names its verdict.
+ */
 export type GameOutcome = Readonly<{
-  kind: "night" | "meeting";
-  victimPlayerId: string | null;
+  kind: "report" | "emergency" | "timeout" | "meeting";
+  callerPlayerId: string | null;
+  bodyPlayerId: string | null;
+  deaths: readonly string[];
   eliminatedPlayerId: string | null;
   eliminatedMafia: boolean | null;
 }>;
@@ -56,11 +66,6 @@ export type SelfView = Readonly<{
   status: ParticipantStatus;
   killedByMafia: boolean;
   mafiaTeam: readonly string[] | null;
-  mafiaVotes: readonly Ballot[] | null;
-  mafiaVote: string | null;
-  protect: string | null;
-  protectBlockedPlayerId: string | null;
-  investigate: string | null;
   investigations: readonly Investigation[] | null;
   meetingVoted: boolean;
   meetingVote: string | null;
@@ -78,6 +83,27 @@ export type GameView = Readonly<{
   self: SelfView;
 }>;
 
+/** One Avatar this recipient is allowed to see during a Roam. */
+export type FieldPlayer = Readonly<{ playerId: string; x: number; y: number; facing: Direction; ghost: boolean; vanished: boolean }>;
+export type Body = Readonly<{ playerId: string; x: number; y: number }>;
+
+/** This recipient's own position and ability timers; null where their Role has no such ability. */
+export type OwnField = Readonly<{
+  x: number;
+  y: number;
+  facing: Direction;
+  correction: number;
+  crowding: number | null;
+  primaryCooldownMs: number | null;
+  vanishCooldownMs: number | null;
+  vanishedMs: number | null;
+  shieldTargetPlayerId: string | null;
+  shieldMs: number | null;
+  emergencyAvailable: boolean;
+}>;
+
+export type FieldView = Readonly<{ round: number; players: readonly FieldPlayer[]; bodies: readonly Body[]; self: OwnField }>;
+
 export type ChatEntry = Readonly<{
   channel: ChatChannel;
   round: number;
@@ -92,6 +118,7 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
   | (GameView & Readonly<{ version: 1; type: "game_state" }>)
+  | (FieldView & Readonly<{ version: 1; type: "field_state" }>)
   | (ChatEntry & Readonly<{ version: 1; type: "chat_message" }>)
   | Readonly<{ version: 1; type: "chat_history"; messages: readonly ChatEntry[] }>
   | Readonly<{ version: 1; type: "player_left"; playerId: string; reason: "left" | "disconnected" | "expired" }>
@@ -107,12 +134,27 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "ping" }>
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
   | Readonly<{ version: 1; type: "leave_room" }>
-  | Readonly<{ version: 1; type: "mafia_vote" | "protect" | "investigate"; round: number; targetPlayerId: string }>
+  | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
+  | Readonly<{ version: 1; type: "use_ability"; ability: Ability; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
 
-export function nightAction(type: "mafia_vote" | "protect" | "investigate", round: number, targetPlayerId: string): ClientMessage {
-  return { version: 1, type, round: requireRound(round), targetPlayerId: requireNonEmptyString(targetPlayerId, "targetPlayerId") };
+export function move(x: number, y: number, facing: Direction): ClientMessage {
+  return {
+    version: 1, type: "move",
+    x: Math.round(requireFiniteNumber(x, "x") * 10) / 10,
+    y: Math.round(requireFiniteNumber(y, "y") * 10) / 10,
+    facing: requireFacing(facing)
+  };
+}
+
+export function useAbility(ability: Ability, round: number, targetPlayerId: string | null): ClientMessage {
+  const targeted = TARGETED_ABILITIES.includes(ability);
+  if (targeted !== (targetPlayerId !== null)) throw new Error(targeted ? "This ability needs a target" : "This ability takes no target");
+  return {
+    version: 1, type: "use_ability", ability: requireMember(ability, ABILITIES, "ability"), round: requireRound(round),
+    targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
+  };
 }
 
 export function meetingVote(round: number, targetPlayerId: string | null): ClientMessage {
@@ -208,6 +250,8 @@ export function decodeServerMessage(payload: string): ServerMessage {
       return { version: 1, type, player: decodePlayer(message.player) };
     case "game_state":
       return { version: 1, type, ...decodeGameView(message) };
+    case "field_state":
+      return { version: 1, type, ...decodeField(message) };
     case "chat_message":
       requireFields(message, ["version", "type", "channel", "round", "senderPlayerId", "senderName", "text"]);
       return { version: 1, type, ...decodeChatEntry(message) };
@@ -272,11 +316,54 @@ function decodeRosterEntry(value: unknown): RosterEntry {
   };
 }
 
-function decodeOutcome(outcome: Record<string, unknown>): GameOutcome {
-  requireFields(outcome, ["kind", "victimPlayerId", "eliminatedPlayerId", "eliminatedMafia"]);
+function decodeField(message: Record<string, unknown>): FieldView {
+  requireFields(message, ["version", "type", "round", "players", "bodies", "self"]);
   return {
-    kind: requireMember(outcome.kind, ["night", "meeting"] as const, "outcome kind"),
-    victimPlayerId: requireOptionalPlayerId(outcome.victimPlayerId),
+    round: requireRound(message.round),
+    players: requireArray(message.players, "players").map(value => {
+      const player = requireRecord(value, "field player");
+      requireFields(player, ["playerId", "x", "y", "facing", "ghost", "vanished"]);
+      return {
+        playerId: requireNonEmptyString(player.playerId, "playerId"),
+        x: requireFiniteNumber(player.x, "x"), y: requireFiniteNumber(player.y, "y"),
+        facing: requireFacing(player.facing), ghost: requireBoolean(player.ghost), vanished: requireBoolean(player.vanished)
+      };
+    }),
+    bodies: requireArray(message.bodies, "bodies").map(value => {
+      const body = requireRecord(value, "body");
+      requireFields(body, ["playerId", "x", "y"]);
+      return { playerId: requireNonEmptyString(body.playerId, "playerId"), x: requireFiniteNumber(body.x, "x"), y: requireFiniteNumber(body.y, "y") };
+    }),
+    self: decodeOwnField(requireRecord(message.self, "self"))
+  };
+}
+
+function decodeOwnField(self: Record<string, unknown>): OwnField {
+  requireFields(self, ["x", "y", "facing", "correction", "crowding", "primaryCooldownMs", "vanishCooldownMs", "vanishedMs",
+    "shieldTargetPlayerId", "shieldMs", "emergencyAvailable"]);
+  const optionalCounter = (value: unknown) => value === null ? null : requireCounter(value);
+  return {
+    x: requireFiniteNumber(self.x, "x"),
+    y: requireFiniteNumber(self.y, "y"),
+    facing: requireFacing(self.facing),
+    correction: requireCounter(self.correction),
+    crowding: self.crowding === null ? null : requireFiniteNumber(self.crowding, "crowding"),
+    primaryCooldownMs: optionalCounter(self.primaryCooldownMs),
+    vanishCooldownMs: optionalCounter(self.vanishCooldownMs),
+    vanishedMs: optionalCounter(self.vanishedMs),
+    shieldTargetPlayerId: requireOptionalPlayerId(self.shieldTargetPlayerId),
+    shieldMs: optionalCounter(self.shieldMs),
+    emergencyAvailable: requireBoolean(self.emergencyAvailable)
+  };
+}
+
+function decodeOutcome(outcome: Record<string, unknown>): GameOutcome {
+  requireFields(outcome, ["kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedMafia"]);
+  return {
+    kind: requireMember(outcome.kind, ["report", "emergency", "timeout", "meeting"] as const, "outcome kind"),
+    callerPlayerId: requireOptionalPlayerId(outcome.callerPlayerId),
+    bodyPlayerId: requireOptionalPlayerId(outcome.bodyPlayerId),
+    deaths: requireArray(outcome.deaths, "deaths").map(id => requireNonEmptyString(id, "playerId")),
     eliminatedPlayerId: requireOptionalPlayerId(outcome.eliminatedPlayerId),
     eliminatedMafia: outcome.eliminatedMafia === null ? null : requireBoolean(outcome.eliminatedMafia)
   };
@@ -298,19 +385,13 @@ function decodeRoleReveal(value: unknown): Readonly<{ playerId: string; role: Ro
 }
 
 function decodeSelf(self: Record<string, unknown>): SelfView {
-  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "mafiaVotes", "mafiaVote",
-    "protect", "protectBlockedPlayerId", "investigate", "investigations", "meetingVoted", "meetingVote"]);
+  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote"]);
   return {
     role: requireMember(self.role, ROLES, "Role"),
     faction: requireMember(self.faction, ["mafia", "village"] as const, "Faction"),
     status: requireMember(self.status, ["living", "eliminated", "left"] as const, "participation status"),
     killedByMafia: requireBoolean(self.killedByMafia),
     mafiaTeam: self.mafiaTeam === null ? null : requireArray(self.mafiaTeam, "mafiaTeam").map(id => requireNonEmptyString(id, "playerId")),
-    mafiaVotes: self.mafiaVotes === null ? null : requireArray(self.mafiaVotes, "mafiaVotes").map(decodeBallot),
-    mafiaVote: requireOptionalPlayerId(self.mafiaVote),
-    protect: requireOptionalPlayerId(self.protect),
-    protectBlockedPlayerId: requireOptionalPlayerId(self.protectBlockedPlayerId),
-    investigate: requireOptionalPlayerId(self.investigate),
     investigations: self.investigations === null ? null : requireArray(self.investigations, "investigations").map(decodeInvestigation),
     meetingVoted: requireBoolean(self.meetingVoted),
     meetingVote: requireOptionalPlayerId(self.meetingVote)

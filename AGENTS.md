@@ -4,11 +4,11 @@ This file is the operational guide for agents and contributors working in this r
 
 ## Project at a glance
 
-PU Town is a real-time ten-Player Mafia game:
+PU Town is a real-time Mafia game for four to ten Players, played like Among Us:
 
 - `frontend/` is a strict TypeScript, Vite, and Phaser client.
 - `backend/` is a Java 17 Spring Boot WebSocket server.
-- Players are seated for the whole Room; the client renders server state and predicts nothing.
+- Players sit at their Seat in the Lobby and Meetings, and walk the town during the Roam; the client predicts only its own Avatar's steps.
 - The server owns Room membership, Roles, the Game clock, and every result.
 - Every Game message is built per recipient; client-side concealment is never the enforcement.
 - Server state is in memory; there is no database or external service.
@@ -30,7 +30,7 @@ The current ADRs establish these invariants:
 - The client applies queued network events only at Phaser game-frame boundaries.
 - Room transitions and outbound event creation are serialized per room.
 - Slow connections use bounded, strictly ordered outbound queues that never evict or replace an event; a connection that cannot keep up is closed and recovers a complete snapshot.
-- A Player holds one Seat from joining until their Membership ends. The protocol carries no movement at all, and a Player's position is only ever the Seat the server gave them (ADR 0013, which retires ADR 0001 and supersedes the coalescing half of ADR 0004).
+- A Player holds one Seat from joining until their Membership ends. During a Roam the client sends its own positions, the server accepts only reachable ones and corrects the rest, and each Participant's `field_state` holds only what they can see (ADR 0015, which supersedes ADR 0013).
 - The Game Roster outlives Room Membership; Elimination, Leave and Forfeit are distinct.
 - `game_state` is built per recipient, and an accepted choice updates only the recipients whose authorized view changed.
 
@@ -96,7 +96,8 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/main.ts` — Phaser game bootstrap and canvas sizing.
 - `frontend/src/pu-town-scene.ts` — scene lifecycle, URL configuration, and per-frame rendering of the entry and Game surfaces.
 - `frontend/src/game-interface.ts` — the Game overlay: phase banner and countdown, Role card, target list and Confirm, results, and chat.
-- `frontend/src/avatar-facing.ts` — the inward Facing each Seat holds for the whole Room.
+- `frontend/src/avatar-facing.ts` — the inward Facing each Seat holds in the Lobby and Meetings.
+- `frontend/src/field-controller.ts` — walks this client's own Avatar during a Roam and adopts server corrections.
 - `frontend/src/protocol.ts` — client message builders, server message types, and strict decoding.
 - `frontend/src/reconnecting-game-client.ts` — entry deadlines, transport-timer heartbeat health, frame-applied timeout effects, reconnection, and retained recovery intent.
 - `frontend/src/join-interface.ts` — entry form, remembered Display Name, Room Code controls, and reconnect overlay.
@@ -105,7 +106,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/network-frame-boundary.ts` — drains network events at the start of each game frame.
 - `frontend/src/world-state.ts` — pure client world state and event reducer.
 - `frontend/src/avatar-reconciler.ts` — creates, moves, and removes Phaser avatars to match world state.
-- `frontend/src/room-rules.ts` — client copies of the shared Room dimensions.
+- `frontend/src/room-rules.ts` — client copies of the shared town dimensions, obstacles, Vision and ability ranges.
 - `frontend/src/avatar-seating.ts` — client-only sit-down timing for a newly taken Seat.
 - `frontend/src/avatar-chooser.ts` — Lobby chooser; clicking a character requests it from the Room.
 - `frontend/src/avatar-presets.ts` — the active Room collection, its strict decoding, and the join-time fetch.
@@ -122,10 +123,10 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `backend/src/main/java/dev/lpa/pu_go/avatar/` — publication loading, per-Room collections, and the collection endpoint.
 - `backend/data/published-avatars.json` — the publication the authoring tool writes and the backend reads.
 - `backend/src/main/java/dev/lpa/pu_go/room/RoomManager.java` — room registry and deterministic per-room locking.
-- `backend/src/main/java/dev/lpa/pu_go/room/RoomRules.java` — authoritative Room bounds, capacity, and Seat positions and Facing.
-- `backend/src/main/java/dev/lpa/pu_go/game/` — the Game: `Role`, `Faction`, `GamePhase`, `Participant`, `ChatEntry`, and `Game`, the rules engine that owns phases, resolution, forfeits and victory.
+- `backend/src/main/java/dev/lpa/pu_go/room/RoomRules.java` — authoritative town bounds, obstacles, capacity, and Seat positions and Facing.
+- `backend/src/main/java/dev/lpa/pu_go/game/` — the Game: `Role`, `Faction`, `GamePhase`, `Ability`, `FieldRules`, `Participant`, `ChatEntry`, and `Game`, the rules engine that owns phases, movement, sight, abilities, Crowding, forfeits and victory.
 - `backend/src/main/java/dev/lpa/pu_go/websocket/config/WebSocketConfig.java` — WebSocket route and allowed browser origins.
-- `backend/src/main/java/dev/lpa/pu_go/websocket/handler/GameWebSocketHandler.java` — connection, join, leave, Start, Game submissions, the phase sweep, and per-recipient delivery.
+- `backend/src/main/java/dev/lpa/pu_go/websocket/handler/GameWebSocketHandler.java` — connection, join, leave, Start, Game submissions, the phase sweep, the Roam's field tick, and per-recipient delivery.
 - `backend/src/main/java/dev/lpa/pu_go/websocket/handler/ConnectionOutbox.java` — bounded, strictly ordered outbound delivery.
 - `backend/src/main/java/dev/lpa/pu_go/websocket/message/` — protocol DTOs, strict decoding, and client-error handling.
 - `backend/src/test/` — Spring context, WebSocket handler, outbox, and `MafiaGameTest`, which plays whole Games at the WebSocket boundary on a controlled clock.
@@ -139,9 +140,9 @@ The client accepts this infrastructure query parameter (room/name options are ig
 4. `game-transport.ts` decodes server messages into `network-inbox.ts`.
 5. `network-frame-boundary.ts` applies queued events to `world-state.ts` before the frame renders anything.
 6. `avatar-reconciler.ts` and `game-interface.ts` bring the Phaser objects and the DOM overlay into line with that state.
-7. Confirming a choice sends one Game control; the backend validates it against the phase, round, Role and lock, and answers only the recipients whose authorized view changed.
+7. During a Roam, `field-controller.ts` walks this client's Avatar and sends `move`; abilities send `use_ability`. The backend validates each against the phase, round, Role, range, sight and cooldown, streams each Participant their own `field_state` ten times a second, and answers only the recipients whose authorized view changed.
 
-After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. In a Game, recovery also restores the recipient's Role, locked choices, retained Sheriff results and readable chat; a Disconnect never Forfeits, and the Participant stays in every majority until the reservation ends. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect. Started Rooms reject new memberships, including fresh Join after Leave or expiry; valid recovery still follows the current phase. Start needs all ten Players present, connected and Ready, and a blocked Start says which. Expired recovery returns to lobby selection without a Join again shortcut. Final Leave or expiry removes a started Room immediately, while recoverable disconnected memberships keep it alive. Never-started empty Lobbies retain their five-minute lifetime.
+After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. In a Game, recovery also restores the recipient's Role, locked ballot, retained Scan results, readable chat and, during a Roam, their field; a Disconnect never Forfeits, and the Participant stays in every majority until the reservation ends. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect. Started Rooms reject new memberships, including fresh Join after Leave or expiry; valid recovery still follows the current phase. Start needs at least four Players present, all connected and Ready, and a blocked Start says which. Expired recovery returns to lobby selection without a Join again shortcut. Final Leave or expiry removes a started Room immediately, while recoverable disconnected memberships keep it alive. Never-started empty Lobbies retain their five-minute lifetime.
 
 Lobby Avatar selection is cosmetic and optional: the Room's pinned collection of named published choices, requested by clicking one, and accepted through structural Room State. Selection shares the Start lock, does not change Ready, and updates existing seated Avatars without replaying arrivals. Recovery preserves accepted selection; Leave ends it. A client fetches the Room's collection over HTTP on join and creates every texture before the scene renders the Room. Publishing reaches Rooms created from then on, without a rebuild or restart; never make drafts or authoring endpoints available in the Player app.
 
@@ -150,7 +151,7 @@ Lobby Avatar selection is cosmetic and optional: the Room's pinned collection of
 - Treat files under `backend/src/` and `frontend/src/` as authoritative source. Do not infer current behavior from generated `backend/target/` or `frontend/dist/` files.
 - The backend is the single reader of the publication file; never hard-code a second catalogue, and never reintroduce a build-time copy into either bundle. Publish validates at least one complete distinct design before atomic replacement. Run the authoring boundary suite through `npm test`; draft edits must not mutate publication.
 - The protocol is represented in Java message/decoder code, TypeScript protocol code, and `docs/websocket-protocol-v1.md`. Keep all three synchronized. The collection endpoint's payload shape is part of that contract: `AvatarCollectionController` and `avatar-presets.ts` must agree.
-- Room dimensions are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`, and Seat Facing in `RoomRules.seatFacing` and `avatar-facing.ts`. Keep shared values synchronized; the backend remains authoritative.
+- Town dimensions and obstacles are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`, Vision and ranges in `FieldRules.java` and `room-rules.ts`, and Seat Facing in `RoomRules.seatFacing` and `avatar-facing.ts`. Keep shared values synchronized; the backend remains authoritative.
 - Preserve strict message decoding: unknown fields, unsupported versions, and malformed payloads should remain explicit errors.
 - Never widen a Game view to save a round trip. `game_state` is built per recipient, an absent private field is `null` rather than filtered, and an accepted choice reaches only the recipients whose authorized view changed — broadcasting it would leak hidden Role activity through the countdown alone.
 - The Game clock is the server's. Phases end on their own deadline, each deadline derives from the one it replaces, and every submission carries the round it was chosen in.

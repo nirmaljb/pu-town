@@ -1,6 +1,7 @@
 import { AvatarChooser } from "./avatar-chooser.js";
 import type { AvatarCollection } from "./avatar-presets.js";
 import { ROOM_CAPACITY } from "./meeting-area.js";
+import { MIN_PLAYERS } from "./room-rules.js";
 import type { WorldState } from "./world-state.js";
 import { normalizeDisplayName } from "./protocol.js";
 import { ReconnectingGameClient, type ConnectionState } from "./reconnecting-game-client.js";
@@ -40,7 +41,7 @@ export class JoinInterface {
           </div>
           <p class="entry-status" role="status" aria-live="polite"></p>
         </form>
-        <p class="footnote"><span>Exactly 10 Players</span><span>Three Mafia against the Village</span></p>
+        <p class="footnote"><span>4–10 Players</span><span>Roam the town. Find the Mafia.</span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>
@@ -129,13 +130,13 @@ export class JoinInterface {
     const gathered = this.#world?.players.size ?? 0;
     const waiting = [...(this.#world?.players.values() ?? [])].filter(player => !player.ready || !player.connected).length;
     this.element(".host-guidance").textContent = host
-      ? gathered < ROOM_CAPACITY
-        ? `You are the Host. ${ROOM_CAPACITY - gathered} more ${ROOM_CAPACITY - gathered === 1 ? "Player" : "Players"} needed.`
+      ? gathered < MIN_PLAYERS
+        ? `You are the Host. ${MIN_PLAYERS - gathered} more ${MIN_PLAYERS - gathered === 1 ? "Player" : "Players"} needed.`
         : waiting > 0 ? `You are the Host. Waiting for ${waiting} to be Ready and connected.` : "You are the Host. Everyone is Ready."
       : "Waiting for the Host to start";
     this.element<HTMLButtonElement>(".start-game").hidden = !host;
     this.element<HTMLButtonElement>(".start-game").disabled =
-      state.status !== "playing" || gathered < ROOM_CAPACITY || waiting > 0;
+      state.status !== "playing" || gathered < MIN_PLAYERS || waiting > 0;
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
     ready.textContent = self?.ready ? "Not Ready" : "Ready";

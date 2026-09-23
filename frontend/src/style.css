@@ -220,12 +220,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 .game-countdown { font: 700 22px ui-monospace, monospace; color: #efbd72; }
 .game-round { font-size: 12px; color: #e0cba9; }
 .game-announcement { flex: 1 0 100%; margin: 4px 0 0; font-size: 14px; color: #ffe6bb; min-height: 1.2em; }
-.sleep-veil {
-  position: fixed; top: 128px; left: 0; width: calc(100% - 340px); height: calc(100% - 148px);
-  display: grid; place-items: center; background: #060911e8; color: #c9d4ea; text-align: center; padding: 20px;
-}
-.sleep-veil h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: .04em; }
-/* The six-second Night and Meeting outcome, drawn over the table it describes. */
+/* The Meeting Call and verdict, drawn over the table they describe. */
 .outcome-reveal {
   position: fixed; top: 128px; left: 0; width: calc(100% - 340px); height: calc(100% - 148px);
   display: grid; place-items: center; padding: 20px; background: #060911a0; text-align: center;
@@ -241,7 +236,6 @@ h2 { margin: 16px 0; font-size: 28px; }
 .outcome-reveal[data-verdict="not-mafia"] .outcome-verdict { color: #9fe0b1; }
 @keyframes outcome-in { from { opacity: 0; transform: translateY(12px) scale(.94); } }
 @media (prefers-reduced-motion: reduce) { .outcome-card, .outcome-verdict { animation: none; } }
-.sleep-note { margin: 0; font-size: 13px; color: #8e9db8; }
 .game-panel {
   pointer-events: auto; position: fixed; right: 16px; top: 68px; bottom: 16px; width: 308px;
   display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding: 14px;
@@ -277,10 +271,47 @@ h2 { margin: 16px 0; font-size: 28px; }
 .chat-input { flex: 1 1 auto; min-width: 0; padding: 8px; border-radius: 2px; border: 2px solid #a9aa91; background: #241d16; color: #fff0c9; }
 .chat-form button { padding: 8px 12px; border-radius: 2px; border: 2px solid #a9aa91; background: #453726; color: #fff0c9; cursor: pointer; }
 .chat-form button:disabled, .chat-input:disabled { opacity: .5; }
+/* The Roam: ability bar along the bottom of the town view. */
+.ability-bar {
+  pointer-events: auto; position: fixed; bottom: 26px; left: calc((100% - 340px) / 2); transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 14px; background: #221a15e0; border: 2px solid #9b784e; color: #fff0c9;
+}
+.ability-buttons { display: flex; gap: 8px; }
+.ability {
+  position: relative; display: grid; justify-items: center; gap: 2px; min-width: 78px; padding: 8px 10px 6px;
+  border: 2px solid #ffe0a0; border-radius: 3px; background: #5d4a33; color: #fff0c9; cursor: pointer; font-weight: 700;
+}
+.ability kbd { font: 700 11px ui-monospace, monospace; padding: 1px 5px; background: #221a15; border: 1px solid #9b784e; border-radius: 2px; }
+.ability-label { font-size: 14px; }
+.ability-note { font-size: 11px; font-weight: 400; color: #ffe6bb; min-height: 1.2em; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ability:disabled { opacity: .5; cursor: default; border-color: #7d6a50; }
+.ability-kill:not(:disabled) { background: #8b2a22; border-color: #ff9f8f; }
+.ability-vanish:not(:disabled) { background: #3d3566; border-color: #c7b8ff; }
+.ability-shield:not(:disabled) { background: #245a44; border-color: #9fe0b1; }
+.ability-scan:not(:disabled) { background: #2a4a78; border-color: #a9cbff; }
+.ability-report:not(:disabled) { background: #a0522d; border-color: #ffd29f; animation: pulse 900ms infinite alternate; }
+.ability-emergency:not(:disabled) { background: #9b1c1c; border-color: #ffb3b3; }
+@keyframes pulse { to { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .ability-report:not(:disabled) { animation: none; } }
+.ability-status { margin: 0; font-size: 12px; color: #e0cba9; min-height: 1em; }
+.ability-status:empty { display: none; }
+.crowding { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #e0cba9; }
+.crowding-meter { width: 160px; height: 8px; background: #221a15; border: 1px solid #9b784e; }
+.crowding-fill { height: 100%; width: 0; background: #9fe0b1; transition: width 100ms linear; }
+.crowding-fill[data-level="mid"] { background: #efbd72; }
+.crowding-fill[data-level="high"] { background: #ff6b5b; }
+.ability-toast {
+  position: fixed; top: 150px; left: calc((100% - 340px) / 2); transform: translateX(-50%); margin: 0;
+  padding: 10px 18px; font-size: 16px; font-weight: 700; background: #221a15f2; border: 2px solid #9b784e; color: #fff0c9;
+}
+.ability-toast[data-tone="danger"] { border-color: #ff9f8f; color: #ffc4b9; }
+.ability-toast[data-tone="safe"] { border-color: #9fe0b1; color: #c9f3d4; }
 .game-panel :focus-visible { outline: 3px solid #ffe0a0; outline-offset: 2px; }
 @media (max-width: 860px) {
   .in-game #stage { width: 100%; height: 34vh; top: 132px; }
   .game-banner { right: 0; }
-  .sleep-veil, .outcome-reveal { width: 100%; height: 34vh; }
+  .outcome-reveal { width: 100%; height: 34vh; }
+  .ability-bar { left: 12px; right: 12px; transform: none; bottom: auto; top: calc(132px + 34vh - 92px); }
   .game-panel { left: 12px; right: 12px; width: auto; top: calc(132px + 34vh); }
 }

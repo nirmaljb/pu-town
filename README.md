@@ -1,6 +1,6 @@
 # PU Town
 
-PU Town is a ten-Player social deduction game. Players gather in an isolated Room, take a seat around a Town Hall table, and play a full Mafia Game: three Mafia against seven Villagers, with a Doctor and a Sheriff among them. A Spring Boot server owns the Roles, the clock and every result, and tells each Player only what they are entitled to know.
+PU Town is a social deduction game for four to ten Players, played like Among Us. Players gather in an isolated Room around a Town Hall table, then roam a small town: the Mafia hunt and can vanish, the Doctor shields, the Sheriff scans, and anyone who finds a Body reports it and calls everyone back to the table to vote. A Spring Boot server owns the Roles, the clock, every position and every result, and tells each Player only what they are entitled to know, down to which Players they can see.
 
 The project currently targets local development. It consists of two processes:
 
@@ -44,7 +44,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a wooden Town Hall Meeting Area with ten inward-facing chairs. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; nobody walks.
 
-The creator is Host. Start Game needs a full table: all ten Players present, connected and Ready, and the Host is told which of those is missing until it is. An eleventh Join receives “Room is full”, and a started Room accepts no new Players.
+The creator is Host. Start Game needs at least four Players present, all connected and Ready, and the Host is told which of those is missing until it is. An eleventh Join receives “Room is full”, and a started Room accepts no new Players.
 
 Players receive one of ten randomly assigned published LPC Avatar Presets. In the Lobby, the character panel beside the Meeting Area shows ten named thumbnails in published order. Click to preview privately, then Use character to share the selection with the Room. Choices can repeat and do not change Ready; Start locks the last server-accepted choice. A coloured marker underneath distinguishes Players even when presets repeat. Copy code shares the Room Code; Leave Room returns to the form. The browser remembers the last submitted Display Name.
 
@@ -58,21 +58,32 @@ Vite may choose another port when `5173` is unavailable, but the backend current
 
 ## The Game
 
-Start deals three Mafia, five Villagers, one Doctor and one Sheriff. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
+Start deals one Mafia to a table of four to six, two to seven or eight, and three to nine or ten, with one Doctor and one Sheriff; everyone else is a Villager. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
 
 | Phase | Length | What you do |
 | --- | --- | --- |
-| Night | 90 s | Mafia agree a target and talk on a private channel; the Doctor protects someone; the Sheriff investigates someone. |
-| Night result | 6 s | Who died, or that the Night passed quietly. |
-| Discussion | 120 s | Everyone living talks in public chat. |
+| Roam | up to 150 s | Walk the town with WASD or the arrow keys. Use your abilities, find Bodies. |
+| Meeting called | 5 s | Who called it, and everyone who died since the last Meeting. |
+| Discussion | 90 s | Everyone living talks in public chat at the Town Hall table. |
 | Voting | 30 s | One vote each, or Skip. |
 | Voting result | 6 s | The result, with every vote shown. |
 
-Phases end on their own deadline, never on everyone having acted, so nobody can hurry or stall a Night. Choices are final once confirmed, and the Mafia see each other's votes as they are cast. A Player dies at Night only if a majority of the living Mafia named them and the Doctor did not protect them; the Doctor cannot protect the same Player two Nights running and may protect themselves. The Sheriff learns only whether the investigated Player is Mafia, and keeps every past result. A successful protection, a split vote and an idle Night look identical from outside.
+During the Roam:
 
-A Meeting eliminates a Player only on a majority of the living, and reveals only their Faction. The Village wins when no Mafia is living; the Mafia win when they are at least as many as the Village. The Game then ends at once and every Role is revealed, including for Players who died or left.
+| Key | Who | What it does |
+| --- | --- | --- |
+| Q | Mafia | Kill a Village Player right next to you (25 s cooldown). They drop as a Body where they stood. |
+| E | Mafia | Vanish: nobody but the Mafia can see you for 10 s (30 s cooldown). |
+| Q | Doctor | Shield a nearby Player for 20 s: the next kill on them fails and uses up the Shield (30 s cooldown). |
+| Q | Sheriff | Scan a nearby Player and learn, privately, whether they are Mafia (30 s cooldown). |
+| R | Everyone living | Report a Body next to you, which calls a Meeting. |
+| F | Everyone living | At the red button in the Town Hall: call an Emergency Meeting, once per Game. |
 
-Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their locked choice, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
+Every cooldown starts 10 seconds in at the beginning of each Roam. Villagers have no ability, and they can't stay close to one Player for long: after about six seconds within arm's reach of someone, a Villager is pushed away. You only see Players within your Vision, a circle around you, and the server never sends anyone the positions it would hide. A kill is secret: only the Mafia and the victim know until someone finds the Body or a Meeting is called. The victim becomes a Ghost who can still walk and watch but is invisible to the living. The Mafia can whisper to each other during the Roam. If nobody reports anything before the Roam ends, a Meeting is called anyway, and every Roam starts with everyone standing up from their Seat.
+
+A Meeting eliminates a Player only on a majority of the living, and reveals only their Faction. The Village wins when no Mafia is living; the Mafia win the moment they are at least as many as the Village. The Game then ends at once and every Role is revealed, including for Players who died or left.
+
+Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 
 ## Client options
 

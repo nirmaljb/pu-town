@@ -2,7 +2,6 @@ package dev.lpa.pu_go.websocket.handler;
 
 import dev.lpa.pu_go.game.ChatEntry;
 import dev.lpa.pu_go.game.Game;
-import dev.lpa.pu_go.game.NightChoice;
 import dev.lpa.pu_go.game.Participant;
 import dev.lpa.pu_go.game.Role;
 import dev.lpa.pu_go.player.PlayerState;
@@ -43,9 +42,19 @@ import java.util.function.UnaryOperator;
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
-    /** The fixed distribution: three Mafia against five Villagers, one Doctor and one Sheriff. */
-    static final List<Role> ROLE_DISTRIBUTION = List.of(Role.MAFIA, Role.MAFIA, Role.MAFIA,
-            Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.VILLAGER, Role.DOCTOR, Role.SHERIFF);
+
+    /**
+     * The deal for a table of this size: one Mafia for four to six Players, two for seven or
+     * eight and three for nine or ten, always with one Doctor and one Sheriff.
+     */
+    static List<Role> rolesFor(int players) {
+        int mafia = players >= 9 ? 3 : players >= 7 ? 2 : 1;
+        List<Role> roles = new ArrayList<>();
+        for (int index = 0; index < players; index++) {
+            roles.add(index < mafia ? Role.MAFIA : index == mafia ? Role.DOCTOR : index == mafia + 1 ? Role.SHERIFF : Role.VILLAGER);
+        }
+        return List.copyOf(roles);
+    }
 
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -113,7 +122,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
-                    else if (incoming instanceof ClientMessage.NightAction action) handleNightAction(player, action);
+                    else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
+                    else if (incoming instanceof ClientMessage.UseAbility ability) handleAbility(player, ability);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
@@ -172,6 +182,34 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
         transferDisconnectedHost(room);
         return roomManager.findRoom(code);
+    }
+
+    /**
+     * The Roam's heartbeat: Villager crowding advances, and every Participant receives the
+     * part of the town they can see along with their own ability timers.
+     */
+    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 100)
+    public void tickFields() {
+        for (String code : roomManager.roomIdsSnapshot()) {
+            roomManager.serialized(List.of(code), () -> {
+                Room room = roomManager.findRoom(code);
+                Game game = room == null ? null : room.getGame();
+                if (game == null || !game.isRoaming()) return null;
+                long now = roomManager.currentTimeMillis();
+                game.tick(now);
+                List<Delivery> deliveries = new ArrayList<>();
+                for (String memberId : room.playerIdsSnapshot()) {
+                    if (game.participant(memberId) != null) deliveries.add(new Delivery(memberId, fieldStateFor(game, memberId, now)));
+                }
+                deliverAll(deliveries);
+                return null;
+            });
+        }
+    }
+
+    private static ServerMessage.FieldState fieldStateFor(Game game, String playerId, long now) {
+        return new ServerMessage.FieldState(game.round(), game.fieldPlayersFor(playerId, now),
+                game.bodiesFor(playerId), game.ownFieldOf(playerId, now));
     }
 
     private boolean hostGraceElapsed(Room room) {
@@ -367,7 +405,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 deliver(error(player, "start_blocked", blocked));
                 return null;
             }
-            List<Role> roles = roleAssignment.apply(ROLE_DISTRIBUTION);
+            List<Role> roles = roleAssignment.apply(rolesFor(members.size()));
             if (roles.size() != members.size()) throw new IllegalStateException("Role assignment must cover every Player");
             List<Participant> roster = new ArrayList<>();
             for (int index = 0; index < members.size(); index++) {
@@ -385,8 +423,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private static String startBlockedReason(List<PlayerState> members) {
-        if (members.size() != RoomRules.CAPACITY)
-            return "All " + RoomRules.CAPACITY + " Players must be in the Room to start.";
+        if (members.size() < RoomRules.MIN_PLAYERS)
+            return "At least " + RoomRules.MIN_PLAYERS + " Players must be in the Room to start.";
         if (members.stream().anyMatch(member -> !member.isConnected()))
             return "Every Player must be connected to start.";
         if (members.stream().anyMatch(member -> !member.isReady()))
@@ -394,23 +432,38 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         return null;
     }
 
-    private void handleNightAction(PlayerState player, ClientMessage.NightAction message) {
+    /** Movement is answered only through the next field state, never with an error per step. */
+    private void handleMove(PlayerState player, ClientMessage.Move message) {
+        withGame(player, (room, game) ->
+                game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
+    }
+
+    private void handleAbility(PlayerState player, ClientMessage.UseAbility message) {
         withGame(player, (room, game) -> {
-            Game.Rejection rejection = switch (message.choice()) {
-                case MAFIA_VOTE -> game.submitMafiaVote(player.getId(), message.round(), message.targetPlayerId());
-                case PROTECT -> game.submitProtection(player.getId(), message.round(), message.targetPlayerId());
-                case INVESTIGATE -> game.submitInvestigation(player.getId(), message.round(), message.targetPlayerId());
-            };
-            if (rejection != null) {
-                deliver(error(player, rejection.code(), rejection.message()));
+            long now = roomManager.currentTimeMillis();
+            Game.AbilityResult result = game.useAbility(player.getId(), message.ability(), message.round(),
+                    message.targetPlayerId(), now);
+            List<Delivery> deliveries = new ArrayList<>();
+            if (result.rejection() != null) deliveries.add(error(player, result.rejection().code(), result.rejection().message()));
+            if (result.effect() == null) {
+                deliverAll(deliveries);
                 return;
             }
-            // Only the recipients whose authorized view changed are told, so a timed phase
-            // never signals hidden Role activity to anyone else.
-            List<String> recipients = message.choice() == NightChoice.MAFIA_VOTE
-                    ? livingMafiaMembers(room, game) : List.of(player.getId());
-            List<Delivery> deliveries = new ArrayList<>();
-            addGameStateFor(deliveries, room, recipients);
+            // Only the recipients whose authorized view changed are told: a kill reaches the
+            // killer, the victim and the Mafia, while the living Village learns of it only by
+            // finding the Body or at the next Meeting.
+            switch (result.effect()) {
+                case KILLED -> {
+                    List<String> told = new ArrayList<>(livingMafiaMembers(room, game));
+                    if (!told.contains(result.targetPlayerId())) told.add(result.targetPlayerId());
+                    addGameStateFor(deliveries, room, told);
+                }
+                case MEETING_CALLED, GAME_WON -> addGameState(deliveries, room);
+                case SCANNED -> addGameStateFor(deliveries, room, List.of(player.getId()));
+                case VANISHED, SHIELDED -> deliveries.add(new Delivery(player.getId(), fieldStateFor(game, player.getId(), now)));
+                // The killer's refusal is already queued; the Doctor sees the spent Shield on the next tick.
+                case SHIELD_ABSORBED -> { }
+            }
             deliverAll(deliveries);
         });
     }
@@ -492,7 +545,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Participant self = game.participant(playerId);
         List<ServerMessage.RosterView> roster = game.roster().stream()
                 .map(member -> new ServerMessage.RosterView(member.playerId(), member.displayName(), member.colour(),
-                        member.avatarPreset(), member.seat(), member.status()))
+                        member.avatarPreset(), member.seat(), game.statusSeenBy(member, playerId)))
                 .toList();
         Game.Outcome outcome = game.outcome();
         List<Game.Ballot> revealed = game.revealedBallots();
@@ -501,8 +554,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 : null;
         return new ServerMessage.GameState(game.phase().wireValue(), game.round(),
                 game.remainingMillis(roomManager.currentTimeMillis()), roster,
-                outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.victimPlayerId(),
-                        outcome.eliminatedPlayerId(), outcome.eliminatedMafia()),
+                outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.callerPlayerId(),
+                        outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedMafia()),
                 revealed == null ? null : revealed.stream().map(GameWebSocketHandler::ballotView).toList(),
                 game.winner(), roles, selfViewOf(game, self));
     }
@@ -513,16 +566,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private static ServerMessage.SelfView selfViewOf(Game game, Participant self) {
         boolean mafia = self.role() == Role.MAFIA;
-        boolean livingMafia = mafia && self.isLiving();
-        boolean doctor = self.role() == Role.DOCTOR && self.isLiving();
         boolean sheriff = self.role() == Role.SHERIFF;
         return new ServerMessage.SelfView(self.role(), self.role().faction(), self.status(), self.killedByMafia(),
                 mafia ? game.mafiaTeam() : null,
-                livingMafia ? game.mafiaVotesView().stream().map(GameWebSocketHandler::ballotView).toList() : null,
-                livingMafia ? game.acceptedMafiaVote(self.playerId()) : null,
-                doctor ? game.acceptedProtection() : null,
-                doctor ? game.blockedProtection() : null,
-                sheriff && self.isLiving() ? game.acceptedInvestigation() : null,
                 sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
                         result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
                 game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()));

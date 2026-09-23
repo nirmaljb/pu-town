@@ -1,24 +1,28 @@
 import Phaser from "phaser";
-import type { Direction } from "./avatar-facing.js";
+import { seatFacing, type Direction } from "./avatar-facing.js";
+import { HALL_X, HALL_Y, OBSTACLES, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
 
 export const ROOM_CAPACITY = 10;
 
-/** Seat zero is north; clockwise geometry mirrors authoritative RoomRules. */
+/** Seat zero is north; clockwise geometry mirrors authoritative RoomRules, in town coordinates. */
 export function meetingSeat(seat: number): { x: number; y: number; facing: Direction } {
   return {
-    x: Math.round(640 + 390 * Math.sin(seat * Math.PI / 5)),
-    y: Math.round(382 - 205 * Math.cos(seat * Math.PI / 5)),
-    facing: seat === 0 ? "down" : seat < 5 ? "left" : seat === 5 ? "up" : "right"
+    x: HALL_X + Math.round(640 + 390 * Math.sin(seat * 2 * Math.PI / ROOM_CAPACITY)),
+    y: HALL_Y + Math.round(382 - 205 * Math.cos(seat * 2 * Math.PI / ROOM_CAPACITY)),
+    facing: seatFacing(seat)
   };
 }
 
-/** The physical Meeting Area is independent of the Room's waiting-phase controls. */
+/** The town the Players roam, with the Town Hall and its Meeting Area at its centre. */
 export class MeetingArea {
   readonly #container: Phaser.GameObjects.Container;
+  readonly #town: Phaser.GameObjects.Graphics;
+  readonly #canopies: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene) {
+    this.#town = drawTown(scene);
+    this.#canopies = drawCanopies(scene);
     const floor = scene.add.graphics();
-    floor.fillStyle(0x251e22).fillRect(0, 0, 1280, 720);
     floor.fillStyle(0x493126).fillRect(66, 72, 1148, 610);
     // Staggered plank joints and small grain marks keep the floor pixel aligned.
     for (let row = 0; row < 18; row++) {
@@ -57,15 +61,20 @@ export class MeetingArea {
       fontFamily: '"Courier New", monospace', fontStyle: "bold", fontSize: "25px",
       color: "#fff0c9", stroke: "#382921", strokeThickness: 5
     }).setOrigin(0.5);
-    const centre = scene.add.text(640, 366, "Meeting Area", {
-      fontFamily: '"Courier New", monospace', fontSize: "20px", color: "#ece4bf"
-    }).setOrigin(0.5);
-    const hint = scene.add.text(640, 399, "Take a moment. Gather your people.", {
+    // The Emergency Meeting button stands at the centre of the rug.
+    const button = scene.add.graphics();
+    button.fillStyle(0x2c2c34).fillEllipse(640, 390, 58, 26);
+    button.fillStyle(0x7a1f1f).fillEllipse(640, 382, 40, 22);
+    button.fillStyle(0xd93b3b).fillEllipse(640, 378, 34, 16);
+    button.fillStyle(0xff8a80, 0.8).fillEllipse(634, 375, 10, 5);
+    const hint = scene.add.text(640, 420, "Emergency Meeting · press F here", {
       fontFamily: "sans-serif", fontSize: "13px", color: "#d7ddc7"
     }).setOrigin(0.5);
-    this.#container = scene.add.container(0, 0, [floor, title, centre, hint]).setDepth(-1000);
+    this.#container = scene.add.container(HALL_X, HALL_Y, [floor, title, button, hint]).setDepth(-1000);
     for (let seat = 0; seat < ROOM_CAPACITY; seat++) {
-      const { x, y } = meetingSeat(seat);
+      const world = meetingSeat(seat);
+      const x = world.x - HALL_X;
+      const y = world.y - HALL_Y;
       const chair = scene.add.graphics();
       chair.fillStyle(0x372822, 0.45).fillRect(-24, -16, 52, 47);
       chair.fillStyle(0x352820).fillRect(-21, -24, 42, 48);
@@ -77,11 +86,70 @@ export class MeetingArea {
       chair.fillStyle(0x372820).fillRect(-23, -30, 46, 12);
       chair.fillStyle(0xc39358).fillRect(-19, -28, 38, 6);
       chair.fillStyle(0x4a3227).fillRect(-20, 17, 7, 12).fillRect(13, 17, 7, 12);
-      chair.setPosition(x, y - 3).setRotation(seat * Math.PI / 5);
+      chair.setPosition(x, y - 3).setRotation(seat * 2 * Math.PI / ROOM_CAPACITY);
       this.#container.add(chair);
     }
     this.setVisible(false);
   }
 
-  setVisible(visible: boolean): void { this.#container.setVisible(visible); }
+  setVisible(visible: boolean): void {
+    this.#container.setVisible(visible);
+    this.#town.setVisible(visible);
+    this.#canopies.setVisible(visible);
+  }
+}
+
+function drawTown(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
+  const town = scene.add.graphics().setDepth(-1100);
+  town.fillStyle(0x4f7d3e).fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+  // Deterministic grass tufts, so every client draws the same town.
+  for (let index = 0; index < 900; index++) {
+    const x = (index * 7919) % WORLD_WIDTH;
+    const y = (index * 104729) % WORLD_HEIGHT;
+    town.fillStyle(index % 3 === 0 ? 0x5f9149 : 0x43703a).fillRect(x, y, 6, 3);
+  }
+  // Dirt roads: one leaves the open south side of the Town Hall, one crosses the town.
+  town.fillStyle(0xa98a5c).fillRect(1180, 1040, 200, WORLD_HEIGHT - 1040);
+  town.fillStyle(0xa98a5c).fillRect(0, 1110, WORLD_WIDTH, 70);
+  town.fillStyle(0xa98a5c).fillRect(560, 0, 70, WORLD_HEIGHT);
+  town.fillStyle(0xa98a5c).fillRect(1930, 0, 70, WORLD_HEIGHT);
+  town.fillStyle(0xa98a5c).fillRect(0, 440, WORLD_WIDTH, 60);
+  for (const obstacle of OBSTACLES) {
+    const { x, y, width, height } = obstacle;
+    if (obstacle.kind === "house") {
+      town.fillStyle(0x2d2420).fillRect(x - 4, y + 8, width + 8, height);
+      town.fillStyle(0xcdb58a).fillRect(x, y + height * 0.45, width, height * 0.55);
+      town.fillStyle(0x8b3a2e).fillRect(x - 10, y, width + 20, height * 0.5);
+      town.fillStyle(0xa84a3a).fillRect(x - 10, y, width + 20, 10);
+      town.fillStyle(0x5a3a26).fillRect(x + width / 2 - 20, y + height - 56, 40, 56);
+      town.fillStyle(0x9fd3e6).fillRect(x + 40, y + height - 70, 44, 32).fillRect(x + width - 84, y + height - 70, 44, 32);
+    } else if (obstacle.kind === "shed") {
+      town.fillStyle(0x6b4a2e).fillRect(x, y, width, height);
+      town.fillStyle(0x7f5a38).fillRect(x + 8, y + 8, width - 16, height - 16);
+      for (let plank = x + 20; plank < x + width - 10; plank += 26) town.fillStyle(0x5b3e26).fillRect(plank, y + 8, 3, height - 16);
+    } else if (obstacle.kind === "stall") {
+      town.fillStyle(0x6d4c30).fillRect(x, y + 30, width, height - 30);
+      for (let stripe = 0; stripe < width; stripe += 28) {
+        town.fillStyle(stripe % 56 === 0 ? 0xe6d3a3 : 0xc0443a).fillRect(x + stripe, y, Math.min(28, width - stripe), 34);
+      }
+      town.fillStyle(0xe0a040).fillCircle(x + 50, y + 70, 12).fillCircle(x + 110, y + 72, 12).fillCircle(x + 170, y + 68, 12);
+    } else if (obstacle.kind === "tree") {
+      town.fillStyle(0x5a3a22).fillRect(x + 16, y + 8, 16, 40);
+    }
+  }
+  return town;
+}
+
+/** Tree canopies are drawn above the Avatars, so walking under one hides you from sight. */
+function drawCanopies(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
+  const canopies = scene.add.graphics().setDepth(5_000);
+  for (const obstacle of OBSTACLES) {
+    if (obstacle.kind !== "tree") continue;
+    const x = obstacle.x + obstacle.width / 2;
+    const y = obstacle.y;
+    canopies.fillStyle(0x2f5a2a, 0.95).fillCircle(x, y, 62);
+    canopies.fillStyle(0x3d7336, 0.95).fillCircle(x - 14, y - 12, 44);
+    canopies.fillStyle(0x4f8a42, 0.9).fillCircle(x - 22, y - 22, 20);
+  }
+  return canopies;
 }

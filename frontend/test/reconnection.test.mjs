@@ -176,8 +176,9 @@ test("Lobby and Game controls each belong to one phase, and recovery follows the
     sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], ready: false }] });
     client.update();
     const count = sockets[0].sent.length;
-    // A Night choice has no meaning before the Game is dealt, so it is never submitted.
-    client.nightAction("mafia_vote", 1, "p");
+    // An ability or a step has no meaning before the Game is dealt, so neither is submitted.
+    client.useAbility("kill", 1, "p");
+    client.move(900, 600, "up");
     client.meetingVote(1, null);
     client.chat("public", "Too early.");
     assert.equal(sockets[0].sent.length, count);
@@ -200,9 +201,10 @@ test("Lobby and Game controls each belong to one phase, and recovery follows the
       const playingCount = sockets[1].sent.length;
       client.setReady(true); client.startGame(); client.selectAvatar("townsperson-1");
       assert.equal(sockets[1].sent.length, playingCount, "Start closes the Lobby's own controls");
-      client.nightAction("investigate", 2, "p");
+      client.useAbility("scan", 2, "p");
+      client.move(900, 600, "up");
       client.meetingVote(2, null);
-      assert.deepEqual(sockets[1].sent.slice(playingCount).map(value => JSON.parse(value).type), ["investigate", "meeting_vote"]);
+      assert.deepEqual(sockets[1].sent.slice(playingCount).map(value => JSON.parse(value).type), ["use_ability", "move", "meeting_vote"]);
     }
   }
 });
@@ -272,7 +274,7 @@ test("real connection loss recovers the private membership and waits for its cur
   assert.deepEqual(JSON.parse(sockets[1].sent[0]), {
     version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64)
   });
-  client.nightAction("mafia_vote", 1, "p");
+  client.useAbility("kill", 1, "p");
   assert.equal(sockets[1].sent.length, 1);
   sockets[1].message(snapshot);
   assert.equal(client.state.status, "reconnecting");
