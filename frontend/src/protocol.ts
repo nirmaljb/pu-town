@@ -104,6 +104,11 @@ export type OwnField = Readonly<{
 
 export type FieldView = Readonly<{ round: number; players: readonly FieldPlayer[]; bodies: readonly Body[]; self: OwnField }>;
 
+/** The Host's deal: how many Mafia, Doctors and Sheriffs. Everyone else is a Villager. */
+export type RoleSetup = Readonly<{ mafia: number; doctors: number; sheriffs: number }>;
+export const MAX_MAFIA = 2;
+export const MAX_SHERIFFS = 2;
+
 export type ChatEntry = Readonly<{
   channel: ChatChannel;
   round: number;
@@ -113,9 +118,9 @@ export type ChatEntry = Readonly<{
 }>;
 
 export type ServerMessage =
-  | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
-  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
   | (GameView & Readonly<{ version: 1; type: "game_state" }>)
   | (FieldView & Readonly<{ version: 1; type: "field_state" }>)
@@ -130,6 +135,7 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "recover_room"; roomId: string; recoveryToken: string }>
   | Readonly<{ version: 1; type: "start_game" }>
   | Readonly<{ version: 1; type: "set_ready"; ready: boolean }>
+  | Readonly<{ version: 1; type: "set_role_setup"; mafia: number; doctors: number; sheriffs: number }>
   | Readonly<{ version: 1; type: "create_room"; displayName: string }>
   | Readonly<{ version: 1; type: "ping" }>
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
@@ -224,7 +230,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type"]);
       return { version: 1, type };
     case "room_snapshot": {
-      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "recoveryToken", "phase", "hostPlayerId", "players"]);
+      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "recoveryToken", "phase", "hostPlayerId", "roleSetup", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1,
@@ -234,15 +240,17 @@ export function decodeServerMessage(payload: string): ServerMessage {
         roomId: requireNonEmptyString(message.roomId, "roomId"),
         phase: requirePhase(message.phase),
         hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
+        roleSetup: decodeRoleSetup(message.roleSetup),
         players: decodeRoomPlayers(message.players)
       };
     }
     case "room_state":
-      requireFields(message, ["version", "type", "phase", "hostPlayerId", "players"]);
+      requireFields(message, ["version", "type", "phase", "hostPlayerId", "roleSetup", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1, type, phase: requirePhase(message.phase),
         hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
+        roleSetup: decodeRoleSetup(message.roleSetup),
         players: decodeRoomPlayers(message.players)
       };
     case "player_joined":
@@ -509,6 +517,22 @@ function requireFacing(value: unknown): Direction {
 }
 
 /** A Game round counts up from zero; only Role Reveal, before the first Night, is zero. */
+function decodeRoleSetup(value: unknown): RoleSetup {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("roleSetup must be an object");
+  const setup = value as Record<string, unknown>;
+  requireFields(setup, ["mafia", "doctors", "sheriffs"]);
+  const count = (field: unknown) => {
+    const n = requireCounter(field);
+    if (n < 1) throw new Error("Every Role is dealt at least once");
+    return n;
+  };
+  return { mafia: count(setup.mafia), doctors: count(setup.doctors), sheriffs: count(setup.sheriffs) };
+}
+
+export function setRoleSetup(setup: RoleSetup): ClientMessage {
+  return { version: 1, type: "set_role_setup", mafia: setup.mafia, doctors: setup.doctors, sheriffs: setup.sheriffs };
+}
+
 function requireCounter(value: unknown): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) throw new Error("Invalid Game counter");
   return value;

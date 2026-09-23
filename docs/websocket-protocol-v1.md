@@ -14,6 +14,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `start_game` | none |
 | `select_avatar` | `avatarPreset: string` |
 | `set_ready` | `ready: boolean` |
+| `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
 | `move` | `x: number`, `y: number`, `facing: Facing` |
 | `use_ability` | `ability: Ability`, `round: integer`, `targetPlayerId: string \| null` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
@@ -24,8 +25,8 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | Type | Additional fields |
 | --- | --- |
 | `pong` | none |
-| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `players: PlayerView[]` |
-| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `players: PlayerView[]` |
+| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
+| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
 | `game_state` | `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `bodies: Body[]`, `self: OwnField` |
@@ -45,7 +46,7 @@ The server randomly assigns an Avatar Preset when a new Room Membership begins, 
 
 ## Seats and the Roam
 
-The town is 2560 × 1440. The Town Hall is drawn in a 1280 × 720 frame whose top-left corner is at (640, 360); its Emergency button stands at (1280, 742). A Player View's `x`, `y` and `facing` are always their Seat's: Room State describes the Lobby and the Meeting table. Walking happens only during a Game's `roam` phase, and positions there travel only in `move` and `field_state` (below). The server is the only author of every position a client draws for someone else.
+The town is the 2560 × 1440 PU Town map (`frontend/public/maps/pu-town/`); its obstacles are that map's collision layer, and the Emergency button stands at (1280, 742) in the middle of the Town Square, with the Seats in a ring around it. A Player View's `x`, `y` and `facing` are always their Seat's: Room State describes the Lobby and the Meeting table. Walking happens only during a Game's `roam` phase, and positions there travel only in `move` and `field_state` (below). The server is the only author of every position a client draws for someone else.
 
 The Room's shared state is its Player Views and, once the Game starts, each recipient's own `game_state` and, during a Roam, `field_state`.
 
@@ -53,7 +54,7 @@ The bounded outbound queue is strictly ordered and never replaces or evicts an e
 
 A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership's Player ID.
 
-Current error codes are `cooling_down`, `target_shielded`, `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `start_blocked`, `invalid_phase`, `invalid_action`, `invalid_target`, `already_submitted`, `invalid_avatar_preset`, `recovery_expired`, and `recovery_in_use`.
+Current error codes are `cooling_down`, `target_shielded`, `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `invalid_role_setup`, `start_blocked`, `invalid_phase`, `invalid_action`, `invalid_target`, `already_submitted`, `invalid_avatar_preset`, `recovery_expired`, and `recovery_in_use`.
 
 ## Entry and Room lifetime
 
@@ -81,13 +82,16 @@ Creation enters `lobby`; the first membership is Host. Each new Lobby membership
 
 Choosing a character in the chooser sends the request immediately, without an optimistic shared-state change; there is no separate confirming action. Selection and Start use the same Room serialization: selection first is retained by Start; Start first rejects the selection. A pending request cannot override the accepted choice. Clients apply the resulting Room State at the next game-frame boundary and update existing Avatar textures and seated artwork without replaying arrivals. Recovery and takeover keep the accepted selection, including after Start; retired sockets cannot select. Leave/expiry end it, and a new membership draws randomly without a cross-Room preference.
 
+**Role Setup.** `RoleSetup` is `{ mafia, doctors, sheriffs }`: how many of each special Role the Room's Game deals. Everyone else is a Villager. A new Room's setup is one of each. Only the current Host can `set_role_setup`, and only in the Lobby; others receive `not_host`, and active play returns `invalid_phase`. The three fields are exact and each must be a non-negative integer, or the message is `malformed_message`. A setup needs one or two Mafia, one or two Sheriffs and at least one Doctor, with at most nine special Roles, so a full Room always keeps a Villager; anything else is `invalid_role_setup` and changes nothing. An accepted setup broadcasts `room_state` to all current members, and every `room_state` and `room_snapshot` carries the current setup. Changing it does not change anyone's readiness.
+
 Only the current Host can `start_game` in the Lobby. Non-Hosts receive `not_host`, unjoined connections receive `not_in_room`, and a Host attempting to restart active play receives `invalid_phase`. The Game needs at least four Players, so Start is gated and rejected with `start_blocked` and one of:
 
 - “At least 4 Players must be in the Room to start.”
+- “This deal of M Mafia, D Doctors and S Sheriffs needs at least N Players, so one is left a Villager.” (N is one more than the special Roles; counts are written as numbers, with “Doctor” and “Sheriff” singular for one.)
 - “Every Player must be connected to start.”
 - “Every Player must be Ready to start.”
 
-The gate is checked in that order and a blocked Start changes nothing. An accepted Start atomically changes phase to `playing`, deals Roles, creates the Game, and broadcasts `room_state` followed by one `game_state` per Player. Every Player keeps the Seat the Lobby gave them. Readiness remains informational membership state but cannot change during active play.
+The gate is checked in that order and a blocked Start changes nothing. An accepted Start atomically changes phase to `playing`, deals Roles by the Room's Role Setup, creates the Game, and broadcasts `room_state` followed by one `game_state` per Player. Every Player keeps the Seat the Lobby gave them. Readiness remains informational membership state but cannot change during active play.
 
 On Host Leave or expiry, the longest-present connected membership becomes Host if available, otherwise the oldest retained membership holds the role. Host Disconnect preserves authority for fifteen seconds; at or after that deadline the longest-present connected membership succeeds. If nobody is connected, the first returning Player takes authority. Recovery before the deadline preserves the Host. Succession and recovery are serialized per Room. On membership end, the ordered `player_left` announcement is followed by `room_state` carrying the successor and complete current Player Views. Disconnect instead broadcasts connected presence in `room_state`. Other departures emit only `player_left`. A recovering former Host retains membership but cannot displace the current Host; duplicate Display Names confer no authority.
 
@@ -135,17 +139,17 @@ The server owns the clock. `GamePhase` and its fixed duration:
 | `voting_result` | 6 s | The Meeting's outcome, with every ballot disclosed. |
 | `finished` | — | The winning Faction and every Role. |
 
-`role_reveal` is round `0`; each Roam increments the round, so the first Roam is round `1` and a round runs Roam through Voting Result. `remainingMs` is the milliseconds left in the current phase, never negative, and `null` once the Game is `finished`.
+`role_reveal` is round `0`; each Roam increments the round, so the first Roam is round `1` and a round runs Roam through Voting Result. `remainingMs` is the milliseconds left in the current phase when the message was built, never negative, and `null` once the Game is `finished`. A client counts it down from the moment the message arrived, not from when it gets round to applying it.
 
 A timed phase ends when its deadline passes, never when everyone has acted. Each new deadline is derived from the deadline it replaces, not from the current time; a Roam ended by a Report or an Emergency Meeting starts its Meeting Call at the moment it was called. Every Participant in the Room receives a `game_state` at each transition.
 
 ### The Roam
 
-Every Roam begins with every Participant, living or not, standing at their own Seat, and every ability cooldown ten seconds from ready.
+Every Roam begins with every Participant, living or not, standing at their own Seat on the open sand of the Town Square, and every ability cooldown ten seconds from ready.
 
 **Movement.** `move` carries the sender's own position. The server accepts it only in `roam`, from a Participant who has not left, when the point and the midpoint from the last accepted position are clear of every obstacle and inside the town, and when the distance is within `240 px/s × 1.4 × elapsed + 24 px` (elapsed is clamped to 50 ms – 1 s). A refused step is not an error: the server keeps the previous position and increments that Participant's `correction`. The server also increments it when it moves a Participant itself, at the start of a Roam and on a Crowding push. A client adopts `OwnField.x`, `y` and `facing` whenever `correction` changes. `x` and `y` must be finite numbers and `facing` a Facing, or the message is `malformed_message`. Outside a Game `move` is `invalid_phase`.
 
-**The field.** Ten times a second during `roam`, each Participant who is a current member receives their own `field_state`. `players` holds exactly the Participants they can see, themselves included. A living recipient sees living Participants within a Vision of 380 px, except a Vanished Mafia, whom only Mafia recipients see. A Ghost (a Participant who is not living) is never visible to the living. A recipient who is not living sees every Participant who has not left. `ghost` marks a non-living Participant and `vanished` a Vanished one. `bodies` holds the Bodies within the recipient's Vision, or all of them for a recipient who is not living. `self` carries the recipient's own position, `correction` and timers, with `null` wherever their Role or status has no such thing: `crowding` (0–1) for a living Villager, `primaryCooldownMs` for a living Mafia, Doctor or Sheriff, `vanishCooldownMs` and `vanishedMs` for living Mafia, and `shieldMs` for the living Doctor, whose `shieldTargetPlayerId` names the Player they are Shielding. `emergencyAvailable` is whether a living recipient still has their Emergency Meeting. No position outside a recipient's field is sent to them in any message.
+**The field.** Ten times a second during `roam`, each Participant who is a current member receives their own `field_state`. `players` holds exactly the Participants they can see, themselves included. A living recipient sees living Participants within their Role's Vision (Mafia 440 px, Doctor 380 px, Sheriff 330 px, Villager 270 px; Bodies use the same distance), except a Vanished Mafia, whom only Mafia recipients see. A Ghost (a Participant who is not living) is never visible to the living. A recipient who is not living sees every Participant who has not left. `ghost` marks a non-living Participant and `vanished` a Vanished one. `bodies` holds the Bodies within the recipient's Vision, or all of them for a recipient who is not living. `self` carries the recipient's own position, `correction` and timers, with `null` wherever their Role or status has no such thing: `crowding` (0–1) for a living Villager, `primaryCooldownMs` for a living Mafia, Doctor or Sheriff, `vanishCooldownMs` and `vanishedMs` for living Mafia, and `shieldMs` for the living Doctor, whose `shieldTargetPlayerId` names the Player they are Shielding. `emergencyAvailable` is whether a living recipient still has their Emergency Meeting. No position outside a recipient's field is sent to them in any message.
 
 **Abilities.** `use_ability` carries its `round`. `kill`, `shield` and `scan` require a `targetPlayerId`; `vanish`, `report` and `emergency` require `null`; anything else is `malformed_message`. An ability is accepted only in `roam` and its own round (`invalid_phase`), only from a living Participant with the right Role (`invalid_action`), and only when its cooldown has passed (`cooling_down`). A targeted ability needs another living Participant the actor can currently see; a target that is out of range, hidden or not living is refused with `invalid_target` and the same message, “No such Player within reach.”, so a refusal never reveals a hidden Player.
 

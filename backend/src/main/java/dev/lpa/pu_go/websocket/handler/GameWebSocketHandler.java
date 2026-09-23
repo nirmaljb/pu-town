@@ -4,6 +4,7 @@ import dev.lpa.pu_go.game.ChatEntry;
 import dev.lpa.pu_go.game.Game;
 import dev.lpa.pu_go.game.Participant;
 import dev.lpa.pu_go.game.Role;
+import dev.lpa.pu_go.game.RoleSetup;
 import dev.lpa.pu_go.player.PlayerState;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
@@ -42,19 +43,6 @@ import java.util.function.UnaryOperator;
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
-
-    /**
-     * The deal for a table of this size: one Mafia for four to six Players, two for seven or
-     * eight and three for nine or ten, always with one Doctor and one Sheriff.
-     */
-    static List<Role> rolesFor(int players) {
-        int mafia = players >= 9 ? 3 : players >= 7 ? 2 : 1;
-        List<Role> roles = new ArrayList<>();
-        for (int index = 0; index < players; index++) {
-            roles.add(index < mafia ? Role.MAFIA : index == mafia ? Role.DOCTOR : index == mafia + 1 ? Role.SHERIFF : Role.VILLAGER);
-        }
-        return List.copyOf(roles);
-    }
 
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -121,6 +109,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
                     else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
+                    else if (incoming instanceof ClientMessage.SetRoleSetup setup) handleRoleSetup(player, setup);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.UseAbility ability) handleAbility(player, ability);
@@ -252,7 +241,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 catch (IOException ignored) { /* Retired sessions already have no authority. */ }
             });
             deliver(new Delivery(member.getId(), new ServerMessage.RoomSnapshot(member.getId(), message.roomId(),
-                    member.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), stateOf(room).players())));
+                    member.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(),
+                    ServerMessage.RoleSetupView.of(room.getRoleSetup()), stateOf(room).players())));
             List<Delivery> deliveries = new ArrayList<>();
             addPrivateGameEntry(deliveries, room, member.getId());
             addForPlayers(deliveries, room.playerIdsSnapshot().stream().filter(id -> !id.equals(member.getId())).toList(), stateOf(room));
@@ -312,7 +302,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     .map(this::viewOf)
                     .toList();
             pendingDeliveries.add(new Delivery(player.getId(),
-                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(), snapshotPlayers)));
+                    new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(),
+                            ServerMessage.RoleSetupView.of(room.getRoleSetup()), snapshotPlayers)));
             addPrivateGameEntry(pendingDeliveries, room, player.getId());
             deliverAll(pendingDeliveries);
             return null;
@@ -382,6 +373,29 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
+    // Called under the same per-Room serialization as Start, so a Game deals the setup its Host last saw.
+    private void handleRoleSetup(PlayerState player, ClientMessage.SetRoleSetup message) {
+        if (player.getRoomId() == null) {
+            deliver(error(player, "not_in_room", "Join a Room before choosing the Roles."));
+            return;
+        }
+        Room room = roomManager.findRoom(player.getRoomId());
+        RoleSetup setup = new RoleSetup(message.mafia(), message.doctors(), message.sheriffs());
+        String invalid = setup.invalidReason(RoomRules.CAPACITY);
+        if (!player.getId().equals(room.getHostPlayerId())) {
+            deliver(error(player, "not_host", "Only the Host can choose the Roles."));
+        } else if (!room.getPhase().equals("lobby")) {
+            deliver(error(player, "invalid_phase", "The Roles are chosen in the Lobby."));
+        } else if (invalid != null) {
+            deliver(error(player, "invalid_role_setup", invalid));
+        } else {
+            room.setRoleSetup(setup);
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+            deliverAll(deliveries);
+        }
+    }
+
     private void handleStart(PlayerState player) {
         String roomId = player.getRoomId();
         if (roomId == null) {
@@ -400,12 +414,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
             List<PlayerState> members = room.playerIdsSnapshot().stream().map(playersById::get)
                     .filter(Objects::nonNull).sorted(Comparator.comparingInt(PlayerState::getSeat)).toList();
-            String blocked = startBlockedReason(members);
+            String blocked = startBlockedReason(members, room.getRoleSetup());
             if (blocked != null) {
                 deliver(error(player, "start_blocked", blocked));
                 return null;
             }
-            List<Role> roles = roleAssignment.apply(rolesFor(members.size()));
+            List<Role> roles = roleAssignment.apply(room.getRoleSetup().deal(members.size()));
             if (roles.size() != members.size()) throw new IllegalStateException("Role assignment must cover every Player");
             List<Participant> roster = new ArrayList<>();
             for (int index = 0; index < members.size(); index++) {
@@ -422,14 +436,22 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
-    private static String startBlockedReason(List<PlayerState> members) {
+    private static String startBlockedReason(List<PlayerState> members, RoleSetup setup) {
         if (members.size() < RoomRules.MIN_PLAYERS)
             return "At least " + RoomRules.MIN_PLAYERS + " Players must be in the Room to start.";
+        if (members.size() < setup.minimumPlayers())
+            return "This deal of " + plural(setup.mafia(), "Mafia", "Mafia") + ", " + plural(setup.doctors(), "Doctor", "Doctors")
+                    + " and " + plural(setup.sheriffs(), "Sheriff", "Sheriffs") + " needs at least " + setup.minimumPlayers()
+                    + " Players, so one is left a Villager.";
         if (members.stream().anyMatch(member -> !member.isConnected()))
             return "Every Player must be connected to start.";
         if (members.stream().anyMatch(member -> !member.isReady()))
             return "Every Player must be Ready to start.";
         return null;
+    }
+
+    private static String plural(int count, String one, String many) {
+        return count + " " + (count == 1 ? one : many);
     }
 
     /** Movement is answered only through the next field state, never with an error per step. */
@@ -524,7 +546,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private ServerMessage.RoomState stateOf(Room room) {
-        return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(),
+        return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(), ServerMessage.RoleSetupView.of(room.getRoleSetup()),
                 room.playerIdsSnapshot().stream().map(playersById::get).map(this::viewOf).toList());
     }
 

@@ -22,7 +22,9 @@ const ROLE_BRIEFS: Record<Role, string> = {
   sheriff: "Q scans a nearby Player and tells you, privately, whether they are Mafia."
 };
 
-const EVERYONE_BRIEF = "Walk with WASD or the arrow keys. R reports a Body next to you. F at the red button in the Town Hall calls an Emergency Meeting (once per Game).";
+const EVERYONE_BRIEF = "Walk with WASD or the arrow keys. R reports a Body next to you. F at the red button in the Town Square calls an Emergency Meeting (once per Game).";
+
+const DEATH_SCREEN_MS = 2_000;
 
 /** Client ranges are a little tighter than the server's, so a highlighted target is really in reach. */
 const REACH_MARGIN = 12;
@@ -39,7 +41,6 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 export class GameInterface {
   readonly #root = document.createElement("div");
   #preview: Preview | null = null;
-  #receivedAt = 0;
   #lastGame: GameView | null = null;
   #lastWorld: WorldState | undefined;
   #self: LocalPosition | null = null;
@@ -47,6 +48,9 @@ export class GameInterface {
   #renderedInvestigations = -1;
   #lastError: WorldState["lastError"] = null;
   #toastUntil = 0;
+  // Whether this Player was living in the last Game state, so only a death seen live flashes red.
+  #wasLiving: boolean | null = null;
+  #deathUntil = 0;
   // The scene renders every frame, but the target list holds focus and receives clicks, so
   // it is rebuilt only when the Game, the world or the local selection behind it changed.
   #rendered: Readonly<{ game: GameView; world: WorldState; preview: Preview | null }> | null = null;
@@ -76,6 +80,10 @@ export class GameInterface {
         <p class="ability-status"></p>
       </section>
       <p class="ability-toast" hidden role="status"></p>
+      <section class="death-screen" hidden role="alert">
+        <h2>You are dead</h2>
+        <p class="death-cause"></p>
+      </section>
       <aside class="game-panel" hidden aria-label="Game controls">
         <div class="role-card">
           <p class="eyebrow role-faction"></p>
@@ -133,6 +141,9 @@ export class GameInterface {
       this.element(".outcome-reveal").hidden = true;
       this.element(".ability-bar").hidden = true;
       this.element(".ability-toast").hidden = true;
+      this.element(".death-screen").hidden = true;
+      this.#wasLiving = null;
+      this.#deathUntil = 0;
       this.#lastGame = null;
       this.#renderedChat = 0;
       this.#renderedInvestigations = -1;
@@ -144,9 +155,9 @@ export class GameInterface {
         this.#preview = null;
       }
       this.#lastGame = game;
-      this.#receivedAt = this.now();
     }
-    this.renderBanner(game);
+    this.renderBanner(game, world);
+    this.renderDeath(game);
     const rendered = this.#rendered;
     if (rendered === null || rendered.game !== game || rendered.world !== world || rendered.preview !== this.#preview) {
       this.#rendered = { game, world, preview: this.#preview };
@@ -160,17 +171,30 @@ export class GameInterface {
     this.renderChat(game, world);
   }
 
-  private renderBanner(game: GameView): void {
+  private renderBanner(game: GameView, world: WorldState): void {
     this.element(".game-phase").textContent = PHASE_TITLES[game.phase];
     this.element(".game-round").textContent = game.round > 0 && game.phase !== "finished" ? `Round ${game.round}` : "";
-    this.element(".game-countdown").textContent = this.countdown(game);
+    this.element(".game-countdown").textContent = this.countdown(world);
     this.element(".game-announcement").textContent = this.announcement(game);
   }
 
-  /** The server owns the deadline; this only presents the time it last published. */
-  private countdown(game: GameView): string {
-    if (game.remainingMs === null) return "";
-    const left = Math.max(0, game.remainingMs - (this.now() - this.#receivedAt));
+  /** The whole screen turns red for two seconds at the moment this Player dies. */
+  private renderDeath(game: GameView): void {
+    const living = game.self.status === "living";
+    if (this.#wasLiving === true && game.self.status === "eliminated") {
+      this.#deathUntil = this.now() + DEATH_SCREEN_MS;
+      this.element(".death-cause").textContent = game.self.killedByMafia
+        ? "The Mafia got you. As a ghost you can still wander and watch."
+        : "The Village voted you out.";
+    }
+    this.#wasLiving = living;
+    this.element(".death-screen").hidden = this.now() >= this.#deathUntil;
+  }
+
+  /** The server owns the deadline; this counts down to it from when its message arrived. */
+  private countdown(world: WorldState): string {
+    if (world.phaseEndsAt === null) return "";
+    const left = Math.max(0, world.phaseEndsAt - this.now());
     const seconds = Math.ceil(left / 1_000);
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   }
@@ -190,7 +214,7 @@ export class GameInterface {
       const caller = outcome.callerPlayerId === null ? "" : this.nameOf(game, outcome.callerPlayerId);
       const headline = outcome.kind === "report"
         ? `${caller} found ${this.nameOf(game, outcome.bodyPlayerId ?? "")}'s body!`
-        : outcome.kind === "emergency" ? `${caller} called an Emergency Meeting.` : "Time's up. Everyone to the Town Hall.";
+        : outcome.kind === "emergency" ? `${caller} called an Emergency Meeting.` : "Time's up. Everyone to the Town Square.";
       const verdict = outcome.deaths.length === 0 ? "Nobody has died since the last Meeting."
         : `Dead since the last Meeting: ${outcome.deaths.map(id => this.nameOf(game, id)).join(", ")}.`;
       return { headline, verdict, mafia: null };

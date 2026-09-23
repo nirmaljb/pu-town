@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import { FieldController } from "../dist/field-controller.js";
-import { walkable } from "../dist/room-rules.js";
+import { BUTTON_X, BUTTON_Y, OBSTACLES, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "../dist/room-rules.js";
 
 const own = (patch = {}) => ({
   x: 1280, y: 900, facing: "down", correction: 1, crowding: null, primaryCooldownMs: null,
@@ -39,10 +40,18 @@ test("a server correction or a new Roam replaces the local position", () => {
 });
 
 test("walls stop movement on their own axis only", () => {
-  // The Town Hall's north wall spans y 424..454, so a Player just below it can only slide.
+  // The Town Hall's front wall ends at y 512, so a Player just below it can only slide.
   const controller = new FieldController(() => {});
-  controller.update(world(own({ x: 1000, y: 470 })), { ...idle, up: true, right: true }, 100, 0);
-  assert.ok(controller.position.x > 1000, "slides along the wall");
+  controller.update(world(own({ x: 1280, y: 530 })), { ...idle, up: true, right: true }, 100, 0);
+  assert.ok(controller.position.x > 1280, "slides along the wall");
+  assert.equal(controller.position.y, 530);
   assert.ok(walkable(controller.position.x, controller.position.y));
-  assert.equal(walkable(1000, 440), false);
+  assert.equal(walkable(1280, 500), false);
+});
+
+test("the client's collision copy is the map's own collision layer", () => {
+  const map = JSON.parse(readFileSync(new URL("../public/maps/pu-town/pu-town.collision.json", import.meta.url), "utf8"));
+  assert.deepEqual(OBSTACLES, map.obstacles);
+  assert.deepEqual([WORLD_WIDTH, WORLD_HEIGHT], [map.world.width, map.world.height]);
+  assert.deepEqual([BUTTON_X, BUTTON_Y], [map.emergencyButton.x, map.emergencyButton.y]);
 });

@@ -49,7 +49,19 @@ class MafiaGameTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AtomicInteger playerIds = new AtomicInteger();
     private final AtomicLong milliseconds = new AtomicLong();
-    private final AtomicReference<UnaryOperator<List<Role>>> assignment = new AtomicReference<>(UnaryOperator.identity());
+    /**
+     * Tables of five or more deal two Mafia, a Doctor and a Sheriff (see startTable). The deal
+     * [M, M, D, S, V...] is laid out as Mafia in seats 0 and 2, a Villager in seat 1, the Doctor
+     * in seat 3 and the Sheriff in seat 4, so the tests can place each Role by its Seat.
+     */
+    private static final UnaryOperator<List<Role>> SEAT_LAYOUT = roles -> {
+        if (roles.size() < 5) return roles;
+        List<Role> laidOut = new ArrayList<>(List.of(roles.get(0), roles.get(4), roles.get(1), roles.get(2), roles.get(3)));
+        laidOut.addAll(roles.subList(5, roles.size()));
+        return laidOut;
+    };
+
+    private final AtomicReference<UnaryOperator<List<Role>>> assignment = new AtomicReference<>(SEAT_LAYOUT);
     private final GameWebSocketHandler handler = new GameWebSocketHandler(
             new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
             () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles));
@@ -92,24 +104,28 @@ class MafiaGameTest {
     }
 
     @Test
-    void theDealScalesWithTheTableAndIsIndependentOfSeats() throws Exception {
-        int[] expectedMafia = {1, 1, 1, 2, 2, 3, 3};
+    void theDealFollowsTheHostsRoleSetupAndIsIndependentOfSeats() throws Exception {
         for (int players = 4; players <= 10; players++) {
             table.clear();
             startTable("deal-" + players, players);
-            var counts = new java.util.EnumMap<Role, Integer>(Role.class);
-            for (int seat = 0; seat < players; seat++) {
-                Role role = Role.valueOf(game(seat).path("self").path("role").asText().toUpperCase());
-                counts.merge(role, 1, Integer::sum);
-                assertEquals(role.faction().wireValue(), game(seat).path("self").path("faction").asText());
-            }
-            assertEquals(expectedMafia[players - 4], counts.get(Role.MAFIA));
+            int mafia = players >= 5 ? 2 : 1;
+            var counts = roleCounts(players);
+            assertEquals(mafia, counts.get(Role.MAFIA));
             assertEquals(1, counts.get(Role.DOCTOR));
             assertEquals(1, counts.get(Role.SHERIFF));
-            assertEquals(players - expectedMafia[players - 4] - 2, counts.getOrDefault(Role.VILLAGER, 0));
+            assertEquals(players - mafia - 2, counts.getOrDefault(Role.VILLAGER, 0));
             send(table.get(0), "{\"version\":1,\"type\":\"start_game\"}");
             assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+            roleSetup(0, 1, 1, 1);
+            assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
         }
+        table.clear();
+        startTable("deal-many", 10, 2, 3, 2);
+        var counts = roleCounts(10);
+        assertEquals(2, counts.get(Role.MAFIA));
+        assertEquals(3, counts.get(Role.DOCTOR));
+        assertEquals(2, counts.get(Role.SHERIFF));
+        assertEquals(3, counts.get(Role.VILLAGER));
         var seed = new AtomicLong();
         var seenBySeat = new HashSet<String>();
         assignment.set(roles -> {
@@ -128,17 +144,65 @@ class MafiaGameTest {
     }
 
     @Test
+    void onlyTheHostChoosesTheRolesWithinTheLimitsAndEveryoneSeesTheChoice() throws Exception {
+        var host = connect("setup-0");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        assertEquals(1, latest(host).path("roleSetup").path("mafia").asInt());
+        table.add(host);
+        for (int seat = 1; seat < 5; seat++) {
+            var guest = connect("setup-" + seat);
+            join(guest, code);
+            table.add(guest);
+        }
+        roleSetup(1, 2, 1, 1);
+        assertEquals("not_host", latest(table.get(1)).path("code").asText());
+        for (int[] invalid : new int[][] {{3, 1, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 3}, {2, 6, 2}}) {
+            roleSetup(0, invalid[0], invalid[1], invalid[2]);
+            assertEquals("invalid_role_setup", latest(host).path("code").asText(), java.util.Arrays.toString(invalid));
+        }
+        send(host, "{\"version\":1,\"type\":\"set_role_setup\",\"mafia\":1.5,\"doctors\":1,\"sheriffs\":1}");
+        assertEquals("malformed_message", latest(host).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"set_role_setup\",\"mafia\":1,\"doctors\":1}");
+        assertEquals("malformed_message", latest(host).path("code").asText());
+        // Two Mafia, two Doctors and two Sheriffs leave nobody a Villager at five.
+        roleSetup(0, 2, 2, 2);
+        for (var member : table) {
+            JsonNode setup = latestOfType(member, "room_state").path("roleSetup");
+            assertEquals(List.of(2, 2, 2), List.of(setup.path("mafia").asInt(), setup.path("doctors").asInt(), setup.path("sheriffs").asInt()));
+        }
+        for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        assertEquals("This deal of 2 Mafia, 2 Doctors and 2 Sheriffs needs at least 7 Players, so one is left a Villager.",
+                latest(host).path("message").asText());
+        // A late arrival learns the setup from their snapshot.
+        var sixth = connect("setup-5");
+        join(sixth, code);
+        assertEquals(2, latestOfType(sixth, "room_snapshot").path("roleSetup").path("sheriffs").asInt());
+        table.add(sixth);
+        var seventh = connect("setup-6");
+        join(seventh, code);
+        table.add(seventh);
+        for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        var counts = roleCounts(7);
+        assertEquals(List.of(2, 2, 2, 1), List.of(counts.get(Role.MAFIA), counts.get(Role.DOCTOR), counts.get(Role.SHERIFF), counts.get(Role.VILLAGER)));
+    }
+
+    @Test
     void theRoleRevealIsPrivateAndOnlyMafiaLearnTheirTeam() throws Exception {
         startTable("reveal", 10);
         assertEquals("role_reveal", game(0).path("phase").asText());
         assertEquals(REVEAL, game(0).path("remainingMs").asLong());
-        assertEquals(List.of("player-1", "player-2", "player-3"), names(game(1).path("self").path("mafiaTeam")));
-        for (int seat = 3; seat < 10; seat++) {
+        assertEquals(List.of("player-1", "player-3"), names(game(2).path("self").path("mafiaTeam")));
+        for (int seat = 1; seat < 10; seat++) {
+            if (seat == 2) continue;
             assertTrue(game(seat).path("self").path("mafiaTeam").isNull());
             assertNoHiddenRolesLeaked(table.get(seat));
         }
         assertEquals("doctor", game(3).path("self").path("role").asText());
         assertEquals("sheriff", game(4).path("self").path("role").asText());
+        assertEquals("villager", game(1).path("self").path("role").asText());
         assertEquals("villager", game(7).path("self").path("role").asText());
     }
 
@@ -159,11 +223,11 @@ class MafiaGameTest {
             Set<String> expected = new HashSet<>();
             for (int other = 0; other < 10; other++) {
                 double distance = Math.hypot(RoomRules.seatX(other) - RoomRules.seatX(seat), RoomRules.seatY(other) - RoomRules.seatY(seat));
-                if (distance <= FieldRules.VISION) expected.add(playerId(other));
+                if (distance <= visionOf(seat)) expected.add(playerId(other));
             }
             assertEquals(expected, fieldIds(seat), "seat " + seat);
         }
-        // Opposite sides of the Hall are out of each other's sight.
+        // Opposite sides of the Town Square are out of each other's sight.
         assertFalse(fieldIds(2).contains(playerId(7)));
         // Nobody's field ever names a Role.
         for (var member : table) assertTrue(member.payloads().stream().filter(p -> p.contains("field_state")).noneMatch(p -> p.contains("\"role\"")));
@@ -182,18 +246,42 @@ class MafiaGameTest {
         assertEquals(RoomRules.seatX(5), field(5).path("self").path("x").asDouble());
         assertEquals(correction + 1, field(5).path("self").path("correction").asInt());
         // Walking into the Town Hall's wall is refused too.
-        walk(5, 760, 900);
+        walk(5, 1_280, 545);
         milliseconds.addAndGet(100);
-        move(5, 720, 900);
+        move(5, 1_280, 505);
         handler.tickFields();
-        assertEquals(760, field(5).path("self").path("x").asDouble(), 0.5);
+        assertEquals(545, field(5).path("self").path("y").asDouble(), 0.5);
         // A reachable step is accepted and seen by others.
         milliseconds.addAndGet(100);
-        move(5, 775, 900);
+        move(5, 1_280, 530);
         handler.tickFields();
-        assertEquals(775, field(5).path("self").path("x").asDouble(), 0.5);
+        assertEquals(530, field(5).path("self").path("y").asDouble(), 0.5);
         send(table.get(5), "{\"version\":1,\"type\":\"move\",\"x\":\"far\",\"y\":1,\"facing\":\"up\"}");
         assertEquals("malformed_message", latest(table.get(5)).path("code").asText());
+    }
+
+    @Test
+    void theMafiaSeeFurthestThenTheDoctorThenTheSheriffAndVillagersLeast() throws Exception {
+        assertTrue(FieldRules.MAFIA_VISION > FieldRules.DOCTOR_VISION);
+        assertTrue(FieldRules.DOCTOR_VISION > FieldRules.SHERIFF_VISION);
+        assertTrue(FieldRules.SHERIFF_VISION > FieldRules.VILLAGER_VISION);
+        assertTrue(FieldRules.VILLAGER_VISION > FieldRules.SCAN_RANGE, "every ability reaches only what its user can see");
+        startTable("vision", 10);
+        advance(REVEAL);
+        // Seat 1, a Villager, walks just inside and then just outside each watcher's Vision,
+        // heading from that watcher toward the button across the open square.
+        for (int watcher : new int[] {0, 3, 4, 6}) {
+            double reach = visionOf(watcher);
+            double toX = RoomRules.BUTTON_X - RoomRules.seatX(watcher);
+            double toY = RoomRules.BUTTON_Y - RoomRules.seatY(watcher);
+            double length = Math.hypot(toX, toY);
+            for (double offset : new double[] {-20, 20}) {
+                walk(1, Math.round(RoomRules.seatX(watcher) + toX / length * (reach + offset)),
+                        Math.round(RoomRules.seatY(watcher) + toY / length * (reach + offset)));
+                assertEquals(offset < 0, fieldIds(watcher).contains(playerId(1)),
+                        game(watcher).path("self").path("role").asText() + " at " + (reach + offset));
+            }
+        }
     }
 
     // ----- kills, Bodies and Meetings -----------------------------------------------------
@@ -210,13 +298,13 @@ class MafiaGameTest {
         assertEquals("eliminated", game(9).path("self").path("status").asText());
         assertTrue(game(9).path("self").path("killedByMafia").asBoolean());
         // The Mafia learn at once; the living Village receives nothing at all.
-        assertEquals("eliminated", game(1).path("players").get(9).path("status").asText());
+        assertEquals("eliminated", game(2).path("players").get(9).path("status").asText());
         assertEquals(villageStates, countOfType(table.get(5), "game_state"));
         assertEquals("living", game(5).path("players").get(9).path("status").asText());
         handler.tickFields();
         for (int seat = 0; seat < 9; seat++) {
             JsonNode self = field(seat).path("self");
-            boolean near = Math.hypot(self.path("x").asDouble() - bodyX, self.path("y").asDouble() - bodyY) <= FieldRules.VISION;
+            boolean near = Math.hypot(self.path("x").asDouble() - bodyX, self.path("y").asDouble() - bodyY) <= visionOf(seat);
             assertEquals(near ? 1 : 0, field(seat).path("bodies").size(), "seat " + seat);
             assertFalse(fieldIds(seat).contains(playerId(9)), "a ghost is invisible to the living");
         }
@@ -258,7 +346,7 @@ class MafiaGameTest {
         assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
         ability(0, "kill", 1, 5);
         assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
-        ability(0, "kill", 1, 1);
+        ability(0, "kill", 1, 2);
         assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
         ability(0, "kill", 2, 9);
         assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
@@ -303,7 +391,7 @@ class MafiaGameTest {
         startTable("button", 10);
         advance(REVEAL);
         ability(5, "emergency", 1, null);
-        assertEquals("Stand by the button in the Town Hall.", latest(table.get(5)).path("message").asText());
+        assertEquals("Stand by the button in the Town Square.", latest(table.get(5)).path("message").asText());
         walk(5, RoomRules.BUTTON_X, RoomRules.BUTTON_Y + 50);
         ability(5, "emergency", 1, null);
         assertEquals("meeting_call", game(0).path("phase").asText());
@@ -333,7 +421,7 @@ class MafiaGameTest {
         handler.tickFields();
         assertFalse(fieldIds(9).contains(playerId(0)));
         assertFalse(fieldIds(4).contains(playerId(0)));
-        JsonNode seenByTeam = fieldPlayer(1, playerId(0));
+        JsonNode seenByTeam = fieldPlayer(2, playerId(0));
         assertTrue(seenByTeam.path("vanished").asBoolean());
         // Aiming at a Vanished Player reads exactly like aiming at nobody.
         ability(4, "scan", 1, 0);
@@ -350,7 +438,7 @@ class MafiaGameTest {
     void aShieldMakesTheNextKillFailAndIsSpent() throws Exception {
         startTable("shield", 10);
         advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        walk(4, 1_620, 740);
+        walk(4, 1_560, 740);
         ability(3, "shield", 1, 3);
         assertEquals("invalid_target", latest(table.get(3)).path("code").asText());
         ability(3, "shield", 1, 4);
@@ -375,7 +463,7 @@ class MafiaGameTest {
         advance(REVEAL + FieldRules.OPENING_COOLDOWN);
         ability(4, "scan", 1, 2);
         assertEquals("invalid_target", latest(table.get(4)).path("code").asText());
-        walk(4, 1_620, 740);
+        walk(4, 1_560, 740);
         List<Integer> before = new ArrayList<>();
         for (var member : table) before.add(countOfType(member, "game_state"));
         ability(4, "scan", 1, 2);
@@ -427,7 +515,7 @@ class MafiaGameTest {
         advance(REVEAL);
         chat(0, "mafia", "Take the Doctor.");
         for (int seat = 0; seat < 10; seat++) {
-            boolean mafia = seat < 3;
+            boolean mafia = seat == 0 || seat == 2;
             assertEquals(mafia, table.get(seat).payloads().stream().anyMatch(p -> p.contains("Take the Doctor.")), "seat " + seat);
         }
         chat(5, "public", "Hello?");
@@ -491,6 +579,31 @@ class MafiaGameTest {
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {
+        if (players >= 5) startTable(label, players, 2, 1, 1);
+        else startTable(label, players, 1, 1, 1);
+    }
+
+    /** How far this Seat's Player sees, by the Role they were dealt. */
+    private double visionOf(int seat) {
+        return FieldRules.vision(Role.valueOf(game(seat).path("self").path("role").asText().toUpperCase()));
+    }
+
+    private void roleSetup(int seat, int mafia, int doctors, int sheriffs) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"set_role_setup\",\"mafia\":" + mafia
+                + ",\"doctors\":" + doctors + ",\"sheriffs\":" + sheriffs + "}");
+    }
+
+    private java.util.EnumMap<Role, Integer> roleCounts(int players) {
+        var counts = new java.util.EnumMap<Role, Integer>(Role.class);
+        for (int seat = 0; seat < players; seat++) {
+            Role role = Role.valueOf(game(seat).path("self").path("role").asText().toUpperCase());
+            counts.merge(role, 1, Integer::sum);
+            assertEquals(role.faction().wireValue(), game(seat).path("self").path("faction").asText());
+        }
+        return counts;
+    }
+
+    private void startTable(String label, int players, int mafia, int doctors, int sheriffs) throws Exception {
         tokens.clear();
         var host = connect(label + "-0");
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Player 0\"}");
@@ -503,6 +616,7 @@ class MafiaGameTest {
             tokens.add(json(guest.payloads().get(0)).path("recoveryToken").asText());
             table.add(guest);
         }
+        roleSetup(0, mafia, doctors, sheriffs);
         for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
         send(host, "{\"version\":1,\"type\":\"start_game\"}");
     }

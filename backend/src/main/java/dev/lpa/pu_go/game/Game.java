@@ -127,7 +127,7 @@ public final class Game {
         enter(GamePhase.ROAM, at);
     }
 
-    /** Everyone stands up from their own Seat, so a Roam always begins in the Town Hall. */
+    /** Everyone stands up at their own Seat, so a Roam always begins in the Town Square. */
     private static void placeAtSeat(Participant member, long at) {
         member.x = RoomRules.seatX(member.seat());
         member.y = RoomRules.seatY(member.seat());
@@ -135,6 +135,7 @@ public final class Game {
         member.lastMoveAt = at;
         member.correction++;
     }
+
 
     private void callMeeting(String kind, String callerId, String bodyId, long at) {
         outcome = new Outcome(kind, callerId, bodyId, List.copyOf(deaths), null, null);
@@ -315,7 +316,7 @@ public final class Game {
     private AbilityResult emergency(Participant caller, long now) {
         if (caller.emergencyUsed) return AbilityResult.rejected(new Rejection("invalid_action", "You have already called your Emergency Meeting."));
         if (caller.distanceTo(RoomRules.BUTTON_X, RoomRules.BUTTON_Y) > EMERGENCY_RANGE)
-            return AbilityResult.rejected(new Rejection("invalid_target", "Stand by the button in the Town Hall."));
+            return AbilityResult.rejected(new Rejection("invalid_target", "Stand by the button in the Town Square."));
         caller.emergencyUsed = true;
         callMeeting("emergency", caller.playerId(), null, now);
         return AbilityResult.of(Effect.MEETING_CALLED, null);
@@ -330,7 +331,7 @@ public final class Game {
         if (other == viewer || !viewer.isLiving()) return true;
         if (!other.isLiving()) return false;
         if (other.vanished(now) && viewer.role() != Role.MAFIA) return false;
-        return viewer.distanceTo(other) <= VISION;
+        return viewer.distanceTo(other) <= vision(viewer.role());
     }
 
     /** Every Avatar this recipient may see right now, themselves included. */
@@ -344,7 +345,7 @@ public final class Game {
 
     public List<Body> bodiesFor(String viewerId) {
         Participant viewer = participants.get(viewerId);
-        return bodies.stream().filter(body -> !viewer.isLiving() || viewer.distanceTo(body.x(), body.y()) <= VISION).toList();
+        return bodies.stream().filter(body -> !viewer.isLiving() || viewer.distanceTo(body.x(), body.y()) <= vision(viewer.role())).toList();
     }
 
     /**

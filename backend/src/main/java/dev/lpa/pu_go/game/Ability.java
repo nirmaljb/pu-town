@@ -16,7 +16,7 @@ public enum Ability {
     SCAN("scan"),
     /** Anyone living: report a Body within reach, which calls a Meeting. */
     REPORT("report"),
-    /** Anyone living, once per Game: call a Meeting from the button in the Town Hall. */
+    /** Anyone living, once per Game: call a Meeting from the button in the Town Square. */
     EMERGENCY("emergency");
 
     private final String wireValue;

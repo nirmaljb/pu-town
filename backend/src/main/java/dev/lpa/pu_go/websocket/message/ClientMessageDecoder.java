@@ -40,6 +40,10 @@ public final class ClientMessageDecoder {
                     throw new InvalidClientMessageException("malformed_message", "ready must be a boolean.");
                 yield new ClientMessage.SetReady(1, type, root.get("ready").asBoolean());
             }
+            case "set_role_setup" -> {
+                requireOnly(root, Set.of("version", "type", "mafia", "doctors", "sheriffs"));
+                yield new ClientMessage.SetRoleSetup(1, type, count(root, "mafia"), count(root, "doctors"), count(root, "sheriffs"));
+            }
             case "start_game" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.StartGame(1, type);
@@ -113,6 +117,13 @@ public final class ClientMessageDecoder {
         if (value == null || !value.isNumber() || !Double.isFinite(value.asDouble()))
             throw new InvalidClientMessageException("malformed_message", name + " must be a finite number.");
         return value.asDouble();
+    }
+
+    private static int count(JsonNode root, String name) throws InvalidClientMessageException {
+        JsonNode value = root.get(name);
+        if (!value.isIntegralNumber() || !value.canConvertToInt() || value.asInt() < 0)
+            throw new InvalidClientMessageException("malformed_message", name + " must be a non-negative integer.");
+        return value.asInt();
     }
 
     private static int round(JsonNode root) throws InvalidClientMessageException {

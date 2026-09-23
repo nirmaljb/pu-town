@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { MeetingArea } from "./meeting-area.js";
+import { loadTownMap, MeetingArea } from "./meeting-area.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
 import { AvatarReconciler, loadAvatarCollection } from "./avatar-reconciler.js";
@@ -9,7 +9,11 @@ import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
-import { HALL_X, HALL_Y, VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
+import { VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
+
+/** Outside a Roam the camera frames the Town Square, where the Players sit. */
+const SQUARE_X = WORLD_WIDTH / 2;
+const SQUARE_Y = WORLD_HEIGHT / 2;
 
 /** Keys that walk; anything typed into a text field is left alone. */
 const MOVEMENT_KEYS: Readonly<Record<string, "up" | "down" | "left" | "right">> = {
@@ -37,6 +41,10 @@ export class PuTownScene extends Phaser.Scene {
     super("pu-town");
   }
 
+  preload(): void {
+    loadTownMap(this);
+  }
+
   create(): void {
     this.cameras.main.setBackgroundColor(0x182132);
     this.#meetingArea = new MeetingArea(this);
@@ -55,7 +63,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    this.cameras.main.centerOn(HALL_X + 640, HALL_Y + 360);
+    this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
     const typing = (event: KeyboardEvent) => event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
     const keyChanged = (held: boolean) => (event: KeyboardEvent) => {
@@ -133,22 +141,24 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
-    this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined);
+    this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     this.#avatarReconciler?.updateAnimations(time, delta, self);
-    // During a Roam the camera follows this Player; otherwise it frames the Town Hall.
+    // During a Roam the camera follows this Player; otherwise it frames the Town Square.
     const camera = this.cameras.main;
-    const focusX = self?.x ?? HALL_X + 640;
-    const focusY = self?.y ?? HALL_Y + 360;
+    const focusX = self?.x ?? SQUARE_X;
+    const focusY = self?.y ?? SQUARE_Y;
     const follow = Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);
     // The living see only a circle around themselves; the server sends nothing beyond it.
     this.#fog?.clear();
-    const living = world?.game?.self.status === "living";
-    if (self && living) {
-      this.#fog?.lineStyle(3_000, 0x05070d, 0.86).strokeCircle(self.x, self.y, VISION + 1_500);
-      this.#fog?.lineStyle(60, 0x05070d, 0.45).strokeCircle(self.x, self.y, VISION - 30);
+    const own = world?.game?.self;
+    if (self && own?.status === "living") {
+      // Each Role sees its own distance; the server sends nothing beyond it.
+      const vision = VISION[own.role];
+      this.#fog?.lineStyle(3_000, 0x05070d, 0.86).strokeCircle(self.x, self.y, vision + 1_500);
+      this.#fog?.lineStyle(60, 0x05070d, 0.45).strokeCircle(self.x, self.y, vision - 30);
     }
   }
 }

@@ -29,7 +29,7 @@ function lobby() {
   }};
 }
 const snapshot = (self = 'self', players = [player('host', 0), player(self, 1)]) => ({
-  type: 'room_snapshot', roomId: 'ABC234', selfPlayerId: self, hostPlayerId: 'host', phase: 'lobby', players
+  type: 'room_snapshot', roomId: 'ABC234', selfPlayerId: self, hostPlayerId: 'host', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, phase: 'lobby', players
 });
 
 test('snapshot occupants are seated; self and a subsequent arrival in the same frame sit down', () => {
@@ -46,7 +46,7 @@ test('snapshot occupants are seated; self and a subsequent arrival in the same f
 test('readiness, Host changes and repeated snapshots never restart sitting', () => {
   const l = lobby();
   l.frame([snapshot()], 0);
-  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'self',
+  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'self', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
     players: [player('host', 0), { ...player('self', 1), ready: true }] }], 100);
   assert.equal(l.poses.get('self').progress(210), 0.5);
   l.frame([snapshot()], 300);
@@ -56,7 +56,7 @@ test('readiness, Host changes and repeated snapshots never restart sitting', () 
 });
 
 test('Start keeps every Player in the Seat the Lobby gave them', () => {
-  const start = { type: 'room_state', phase: 'playing', hostPlayerId: 'host',
+  const start = { type: 'room_state', phase: 'playing', hostPlayerId: 'host', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
     players: [player('host', 0), player('self', 1)] };
   const l = lobby();
   l.frame([snapshot()], 0);
@@ -93,13 +93,13 @@ test('a delayed frame settles sitting without a repeated transition', () => {
 test('changing appearance while seated preserves sit progress across Start', () => {
   const l = lobby();
   l.frame([snapshot()], 0);
-  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host',
+  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
     players: [player('host', 0), { ...player('self', 1), avatarPreset: 'townsperson-10', ready: true }] }], 100);
   assert.equal(l.poses.get('self').progress(210), 0.5);
-  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host',
+  l.frame([{ type: 'room_state', phase: 'lobby', hostPlayerId: 'host', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
     players: [player('host', 0), { ...player('self', 1), avatarPreset: 'townsperson-9', ready: true }] }], 500);
   assert.equal(l.poses.get('self').progress(500), 1);
-  l.frame([{ type: 'room_state', phase: 'playing', hostPlayerId: 'host',
+  l.frame([{ type: 'room_state', phase: 'playing', hostPlayerId: 'host', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
     players: [{ ...player('self', 1), avatarPreset: 'townsperson-9' }] }], 550);
   assert.equal(l.poses.get('self').progress(550), 1);
 });

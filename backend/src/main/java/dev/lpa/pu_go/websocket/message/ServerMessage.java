@@ -34,17 +34,26 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public String wireValue() { return wireValue; }
     }
 
-    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players)
+    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
+                        RoleSetupView roleSetup, List<PlayerView> players)
             implements ServerMessage {
-        public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players) {
-            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, List.copyOf(players));
+        public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
+                            RoleSetupView roleSetup, List<PlayerView> players) {
+            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, roleSetup, List.copyOf(players));
         }
     }
 
-    record RoomState(int version, String type, String phase, String hostPlayerId, List<PlayerView> players)
+    record RoomState(int version, String type, String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players)
             implements ServerMessage {
-        public RoomState(String phase, String hostPlayerId, List<PlayerView> players) {
-            this(1, "room_state", phase, hostPlayerId, List.copyOf(players));
+        public RoomState(String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players) {
+            this(1, "room_state", phase, hostPlayerId, roleSetup, List.copyOf(players));
+        }
+    }
+
+    /** The Room's deal: how many Mafia, Doctors and Sheriffs; everyone else is a Villager. */
+    record RoleSetupView(int mafia, int doctors, int sheriffs) {
+        public static RoleSetupView of(dev.lpa.pu_go.game.RoleSetup setup) {
+            return new RoleSetupView(setup.mafia(), setup.doctors(), setup.sheriffs());
         }
     }
 
