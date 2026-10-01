@@ -16,7 +16,7 @@ import java.util.Locale;
  * because only then do they know which Room — and so which collection — they need.
  */
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "https://localhost:5173"})
+@CrossOrigin(origins = "${putown.allowed-origins:http://localhost:5173,https://localhost:5173}")
 public class AvatarCollectionController {
     private final RoomManager roomManager;
 
