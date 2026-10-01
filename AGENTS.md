@@ -177,7 +177,7 @@ Do not claim an integration path was verified if only unit tests ran.
 
 ## Current limitations and hazards
 
-- `WebSocketConfig.java` and `AvatarCollectionController` accept browser origins only from `http://localhost:5173` and `https://localhost:5173`. Vite falling back to another port will break both the connection and the collection fetch.
+- `WebSocketConfig.java` and `AvatarCollectionController` default to browser origins `http://localhost:5173` and `https://localhost:5173`. Configure `putown.allowed-origins` with an exact comma-separated allow-list for public access. Vite falling back to another port will break both the connection and the collection fetch unless that origin is configured.
 - Rooms and player state live only in one backend process. Multiple server instances do not share state or coordinate rooms.
 - Production hosting, TLS termination, reverse-proxy configuration, and deployment automation are absent.
 - A deployed HTTPS frontend must use a `wss://` endpoint and a matching backend origin allow-list.

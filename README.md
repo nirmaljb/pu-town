@@ -56,6 +56,31 @@ To verify the backend is running, request [http://localhost:8080/health](http://
 
 Vite may choose another port when `5173` is unavailable, but the backend currently accepts WebSocket connections only from `http://localhost:5173` and `https://localhost:5173`. Free port `5173` before starting the frontend.
 
+### Public access with Tailscale Funnel
+
+For temporary public access, build the frontend with `npm run build` and the backend with `./mvnw package`. Start the backend from `backend/`, allowing the exact public frontend origin for both WebSocket connections and Avatar Collection requests:
+
+```sh
+java -jar target/backend-0.0.1-SNAPSHOT.jar --server.address=127.0.0.1 --putown.allowed-origins=http://localhost:5173,https://localhost:5173,https://YOUR-MACHINE.YOUR-TAILNET.ts.net:8443
+```
+
+From `frontend/`, serve the built bundle on loopback:
+
+```sh
+__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=YOUR-MACHINE.YOUR-TAILNET.ts.net npx vite preview --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Expose the two services on separate Funnel ports, preserving any existing route on port 443:
+
+```sh
+tailscale funnel --bg --https=8443 http://127.0.0.1:5173
+tailscale funnel --bg --https=10000 http://127.0.0.1:8080
+```
+
+Open `https://YOUR-MACHINE.YOUR-TAILNET.ts.net:8443/?ws=wss%3A%2F%2FYOUR-MACHINE.YOUR-TAILNET.ts.net%3A10000%2Fws%2Fgame`. The `ws` parameter is required; it also directs Avatar Collection requests to the public backend. Check the backend at `https://YOUR-MACHINE.YOUR-TAILNET.ts.net:10000/health`. Replace the example hostname with your machine's Tailscale DNS name. These endpoints are public, and the local processes must remain running. The backend's `putown.allowed-origins` setting (or `PUTOWN_ALLOWED_ORIGINS` environment variable) replaces the default comma-separated allow-list; use exact origins rather than `*`.
+
+Stop only these tunnels with `tailscale funnel --https=8443 off` and `tailscale funnel --https=10000 off`.
+
 ## The Game
 
 In the Lobby the Host chooses the deal with the − / + controls under the Town Square: one or two Mafia, one or two Sheriffs and at least one Doctor, and everyone else is a Villager. Every Player sees the choice. There must always be at least one Villager, so the Game needs one more Player than the special Roles, and never fewer than four. A new Room deals one of each. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
