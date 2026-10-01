@@ -1,11 +1,23 @@
 import { AvatarChooser } from "./avatar-chooser.js";
 import type { AvatarCollection } from "./avatar-presets.js";
 import { ROOM_CAPACITY } from "./meeting-area.js";
+import { MIN_PLAYERS } from "./room-rules.js";
 import type { WorldState } from "./world-state.js";
-import { normalizeDisplayName } from "./protocol.js";
+import { MAX_MAFIA, MAX_SHERIFFS, normalizeDisplayName, type RoleSetup } from "./protocol.js";
 import { ReconnectingGameClient, type ConnectionState } from "./reconnecting-game-client.js";
 
 const NAME_KEY = "pu-town.display-name";
+
+type SetupRole = keyof RoleSetup;
+const SETUP_ROLES: readonly Readonly<{ role: SetupRole; label: string; max: number }>[] = [
+  { role: "mafia", label: "Mafia", max: MAX_MAFIA },
+  { role: "doctors", label: "Doctors", max: ROOM_CAPACITY },
+  { role: "sheriffs", label: "Sheriffs", max: MAX_SHERIFFS }
+];
+
+function specialRoles(setup: RoleSetup): number {
+  return setup.mafia + setup.doctors + setup.sheriffs;
+}
 
 export class JoinInterface {
   readonly #root = document.createElement("div");
@@ -40,7 +52,7 @@ export class JoinInterface {
           </div>
           <p class="entry-status" role="status" aria-live="polite"></p>
         </form>
-        <p class="footnote"><span>Exactly 10 Players</span><span>Three Mafia against the Village</span></p>
+        <p class="footnote"><span>4–10 Players</span><span>Roam the town. Find the Mafia.</span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>
@@ -51,7 +63,18 @@ export class JoinInterface {
         <button type="button" class="leave-room">Leave Room</button>
       </header>
       <section class="lobby-controls" hidden aria-label="Lobby controls">
-        <div><strong>Gather in the Town Hall</strong><p class="host-guidance"></p></div>
+        <div class="role-setup" role="group" aria-label="Roles">
+          <span class="role-setup-title">Roles</span>
+          ${SETUP_ROLES.map(({ role, label }) => `
+          <span class="role-count">
+            <span>${label}</span>
+            <button type="button" class="role-step" data-role="${role}" data-step="-1" aria-label="Fewer ${label}">−</button>
+            <output data-role="${role}">1</output>
+            <button type="button" class="role-step" data-role="${role}" data-step="1" aria-label="More ${label}">+</button>
+          </span>`).join("")}
+          <span class="role-villagers"></span>
+        </div>
+        <div><strong>Gather in the Town Square</strong><p class="host-guidance"></p></div>
         <button type="button" class="ready-toggle" aria-pressed="false">Ready</button>
         <button type="button" class="primary start-game">Start Game</button>
       </section>
@@ -96,6 +119,14 @@ export class JoinInterface {
       if (self) this.client.setReady(!self.ready);
     });
     this.element(".start-game").addEventListener("click", () => this.client.startGame());
+    for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>(".role-step"))) {
+      button.addEventListener("click", () => {
+        const setup = this.#world?.roleSetup;
+        if (!setup) return;
+        const role = button.dataset.role as SetupRole;
+        this.client.setRoleSetup({ ...setup, [role]: setup[role] + Number(button.dataset.step) });
+      });
+    }
     this.element(".leave-room").addEventListener("click", () => { this.client.leave(); this.render(); });
     this.element(".back").addEventListener("click", () => { this.client.leave(); this.render(); });
     this.element(".copy-code").addEventListener("click", () => {
@@ -129,13 +160,19 @@ export class JoinInterface {
     const gathered = this.#world?.players.size ?? 0;
     const waiting = [...(this.#world?.players.values() ?? [])].filter(player => !player.ready || !player.connected).length;
     this.element(".host-guidance").textContent = host
-      ? gathered < ROOM_CAPACITY
-        ? `You are the Host. ${ROOM_CAPACITY - gathered} more ${ROOM_CAPACITY - gathered === 1 ? "Player" : "Players"} needed.`
+      ? gathered < MIN_PLAYERS
+        ? `You are the Host. ${MIN_PLAYERS - gathered} more ${MIN_PLAYERS - gathered === 1 ? "Player" : "Players"} needed.`
         : waiting > 0 ? `You are the Host. Waiting for ${waiting} to be Ready and connected.` : "You are the Host. Everyone is Ready."
       : "Waiting for the Host to start";
+    const setup = this.#world?.roleSetup ?? null;
+    const needed = setup ? Math.max(MIN_PLAYERS, specialRoles(setup) + 1) : MIN_PLAYERS;
+    if (host && gathered >= MIN_PLAYERS && gathered < needed) {
+      this.element(".host-guidance").textContent = `You are the Host. These Roles need ${needed} Players, so one is left a Villager.`;
+    }
+    this.renderRoleSetup(setup, host && state.status === "playing", gathered);
     this.element<HTMLButtonElement>(".start-game").hidden = !host;
     this.element<HTMLButtonElement>(".start-game").disabled =
-      state.status !== "playing" || gathered < ROOM_CAPACITY || waiting > 0;
+      state.status !== "playing" || gathered < needed || waiting > 0;
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
     ready.textContent = self?.ready ? "Not Ready" : "Ready";
@@ -162,6 +199,26 @@ export class JoinInterface {
       : "Your place is held while we bring you back.";
     if (state.status === "join" && previous?.status !== "join") this.#name.focus();
     if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(".back").focus();
+  }
+
+  /** Only the Host changes the deal; everyone sees it. The server enforces every limit again. */
+  private renderRoleSetup(setup: RoleSetup | null, editable: boolean, gathered: number): void {
+    this.element(".role-setup").hidden = setup === null;
+    if (!setup) return;
+    for (const { role, max } of SETUP_ROLES) {
+      this.element(`output[data-role="${role}"]`).textContent = String(setup[role]);
+      const fewer = this.element<HTMLButtonElement>(`.role-step[data-role="${role}"][data-step="-1"]`);
+      const more = this.element<HTMLButtonElement>(`.role-step[data-role="${role}"][data-step="1"]`);
+      fewer.hidden = more.hidden = !editable;
+      fewer.disabled = setup[role] <= 1;
+      // Always leave room for at least one Villager in a full Room.
+      more.disabled = setup[role] >= max || specialRoles(setup) >= ROOM_CAPACITY - 1;
+    }
+    const villagers = gathered - specialRoles(setup);
+    this.element(".role-villagers").textContent = villagers >= 1
+      ? `Villagers ${villagers}`
+      : `Needs ${specialRoles(setup) + 1}+ Players`;
+    this.element(".role-villagers").classList.toggle("short", villagers < 1);
   }
 
   destroy(): void { this.#root.remove(); document.body.classList.remove("in-lobby"); }

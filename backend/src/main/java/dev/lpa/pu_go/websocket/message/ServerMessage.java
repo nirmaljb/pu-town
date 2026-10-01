@@ -3,6 +3,7 @@ package dev.lpa.pu_go.websocket.message;
 import com.fasterxml.jackson.annotation.JsonValue;
 import dev.lpa.pu_go.game.ChatChannel;
 import dev.lpa.pu_go.game.Faction;
+import dev.lpa.pu_go.game.Game;
 import dev.lpa.pu_go.game.ParticipantStatus;
 import dev.lpa.pu_go.game.Role;
 
@@ -10,7 +11,7 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.ChatMessage, ServerMessage.ChatHistory {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory {
     int version();
     String type();
 
@@ -33,17 +34,26 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public String wireValue() { return wireValue; }
     }
 
-    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players)
+    record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
+                        RoleSetupView roleSetup, List<PlayerView> players)
             implements ServerMessage {
-        public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId, List<PlayerView> players) {
-            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, List.copyOf(players));
+        public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
+                            RoleSetupView roleSetup, List<PlayerView> players) {
+            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, roleSetup, List.copyOf(players));
         }
     }
 
-    record RoomState(int version, String type, String phase, String hostPlayerId, List<PlayerView> players)
+    record RoomState(int version, String type, String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players)
             implements ServerMessage {
-        public RoomState(String phase, String hostPlayerId, List<PlayerView> players) {
-            this(1, "room_state", phase, hostPlayerId, List.copyOf(players));
+        public RoomState(String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players) {
+            this(1, "room_state", phase, hostPlayerId, roleSetup, List.copyOf(players));
+        }
+    }
+
+    /** The Room's deal: how many Mafia, Doctors and Sheriffs; everyone else is a Villager. */
+    record RoleSetupView(int mafia, int doctors, int sheriffs) {
+        public static RoleSetupView of(dev.lpa.pu_go.game.RoleSetup setup) {
+            return new RoleSetupView(setup.mafia(), setup.doctors(), setup.sheriffs());
         }
     }
 
@@ -67,7 +77,12 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
     record RosterView(String playerId, String displayName, String colour, String avatarPreset, int seat,
                       ParticipantStatus status) {}
 
-    record OutcomeView(String kind, String victimPlayerId, String eliminatedPlayerId, Boolean eliminatedMafia) {}
+    /**
+     * A Meeting Call ({@code report}, {@code emergency} or {@code timeout}) names its caller, the
+     * reported Body and every death since the last Meeting; a {@code meeting} names its verdict.
+     */
+    record OutcomeView(String kind, String callerPlayerId, String bodyPlayerId, List<String> deaths,
+                       String eliminatedPlayerId, Boolean eliminatedMafia) {}
 
     /** A disclosed ballot or accepted Mafia vote. A null target is an explicit Skip. */
     record BallotView(String voterPlayerId, String targetPlayerId) {}
@@ -81,9 +96,8 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
      * built per recipient, never filtered in the client.
      */
     record SelfView(Role role, Faction faction, ParticipantStatus status, boolean killedByMafia,
-                    List<String> mafiaTeam, List<BallotView> mafiaVotes, String mafiaVote,
-                    String protect, String protectBlockedPlayerId, String investigate,
-                    List<InvestigationView> investigations, boolean meetingVoted, String meetingVote) {}
+                    List<String> mafiaTeam, List<InvestigationView> investigations,
+                    boolean meetingVoted, String meetingVote) {}
 
     record GameState(int version, String type, String phase, int round, Long remainingMs,
                      List<RosterView> players, OutcomeView outcome, List<BallotView> ballots,
@@ -93,6 +107,17 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
             this(1, "game_state", phase, round, remainingMs, List.copyOf(players), outcome,
                     ballots == null ? null : List.copyOf(ballots), winner,
                     roles == null ? null : List.copyOf(roles), self);
+        }
+    }
+
+    /**
+     * One recipient's view of the town during a Roam, sent ten times a second. It holds only
+     * the Avatars and Bodies that recipient can see, and their own private ability timers.
+     */
+    record FieldState(int version, String type, int round, List<Game.FieldPlayer> players,
+                      List<Game.Body> bodies, Game.OwnField self) implements ServerMessage {
+        public FieldState(int round, List<Game.FieldPlayer> players, List<Game.Body> bodies, Game.OwnField self) {
+            this(1, "field_state", round, List.copyOf(players), List.copyOf(bodies), self);
         }
     }
 

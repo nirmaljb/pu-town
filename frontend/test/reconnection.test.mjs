@@ -16,7 +16,7 @@ function setup(storage) {
     client.update();
   } };
 }
-const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roomId: "ABC234", selfPlayerId: "p",
+const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, roomId: "ABC234", selfPlayerId: "p",
   players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: 0, ready: false, facing: "up", x: 640, y: 177 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
@@ -176,8 +176,9 @@ test("Lobby and Game controls each belong to one phase, and recovery follows the
     sockets[0].message({ ...snapshot, phase: "lobby", players: [{ ...snapshot.players[0], ready: false }] });
     client.update();
     const count = sockets[0].sent.length;
-    // A Night choice has no meaning before the Game is dealt, so it is never submitted.
-    client.nightAction("mafia_vote", 1, "p");
+    // An ability or a step has no meaning before the Game is dealt, so neither is submitted.
+    client.useAbility("kill", 1, "p");
+    client.move(900, 600, "up");
     client.meetingVote(1, null);
     client.chat("public", "Too early.");
     assert.equal(sockets[0].sent.length, count);
@@ -194,15 +195,16 @@ test("Lobby and Game controls each belong to one phase, and recovery follows the
     client.update();
     client.chat("public", "Back.");
     assert.equal(sockets[1].sent.length, before + (phase === "playing" ? 1 : 0));
-    assert.equal(inbox.drain().at(-1).phase, phase);
+    assert.equal(inbox.drain().at(-1).event.phase, phase);
     if (phase === "playing") {
       assert.deepEqual(JSON.parse(sockets[1].sent.at(-1)), { version: 1, type: "send_chat", channel: "public", text: "Back." });
       const playingCount = sockets[1].sent.length;
       client.setReady(true); client.startGame(); client.selectAvatar("townsperson-1");
       assert.equal(sockets[1].sent.length, playingCount, "Start closes the Lobby's own controls");
-      client.nightAction("investigate", 2, "p");
+      client.useAbility("scan", 2, "p");
+      client.move(900, 600, "up");
       client.meetingVote(2, null);
-      assert.deepEqual(sockets[1].sent.slice(playingCount).map(value => JSON.parse(value).type), ["investigate", "meeting_vote"]);
+      assert.deepEqual(sockets[1].sent.slice(playingCount).map(value => JSON.parse(value).type), ["use_ability", "move", "meeting_vote"]);
     }
   }
 });
@@ -272,7 +274,7 @@ test("real connection loss recovers the private membership and waits for its cur
   assert.deepEqual(JSON.parse(sockets[1].sent[0]), {
     version: 1, type: "recover_room", roomId: "ABC234", recoveryToken: "a".repeat(64)
   });
-  client.nightAction("mafia_vote", 1, "p");
+  client.useAbility("kill", 1, "p");
   assert.equal(sockets[1].sent.length, 1);
   sockets[1].message(snapshot);
   assert.equal(client.state.status, "reconnecting");
@@ -444,11 +446,11 @@ test('selection sends only in a confirmed Lobby and recovery takes appearance fr
   const accepted = { ...lobby, type: 'room_state', players: [{ ...lobby.players[0], avatarPreset: 'townsperson-10', ready: true }] };
   delete accepted.recoveryToken; delete accepted.roomId; delete accepted.selfPlayerId;
   first.sockets[0].message(accepted); first.client.update();
-  assert.equal(first.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  assert.equal(first.inbox.drain().at(-1).event.players[0].avatarPreset, 'townsperson-10');
   first.sockets[0].disconnect(); first.client.update(); first.advance(500); first.sockets[1].open();
   const playing = { ...snapshot, players: [{ ...snapshot.players[0], avatarPreset: 'townsperson-10', ready: true }] };
   first.sockets[1].message(playing); first.client.update();
-  assert.equal(first.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  assert.equal(first.inbox.drain().at(-1).event.players[0].avatarPreset, 'townsperson-10');
   const count = first.sockets[1].sent.length;
   first.client.selectAvatar('townsperson-9');
   assert.equal(first.sockets[1].sent.length, count, 'Start prevents further submission');
@@ -456,7 +458,7 @@ test('selection sends only in a confirmed Lobby and recovery takes appearance fr
   assert.equal(JSON.parse(refresh.sockets[0].sent[0]).type, 'recover_room');
   assert.ok(![...storage.values()][0].includes('townsperson'), 'no appearance preference stored');
   refresh.sockets[0].message(playing); refresh.client.update();
-  assert.equal(refresh.inbox.drain().at(-1).players[0].avatarPreset, 'townsperson-10');
+  assert.equal(refresh.inbox.drain().at(-1).event.players[0].avatarPreset, 'townsperson-10');
   refresh.client.leave(); refresh.sockets[0].message({ version: 1, type: 'room_left', roomId: 'ABC234' }); refresh.client.update();
   assert.equal(storage.size, 0);
   refresh.client.create('Alex'); refresh.sockets[1].open();

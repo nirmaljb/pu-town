@@ -31,7 +31,7 @@ export class NetworkFrameBoundary {
     const events = this.inbox.drain();
     if (events.length === 0) return;
     const arrivals = new Set<string>();
-    for (const event of events) {
+    for (const { event, receivedAt } of events) {
       if (event.type === "room_snapshot") {
         arrivals.clear();
         if (event.selfPlayerId !== this.#world.selfPlayerId || event.roomId !== this.#world.roomId) {
@@ -41,7 +41,7 @@ export class NetworkFrameBoundary {
         arrivals.add(event.player.playerId);
       } else if (event.type === "player_left") arrivals.delete(event.playerId);
       else if (event.type === "room_left") arrivals.clear();
-      this.#world = reduceWorldEvent(this.#world, event);
+      this.#world = reduceWorldEvent(this.#world, event, receivedAt);
     }
     this.view.reconcile(this.#world, arrivals);
   }

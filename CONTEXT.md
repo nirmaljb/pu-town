@@ -1,6 +1,6 @@
 # PU Town
 
-PU Town is a social deduction game in which Players occupy isolated Rooms, gather around one table, and play out a Game of Mafia against the Village in real time.
+PU Town is a social deduction game in which Players occupy isolated Rooms, roam a small town, and play out a Game of Mafia against the Village in real time, returning to one table for every Meeting.
 
 ## Language
 
@@ -59,15 +59,15 @@ _Avoid_: Room owner
 A Player's declaration that they are prepared for the game to start. A Player who has not made or has withdrawn that declaration is Not Ready.
 _Avoid_: Connected, joined
 
-**Town Hall**:
-The in-world building containing the Meeting Area.
+**Town Square**:
+The open square at the centre of the town, around the Emergency button, that holds the Meeting Area.
 
 **Meeting Area**:
-The place inside the Town Hall where Players sit in a circle for the Lobby and Meetings.
+The place in the Town Square where Players sit in a circle for the Lobby and Meetings.
 _Avoid_: Lobby, Room
 
 **Seat**:
-An allocated place for one Player in the Meeting Area, retained from the Lobby into the Game.
+An allocated place for one Player in the Meeting Area, retained from the Lobby into the Game. Every Roam begins beside it and every Meeting returns to it.
 _Avoid_: Spawn Point
 
 **Game**:
@@ -86,25 +86,61 @@ _Avoid_: Role
 A Player's assigned identity and abilities within a Game: Mafia, Villager, Doctor, or Sheriff. It is independent of their Avatar Preset.
 _Avoid_: Faction, Avatar Preset
 
+**Role Setup**:
+The Host's choice, in the Lobby, of how many Mafia, Doctors and Sheriffs a Game deals. Every Role is dealt at least once, and everyone else is a Villager.
+_Avoid_: Deal size, table size
+
 **Mafia**:
-The faction whose members know one another and collectively choose a Night attack; also the Role held by each member of that faction.
+The faction whose members know one another and kill Village Players during the Roam; also the Role held by each member of that faction.
 
 **Village**:
 The faction comprising Villagers, the Doctor, and the Sheriff.
 _Avoid_: Villager when referring to the entire faction
 
 **Villager**:
-A Village Role with no special Night action.
+A Village Role with no ability beyond walking, reporting and voting, and subject to Crowding.
 _Avoid_: Village when referring to this Role
 
 **Doctor**:
-The Village Role that can protect one living Player from a Night attack, including themselves, but cannot protect the same Player on consecutive Nights.
+The Village Role that can Shield another nearby living Player.
 
 **Sheriff**:
-The Village Role that can investigate another living Player at Night to learn whether they belong to the Mafia faction.
+The Village Role that can Scan another nearby living Player to learn privately whether they belong to the Mafia faction.
 
-**Night**:
-The Game phase in which living Mafia privately discuss and choose an attack, the Doctor chooses protection, and the Sheriff chooses an investigation.
+**Roam**:
+The Game phase in which every Player walks the town, the Mafia kill, the Doctor Shields and the Sheriff Scans. It ends when a Meeting is called or its time runs out.
+_Avoid_: Night
+
+**Vision**:
+How far a living Player can see during the Roam. It depends on their Role: the Mafia see furthest, then the Doctor, then the Sheriff, and Villagers least. Nothing beyond it is ever sent to them.
+
+**Body**:
+What a Roam kill leaves where the victim fell, visible only within Vision, until a Meeting is called.
+
+**Report**:
+A living Player's act of calling a Meeting from beside a Body.
+
+**Emergency Meeting**:
+A Meeting a living Player calls from the button in the Town Square, once per Game.
+
+**Meeting Call**:
+The moment between the Roam and a Meeting, which names who called it and every Player killed since the last Meeting.
+
+**Vanish**:
+A Mafia ability that hides them from every non-Mafia Player for a short time.
+
+**Shield**:
+A Doctor ability that makes the next kill on its target fail, for a short time.
+
+**Scan**:
+A Sheriff ability that reveals only whether its target is Mafia.
+
+**Crowding**:
+The limit on how long a Villager may stay close to another Player before being pushed away.
+
+**Ghost**:
+A Player killed during the Roam, who keeps walking unseen by the living and sees the whole town.
+_Avoid_: Spectator
 
 **Meeting**:
 The Game phase in which living Players discuss publicly and then vote on whether to eliminate a Player.

@@ -1,69 +1,84 @@
 import Phaser from "phaser";
-import type { Direction } from "./avatar-facing.js";
+import { seatFacing, type Direction } from "./avatar-facing.js";
+import { BUTTON_X, BUTTON_Y } from "./room-rules.js";
 
 export const ROOM_CAPACITY = 10;
 
-/** Seat zero is north; clockwise geometry mirrors authoritative RoomRules. */
+const MAP_KEY = "pu-town";
+const MAP_ROOT = "maps/pu-town/";
+/** Tile layers, bottom to top, all beneath the Avatars. */
+const TILE_LAYERS = ["water", "sand", "grass", "bridge", "floor", "walls"];
+const LAYER_DEPTH = -1_100;
+/** Surf is drawn between the sea and the island; rugs and doormats lie beneath everyone. */
+const FOAM_DEPTH = LAYER_DEPTH + 0.5;
+const FLOOR_DECOR_DEPTH = -1_050;
+
+type TiledTileset = Readonly<{ name: string; image: string; tilewidth: number; tileheight: number }>;
+
+/** Every tileset image the map names, as a texture key. */
+function textureOf(tileset: string): string {
+  return `${MAP_KEY}-${tileset}`;
+}
+
+/**
+ * Queues the PU Town map; once its JSON arrives, every tileset it embeds is queued too, as a
+ * spritesheet cut to that tileset's tile size. Call from the scene's preload.
+ */
+export function loadTownMap(scene: Phaser.Scene): void {
+  scene.load.once(`filecomplete-tilemapJSON-${MAP_KEY}`, () => {
+    const data = scene.cache.tilemap.get(MAP_KEY)?.data as { tilesets?: TiledTileset[] } | undefined;
+    for (const tileset of data?.tilesets ?? []) {
+      scene.load.spritesheet(textureOf(tileset.name), MAP_ROOT + tileset.image,
+        { frameWidth: tileset.tilewidth, frameHeight: tileset.tileheight });
+    }
+  });
+  scene.load.tilemapTiledJSON(MAP_KEY, `${MAP_ROOT}pu-town.json`);
+}
+
+/** Seat zero is north; clockwise geometry mirrors authoritative RoomRules, in town coordinates. */
 export function meetingSeat(seat: number): { x: number; y: number; facing: Direction } {
   return {
-    x: Math.round(640 + 390 * Math.sin(seat * Math.PI / 5)),
-    y: Math.round(382 - 205 * Math.cos(seat * Math.PI / 5)),
-    facing: seat === 0 ? "down" : seat < 5 ? "left" : seat === 5 ? "up" : "right"
+    x: BUTTON_X + Math.round(330 * Math.sin(seat * 2 * Math.PI / ROOM_CAPACITY)),
+    y: BUTTON_Y + Math.round(-205 * Math.cos(seat * 2 * Math.PI / ROOM_CAPACITY)),
+    facing: seatFacing(seat)
   };
 }
 
-/** The physical Meeting Area is independent of the Room's waiting-phase controls. */
+/** The town the Players roam; Meetings gather on chairs around the button in the Town Square. */
 export class MeetingArea {
-  readonly #container: Phaser.GameObjects.Container;
+  readonly #town: Phaser.GameObjects.GameObject[] = [];
+  readonly #button: Phaser.GameObjects.Container;
+  readonly #chairs: Phaser.GameObjects.Container;
 
   constructor(scene: Phaser.Scene) {
-    const floor = scene.add.graphics();
-    floor.fillStyle(0x251e22).fillRect(0, 0, 1280, 720);
-    floor.fillStyle(0x493126).fillRect(66, 72, 1148, 610);
-    // Staggered plank joints and small grain marks keep the floor pixel aligned.
-    for (let row = 0; row < 18; row++) {
-      for (let col = 0; col < 9; col++) {
-        const x = 80 + col * 140 - (row % 2) * 70;
-        const y = 92 + row * 32;
-        const left = Math.max(80, x);
-        const right = Math.min(1200, x + 138);
-        if (left >= right) continue;
-        floor.fillStyle([0x92613c, 0x875936, 0x9b6941][(row + col) % 3]!).fillRect(left, y, right - left, 30);
-        floor.fillStyle(0xb7804c, 0.6).fillRect(left + 3, y + 2, right - left - 6, 2);
-        floor.fillStyle(0x6e482e, 0.55).fillRect(left + 12, y + 20, Math.min(40, right - left - 14), 2);
-      }
+    const map = scene.make.tilemap({ key: MAP_KEY });
+    const tilesets = map.tilesets.map(tileset => {
+      const added = map.addTilesetImage(tileset.name, textureOf(tileset.name));
+      if (!added) throw new Error(`Missing tileset ${tileset.name}`);
+      return added;
+    });
+    for (const [index, name] of TILE_LAYERS.entries()) {
+      const layer = map.createLayer(name, tilesets);
+      if (layer) this.#town.push(layer.setDepth(LAYER_DEPTH + index));
     }
-    floor.fillStyle(0x382921).fillRect(64, 66, 1152, 28);
-    floor.fillStyle(0xc59559).fillRect(76, 64, 1128, 6);
-    for (const x of [68, 1186]) {
-      floor.fillStyle(0x3f2b25).fillRect(x, 80, 26, 582);
-      floor.fillStyle(0xb27a45).fillRect(x + 4, 80, 5, 580);
-    }
-    // An unoccupied woven rug defines the centre of the circle.
-    floor.fillStyle(0x624234).fillRect(432, 278, 416, 204);
-    floor.fillStyle(0xb68c56).fillRect(440, 286, 400, 188);
-    floor.fillStyle(0x425951).fillRect(450, 296, 380, 168);
-    floor.lineStyle(3, 0x98a081).strokeRect(460, 306, 360, 148);
-    for (let x = 444; x < 840; x += 12) {
-      floor.fillStyle(0xd4ad70).fillRect(x, 280, 4, 8).fillRect(x, 474, 4, 8);
-    }
-    // Two wall lanterns frame the gathering.
-    for (const x of [330, 950]) {
-      floor.fillStyle(0x3c2925).fillRect(x - 12, 82, 24, 36);
-      floor.fillStyle(0xefbd72).fillRect(x - 8, 87, 16, 22);
-      floor.fillStyle(0xffe1a0).fillRect(x - 4, 90, 8, 14);
-    }
-    const title = scene.add.text(640, 332, "Town Hall", {
-      fontFamily: '"Courier New", monospace', fontStyle: "bold", fontSize: "25px",
-      color: "#fff0c9", stroke: "#382921", strokeThickness: 5
+    for (const object of map.getObjectLayer("foam")?.objects ?? []) this.spawn(scene, map, object, FOAM_DEPTH);
+    for (const object of map.getObjectLayer("floor_decor")?.objects ?? []) this.spawn(scene, map, object, FLOOR_DECOR_DEPTH);
+    // Buildings, trees and furniture sort by their bottom edge, as the Avatars sort by their feet,
+    // so a Player walks behind a roof or a tree top and in front of its base.
+    for (const object of map.getObjectLayer("objects")?.objects ?? []) this.spawn(scene, map, object, object.y ?? 0);
+
+    // The Emergency Meeting button stands in the open middle of the Town Square.
+    const button = scene.add.graphics();
+    button.fillStyle(0x2c2c34).fillEllipse(0, 8, 58, 26);
+    button.fillStyle(0x7a1f1f).fillEllipse(0, 0, 40, 22);
+    button.fillStyle(0xd93b3b).fillEllipse(0, -4, 34, 16);
+    button.fillStyle(0xff8a80, 0.8).fillEllipse(-6, -7, 10, 5);
+    const hint = scene.add.text(0, 38, "Emergency Meeting · press F here", {
+      fontFamily: "sans-serif", fontSize: "13px", color: "#fff0c9", stroke: "#2a2118", strokeThickness: 4
     }).setOrigin(0.5);
-    const centre = scene.add.text(640, 366, "Meeting Area", {
-      fontFamily: '"Courier New", monospace', fontSize: "20px", color: "#ece4bf"
-    }).setOrigin(0.5);
-    const hint = scene.add.text(640, 399, "Take a moment. Gather your people.", {
-      fontFamily: "sans-serif", fontSize: "13px", color: "#d7ddc7"
-    }).setOrigin(0.5);
-    this.#container = scene.add.container(0, 0, [floor, title, centre, hint]).setDepth(-1000);
+    this.#button = scene.add.container(BUTTON_X, BUTTON_Y, [button, hint]).setDepth(-1_000);
+
+    this.#chairs = scene.add.container(0, 0).setDepth(-999);
     for (let seat = 0; seat < ROOM_CAPACITY; seat++) {
       const { x, y } = meetingSeat(seat);
       const chair = scene.add.graphics();
@@ -77,11 +92,41 @@ export class MeetingArea {
       chair.fillStyle(0x372820).fillRect(-23, -30, 46, 12);
       chair.fillStyle(0xc39358).fillRect(-19, -28, 38, 6);
       chair.fillStyle(0x4a3227).fillRect(-20, 17, 7, 12).fillRect(13, 17, 7, 12);
-      chair.setPosition(x, y - 3).setRotation(seat * Math.PI / 5);
-      this.#container.add(chair);
+      chair.setPosition(x, y - 3).setRotation(seat * 2 * Math.PI / ROOM_CAPACITY);
+      this.#chairs.add(chair);
     }
-    this.setVisible(false);
+    this.setVisible(false, false);
   }
 
-  setVisible(visible: boolean): void { this.#container.setVisible(visible); }
+  /** One Tiled tile object as a sprite, playing its tileset's animation if it has one. */
+  private spawn(scene: Phaser.Scene, map: Phaser.Tilemaps.Tilemap, object: Phaser.Types.Tilemaps.TiledObject, depth: number): void {
+    const gid = object.gid;
+    if (gid === undefined) return;
+    const tileset = map.tilesets.find(candidate => gid >= candidate.firstgid && gid < candidate.firstgid + candidate.total);
+    if (!tileset) return;
+    const key = textureOf(tileset.name);
+    const sprite = scene.add.sprite(object.x ?? 0, object.y ?? 0, key, gid - tileset.firstgid)
+      .setOrigin(0, 1).setDepth(depth).setFlip(Boolean(object.flippedHorizontal), Boolean(object.flippedVertical));
+    if (object.width && object.height) sprite.setDisplaySize(object.width, object.height);
+    const frames = (tileset.tileData as Record<number, { animation?: { tileid: number; duration: number }[] }>)[0]?.animation;
+    if (frames && frames.length > 1) {
+      const animation = `${key}-loop`;
+      if (!scene.anims.exists(animation)) {
+        scene.anims.create({
+          key: animation, repeat: -1,
+          frames: frames.map(frame => ({ key, frame: frame.tileid, duration: frame.duration }))
+        });
+      }
+      // Each sheep, tree and wave starts at its own frame, so the town does not sway in step.
+      sprite.play({ key: animation, startFrame: Math.floor(Math.random() * frames.length) });
+    }
+    this.#town.push(sprite);
+  }
+
+  /** The town shows while in a Room; the chairs only while the Players are seated. */
+  setVisible(visible: boolean, seated: boolean): void {
+    for (const part of this.#town) (part as unknown as Phaser.GameObjects.Components.Visible).setVisible(visible);
+    this.#button.setVisible(visible);
+    this.#chairs.setVisible(visible && seated);
+  }
 }

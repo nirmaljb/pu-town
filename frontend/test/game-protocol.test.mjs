@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, nightAction, sendChat } from "../dist/protocol.js";
+import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, move, sendChat, useAbility } from "../dist/protocol.js";
 
 const seat = (index, status = "living") => ({
   playerId: "p" + index, displayName: "Player " + index, colour: "#4F8CFF",
@@ -10,16 +10,27 @@ const seat = (index, status = "living") => ({
 
 const SELF = {
   role: "sheriff", faction: "village", status: "living", killedByMafia: false,
-  mafiaTeam: null, mafiaVotes: null, mafiaVote: null,
-  protect: null, protectBlockedPlayerId: null,
-  investigate: "p3", investigations: [{ round: 1, targetPlayerId: "p2", mafia: true }],
+  mafiaTeam: null, investigations: [{ round: 1, targetPlayerId: "p2", mafia: true }],
   meetingVoted: false, meetingVote: null
 };
 
 const GAME = {
-  version: 1, type: "game_state", phase: "night", round: 2, remainingMs: 61_500,
+  version: 1, type: "game_state", phase: "roam", round: 2, remainingMs: 61_500,
   players: [seat(0), seat(1, "eliminated"), seat(2, "left")],
   outcome: null, ballots: null, winner: null, roles: null, self: SELF
+};
+
+const OWN = {
+  x: 900, y: 600.5, facing: "left", correction: 3, crowding: null,
+  primaryCooldownMs: 4_200, vanishCooldownMs: null, vanishedMs: null,
+  shieldTargetPlayerId: null, shieldMs: null, emergencyAvailable: true
+};
+
+const FIELD = {
+  version: 1, type: "field_state", round: 2,
+  players: [{ playerId: "p0", x: 900, y: 600.5, facing: "left", ghost: false, vanished: false }],
+  bodies: [{ playerId: "p1", x: 1000, y: 610 }],
+  self: OWN
 };
 
 const decode = value => decodeServerMessage(JSON.stringify(value));
@@ -27,17 +38,30 @@ const decode = value => decodeServerMessage(JSON.stringify(value));
 test("Game state carries the Roster, the countdown and this recipient's own private view", () => {
   assert.deepEqual(decode(GAME), GAME);
   const view = decode(GAME);
-  assert.equal(view.phase, "night");
+  assert.equal(view.phase, "roam");
   assert.equal(view.remainingMs, 61_500);
   assert.deepEqual(view.players.map(entry => entry.status), ["living", "eliminated", "left"]);
   assert.equal(view.self.investigations[0].mafia, true);
+});
+
+test("a Meeting Call names its caller, the Body and every death since the last Meeting", () => {
+  const called = {
+    ...GAME, phase: "meeting_call",
+    outcome: { kind: "report", callerPlayerId: "p0", bodyPlayerId: "p1", deaths: ["p1"], eliminatedPlayerId: null, eliminatedMafia: null }
+  };
+  assert.deepEqual(decode(called), called);
+  for (const kind of ["emergency", "timeout"]) {
+    const outcome = { ...called.outcome, kind, bodyPlayerId: null };
+    assert.equal(decode({ ...called, outcome }).outcome.kind, kind);
+  }
+  assert.throws(() => decode({ ...called, outcome: { ...called.outcome, deaths: null } }));
 });
 
 test("a finished Game reveals every Role, the winning Faction and no countdown", () => {
   const finished = {
     ...GAME, phase: "finished", remainingMs: null, winner: "village",
     roles: [{ playerId: "p0", role: "mafia" }, { playerId: "p1", role: "doctor" }],
-    outcome: { kind: "meeting", victimPlayerId: null, eliminatedPlayerId: "p0", eliminatedMafia: true },
+    outcome: { kind: "meeting", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: "p0", eliminatedMafia: true },
     ballots: [{ voterPlayerId: "p1", targetPlayerId: "p0" }, { voterPlayerId: "p2", targetPlayerId: null }]
   };
   assert.deepEqual(decode(finished), finished);
@@ -47,11 +71,11 @@ test("a finished Game reveals every Role, the winning Faction and no countdown",
 
 test("Game state is decoded strictly, field by field", () => {
   for (const patch of [
-    { phase: "dawn" }, { phase: null }, { round: -1 }, { round: 1.5 },
+    { phase: "night" }, { phase: null }, { round: -1 }, { round: 1.5 },
     { remainingMs: -1 }, { remainingMs: "soon" }, { winner: "villagers" },
     { surprise: true }, { self: null }, { players: null },
     { roles: [{ playerId: "p0", role: "mayor" }] },
-    { outcome: { kind: "dawn", victimPlayerId: null, eliminatedPlayerId: null, eliminatedMafia: null } },
+    { outcome: { kind: "night", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: null, eliminatedMafia: null } },
     { ballots: [{ voterPlayerId: "p1" }] }
   ]) {
     assert.throws(() => decode({ ...GAME, ...patch }), undefined, JSON.stringify(patch));
@@ -59,15 +83,28 @@ test("Game state is decoded strictly, field by field", () => {
   for (const patch of [
     { role: "mayor" }, { faction: "town" }, { status: "dead" }, { killedByMafia: null },
     { mafiaTeam: "p0" }, { investigations: [{ round: 1, targetPlayerId: "p2" }] },
-    { meetingVoted: "no" }
+    { meetingVoted: "no" }, { mafiaVotes: null }
   ]) {
     assert.throws(() => decode({ ...GAME, self: { ...SELF, ...patch } }), undefined, JSON.stringify(patch));
   }
-  // A missing private field is not the same as an absent one; the set is exact.
-  // Role Reveal precedes the first Night, so it is the one phase whose round is zero.
+  // Role Reveal precedes the first Roam, so it is the one phase whose round is zero.
   assert.equal(decode({ ...GAME, phase: "role_reveal", round: 0 }).round, 0);
   const { mafiaTeam, ...incomplete } = SELF;
   assert.throws(() => decode({ ...GAME, self: incomplete }), /fields/);
+});
+
+test("a field state holds only what its recipient may see, and their own timers", () => {
+  assert.deepEqual(decode(FIELD), FIELD);
+  for (const patch of [
+    { round: 0 }, { players: null }, { bodies: [{ playerId: "p1", x: 1 }] },
+    { players: [{ ...FIELD.players[0], facing: "north" }] },
+    { players: [{ ...FIELD.players[0], role: "mafia" }] }, { extra: 1 }
+  ]) {
+    assert.throws(() => decode({ ...FIELD, ...patch }), undefined, JSON.stringify(patch));
+  }
+  for (const patch of [{ correction: -1 }, { primaryCooldownMs: -5 }, { emergencyAvailable: null }, { crowding: "full" }]) {
+    assert.throws(() => decode({ ...FIELD, self: { ...OWN, ...patch } }), undefined, JSON.stringify(patch));
+  }
 });
 
 test("a Roster entry keeps its Seat and its participation status after the Membership ends", () => {
@@ -91,15 +128,18 @@ test("chat arrives one entry at a time or as the recipient's whole readable hist
   assert.throws(() => decode({ version: 1, type: "chat_history", messages: [{ ...entry, extra: 1 }] }), /fields/);
 });
 
-test("Night choices, Meeting ballots and chat are built for the round they belong to", () => {
-  assert.deepEqual(nightAction("mafia_vote", 2, "p4"), { version: 1, type: "mafia_vote", round: 2, targetPlayerId: "p4" });
-  assert.deepEqual(nightAction("protect", 1, "p4"), { version: 1, type: "protect", round: 1, targetPlayerId: "p4" });
-  assert.deepEqual(nightAction("investigate", 1, "p4"), { version: 1, type: "investigate", round: 1, targetPlayerId: "p4" });
+test("steps, abilities, Meeting ballots and chat are built exactly", () => {
+  assert.deepEqual(move(900.04, 600.06, "up"), { version: 1, type: "move", x: 900, y: 600.1, facing: "up" });
+  assert.throws(() => move(Number.NaN, 1, "up"), /x/);
+  assert.throws(() => move(1, 1, "north"), /Facing/);
+  assert.deepEqual(useAbility("kill", 2, "p4"), { version: 1, type: "use_ability", ability: "kill", round: 2, targetPlayerId: "p4" });
+  assert.deepEqual(useAbility("report", 2, null), { version: 1, type: "use_ability", ability: "report", round: 2, targetPlayerId: null });
+  // Kill, Shield and Scan need a target; Vanish, Report and Emergency take none.
+  assert.throws(() => useAbility("scan", 1, null), /target/);
+  assert.throws(() => useAbility("vanish", 1, "p4"), /target/);
   for (const round of [0, -1, 1.5, Number.NaN]) {
-    assert.throws(() => nightAction("protect", round, "p4"), /round/);
+    assert.throws(() => useAbility("shield", round, "p4"), /round/);
   }
-  assert.throws(() => nightAction("protect", 1, ""), /targetPlayerId/);
-  // A Meeting ballot may be an explicit Skip; a Night choice may not.
   assert.deepEqual(meetingVote(3, null), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: null });
   assert.deepEqual(meetingVote(3, "p4"), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: "p4" });
   assert.deepEqual(sendChat("public", "  I was with p2  "), { version: 1, type: "send_chat", channel: "public", text: "I was with p2" });
