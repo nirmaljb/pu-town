@@ -84,14 +84,20 @@ export class GameInterface {
         <h2>You are dead</h2>
         <p class="death-cause"></p>
       </section>
-      <aside class="game-panel" hidden aria-label="Game controls">
-        <div class="role-card">
-          <p class="eyebrow role-faction"></p>
-          <h2 class="role-name"></h2>
-          <p class="role-brief"></p>
-          <p class="role-brief role-everyone"></p>
-          <p class="role-team"></p>
-          <p class="role-notice"></p>
+      <section class="game-panel" hidden aria-label="Game controls">
+        <div class="personal-panels">
+          <details class="role-card">
+            <summary><span class="role-name"></span></summary>
+            <p class="eyebrow role-faction"></p>
+            <p class="role-brief"></p>
+            <p class="role-brief role-everyone"></p>
+            <p class="role-team"></p>
+            <p class="role-notice"></p>
+          </details>
+          <details class="results-panel" hidden>
+            <summary>Results</summary>
+            <div class="results-content"></div>
+          </details>
         </div>
         <div class="action-panel" hidden>
           <h3 class="action-title">Cast your ballot</h3>
@@ -99,15 +105,14 @@ export class GameInterface {
           <ul class="target-list"></ul>
           <button type="button" class="primary confirm-action">Confirm ballot</button>
         </div>
-        <div class="results-panel" hidden></div>
         <div class="chat-panel" hidden>
           <ul class="chat-log" aria-live="polite"></ul>
           <form class="chat-form">
-            <input class="chat-input" autocomplete="off" maxlength="${MAX_CHAT_CHARACTERS}" placeholder="Say something">
+            <input class="chat-input" aria-label="Chat message" autocomplete="off" maxlength="${MAX_CHAT_CHARACTERS}" placeholder="Say something">
             <button type="submit">Send</button>
           </form>
         </div>
-      </aside>`;
+      </section>`;
     document.body.append(this.#root);
     this.element(".role-everyone").textContent = EVERYONE_BRIEF;
     this.element(".confirm-action").addEventListener("click", () => this.confirm());
@@ -151,6 +156,9 @@ export class GameInterface {
       return;
     }
     if (game !== this.#lastGame) {
+      if (this.#lastGame?.phase !== game.phase) {
+        this.element<HTMLDetailsElement>(".role-card").open = game.phase === "role_reveal";
+      }
       if (this.#lastGame === null || game.round !== this.#lastGame.round || game.phase !== this.#lastGame.phase) {
         this.#preview = null;
       }
@@ -476,7 +484,7 @@ export class GameInterface {
       })));
     }
     panel.hidden = parts.length === 0;
-    panel.replaceChildren(...parts);
+    this.element(".results-content").replaceChildren(...parts);
   }
 
   private list(title: string, lines: readonly string[]): HTMLElement {

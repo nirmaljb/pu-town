@@ -6,11 +6,14 @@
     "build": "tsc --noEmit && vite build",
     "build:test": "tsc",
     "dev": "vite",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.browser.json",
     "test": "npm run build:test && node --test test/*.test.mjs",
+    "test:browser": "playwright test",
     "avatars": "python3 ../tools/avatar-editor/server.py"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
     "typescript": "^5.7.2",
     "vite": "^8.2.2"
   },
