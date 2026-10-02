@@ -58,6 +58,13 @@ Vite may choose another port when `5173` is unavailable, but the backend current
 
 ## The Game
 
+The Game map fills the available width and stays centered, with phase information,
+ballots and chat over the town rather than in a reserved sidebar. Your Role opens
+during the reveal; click its heading to consult the instructions later. Retained
+results can be opened separately. During play the Room Code is plain selectable
+text, and Leave Room stays available. Copy code is available in the Lobby.
+Settings and microphone controls will arrive with their respective feature slices.
+
 In the Lobby the Host chooses the deal with the − / + controls under the Town Square: one or two Mafia, one or two Sheriffs and at least one Doctor, and everyone else is a Villager. Every Player sees the choice. There must always be at least one Villager, so the Game needs one more Player than the special Roles, and never fewer than four. A new Room deals one of each. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
 
 | Phase | Length | What you do |
@@ -137,6 +144,33 @@ npm run build
 ```
 
 The production frontend bundle is written to `frontend/dist/`.
+
+### Browser acceptance
+
+Install the Playwright browser and Linux dependencies once, then run the browser suite:
+
+```sh
+cd frontend
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+The harness starts this checkout's backend on port `18081` and Vite on `5173`,
+checks `/health`, and closes both after testing. It requires JDK 17 and free ports;
+it never reuses an existing development server. If another checkout occupies the
+default loopback address on `5173`, use `PU_TOWN_E2E_HOST=127.0.0.2 npm run test:browser`
+to bind a separate loopback address while keeping the browser's supported
+`http://localhost:5173` origin.
+
+The suite uses Phaser's Canvas renderer and four independent browser contexts
+at desktop and phone sizes, including ballot interaction after a landscape resize
+and announcements containing a long Display Name. It exercises Create/Join, Ready/Start, centered map
+and overlay geometry, Role disclosure, movement, Emergency Meeting, public chat,
+ballot preview/confirmation, Leave and a new Room. It waits for real server phase
+deadlines. Failures retain Playwright traces in `frontend/test-results/`; the
+voting screen is also captured there. This is automated browser evidence for
+the current Roam Game; it does not verify the future Day–Night, Tasks or media
+features in epic #22, or constitute manual playtesting.
 
 Run the backend tests and create an executable JAR:
 

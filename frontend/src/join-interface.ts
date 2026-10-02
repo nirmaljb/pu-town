@@ -156,6 +156,7 @@ export class JoinInterface {
     this.#chooser.render(self, choosing);
     document.body.classList.toggle("in-lobby", Boolean(lobby && state.status !== "join" && state.status !== "connecting"));
     this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
+    this.element(".copy-code").hidden = !lobby;
     this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
     const gathered = this.#world?.players.size ?? 0;
     const waiting = [...(this.#world?.players.values() ?? [])].filter(player => !player.ready || !player.connected).length;
