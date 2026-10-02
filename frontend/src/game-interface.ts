@@ -1,35 +1,28 @@
-import type { Ability, ChatChannel, ChatEntry, FieldPlayer, GameView, Role, RosterEntry } from "./protocol.js";
+import type { ChatChannel, ChatEntry, GameView, Role, RosterEntry } from "./protocol.js";
 import { MAX_CHAT_CHARACTERS } from "./protocol.js";
 import type { LocalPosition } from "./field-controller.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
-import { BUTTON_X, BUTTON_Y, EMERGENCY_RANGE, KILL_RANGE, REPORT_RANGE, SCAN_RANGE, SHIELD_RANGE } from "./room-rules.js";
 import type { WorldState } from "./world-state.js";
 
 const PHASE_TITLES: Record<GameView["phase"], string> = {
   role_reveal: "Your role",
-  roam: "Roam the town",
-  meeting_call: "Meeting called!",
-  discussion: "Meeting · Discussion",
-  voting: "Meeting · Voting",
+  day: "Day · Explore the town",
+  night: "Night · Sleeping",
+  discussion: "Townhall · Discussion",
+  voting: "Townhall · Voting",
   voting_result: "The verdict",
   finished: "Game over"
 };
 
 const ROLE_BRIEFS: Record<Role, string> = {
-  mafia: "Hunt the Village. Q kills a Player right next to you. E makes you vanish from everyone but your team for 10 seconds.",
-  villager: "Find the Mafia. Walk the town, but you cannot stay close to one Player for long — linger and you get pushed away.",
-  doctor: "Q shields a nearby Player for 20 seconds. The next kill on them fails.",
-  sheriff: "Q scans a nearby Player and tells you, privately, whether they are Mafia."
+  mafia: "Your team wins when living Mafia equal or outnumber the living Village.",
+  villager: "Find the Mafia. Discuss at Townhall and vote to eliminate them.",
+  doctor: "You belong to the Village. Find the Mafia through Townhall discussion and voting.",
+  sheriff: "You belong to the Village. Find the Mafia through Townhall discussion and voting."
 };
 
-const EVERYONE_BRIEF = "Walk with WASD or the arrow keys. R reports a Body next to you. F at the red button in the Town Square calls an Emergency Meeting (once per Game).";
-
+const EVERYONE_BRIEF = "Walk with WASD or the arrow keys during Day. Sleep in place during Night, then return to your Seat for Townhall discussion and voting.";
 const DEATH_SCREEN_MS = 2_000;
-
-/** Client ranges are a little tighter than the server's, so a highlighted target is really in reach. */
-const REACH_MARGIN = 12;
-
-type Slot = Readonly<{ ability: Ability; key: string; label: string }>;
 
 function capitalized(role: Role): string {
   return role[0]!.toUpperCase() + role.slice(1);
@@ -54,7 +47,6 @@ export class GameInterface {
   // The scene renders every frame, but the target list holds focus and receives clicks, so
   // it is rebuilt only when the Game, the world or the local selection behind it changed.
   #rendered: Readonly<{ game: GameView; world: WorldState; preview: Preview | null }> | null = null;
-  readonly #onKey = (event: KeyboardEvent) => this.keyPressed(event);
 
   constructor(private readonly client: ReconnectingGameClient, private readonly now: () => number = Date.now) {
     this.#root.className = "game-interface";
@@ -70,14 +62,6 @@ export class GameInterface {
           <h2 class="outcome-headline"></h2>
           <p class="outcome-verdict"></p>
         </div>
-      </section>
-      <section class="ability-bar" hidden aria-label="Abilities">
-        <div class="crowding" hidden>
-          <span>Personal space</span>
-          <div class="crowding-meter"><div class="crowding-fill"></div></div>
-        </div>
-        <div class="ability-buttons"></div>
-        <p class="ability-status"></p>
       </section>
       <p class="ability-toast" hidden role="status"></p>
       <section class="death-screen" hidden role="alert">
@@ -119,18 +103,16 @@ export class GameInterface {
     this.element<HTMLFormElement>(".chat-form").addEventListener("submit", event => {
       event.preventDefault();
       const input = this.element<HTMLInputElement>(".chat-input");
-      const channel: ChatChannel = this.#lastGame?.phase === "roam" ? "mafia" : "public";
+      const channel: ChatChannel = "public";
       if (input.value.trim() === "") return;
       this.client.chat(channel, input.value);
       input.value = "";
     });
-    window.addEventListener("keydown", this.#onKey);
   }
 
   destroy(): void {
-    window.removeEventListener("keydown", this.#onKey);
     this.#root.remove();
-    document.body.classList.remove("in-game");
+    document.body.classList.remove("in-game", "sleeping");
   }
 
   render(world: WorldState | undefined, self: LocalPosition | null = null): void {
@@ -139,12 +121,12 @@ export class GameInterface {
     const game = world?.game ?? null;
     const active = Boolean(game) && this.client.state.status === "playing";
     document.body.classList.toggle("in-game", active);
-    document.body.classList.toggle("roaming", active && game?.phase === "roam");
+    document.body.classList.toggle("sleeping", active && game?.phase === "night");
+    this.#root.dataset.phase = active ? game?.phase ?? "" : "";
     this.element(".game-banner").hidden = !active;
     this.element(".game-panel").hidden = !active;
     if (!game || !world) {
       this.element(".outcome-reveal").hidden = true;
-      this.element(".ability-bar").hidden = true;
       this.element(".ability-toast").hidden = true;
       this.element(".death-screen").hidden = true;
       this.#wasLiving = null;
@@ -174,7 +156,6 @@ export class GameInterface {
       this.renderResults(game);
       this.renderOutcome(game);
     }
-    this.renderAbilities(game, world);
     this.renderToasts(game, world);
     this.renderChat(game, world);
   }
@@ -209,7 +190,8 @@ export class GameInterface {
 
   private announcement(game: GameView): string {
     if (game.phase === "finished") return game.winner === "mafia" ? "The Mafia win." : "The Village wins.";
-    if (game.phase === "roam") return game.self.status === "living" ? "Find the Mafia before they find you." : "You are a ghost. Nobody living can see you.";
+    if (game.phase === "day") return "Explore the town. Townhall follows Night.";
+    if (game.phase === "night") return "Everyone sleeps in place. Movement and conversation are closed.";
     const outcome = this.outcomeText(game);
     return outcome === null ? "" : [outcome.headline, outcome.verdict].filter(Boolean).join(" ");
   }
@@ -219,12 +201,9 @@ export class GameInterface {
     const outcome = game.outcome;
     if (!outcome) return null;
     if (outcome.kind !== "meeting") {
-      const caller = outcome.callerPlayerId === null ? "" : this.nameOf(game, outcome.callerPlayerId);
-      const headline = outcome.kind === "report"
-        ? `${caller} found ${this.nameOf(game, outcome.bodyPlayerId ?? "")}'s body!`
-        : outcome.kind === "emergency" ? `${caller} called an Emergency Meeting.` : "Time's up. Everyone to the Town Square.";
-      const verdict = outcome.deaths.length === 0 ? "Nobody has died since the last Meeting."
-        : `Dead since the last Meeting: ${outcome.deaths.map(id => this.nameOf(game, id)).join(", ")}.`;
+      const headline = "Everyone to Townhall.";
+      const verdict = outcome.deaths.length === 0 ? "Nobody died during Night."
+        : `Night deaths: ${outcome.deaths.map(id => this.nameOf(game, id)).join(", ")}.`;
       return { headline, verdict, mafia: null };
     }
     if (outcome.eliminatedPlayerId === null) {
@@ -239,7 +218,7 @@ export class GameInterface {
 
   private renderOutcome(game: GameView): void {
     const reveal = this.element(".outcome-reveal");
-    const outcome = game.phase === "meeting_call" || game.phase === "voting_result" ? this.outcomeText(game) : null;
+    const outcome = game.phase === "voting_result" ? this.outcomeText(game) : null;
     reveal.hidden = outcome === null;
     if (outcome === null) return;
     reveal.dataset.verdict = outcome.mafia === null ? "" : outcome.mafia ? "mafia" : "not-mafia";
@@ -260,125 +239,6 @@ export class GameInterface {
       : self.status === "eliminated" ? "You were eliminated. You can watch, but not act." : "";
   }
 
-  // ----- the Roam: abilities --------------------------------------------------------------
-
-  /** The abilities this Player's Role offers, in the order their keys are shown. */
-  private slots(role: Role): readonly Slot[] {
-    const own: Slot[] = role === "mafia" ? [{ ability: "kill", key: "Q", label: "Kill" }, { ability: "vanish", key: "E", label: "Vanish" }]
-      : role === "doctor" ? [{ ability: "shield", key: "Q", label: "Shield" }]
-        : role === "sheriff" ? [{ ability: "scan", key: "Q", label: "Scan" }] : [];
-    return [...own, { ability: "report", key: "R", label: "Report" }, { ability: "emergency", key: "F", label: "Emergency" }];
-  }
-
-  /** The nearest Player this ability could reach right now, or null when nobody is in range. */
-  private targetFor(ability: Ability, game: GameView, world: WorldState): FieldPlayer | null {
-    const self = this.#self;
-    if (!self || !world.field) return null;
-    const range = ability === "kill" ? KILL_RANGE : ability === "shield" ? SHIELD_RANGE : ability === "scan" ? SCAN_RANGE : 0;
-    const team = new Set(game.self.mafiaTeam ?? []);
-    let best: FieldPlayer | null = null;
-    let bestDistance = range - REACH_MARGIN;
-    for (const other of world.field.players) {
-      if (other.playerId === world.selfPlayerId || other.ghost) continue;
-      if (ability === "kill" && team.has(other.playerId)) continue;
-      const distance = Math.hypot(other.x - self.x, other.y - self.y);
-      if (distance <= bestDistance) {
-        best = other;
-        bestDistance = distance;
-      }
-    }
-    return best;
-  }
-
-  /** Whether the ability may be used now, and why not when it may not. */
-  private readiness(ability: Ability, game: GameView, world: WorldState): Readonly<{ ready: boolean; note: string; target: FieldPlayer | null }> {
-    const own = world.field?.self;
-    const self = this.#self;
-    if (!own || !self) return { ready: false, note: "", target: null };
-    const seconds = (ms: number | null) => ms !== null && ms > 0 ? `${Math.ceil(ms / 1_000)}s` : "";
-    if (ability === "kill" || ability === "shield" || ability === "scan") {
-      const cooling = seconds(own.primaryCooldownMs);
-      const target = this.targetFor(ability, game, world);
-      if (cooling) return { ready: false, note: cooling, target };
-      return target ? { ready: true, note: this.nameOf(game, target.playerId), target } : { ready: false, note: "nobody near", target: null };
-    }
-    if (ability === "vanish") {
-      if ((own.vanishedMs ?? 0) > 0) return { ready: false, note: `hidden ${seconds(own.vanishedMs)}`, target: null };
-      const cooling = seconds(own.vanishCooldownMs);
-      return { ready: !cooling, note: cooling, target: null };
-    }
-    if (ability === "report") {
-      const near = world.field?.bodies.some(body => Math.hypot(body.x - self.x, body.y - self.y) <= REPORT_RANGE - REACH_MARGIN) ?? false;
-      return { ready: near, note: near ? "Body!" : "", target: null };
-    }
-    if (!own.emergencyAvailable) return { ready: false, note: "used", target: null };
-    const atButton = Math.hypot(BUTTON_X - self.x, BUTTON_Y - self.y) <= EMERGENCY_RANGE - REACH_MARGIN;
-    return { ready: atButton, note: atButton ? "" : "at the button", target: null };
-  }
-
-  private renderAbilities(game: GameView, world: WorldState): void {
-    const bar = this.element(".ability-bar");
-    const roaming = game.phase === "roam" && world.field !== null && this.#self !== null;
-    bar.hidden = !roaming;
-    if (!roaming) return;
-    const own = world.field!.self;
-    const living = game.self.status === "living";
-    const buttons = this.element(".ability-buttons");
-    const slots = living ? this.slots(game.self.role) : [];
-    if (buttons.dataset.role !== (living ? game.self.role : "ghost")) {
-      buttons.dataset.role = living ? game.self.role : "ghost";
-      buttons.replaceChildren(...slots.map(slot => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `ability ability-${slot.ability}`;
-        button.dataset.ability = slot.ability;
-        button.innerHTML = `<kbd></kbd><span class="ability-label"></span><small class="ability-note"></small>`;
-        button.querySelector("kbd")!.textContent = slot.key;
-        button.querySelector(".ability-label")!.textContent = slot.label;
-        button.addEventListener("click", () => this.trigger(slot.ability));
-        return button;
-      }));
-    }
-    for (const slot of slots) {
-      const button = buttons.querySelector<HTMLButtonElement>(`[data-ability="${slot.ability}"]`);
-      if (!button) continue;
-      const state = this.readiness(slot.ability, game, world);
-      button.disabled = !state.ready;
-      button.querySelector(".ability-note")!.textContent = state.note;
-    }
-    const crowding = this.element(".crowding");
-    crowding.hidden = own.crowding === null;
-    if (own.crowding !== null) {
-      const fill = this.element(".crowding-fill");
-      fill.style.width = `${Math.round(own.crowding * 100)}%`;
-      fill.dataset.level = own.crowding > 0.66 ? "high" : own.crowding > 0.33 ? "mid" : "low";
-    }
-    const status = own.shieldTargetPlayerId !== null
-      ? `Shielding ${this.nameOf(game, own.shieldTargetPlayerId)} · ${Math.ceil((own.shieldMs ?? 0) / 1_000)}s`
-      : (own.vanishedMs ?? 0) > 0 ? "You are invisible to the Village." : living ? "" : "You are a ghost. Wander and watch.";
-    this.element(".ability-status").textContent = status;
-  }
-
-  private keyPressed(event: KeyboardEvent): void {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.repeat) return;
-    const game = this.#lastGame;
-    if (!game || game.phase !== "roam" || game.self.status !== "living") return;
-    const slot = this.slots(game.self.role).find(candidate => candidate.key === event.key.toUpperCase());
-    if (!slot) return;
-    event.preventDefault();
-    this.trigger(slot.ability);
-  }
-
-  private trigger(ability: Ability): void {
-    const game = this.#lastGame;
-    const world = this.#lastWorld;
-    if (!game || !world || game.phase !== "roam") return;
-    const state = this.readiness(ability, game, world);
-    if (!state.ready) return;
-    const targeted = ability === "kill" || ability === "shield" || ability === "scan";
-    this.client.useAbility(ability, game.round, targeted ? state.target!.playerId : null);
-  }
-
   /** Short private notices: refusals from the server, and the Sheriff's newest Scan result. */
   private renderToasts(game: GameView, world: WorldState): void {
     const toast = this.element(".ability-toast");
@@ -391,7 +251,7 @@ export class GameInterface {
     this.#renderedInvestigations = investigations.length;
     if (world.lastError !== this.#lastError) {
       this.#lastError = world.lastError;
-      if (world.lastError && game.phase === "roam") this.showToast(world.lastError.message, "danger");
+      if (world.lastError) this.showToast(world.lastError.message, "danger");
     }
     toast.hidden = this.now() > this.#toastUntil;
   }
@@ -503,12 +363,9 @@ export class GameInterface {
   }
 
   private renderChat(game: GameView, world: WorldState): void {
-    // An eliminated Mafia keeps the messages they received while living, so the Roam still
-    // shows them the channel; only sending is closed to them.
-    const mafiaRoam = game.phase === "roam" && game.self.role === "mafia";
     const meeting = game.phase === "discussion" || game.phase === "voting";
     const panel = this.element(".chat-panel");
-    panel.hidden = !(mafiaRoam || meeting || game.phase === "voting_result" || game.phase === "meeting_call");
+    panel.hidden = !(meeting || game.phase === "voting_result");
     const log = this.element(".chat-log");
     if (world.chat.length < this.#renderedChat) {
       // Recovery replaces the authorized history wholesale.
@@ -520,12 +377,12 @@ export class GameInterface {
       this.#renderedChat = world.chat.length;
       log.scrollTop = log.scrollHeight;
     }
-    const canSend = game.self.status === "living" && (mafiaRoam || meeting);
+    const canSend = game.self.status === "living" && meeting;
     const input = this.element<HTMLInputElement>(".chat-input");
     input.disabled = !canSend;
     input.placeholder = canSend
-      ? (mafiaRoam ? "Whisper to your team" : "Say something to the town")
-      : game.self.status === "living" ? "Chat opens in the Meeting" : "The dead cannot speak";
+      ? "Say something to the town"
+      : game.self.status === "living" ? "Chat opens at Townhall" : "The dead cannot speak";
     this.element<HTMLButtonElement>(".chat-form button").disabled = !canSend;
   }
 

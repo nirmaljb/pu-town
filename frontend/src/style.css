@@ -295,36 +295,6 @@ h2 { margin: 16px 0; font-size: 28px; }
 .chat-form button { flex: 0 0 auto; width: auto; margin: 0; padding: 8px 12px; border-radius: 2px; border: 2px solid #a9aa91; background: #453726; color: #fff0c9; cursor: pointer; }
 .chat-input, .chat-form button { min-height: 38px; }
 .chat-form button:disabled, .chat-input:disabled { opacity: .5; }
-/* The Roam: ability bar along the bottom of the town view. */
-.ability-bar {
-  pointer-events: auto; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 10px 14px; background: #221a15e0; border: 2px solid #9b784e; color: #fff0c9;
-}
-.ability-buttons { display: flex; gap: 8px; }
-.ability {
-  position: relative; display: grid; justify-items: center; gap: 2px; min-width: 78px; padding: 8px 10px 6px;
-  border: 2px solid #ffe0a0; border-radius: 3px; background: #5d4a33; color: #fff0c9; cursor: pointer; font-weight: 700;
-}
-.ability kbd { font: 700 11px ui-monospace, monospace; padding: 1px 5px; background: #221a15; border: 1px solid #9b784e; border-radius: 2px; }
-.ability-label { font-size: 14px; }
-.ability-note { font-size: 11px; font-weight: 400; color: #ffe6bb; min-height: 1.2em; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ability:disabled { opacity: .5; cursor: default; border-color: #7d6a50; }
-.ability-kill:not(:disabled) { background: #8b2a22; border-color: #ff9f8f; }
-.ability-vanish:not(:disabled) { background: #3d3566; border-color: #c7b8ff; }
-.ability-shield:not(:disabled) { background: #245a44; border-color: #9fe0b1; }
-.ability-scan:not(:disabled) { background: #2a4a78; border-color: #a9cbff; }
-.ability-report:not(:disabled) { background: #a0522d; border-color: #ffd29f; animation: pulse 900ms infinite alternate; }
-.ability-emergency:not(:disabled) { background: #9b1c1c; border-color: #ffb3b3; }
-@keyframes pulse { to { transform: scale(1.06); } }
-@media (prefers-reduced-motion: reduce) { .ability-report:not(:disabled) { animation: none; } }
-.ability-status { margin: 0; font-size: 12px; color: #e0cba9; min-height: 1em; }
-.ability-status:empty { display: none; }
-.crowding { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #e0cba9; }
-.crowding-meter { width: 160px; height: 8px; background: #221a15; border: 1px solid #9b784e; }
-.crowding-fill { height: 100%; width: 0; background: #9fe0b1; transition: width 100ms linear; }
-.crowding-fill[data-level="mid"] { background: #efbd72; }
-.crowding-fill[data-level="high"] { background: #ff6b5b; }
 .ability-toast {
   position: fixed; top: 156px; left: 50%; transform: translateX(-50%); margin: 0;
   padding: 10px 18px; font-size: 16px; font-weight: 700; background: #221a15f2; border: 2px solid #9b784e; color: #fff0c9;
@@ -350,8 +320,6 @@ h2 { margin: 16px 0; font-size: 28px; }
   .game-panel:has(.action-panel:not([hidden])) .personal-panels { max-height: 110px; }
   .action-panel { top: 124px; max-height: calc(100% - 368px); }
   .chat-panel { left: 12px; right: 12px; width: auto; bottom: 12px; }
-  .ability-bar { bottom: 224px; max-width: calc(100% - 24px); }
-  .ability-buttons { flex-wrap: wrap; justify-content: center; }
 }
 /* Short viewports scroll the controls together instead of clipping fixed-height cards. */
 @media (max-height: 600px) {
@@ -360,11 +328,17 @@ h2 { margin: 16px 0; font-size: 28px; }
   .game-panel:has(.action-panel:not([hidden])) .personal-panels { max-height: none; }
   .action-panel { position: static; width: auto; max-height: none; transform: none; overflow: visible; }
   .chat-panel { position: static; width: auto; max-height: 140px; grid-column: 2; }
-  .roaming .game-panel { margin-bottom: 132px; }
-  .ability-bar { bottom: 12px; }
 }
 @media (max-height: 600px) and (max-width: 600px) {
   .game-panel { grid-template-columns: minmax(0, 1fr); }
   .personal-panels { grid-row: auto; }
   .chat-panel { grid-column: 1; }
+}
+
+/* Night changes the town's light while controls keep their contrast. */
+#stage canvas { transition: filter 180ms ease-out; }
+.sleeping #stage canvas { filter: brightness(.5) saturate(.65); }
+.game-interface[data-phase="night"] .game-banner { border-color: #9eafe0; }
+@media (prefers-reduced-motion: reduce) {
+  #stage canvas { transition: none; }
 }

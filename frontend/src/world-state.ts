@@ -11,7 +11,7 @@ export type WorldState = Readonly<{
   game: GameView | null;
   /** Local clock time the current phase ends: the server's remaining time, counted from arrival. */
   phaseEndsAt: number | null;
-  /** The part of the town this recipient can see, only while the Game Roams. */
+  /** The part of the town this recipient can see, during Day or sleeping Night. */
   field: FieldView | null;
   chat: readonly ChatEntry[];
   lastError: Readonly<{ code: string; message: string }> | null;
@@ -51,14 +51,14 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       };
     case "game_state": {
       const { version, type, ...game } = event;
-      // A field belongs to one Roam; leaving it, or a new one beginning, discards the old view.
-      const field = game.phase === "roam" && world.field?.round === game.round ? world.field : null;
+      // A field belongs to one round of Day and Night; Townhall or a new Day discards it.
+      const field = (game.phase === "day" || game.phase === "night") && world.field?.round === game.round ? world.field : null;
       const phaseEndsAt = game.remainingMs === null ? null : receivedAt + game.remainingMs;
       return { ...world, game, phaseEndsAt, field };
     }
     case "field_state": {
       const { version, type, ...field } = event;
-      if (world.game?.phase !== "roam" || world.game.round !== field.round) return world;
+      if ((world.game?.phase !== "day" && world.game?.phase !== "night") || world.game.round !== field.round) return world;
       return { ...world, field };
     }
     case "chat_history":
