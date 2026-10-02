@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /** The server-owned Game phases and their fixed durations. */
 public enum GamePhase {
     ROLE_REVEAL("role_reveal", 8_000),
-    /** Everyone walks the town; the Mafia hunt, the Doctor shields, the Sheriff scans. */
-    ROAM("roam", 150_000),
-    /** A Body was reported, an Emergency Meeting called, or the Roam ran out. */
-    MEETING_CALL("meeting_call", 5_000),
+    DAY("day", 180_000),
+    NIGHT("night", 20_000),
     DISCUSSION("discussion", 90_000),
     VOTING("voting", 30_000),
     VOTING_RESULT("voting_result", 6_000),

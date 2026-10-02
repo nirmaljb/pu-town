@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0016
 ---
 
 # Roam the town with server-owned sight

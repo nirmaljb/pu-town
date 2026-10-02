@@ -9,8 +9,8 @@ export type LocalPosition = Readonly<{ x: number; y: number; facing: Direction; 
 const SEND_INTERVAL_MS = 66;
 
 /**
- * Walks this client's own Avatar during a Roam. The server re-checks every step; when it
- * refuses one, or moves us itself (a new Roam, a Crowding push), its correction counter
+ * Walks this client's own Avatar during Day. The server re-checks every step; when it
+ * refuses one, or moves us itself (a new Day), its correction counter
  * changes and we adopt the position it kept.
  */
 export class FieldController {
@@ -26,14 +26,15 @@ export class FieldController {
 
   constructor(private readonly send: (x: number, y: number, facing: Direction) => void) {}
 
-  /** Where to draw this client's Avatar, or null outside a Roam. */
+  /** Where to draw this client's Avatar, or null outside Day and sleeping Night. */
   get position(): LocalPosition | null {
     return this.#active ? { x: this.#x, y: this.#y, facing: this.#facing, moving: this.#moving } : null;
   }
 
   update(world: WorldState | undefined, keys: HeldKeys, deltaMs: number, now: number): void {
     const field = world?.field ?? null;
-    if (!field || world?.game?.phase !== "roam") {
+    const sleeping = world?.game?.phase === "night";
+    if (!field || (world?.game?.phase !== "day" && !sleeping)) {
       this.#active = false;
       this.#round = -1;
       return;
@@ -46,6 +47,13 @@ export class FieldController {
       this.#correction = field.self.correction;
       this.#sent = { x: this.#x, y: this.#y, facing: this.#facing };
       this.#active = true;
+    }
+    if (sleeping) {
+      this.#x = field.self.x;
+      this.#y = field.self.y;
+      this.#facing = field.self.facing;
+      this.#moving = false;
+      return;
     }
     let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
     let dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);

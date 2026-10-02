@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, move, recoverRoom, sendChat, setRoleSetup, useAbility, type Ability, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -193,10 +193,6 @@ export class ReconnectingGameClient {
     this.sendControl("playing", () => move(x, y, facing));
   }
 
-  /** A Roam ability. The server owns the phase, Role, range and cooldown checks. */
-  useAbility(ability: Ability, round: number, targetPlayerId: string | null): void {
-    this.sendControl("playing", () => useAbility(ability, round, targetPlayerId));
-  }
 
   meetingVote(round: number, targetPlayerId: string | null): void {
     this.sendControl("playing", () => meetingVote(round, targetPlayerId));

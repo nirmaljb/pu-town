@@ -6,6 +6,19 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     try {
       const pages = await Promise.all(contexts.map(context => context.newPage()));
       const host = pages[0]!;
+      // Observe the real wire boundary without adding production test APIs.
+      type Position = { x: number; y: number; correction: number };
+      type View = { phase?: string; self?: Position & { role?: string }; players?: { playerId: string; x: number; y: number }[] };
+      const fields: (View | undefined)[] = [];
+      const games: (View | undefined)[] = [];
+      const fieldCounts = pages.map(() => 0);
+      for (const [index, page] of pages.entries()) {
+        page.on("websocket", socket => socket.on("framereceived", ({ payload }) => {
+          const event = JSON.parse(String(payload)) as View & { type: string };
+          if (event.type === "field_state") { fields[index] = event; fieldCounts[index]!++; }
+          if (event.type === "game_state") games[index] = event;
+        }));
+      }
       for (const [index, page] of pages.entries()) {
         await page.bringToFront();
         await page.goto("/?ws=ws://localhost:18081/ws/game");
@@ -42,23 +55,51 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         expect(controls!.y + controls!.height).toBeLessThanOrEqual(stage!.y + stage!.height);
       }
       await host.bringToFront();
-      await expect(host.locator(".game-phase")).toHaveText("Roam the town", { timeout: 15_000 });
+      await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town", { timeout: 15_000 });
       await expect(host.locator(".role-card")).not.toHaveAttribute("open", "");
       await host.locator(".role-card summary").click();
       await expect(host.locator(".role-brief").first()).toBeVisible();
       await host.locator(".role-card summary").click();
-      // The Host occupies the first Seat, directly north of the Emergency button.
+      await expect(host.locator(".ability-bar")).toHaveCount(0);
+      await expect.poll(() => fields[0]?.self?.y).toBeDefined();
+      const start = { ...fields[0]!.self! };
       await host.keyboard.down("s");
       try {
-        await expect(host.locator(".ability-emergency")).toBeEnabled();
+        await expect.poll(() => fields[0]?.self?.y).toBeGreaterThan(start.y + 40);
       } finally {
         await host.keyboard.up("s");
       }
-      await host.locator(".ability-emergency").click();
-      await expect(host.locator(".game-phase")).toHaveText("Meeting · Discussion", { timeout: 10_000 });
+      // The clock is real: Day cannot be interrupted by an Emergency or Report.
+      await expect(host.locator(".game-phase")).toHaveText("Night · Sleeping", { timeout: 185_000 });
+      for (const page of pages) {
+        await page.bringToFront();
+        await expect(page.locator(".game-phase")).toHaveText("Night · Sleeping");
+        await expect(page.locator("body")).toHaveClass(/sleeping/);
+        await expect(page.getByRole("textbox", { name: "Chat message" })).toBeHidden();
+      }
+      await host.bringToFront();
+      const sleeping = { ...fields[0]!.self! };
+      const beforeNightFields = fieldCounts[0]!;
+      await host.keyboard.down("s");
+      try {
+        await expect.poll(() => fieldCounts[0]).toBeGreaterThan(beforeNightFields + 3);
+        expect(fields[0]!.self!.x).toBe(sleeping.x);
+        expect(fields[0]!.self!.y).toBe(sleeping.y);
+      } finally {
+        await host.keyboard.up("s");
+      }
+      await host.screenshot({ path: test.info().outputPath("sleeping-night.png") });
+      const role = games[0]!.self!.role;
+      await host.reload();
+      await expect(host.locator(".game-phase")).toHaveText("Night · Sleeping");
+      await expect(host.locator("body")).toHaveClass(/sleeping/);
+      expect(fields[0]!.self!.y).toBe(sleeping.y);
+      expect(games[0]!.self!.role).toBe(role);
+      await expect(host.locator(".game-phase")).toHaveText("Townhall · Discussion", { timeout: 25_000 });
       await host.getByRole("textbox", { name: "Chat message" }).fill("Meet in the Town Square");
       await host.getByRole("button", { name: "Send", exact: true }).click();
       for (const page of pages) {
+        await page.bringToFront();
         await expect(page.locator(".chat-log")).toContainText("Meet in the Town Square");
         const banner = await page.locator(".game-banner").boundingBox();
         const role = await page.locator(".role-card").boundingBox();
@@ -69,7 +110,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         expect(chat!.y).toBeGreaterThanOrEqual(76);
         expect(chat!.y + chat!.height).toBeLessThanOrEqual(viewport.height);
       }
-      await expect(host.locator(".game-phase")).toHaveText("Meeting · Voting", { timeout: 95_000 });
+      await expect(host.locator(".game-phase")).toHaveText("Townhall · Voting", { timeout: 95_000 });
       if (viewport.width === 1280) await host.setViewportSize({ width: 844, height: 390 });
       await expect(host.getByRole("button", { name: "Confirm ballot" })).toBeDisabled();
       await host.getByRole("button", { name: "Skip — eliminate nobody" }).click();
@@ -83,6 +124,13 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         await host.setViewportSize(viewport);
       }
       await host.screenshot({ path: test.info().outputPath("game-layout.png") });
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("The verdict", { timeout: 35_000 });
+      await expect(host.locator(".game-announcement")).toContainText("Nobody was eliminated");
+      await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town", { timeout: 10_000 });
+      await expect.poll(() => fields[0]?.self?.y).toBe(start.y);
+      await expect(host.locator(".game-round")).toHaveText("Round 2");
+      await expect(host.locator("body")).not.toHaveClass(/sleeping/);
       await pages[1]!.bringToFront();
       await pages[1]!.getByRole("button", { name: "Leave Room", exact: true }).click();
       await expect(pages[1]!.getByRole("button", { name: "Create Room" })).toBeVisible();

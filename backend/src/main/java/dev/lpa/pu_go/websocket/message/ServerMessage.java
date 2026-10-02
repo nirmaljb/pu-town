@@ -78,8 +78,7 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
                       ParticipantStatus status) {}
 
     /**
-     * A Meeting Call ({@code report}, {@code emergency} or {@code timeout}) names its caller, the
-     * reported Body and every death since the last Meeting; a {@code meeting} names its verdict.
+     * Townhall announces Night deaths or a Meeting verdict. Caller and Body fields are null.
      */
     record OutcomeView(String kind, String callerPlayerId, String bodyPlayerId, List<String> deaths,
                        String eliminatedPlayerId, Boolean eliminatedMafia) {}
@@ -111,13 +110,13 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
     }
 
     /**
-     * One recipient's view of the town during a Roam, sent ten times a second. It holds only
-     * the Avatars and Bodies that recipient can see, and their own private ability timers.
+     * One recipient's view of the town during Day and Night, sent ten times a second. It holds only
+     * the Avatars that recipient can see and their own accepted position.
      */
     record FieldState(int version, String type, int round, List<Game.FieldPlayer> players,
-                      List<Game.Body> bodies, Game.OwnField self) implements ServerMessage {
-        public FieldState(int round, List<Game.FieldPlayer> players, List<Game.Body> bodies, Game.OwnField self) {
-            this(1, "field_state", round, List.copyOf(players), List.copyOf(bodies), self);
+                      Game.OwnField self) implements ServerMessage {
+        public FieldState(int round, List<Game.FieldPlayer> players, Game.OwnField self) {
+            this(1, "field_state", round, List.copyOf(players), self);
         }
     }
 

@@ -60,14 +60,14 @@ A Player's declaration that they are prepared for the game to start. A Player wh
 _Avoid_: Connected, joined
 
 **Town Square**:
-The open square at the centre of the town, around the Emergency button, that holds the Meeting Area.
+The open square at the centre of the town, that holds the Meeting Area.
 
 **Meeting Area**:
 The place in the Town Square where Players sit in a circle for the Lobby and Meetings.
 _Avoid_: Lobby, Room
 
 **Seat**:
-An allocated place for one Player in the Meeting Area, retained from the Lobby into the Game. Every Roam begins beside it and every Meeting returns to it.
+An allocated place for one Player in the Meeting Area, retained from the Lobby into the Game. Every Day begins beside it and every Townhall returns to it.
 _Avoid_: Spawn Point
 
 **Game**:
@@ -91,55 +91,38 @@ The Host's choice, in the Lobby, of how many Mafia, Doctors and Sheriffs a Game 
 _Avoid_: Deal size, table size
 
 **Mafia**:
-The faction whose members know one another and kill Village Players during the Roam; also the Role held by each member of that faction.
+The faction whose members know one another and choose Village victims at Night; also the Role held by each member of that faction.
 
 **Village**:
 The faction comprising Villagers, the Doctor, and the Sheriff.
 _Avoid_: Villager when referring to the entire faction
 
 **Villager**:
-A Village Role with no ability beyond walking, reporting and voting, and subject to Crowding.
+A Village Role that explores during Day and votes at Townhall.
 _Avoid_: Village when referring to this Role
 
 **Doctor**:
-The Village Role that can Shield another nearby living Player.
+The Village Role that can protect a living Participant at Night.
 
 **Sheriff**:
-The Village Role that can Scan another nearby living Player to learn privately whether they belong to the Mafia faction.
+The Village Role that can investigate another living Participant at Night to learn their Faction privately.
 
-**Roam**:
-The Game phase in which every Player walks the town, the Mafia kill, the Doctor Shields and the Sheriff Scans. It ends when a Meeting is called or its time runs out.
-_Avoid_: Night
+**Day**:
+The Game phase in which Players walk the town and explore before Night.
+_Avoid_: Roam
+
+**Night**:
+The Game phase in which Players sleep where they stood, without movement or conversation, while special Roles make private choices.
+
+**Townhall**:
+The gathering at retained Seats after Night, for public discussion, voting and the Meeting result.
+_Avoid_: Lobby
 
 **Vision**:
-How far a living Player can see during the Roam. It depends on their Role: the Mafia see furthest, then the Doctor, then the Sheriff, and Villagers least. Nothing beyond it is ever sent to them.
-
-**Body**:
-What a Roam kill leaves where the victim fell, visible only within Vision, until a Meeting is called.
-
-**Report**:
-A living Player's act of calling a Meeting from beside a Body.
-
-**Emergency Meeting**:
-A Meeting a living Player calls from the button in the Town Square, once per Game.
-
-**Meeting Call**:
-The moment between the Roam and a Meeting, which names who called it and every Player killed since the last Meeting.
-
-**Vanish**:
-A Mafia ability that hides them from every non-Mafia Player for a short time.
-
-**Shield**:
-A Doctor ability that makes the next kill on its target fail, for a short time.
-
-**Scan**:
-A Sheriff ability that reveals only whether its target is Mafia.
-
-**Crowding**:
-The limit on how long a Villager may stay close to another Player before being pushed away.
+How far a living Player can see in the town. Nothing beyond it is disclosed to them.
 
 **Ghost**:
-A Player killed during the Roam, who keeps walking unseen by the living and sees the whole town.
+An eliminated Participant who walks unseen by the living during Day and sees the whole town.
 _Avoid_: Spectator
 
 **Meeting**:
@@ -147,7 +130,7 @@ The Game phase in which living Players discuss publicly and then vote on whether
 _Avoid_: Lobby
 
 **Elimination**:
-The loss of a Player's ability to act, chat, or vote in the current Game. Elimination alone does not end Room Membership; the Player may remain to watch public proceedings.
+The loss of a Player's living participation, including speaking and voting, in the current Game. Elimination alone does not end Room Membership; the Player may remain to watch public proceedings.
 _Avoid_: Leave, Disconnect
 
 **Forfeit**:

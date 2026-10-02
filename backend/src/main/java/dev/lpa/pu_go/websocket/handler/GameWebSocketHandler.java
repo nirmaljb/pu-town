@@ -112,7 +112,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.SetRoleSetup setup) handleRoleSetup(player, setup);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
-                    else if (incoming instanceof ClientMessage.UseAbility ability) handleAbility(player, ability);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
@@ -174,21 +173,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     /**
-     * The Roam's heartbeat: Villager crowding advances, and every Participant receives the
-     * part of the town they can see along with their own ability timers.
+     * Every Participant receives the authorized field during Day and sleeping Night.
      */
     @org.springframework.scheduling.annotation.Scheduled(fixedRate = 100)
     public void tickFields() {
         for (String code : roomManager.roomIdsSnapshot()) {
             roomManager.serialized(List.of(code), () -> {
-                Room room = roomManager.findRoom(code);
+                Room room = settleRoom(code);
                 Game game = room == null ? null : room.getGame();
-                if (game == null || !game.isRoaming()) return null;
-                long now = roomManager.currentTimeMillis();
-                game.tick(now);
+                if (game == null || !game.hasField()) return null;
                 List<Delivery> deliveries = new ArrayList<>();
                 for (String memberId : room.playerIdsSnapshot()) {
-                    if (game.participant(memberId) != null) deliveries.add(new Delivery(memberId, fieldStateFor(game, memberId, now)));
+                    if (game.participant(memberId) != null) deliveries.add(new Delivery(memberId, fieldStateFor(game, memberId)));
                 }
                 deliverAll(deliveries);
                 return null;
@@ -196,9 +192,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private static ServerMessage.FieldState fieldStateFor(Game game, String playerId, long now) {
-        return new ServerMessage.FieldState(game.round(), game.fieldPlayersFor(playerId, now),
-                game.bodiesFor(playerId), game.ownFieldOf(playerId, now));
+    private static ServerMessage.FieldState fieldStateFor(Game game, String playerId) {
+        return new ServerMessage.FieldState(game.round(), game.fieldPlayersFor(playerId),
+                game.ownFieldOf(playerId));
     }
 
     private boolean hostGraceElapsed(Room room) {
@@ -315,6 +311,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Game game = room.getGame();
         if (game == null || game.participant(playerId) == null) return;
         deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+        if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
         deliveries.add(new Delivery(playerId, new ServerMessage.ChatHistory(game.historyFor(playerId).stream()
                 .map(entry -> new ServerMessage.ChatView(entry.channel(), entry.round(),
                         entry.senderPlayerId(), entry.senderName(), entry.text()))
@@ -460,36 +457,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
     }
 
-    private void handleAbility(PlayerState player, ClientMessage.UseAbility message) {
-        withGame(player, (room, game) -> {
-            long now = roomManager.currentTimeMillis();
-            Game.AbilityResult result = game.useAbility(player.getId(), message.ability(), message.round(),
-                    message.targetPlayerId(), now);
-            List<Delivery> deliveries = new ArrayList<>();
-            if (result.rejection() != null) deliveries.add(error(player, result.rejection().code(), result.rejection().message()));
-            if (result.effect() == null) {
-                deliverAll(deliveries);
-                return;
-            }
-            // Only the recipients whose authorized view changed are told: a kill reaches the
-            // killer, the victim and the Mafia, while the living Village learns of it only by
-            // finding the Body or at the next Meeting.
-            switch (result.effect()) {
-                case KILLED -> {
-                    List<String> told = new ArrayList<>(livingMafiaMembers(room, game));
-                    if (!told.contains(result.targetPlayerId())) told.add(result.targetPlayerId());
-                    addGameStateFor(deliveries, room, told);
-                }
-                case MEETING_CALLED, GAME_WON -> addGameState(deliveries, room);
-                case SCANNED -> addGameStateFor(deliveries, room, List.of(player.getId()));
-                case VANISHED, SHIELDED -> deliveries.add(new Delivery(player.getId(), fieldStateFor(game, player.getId(), now)));
-                // The killer's refusal is already queued; the Doctor sees the spent Shield on the next tick.
-                case SHIELD_ABSORBED -> { }
-            }
-            deliverAll(deliveries);
-        });
-    }
-
     private void handleMeetingVote(PlayerState player, ClientMessage.MeetingVote message) {
         withGame(player, (room, game) -> {
             Game.Rejection rejection = game.submitBallot(player.getId(), message.round(), message.targetPlayerId());
@@ -538,12 +505,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
-    private List<String> livingMafiaMembers(Room room, Game game) {
-        return room.playerIdsSnapshot().stream().filter(memberId -> {
-            Participant participant = game.participant(memberId);
-            return participant != null && participant.isLiving() && participant.role() == Role.MAFIA;
-        }).toList();
-    }
+
 
     private ServerMessage.RoomState stateOf(Room room) {
         return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(), ServerMessage.RoleSetupView.of(room.getRoleSetup()),
@@ -558,7 +520,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Game game = room.getGame();
         if (game == null) return;
         for (String playerId : playerIds) {
-            if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+            if (game.participant(playerId) != null) {
+                deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+                if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
+            }
         }
     }
 
@@ -567,7 +532,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Participant self = game.participant(playerId);
         List<ServerMessage.RosterView> roster = game.roster().stream()
                 .map(member -> new ServerMessage.RosterView(member.playerId(), member.displayName(), member.colour(),
-                        member.avatarPreset(), member.seat(), game.statusSeenBy(member, playerId)))
+                        member.avatarPreset(), member.seat(), member.status()))
                 .toList();
         Game.Outcome outcome = game.outcome();
         List<Game.Ballot> revealed = game.revealedBallots();
