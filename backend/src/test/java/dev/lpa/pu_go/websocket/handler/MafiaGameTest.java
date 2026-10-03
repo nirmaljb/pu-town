@@ -1268,6 +1268,26 @@ class MafiaGameTest {
         assertEquals("doctor", latestOfType(recovered, "game_state").path("self").path("role").asText());
     }
 
+    @Test
+    void acceptedFootstepsReachOnlySameAreaNearbyListenersAndImpossibleMovesProduceNoSound() throws Exception {
+        startTable("footsteps", 10); advance(REVEAL);
+        walk(0, 1280, 742); walk(1, 1400, 742); walk(2, 1520, 742);
+        int nearby = countOfType(table.get(1), "sound_event"), distant = countOfType(table.get(2), "sound_event");
+        advance(600); move(0, 1312, 742);
+        assertEquals(nearby + 1, countOfType(table.get(1), "sound_event"));
+        JsonNode sound = latestOfType(table.get(1), "sound_event");
+        assertEquals("footstep", sound.path("kind").asText());
+        assertEquals(.75, sound.path("gain").asDouble(), .001);
+        assertFalse(sound.has("x")); assertFalse(sound.has("y"));
+        assertEquals(distant, countOfType(table.get(2), "sound_event"));
+        int own = countOfType(table.get(0), "sound_event");
+        move(0, 300, 300);
+        assertEquals(own, countOfType(table.get(0), "sound_event"));
+        advance(REVEAL + DAY - milliseconds.get());
+        move(0, 1328, 742);
+        assertEquals(own, countOfType(table.get(0), "sound_event"), "Night is silent");
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void ensureDay(int seat) {

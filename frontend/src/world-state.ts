@@ -1,8 +1,9 @@
-import type { PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
+import type { MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
   snapshotSerial: number;
+  sounds: readonly MovementSound[];
   phase: RoomPhase | null;
   hostPlayerId: string | null;
   /** The Host's deal for the Room's Game. */
@@ -23,7 +24,7 @@ export type WorldState = Readonly<{
 
 export function emptyWorld(): WorldState {
   return {
-    snapshotSerial: 0, phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
+    snapshotSerial: 0, sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
     players: new Map(), game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
@@ -65,6 +66,11 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       const { version, type, ...field } = event;
       if ((world.game?.phase !== "day" && world.game?.phase !== "night") || world.game.round !== field.round) return world;
       return { ...world, field };
+    }
+    case "sound_event": {
+      const { version, type, ...sound } = event;
+      if (world.game?.phase !== "day" || world.game.round !== sound.round) return world;
+      return { ...world, sounds: [...world.sounds, sound].slice(-64) };
     }
     case "practice_state":
       return { ...world, practiceTargets: event.targets };
