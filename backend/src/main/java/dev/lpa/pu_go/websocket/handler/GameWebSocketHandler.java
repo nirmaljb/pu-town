@@ -46,6 +46,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private final java.util.concurrent.atomic.AtomicLong soundIds = new java.util.concurrent.atomic.AtomicLong();
     private final Map<String, Long> lastFootsteps = new ConcurrentHashMap<>();
+    private final Map<String, Double> walkedSinceFootstep = new ConcurrentHashMap<>();
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -515,10 +516,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             long now = roomManager.currentTimeMillis();
             if (!game.move(player.getId(), message.x(), message.y(), message.facing(), now)) return;
             String area = RoomRules.areaAt(actor.x(), actor.y());
+            double walked = walkedSinceFootstep.merge(player.getId(), Math.hypot(x - actor.x(), y - actor.y()), Double::sum);
             String kind = !before.equals(area) ? area.equals("Outdoors") ? "exit" : "enter"
-                    : Math.hypot(x - actor.x(), y - actor.y()) >= 16 && now - lastFootsteps.getOrDefault(player.getId(), 0L) >= 400 ? "footstep" : null;
+                    : walked >= 24 && now - lastFootsteps.getOrDefault(player.getId(), 0L) >= 400 ? "footstep" : null;
             if (kind == null) return;
             lastFootsteps.put(player.getId(), now);
+            walkedSinceFootstep.put(player.getId(), 0.0);
             long eventId = soundIds.incrementAndGet();
             List<Delivery> deliveries = new ArrayList<>();
             for (String listenerId : room.playerIdsSnapshot()) {
@@ -674,6 +677,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 outboxes.remove(player.getId());
                 if (roomId == null) {
                     lastFootsteps.remove(player.getId());
+        walkedSinceFootstep.remove(player.getId());
         playersById.remove(player.getId());
                     return null;
                 }
