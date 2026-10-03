@@ -12,6 +12,8 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `recover_room` | `roomId: string`, `recoveryToken: string` |
 | `leave_room` | none |
 | `start_game` | none |
+| `start_practice` | none |
+| `advance_practice` | `round: integer`, `phase: "day" \| "night" \| "discussion" \| "voting" \| "voting_result" |
 | `select_avatar` | `avatarPreset: string` |
 | `set_ready` | `ready: boolean` |
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
@@ -27,7 +29,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
-| `game_state` | `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
+| `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `self: OwnField` |
 | `chat_message` | `channel`, `round: integer`, `senderPlayerId: string`, `senderName: string`, `text: string` |
 | `chat_history` | `messages: ChatEntry[]` |
@@ -53,7 +55,7 @@ The bounded outbound queue is strictly ordered and never replaces or evicts an e
 
 A newly joined connection receives a new Player ID; credential-based recovery retains the existing membership's Player ID.
 
-Current error codes are `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `invalid_role_setup`, `start_blocked`, `invalid_phase`, `invalid_action`, `invalid_target`, `already_submitted`, `invalid_avatar_preset`, `recovery_expired`, and `recovery_in_use`.
+Current error codes are `malformed_message`, `unsupported_version`, `unknown_message_type`, `not_in_room`, `room_not_found`, `room_full`, `not_host`, `invalid_role_setup`, `start_blocked`, `practice_blocked`, `invalid_phase`, `invalid_action`, `invalid_target`, `already_submitted`, `invalid_avatar_preset`, `recovery_expired`, and `recovery_in_use`.
 
 ## Entry and Room lifetime
 
@@ -98,6 +100,16 @@ On Host Leave or expiry, the longest-present connected membership becomes Host i
 
 Fresh Join is restricted to the Lobby and uses ordinary ten-Player capacity and initialization. Recovering Players follow the current phase in their Room Snapshot. Recovery preserves identity, appearance, colour, readiness, position and Facing, subject to subsequent Room transitions. Start includes reserved memberships. The end of the final membership removes a started Room; a never-started Room instead begins five-minute empty-Lobby expiry. Recoverable disconnected memberships keep either phase alive even with no connected Players.
 
+## Solo Practice
+
+`start_practice` enters Solo Practice only when the sender is the Host, the Room is a Lobby, and its sole Membership belongs to that Host. Ready and Role Setup do not gate practice. A disconnected guest still occupies a Membership and blocks entry. Rejections use `not_in_room`, `not_host`, `invalid_phase`, or `practice_blocked`; acceptance sends `room_state`, `game_state` and an immediate `field_state` in order.
+
+Every `game_state` includes `mode`, exactly `competitive` or `practice`. Practice starts at Day, round 1, with the Host as a Villager and its only Roster entry; it creates no target Players. `remainingMs` is null throughout practice. No phase advances with elapsed time, and no elimination or faction victory occurs. Practice rejects `meeting_vote` with `invalid_action` and shows no ballot controls. Role selection and practice targets follow in #40; Tasks follow in #41.
+
+The Host sends `advance_practice` with the current positive round and phase. Only practice accepts it. A wrong round or phase receives `invalid_phase`, preventing a repeated request from skipping a preview; a competitive Game receives `invalid_action`. Advancement cycles Day → Night → Discussion → Voting → Voting Result → Day, incrementing the round at each Day. Normal server movement checks and sleeping Night positions apply. Townhall restores retained Seats, and a new Day begins beside them. Practice movement timing resets at the actual manual transition time.
+
+Recovery and takeover retain the Host's identity, appearance, mode, round, phase and accepted field position. Reservation expiry and Leave still end Membership, and remove the started Room when it becomes empty. New Join remains unavailable after practice starts. Competitive Start gates, durations, deadlines, voting and victory are unchanged.
+
 ## The Game
 
 ### Shapes
@@ -136,7 +148,7 @@ The server owns the clock. `GamePhase` and its fixed duration:
 | `voting_result` | 6 s | The Meeting's outcome, with every ballot disclosed. |
 | `finished` | — | The winning Faction and every Role. |
 
-`role_reveal` is round `0`; each Day increments the round, so the first Day is round `1` and a round runs Day through Voting Result. `remainingMs` is the milliseconds left in the current phase when the message was built, never negative, and `null` once the Game is `finished`. A client counts it down from the moment the message arrived, not from when it gets round to applying it.
+`role_reveal` is round `0`; each Day increments the round, so the first Day is round `1` and a round runs Day through Voting Result. `remainingMs` is the milliseconds left in the current phase when the message was built, never negative, and `null` once a competitive Game is `finished` or throughout Solo Practice. A client counts it down from the moment the message arrived, not from when it gets round to applying it.
 
 A timed phase ends when its deadline passes, never when everyone has acted. Each new deadline is derived from the deadline it replaces, not from the current time. Night never ends early based on private activity. Every Participant in the Room receives a `game_state` at each transition.
 
@@ -166,7 +178,7 @@ The server records the recipients of each entry and delivers `chat_message` only
 
 ### Privacy
 
-`game_state` is built per recipient. `phase`, `round`, `remainingMs`, `outcome`, `ballots` and `winner` are the same for everyone; `players` is the same for everyone; `self` is that recipient's own view and nothing else. A non-Mafia recipient's `mafiaTeam` is `null`, not a filtered list, and a non-Sheriff's `investigations` is `null`. `field_state` is built per recipient too. Nothing private is ever sent to a client that merely declines to draw it.
+`game_state` is built per recipient. `mode`, `phase`, `round`, `remainingMs`, `outcome`, `ballots` and `winner` are the same for everyone; `players` is the same for everyone; `self` is that recipient's own view and nothing else. A non-Mafia recipient's `mafiaTeam` is `null`, not a filtered list, and a non-Sheriff's `investigations` is `null`. `field_state` is built per recipient too. Nothing private is ever sent to a client that merely declines to draw it.
 
 An accepted `meeting_vote` updates only its submitter's authorized `game_state`. Broadcasting private choices would leak activity through countdown delivery. Phase transitions and public departures update current recipients in Room order.
 
@@ -194,7 +206,7 @@ Expired recovery shows “Your place in the Room expired” and “Back to lobby
 
 Leave during recovery clears local intent immediately. A separate socket makes one bounded ten-second attempt, sending `recover_room` followed by `leave_room` in WebSocket order, then closing on `room_left`, error, or timeout. It never forwards snapshots into the game or starts retries; unreachable reservations expire naturally. Acknowledged intentional Leave still ends membership without reconnecting. Server restart clears Rooms and recovery state.
 
-These changes extend protocol v1 for the coordinated local client/server release; older clients using Roam phases, live abilities or retired field data must be updated together with the server.
+These changes extend protocol v1 for the coordinated local client/server release; older clients missing the Game mode or using Roam phases, live abilities or retired field data must be updated together with the server.
 
 
 ## The Published Avatar Collection

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, move, sendChat } from "../dist/protocol.js";
+import { MAX_CHAT_CHARACTERS, startPractice, advancePractice, decodeServerMessage, meetingVote, move, sendChat } from "../dist/protocol.js";
 
 const seat = (index, status = "living") => ({
   playerId: "p" + index, displayName: "Player " + index, colour: "#4F8CFF",
@@ -15,7 +15,7 @@ const SELF = {
 };
 
 const GAME = {
-  version: 1, type: "game_state", phase: "day", round: 2, remainingMs: 61_500,
+  version: 1, type: "game_state", mode: "competitive", phase: "day", round: 2, remainingMs: 61_500,
   players: [seat(0), seat(1, "eliminated"), seat(2, "left")],
   outcome: null, ballots: null, winner: null, roles: null, self: SELF
 };
@@ -144,4 +144,16 @@ test("Townhall results decode exact Roles and reject missing, unknown and retire
     assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedRole: role } }));
   }
   assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedMafia: false } }), /fields/);
+});
+
+test("Solo Practice has an explicit mode and no countdown, with strict phase advance requests", () => {
+  const practice = { ...GAME, mode: "practice", remainingMs: null };
+  assert.deepEqual(decode(practice), practice);
+  assert.deepEqual(startPractice(), { version: 1, type: "start_practice" });
+  assert.deepEqual(advancePractice(1, "night"), { version: 1, type: "advance_practice", round: 1, phase: "night" });
+  for (const round of [0, -1, 1.5]) assert.throws(() => advancePractice(round, "day"));
+  for (const phase of ["roam", "finished", "role_reveal"]) assert.throws(() => advancePractice(1, phase));
+  assert.throws(() => decode({ ...GAME, mode: "solo" }));
+  const { mode, ...incomplete } = GAME;
+  assert.throws(() => decode(incomplete), /fields/);
 });
