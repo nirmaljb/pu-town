@@ -98,12 +98,12 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
                     List<String> mafiaTeam, List<InvestigationView> investigations,
                     boolean meetingVoted, String meetingVote, String nightChoice) {}
 
-    record GameState(int version, String type, String mode, String phase, int round, Long remainingMs,
+    record GameState(int version, String type, String phase, int round, Long remainingMs,
                      List<RosterView> players, OutcomeView outcome, List<BallotView> ballots,
                      Faction winner, List<RoleView> roles, SelfView self) implements ServerMessage {
-        public GameState(String mode, String phase, int round, Long remainingMs, List<RosterView> players, OutcomeView outcome,
+        public GameState(String phase, int round, Long remainingMs, List<RosterView> players, OutcomeView outcome,
                          List<BallotView> ballots, Faction winner, List<RoleView> roles, SelfView self) {
-            this(1, "game_state", mode, phase, round, remainingMs, List.copyOf(players), outcome,
+            this(1, "game_state", phase, round, remainingMs, List.copyOf(players), outcome,
                     ballots == null ? null : List.copyOf(ballots), winner,
                     roles == null ? null : List.copyOf(roles), self);
         }

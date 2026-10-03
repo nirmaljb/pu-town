@@ -462,28 +462,3 @@ test('selection sends only in a confirmed Lobby and recovery takes appearance fr
   refresh.client.create('Alex'); refresh.sockets[1].open();
   assert.equal(JSON.parse(refresh.sockets[1].sent[0]).type, 'create_room');
 });
-
-
-test("practice entry and phase controls follow frame-applied membership and stop during recovery", () => {
-  const { client, sockets } = setup();
-  client.create("Alex");
-  sockets[0].open();
-  client.startPractice();
-  assert.equal(sockets[0].sent.length, 1);
-  sockets[0].message({ ...snapshot, phase: "lobby" });
-  client.startPractice();
-  assert.equal(sockets[0].sent.length, 1, "the snapshot awaits frame application");
-  client.update();
-  client.startPractice();
-  assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "start_practice" });
-  sockets[0].message({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "p", roleSetup: snapshot.roleSetup, players: snapshot.players });
-  client.update();
-  client.advancePractice(1, "day");
-  assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "advance_practice", round: 1, phase: "day" });
-  const sent = sockets[0].sent.length;
-  sockets[0].disconnect();
-  client.update();
-  client.advancePractice(1, "night");
-  client.startPractice();
-  assert.equal(sockets[0].sent.length, sent);
-});

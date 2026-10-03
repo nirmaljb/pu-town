@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Arrays;
 
-/** Who a chat message is addressed to: the whole town, or the Mafia alone. */
+/** Public Townhall conversation or send-time Day proximity conversation. */
 public enum ChatChannel {
     PUBLIC("public"),
-    MAFIA("mafia");
+    PROXIMITY("proximity");
 
     private final String wireValue;
 

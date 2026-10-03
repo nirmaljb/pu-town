@@ -21,7 +21,7 @@ const selfView = (patch = {}) => ({
 });
 
 const gameState = (patch = {}) => ({
-  version: 1, type: "game_state", mode: "competitive", phase: "night", round: 1, remainingMs: 20_000,
+  version: 1, type: "game_state", phase: "night", round: 1, remainingMs: 20_000,
   players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), ...patch
 });
 
@@ -315,20 +315,4 @@ test("ballot confirmation and the next round apply at frames without extending v
   boundary.beginFrame();
   assert.equal(boundary.world.game.round, 2);
   assert.equal(boundary.world.game.self.meetingVoted, false);
-});
-
-
-test("practice mode and untimed previews apply only at a frame boundary", () => {
-  const inbox = new NetworkInbox();
-  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
-  inbox.enqueue(gameState({ mode: "practice", phase: "day", remainingMs: null }));
-  assert.equal(boundary.world.game, null);
-  boundary.beginFrame();
-  assert.equal(boundary.world.game.mode, "practice");
-  assert.equal(boundary.world.phaseEndsAt, null);
-  inbox.enqueue(gameState({ mode: "practice", phase: "night", remainingMs: null }));
-  assert.equal(boundary.world.game.phase, "day");
-  boundary.beginFrame();
-  assert.equal(boundary.world.game.phase, "night");
-  assert.equal(boundary.world.phaseEndsAt, null);
 });

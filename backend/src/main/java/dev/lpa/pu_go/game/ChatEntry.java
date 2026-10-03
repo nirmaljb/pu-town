@@ -3,9 +3,8 @@ package dev.lpa.pu_go.game;
 import java.util.Set;
 
 /**
- * One retained chat message. A public entry has no recipient restriction; a Mafia entry
- * carries the living Mafia who were entitled to it when it was sent, so a later Elimination
- * neither erases earlier messages nor grants continuing private access.
+ * One retained chat message, with the Participants entitled to it when it was sent.
+ * Later movement and recovery never widen a message's audience.
  */
 public record ChatEntry(ChatChannel channel, int round, String senderPlayerId, String senderName, String text,
                         Set<String> recipients) {

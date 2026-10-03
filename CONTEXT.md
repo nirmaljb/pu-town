@@ -74,10 +74,6 @@ _Avoid_: Spawn Point
 A contest within a Room between the Mafia and Village factions, beginning with role assignment and ending with a faction's victory.
 _Avoid_: Room, Lobby
 
-**Solo Practice**:
-A noncompetitive session in which the Host explores alone and previews Game phases at their own pace, without faction victory.
-_Avoid_: Competitive solo Game
-
 **Game Roster**:
 The record of a Game's original Players and their participation, including those who have been eliminated or forfeited. Leaving the Room does not erase a Player from this record.
 _Avoid_: Current Room Memberships

@@ -33,7 +33,6 @@ public final class Game {
     private static final Rejection WRONG_PHASE = new Rejection("invalid_phase", "That action does not belong to this phase.");
     private static final Rejection NOT_ALLOWED = new Rejection("invalid_action", "You cannot take that action.");
 
-    private final boolean practice;
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
     private final Map<String, String> nightChoices = new LinkedHashMap<>();
@@ -46,24 +45,12 @@ public final class Game {
     private Outcome outcome;
 
     public Game(List<Participant> roster, long startedAt) {
-        this(roster, startedAt, false);
-    }
-
-    public static Game soloPractice(Participant host, long startedAt) {
-        return new Game(List.of(host), startedAt, true);
-    }
-
-    private Game(List<Participant> roster, long startedAt, boolean practice) {
-        this.practice = practice;
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
             placeAtSeat(participant, startedAt);
         }
         phaseEndsAt = startedAt + GamePhase.ROLE_REVEAL.durationMillis();
-        if (practice) beginDay(startedAt);
     }
-
-    public boolean isPractice() { return practice; }
 
     public GamePhase phase() { return phase; }
     public int round() { return round; }
@@ -76,25 +63,16 @@ public final class Game {
     public boolean hasField() { return phase == GamePhase.DAY || phase == GamePhase.NIGHT; }
 
     public Long remainingMillis(long now) {
-        return practice || phase == GamePhase.FINISHED ? null : Math.max(0, phaseEndsAt - now);
+        return phase == GamePhase.FINISHED ? null : Math.max(0, phaseEndsAt - now);
     }
 
-    /** The competitive phase deadline; null throughout practice and after the Game finishes. */
-    public Long phaseDeadline() { return practice || phase == GamePhase.FINISHED ? null : phaseEndsAt; }
+    /** The deadline of the phase awaiting its transition, or null once the Game is finished. */
+    public Long phaseDeadline() { return phase == GamePhase.FINISHED ? null : phaseEndsAt; }
 
     /** Advances exactly one expired phase. Callers repeat while a deadline remains due. */
     public void advance() {
-        advanceAt(phaseEndsAt);
-    }
-
-    /** Practice resets movement timing at the actual preview transition, without a deadline. */
-    public void advancePractice(long now) {
-        if (!practice) throw new IllegalStateException("Only practice can advance manually");
-        advanceAt(now);
-    }
-
-    private void advanceAt(long boundary) {
         if (phase == GamePhase.FINISHED) return;
+        long boundary = phaseEndsAt;
         switch (phase) {
             case ROLE_REVEAL -> beginDay(boundary);
             case DAY -> enter(GamePhase.NIGHT, boundary);
@@ -241,7 +219,6 @@ public final class Game {
     /** A null target is an explicit Skip, which locks exactly like a ballot for a Player. */
     public Rejection submitBallot(String voterId, int submittedRound, String targetPlayerId) {
         Participant voter = participants.get(voterId);
-        if (practice) return NOT_ALLOWED;
         if (phase != GamePhase.VOTING || submittedRound != round) return WRONG_PHASE;
         if (voter == null || !voter.isLiving()) return NOT_ALLOWED;
         if (ballots.containsKey(voterId)) return new Rejection("already_submitted", "Your ballot is already final.");
@@ -256,9 +233,15 @@ public final class Game {
     public Rejection submitChat(String senderId, ChatChannel channel, String text) {
         Participant sender = participants.get(senderId);
         if (sender == null || !sender.isLiving()) return NOT_ALLOWED;
-        if (phase != GamePhase.DISCUSSION && phase != GamePhase.VOTING) return WRONG_PHASE;
-        if (channel != ChatChannel.PUBLIC) return NOT_ALLOWED;
-        chat.add(new ChatEntry(ChatChannel.PUBLIC, round, senderId, sender.displayName(), text, null));
+        boolean day = phase == GamePhase.DAY;
+        if (!day && phase != GamePhase.DISCUSSION && phase != GamePhase.VOTING) return WRONG_PHASE;
+        if (channel != (day ? ChatChannel.PROXIMITY : ChatChannel.PUBLIC)) return WRONG_PHASE;
+        var recipients = participants.values().stream()
+                .filter(listener -> listener.status() != ParticipantStatus.LEFT)
+                .filter(listener -> !day || listener.isLiving() && sender.distanceTo(listener) <= HEARING_RANGE
+                        && RoomRules.areaAt(sender.x, sender.y).equals(RoomRules.areaAt(listener.x, listener.y)))
+                .map(Participant::playerId).collect(java.util.stream.Collectors.toSet());
+        chat.add(new ChatEntry(channel, round, senderId, sender.displayName(), text, recipients));
         return null;
     }
 
@@ -314,7 +297,7 @@ public final class Game {
     }
 
     private void checkVictory() {
-        if (practice || winner != null) return;
+        if (winner != null) return;
         long livingMafia = livingMafia().count();
         long livingVillage = livingCount() - livingMafia;
         if (livingMafia == 0) winner = Faction.VILLAGE;

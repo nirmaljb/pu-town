@@ -2,7 +2,7 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat {
+public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat {
     int version();
     String type();
 
@@ -11,8 +11,6 @@ public sealed interface ClientMessage permits ClientMessage.SelectAvatar, Client
     record SetReady(int version, String type, boolean ready) implements ClientMessage {}
     /** The Host's deal for the next Game: how many Mafia, Doctors and Sheriffs. */
     record SetRoleSetup(int version, String type, int mafia, int doctors, int sheriffs) implements ClientMessage {}
-    record StartPractice(int version, String type) implements ClientMessage {}
-    record AdvancePractice(int version, String type, int round, String phase) implements ClientMessage {}
     record StartGame(int version, String type) implements ClientMessage {}
     record Ping(int version, String type) implements ClientMessage {}
     record CreateRoom(int version, String type, String displayName) implements ClientMessage {}

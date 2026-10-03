@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -212,12 +212,6 @@ export class ReconnectingGameClient {
 
   /** The Host's deal; the server checks the limits and that the sender is the Host. */
   setRoleSetup(setup: RoleSetup): void { this.sendControl("lobby", () => setRoleSetup(setup)); }
-
-  startPractice(): void { this.sendControl("lobby", startPractice); }
-
-  advancePractice(round: number, phase: PracticePhase): void {
-    this.sendControl("playing", () => advancePractice(round, phase));
-  }
 
   startGame(): void { this.sendControl("lobby", () => ({ version: 1, type: "start_game" })); }
 

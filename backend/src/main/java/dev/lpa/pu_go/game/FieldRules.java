@@ -6,6 +6,8 @@ public final class FieldRules {
     public static final double SPEED = 240;
     /** Shared living Vision, covering the five-tile (160px) hearing range. */
     public static final double DAY_VISION = 320;
+    /** Five 32px map tiles, evaluated independently for every speaker/listener pair. */
+    public static final double HEARING_RANGE = 160;
 
     private FieldRules() {}
 }
