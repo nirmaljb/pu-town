@@ -43,8 +43,8 @@ export class TaskInterface {
         for (const value of values) {
           const button = document.createElement("button");
           button.type = "button";
-          button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : task.kind === "sequence" ? `${value + 1}` : "Finish repair step"
-            : task.kind === "sequence" ? "Start sequence" : "Repair";
+          button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : task.kind === "sequence" ? `${value + 1}` : task.kind === "delivery" ? task.step % 2 === 0 ? "Pick up item" : "Deliver item" : "Finish repair step"
+            : task.kind === "sequence" ? "Start sequence" : task.kind === "delivery" ? task.step % 2 === 0 ? "Collect" : "Deliver" : "Repair";
           button.disabled = !nearby[index] || active && seconds > 0;
           button.addEventListener("click", () => active ? this.client.taskStep(game.round, task.taskId, task.step, value) : this.client.openTask(game.round, task.taskId));
           item.append(button);

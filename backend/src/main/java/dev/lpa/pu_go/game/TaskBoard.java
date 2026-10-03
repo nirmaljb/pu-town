@@ -31,15 +31,18 @@ public final class TaskBoard {
         String owner;
         final Location location;
         final String kind;
+        final Location destination;
         final List<Integer> sequence;
         int step;
         Assignment(String id, String owner, Location location, String kind) {
             this.id = id; this.owner = owner; this.location = location; this.kind = kind;
+            this.destination = LOCATIONS.get(0);
             this.sequence = kind.equals("sequence") ? List.of(2, 0, 3, 1) : List.of();
         }
-        int steps() { return kind.equals("sequence") ? sequence.size() : REPAIR_STEPS; }
-        long duration() { return kind.equals("sequence") ? 1000 : REPAIR_MS; }
-        TaskView view() { return new TaskView(id, location.name(), kind, location.x(), location.y(), step, steps(), false, sequence); }
+        Location currentLocation() { return kind.equals("delivery") && step % 2 == 1 ? destination : location; }
+        int steps() { return kind.equals("sequence") ? sequence.size() : kind.equals("delivery") ? 2 : REPAIR_STEPS; }
+        long duration() { return kind.equals("repair") ? REPAIR_MS : 1000; }
+        TaskView view() { Location current = currentLocation(); return new TaskView(id, kind.equals("delivery") ? (step % 2 == 1 ? "Deliver " : "Collect ") + location.name() : location.name(), kind, current.x(), current.y(), step, steps(), false, sequence); }
     }
     private record Interaction(String taskId, int step, long readyAt) {}
     private final List<Assignment> assignments = new ArrayList<>();
@@ -50,7 +53,7 @@ public final class TaskBoard {
             if (member.role() == Role.MAFIA) continue;
             for (int slot = 0; slot < 3; slot++) {
                 Location location = LOCATIONS.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % LOCATIONS.size());
-                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : "repair"));
+                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair"));
             }
         }
     }
@@ -60,8 +63,8 @@ public final class TaskBoard {
         return assignments.stream().filter(task -> task.owner.equals(playerId) && task.id.equals(taskId)).findFirst().orElse(null);
     }
     private boolean nearby(Participant actor, Assignment task) {
-        return Math.hypot(actor.x() - task.location.x(), actor.y() - task.location.y()) <= RANGE
-                && RoomRules.areaAt(actor.x(), actor.y()).equals(RoomRules.areaAt(task.location.x(), task.location.y()));
+        return Math.hypot(actor.x() - task.currentLocation().x(), actor.y() - task.currentLocation().y()) <= RANGE
+                && RoomRules.areaAt(actor.x(), actor.y()).equals(RoomRules.areaAt(task.currentLocation().x(), task.currentLocation().y()));
     }
     public Game.Rejection open(Participant actor, String taskId, long now) {
         Assignment task = owned(actor.playerId(), taskId);

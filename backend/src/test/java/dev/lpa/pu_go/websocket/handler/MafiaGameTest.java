@@ -1065,6 +1065,35 @@ class MafiaGameTest {
         assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(1).path("step").asInt());
     }
 
+    @Test
+    void deliveryKeepsCarriedItemsAndRequiresTheAssignedDestination() throws Exception {
+        startTable("delivery-tasks", 4);
+        advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(2);
+        assertEquals("delivery", task.path("kind").asText());
+        walkToTask(1, task);
+        openTask(1, task.path("taskId").asText());
+        advance(1000);
+        taskStep(1, task.path("taskId").asText(), 0, 0);
+        JsonNode carrying = latestOfType(table.get(1), "task_state").path("tasks").get(2);
+        assertEquals(1, carrying.path("step").asInt());
+        assertNotEquals(task.path("x").asDouble(), carrying.path("x").asDouble());
+        openTask(1, task.path("taskId").asText());
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var recovered = connect("delivery-recovered");
+        recover(recovered, code, tokens.get(1));
+        table.set(1, recovered);
+        assertEquals(carrying, latestOfType(recovered, "task_state").path("tasks").get(2));
+        walkToTask(1, carrying);
+        openTask(1, carrying.path("taskId").asText());
+        advance(1000);
+        taskStep(1, carrying.path("taskId").asText(), 1, 0);
+        assertEquals(2, latestOfType(recovered, "task_state").path("tasks").get(2).path("step").asInt());
+        taskStep(1, carrying.path("taskId").asText(), 1, 0);
+        assertEquals("invalid_task", latest(recovered).path("code").asText());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void openTask(int seat, String taskId) throws Exception {
