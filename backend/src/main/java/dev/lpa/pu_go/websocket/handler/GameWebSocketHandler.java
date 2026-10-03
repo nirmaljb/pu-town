@@ -113,6 +113,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
+                    else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
                 });
@@ -457,6 +458,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
     }
 
+    private void handleNightChoice(PlayerState player, ClientMessage.NightChoice message) {
+        withGame(player, (room, game) -> {
+            Game.Rejection rejection = game.submitNightChoice(player.getId(), message.round(), message.targetPlayerId());
+            if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
+            else {
+                List<Delivery> deliveries = new ArrayList<>();
+                addGameStateFor(deliveries, room, List.of(player.getId()));
+                deliverAll(deliveries);
+            }
+        });
+    }
+
     private void handleMeetingVote(PlayerState player, ClientMessage.MeetingVote message) {
         withGame(player, (room, game) -> {
             Game.Rejection rejection = game.submitBallot(player.getId(), message.round(), message.targetPlayerId());
@@ -558,7 +571,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 mafia ? game.mafiaTeam() : null,
                 sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
                         result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
-                game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()));
+                game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()),
+                mafia ? game.nightChoiceFor(self.playerId()) : null);
     }
 
     @Override

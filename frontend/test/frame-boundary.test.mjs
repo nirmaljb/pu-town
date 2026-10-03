@@ -17,7 +17,7 @@ const rosterOf = (...players) => players.map(player => ({
 
 const selfView = (patch = {}) => ({
   role: "villager", faction: "village", status: "living", killedByMafia: false,
-  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, ...patch
+  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, nightChoice: null, ...patch
 });
 
 const gameState = (patch = {}) => ({

@@ -54,12 +54,14 @@ public final class ClientMessageDecoder {
                     throw new InvalidClientMessageException("malformed_message", "facing must be up, left, down or right.");
                 yield new ClientMessage.Move(1, type, coordinate(root, "x"), coordinate(root, "y"), facing);
             }
-            case "meeting_vote" -> {
+            case "meeting_vote", "night_choice" -> {
                 requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));
                 JsonNode target = root.get("targetPlayerId");
                 if (target == null || !(target.isNull() || target.isTextual() && !target.asText().isBlank()))
                     throw new InvalidClientMessageException("malformed_message", "targetPlayerId must be a Player ID or null.");
-                yield new ClientMessage.MeetingVote(1, type, round(root), target.isNull() ? null : target.asText());
+                String targetId = target.isNull() ? null : target.asText();
+                yield type.equals("night_choice") ? new ClientMessage.NightChoice(1, type, round(root), targetId)
+                        : new ClientMessage.MeetingVote(1, type, round(root), targetId);
             }
             case "send_chat" -> {
                 requireOnly(root, Set.of("version", "type", "channel", "text"));

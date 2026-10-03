@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -196,6 +196,10 @@ export class ReconnectingGameClient {
 
   meetingVote(round: number, targetPlayerId: string | null): void {
     this.sendControl("playing", () => meetingVote(round, targetPlayerId));
+  }
+
+  nightChoice(round: number, targetPlayerId: string | null): void {
+    this.sendControl("playing", () => nightChoice(round, targetPlayerId));
   }
 
   chat(channel: ChatChannel, text: string): void {

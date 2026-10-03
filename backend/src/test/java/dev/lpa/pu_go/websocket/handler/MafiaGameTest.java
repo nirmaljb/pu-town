@@ -632,6 +632,101 @@ class MafiaGameTest {
         assertEquals("The dead can listen", latest(table.get(9)).path("text").asText());
     }
 
+    @Test
+    void mafiaCanRevisePrivateNightChoicesUntilTheFixedDeadline() throws Exception {
+        startTable("night-choices", 10);
+        advance(REVEAL + DAY);
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        send(table.get(0), "{\"version\":1,\"type\":\"night_choice\",\"round\":1,\"targetPlayerId\":\"player-6\"}");
+        assertEquals("player-6", game(0).path("self").path("nightChoice").asText());
+        for (int seat = 1; seat < 10; seat++) assertEquals(counts.get(seat), table.get(seat).payloads().size());
+        send(table.get(0), "{\"version\":1,\"type\":\"night_choice\",\"round\":1,\"targetPlayerId\":\"player-7\"}");
+        send(table.get(2), "{\"version\":1,\"type\":\"night_choice\",\"round\":1,\"targetPlayerId\":\"player-7\"}");
+        advance(NIGHT - 1);
+        assertEquals("night", game(0).path("phase").asText());
+        advance(1);
+        for (int seat = 0; seat < 10; seat++) {
+            assertEquals("discussion", game(seat).path("phase").asText());
+            assertEquals(List.of("player-7"), names(game(seat).path("outcome").path("deaths")));
+        }
+        assertTrue(game(6).path("self").path("killedByMafia").asBoolean());
+    }
+
+    @Test
+    void missingOrDisagreeingMafiaChoicesDoNotKillAndNewRoundsClearChoices() throws Exception {
+        startTable("night-majority", 10);
+        advance(REVEAL + DAY);
+        nightChoice(0, 1, 5);
+        advance(NIGHT);
+        assertEquals(List.of(), names(game(1).path("outcome").path("deaths")));
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY);
+        assertTrue(game(0).path("self").path("nightChoice").isNull());
+        nightChoice(0, 2, 5);
+        nightChoice(2, 2, 6);
+        advance(NIGHT);
+        assertEquals(List.of(), names(game(1).path("outcome").path("deaths")));
+    }
+
+    @Test
+    void nightChoicesRejectWrongRolesRoundsTargetsAndMalformedMessages() throws Exception {
+        startTable("night-validation", 10);
+        nightChoice(0, 1, 5);
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+        advance(REVEAL + DAY);
+        nightChoice(1, 1, 5);
+        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
+        nightChoice(0, 2, 5);
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+        nightChoice(0, 1, 2);
+        assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
+        nightChoice(0, 1, 99);
+        assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
+        for (String fields : List.of("\"round\":0,\"targetPlayerId\":null", "\"round\":1", "\"round\":1,\"targetPlayerId\":5", "\"round\":1,\"targetPlayerId\":null,\"extra\":true")) {
+            send(table.get(0), "{\"version\":1,\"type\":\"night_choice\"," + fields + "}");
+            assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+        }
+        nightChoice(0, 1, 5);
+        nightChoice(0, 1, null);
+        assertTrue(game(0).path("self").path("nightChoice").isNull());
+        milliseconds.addAndGet(NIGHT);
+        nightChoice(0, 1, 5);
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+        assertEquals(List.of(), names(game(1).path("outcome").path("deaths")));
+    }
+
+    @Test
+    void recoveryRetainsOnlyOwnNightChoiceAndDisconnectedMafiaStillCount() throws Exception {
+        startTable("night-recovery", 10);
+        advance(REVEAL + DAY);
+        nightChoice(0, 1, 5);
+        handler.afterConnectionClosed(table.get(0), CloseStatus.NORMAL);
+        var replacement = connect("night-replacement");
+        recover(replacement, code, tokens.get(0));
+        assertEquals(playerId(5), latestOfType(replacement, "game_state").path("self").path("nightChoice").asText());
+        assertTrue(game(1).path("self").path("nightChoice").isNull());
+        handler.afterConnectionClosed(table.get(2), CloseStatus.NORMAL);
+        advance(NIGHT);
+        assertEquals(List.of(), names(game(1).path("outcome").path("deaths")));
+    }
+
+    @Test
+    void aNightKillChecksParityOnlyAfterTheOutcomeIsComplete() throws Exception {
+        startTable("night-parity", 5);
+        advance(REVEAL + DAY);
+        nightChoice(0, 1, 1);
+        nightChoice(2, 1, 1);
+        advance(NIGHT);
+        assertEquals("finished", game(0).path("phase").asText());
+        assertEquals("mafia", game(0).path("winner").asText());
+        assertEquals(List.of(playerId(1)), names(game(0).path("outcome").path("deaths")));
+        assertEquals("eliminated", game(1).path("self").path("status").asText());
+    }
+
+    private void nightChoice(int seat, int round, Integer targetSeat) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"night_choice\",\"round\":" + round + ",\"targetPlayerId\":"
+                + (targetSeat == null ? "null" : "\"" + playerId(targetSeat) + "\"") + "}");
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {

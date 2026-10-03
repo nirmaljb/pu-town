@@ -100,7 +100,7 @@ In the Lobby the Host chooses the deal with the − / + controls under the Town 
 | Townhall voting | 30 s | One confirmed ballot each, or Skip. |
 | Voting result | 6 s | The result, with every vote shown. |
 
-Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. Night target choices, Tasks, interiors, shared Day Vision, proximity text, voice and Solo Practice are subsequent slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22); they are not playable yet. The current Night resolves no Role choices and nobody dies during it.
+Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. During Night, living Mafia select a living Village victim and press Set Night choice. They can revise or withdraw it until the twenty-second deadline. A strict majority of living Mafia must agree; missing choices or disagreement cause no kill. Deaths are announced at Townhall, and a kill that brings Mafia to parity ends the Game immediately. Recovery restores only the returning Player's own choice. Doctor protection, Sheriff investigation, Tasks, interiors, shared Day Vision, proximity text, voice and Solo Practice remain subsequent slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22).
 
 Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. The living currently see only Avatars within their Role's Vision: Mafia 440 px, Doctors 380, Sheriffs 330 and Villagers 270. Eliminated Participants can walk during Day and see the town, unseen by the living. Day and Night have no text channel; public text opens during Townhall discussion and voting.
 
@@ -217,6 +217,8 @@ before voting under host resource pressure. The trace is retained locally; the
 WebSocket and frame-boundary regressions provide separate deterministic evidence.
 The suite does not verify the future Tasks, Night choices,
 interiors or media features in epic #22, or constitute manual playtesting.
+
+Ticket #27's editable Night choices, fixed deadline, strict majority, recipient privacy, recovery and parity are covered through controlled-clock WebSocket tests and frontend contract/frame tests. Browser automation and manual multi-browser acceptance were not run for #27; its Night controls and death announcements still need browser acceptance.
 
 If trace capture causes Chromium failures in your environment,
 `npm run test:browser -- --trace off` runs the same browser actions and assertions

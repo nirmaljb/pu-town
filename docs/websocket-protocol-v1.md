@@ -17,6 +17,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
 | `move` | `x: number`, `y: number`, `facing: Facing` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
+| `night_choice` | `round: integer`, `targetPlayerId: string \| null` |
 | `send_chat` | `channel: "public" \| "mafia"`, `text: string` |
 
 ## Server to client
@@ -111,7 +112,7 @@ Outcome      { "kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPl
 RoleView     { "playerId", "role" }
 Investigation{ "round", "targetPlayerId", "mafia" }
 ChatEntry    { "channel", "round", "senderPlayerId", "senderName", "text" }
-SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote" }
+SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice" }
 FieldPlayer  { "playerId", "x", "y", "facing", "ghost" }
 OwnField     { "x", "y", "facing", "correction" }
 ```
@@ -120,7 +121,7 @@ OwnField     { "x", "y", "facing", "correction" }
 
 ### Roles
 
-Start deals the Host's accepted Role Setup, shuffles it and deals in Seat order. Mafia belong to the Mafia Faction; the other Roles belong to the Village. Each recipient receives only their own Role and, for Mafia, their team. Complete Roles are disclosed when the Game finishes. Ticket #24 removes live Role abilities; Night target choices arrive through #27–#29.
+Start deals the Host's accepted Role Setup, shuffles it and deals in Seat order. Mafia belong to the Mafia Faction; the other Roles belong to the Village. Each recipient receives only their own Role and, for Mafia, their team. Complete Roles are disclosed when the Game finishes. Mafia choose victims at Night; Doctor protection and Sheriff investigation follow in #28–#29.
 
 ### Phases and the clock
 
@@ -148,7 +149,15 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 
 **The field.** `field_state` is built per recipient. It holds only visible Avatars, themselves included, and the recipient's accepted position and `correction`. Living recipients see living Participants within their Role's current Vision (Mafia 440 px, Doctor 380 px, Sheriff 330 px, Villager 270 px); #30 will introduce shared Day Vision and interiors. Eliminated recipients see every Participant who has not left; `ghost` marks eliminated Participants, who are invisible to the living. No Body, Vanish, ability timer or Crowding field is sent. Night retains the same authorized field at sleeping positions and the client disables movement prediction.
 
-**Retired requests.** `use_ability` is no longer a supported message type and receives `unknown_message_type`, including kill, shield, scan, vanish, report and emergency payloads. Neither Game rules nor the interface offer those live actions. `roam` and `meeting_call` are no longer phases. Night currently resolves no Role choices; discussion starts with `kind: "night"` and empty `deaths`, pending #27–#29.
+**Retired requests.** `use_ability` is no longer a supported message type and receives `unknown_message_type`, including kill, shield, scan, vanish, report and emergency payloads. Neither Game rules nor the interface offer those live actions. `roam` and `meeting_call` are no longer phases.
+
+### Night choices
+
+`night_choice` carries the current positive `round` and a living Village `targetPlayerId`, or `null` to withdraw. Only living Mafia can submit in this slice. Choices remain editable until the fixed twenty-second deadline; no submission shortens Night. Wrong phase or round receives `invalid_phase`, an ineligible actor receives `invalid_action`, and unknown, non-living or Mafia targets receive `invalid_target`. Missing fields, extra fields and malformed values receive `malformed_message`.
+
+Acceptance sends only the submitter a `game_state`; `self.nightChoice` restores their own accepted target on recovery and is `null` for everyone else and after resolution. No teammate choice or activity count is disclosed. Disconnect preserves choices and keeps the Participant in the majority; Forfeit withdraws their choice and removes them from the denominator. Choices targeting a Participant who is no longer living do not count.
+
+At the deadline, a strict majority of all living Mafia must agree on one living Village victim. Missing choices, disagreement and an insufficient majority cause no kill. The server resolves the outcome under the Room lock, marks the victim eliminated and `killedByMafia`, and publishes `kind: "night"` with the victim's ID in `deaths`, or an empty list. All Participants return to retained Seats. Victory is checked after the complete outcome; parity enters `finished` immediately with that outcome, otherwise Townhall discussion begins. Choices clear at resolution and do not carry into later rounds.
 
 ### Meetings
 

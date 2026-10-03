@@ -64,6 +64,7 @@ export type SelfView = Readonly<{
   investigations: readonly Investigation[] | null;
   meetingVoted: boolean;
   meetingVote: string | null;
+  nightChoice: string | null;
 }>;
 
 export type GameView = Readonly<{
@@ -121,6 +122,7 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "leave_room" }>
   | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
+  | Readonly<{ version: 1; type: "night_choice"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
 
 export function move(x: number, y: number, facing: Direction): ClientMessage {
@@ -135,6 +137,13 @@ export function move(x: number, y: number, facing: Direction): ClientMessage {
 export function meetingVote(round: number, targetPlayerId: string | null): ClientMessage {
   return {
     version: 1, type: "meeting_vote", round: requireRound(round),
+    targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
+  };
+}
+
+export function nightChoice(round: number, targetPlayerId: string | null): ClientMessage {
+  return {
+    version: 1, type: "night_choice", round: requireRound(round),
     targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
   };
 }
@@ -346,7 +355,7 @@ function decodeRoleReveal(value: unknown): Readonly<{ playerId: string; role: Ro
 }
 
 function decodeSelf(self: Record<string, unknown>): SelfView {
-  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote"]);
+  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice"]);
   return {
     role: requireMember(self.role, ROLES, "Role"),
     faction: requireMember(self.faction, ["mafia", "village"] as const, "Faction"),
@@ -355,7 +364,8 @@ function decodeSelf(self: Record<string, unknown>): SelfView {
     mafiaTeam: self.mafiaTeam === null ? null : requireArray(self.mafiaTeam, "mafiaTeam").map(id => requireNonEmptyString(id, "playerId")),
     investigations: self.investigations === null ? null : requireArray(self.investigations, "investigations").map(decodeInvestigation),
     meetingVoted: requireBoolean(self.meetingVoted),
-    meetingVote: requireOptionalPlayerId(self.meetingVote)
+    meetingVote: requireOptionalPlayerId(self.meetingVote),
+    nightChoice: requireOptionalPlayerId(self.nightChoice)
   };
 }
 

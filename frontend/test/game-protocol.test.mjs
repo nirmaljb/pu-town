@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, move, sendChat } from "../dist/protocol.js";
+import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, nightChoice, move, sendChat } from "../dist/protocol.js";
 
 const seat = (index, status = "living") => ({
   playerId: "p" + index, displayName: "Player " + index, colour: "#4F8CFF",
@@ -11,7 +11,7 @@ const seat = (index, status = "living") => ({
 const SELF = {
   role: "sheriff", faction: "village", status: "living", killedByMafia: false,
   mafiaTeam: null, investigations: [{ round: 1, targetPlayerId: "p2", mafia: true }],
-  meetingVoted: false, meetingVote: null
+  meetingVoted: false, meetingVote: null, nightChoice: null
 };
 
 const GAME = {
@@ -28,6 +28,15 @@ const FIELD = {
 };
 
 const decode = value => decodeServerMessage(JSON.stringify(value));
+
+test("Night choices carry the current round and decode only in the recipient's private view", () => {
+  assert.deepEqual(nightChoice(2, "p3"), { version: 1, type: "night_choice", round: 2, targetPlayerId: "p3" });
+  assert.deepEqual(nightChoice(2, null), { version: 1, type: "night_choice", round: 2, targetPlayerId: null });
+  for (const round of [0, -1, 1.5]) assert.throws(() => nightChoice(round, "p3"));
+  assert.throws(() => nightChoice(2, ""));
+  assert.equal(decode({ ...GAME, phase: "night", self: { ...SELF, nightChoice: "p3" } }).self.nightChoice, "p3");
+  assert.throws(() => decode({ ...GAME, self: { ...SELF, nightChoice: 3 } }));
+});
 
 test("Game state carries the Roster, the countdown and this recipient's own private view", () => {
   assert.deepEqual(decode(GAME), GAME);

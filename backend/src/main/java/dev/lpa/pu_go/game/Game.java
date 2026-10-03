@@ -35,6 +35,7 @@ public final class Game {
 
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
+    private final Map<String, String> nightChoices = new LinkedHashMap<>();
     private final List<ChatEntry> chat = new ArrayList<>();
     private GamePhase phase = GamePhase.ROLE_REVEAL;
     private int round;
@@ -92,6 +93,7 @@ public final class Game {
     private void beginDay(long at) {
         round++;
         ballots.clear();
+        nightChoices.clear();
         revealedBallots = null;
         outcome = null;
         for (Participant member : participants.values()) placeAtSeat(member, at);
@@ -109,9 +111,26 @@ public final class Game {
 
 
     private void beginTownhall(long at) {
-        outcome = new Outcome("night", null, null, List.of(), null, null);
+        Map<String, Integer> tally = new LinkedHashMap<>();
+        livingMafia().forEach(member -> {
+            Participant target = participants.get(nightChoices.get(member.playerId()));
+            if (target != null && target.isLiving() && target.role() != Role.MAFIA)
+                tally.merge(target.playerId(), 1, Integer::sum);
+        });
+        long mafia = livingMafia().count();
+        String victimId = tally.entrySet().stream().filter(entry -> entry.getValue() * 2L > mafia)
+                .map(Map.Entry::getKey).findFirst().orElse(null);
+        if (victimId != null) {
+            Participant victim = participants.get(victimId);
+            victim.setStatus(ParticipantStatus.ELIMINATED);
+            victim.setKilledByMafia(true);
+        }
+        outcome = new Outcome("night", null, null, victimId == null ? List.of() : List.of(victimId), null, null);
+        nightChoices.clear();
         for (Participant member : participants.values()) placeAtSeat(member, at);
         enter(GamePhase.DISCUSSION, at);
+        checkVictory();
+        if (winner != null) finish();
     }
 
     private void enter(GamePhase next, long boundary) {
@@ -166,6 +185,22 @@ public final class Game {
 
     // ----- Meetings and chat -------------------------------------------------------------
 
+    /** Editable private choices never advance Night's fixed deadline. Null withdraws a choice. */
+    public Rejection submitNightChoice(String playerId, int submittedRound, String targetPlayerId) {
+        if (phase != GamePhase.NIGHT || submittedRound != round) return WRONG_PHASE;
+        Participant actor = participants.get(playerId);
+        if (actor == null || !actor.isLiving() || actor.role() != Role.MAFIA) return NOT_ALLOWED;
+        if (targetPlayerId != null) {
+            Participant target = participants.get(targetPlayerId);
+            if (target == null || !target.isLiving() || target.role() == Role.MAFIA)
+                return new Rejection("invalid_target", "Choose a living Village Player.");
+            nightChoices.put(playerId, targetPlayerId);
+        } else nightChoices.remove(playerId);
+        return null;
+    }
+
+    public String nightChoiceFor(String playerId) { return nightChoices.get(playerId); }
+
     /** A null target is an explicit Skip, which locks exactly like a ballot for a Player. */
     public Rejection submitBallot(String voterId, int submittedRound, String targetPlayerId) {
         Participant voter = participants.get(voterId);
@@ -211,6 +246,7 @@ public final class Game {
         boolean undecided = winner == null;
         participant.setStatus(ParticipantStatus.LEFT);
         ballots.remove(playerId);
+        nightChoices.remove(playerId);
         checkVictory();
         if (undecided && winner != null) finish();
     }

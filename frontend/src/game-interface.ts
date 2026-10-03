@@ -15,7 +15,7 @@ const PHASE_TITLES: Record<GameView["phase"], string> = {
 };
 
 const ROLE_BRIEFS: Record<Role, string> = {
-  mafia: "Your team wins when living Mafia equal or outnumber the living Village.",
+  mafia: "Choose a Village victim during Night. A strict majority of living Mafia must agree. Your team wins at parity.",
   villager: "Find the Mafia. Discuss at Townhall and vote to eliminate them.",
   doctor: "You belong to the Village. Find the Mafia through Townhall discussion and voting.",
   sheriff: "You belong to the Village. Find the Mafia through Townhall discussion and voting."
@@ -276,15 +276,19 @@ export class GameInterface {
 
   private renderBallot(game: GameView): void {
     const panel = this.element(".action-panel");
-    const open = game.phase === "voting" && game.self.status === "living";
+    const night = game.phase === "night" && game.self.role === "mafia";
+    const open = (game.phase === "voting" || night) && game.self.status === "living";
     panel.hidden = !open;
     if (!open) return;
-    const living = game.players.filter(entry => entry.status === "living");
-    const locked = game.self.meetingVoted;
-    const accepted = game.self.meetingVote;
+    this.element(".action-title").textContent = night ? "Choose tonight's victim" : "Cast your ballot";
+    const living = game.players.filter(entry => entry.status === "living"
+      && (!night || !game.self.mafiaTeam?.includes(entry.playerId)));
+    const locked = !night && game.self.meetingVoted;
+    const accepted = night ? game.self.nightChoice : game.self.meetingVote;
     this.element(".action-hint").textContent = locked
       ? `Locked in: ${accepted === null ? "Skip" : this.nameOf(game, accepted)}`
-      : "Select a Player, then confirm. A confirmed ballot is final.";
+      : night ? `Current choice: ${accepted === null ? "Nobody" : this.nameOf(game, accepted)}. You can revise until Night ends.`
+        : "Select a Player, then confirm. A confirmed ballot is final.";
     const list = this.element(".target-list");
     const choices: readonly (RosterEntry | null)[] = [...living, null];
     const available = new Set(choices.map(target => target?.playerId ?? null));
@@ -302,9 +306,9 @@ export class GameInterface {
         this.#ballotItems.set(playerId, item);
       }
       const button = item.querySelector<HTMLButtonElement>("button")!;
-      button.textContent = target?.displayName ?? "Skip — eliminate nobody";
+      button.textContent = target?.displayName ?? (night ? "Nobody — withdraw choice" : "Skip — eliminate nobody");
       button.style.borderLeft = target === null ? "" : `6px solid ${target.colour}`;
-      const chosen = locked ? accepted === playerId
+      const chosen = locked || (night && this.#preview === null) ? accepted === playerId
         : this.#preview !== null && this.#preview.targetPlayerId === playerId;
       button.setAttribute("aria-pressed", String(chosen));
       button.disabled = locked;
@@ -312,6 +316,7 @@ export class GameInterface {
       if (list.children[index] !== item) list.insertBefore(item, list.children[index] ?? null);
     }
     const confirm = this.element<HTMLButtonElement>(".confirm-action");
+    confirm.textContent = night ? "Set Night choice" : "Confirm ballot";
     confirm.disabled = locked || this.#preview === null;
     confirm.hidden = locked;
   }
@@ -323,7 +328,8 @@ export class GameInterface {
     // A click previews locally; nothing is submitted until the explicit confirmation.
     button.addEventListener("click", () => {
       const game = this.#lastGame;
-      if (!game || game.phase !== "voting" || game.self.status !== "living" || game.self.meetingVoted) return;
+      if (!game || game.self.status !== "living") return;
+      if (game.phase === "voting" ? game.self.meetingVoted : game.phase !== "night" || game.self.role !== "mafia") return;
       this.#preview = { round: game.round, phase: game.phase, targetPlayerId };
       this.render(this.#lastWorld, this.#self);
     });
@@ -335,7 +341,12 @@ export class GameInterface {
     const game = this.#lastGame;
     const preview = this.#preview;
     if (!game || !preview || preview.round !== game.round || preview.phase !== game.phase) return;
-    if (game.phase !== "voting" || game.self.status !== "living" || game.self.meetingVoted) return;
+    if (game.self.status !== "living") return;
+    if (game.phase === "night" && game.self.role === "mafia") {
+      this.client.nightChoice(game.round, preview.targetPlayerId);
+      return;
+    }
+    if (game.phase !== "voting" || game.self.meetingVoted) return;
     if (preview.targetPlayerId !== null && !game.players.some(entry =>
       entry.playerId === preview.targetPlayerId && entry.status === "living")) return;
     this.client.meetingVote(game.round, preview.targetPlayerId);
