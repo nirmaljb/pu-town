@@ -2,10 +2,7 @@ package dev.lpa.pu_go.game;
 
 import java.util.Set;
 
-/**
- * One retained chat message, with the Participants entitled to it when it was sent.
- * Later movement and recovery never widen a message's audience.
- */
+/** One retained message with the immutable recipient set authorized when it was sent. */
 public record ChatEntry(ChatChannel channel, int round, String senderPlayerId, String senderName, String text,
                         Set<String> recipients) {
     public ChatEntry {

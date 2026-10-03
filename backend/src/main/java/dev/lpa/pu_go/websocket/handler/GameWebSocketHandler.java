@@ -110,6 +110,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
                     else if (incoming instanceof ClientMessage.SetRoleSetup setup) handleRoleSetup(player, setup);
+                    else if (incoming instanceof ClientMessage.StartPractice) handlePracticeStart(player);
+                    else if (incoming instanceof ClientMessage.AdvancePractice preview) handlePracticeAdvance(player, preview);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
@@ -394,6 +396,46 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private void handlePracticeStart(PlayerState player) {
+        if (player.getRoomId() == null) {
+            deliver(error(player, "not_in_room", "Join a Room before practicing."));
+            return;
+        }
+        Room room = roomManager.findRoom(player.getRoomId());
+        if (!player.getId().equals(room.getHostPlayerId())) {
+            deliver(error(player, "not_host", "Only the Host can start Solo Practice."));
+        } else if (!room.getPhase().equals("lobby")) {
+            deliver(error(player, "invalid_phase", "Solo Practice starts in the Lobby."));
+        } else if (room.playerIdsSnapshot().size() != 1) {
+            deliver(error(player, "practice_blocked", "Solo Practice needs the Host alone in the Room."));
+        } else {
+            Participant host = new Participant(player.getId(), player.getDisplayName(), player.getColour(),
+                    player.getAvatarPreset(), player.getSeat(), Role.VILLAGER);
+            room.startGame(Game.soloPractice(host, roomManager.currentTimeMillis()));
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+            addGameState(deliveries, room);
+            deliverAll(deliveries);
+        }
+    }
+
+    private void handlePracticeAdvance(PlayerState player, ClientMessage.AdvancePractice message) {
+        withGame(player, (room, game) -> {
+            if (!game.isPractice()) {
+                deliver(error(player, "invalid_action", "Next phase is available only in Solo Practice."));
+            } else if (!player.getId().equals(room.getHostPlayerId())) {
+                deliver(error(player, "not_host", "Only the Host can advance Solo Practice."));
+            } else if (game.round() != message.round() || !game.phase().wireValue().equals(message.phase())) {
+                deliver(error(player, "invalid_phase", "That practice phase has already ended."));
+            } else {
+                game.advancePractice(roomManager.currentTimeMillis());
+                List<Delivery> deliveries = new ArrayList<>();
+                addGameState(deliveries, room);
+                deliverAll(deliveries);
+            }
+        });
+    }
+
     private void handleStart(PlayerState player) {
         String roomId = player.getRoomId();
         if (roomId == null) {
@@ -547,7 +589,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         List<ServerMessage.RoleView> roles = game.isFinished()
                 ? game.roster().stream().map(member -> new ServerMessage.RoleView(member.playerId(), member.role())).toList()
                 : null;
-        return new ServerMessage.GameState(game.phase().wireValue(), game.round(),
+        return new ServerMessage.GameState(game.isPractice() ? "practice" : "competitive", game.phase().wireValue(), game.round(),
                 game.remainingMillis(roomManager.currentTimeMillis()), roster,
                 outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.callerPlayerId(),
                         outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedRole()),

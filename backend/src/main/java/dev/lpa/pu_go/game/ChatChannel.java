@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Arrays;
 
-/** Public Townhall conversation or send-time Day proximity conversation. */
+/** Who a chat message is addressed to: nearby Day listeners or Townhall attendees. */
 public enum ChatChannel {
-    PUBLIC("public"),
-    PROXIMITY("proximity");
+    PUBLIC("public");
 
     private final String wireValue;
 

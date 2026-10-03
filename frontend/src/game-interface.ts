@@ -58,6 +58,7 @@ export class GameInterface {
         <span class="game-countdown"></span>
         <span class="game-round"></span>
         <p class="game-announcement"></p>
+        <button type="button" class="next-practice-phase" hidden>Next phase</button>
       </section>
       <section class="outcome-reveal" hidden aria-live="polite">
         <div class="outcome-card">
@@ -101,11 +102,17 @@ export class GameInterface {
       </section>`;
     document.body.append(this.#root);
     this.element(".role-everyone").textContent = EVERYONE_BRIEF;
+    this.element(".next-practice-phase").addEventListener("click", () => {
+      const game = this.#lastWorld?.game;
+      if (game?.mode === "practice" && game.phase !== "finished" && game.phase !== "role_reveal") {
+        this.client.advancePractice(game.round, game.phase);
+      }
+    });
     this.element(".confirm-action").addEventListener("click", () => this.confirm());
     this.element<HTMLFormElement>(".chat-form").addEventListener("submit", event => {
       event.preventDefault();
       const input = this.element<HTMLInputElement>(".chat-input");
-      const channel: ChatChannel = this.#lastGame?.phase === "day" ? "proximity" : "public";
+      const channel: ChatChannel = "public";
       if (input.value.trim() === "") return;
       this.client.chat(channel, input.value);
       input.value = "";
@@ -171,7 +178,9 @@ export class GameInterface {
   }
 
   private renderBanner(game: GameView, world: WorldState): void {
-    this.element(".game-phase").textContent = PHASE_TITLES[game.phase];
+    this.element(".game-phase").textContent = `${game.mode === "practice" ? "Solo Practice · " : ""}${PHASE_TITLES[game.phase]}`;
+    this.element(".next-practice-phase").hidden = game.mode !== "practice" || world.hostPlayerId !== world.selfPlayerId;
+    this.element<HTMLButtonElement>(".next-practice-phase").disabled = this.client.state.status !== "playing";
     this.element(".game-round").textContent = game.round > 0 && game.phase !== "finished" ? `Round ${game.round}` : "";
     this.element(".game-countdown").textContent = this.countdown(world);
     const field = world.field;
@@ -194,7 +203,7 @@ export class GameInterface {
 
   /** The server owns the deadline; this counts down to it from when its message arrived. */
   private countdown(world: WorldState): string {
-    if (world.phaseEndsAt === null) return "";
+    if (world.phaseEndsAt === null) return world.game?.mode === "practice" ? "Advance when ready" : "";
     const left = Math.max(0, world.phaseEndsAt - this.now());
     const seconds = Math.ceil(left / 1_000);
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -246,7 +255,9 @@ export class GameInterface {
     const self = game.self;
     this.element(".role-faction").textContent = self.faction === "mafia" ? "Mafia" : "Village";
     this.element(".role-name").textContent = capitalized(self.role);
-    this.element(".role-brief").textContent = ROLE_BRIEFS[self.role];
+    this.element(".role-brief").textContent = game.mode === "practice"
+      ? "Explore freely and use Next phase to preview the cycle. Solo Practice has no elimination or faction victory."
+      : ROLE_BRIEFS[self.role];
     const team = self.mafiaTeam?.filter(playerId => playerId !== world.selfPlayerId) ?? [];
     this.element(".role-team").textContent = team.length === 0
       ? "" : `Your team: ${team.map(playerId => this.nameOf(game, playerId)).join(", ")}`;
@@ -284,7 +295,7 @@ export class GameInterface {
   private renderBallot(game: GameView): void {
     const panel = this.element(".action-panel");
     const night = game.phase === "night" && game.self.role !== "villager";
-    const open = (game.phase === "voting" || night) && game.self.status === "living";
+    const open = game.mode === "competitive" && (game.phase === "voting" || night) && game.self.status === "living";
     panel.hidden = !open;
     if (!open) return;
     this.element(".action-title").textContent = night
@@ -404,9 +415,8 @@ export class GameInterface {
 
   private renderChat(game: GameView, world: WorldState): void {
     const meeting = game.phase === "discussion" || game.phase === "voting";
-    const day = game.phase === "day";
     const panel = this.element(".chat-panel");
-    panel.hidden = !(day || meeting || game.phase === "voting_result");
+    panel.hidden = !(game.phase === "day" || meeting || game.phase === "voting_result");
     const log = this.element(".chat-log");
     if (world.chat.length < this.#renderedChat) {
       // Recovery replaces the authorized history wholesale.
@@ -418,18 +428,18 @@ export class GameInterface {
       this.#renderedChat = world.chat.length;
       log.scrollTop = log.scrollHeight;
     }
-    const canSend = game.self.status === "living" && (day || meeting);
+    const canSend = game.self.status === "living" && (game.phase === "day" || meeting);
     const input = this.element<HTMLInputElement>(".chat-input");
     input.disabled = !canSend;
     input.placeholder = canSend
-      ? day ? "Say something to nearby Players" : "Say something to the town"
+      ? game.phase === "day" ? "Say something to nearby Players" : "Say something to the town"
       : game.self.status === "living" ? "Chat opens at Townhall" : "The dead cannot speak";
     this.element<HTMLButtonElement>(".chat-form button").disabled = !canSend;
   }
 
   private chatLine(entry: ChatEntry): HTMLLIElement {
     const line = document.createElement("li");
-    line.className = entry.channel === "proximity" ? "chat-proximity" : "chat-public";
+    line.className = "chat-public";
     const who = document.createElement("strong");
     who.textContent = entry.senderName;
     const text = document.createElement("span");

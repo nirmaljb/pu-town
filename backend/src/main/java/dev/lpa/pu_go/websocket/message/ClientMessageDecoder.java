@@ -43,6 +43,17 @@ public final class ClientMessageDecoder {
                 requireOnly(root, Set.of("version", "type", "mafia", "doctors", "sheriffs"));
                 yield new ClientMessage.SetRoleSetup(1, type, count(root, "mafia"), count(root, "doctors"), count(root, "sheriffs"));
             }
+            case "start_practice" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.StartPractice(1, type);
+            }
+            case "advance_practice" -> {
+                requireOnly(root, Set.of("version", "type", "round", "phase"));
+                String phase = requiredText(root, "phase");
+                if (!Set.of("day", "night", "discussion", "voting", "voting_result").contains(phase))
+                    throw new InvalidClientMessageException("malformed_message", "Unknown practice phase.");
+                yield new ClientMessage.AdvancePractice(1, type, round(root), phase);
+            }
             case "start_game" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.StartGame(1, type);

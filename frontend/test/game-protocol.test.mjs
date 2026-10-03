@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { MAX_CHAT_CHARACTERS, decodeServerMessage, meetingVote, nightChoice, move, sendChat } from "../dist/protocol.js";
+import { MAX_CHAT_CHARACTERS, startPractice, advancePractice, decodeServerMessage, meetingVote, nightChoice, move, sendChat } from "../dist/protocol.js";
 
 const seat = (index, status = "living") => ({
   playerId: "p" + index, displayName: "Player " + index, colour: "#4F8CFF",
@@ -15,7 +15,7 @@ const SELF = {
 };
 
 const GAME = {
-  version: 1, type: "game_state", phase: "day", round: 2, remainingMs: 61_500,
+  version: 1, type: "game_state", mode: "competitive", phase: "day", round: 2, remainingMs: 61_500,
   players: [seat(0), seat(1, "eliminated"), seat(2, "left")],
   outcome: null, ballots: null, winner: null, roles: null, self: SELF
 };
@@ -117,7 +117,7 @@ test("a Roster entry keeps its Seat and its participation status after the Membe
 });
 
 test("chat arrives one entry at a time or as the recipient's whole readable history", () => {
-  const entry = { channel: "proximity", round: 3, senderPlayerId: "p0", senderName: "Alex", text: "Meet at the store." };
+  const entry = { channel: "public", round: 3, senderPlayerId: "p0", senderName: "Alex", text: "Take the Doctor." };
   assert.deepEqual(decode({ version: 1, type: "chat_history", messages: [entry] }),
     { version: 1, type: "chat_history", messages: [entry] });
   assert.deepEqual(decode({ version: 1, type: "chat_history", messages: [] }),
@@ -136,9 +136,7 @@ test("steps, Meeting ballots and chat are built exactly", () => {
   assert.deepEqual(meetingVote(3, null), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: null });
   assert.deepEqual(meetingVote(3, "p4"), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: "p4" });
   assert.deepEqual(sendChat("public", "  I was with p2  "), { version: 1, type: "send_chat", channel: "public", text: "I was with p2" });
-  assert.equal(sendChat("proximity", "x".repeat(MAX_CHAT_CHARACTERS)).text.length, MAX_CHAT_CHARACTERS);
-  assert.throws(() => sendChat("mafia", "Retired private channel"));
-  assert.throws(() => decode({ version: 1, type: "chat_message", channel: "mafia", round: 1, senderPlayerId: "p0", senderName: "Alex", text: "Retired" }));
+  assert.equal(sendChat("public", "x".repeat(MAX_CHAT_CHARACTERS)).text.length, MAX_CHAT_CHARACTERS);
   assert.throws(() => sendChat("public", "   "), new RegExp(String(MAX_CHAT_CHARACTERS)));
   assert.throws(() => sendChat("public", "x".repeat(MAX_CHAT_CHARACTERS + 1)), new RegExp(String(MAX_CHAT_CHARACTERS)));
   // Chat length is counted in code points, as Display Names are.
@@ -155,4 +153,16 @@ test("Townhall results decode exact Roles and reject missing, unknown and retire
     assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedRole: role } }));
   }
   assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedMafia: false } }), /fields/);
+});
+
+test("Solo Practice has an explicit mode and no countdown, with strict phase advance requests", () => {
+  const practice = { ...GAME, mode: "practice", remainingMs: null };
+  assert.deepEqual(decode(practice), practice);
+  assert.deepEqual(startPractice(), { version: 1, type: "start_practice" });
+  assert.deepEqual(advancePractice(1, "night"), { version: 1, type: "advance_practice", round: 1, phase: "night" });
+  for (const round of [0, -1, 1.5]) assert.throws(() => advancePractice(round, "day"));
+  for (const phase of ["roam", "finished", "role_reveal"]) assert.throws(() => advancePractice(1, phase));
+  assert.throws(() => decode({ ...GAME, mode: "solo" }));
+  const { mode, ...incomplete } = GAME;
+  assert.throws(() => decode(incomplete), /fields/);
 });
