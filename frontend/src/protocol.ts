@@ -57,10 +57,10 @@ export type Investigation = Readonly<{ round: number; targetPlayerId: string; ma
 
 /** Everything this recipient is entitled to know. Absent fields are absent from the wire. */
 export type TaskView = Readonly<{
-  taskId: string; name: string; kind: "repair"; x: number; y: number;
-  completedSteps: number; totalSteps: number; active: boolean; workRemainingMs: number | null;
+  taskId: string; name: string; kind: "repair" | "sequence"; x: number; y: number;
+  completedSteps: number; totalSteps: number; active: boolean; workRemainingMs: number | null; sequence: readonly number[] | null;
 }>;
-export type TaskAction = "start" | "complete" | "cancel";
+export type TaskAction = "start" | "complete" | "cancel" | "press_1" | "press_2" | "press_3" | "press_4";
 
 export type SelfView = Readonly<{
   role: Role;
@@ -175,7 +175,7 @@ export function nightChoice(round: number, targetPlayerId: string | null): Clien
 export function taskAction(round: number, taskId: string, step: number, action: TaskAction): ClientMessage {
   return { version: 1, type: "task_action", round: requireRound(round),
     taskId: requireNonEmptyString(taskId, "taskId"), step: requireCounter(step),
-    action: requireMember(action, ["start", "complete", "cancel"] as const, "Task action") };
+    action: requireMember(action, ["start", "complete", "cancel", "press_1", "press_2", "press_3", "press_4"] as const, "Task action") };
 }
 
 export function sendChat(channel: ChatChannel, text: string): ClientMessage {
@@ -413,16 +413,23 @@ function decodeTaskProgress(value: unknown): Readonly<{ completed: number; total
 
 function decodeTask(value: unknown): TaskView {
   const task = requireRecord(value, "Task");
-  requireFields(task, ["taskId", "name", "kind", "x", "y", "completedSteps", "totalSteps", "active", "workRemainingMs"]);
+  requireFields(task, ["taskId", "name", "kind", "x", "y", "completedSteps", "totalSteps", "active", "workRemainingMs", "sequence"]);
   const completedSteps = requireCounter(task.completedSteps);
   const totalSteps = requireRound(task.totalSteps);
   const active = requireBoolean(task.active);
   const workRemainingMs = task.workRemainingMs === null ? null : requireCounter(task.workRemainingMs);
   if (completedSteps > totalSteps || active !== (workRemainingMs !== null)) throw new Error("Invalid Task progress");
+  const kind = requireMember(task.kind, ["repair", "sequence"] as const, "Task kind");
+  const sequence = task.sequence === null ? null : requireArray(task.sequence, "Task sequence").map(value => {
+    const input = requireRound(value);
+    if (input > 4) throw new Error("Invalid sequence input");
+    return input;
+  });
+  if (kind === "sequence" ? !sequence || sequence.length === 0 : sequence !== null) throw new Error("Invalid Task sequence");
   return { taskId: requireNonEmptyString(task.taskId, "taskId"), name: requireNonEmptyString(task.name, "name"),
-    kind: requireMember(task.kind, ["repair"] as const, "Task kind"),
+    kind,
     x: requireFiniteNumber(task.x, "x"), y: requireFiniteNumber(task.y, "y"),
-    completedSteps, totalSteps, active, workRemainingMs };
+    completedSteps, totalSteps, active, workRemainingMs, sequence };
 }
 
 function decodeInvestigation(value: unknown): Investigation {

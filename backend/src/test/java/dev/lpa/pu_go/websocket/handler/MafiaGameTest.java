@@ -82,6 +82,7 @@ class MafiaGameTest {
         assertEquals("start_blocked", latest(host).path("code").asText());
         send(host, "{\"version\":1,\"type\":\"start_practice\"}");
         assertEquals("practice", game(0).path("mode").asText());
+        assertEquals("sequence", game(0).path("self").path("tasks").get(1).path("kind").asText());
         assertEquals("day", game(0).path("phase").asText());
         assertEquals(1, game(0).path("players").size());
         assertEquals(playerId(0), game(0).path("players").get(0).path("playerId").asText());
@@ -1060,6 +1061,44 @@ class MafiaGameTest {
         assertEquals("invalid_action", latest(recovered).path("code").asText());
         taskAction(0, id, 1, "start");
         assertEquals("invalid_action", latest(table.get(0)).path("code").asText());
+    }
+
+    @Test
+    void sequenceTasksValidateOrderedInputsAndRetainPrivateProgress() throws Exception {
+        startTable("sequence-tasks", 10);
+        JsonNode task = game(1).path("self").path("tasks").get(1);
+        assertEquals("sequence", task.path("kind").asText());
+        String id = task.path("taskId").asText();
+        advance(REVEAL);
+        walk(1, 1280, 742);
+        walk(1, 850, 742);
+        walk(1, 850, 420);
+        taskAction(1, id, 0, "press_2");
+        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
+        taskAction(1, id, 0, "start");
+        advance(5_000);
+        taskAction(1, id, 0, "press_1");
+        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
+        taskAction(1, id, 0, "press_2");
+        assertEquals(1, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
+        assertEquals(1, game(0).path("taskProgress").path("completed").asInt());
+        assertTrue(game(0).path("self").path("tasks").isNull());
+        taskAction(1, id, 0, "press_2");
+        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
+        advance(5_000);
+        taskAction(1, id, 1, "press_4");
+        assertEquals(2, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var recovered = connect("sequence-recovered");
+        recover(recovered, code, tokens.get(1));
+        table.set(1, recovered);
+        assertEquals(2, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
+        advance(DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT);
+        assertEquals("day", game(1).path("phase").asText());
+        task = game(1).path("self").path("tasks").get(1);
+        assertEquals(id, task.path("taskId").asText());
+        assertEquals(2, task.path("completedSteps").asInt());
+        assertFalse(task.path("active").asBoolean());
     }
 
     private void taskAction(int seat, String taskId, int step, String action) throws Exception {

@@ -25,6 +25,25 @@ const gameState = (patch = {}) => ({
   players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), taskProgress: { completed: 0, total: 0 }, ...patch
 });
 
+test("sequence progress and work deadlines update only at the frame boundary", () => {
+  let arrival = 1000;
+  const inbox = new NetworkInbox(() => arrival);
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const task = { taskId: "p-task-1", name: "Pick apples", kind: "sequence", x: 840, y: 420,
+    completedSteps: 1, totalSteps: 24, active: true, workRemainingMs: 5_000, sequence: [2, 4, 1, 3] };
+  inbox.enqueue(gameState({ phase: "day", self: selfView({ tasks: [task] }) }));
+  assert.equal(boundary.world.game, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 1);
+  assert.equal(boundary.world.gameReceivedAt, 1000);
+  arrival = 6000;
+  inbox.enqueue(gameState({ phase: "day", self: selfView({ tasks: [{ ...task, completedSteps: 2 }] }) }));
+  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 1);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 2);
+  assert.equal(boundary.world.gameReceivedAt, 6000);
+});
+
 test("private Night choices and a killed Sheriff's results apply only at a frame boundary", () => {
   const inbox = new NetworkInbox();
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });

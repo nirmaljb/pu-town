@@ -68,7 +68,7 @@ public final class ClientMessageDecoder {
             case "task_action" -> {
                 requireOnly(root, Set.of("version", "type", "round", "taskId", "step", "action"));
                 String action = requiredText(root, "action");
-                if (!Set.of("start", "complete", "cancel").contains(action))
+                if (!Set.of("start", "complete", "cancel", "press_1", "press_2", "press_3", "press_4").contains(action))
                     throw new InvalidClientMessageException("malformed_message", "Unknown Task action.");
                 yield new ClientMessage.TaskAction(1, type, round(root), requiredText(root, "taskId"), count(root, "step"), action);
             }

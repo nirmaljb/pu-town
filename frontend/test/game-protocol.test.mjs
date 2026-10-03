@@ -31,13 +31,23 @@ const decode = value => decodeServerMessage(JSON.stringify(value));
 
 test("repair assignments and aggregate progress decode strictly and requests carry expected progress", () => {
   const task = { taskId: "p1-task-0", name: "Sign the town ledger", kind: "repair", x: 1280, y: 544,
-    completedSteps: 1, totalSteps: 24, active: true, workRemainingMs: 20_000 };
+    completedSteps: 1, totalSteps: 24, active: true, workRemainingMs: 20_000, sequence: null };
   assert.deepEqual(decode({ ...GAME, self: { ...SELF, tasks: [task] } }).self.tasks, [task]);
   assert.deepEqual(taskAction(2, task.taskId, 1, "start"), { version: 1, type: "task_action", round: 2, taskId: "p1-task-0", step: 1, action: "start" });
   for (const patch of [{ completedSteps: 25 }, { totalSteps: -1 }, { active: "yes" }, { workRemainingMs: -1 }, { kind: "invented" }, { extra: true }])
     assert.throws(() => decode({ ...GAME, self: { ...SELF, tasks: [{ ...task, ...patch }] } }));
   assert.throws(() => decode({ ...GAME, taskProgress: { completed: 2, total: 1 } }));
   assert.throws(() => taskAction(2, task.taskId, -1, "start"));
+});
+
+test("sequence Tasks expose ordered controls and reject malformed sequences", () => {
+  const task = { taskId: "p1-task-1", name: "Pick apples", kind: "sequence", x: 840, y: 420,
+    completedSteps: 2, totalSteps: 24, active: true, workRemainingMs: 5_000, sequence: [2, 4, 1, 3] };
+  assert.deepEqual(decode({ ...GAME, self: { ...SELF, tasks: [task] } }).self.tasks, [task]);
+  assert.equal(taskAction(2, task.taskId, 2, "press_1").action, "press_1");
+  for (const sequence of [null, [], [0, 1], [1, 5], [1.5], "1234"])
+    assert.throws(() => decode({ ...GAME, self: { ...SELF, tasks: [{ ...task, sequence }] } }));
+  assert.throws(() => taskAction(2, task.taskId, 2, "press_5"));
 });
 
 test("Night choices carry the current round and decode only in the recipient's private view", () => {

@@ -37,7 +37,7 @@ public final class Game {
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
     private final Map<String, String> nightChoices = new LinkedHashMap<>();
-    private final Map<String, List<RepairTask>> tasks = new LinkedHashMap<>();
+    private final Map<String, List<TaskAssignment>> tasks = new LinkedHashMap<>();
     private final List<ChatEntry> chat = new ArrayList<>();
     private GamePhase phase = GamePhase.ROLE_REVEAL;
     private int round;
@@ -59,10 +59,10 @@ public final class Game {
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
             if (participant.role().faction() == Faction.VILLAGE) {
-                List<RepairTask> assignments = new ArrayList<>();
-                assignments.add(new RepairTask(participant.playerId() + "-task-0", RoomRules.TASK_LOCATIONS.get(0)));
-                for (int index = 1; index < 3; index++) assignments.add(new RepairTask(participant.playerId() + "-task-" + index,
-                        RoomRules.TASK_LOCATIONS.get(1 + (participant.seat() * 2 + index - 1) % 13)));
+                List<TaskAssignment> assignments = new ArrayList<>();
+                assignments.add(new TaskAssignment(participant.playerId() + "-task-0", RoomRules.TASK_LOCATIONS.get(0), "repair"));
+                for (int index = 1; index < 3; index++) assignments.add(new TaskAssignment(participant.playerId() + "-task-" + index,
+                        RoomRules.TASK_LOCATIONS.get(1 + (participant.seat() * 2 + index - 1) % 13), index == 1 ? "sequence" : "repair"));
                 tasks.put(participant.playerId(), assignments);
             }
             placeAtSeat(participant, startedAt);
@@ -175,13 +175,13 @@ public final class Game {
     }
 
     private void enter(GamePhase next, long boundary) {
-        if (next != GamePhase.DAY) tasks.values().forEach(assignments -> assignments.forEach(RepairTask::interrupt));
+        if (next != GamePhase.DAY) tasks.values().forEach(assignments -> assignments.forEach(TaskAssignment::interrupt));
         phase = next;
         phaseEndsAt = boundary + next.durationMillis();
     }
 
     private void finish() {
-        tasks.values().forEach(assignments -> assignments.forEach(RepairTask::interrupt));
+        tasks.values().forEach(assignments -> assignments.forEach(TaskAssignment::interrupt));
         phase = GamePhase.FINISHED;
     }
 
@@ -207,8 +207,8 @@ public final class Game {
         walker.y = y;
         walker.facing = facing;
         walker.lastMoveAt = now;
-        for (RepairTask task : tasks.getOrDefault(playerId, List.of())) {
-            if (walker.distanceTo(task.location().x(), task.location().y()) > RepairTask.REACH) task.interrupt();
+        for (TaskAssignment task : tasks.getOrDefault(playerId, List.of())) {
+            if (walker.distanceTo(task.location().x(), task.location().y()) > TaskAssignment.REACH) task.interrupt();
         }
         return true;
     }
@@ -235,12 +235,12 @@ public final class Game {
     public record TaskProgress(int completed, int total) {}
 
     public TaskProgress taskProgress() {
-        return new TaskProgress(tasks.values().stream().flatMap(List::stream).mapToInt(RepairTask::completedSteps).sum(),
-                tasks.values().stream().mapToInt(List::size).sum() * RepairTask.TOTAL_STEPS);
+        return new TaskProgress(tasks.values().stream().flatMap(List::stream).mapToInt(TaskAssignment::completedSteps).sum(),
+                tasks.values().stream().mapToInt(List::size).sum() * TaskAssignment.TOTAL_STEPS);
     }
 
-    public List<RepairTask.View> tasksFor(String playerId, long now) {
-        List<RepairTask> assignments = tasks.get(playerId);
+    public List<TaskAssignment.View> tasksFor(String playerId, long now) {
+        List<TaskAssignment> assignments = tasks.get(playerId);
         return assignments == null ? null : assignments.stream().map(task -> task.view(now)).toList();
     }
 
@@ -248,14 +248,14 @@ public final class Game {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || !actor.isLiving() || !tasks.containsKey(playerId)) return NOT_ALLOWED;
-        RepairTask task = tasks.get(playerId).stream().filter(assignment -> assignment.taskId().equals(taskId)).findFirst().orElse(null);
+        TaskAssignment task = tasks.get(playerId).stream().filter(assignment -> assignment.taskId().equals(taskId)).findFirst().orElse(null);
         if (task == null) return new Rejection("invalid_target", "Choose one of your assigned Tasks.");
-        if (actor.distanceTo(task.location().x(), task.location().y()) > RepairTask.REACH
+        if (actor.distanceTo(task.location().x(), task.location().y()) > TaskAssignment.REACH
                 || !RoomRules.areaAt(actor.x, actor.y).equals(RoomRules.areaAt(task.location().x(), task.location().y())))
             return new Rejection("invalid_action", "Move beside the Task location.");
-        if (!task.act(step, action, now)) return new Rejection("invalid_action", "That repair step is not ready or is already complete.");
+        if (!task.act(step, action, now)) return new Rejection("invalid_action", "That Task step is not ready or is already complete.");
         if (action.equals("start")) {
-            for (RepairTask other : tasks.get(playerId)) if (other != task) other.interrupt();
+            for (TaskAssignment other : tasks.get(playerId)) if (other != task) other.interrupt();
         }
         return null;
     }
@@ -332,7 +332,7 @@ public final class Game {
         participant.setStatus(ParticipantStatus.LEFT);
         ballots.remove(playerId);
         nightChoices.remove(playerId);
-        tasks.getOrDefault(playerId, List.of()).forEach(RepairTask::interrupt);
+        tasks.getOrDefault(playerId, List.of()).forEach(TaskAssignment::interrupt);
         checkVictory();
         if (undecided && winner != null) finish();
     }

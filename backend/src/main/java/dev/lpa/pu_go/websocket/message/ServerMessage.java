@@ -96,7 +96,7 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
      */
     record SelfView(Role role, Faction faction, ParticipantStatus status, boolean killedByMafia,
                     List<String> mafiaTeam, List<InvestigationView> investigations,
-                    boolean meetingVoted, String meetingVote, String nightChoice, List<dev.lpa.pu_go.game.RepairTask.View> tasks) {}
+                    boolean meetingVoted, String meetingVote, String nightChoice, List<dev.lpa.pu_go.game.TaskAssignment.View> tasks) {}
 
     record GameState(int version, String type, String mode, String phase, int round, Long remainingMs,
                      List<RosterView> players, OutcomeView outcome, List<BallotView> ballots,
