@@ -191,7 +191,7 @@ export class AvatarReconciler implements WorldReconciler {
    * Seated Avatars lower into their chair. During a Roam, other Avatars glide toward the
    * position the server last sent, and this client's own Avatar follows local input.
    */
-  updateAnimations(time: number, delta = 16, self: LocalPosition | null = null): void {
+  updateAnimations(time: number, delta = 16, self: LocalPosition | null = null, reducedMotion = false): void {
     const walkFrame = 1 + Math.floor(time / 90) % 8;
     for (const [playerId, avatar] of this.#avatars) {
       const { sprite } = avatar;
@@ -204,16 +204,17 @@ export class AvatarReconciler implements WorldReconciler {
           avatar.facing = self.facing;
           walking = self.moving;
         } else if (avatar.target) {
-          const blend = Math.min(1, delta / 1_000 * 14);
+          const blend = reducedMotion ? 1 : Math.min(1, delta / 1_000 * 14);
           avatar.container.setPosition(
             avatar.container.x + (avatar.target.x - avatar.container.x) * blend,
             avatar.container.y + (avatar.target.y - avatar.container.y) * blend);
         }
         avatar.container.setDepth(avatar.container.y);
-        sprite.setFrame(DIRECTIONS.indexOf(avatar.facing) * 9 + (walking ? walkFrame : 0));
+        sprite.setFrame(DIRECTIONS.indexOf(avatar.facing) * 9 + (walking && !reducedMotion ? walkFrame : 0));
         continue;
       }
-      const sitting = avatar.seating.progress(time);
+      const progress = avatar.seating.progress(time);
+      const sitting = reducedMotion ? 1 : progress;
       sprite.setFrame(DIRECTIONS.indexOf(avatar.facing) * 9);
       const lowering = Math.round(10 * (1 - (1 - sitting) ** 3));
       const bent = sitting >= 0.2;

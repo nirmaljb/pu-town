@@ -360,7 +360,7 @@ export class GameInterface {
   }
 
   private keyPressed(event: KeyboardEvent): void {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.repeat) return;
+    if (document.querySelector("dialog:modal") || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.repeat) return;
     const game = this.#lastGame;
     if (!game || game.phase !== "roam" || game.self.status !== "living") return;
     const slot = this.slots(game.self.role).find(candidate => candidate.key === event.key.toUpperCase());

@@ -1,4 +1,6 @@
 import Phaser from "phaser";
+import { AudioMixer } from "./audio-mixer.js";
+import { SettingsInterface } from "./settings-interface.js";
 import { loadTownMap, MeetingArea } from "./meeting-area.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
@@ -27,6 +29,8 @@ export class PuTownScene extends Phaser.Scene {
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
+  #audio?: AudioMixer;
+  #settings?: SettingsInterface;
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #field?: FieldController;
@@ -59,6 +63,8 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
+    this.#audio = new AudioMixer();
+    this.#settings = new SettingsInterface(this.#audio);
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
@@ -68,7 +74,7 @@ export class PuTownScene extends Phaser.Scene {
     const typing = (event: KeyboardEvent) => event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
     const keyChanged = (held: boolean) => (event: KeyboardEvent) => {
       const direction = MOVEMENT_KEYS[event.code];
-      if (!direction || (held && typing(event))) return;
+      if (!direction || (held && (typing(event) || document.querySelector("dialog:modal")))) return;
       this.#held[direction] = held;
       if (held && this.#field?.position) event.preventDefault();
     };
@@ -92,6 +98,8 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#settings?.destroy();
+      this.#audio?.destroy();
     });
   }
 
@@ -137,18 +145,21 @@ export class PuTownScene extends Phaser.Scene {
     if (!this.readyForRoomArtwork()) return;
     this.#frameBoundary?.beginFrame();
     const world = this.#frameBoundary?.world;
+    if (document.querySelector("dialog:modal")) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
     this.#field?.update(world, this.#held, delta, time);
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
-    this.#avatarReconciler?.updateAnimations(time, delta, self);
+    const reducedMotion = this.#settings?.reducedMotion ?? false;
+    this.#avatarReconciler?.updateAnimations(time, delta, self, reducedMotion);
+    this.#meetingArea?.setReducedMotion(reducedMotion);
     // During a Roam the camera follows this Player; otherwise it frames the Town Square.
     const camera = this.cameras.main;
     const focusX = self?.x ?? SQUARE_X;
     const focusY = self?.y ?? SQUARE_Y;
-    const follow = Math.min(1, delta / 1_000 * (self ? 10 : 6));
+    const follow = reducedMotion ? 1 : Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);
     // The living see only a circle around themselves; the server sends nothing beyond it.

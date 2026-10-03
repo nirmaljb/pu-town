@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { BACKEND_PORT } from "./e2e/environment.js";
 
 // A separate loopback address can isolate this harness from another checkout's Vite.
 // Browsers still use localhost so the backend's supported Origin remains unchanged.
@@ -16,9 +17,9 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: "./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=18081",
+      command: `./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=${BACKEND_PORT}`,
       cwd: "../backend",
-      url: "http://localhost:18081/health",
+      url: `http://localhost:${BACKEND_PORT}/health`,
       timeout: 120_000
     },
     {

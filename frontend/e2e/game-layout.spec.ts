@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { GAME_URL } from "./environment.js";
 
 for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   test(`independent Players enter, play on a centered map and Leave at ${viewport.width}px`, async ({ browser }) => {
@@ -8,7 +9,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       const host = pages[0]!;
       for (const [index, page] of pages.entries()) {
         await page.bringToFront();
-        await page.goto("/?ws=ws://localhost:18081/ws/game");
+        await page.goto(GAME_URL);
         const name = index === 0 ? "Host with a lengthy name" : `Player ${index + 1}`;
         await page.getByLabel("Display Name", { exact: true }).fill(name);
         await expect(page.getByLabel("Display Name", { exact: true })).toHaveValue(name);
@@ -22,10 +23,12 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         await expect(page.getByRole("button", { name: "Copy code", exact: true })).toBeVisible();
         await page.getByRole("button", { name: "Ready", exact: true }).click();
       }
+      await host.bringToFront();
       await expect(host.locator(".occupancy")).toHaveText("4 / 10 Players");
       await expect(host.getByRole("button", { name: "Start Game" })).toBeEnabled();
       await host.getByRole("button", { name: "Start Game" }).click();
       for (const page of pages) {
+        await page.bringToFront();
         await expect(page.locator(".game-banner")).toBeVisible();
         await expect(page.getByRole("button", { name: "Copy code", exact: true })).toBeHidden();
         await expect(page.getByRole("button", { name: "Leave Room", exact: true })).toBeVisible();
@@ -59,6 +62,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await host.getByRole("textbox", { name: "Chat message" }).fill("Meet in the Town Square");
       await host.getByRole("button", { name: "Send", exact: true }).click();
       for (const page of pages) {
+        await page.bringToFront();
         await expect(page.locator(".chat-log")).toContainText("Meet in the Town Square");
         const banner = await page.locator(".game-banner").boundingBox();
         const role = await page.locator(".role-card").boundingBox();
@@ -69,6 +73,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         expect(chat!.y).toBeGreaterThanOrEqual(76);
         expect(chat!.y + chat!.height).toBeLessThanOrEqual(viewport.height);
       }
+      await host.bringToFront();
       await expect(host.locator(".game-phase")).toHaveText("Meeting · Voting", { timeout: 95_000 });
       if (viewport.width === 1280) await host.setViewportSize({ width: 844, height: 390 });
       await expect(host.getByRole("button", { name: "Confirm ballot" })).toBeDisabled();
@@ -86,7 +91,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await pages[1]!.bringToFront();
       await pages[1]!.getByRole("button", { name: "Leave Room", exact: true }).click();
       await expect(pages[1]!.getByRole("button", { name: "Create Room" })).toBeVisible();
+      await host.bringToFront();
       await expect(host.locator(".occupancy")).toHaveText("3 / 10 Players");
+      await pages[1]!.bringToFront();
       await pages[1]!.getByRole("button", { name: "Create Room" }).click();
       await expect(pages[1]!.getByRole("button", { name: "Copy code", exact: true })).toBeVisible();
       await expect(pages[1]!.locator(".occupancy")).toHaveText("1 / 10 Players");

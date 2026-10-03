@@ -47,6 +47,8 @@ export function meetingSeat(seat: number): { x: number; y: number; facing: Direc
 /** The town the Players roam; Meetings gather on chairs around the button in the Town Square. */
 export class MeetingArea {
   readonly #town: Phaser.GameObjects.GameObject[] = [];
+  readonly #animated: Phaser.GameObjects.Sprite[] = [];
+  #reducedMotion = false;
   readonly #button: Phaser.GameObjects.Container;
   readonly #chairs: Phaser.GameObjects.Container;
 
@@ -119,8 +121,18 @@ export class MeetingArea {
       }
       // Each sheep, tree and wave starts at its own frame, so the town does not sway in step.
       sprite.play({ key: animation, startFrame: Math.floor(Math.random() * frames.length) });
+      this.#animated.push(sprite);
     }
     this.#town.push(sprite);
+  }
+
+  setReducedMotion(reduced: boolean): void {
+    if (this.#reducedMotion === reduced) return;
+    this.#reducedMotion = reduced;
+    for (const sprite of this.#animated) {
+      if (reduced) sprite.anims.pause();
+      else sprite.anims.resume();
+    }
   }
 
   /** The town shows while in a Room; the chairs only while the Players are seated. */

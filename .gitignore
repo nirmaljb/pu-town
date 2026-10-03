@@ -7,3 +7,7 @@ frontend/playwright-report/
 
 __pycache__/
 .venv/
+
+.scratch/browser-temp/
+.scratch/playwright/
+.scratch/browser-libs/
