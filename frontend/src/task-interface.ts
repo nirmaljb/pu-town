@@ -1,3 +1,4 @@
+import type { SoundEffects } from "./sound-effects.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
 import { areaAt } from "./room-rules.js";
@@ -6,7 +7,7 @@ import { areaAt } from "./room-rules.js";
 export class TaskInterface {
   readonly #root = document.createElement("section");
   #signature = "";
-  constructor(private readonly client: ReconnectingGameClient, private readonly now = Date.now) {
+  constructor(private readonly client: ReconnectingGameClient, private readonly effects: SoundEffects, private readonly now = Date.now) {
     this.#root.className = "task-interface";
     this.#root.setAttribute("aria-label", "Tasks");
     document.querySelector("#game-container")?.append(this.#root);
@@ -46,7 +47,10 @@ export class TaskInterface {
           button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : task.kind === "sequence" ? `${value + 1}` : task.kind === "delivery" ? task.step % 2 === 0 ? "Pick up item" : "Deliver item" : "Finish repair step"
             : task.kind === "sequence" ? "Start sequence" : task.kind === "delivery" ? task.step % 2 === 0 ? "Collect" : "Deliver" : "Repair";
           button.disabled = !nearby[index] || active && seconds > 0;
-          button.addEventListener("click", () => active ? this.client.taskStep(game.round, task.taskId, task.step, value) : this.client.openTask(game.round, task.taskId));
+          button.addEventListener("click", () => { this.effects.play(active ? "click" : "select");
+            if (active) this.client.taskStep(game.round, task.taskId, task.step, value);
+            else this.client.openTask(game.round, task.taskId);
+          });
           item.append(button);
         }
       }

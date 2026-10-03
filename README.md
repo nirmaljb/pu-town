@@ -283,3 +283,5 @@ Day text reaches living Players in the same indoor/outdoor area within five tile
 Village Participants receive three persistent repair Tasks. The lower map overlay lists current locations and earned steps; approach a location, Repair, wait for the four-second interaction, then finish its step. Three earned steps complete a Task. Night closes unfinished interactions, while earned steps survive later Days and recovery. Only aggregate completed Tasks are public.
 
 Solo Practice includes a Preview Role selector and separate practice targets for Night choices and Townhall ballots. Mafia preview uses Fake Tasks; Village previews retain real assignments. Repair, ordered sequence and pickup/delivery steps persist through phase previews, Role switches and same-tab recovery. Finishing practice Tasks never ends practice.
+
+Private Task selection/click/success, accepted ballot confirmation and phase transitions play local effects through saved master/effects volumes. Audio starts after a browser gesture; recovery establishes a silent baseline, so retained choices and completed Tasks do not replay cues.

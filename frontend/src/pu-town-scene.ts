@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioMixer } from "./audio-mixer.js";
 import { SettingsInterface } from "./settings-interface.js";
 import { loadTownMap, MeetingArea } from "./meeting-area.js";
+import { SoundEffects } from "./sound-effects.js";
 import { TaskInterface } from "./task-interface.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
@@ -31,6 +32,7 @@ export class PuTownScene extends Phaser.Scene {
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
   #taskInterface?: TaskInterface;
+  #effects?: SoundEffects;
   #audio?: AudioMixer;
   #settings?: SettingsInterface;
   #frameBoundary?: NetworkFrameBoundary;
@@ -65,8 +67,11 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
-    this.#taskInterface = new TaskInterface(this.#client);
+
     this.#audio = new AudioMixer();
+    this.#effects = new SoundEffects(this.#audio);
+    this.#effects.start();
+    this.#taskInterface = new TaskInterface(this.#client, this.#effects);
     this.#settings = new SettingsInterface(this.#audio);
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
@@ -103,6 +108,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#gameInterface?.destroy();
       this.#taskInterface?.destroy();
       this.#settings?.destroy();
+      this.#effects?.destroy();
       this.#audio?.destroy();
     });
   }
@@ -155,6 +161,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
     this.#taskInterface?.render(world);
+    this.#effects?.update(world, this.#client?.state.status === "playing");
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     const reducedMotion = this.#settings?.reducedMotion ?? false;

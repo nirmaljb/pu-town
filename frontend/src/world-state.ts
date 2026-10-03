@@ -2,6 +2,7 @@ import type { PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerV
 
 export type WorldState = Readonly<{
   roomId: string | null;
+  snapshotSerial: number;
   phase: RoomPhase | null;
   hostPlayerId: string | null;
   /** The Host's deal for the Room's Game. */
@@ -22,7 +23,7 @@ export type WorldState = Readonly<{
 
 export function emptyWorld(): WorldState {
   return {
-    phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
+    snapshotSerial: 0, phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
     players: new Map(), game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
@@ -40,6 +41,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
     case "room_snapshot":
       return {
         ...emptyWorld(),
+        snapshotSerial: world.snapshotSerial + 1,
         roomId: event.roomId,
         phase: event.phase,
         hostPlayerId: event.hostPlayerId,
