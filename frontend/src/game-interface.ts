@@ -112,7 +112,7 @@ export class GameInterface {
     this.element<HTMLFormElement>(".chat-form").addEventListener("submit", event => {
       event.preventDefault();
       const input = this.element<HTMLInputElement>(".chat-input");
-      const channel: ChatChannel = this.#lastGame?.phase === "day" ? "proximity" : "public";
+      const channel: ChatChannel = "public";
       if (input.value.trim() === "") return;
       this.client.chat(channel, input.value);
       input.value = "";
@@ -415,9 +415,8 @@ export class GameInterface {
 
   private renderChat(game: GameView, world: WorldState): void {
     const meeting = game.phase === "discussion" || game.phase === "voting";
-    const day = game.phase === "day";
     const panel = this.element(".chat-panel");
-    panel.hidden = !(day || meeting || game.phase === "voting_result");
+    panel.hidden = !(game.phase === "day" || meeting || game.phase === "voting_result");
     const log = this.element(".chat-log");
     if (world.chat.length < this.#renderedChat) {
       // Recovery replaces the authorized history wholesale.
@@ -429,18 +428,18 @@ export class GameInterface {
       this.#renderedChat = world.chat.length;
       log.scrollTop = log.scrollHeight;
     }
-    const canSend = game.self.status === "living" && (day || meeting);
+    const canSend = game.self.status === "living" && (game.phase === "day" || meeting);
     const input = this.element<HTMLInputElement>(".chat-input");
     input.disabled = !canSend;
     input.placeholder = canSend
-      ? day ? "Say something to nearby Players" : "Say something to the town"
+      ? game.phase === "day" ? "Say something to nearby Players" : "Say something to the town"
       : game.self.status === "living" ? "Chat opens at Townhall" : "The dead cannot speak";
     this.element<HTMLButtonElement>(".chat-form button").disabled = !canSend;
   }
 
   private chatLine(entry: ChatEntry): HTMLLIElement {
     const line = document.createElement("li");
-    line.className = entry.channel === "proximity" ? "chat-proximity" : "chat-public";
+    line.className = "chat-public";
     const who = document.createElement("strong");
     who.textContent = entry.senderName;
     const text = document.createElement("span");

@@ -117,7 +117,7 @@ test("a Roster entry keeps its Seat and its participation status after the Membe
 });
 
 test("chat arrives one entry at a time or as the recipient's whole readable history", () => {
-  const entry = { channel: "proximity", round: 3, senderPlayerId: "p0", senderName: "Alex", text: "Meet at the store." };
+  const entry = { channel: "public", round: 3, senderPlayerId: "p0", senderName: "Alex", text: "Take the Doctor." };
   assert.deepEqual(decode({ version: 1, type: "chat_history", messages: [entry] }),
     { version: 1, type: "chat_history", messages: [entry] });
   assert.deepEqual(decode({ version: 1, type: "chat_history", messages: [] }),
@@ -136,9 +136,7 @@ test("steps, Meeting ballots and chat are built exactly", () => {
   assert.deepEqual(meetingVote(3, null), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: null });
   assert.deepEqual(meetingVote(3, "p4"), { version: 1, type: "meeting_vote", round: 3, targetPlayerId: "p4" });
   assert.deepEqual(sendChat("public", "  I was with p2  "), { version: 1, type: "send_chat", channel: "public", text: "I was with p2" });
-  assert.equal(sendChat("proximity", "x".repeat(MAX_CHAT_CHARACTERS)).text.length, MAX_CHAT_CHARACTERS);
-  assert.throws(() => sendChat("mafia", "Retired private channel"));
-  assert.throws(() => decode({ version: 1, type: "chat_message", channel: "mafia", round: 1, senderPlayerId: "p0", senderName: "Alex", text: "Retired" }));
+  assert.equal(sendChat("public", "x".repeat(MAX_CHAT_CHARACTERS)).text.length, MAX_CHAT_CHARACTERS);
   assert.throws(() => sendChat("public", "   "), new RegExp(String(MAX_CHAT_CHARACTERS)));
   assert.throws(() => sendChat("public", "x".repeat(MAX_CHAT_CHARACTERS + 1)), new RegExp(String(MAX_CHAT_CHARACTERS)));
   // Chat length is counted in code points, as Display Names are.

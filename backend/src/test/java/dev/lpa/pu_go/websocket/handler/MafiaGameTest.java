@@ -437,14 +437,13 @@ class MafiaGameTest {
     }
 
     @Test
-    void dayHasNoPrivateMafiaChannelAndTownhallTextRemainsPublic() throws Exception {
+    void dayHasNoPrivateMafiaChannelAndTownhallKeepsPublicDiscussion() throws Exception {
         startTable("chat", 10);
         advance(REVEAL);
         chat(0, "mafia", "No private channel");
         assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
         chat(5, "public", "Hello?");
-        assertEquals("invalid_phase", latest(table.get(5)).path("code").asText());
-        for (var member : table) assertEquals(0, countOfType(member, "chat_message"));
+        assertEquals("chat_message", latest(table.get(5)).path("type").asText());
         advance(DAY + NIGHT);
         chat(0, "mafia", "Still no private channel");
         assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
@@ -964,36 +963,51 @@ class MafiaGameTest {
     }
 
     @Test
-    void dayTextUsesAcceptedProximityAtSendTimeAndRecoveryCannotGrantOldMessages() throws Exception {
+    void dayTextUsesAcceptedProximityAtSendTimeAndRecoveryNeverWidensHistory() throws Exception {
         startTable("proximity-text", 10);
         advance(REVEAL);
         walk(0, 1280, 742);
         walk(1, 1400, 742);
-        walk(2, 1560, 742);
-        var distantCount = table.get(2).payloads().size();
-        chat(0, "proximity", "Only nearby listeners");
-        assertEquals("Only nearby listeners", latest(table.get(1)).path("text").asText());
-        assertEquals(distantCount, table.get(2).payloads().size());
-        chat(1, "proximity", "A third Player hears each speaker independently");
-        assertEquals("A third Player hears each speaker independently", latest(table.get(2)).path("text").asText());
-        walk(2, 1300, 742);
+        walk(2, 1480, 742);
+        walk(5, 1280, 1200);
+        chat(0, "public", "Only nearby listeners");
+        assertEquals("chat_message", latest(table.get(0)).path("type").asText());
+        assertEquals("Only nearby listeners", latestOfType(table.get(1), "chat_message").path("text").asText());
+        assertEquals(0, countOfType(table.get(2), "chat_message"));
+        walk(2, 1320, 742);
         handler.afterConnectionClosed(table.get(2), CloseStatus.NORMAL);
-        var replacement = connect("proximity-replacement");
-        recover(replacement, code, tokens.get(2));
-        JsonNode history = latestOfType(replacement, "chat_history").path("messages");
-        assertEquals(1, history.size());
-        assertEquals("A third Player hears each speaker independently", history.get(0).path("text").asText());
-        table.set(2, replacement);
-        chat(0, "proximity", "Now you are nearby");
-        assertEquals("Now you are nearby", latest(replacement).path("text").asText());
+        var recovered = connect("proximity-recovered");
+        recover(recovered, code, tokens.get(2));
+        assertEquals(0, latestOfType(recovered, "chat_history").path("messages").size());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var listener = connect("listener-recovered");
+        recover(listener, code, tokens.get(1));
+        assertEquals("Only nearby listeners", latestOfType(listener, "chat_history").path("messages").get(0).path("text").asText());
+        var distantBefore = countOfType(table.get(5), "chat_message");
+        move(5, 1280, 742); // an impossible teleport must not grant hearing
+        chat(0, "public", "Accepted positions only");
+        assertEquals(distantBefore, countOfType(table.get(5), "chat_message"));
+        chat(0, "mafia", "No private channel");
+        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+        advance(REVEAL + DAY - milliseconds.get());
+        chat(0, "public", "Night is silent");
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+    }
+
+    @Test
+    void buildingBoundariesExcludeDayTextEvenInsideHearingRange() throws Exception {
+        startTable("interior-text", 10);
+        advance(REVEAL);
         walk(0, 576, 742);
         walk(0, 576, 800);
         walk(1, 1280, 742);
         walk(1, 576, 742);
         walk(1, 576, 900);
-        var indoorCount = table.get(1).payloads().size();
-        chat(0, "proximity", "Outside only");
-        assertEquals(indoorCount, table.get(1).payloads().size());
+        chat(0, "public", "Outside the store");
+        assertEquals(0, countOfType(table.get(1), "chat_message"));
+        walk(0, 576, 900);
+        chat(0, "public", "Inside the store");
+        assertEquals("Inside the store", latestOfType(table.get(1), "chat_message").path("text").asText());
     }
 
     // ----- helpers ------------------------------------------------------------------------

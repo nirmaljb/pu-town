@@ -25,7 +25,7 @@ export const ROLES = ["mafia", "villager", "doctor", "sheriff"] as const;
 export type Role = typeof ROLES[number];
 export type Faction = "mafia" | "village";
 export type ParticipantStatus = "living" | "eliminated" | "left";
-export type ChatChannel = "public" | "proximity";
+export type ChatChannel = "public";
 export const MAX_CHAT_CHARACTERS = 240;
 
 /** One Game Roster entry: it outlives the Room Membership that created it. */
@@ -168,7 +168,7 @@ export function sendChat(channel: ChatChannel, text: string): ClientMessage {
   if ([...message].length < 1 || [...message].length > MAX_CHAT_CHARACTERS) {
     throw new Error(`A chat message must be 1\u2013${MAX_CHAT_CHARACTERS} characters.`);
   }
-  return { version: 1, type: "send_chat", channel: requireMember(channel, ["public", "proximity"] as const, "chat channel"), text: message };
+  return { version: 1, type: "send_chat", channel, text: message };
 }
 
 /** Rounds are numbered from one; only Role Reveal, which precedes the first Day, is round zero. */
@@ -398,7 +398,7 @@ function decodeInvestigation(value: unknown): Investigation {
 function decodeChatEntry(entry: Record<string, unknown>): ChatEntry {
   if (!("version" in entry)) requireFields(entry, ["channel", "round", "senderPlayerId", "senderName", "text"]);
   return {
-    channel: requireMember(entry.channel, ["public", "proximity"] as const, "chat channel"),
+    channel: requireMember(entry.channel, ["public"] as const, "chat channel"),
     round: requireRound(entry.round),
     senderPlayerId: requireNonEmptyString(entry.senderPlayerId, "senderPlayerId"),
     senderName: requireNonEmptyString(entry.senderName, "senderName"),

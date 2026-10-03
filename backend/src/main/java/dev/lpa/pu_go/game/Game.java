@@ -256,15 +256,15 @@ public final class Game {
     public Rejection submitChat(String senderId, ChatChannel channel, String text) {
         Participant sender = participants.get(senderId);
         if (sender == null || !sender.isLiving()) return NOT_ALLOWED;
-        boolean day = phase == GamePhase.DAY;
-        if (!day && phase != GamePhase.DISCUSSION && phase != GamePhase.VOTING) return WRONG_PHASE;
-        if (channel != (day ? ChatChannel.PROXIMITY : ChatChannel.PUBLIC)) return WRONG_PHASE;
-        var recipients = participants.values().stream()
-                .filter(listener -> listener.status() != ParticipantStatus.LEFT)
-                .filter(listener -> !day || listener.isLiving() && sender.distanceTo(listener) <= HEARING_RANGE
-                        && RoomRules.areaAt(sender.x, sender.y).equals(RoomRules.areaAt(listener.x, listener.y)))
+        if (phase != GamePhase.DAY && phase != GamePhase.DISCUSSION && phase != GamePhase.VOTING) return WRONG_PHASE;
+        if (channel != ChatChannel.PUBLIC) return NOT_ALLOWED;
+        java.util.Set<String> recipients = participants.values().stream()
+                .filter(member -> member.status() != ParticipantStatus.LEFT)
+                .filter(member -> phase != GamePhase.DAY || member.isLiving()
+                        && sender.distanceTo(member) <= HEARING_RANGE
+                        && RoomRules.areaAt(sender.x, sender.y).equals(RoomRules.areaAt(member.x, member.y)))
                 .map(Participant::playerId).collect(java.util.stream.Collectors.toSet());
-        chat.add(new ChatEntry(channel, round, senderId, sender.displayName(), text, recipients));
+        chat.add(new ChatEntry(ChatChannel.PUBLIC, round, senderId, sender.displayName(), text, recipients));
         return null;
     }
 

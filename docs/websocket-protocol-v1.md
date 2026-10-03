@@ -20,7 +20,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `move` | `x: number`, `y: number`, `facing: Facing` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
 | `night_choice` | `round: integer`, `targetPlayerId: string \| null` |
-| `send_chat` | `channel: "public" \| "proximity"`, `text: string` |
+| `send_chat` | `channel: "public" \| "mafia"`, `text: string` |
 
 ## Server to client
 
@@ -181,7 +181,7 @@ At Voting Result, `ballots` discloses every ballot cast, Skips included, and `ou
 
 ### Chat
 
-`send_chat` carries `channel` and `text`. Text is trimmed and must be 1–240 Unicode code points; anything else is `malformed_message`. `public` is accepted from living Participants during `discussion` or `voting` and reaches attending Participants, including the eliminated. `proximity` is accepted from living Participants during `day` and reaches only living Participants in the same accepted interior/outdoor area within five 32px tiles (160px), including the sender. Distance is evaluated independently for each sender/recipient, with the boundary included; another listener cannot extend the sender's range. Channels submitted in the wrong phase receive `invalid_phase`. Night accepts no chat. The retired `mafia` channel is `malformed_message` in every phase and is no longer decoded by clients.
+`send_chat` carries `channel: "public"` and `text`. Text is trimmed and must be 1–240 Unicode code points; unknown channels (including `mafia`) and malformed text receive `malformed_message`. During Day, only living Participants in the sender's same area and within five tiles (160 pixels) of the accepted position receive text. Interior boundaries exclude exterior listeners. During discussion and voting, living Participants can send to all attending Participants, including eliminated read-only listeners. Night rejects text with `invalid_phase`; eliminated senders receive `invalid_action`. Each entry retains its send-time recipient set: later approach and recovery cannot grant past proximity messages.
 
 The server records the recipients of each entry and delivers `chat_message` only to them. On recovery a Participant receives `chat_history` holding exactly the entries they are entitled to read; it replaces the client's log rather than adding to it. Eliminated Players can read what they could read while living but cannot speak.
 
