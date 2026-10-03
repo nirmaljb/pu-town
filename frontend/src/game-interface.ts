@@ -198,7 +198,11 @@ export class GameInterface {
   }
 
   private announcement(game: GameView): string {
-    if (game.phase === "finished") return game.winner === "mafia" ? "The Mafia win." : "The Village wins.";
+    if (game.phase === "finished") {
+      const winner = game.winner === "mafia" ? "The Mafia win." : "The Village wins.";
+      const outcome = this.outcomeText(game);
+      return outcome === null ? winner : [outcome.verdict || outcome.headline, winner].join(" ");
+    }
     if (game.phase === "day") return "Explore the town. Townhall follows Night.";
     if (game.phase === "night") return "Everyone sleeps in place. Movement and conversation are closed.";
     const outcome = this.outcomeText(game);

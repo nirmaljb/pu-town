@@ -459,27 +459,22 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handleNightChoice(PlayerState player, ClientMessage.NightChoice message) {
-        withGame(player, (room, game) -> {
-            Game.Rejection rejection = game.submitNightChoice(player.getId(), message.round(), message.targetPlayerId());
-            if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
-            else {
-                List<Delivery> deliveries = new ArrayList<>();
-                addGameStateFor(deliveries, room, List.of(player.getId()));
-                deliverAll(deliveries);
-            }
-        });
+        withGame(player, (room, game) -> answerPrivateSubmission(player, room,
+                game.submitNightChoice(player.getId(), message.round(), message.targetPlayerId())));
     }
 
     private void handleMeetingVote(PlayerState player, ClientMessage.MeetingVote message) {
-        withGame(player, (room, game) -> {
-            Game.Rejection rejection = game.submitBallot(player.getId(), message.round(), message.targetPlayerId());
-            if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
-            else {
-                List<Delivery> deliveries = new ArrayList<>();
-                addGameStateFor(deliveries, room, List.of(player.getId()));
-                deliverAll(deliveries);
-            }
-        });
+        withGame(player, (room, game) -> answerPrivateSubmission(player, room,
+                game.submitBallot(player.getId(), message.round(), message.targetPlayerId())));
+    }
+
+    private void answerPrivateSubmission(PlayerState player, Room room, Game.Rejection rejection) {
+        if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
+        else {
+            List<Delivery> deliveries = new ArrayList<>();
+            addGameStateFor(deliveries, room, List.of(player.getId()));
+            deliverAll(deliveries);
+        }
     }
 
     private void handleChat(PlayerState player, ClientMessage.SendChat message) {
