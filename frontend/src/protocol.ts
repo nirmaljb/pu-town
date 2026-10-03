@@ -56,12 +56,6 @@ export type GameOutcome = Readonly<{
 export type Investigation = Readonly<{ round: number; targetPlayerId: string; mafia: boolean }>;
 
 /** Everything this recipient is entitled to know. Absent fields are absent from the wire. */
-export type TaskView = Readonly<{
-  taskId: string; name: string; kind: "repair" | "sequence"; x: number; y: number;
-  completedSteps: number; totalSteps: number; active: boolean; workRemainingMs: number | null; sequence: readonly number[] | null;
-}>;
-export type TaskAction = "start" | "complete" | "cancel" | "press_1" | "press_2" | "press_3" | "press_4";
-
 export type SelfView = Readonly<{
   role: Role;
   faction: Faction;
@@ -72,7 +66,6 @@ export type SelfView = Readonly<{
   meetingVoted: boolean;
   meetingVote: string | null;
   nightChoice: string | null;
-  tasks: readonly TaskView[] | null;
 }>;
 
 export type GameView = Readonly<{
@@ -86,7 +79,6 @@ export type GameView = Readonly<{
   winner: Faction | null;
   roles: readonly Readonly<{ playerId: string; role: Role }>[] | null;
   self: SelfView;
-  taskProgress: Readonly<{ completed: number; total: number }>;
 }>;
 
 /** One Avatar this recipient is allowed to see during Day or sleeping Night. */
@@ -107,7 +99,16 @@ export type ChatEntry = Readonly<{
   text: string;
 }>;
 
+export type PracticeTarget = Readonly<{ targetId: string; displayName: string; role: Role }>;
+
+export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" | "sequence" | "delivery";
+  x: number; y: number; step: number; steps: number; fake: boolean; sequence: readonly number[] }>;
+export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number; total: number;
+  activeTaskId: string | null; remainingMs: number | null }>;
+
 export type ServerMessage =
+  | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
+  | (TaskState & Readonly<{ version: 1; type: "task_state" }>)
   | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
   | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
@@ -121,6 +122,10 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "preview_role"; role: Role }>
+  | Readonly<{ version: 1; type: "open_task"; round: number; taskId: string }>
+  | Readonly<{ version: 1; type: "task_step"; round: number; taskId: string; step: number; value: number }>
+  | Readonly<{ version: 1; type: "close_task" }>
   | Readonly<{ version: 1; type: "select_avatar"; avatarPreset: AvatarPreset }>
   | Readonly<{ version: 1; type: "recover_room"; roomId: string; recoveryToken: string }>
   | Readonly<{ version: 1; type: "start_game" }>
@@ -135,7 +140,6 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "night_choice"; round: number; targetPlayerId: string | null }>
-  | Readonly<{ version: 1; type: "task_action"; round: number; taskId: string; step: number; action: TaskAction }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
 
 export function startPractice(): ClientMessage {
@@ -170,12 +174,6 @@ export function nightChoice(round: number, targetPlayerId: string | null): Clien
     version: 1, type: "night_choice", round: requireRound(round),
     targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
   };
-}
-
-export function taskAction(round: number, taskId: string, step: number, action: TaskAction): ClientMessage {
-  return { version: 1, type: "task_action", round: requireRound(round),
-    taskId: requireNonEmptyString(taskId, "taskId"), step: requireCounter(step),
-    action: requireMember(action, ["start", "complete", "cancel", "press_1", "press_2", "press_3", "press_4"] as const, "Task action") };
 }
 
 export function sendChat(channel: ChatChannel, text: string): ClientMessage {
@@ -268,6 +266,39 @@ export function decodeServerMessage(payload: string): ServerMessage {
       return { version: 1, type, ...decodeGameView(message) };
     case "field_state":
       return { version: 1, type, ...decodeField(message) };
+    case "practice_state": {
+      requireFields(message, ["version", "type", "targets"]);
+      const targets = requireArray(message.targets, "targets").map(value => {
+        const target = requireRecord(value, "practice target");
+        requireFields(target, ["targetId", "displayName", "role"]);
+        return { targetId: requireNonEmptyString(target.targetId, "targetId"), displayName: requireNonEmptyString(target.displayName, "displayName"), role: requireMember(target.role, ROLES, "practice Role") };
+      });
+      if (new Set(targets.map(target => target.targetId)).size !== targets.length) throw new Error("Duplicate practice target");
+      return { version: 1, type, targets };
+    }
+    case "task_state": {
+      requireFields(message, ["version", "type", "tasks", "completed", "total", "activeTaskId", "remainingMs"]);
+      const total = requireNonNegativeInteger(message.total, "total");
+      const completed = requireNonNegativeInteger(message.completed, "completed");
+      if (completed > total) throw new Error("Task progress exceeds total");
+      const tasks = requireArray(message.tasks, "tasks").map(value => {
+        const task = requireRecord(value, "Task");
+        requireFields(task, ["taskId", "name", "kind", "x", "y", "step", "steps", "fake", "sequence"]);
+        const steps = requireNonNegativeInteger(task.steps, "steps");
+        const step = requireNonNegativeInteger(task.step, "step");
+        if (steps === 0 || step > steps) throw new Error("Invalid Task step");
+        return { taskId: requireNonEmptyString(task.taskId, "taskId"), name: requireNonEmptyString(task.name, "name"),
+          kind: requireMember(task.kind, ["repair", "sequence", "delivery"] as const, "Task kind"),
+          x: requireFiniteNumber(task.x, "x"), y: requireFiniteNumber(task.y, "y"), step, steps,
+          fake: requireBoolean(task.fake), sequence: requireArray(task.sequence, "sequence").map(value => requireNonNegativeInteger(value, "sequence value")) };
+      });
+      if (new Set(tasks.map(task => task.taskId)).size !== tasks.length) throw new Error("Duplicate Task assignment");
+      const activeTaskId = message.activeTaskId === null ? null : requireNonEmptyString(message.activeTaskId, "activeTaskId");
+      const remainingMs = message.remainingMs === null ? null : requireNonNegativeInteger(message.remainingMs, "remainingMs");
+      if ((activeTaskId === null) !== (remainingMs === null) || activeTaskId !== null && !tasks.some(task => task.taskId === activeTaskId && task.step < task.steps))
+        throw new Error("Invalid active Task");
+      return { version: 1, type, tasks, completed, total, activeTaskId, remainingMs };
+    }
     case "chat_message":
       requireFields(message, ["version", "type", "channel", "round", "senderPlayerId", "senderName", "text"]);
       return { version: 1, type, ...decodeChatEntry(message) };
@@ -304,7 +335,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
 }
 
 function decodeGameView(message: Record<string, unknown>): GameView {
-  requireFields(message, ["version", "type", "mode", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self", "taskProgress"]);
+  requireFields(message, ["version", "type", "mode", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self"]);
   if (!Array.isArray(message.players)) throw new Error("players must be an array");
   return {
     mode: requireMember(message.mode, ["competitive", "practice"] as const, "Game mode"),
@@ -316,8 +347,7 @@ function decodeGameView(message: Record<string, unknown>): GameView {
     ballots: message.ballots === null ? null : requireArray(message.ballots, "ballots").map(decodeBallot),
     winner: message.winner === null ? null : requireMember(message.winner, ["mafia", "village"] as const, "Faction"),
     roles: message.roles === null ? null : requireArray(message.roles, "roles").map(decodeRoleReveal),
-    self: decodeSelf(requireRecord(message.self, "self")),
-    taskProgress: decodeTaskProgress(message.taskProgress)
+    self: decodeSelf(requireRecord(message.self, "self"))
   };
 }
 
@@ -387,7 +417,7 @@ function decodeRoleReveal(value: unknown): Readonly<{ playerId: string; role: Ro
 }
 
 function decodeSelf(self: Record<string, unknown>): SelfView {
-  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice", "tasks"]);
+  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice"]);
   return {
     role: requireMember(self.role, ROLES, "Role"),
     faction: requireMember(self.faction, ["mafia", "village"] as const, "Faction"),
@@ -397,39 +427,8 @@ function decodeSelf(self: Record<string, unknown>): SelfView {
     investigations: self.investigations === null ? null : requireArray(self.investigations, "investigations").map(decodeInvestigation),
     meetingVoted: requireBoolean(self.meetingVoted),
     meetingVote: requireOptionalPlayerId(self.meetingVote),
-    nightChoice: requireOptionalPlayerId(self.nightChoice),
-    tasks: self.tasks === null ? null : requireArray(self.tasks, "tasks").map(decodeTask)
+    nightChoice: requireOptionalPlayerId(self.nightChoice)
   };
-}
-
-function decodeTaskProgress(value: unknown): Readonly<{ completed: number; total: number }> {
-  const progress = requireRecord(value, "taskProgress");
-  requireFields(progress, ["completed", "total"]);
-  const completed = requireCounter(progress.completed);
-  const total = requireCounter(progress.total);
-  if (completed > total) throw new Error("Invalid Task progress");
-  return { completed, total };
-}
-
-function decodeTask(value: unknown): TaskView {
-  const task = requireRecord(value, "Task");
-  requireFields(task, ["taskId", "name", "kind", "x", "y", "completedSteps", "totalSteps", "active", "workRemainingMs", "sequence"]);
-  const completedSteps = requireCounter(task.completedSteps);
-  const totalSteps = requireRound(task.totalSteps);
-  const active = requireBoolean(task.active);
-  const workRemainingMs = task.workRemainingMs === null ? null : requireCounter(task.workRemainingMs);
-  if (completedSteps > totalSteps || active !== (workRemainingMs !== null)) throw new Error("Invalid Task progress");
-  const kind = requireMember(task.kind, ["repair", "sequence"] as const, "Task kind");
-  const sequence = task.sequence === null ? null : requireArray(task.sequence, "Task sequence").map(value => {
-    const input = requireRound(value);
-    if (input > 4) throw new Error("Invalid sequence input");
-    return input;
-  });
-  if (kind === "sequence" ? !sequence || sequence.length === 0 : sequence !== null) throw new Error("Invalid Task sequence");
-  return { taskId: requireNonEmptyString(task.taskId, "taskId"), name: requireNonEmptyString(task.name, "name"),
-    kind,
-    x: requireFiniteNumber(task.x, "x"), y: requireFiniteNumber(task.y, "y"),
-    completedSteps, totalSteps, active, workRemainingMs, sequence };
 }
 
 function decodeInvestigation(value: unknown): Investigation {
@@ -502,6 +501,19 @@ function requireFields(value: Record<string, unknown>, expected: readonly string
 function requireNonEmptyString(value: unknown, name: string): string {
   if (typeof value !== "string" || value.trim() === "") throw new Error(`${name} must be a non-empty string`);
   return value;
+}
+
+function requireNonNegativeInteger(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) throw new Error(`Invalid ${name}`);
+  return value;
+}
+
+export function openTask(round: number, taskId: string): ClientMessage {
+  return { version: 1, type: "open_task", round: requireRound(round), taskId: requireNonEmptyString(taskId, "taskId") };
+}
+export function taskStep(round: number, taskId: string, step: number, value: number): ClientMessage {
+  return { version: 1, type: "task_step", round: requireRound(round), taskId: requireNonEmptyString(taskId, "taskId"),
+    step: requireNonNegativeInteger(step, "step"), value: requireNonNegativeInteger(value, "value") };
 }
 
 function requireFiniteNumber(value: unknown, name: string): number {

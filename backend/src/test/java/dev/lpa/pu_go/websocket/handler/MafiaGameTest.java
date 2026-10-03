@@ -82,7 +82,6 @@ class MafiaGameTest {
         assertEquals("start_blocked", latest(host).path("code").asText());
         send(host, "{\"version\":1,\"type\":\"start_practice\"}");
         assertEquals("practice", game(0).path("mode").asText());
-        assertEquals("sequence", game(0).path("self").path("tasks").get(1).path("kind").asText());
         assertEquals("day", game(0).path("phase").asText());
         assertEquals(1, game(0).path("players").size());
         assertEquals(playerId(0), game(0).path("players").get(0).path("playerId").asText());
@@ -132,7 +131,7 @@ class MafiaGameTest {
         assertEquals("discussion", latestOfType(returned, "game_state").path("phase").asText());
         nextPractice(returned, 1, "discussion");
         send(returned, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"player-1\"}");
-        assertEquals("invalid_action", latest(returned).path("code").asText());
+        assertEquals("invalid_target", latest(returned).path("code").asText());
         nextPractice(returned, 1, "voting");
         assertEquals("voting_result", latestOfType(returned, "game_state").path("phase").asText());
         assertTrue(latestOfType(returned, "game_state").path("outcome").path("eliminatedPlayerId").isNull());
@@ -1012,101 +1011,312 @@ class MafiaGameTest {
     }
 
     @Test
-    void villageReceivesThreePersistentRepairTasksAndOnlyAggregateProgressIsPublic() throws Exception {
-        startTable("repair-tasks", 10);
-        JsonNode assignments = game(1).path("self").path("tasks");
-        assertEquals(3, assignments.size());
-        assertEquals(3, game(3).path("self").path("tasks").size());
-        assertEquals(3, game(4).path("self").path("tasks").size());
-        assertTrue(game(0).path("self").path("tasks").isNull());
-        JsonNode task = assignments.get(0);
-        assertEquals("repair", task.path("kind").asText());
-        assertEquals(0, task.path("completedSteps").asInt());
-        assertEquals(24, task.path("totalSteps").asInt());
-        assertEquals(576, game(0).path("taskProgress").path("total").asInt());
+    void repairTasksArePrivatePersistentAndRequireAssignedNearbyTimedSteps() throws Exception {
+        startTable("repair-tasks", 4);
+        JsonNode tasks = latestOfType(table.get(1), "task_state");
+        assertEquals(3, tasks.path("tasks").size());
+        assertEquals(9, tasks.path("total").asInt());
+        assertEquals(0, tasks.path("completed").asInt());
+        String taskId = tasks.path("tasks").get(0).path("taskId").asText();
+        send(table.get(1), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
         advance(REVEAL);
+        send(table.get(0), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
+        JsonNode task = tasks.path("tasks").get(0);
         walk(1, 1280, 742);
-        walk(1, 1280, 544);
-        String id = task.path("taskId").asText();
-        taskAction(1, id, 0, "start");
-        assertTrue(game(1).path("self").path("tasks").get(0).path("active").asBoolean());
-        taskAction(1, id, 0, "complete");
-        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
-        advance(20_000);
-        taskAction(1, id, 0, "complete");
-        assertEquals(1, game(1).path("self").path("tasks").get(0).path("completedSteps").asInt());
-        assertEquals(1, game(0).path("taskProgress").path("completed").asInt());
-        assertTrue(game(0).path("self").path("tasks").isNull());
-        taskAction(1, id, 0, "complete");
-        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
+        walk(1, task.path("x").asDouble(), task.path("y").asDouble());
+        send(table.get(1), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        String step = "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":0,\"value\":0}";
+        send(table.get(1), step);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        advance(4_000);
+        send(table.get(1), step);
+        assertEquals(1, latestOfType(table.get(1), "task_state").path("tasks").get(0).path("step").asInt());
+        send(table.get(1), step);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
         handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
         var recovered = connect("task-recovered");
         recover(recovered, code, tokens.get(1));
-        assertEquals(1, latestOfType(recovered, "game_state").path("self").path("tasks").get(0).path("completedSteps").asInt());
-        table.set(1, recovered);
-        taskAction(1, id, 1, "start");
-        var counts = table.stream().map(session -> countOfType(session, "game_state")).toList();
-        walk(1, 1280, 610);
-        assertFalse(game(1).path("self").path("tasks").get(0).path("active").asBoolean());
-        for (int seat = 0; seat < 10; seat++)
-            assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), countOfType(table.get(seat), "game_state"));
-        walk(1, 1280, 544);
-        taskAction(1, id, 1, "start");
-        advance(DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT);
-        assertEquals("day", game(1).path("phase").asText());
-        assertEquals(id, game(1).path("self").path("tasks").get(0).path("taskId").asText());
-        assertEquals(1, game(1).path("self").path("tasks").get(0).path("completedSteps").asInt());
-        assertFalse(game(1).path("self").path("tasks").get(0).path("active").asBoolean());
-        taskAction(1, id, 1, "complete");
-        assertEquals("invalid_action", latest(recovered).path("code").asText());
-        taskAction(0, id, 1, "start");
-        assertEquals("invalid_action", latest(table.get(0)).path("code").asText());
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
+        advance(REVEAL + DAY - milliseconds.get());
+        assertTrue(latestOfType(recovered, "task_state").path("activeTaskId").isNull());
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
     }
 
     @Test
-    void sequenceTasksValidateOrderedInputsAndRetainPrivateProgress() throws Exception {
-        startTable("sequence-tasks", 10);
-        JsonNode task = game(1).path("self").path("tasks").get(1);
-        assertEquals("sequence", task.path("kind").asText());
-        String id = task.path("taskId").asText();
+    void sequenceTasksValidateOrderAndPersistEarnedInputsAcrossRecovery() throws Exception {
+        startTable("sequence-tasks", 4);
         advance(REVEAL);
-        walk(1, 1280, 742);
-        walk(1, 850, 742);
-        walk(1, 850, 420);
-        taskAction(1, id, 0, "press_2");
-        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
-        taskAction(1, id, 0, "start");
-        advance(5_000);
-        taskAction(1, id, 0, "press_1");
-        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
-        taskAction(1, id, 0, "press_2");
-        assertEquals(1, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
-        assertEquals(1, game(0).path("taskProgress").path("completed").asInt());
-        assertTrue(game(0).path("self").path("tasks").isNull());
-        taskAction(1, id, 0, "press_2");
-        assertEquals("invalid_action", latest(table.get(1)).path("code").asText());
-        advance(5_000);
-        taskAction(1, id, 1, "press_4");
-        assertEquals(2, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(1);
+        assertEquals("sequence", task.path("kind").asText());
+        walkToTask(1, task);
+        openTask(1, task.path("taskId").asText());
+        advance(1000);
+        taskStep(1, task.path("taskId").asText(), 0, 99);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        taskStep(1, task.path("taskId").asText(), 0, task.path("sequence").get(0).asInt());
+        assertEquals(1, latestOfType(table.get(1), "task_state").path("tasks").get(1).path("step").asInt());
+        taskStep(1, task.path("taskId").asText(), 0, task.path("sequence").get(0).asInt());
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
         handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
         var recovered = connect("sequence-recovered");
         recover(recovered, code, tokens.get(1));
-        table.set(1, recovered);
-        assertEquals(2, game(1).path("self").path("tasks").get(1).path("completedSteps").asInt());
-        advance(DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT);
-        assertEquals("day", game(1).path("phase").asText());
-        task = game(1).path("self").path("tasks").get(1);
-        assertEquals(id, task.path("taskId").asText());
-        assertEquals(2, task.path("completedSteps").asInt());
-        assertFalse(task.path("active").asBoolean());
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(1).path("step").asInt());
     }
 
-    private void taskAction(int seat, String taskId, int step, String action) throws Exception {
-        send(table.get(seat), "{\"version\":1,\"type\":\"task_action\",\"round\":" + game(seat).path("round").asInt()
-                + ",\"taskId\":\"" + taskId + "\",\"step\":" + step + ",\"action\":\"" + action + "\"}");
+    @Test
+    void deliveryKeepsCarriedItemsAndRequiresTheAssignedDestination() throws Exception {
+        startTable("delivery-tasks", 4);
+        advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(2);
+        assertEquals("delivery", task.path("kind").asText());
+        walkToTask(1, task);
+        openTask(1, task.path("taskId").asText());
+        advance(1000);
+        taskStep(1, task.path("taskId").asText(), 0, 0);
+        JsonNode carrying = latestOfType(table.get(1), "task_state").path("tasks").get(2);
+        assertEquals(1, carrying.path("step").asInt());
+        assertNotEquals(task.path("x").asDouble(), carrying.path("x").asDouble());
+        openTask(1, task.path("taskId").asText());
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var recovered = connect("delivery-recovered");
+        recover(recovered, code, tokens.get(1));
+        table.set(1, recovered);
+        assertEquals(carrying, latestOfType(recovered, "task_state").path("tasks").get(2));
+        walkToTask(1, carrying);
+        openTask(1, carrying.path("taskId").asText());
+        advance(1000);
+        taskStep(1, carrying.path("taskId").asText(), 1, 0);
+        assertEquals(2, latestOfType(recovered, "task_state").path("tasks").get(2).path("step").asInt());
+        taskStep(1, carrying.path("taskId").asText(), 1, 0);
+        assertEquals("invalid_task", latest(recovered).path("code").asText());
+    }
+
+    @Test
+    void mafiaFakeTasksUseAllInteractionsWithoutAdvancingTheOriginalVillageWorkload() throws Exception {
+        startTable("fake-tasks", 4);
+        advance(REVEAL);
+        JsonNode state = latestOfType(table.get(0), "task_state");
+        assertEquals(3, state.path("tasks").size());
+        assertEquals(List.of("repair", "sequence", "delivery"),
+                java.util.stream.StreamSupport.stream(state.path("tasks").spliterator(), false).map(task -> task.path("kind").asText()).toList());
+        for (JsonNode task : state.path("tasks")) assertTrue(task.path("fake").asBoolean());
+        JsonNode task = state.path("tasks").get(0);
+        walkToTask(0, task);
+        int otherBefore = countOfType(table.get(1), "task_state");
+        for (int step = 0; step < task.path("steps").asInt(); step++) {
+            openTask(0, task.path("taskId").asText()); advance(4000);
+            taskStep(0, task.path("taskId").asText(), step, 0);
+        }
+        assertEquals(0, latestOfType(table.get(0), "task_state").path("completed").asInt());
+        assertEquals(9, latestOfType(table.get(0), "task_state").path("total").asInt());
+        assertEquals(otherBefore, countOfType(table.get(1), "task_state"), "Fake activity is private");
+        String realTask = latestOfType(table.get(1), "task_state").path("tasks").get(0).path("taskId").asText();
+        openTask(0, realTask);
+        assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
+        assertEquals("day", game(0).path("phase").asText());
+    }
+
+    @Test
+    void completingTheLastOriginalRealTaskWinsImmediatelyWithoutANightOrRoundQuota() throws Exception {
+        startTable("task-victory", 4);
+        advance(REVEAL);
+        for (int seat = 1; seat < 4; seat++) {
+            List<String> taskIds = new ArrayList<>();
+            for (JsonNode task : latestOfType(table.get(seat), "task_state").path("tasks")) taskIds.add(task.path("taskId").asText());
+            for (String taskId : taskIds) completeTask(seat, taskId);
+        }
+        for (int seat = 0; seat < 4; seat++) {
+            assertEquals("finished", game(seat).path("phase").asText());
+            assertEquals("village", game(seat).path("winner").asText());
+            assertEquals(4, game(seat).path("roles").size());
+            assertEquals(9, latestOfType(table.get(seat), "task_state").path("completed").asInt());
+            assertTrue(game(seat).path("remainingMs").isNull());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"night", "meeting"})
+    void eliminatedVillageParticipantsContinueTasksAsInvisibleReadOnlyGhosts(String cause) throws Exception {
+        startTable("ghost-task-" + cause, 10);
+        advance(REVEAL + DAY);
+        if (cause.equals("night")) { nightChoice(0, 1, 5); nightChoice(2, 1, 5); }
+        advance(NIGHT + DISCUSSION);
+        if (cause.equals("meeting")) for (int seat = 0; seat < 6; seat++) ballot(seat, 1, 5);
+        advance(VOTING + VOTING_RESULT);
+        assertEquals("eliminated", game(5).path("self").path("status").asText());
+        String taskId = latestOfType(table.get(5), "task_state").path("tasks").get(0).path("taskId").asText();
+        completeTask(5, taskId);
+        assertEquals(1, latestOfType(table.get(0), "task_state").path("completed").asInt());
+        handler.tickFields();
+        for (int seat = 0; seat < 10; seat++) if (seat != 5) {
+            assertFalse(fieldIds(seat).contains(playerId(5)));
+            for (JsonNode task : latestOfType(table.get(seat), "task_state").path("tasks"))
+                assertNotEquals(taskId, task.path("taskId").asText());
+        }
+        chat(5, "public", "Ghost must not speak");
+        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
+        advance(game(5).path("remainingMs").asLong());
+        nightChoice(5, game(5).path("round").asInt(), 1);
+        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
+        handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
+        var recovered = connect("ghost-task-recovered"); recover(recovered, code, tokens.get(5));
+        assertEquals(3, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"leave", "expiry"})
+    void forfeitTransfersUnfinishedOriginalTasksAndKeepsEarnedProgress(String cause) throws Exception {
+        startTable("transfer-" + cause, 4); advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(0);
+        String taskId = task.path("taskId").asText();
+        walkToTask(1, task); openTask(1, taskId); advance(4000); taskStep(1, taskId, 0, 0);
+        int two = latestOfType(table.get(2), "task_state").path("tasks").size();
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        assertEquals(two, latestOfType(table.get(2), "task_state").path("tasks").size(), "Disconnect keeps ownership");
+        if (cause.equals("leave")) {
+            var recovered = connect("transfer-recovered"); recover(recovered, code, tokens.get(1));
+            send(recovered, "{\"version\":1,\"type\":\"leave_room\"}");
+        } else advance(120000);
+        int received = 0;
+        boolean retainedStep = false;
+        for (int seat : List.of(2, 3)) {
+            JsonNode state = latestOfType(table.get(seat), "task_state");
+            assertEquals(9, state.path("total").asInt());
+            assertEquals(0, state.path("completed").asInt());
+            received += state.path("tasks").size();
+            for (JsonNode assignment : state.path("tasks")) if (assignment.path("taskId").asText().equals(taskId)) {
+                retainedStep = true; assertEquals(1, assignment.path("step").asInt());
+            }
+        }
+        assertEquals(9, received);
+        assertTrue(retainedStep, "Earned stages follow the original assignment");
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        assertEquals(9, latestOfType(table.get(2), "task_state").path("total").asInt());
+    }
+
+    @Test
+    void practicePreviewsEveryRoleAndTargetWithoutAddingCompetitivePlayersOrVictory() throws Exception {
+        var host = connect("role-preview");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText(); table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals(3, latestOfType(host, "practice_state").path("targets").size());
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"sheriff\"}");
+        assertEquals("sheriff", game(0).path("self").path("role").asText());
+        nextPractice(host, 1, "day");
+        send(host, "{\"version\":1,\"type\":\"night_choice\",\"round\":1,\"targetPlayerId\":\"practice-mafia\"}");
+        nextPractice(host, 1, "night");
+        assertTrue(game(0).path("self").path("investigations").get(0).path("mafia").asBoolean());
+        assertEquals(1, game(0).path("players").size());
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"doctor\"}");
+        nextPractice(host, 1, "discussion");
+        send(host, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"practice-mafia\"}");
+        nextPractice(host, 1, "voting");
+        assertEquals("mafia", game(0).path("outcome").path("eliminatedRole").asText());
+        nextPractice(host, 1, "voting_result");
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"mafia\"}");
+        nextPractice(host, 2, "day");
+        send(host, "{\"version\":1,\"type\":\"night_choice\",\"round\":2,\"targetPlayerId\":\"practice-villager\"}");
+        nextPractice(host, 2, "night");
+        assertEquals("practice-villager", game(0).path("outcome").path("deaths").get(0).asText());
+        assertTrue(game(0).path("winner").isNull());
+        assertEquals("practice", game(0).path("mode").asText());
+    }
+
+    @Test
+    void practiceRetainsSeparateRealAndFakeTaskProgressAcrossRolesAndRecoveryWithoutVictory() throws Exception {
+        var host = connect("practice-tasks");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText(); String token = latest(host).path("recoveryToken").asText(); table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        List<String> ids = new ArrayList<>();
+        for (JsonNode task : latestOfType(host, "task_state").path("tasks")) ids.add(task.path("taskId").asText());
+        completeTask(0, ids.get(0));
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"mafia\"}");
+        for (JsonNode task : latestOfType(host, "task_state").path("tasks")) assertTrue(task.path("fake").asBoolean());
+        assertEquals(1, latestOfType(host, "task_state").path("completed").asInt());
+        String fake = latestOfType(host, "task_state").path("tasks").get(0).path("taskId").asText();
+        completeTask(0, fake);
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"doctor\"}");
+        assertEquals(3, latestOfType(host, "task_state").path("tasks").get(0).path("step").asInt());
+        completeTask(0, ids.get(1)); completeTask(0, ids.get(2));
+        assertEquals(3, latestOfType(host, "task_state").path("completed").asInt());
+        assertEquals("day", game(0).path("phase").asText()); assertTrue(game(0).path("winner").isNull());
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        var recovered = connect("practice-tasks-recovered"); recover(recovered, code, token);
+        assertEquals(3, latestOfType(recovered, "task_state").path("completed").asInt());
+        assertEquals("doctor", latestOfType(recovered, "game_state").path("self").path("role").asText());
     }
 
     // ----- helpers ------------------------------------------------------------------------
+
+    private void ensureDay(int seat) {
+        while (!game(seat).path("phase").asText().equals("day")) {
+            assertNotEquals("finished", game(seat).path("phase").asText());
+            advance(Math.max(1, game(seat).path("remainingMs").asLong()));
+        }
+        if (game(seat).path("remainingMs").isNumber() && game(seat).path("remainingMs").asLong() < 60000) {
+            advance(game(seat).path("remainingMs").asLong()); ensureDay(seat);
+        }
+    }
+    private void completeTask(int seat, String taskId) throws Exception {
+        for (;;) {
+            JsonNode task = null;
+            for (JsonNode candidate : latestOfType(table.get(seat), "task_state").path("tasks"))
+                if (candidate.path("taskId").asText().equals(taskId)) task = candidate;
+            if (task == null) throw new IllegalStateException("Missing assignment " + taskId);
+            int step = task.path("step").asInt();
+            if (step == task.path("steps").asInt()) return;
+            ensureDay(seat);
+            walkToTask(seat, task); openTask(seat, taskId);
+            advance(task.path("kind").asText().equals("repair") ? 4000 : 1000);
+            int value = task.path("kind").asText().equals("sequence") ? task.path("sequence").get(step).asInt() : 0;
+            taskStep(seat, taskId, step, value);
+            assertNotEquals("error", latest(table.get(seat)).path("type").asText(), latest(table.get(seat)).toString());
+        }
+    }
+
+    private void openTask(int seat, String taskId) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"open_task\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\"}");
+    }
+    private void taskStep(int seat, String taskId, int step, int value) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"task_step\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\",\"step\":" + step + ",\"value\":" + value + "}");
+    }
+    /** Navigate real move requests through the existing map, never mutate Game positions. */
+    private void walkToTask(int seat, JsonNode task) throws Exception {
+        record Cell(int x, int y) {}
+        handler.tickFields();
+        JsonNode position = field(seat).path("self");
+        Cell start = new Cell((int) Math.round(position.path("x").asDouble() / 16) * 16,
+                (int) Math.round(position.path("y").asDouble() / 16) * 16);
+        if (!RoomRules.walkable(start.x(), start.y())) throw new IllegalStateException("No walkable starting cell");
+        var queue = new java.util.ArrayDeque<Cell>();
+        var previous = new java.util.HashMap<Cell, Cell>();
+        queue.add(start); previous.put(start, start);
+        Cell goal = null;
+        while (!queue.isEmpty()) {
+            Cell cell = queue.remove();
+            if (Math.hypot(cell.x() - task.path("x").asDouble(), cell.y() - task.path("y").asDouble()) <= 48
+                    && RoomRules.areaAt(cell.x(), cell.y()).equals(RoomRules.areaAt(task.path("x").asDouble(), task.path("y").asDouble()))) { goal = cell; break; }
+            for (Cell next : List.of(new Cell(cell.x() + 16, cell.y()), new Cell(cell.x() - 16, cell.y()),
+                    new Cell(cell.x(), cell.y() + 16), new Cell(cell.x(), cell.y() - 16))) {
+                if (!previous.containsKey(next) && RoomRules.walkable(next.x(), next.y())) {
+                    previous.put(next, cell); queue.add(next);
+                }
+            }
+        }
+        if (goal == null) throw new IllegalStateException("No route to " + task);
+        var route = new ArrayList<Cell>();
+        for (Cell cell = goal; !cell.equals(start); cell = previous.get(cell)) route.add(cell);
+        route.add(start); java.util.Collections.reverse(route);
+        for (Cell cell : route) { advance(100); move(seat, cell.x(), cell.y()); }
+        handler.tickFields();
+        assertTrue(Math.hypot(field(seat).path("self").path("x").asDouble() - task.path("x").asDouble(),
+                field(seat).path("self").path("y").asDouble() - task.path("y").asDouble()) <= 64, "Task point must be reachable");
+    }
 
     private void startTable(String label, int players) throws Exception {
         if (players >= 5) startTable(label, players, 2, 1, 1);

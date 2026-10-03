@@ -43,6 +43,14 @@ public final class ClientMessageDecoder {
                 requireOnly(root, Set.of("version", "type", "mafia", "doctors", "sheriffs"));
                 yield new ClientMessage.SetRoleSetup(1, type, count(root, "mafia"), count(root, "doctors"), count(root, "sheriffs"));
             }
+            case "preview_role" -> {
+                requireOnly(root, Set.of("version", "type", "role"));
+                String role = requiredText(root, "role");
+                dev.lpa.pu_go.game.Role selected = java.util.Arrays.stream(dev.lpa.pu_go.game.Role.values())
+                        .filter(value -> value.wireValue().equals(role)).findFirst().orElse(null);
+                if (selected == null) throw new InvalidClientMessageException("malformed_message", "Unknown Role.");
+                yield new ClientMessage.PreviewRole(1, type, selected);
+            }
             case "start_practice" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.StartPractice(1, type);
@@ -65,13 +73,6 @@ public final class ClientMessageDecoder {
                     throw new InvalidClientMessageException("malformed_message", "facing must be up, left, down or right.");
                 yield new ClientMessage.Move(1, type, coordinate(root, "x"), coordinate(root, "y"), facing);
             }
-            case "task_action" -> {
-                requireOnly(root, Set.of("version", "type", "round", "taskId", "step", "action"));
-                String action = requiredText(root, "action");
-                if (!Set.of("start", "complete", "cancel", "press_1", "press_2", "press_3", "press_4").contains(action))
-                    throw new InvalidClientMessageException("malformed_message", "Unknown Task action.");
-                yield new ClientMessage.TaskAction(1, type, round(root), requiredText(root, "taskId"), count(root, "step"), action);
-            }
             case "meeting_vote", "night_choice" -> {
                 requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));
                 JsonNode target = root.get("targetPlayerId");
@@ -80,6 +81,18 @@ public final class ClientMessageDecoder {
                 String targetId = target.isNull() ? null : target.asText();
                 yield type.equals("night_choice") ? new ClientMessage.NightChoice(1, type, round(root), targetId)
                         : new ClientMessage.MeetingVote(1, type, round(root), targetId);
+            }
+            case "open_task" -> {
+                requireOnly(root, Set.of("version", "type", "round", "taskId"));
+                yield new ClientMessage.OpenTask(1, type, round(root), requiredText(root, "taskId"));
+            }
+            case "task_step" -> {
+                requireOnly(root, Set.of("version", "type", "round", "taskId", "step", "value"));
+                yield new ClientMessage.TaskStep(1, type, round(root), requiredText(root, "taskId"), count(root, "step"), count(root, "value"));
+            }
+            case "close_task" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.CloseTask(1, type);
             }
             case "send_chat" -> {
                 requireOnly(root, Set.of("version", "type", "channel", "text"));

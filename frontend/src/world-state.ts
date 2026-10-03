@@ -1,7 +1,8 @@
-import type { ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
+import type { PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
+  snapshotSerial: number;
   phase: RoomPhase | null;
   hostPlayerId: string | null;
   /** The Host's deal for the Room's Game. */
@@ -9,19 +10,21 @@ export type WorldState = Readonly<{
   selfPlayerId: string | null;
   players: ReadonlyMap<string, PlayerView>;
   game: GameView | null;
-  gameReceivedAt: number;
   /** Local clock time the current phase ends: the server's remaining time, counted from arrival. */
   phaseEndsAt: number | null;
   /** The part of the town this recipient can see, during Day or sleeping Night. */
   field: FieldView | null;
+  practiceTargets: readonly PracticeTarget[];
+  tasks: TaskState | null;
+  taskEndsAt: number | null;
   chat: readonly ChatEntry[];
   lastError: Readonly<{ code: string; message: string }> | null;
 }>;
 
 export function emptyWorld(): WorldState {
   return {
-    phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
-    players: new Map(), game: null, gameReceivedAt: 0, phaseEndsAt: null, field: null, chat: [], lastError: null
+    snapshotSerial: 0, phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
+    players: new Map(), game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
 
@@ -38,6 +41,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
     case "room_snapshot":
       return {
         ...emptyWorld(),
+        snapshotSerial: world.snapshotSerial + 1,
         roomId: event.roomId,
         phase: event.phase,
         hostPlayerId: event.hostPlayerId,
@@ -55,12 +59,18 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       // A field belongs to one round of Day and Night; Townhall or a new Day discards it.
       const field = (game.phase === "day" || game.phase === "night") && world.field?.round === game.round ? world.field : null;
       const phaseEndsAt = game.remainingMs === null ? null : receivedAt + game.remainingMs;
-      return { ...world, game, gameReceivedAt: receivedAt, phaseEndsAt, field };
+      return { ...world, game, phaseEndsAt, field };
     }
     case "field_state": {
       const { version, type, ...field } = event;
       if ((world.game?.phase !== "day" && world.game?.phase !== "night") || world.game.round !== field.round) return world;
       return { ...world, field };
+    }
+    case "practice_state":
+      return { ...world, practiceTargets: event.targets };
+    case "task_state": {
+      const { version, type, ...tasks } = event;
+      return { ...world, tasks, taskEndsAt: tasks.remainingMs === null ? null : receivedAt + tasks.remainingMs };
     }
     case "chat_history":
       return { ...world, chat: event.messages };

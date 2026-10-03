@@ -34,10 +34,10 @@ public final class Game {
     private static final Rejection NOT_ALLOWED = new Rejection("invalid_action", "You cannot take that action.");
 
     private final boolean practice;
+    private final TaskBoard tasks;
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
     private final Map<String, String> nightChoices = new LinkedHashMap<>();
-    private final Map<String, List<TaskAssignment>> tasks = new LinkedHashMap<>();
     private final List<ChatEntry> chat = new ArrayList<>();
     private GamePhase phase = GamePhase.ROLE_REVEAL;
     private int round;
@@ -56,19 +56,29 @@ public final class Game {
 
     private Game(List<Participant> roster, long startedAt, boolean practice) {
         this.practice = practice;
+        tasks = new TaskBoard(roster, practice);
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
-            if (participant.role().faction() == Faction.VILLAGE) {
-                List<TaskAssignment> assignments = new ArrayList<>();
-                assignments.add(new TaskAssignment(participant.playerId() + "-task-0", RoomRules.TASK_LOCATIONS.get(0), "repair"));
-                for (int index = 1; index < 3; index++) assignments.add(new TaskAssignment(participant.playerId() + "-task-" + index,
-                        RoomRules.TASK_LOCATIONS.get(1 + (participant.seat() * 2 + index - 1) % 13), index == 1 ? "sequence" : "repair"));
-                tasks.put(participant.playerId(), assignments);
-            }
             placeAtSeat(participant, startedAt);
         }
         phaseEndsAt = startedAt + GamePhase.ROLE_REVEAL.durationMillis();
         if (practice) beginDay(startedAt);
+    }
+
+    public record PracticeTarget(String targetId, String displayName, Role role) {}
+    private static final List<PracticeTarget> PRACTICE_TARGETS = List.of(
+            new PracticeTarget("practice-mafia", "Practice Mafia", Role.MAFIA),
+            new PracticeTarget("practice-villager", "Practice Villager", Role.VILLAGER),
+            new PracticeTarget("practice-doctor", "Practice Doctor", Role.DOCTOR));
+    public List<PracticeTarget> practiceTargets() { return PRACTICE_TARGETS; }
+    private PracticeTarget practiceTarget(String id) {
+        return PRACTICE_TARGETS.stream().filter(target -> target.targetId().equals(id)).findFirst().orElse(null);
+    }
+    public Rejection previewRole(String playerId, Role role) {
+        if (!practice) return NOT_ALLOWED;
+        participants.get(playerId).previewRole(role);
+        nightChoices.clear(); ballots.clear(); tasks.closeAll();
+        return null;
     }
 
     public boolean isPractice() { return practice; }
@@ -141,6 +151,16 @@ public final class Game {
 
 
     private void beginTownhall(long at) {
+        if (practice) {
+            Participant host = roster().get(0);
+            PracticeTarget target = practiceTarget(nightChoices.get(host.playerId()));
+            if (host.role() == Role.SHERIFF && target != null)
+                host.addInvestigation(new Participant.Investigation(round, target.targetId(), target.role() == Role.MAFIA));
+            outcome = new Outcome("night", null, null, host.role() == Role.MAFIA && target != null ? List.of(target.targetId()) : List.of(), null, null);
+            nightChoices.clear();
+            placeAtSeat(host, at); enter(GamePhase.DISCUSSION, at);
+            return;
+        }
         // Resolve every timely investigation before changing any Participant's living status.
         for (Participant sheriff : participants.values()) {
             if (!sheriff.isLiving() || sheriff.role() != Role.SHERIFF) continue;
@@ -175,13 +195,13 @@ public final class Game {
     }
 
     private void enter(GamePhase next, long boundary) {
-        if (next != GamePhase.DAY) tasks.values().forEach(assignments -> assignments.forEach(TaskAssignment::interrupt));
+        tasks.closeAll();
         phase = next;
         phaseEndsAt = boundary + next.durationMillis();
     }
 
     private void finish() {
-        tasks.values().forEach(assignments -> assignments.forEach(TaskAssignment::interrupt));
+        tasks.closeAll();
         phase = GamePhase.FINISHED;
     }
 
@@ -207,9 +227,7 @@ public final class Game {
         walker.y = y;
         walker.facing = facing;
         walker.lastMoveAt = now;
-        for (TaskAssignment task : tasks.getOrDefault(playerId, List.of())) {
-            if (walker.distanceTo(task.location().x(), task.location().y()) > TaskAssignment.REACH) task.interrupt();
-        }
+        tasks.moved(walker);
         return true;
     }
 
@@ -230,41 +248,44 @@ public final class Game {
                 .toList();
     }
 
-    // ----- Meetings and chat -------------------------------------------------------------
+    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, participant(playerId).role(), now); }
 
-    public record TaskProgress(int completed, int total) {}
-
-    public TaskProgress taskProgress() {
-        return new TaskProgress(tasks.values().stream().flatMap(List::stream).mapToInt(TaskAssignment::completedSteps).sum(),
-                tasks.values().stream().mapToInt(List::size).sum() * TaskAssignment.TOTAL_STEPS);
-    }
-
-    public List<TaskAssignment.View> tasksFor(String playerId, long now) {
-        List<TaskAssignment> assignments = tasks.get(playerId);
-        return assignments == null ? null : assignments.stream().map(task -> task.view(now)).toList();
-    }
-
-    public Rejection submitTaskAction(String playerId, int submittedRound, String taskId, int step, String action, long now) {
+    public Rejection openTask(String playerId, int submittedRound, String taskId, long now) {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
-        if (actor == null || !actor.isLiving() || !tasks.containsKey(playerId)) return NOT_ALLOWED;
-        TaskAssignment task = tasks.get(playerId).stream().filter(assignment -> assignment.taskId().equals(taskId)).findFirst().orElse(null);
-        if (task == null) return new Rejection("invalid_target", "Choose one of your assigned Tasks.");
-        if (actor.distanceTo(task.location().x(), task.location().y()) > TaskAssignment.REACH
-                || !RoomRules.areaAt(actor.x, actor.y).equals(RoomRules.areaAt(task.location().x(), task.location().y())))
-            return new Rejection("invalid_action", "Move beside the Task location.");
-        if (!task.act(step, action, now)) return new Rejection("invalid_action", "That Task step is not ready or is already complete.");
-        if (action.equals("start")) {
-            for (TaskAssignment other : tasks.get(playerId)) if (other != task) other.interrupt();
-        }
-        return null;
+        if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
+        return tasks.open(actor, taskId, now);
     }
+
+    public Rejection taskStep(String playerId, int submittedRound, String taskId, int step, int value, long now) {
+        if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
+        Participant actor = participants.get(playerId);
+        if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
+        Rejection rejection = tasks.step(actor, taskId, step, value, now);
+        if (rejection == null) {
+            checkVictory();
+            if (winner != null) finish();
+        }
+        return rejection;
+    }
+
+    public void closeTask(String playerId) { tasks.close(playerId); }
+
+    // ----- Meetings and chat -------------------------------------------------------------
 
     /** Editable private choices never advance Night's fixed deadline. Null withdraws a choice. */
     public Rejection submitNightChoice(String playerId, int submittedRound, String targetPlayerId) {
         if (phase != GamePhase.NIGHT || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || !actor.isLiving() || actor.role() == Role.VILLAGER) return NOT_ALLOWED;
+        if (targetPlayerId != null && practice) {
+            PracticeTarget target = practiceTarget(targetPlayerId);
+            boolean selfProtection = actor.role() == Role.DOCTOR && targetPlayerId.equals(playerId);
+            if (!selfProtection && (target == null || actor.role() == Role.MAFIA && target.role() == Role.MAFIA))
+                return new Rejection("invalid_target", "Choose an eligible practice target.");
+            nightChoices.put(playerId, targetPlayerId);
+            return null;
+        }
         if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
             if (target == null || !target.isLiving() || actor.role() == Role.MAFIA && target.role() == Role.MAFIA
@@ -282,11 +303,12 @@ public final class Game {
     /** A null target is an explicit Skip, which locks exactly like a ballot for a Player. */
     public Rejection submitBallot(String voterId, int submittedRound, String targetPlayerId) {
         Participant voter = participants.get(voterId);
-        if (practice) return NOT_ALLOWED;
         if (phase != GamePhase.VOTING || submittedRound != round) return WRONG_PHASE;
         if (voter == null || !voter.isLiving()) return NOT_ALLOWED;
         if (ballots.containsKey(voterId)) return new Rejection("already_submitted", "Your ballot is already final.");
-        if (targetPlayerId != null) {
+        if (targetPlayerId != null && practice) {
+            if (practiceTarget(targetPlayerId) == null) return new Rejection("invalid_target", "Choose a practice target.");
+        } else if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
             if (target == null || !target.isLiving()) return new Rejection("invalid_target", "Choose a living Player.");
         }
@@ -326,18 +348,25 @@ public final class Game {
         // A finished Game is final: later departures end Memberships, never the result.
         if (phase == GamePhase.FINISHED) return;
         Participant participant = participants.get(playerId);
-        if (participant == null || participant.status() != ParticipantStatus.LIVING) return;
+        if (participant == null || participant.status() == ParticipantStatus.LEFT) return;
         // An Elimination may already have decided the Game; its result phase still runs in full.
         boolean undecided = winner == null;
         participant.setStatus(ParticipantStatus.LEFT);
+        tasks.transfer(playerId, roster());
         ballots.remove(playerId);
         nightChoices.remove(playerId);
-        tasks.getOrDefault(playerId, List.of()).forEach(TaskAssignment::interrupt);
         checkVictory();
         if (undecided && winner != null) finish();
     }
 
     private void resolveMeeting() {
+        if (practice) {
+            Participant host = roster().get(0);
+            PracticeTarget target = practiceTarget(ballots.get(host.playerId()));
+            revealedBallots = hasBallot(host.playerId()) ? List.of(new Ballot(host.playerId(), acceptedBallot(host.playerId()))) : List.of();
+            outcome = new Outcome("meeting", null, null, List.of(), target == null ? null : target.targetId(), target == null ? null : target.role());
+            return;
+        }
         long living = livingCount();
         Map<String, Integer> tally = new LinkedHashMap<>();
         List<Ballot> disclosed = new ArrayList<>();
@@ -365,7 +394,7 @@ public final class Game {
         if (practice || winner != null) return;
         long livingMafia = livingMafia().count();
         long livingVillage = livingCount() - livingMafia;
-        if (livingMafia == 0) winner = Faction.VILLAGE;
+        if (tasks.total() > 0 && tasks.completed() == tasks.total() || livingMafia == 0) winner = Faction.VILLAGE;
         else if (livingMafia >= livingVillage) winner = Faction.MAFIA;
     }
 

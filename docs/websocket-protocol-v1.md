@@ -18,7 +18,6 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `set_ready` | `ready: boolean` |
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
 | `move` | `x: number`, `y: number`, `facing: Facing` |
-| `task_action` | `round: integer`, `taskId: string`, `step: integer`, `action: "start" \| "complete" \| "cancel" \| "press_1" \| "press_2" \| "press_3" \| "press_4"` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
 | `night_choice` | `round: integer`, `targetPlayerId: string \| null` |
 | `send_chat` | `channel: "public" \| "mafia"`, `text: string` |
@@ -31,7 +30,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
-| `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView`, `taskProgress: { completed: integer, total: integer }` |
+| `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `self: OwnField` |
 | `chat_message` | `channel`, `round: integer`, `senderPlayerId: string`, `senderName: string`, `text: string` |
 | `chat_history` | `messages: ChatEntry[]` |
@@ -125,7 +124,7 @@ Outcome      { "kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPl
 RoleView     { "playerId", "role" }
 Investigation{ "round", "targetPlayerId", "mafia" }
 ChatEntry    { "channel", "round", "senderPlayerId", "senderName", "text" }
-SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice", "tasks" }
+SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice" }
 FieldPlayer  { "playerId", "x", "y", "facing", "ghost" }
 OwnField     { "x", "y", "facing", "correction" }
 ```
@@ -163,16 +162,6 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 **The field.** `field_state` is built per recipient. It holds only visible Avatars, themselves included, and the recipient's accepted position and `correction`. All living recipients share 320px Vision, covering the five-tile (160px) hearing range. They receive living Participants only within that distance and in the same interior or outdoor area. The four interiors are the served map's room rectangles: Chapel, Inn, Smithy and General Store; every other point is outdoors. Area membership uses accepted Avatar feet, includes top/left boundaries and excludes bottom/right boundaries. Existing doorways, walls and furniture use the same authoritative collision checks as outdoor movement. Eliminated recipients see every Participant who has not left; `ghost` marks eliminated Participants, who are invisible to the living. No Body, Vanish, ability timer or Crowding field is sent. Night retains the same authorized field at sleeping positions and the client disables movement prediction.
 
 **Retired requests.** `use_ability` is no longer a supported message type and receives `unknown_message_type`, including kill, shield, scan, vanish, report and emergency payloads. Neither Game rules nor the interface offer those live actions. `roam` and `meeting_call` are no longer phases.
-
-### Persistent Tasks
-
-Each Village Participant, including Doctors and Sheriffs, receives three original assignments once per Game. The current slice assigns repair at the town ledger, sequence at the second point and repair at the third point, using existing map task points: the town ledger plus two distinct locations distributed by retained Seat. Only that Participant receives `self.tasks`; Mafia receive `null` until Fake Tasks arrive in #35. Public `taskProgress` contains only completed and total real steps, never per-Participant assignments or progress. The fixed denominator includes original assignments after Elimination or Forfeit; Ghost work and Forfeit transfers arrive in #37–#38, and completion victory in #36.
-
-Each private Task has exactly `taskId`, `name`, `kind: "repair" | "sequence"`, `x`, `y`, `completedSteps`, `totalSteps`, `active`, `workRemainingMs` and `sequence`. Repair uses 24 steps of 20 seconds. Sequence uses 24 ordered inputs, with a server-owned five-second delay after Start and each accepted input; its private `sequence` is `[2,4,1,3]`, repeated until complete, while repair has `sequence: null`. These are provisional workloads for #56's later mixed-Task measurement. `workRemainingMs` is null unless active and otherwise counts down from message arrival; completed steps persist through phase changes and recovery.
-
-`task_action` carries the current positive round, an assigned Task ID, the expected non-negative completed-step counter, and `start`, `complete`, `cancel`, or numbered `press_1` through `press_4`. It is accepted only during Day from a living Village Participant, within 48px of the assigned location in the same accepted area. Starting one assignment interrupts work on another. Completion requires an active step whose server-owned twenty-second deadline has passed; sequence presses require active work, its elapsed deadline and the next numbered input. `complete` is repair-only, numbered presses sequence-only. A wrong input, stale step or duplicate completion receives `invalid_action`. Wrong phase/round receives `invalid_phase`, an unassigned Task receives `invalid_target`, and an ineligible actor or unreachable location receives `invalid_action`. Unknown actions, extra/missing fields and malformed counters are `malformed_message`.
-
-Walking out of reach or into another phase interrupts unfinished work while retaining completed steps. Start, cancel and refusals reach only the actor. A completed step changes the aggregate view and therefore updates current recipients with their own private `game_state`. No Task assignment or individual progress is broadcast. Recovery restores only that Participant's assignments and earned progress. Solo Practice uses the same assignments, sequence controls and validation without phase timers or faction victory.
 
 ### Night choices
 
@@ -242,3 +231,29 @@ A collection holds at least one preset and has no upper bound. `collectionId` is
 Clients fetch this on join, keyed to the Room they are entering, and create every texture before rendering the Room. At page load a client does not yet know which Room it will enter, so it cannot know which collection it needs. Reconnect keeps the collection its membership already has.
 
 The developer editor validates distinct complete compatible saved recipes before atomically replacing the publication file, which the backend reads. Source layers, drafts and authoring endpoints are absent from the Player build. Publishing takes effect for Rooms created from then on, with no rebuild and no restart; a running Room keeps the collection it was created with, and superseded collections stay in memory only while some Room still references one.
+
+## Persistent Tasks (#32)
+
+Each Village Participant receives three real assignments at the existing fourteen map Task points once, including Doctors and Sheriffs. `task_state` is built for one recipient: `{version:1,type:"task_state",tasks,completed,total,activeTaskId,remainingMs}`. `tasks` contains only their assignments; each is `{taskId,name,kind,x,y,step,steps,fake,sequence}`. Repair has `kind:"repair"`, three steps and an empty sequence. The current target is `(x,y)`; `completed` counts fully completed real Tasks and `total` retains the original real workload. Others receive only their own assignments plus this aggregate, never the actor's stage or location. Task snapshots accompany Start, phase transitions and recovery.
+
+`open_task` has exactly `{version:1,type:"open_task",round,taskId}`. It starts a four-second repair interaction only during the submitted Day, for the owner of an unfinished assignment within 64 pixels in the same map area. `task_step` has exactly `{version:1,type:"task_step",round,taskId,step,value}`; non-negative integer `step` must equal current progress and repair `value` must be `0`. Ownership, position and server elapsed time are rechecked. Replay, remote interaction, unknown assignment, unfinished timing and incorrect progress receive `invalid_task`; wrong phase/round receive `invalid_phase`. `close_task` has only version and type and discards unfinished interaction time. Moving out of range or changing phase closes interactions while retaining completed steps. Recovery restores accepted steps and current interaction timing. Accepted partial steps send only the actor a Task snapshot; a completed Task sends each recipient their own snapshot with the new aggregate. Unknown or malformed fields remain explicit decoding errors.
+
+Sequence assignments (#33) use `kind:"sequence"` with their ordered zero-based control values in the recipient's `sequence` array. `steps` equals the sequence length. Each open interaction takes at least one second, and `task_step.value` must equal the next sequence input. Wrong values and replayed stages receive `invalid_task` without advancing progress. Earned inputs persist across Days and recovery. The same personal overlay displays the pattern and numbered controls.
+
+Delivery assignments (#34) use `kind:"delivery"` and two stages. Stage zero collects the assigned item, then stage one changes the private target coordinates and label to the delivery destination. Both interactions take one second and require `value:0`; the server rechecks the same-area range at pickup and delivery. The odd step represents the carried item, retained across later Days and recovery. Duplicate pickup or delivery, wrong destination and unassigned requests never advance progress.
+
+Mafia receive three Fake assignments (#35) through exactly the same repair, sequence and delivery request validation and personal overlay. Their own `fake:true` marks them privately. Real assignment ownership cannot be forged and fake progress is excluded from both aggregate counters. Fake actions notify only their actor; they cannot broadcast activity, complete a real Task, or trigger Village victory.
+
+The accepted final real Task step (#36) checks victory under the Room's serialization and immediately sends `finished`, `winner:"village"`, the final aggregate, and every Role. No phase deadline, Night, successful-kill quota or round cap delays task victory. Fake completion never participates. No-living-Mafia and Mafia parity outcomes remain authoritative, and Night still resolves all actions atomically before victory.
+
+Both Night victims and Meeting-eliminated Village Participants continue their original Tasks as Ghosts (#37). Movement and Task validation accept eliminated Participants during Day, while living field views exclude them and partial Task updates remain private. Completed real Tasks contribute only anonymous aggregate progress. Ghosts still cannot submit Night choices, vote or speak to survivors. Recovery restores their eliminated status and earned steps.
+
+Leave or reservation expiry transfers unfinished real assignments (#38) to living Village Participants, choosing the least-loaded recipient for each Task. The original IDs, locations, carried items and earned stages move with the assignment; completed Tasks retain their original progress and count. `total` never shrinks. Fake Tasks do not transfer and cannot enter the real workload. Disconnect alone leaves ownership intact. Repeated release/expiry cannot duplicate assignments, and a Ghost's final Leave also releases unfinished work. A finished Game remains final.
+
+## Practice Role and target previews (#40)
+
+`preview_role` has exactly version, type and `role` (one of the four Roles). Only Solo Practice accepts it; competitive requests receive `invalid_action`. It clears preview choices and unfinished interactions, while retaining investigations and earned Task progress. The Host's `self.role` reflects the selected preview. Practice snapshots include a separate `practice_state:{version:1,type:"practice_state",targets:[{targetId,displayName,role}]}`. These learning targets never join Room Membership or the competitive Game Roster.
+
+Night choices accept eligible practice target IDs: Mafia choose a Village target, Doctor protection includes self, and Sheriff investigation resolves privately to the target's faction. Manual Next phase resolves the preview. Townhall ballots preview the chosen target's Role at results. No preview eliminates the Host or produces faction victory; Next phase remains available. Recovery restores the selected Role, choices, results and target surface.
+
+Solo Practice has separate persistent real and Fake assignment banks (#41). Village Role previews expose the three real assignments and Mafia exposes three Fake assignments; changing preview Role closes the unfinished interaction but retains each bank's earned steps and carried items. Ownership validation also requires the current real/Fake bank, preventing a saved ID from bypassing the selected Role. All three types share the competitive Task surface. Completing every real practice Task leaves practice running without faction victory. Recovery restores both banks and the selected Role.

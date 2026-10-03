@@ -17,31 +17,12 @@ const rosterOf = (...players) => players.map(player => ({
 
 const selfView = (patch = {}) => ({
   role: "villager", faction: "village", status: "living", killedByMafia: false,
-  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, nightChoice: null, tasks: null, ...patch
+  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, nightChoice: null, ...patch
 });
 
 const gameState = (patch = {}) => ({
   version: 1, type: "game_state", mode: "competitive", phase: "night", round: 1, remainingMs: 20_000,
-  players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), taskProgress: { completed: 0, total: 0 }, ...patch
-});
-
-test("sequence progress and work deadlines update only at the frame boundary", () => {
-  let arrival = 1000;
-  const inbox = new NetworkInbox(() => arrival);
-  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
-  const task = { taskId: "p-task-1", name: "Pick apples", kind: "sequence", x: 840, y: 420,
-    completedSteps: 1, totalSteps: 24, active: true, workRemainingMs: 5_000, sequence: [2, 4, 1, 3] };
-  inbox.enqueue(gameState({ phase: "day", self: selfView({ tasks: [task] }) }));
-  assert.equal(boundary.world.game, null);
-  boundary.beginFrame();
-  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 1);
-  assert.equal(boundary.world.gameReceivedAt, 1000);
-  arrival = 6000;
-  inbox.enqueue(gameState({ phase: "day", self: selfView({ tasks: [{ ...task, completedSteps: 2 }] }) }));
-  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 1);
-  boundary.beginFrame();
-  assert.equal(boundary.world.game.self.tasks[0].completedSteps, 2);
-  assert.equal(boundary.world.gameReceivedAt, 6000);
+  players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), ...patch
 });
 
 test("private Night choices and a killed Sheriff's results apply only at a frame boundary", () => {
@@ -350,4 +331,19 @@ test("practice mode and untimed previews apply only at a frame boundary", () => 
   boundary.beginFrame();
   assert.equal(boundary.world.game.phase, "night");
   assert.equal(boundary.world.phaseEndsAt, null);
+});
+
+test("Task snapshots apply only at frames and interaction timing begins at network arrival", () => {
+  const inbox = new NetworkInbox(() => 1000);
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const task = { taskId: "task-1", name: "Repair", kind: "repair", x: 1280, y: 544, step: 1, steps: 3, fake: false, sequence: [] };
+  inbox.enqueue({ version: 1, type: "task_state", tasks: [task], completed: 0, total: 9, activeTaskId: "task-1", remainingMs: 4000 });
+  assert.equal(boundary.world.tasks, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.tasks.tasks[0].step, 1);
+  assert.equal(boundary.world.taskEndsAt, 5000);
+  inbox.enqueue({ version: 1, type: "room_left", roomId: "ABC234" });
+  boundary.beginFrame();
+  assert.equal(boundary.world.tasks, null);
+  assert.equal(boundary.world.taskEndsAt, null);
 });

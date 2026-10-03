@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { MAX_CHAT_CHARACTERS, startPractice, advancePractice, decodeServerMessage, meetingVote, nightChoice, taskAction, move, sendChat } from "../dist/protocol.js";
+import { MAX_CHAT_CHARACTERS, startPractice, advancePractice, decodeServerMessage, meetingVote, nightChoice, move, sendChat } from "../dist/protocol.js";
 
 const seat = (index, status = "living") => ({
   playerId: "p" + index, displayName: "Player " + index, colour: "#4F8CFF",
@@ -11,13 +11,13 @@ const seat = (index, status = "living") => ({
 const SELF = {
   role: "sheriff", faction: "village", status: "living", killedByMafia: false,
   mafiaTeam: null, investigations: [{ round: 1, targetPlayerId: "p2", mafia: true }],
-  meetingVoted: false, meetingVote: null, nightChoice: null, tasks: null
+  meetingVoted: false, meetingVote: null, nightChoice: null
 };
 
 const GAME = {
   version: 1, type: "game_state", mode: "competitive", phase: "day", round: 2, remainingMs: 61_500,
   players: [seat(0), seat(1, "eliminated"), seat(2, "left")],
-  outcome: null, ballots: null, winner: null, roles: null, self: SELF, taskProgress: { completed: 0, total: 576 }
+  outcome: null, ballots: null, winner: null, roles: null, self: SELF
 };
 
 const OWN = { x: 900, y: 600.5, facing: "left", correction: 3 };
@@ -28,27 +28,6 @@ const FIELD = {
 };
 
 const decode = value => decodeServerMessage(JSON.stringify(value));
-
-test("repair assignments and aggregate progress decode strictly and requests carry expected progress", () => {
-  const task = { taskId: "p1-task-0", name: "Sign the town ledger", kind: "repair", x: 1280, y: 544,
-    completedSteps: 1, totalSteps: 24, active: true, workRemainingMs: 20_000, sequence: null };
-  assert.deepEqual(decode({ ...GAME, self: { ...SELF, tasks: [task] } }).self.tasks, [task]);
-  assert.deepEqual(taskAction(2, task.taskId, 1, "start"), { version: 1, type: "task_action", round: 2, taskId: "p1-task-0", step: 1, action: "start" });
-  for (const patch of [{ completedSteps: 25 }, { totalSteps: -1 }, { active: "yes" }, { workRemainingMs: -1 }, { kind: "invented" }, { extra: true }])
-    assert.throws(() => decode({ ...GAME, self: { ...SELF, tasks: [{ ...task, ...patch }] } }));
-  assert.throws(() => decode({ ...GAME, taskProgress: { completed: 2, total: 1 } }));
-  assert.throws(() => taskAction(2, task.taskId, -1, "start"));
-});
-
-test("sequence Tasks expose ordered controls and reject malformed sequences", () => {
-  const task = { taskId: "p1-task-1", name: "Pick apples", kind: "sequence", x: 840, y: 420,
-    completedSteps: 2, totalSteps: 24, active: true, workRemainingMs: 5_000, sequence: [2, 4, 1, 3] };
-  assert.deepEqual(decode({ ...GAME, self: { ...SELF, tasks: [task] } }).self.tasks, [task]);
-  assert.equal(taskAction(2, task.taskId, 2, "press_1").action, "press_1");
-  for (const sequence of [null, [], [0, 1], [1, 5], [1.5], "1234"])
-    assert.throws(() => decode({ ...GAME, self: { ...SELF, tasks: [{ ...task, sequence }] } }));
-  assert.throws(() => taskAction(2, task.taskId, 2, "press_5"));
-});
 
 test("Night choices carry the current round and decode only in the recipient's private view", () => {
   assert.deepEqual(nightChoice(2, "p3"), { version: 1, type: "night_choice", round: 2, targetPlayerId: "p3" });
@@ -186,4 +165,21 @@ test("Solo Practice has an explicit mode and no countdown, with strict phase adv
   assert.throws(() => decode({ ...GAME, mode: "solo" }));
   const { mode, ...incomplete } = GAME;
   assert.throws(() => decode(incomplete), /fields/);
+});
+
+test("private persistent Tasks decode strict assignments, aggregate progress and timed interaction", () => {
+  const task = { taskId: "task-1-0", name: "Sign the town ledger", kind: "repair", x: 1280, y: 544, step: 1, steps: 3, fake: false, sequence: [] };
+  const state = { version: 1, type: "task_state", tasks: [task], completed: 0, total: 9, activeTaskId: task.taskId, remainingMs: 4000 };
+  assert.deepEqual(decode(state), state);
+  for (const patch of [{ step: -1 }, { step: 4 }, { kind: "forged" }, { owner: "another-player" }])
+    assert.throws(() => decode({ ...state, tasks: [{ ...task, ...patch }] }));
+  assert.throws(() => decode({ ...state, completed: 10 }));
+  assert.throws(() => decode({ ...state, extra: true }));
+});
+
+test("practice targets are a separate strict view rather than fabricated roster Players", () => {
+  const state = { version: 1, type: "practice_state", targets: [{ targetId: "practice-mafia", displayName: "Practice Mafia", role: "mafia" }] };
+  assert.deepEqual(decode(state), state);
+  assert.throws(() => decode({ ...state, targets: [{ ...state.targets[0], playerId: "forged" }] }));
+  assert.throws(() => decode({ ...state, targets: [state.targets[0], state.targets[0]] }));
 });

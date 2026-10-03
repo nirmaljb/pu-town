@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { AudioMixer } from "./audio-mixer.js";
 import { SettingsInterface } from "./settings-interface.js";
 import { loadTownMap, MeetingArea } from "./meeting-area.js";
+import { SoundEffects } from "./sound-effects.js";
+import { TaskInterface } from "./task-interface.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
 import { AvatarReconciler, loadAvatarCollection } from "./avatar-reconciler.js";
@@ -29,13 +31,14 @@ export class PuTownScene extends Phaser.Scene {
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
+  #taskInterface?: TaskInterface;
+  #effects?: SoundEffects;
   #audio?: AudioMixer;
   #settings?: SettingsInterface;
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #field?: FieldController;
   #fog?: Phaser.GameObjects.Graphics;
-  #taskMarkers?: Phaser.GameObjects.Graphics;
   readonly #held = { up: false, down: false, left: false, right: false };
   #websocketUrl = "";
   // The Room whose pinned collection is loaded and active, and the one being fetched.
@@ -64,12 +67,15 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
+
     this.#audio = new AudioMixer();
+    this.#effects = new SoundEffects(this.#audio);
+    this.#effects.start();
+    this.#taskInterface = new TaskInterface(this.#client, this.#effects);
     this.#settings = new SettingsInterface(this.#audio);
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
-    this.#taskMarkers = this.add.graphics().setDepth(5_000);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
@@ -100,7 +106,9 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#taskInterface?.destroy();
       this.#settings?.destroy();
+      this.#effects?.destroy();
       this.#audio?.destroy();
     });
   }
@@ -152,6 +160,8 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
+    this.#taskInterface?.render(world);
+    this.#effects?.update(world, this.#client?.state.status === "playing");
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     const reducedMotion = this.#settings?.reducedMotion ?? false;
@@ -167,13 +177,8 @@ export class PuTownScene extends Phaser.Scene {
     // The living see only a circle around themselves; the server sends nothing beyond it.
     this.#fog?.clear();
     const own = world?.game?.self;
-    this.#taskMarkers?.clear();
-    if (world?.game?.phase === "day") for (const task of own?.tasks ?? []) {
-      if (task.completedSteps < task.totalSteps)
-        this.#taskMarkers?.lineStyle(3, 0x7de0bd, 0.9).strokeCircle(task.x, task.y, 18);
-    }
     if (self && own?.status === "living") {
-      // Every living Role shares this distance; the server sends nothing beyond it.
+      // Each Role sees its own distance; the server sends nothing beyond it.
       const vision = VISION[own.role];
       this.#fog?.lineStyle(3_000, 0x05070d, 0.86).strokeCircle(self.x, self.y, vision + 1_500);
       this.#fog?.lineStyle(60, 0x05070d, 0.45).strokeCircle(self.x, self.y, vision - 30);

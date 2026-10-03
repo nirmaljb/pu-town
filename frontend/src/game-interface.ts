@@ -1,10 +1,9 @@
 import type { ChatChannel, ChatEntry, GameView, Role, RosterEntry } from "./protocol.js";
-import { MAX_CHAT_CHARACTERS } from "./protocol.js";
+import { MAX_CHAT_CHARACTERS, ROLES } from "./protocol.js";
 import type { LocalPosition } from "./field-controller.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
 import { areaAt } from "./room-rules.js";
-import { TaskInterface } from "./task-interface.js";
 
 const PHASE_TITLES: Record<GameView["phase"], string> = {
   role_reveal: "Your role",
@@ -35,7 +34,6 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 /** The Game's own controls. Every rule it presents is enforced again by the server. */
 export class GameInterface {
   readonly #root = document.createElement("div");
-  readonly #tasks: TaskInterface;
   #preview: Preview | null = null;
   readonly #ballotItems = new Map<string | null, HTMLLIElement>();
   #lastGame: GameView | null = null;
@@ -61,6 +59,7 @@ export class GameInterface {
         <span class="game-round"></span>
         <p class="game-announcement"></p>
         <button type="button" class="next-practice-phase" hidden>Next phase</button>
+        <label class="practice-role-label" hidden>Preview Role <select class="practice-role">${ROLES.map(role => `<option value="${role}">${capitalized(role)}</option>`).join("")}</select></label>
       </section>
       <section class="outcome-reveal" hidden aria-live="polite">
         <div class="outcome-card">
@@ -103,8 +102,6 @@ export class GameInterface {
         </div>
       </section>`;
     document.body.append(this.#root);
-    this.#tasks = new TaskInterface(client);
-    this.element(".personal-panels").append(this.#tasks.root);
     this.element(".role-everyone").textContent = EVERYONE_BRIEF;
     this.element(".next-practice-phase").addEventListener("click", () => {
       const game = this.#lastWorld?.game;
@@ -113,6 +110,7 @@ export class GameInterface {
       }
     });
     this.element(".confirm-action").addEventListener("click", () => this.confirm());
+    this.element<HTMLSelectElement>(".practice-role").addEventListener("change", event => this.client.previewRole((event.target as HTMLSelectElement).value as Role));
     this.element<HTMLFormElement>(".chat-form").addEventListener("submit", event => {
       event.preventDefault();
       const input = this.element<HTMLInputElement>(".chat-input");
@@ -133,7 +131,6 @@ export class GameInterface {
     this.#self = self;
     const game = world?.game ?? null;
     const active = Boolean(game) && this.client.state.status === "playing";
-    this.#tasks.render(world, active, this.now());
     document.body.classList.toggle("in-game", active);
     document.body.classList.toggle("sleeping", active && game?.phase === "night");
     this.#root.dataset.phase = active ? game?.phase ?? "" : "";
@@ -163,11 +160,13 @@ export class GameInterface {
       }
       const previewTarget = this.#preview?.targetPlayerId;
       if (previewTarget != null && !game.players.some(entry =>
-        entry.playerId === previewTarget && entry.status === "living")) {
+        entry.playerId === previewTarget && entry.status === "living") && !world.practiceTargets.some(target => target.targetId === previewTarget)) {
         this.#preview = null;
       }
       this.#lastGame = game;
     }
+    this.element(".practice-role-label").hidden = game.mode !== "practice";
+    this.element<HTMLSelectElement>(".practice-role").value = game.self.role;
     this.renderBanner(game, world);
     this.renderDeath(game);
     const rendered = this.#rendered;
@@ -300,14 +299,17 @@ export class GameInterface {
   private renderBallot(game: GameView): void {
     const panel = this.element(".action-panel");
     const night = game.phase === "night" && game.self.role !== "villager";
-    const open = game.mode === "competitive" && (game.phase === "voting" || night) && game.self.status === "living";
+    const open = (game.phase === "voting" || night) && game.self.status === "living";
     panel.hidden = !open;
     if (!open) return;
     this.element(".action-title").textContent = night
       ? game.self.role === "doctor" ? "Choose tonight's protection"
         : game.self.role === "sheriff" ? "Choose tonight's investigation" : "Choose tonight's victim"
       : "Cast your ballot";
-    const living = game.players.filter(entry => entry.status === "living"
+    const targetRoster: readonly RosterEntry[] = game.mode === "practice" ? [...(night && game.self.role === "doctor" ? game.players : []), ...(this.#lastWorld?.practiceTargets ?? []).filter(target =>
+      !night || game.self.role !== "mafia" || target.role !== "mafia").map(target => ({ playerId: target.targetId, displayName: target.displayName,
+        colour: "#B1C6AA", avatarPreset: game.players[0]!.avatarPreset, seat: 0, status: "living" as const }))] : game.players;
+    const living = targetRoster.filter(entry => entry.status === "living"
       && (!night || game.self.role !== "mafia" || !game.self.mafiaTeam?.includes(entry.playerId))
       && (!night || game.self.role !== "sheriff" || entry.playerId !== this.#lastWorld?.selfPlayerId));
     const locked = !night && game.self.meetingVoted;
@@ -454,7 +456,7 @@ export class GameInterface {
   }
 
   private nameOf(game: GameView, playerId: string): string {
-    return game.players.find(entry => entry.playerId === playerId)?.displayName ?? "Someone";
+    return game.players.find(entry => entry.playerId === playerId)?.displayName ?? this.#lastWorld?.practiceTargets.find(target => target.targetId === playerId)?.displayName ?? "Someone";
   }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {

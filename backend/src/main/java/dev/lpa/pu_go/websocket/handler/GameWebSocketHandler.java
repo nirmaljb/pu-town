@@ -116,7 +116,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
-                    else if (incoming instanceof ClientMessage.TaskAction task) handleTaskAction(player, task);
+                    else if (incoming instanceof ClientMessage.PreviewRole preview) withGame(player, (room, game) -> {
+                        Game.Rejection rejection = game.previewRole(player.getId(), preview.role());
+                        if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
+                        else { List<Delivery> deliveries = new ArrayList<>(); addGameState(deliveries, room); deliverAll(deliveries); }
+                    });
+                    else if (incoming instanceof ClientMessage.OpenTask task) handleTask(player, (game) -> game.openTask(player.getId(), task.round(), task.taskId(), roomManager.currentTimeMillis()));
+                    else if (incoming instanceof ClientMessage.TaskStep task) handleTask(player, (game) -> game.taskStep(player.getId(), task.round(), task.taskId(), task.step(), task.value(), roomManager.currentTimeMillis()));
+                    else if (incoming instanceof ClientMessage.CloseTask) handleTask(player, (game) -> { game.closeTask(player.getId()); return null; });
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
                 });
@@ -314,6 +321,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private void addPrivateGameEntry(Collection<Delivery> deliveries, Room room, String playerId) {
         Game game = room.getGame();
         if (game == null || game.participant(playerId) == null) return;
+        deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
+        if (game.isPractice()) deliveries.add(new Delivery(playerId, new ServerMessage.PracticeState(game.practiceTargets())));
         deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
         if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
         deliveries.add(new Delivery(playerId, new ServerMessage.ChatHistory(game.historyFor(playerId).stream()
@@ -497,27 +506,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     /** Movement is answered only through the next field state, never with an error per step. */
     private void handleMove(PlayerState player, ClientMessage.Move message) {
-        withGame(player, (room, game) -> {
-            long now = roomManager.currentTimeMillis();
-            var before = game.tasksFor(player.getId(), now);
-            game.move(player.getId(), message.x(), message.y(), message.facing(), now);
-            if (!java.util.Objects.equals(before, game.tasksFor(player.getId(), now)))
-                answerPrivateSubmission(player, room, null);
-        });
-    }
-
-    private void handleTaskAction(PlayerState player, ClientMessage.TaskAction message) {
-        withGame(player, (room, game) -> {
-            Game.TaskProgress before = game.taskProgress();
-            Game.Rejection rejection = game.submitTaskAction(player.getId(), message.round(), message.taskId(),
-                    message.step(), message.action(), roomManager.currentTimeMillis());
-            if (rejection != null || before.equals(game.taskProgress())) answerPrivateSubmission(player, room, rejection);
-            else {
-                List<Delivery> deliveries = new ArrayList<>();
-                addGameState(deliveries, room);
-                deliverAll(deliveries);
-            }
-        });
+        withGame(player, (room, game) ->
+                game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
     }
 
     private void handleNightChoice(PlayerState player, ClientMessage.NightChoice message) {
@@ -537,6 +527,24 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             addGameStateFor(deliveries, room, List.of(player.getId()));
             deliverAll(deliveries);
         }
+    }
+
+    private ServerMessage.TaskState taskStateFor(Game game, String playerId) {
+        return new ServerMessage.TaskState(game.tasksFor(playerId, roomManager.currentTimeMillis()));
+    }
+
+    private void handleTask(PlayerState player, java.util.function.Function<Game, Game.Rejection> action) {
+        withGame(player, (room, game) -> {
+            int completed = game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
+            Game.Rejection rejection = action.apply(game);
+            if (rejection != null) { deliver(error(player, rejection.code(), rejection.message())); return; }
+            List<Delivery> deliveries = new ArrayList<>();
+            boolean changed = completed != game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
+            if (game.isFinished()) addGameState(deliveries, room);
+            else for (String recipient : changed ? room.playerIdsSnapshot() : List.of(player.getId()))
+                deliveries.add(new Delivery(recipient, taskStateFor(game, recipient)));
+            deliverAll(deliveries);
+        });
     }
 
     private void handleChat(PlayerState player, ClientMessage.SendChat message) {
@@ -583,6 +591,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void addGameState(Collection<Delivery> deliveries, Room room) {
+        Game game = room.getGame();
+        if (game != null) for (String playerId : room.playerIdsSnapshot())
+            if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
         addGameStateFor(deliveries, room, room.playerIdsSnapshot());
     }
 
@@ -591,7 +602,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (game == null) return;
         for (String playerId : playerIds) {
             if (game.participant(playerId) != null) {
-                deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+                if (game.isPractice()) deliveries.add(new Delivery(playerId, new ServerMessage.PracticeState(game.practiceTargets())));
+        deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
                 if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
             }
         }
@@ -614,14 +626,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.callerPlayerId(),
                         outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedRole()),
                 revealed == null ? null : revealed.stream().map(GameWebSocketHandler::ballotView).toList(),
-                game.winner(), roles, selfViewOf(game, self, roomManager.currentTimeMillis()), game.taskProgress());
+                game.winner(), roles, selfViewOf(game, self));
     }
 
     private static ServerMessage.BallotView ballotView(Game.Ballot ballot) {
         return new ServerMessage.BallotView(ballot.voterPlayerId(), ballot.targetPlayerId());
     }
 
-    private static ServerMessage.SelfView selfViewOf(Game game, Participant self, long now) {
+    private static ServerMessage.SelfView selfViewOf(Game game, Participant self) {
         boolean mafia = self.role() == Role.MAFIA;
         boolean sheriff = self.role() == Role.SHERIFF;
         return new ServerMessage.SelfView(self.role(), self.role().faction(), self.status(), self.killedByMafia(),
@@ -629,7 +641,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
                         result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
                 game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()),
-                game.nightChoiceFor(self.playerId()), game.tasksFor(self.playerId(), now));
+                game.nightChoiceFor(self.playerId()));
     }
 
     @Override

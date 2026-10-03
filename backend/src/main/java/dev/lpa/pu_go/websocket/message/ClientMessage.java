@@ -2,7 +2,11 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.TaskAction, ClientMessage.SendChat {
+public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole {
+    record OpenTask(int version, String type, int round, String taskId) implements ClientMessage {}
+    record TaskStep(int version, String type, int round, String taskId, int step, int value) implements ClientMessage {}
+    record CloseTask(int version, String type) implements ClientMessage {}
+    record PreviewRole(int version, String type, dev.lpa.pu_go.game.Role role) implements ClientMessage {}
     int version();
     String type();
 
@@ -25,7 +29,6 @@ public sealed interface ClientMessage permits ClientMessage.SelectAvatar, Client
     /** A Meeting ballot. A null target is an explicit Skip. */
     record MeetingVote(int version, String type, int round, String targetPlayerId) implements ClientMessage {}
     record NightChoice(int version, String type, int round, String targetPlayerId) implements ClientMessage {}
-    record TaskAction(int version, String type, int round, String taskId, int step, String action) implements ClientMessage {}
 
     record SendChat(int version, String type, ChatChannel channel, String text) implements ClientMessage {}
 }

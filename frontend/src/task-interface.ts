@@ -1,83 +1,64 @@
+import type { SoundEffects } from "./sound-effects.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
-import type { GameView } from "./protocol.js";
+import { areaAt } from "./room-rules.js";
 
-/** Assignment details are private; the shared progress line never names a Participant. */
+/** Personal assignments and their current server-authorized interaction, rendered at frames. */
 export class TaskInterface {
-  readonly root = document.createElement("details");
-  readonly #progress = document.createElement("p");
-  readonly #list = document.createElement("ul");
-  readonly #controls = new Map<string, HTMLButtonElement[]>();
-  readonly #timers = new Map<string, HTMLElement>();
-  #renderedGame: GameView | null = null;
-
-  constructor(private readonly client: ReconnectingGameClient) {
-    this.root.className = "tasks-panel";
-    const summary = document.createElement("summary");
-    summary.textContent = "Tasks";
-    const hint = document.createElement("p");
-    hint.textContent = "Green rings mark your assigned locations. Walk beside one to start. Repairs take 20 seconds per step. Sequences repeat the displayed order, with 5 seconds between inputs. Completed steps stay between Days.";
-    this.root.append(summary, this.#progress, hint, this.#list);
+  readonly #root = document.createElement("section");
+  #signature = "";
+  constructor(private readonly client: ReconnectingGameClient, private readonly effects: SoundEffects, private readonly now = Date.now) {
+    this.#root.className = "task-interface";
+    this.#root.setAttribute("aria-label", "Tasks");
+    document.querySelector("#game-container")?.append(this.#root);
   }
-
-  render(world: WorldState | undefined, playing: boolean, now: number): void {
+  destroy(): void { this.#root.remove(); }
+  render(world: WorldState | undefined): void {
     const game = world?.game;
-    this.root.hidden = !playing || !game;
-    if (!game || !world) { this.#renderedGame = null; return; }
-    if (game !== this.#renderedGame) {
-      this.#renderedGame = game;
-      this.#progress.textContent = `Village progress: ${game.taskProgress.completed} / ${game.taskProgress.total} steps`;
-      this.#timers.clear();
-      this.#controls.clear();
-      const rows = (game.self.tasks ?? []).map(task => {
-        const row = document.createElement("li");
-        const name = document.createElement("p");
-        name.textContent = `${task.name} · ${task.completedSteps} / ${task.totalSteps}`;
-        const timer = document.createElement("span");
-        this.#timers.set(task.taskId, timer);
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = task.active ? "Finish step" : task.kind === "sequence" ? "Start sequence" : "Start repair";
-        button.disabled = game.phase !== "day" || game.self.status !== "living" || task.completedSteps === task.totalSteps;
-        button.addEventListener("click", () => this.client.taskAction(game.round, task.taskId, task.completedSteps, task.active ? "complete" : "start"));
-        row.append(name, timer);
+    const state = world?.tasks;
+    this.#root.hidden = !game || !state || game.phase === "role_reveal";
+    if (!game || !state) return;
+    const pos = world.field?.self;
+    const seconds = Math.ceil(Math.max(0, (world.taskEndsAt ?? this.now()) - this.now()) / 1000);
+    const available = game.phase === "day" && game.self.status !== "left" && this.client.state.status === "playing";
+    const nearby = state.tasks.map(task => available && !!pos && Math.hypot(task.x - pos.x, task.y - pos.y) <= 64 && areaAt(task.x, task.y) === areaAt(pos.x, pos.y));
+    const signature = JSON.stringify([game.round, game.phase, state, seconds, nearby, available]);
+    if (signature === this.#signature) return;
+    this.#signature = signature;
+    const heading = document.createElement("strong");
+    heading.textContent = `Village Tasks: ${state.completed}/${state.total}`;
+    const list = document.createElement("ul");
+    for (const [index, task] of state.tasks.entries()) {
+      const item = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = `${task.fake ? "Fake · " : ""}${task.name} · ${task.step}/${task.steps} · ${areaAt(task.x, task.y)} (${task.x}, ${task.y})`;
+      item.append(label);
+      if (task.step < task.steps) {
+        const active = state.activeTaskId === task.taskId;
+        const values = active && task.kind === "sequence" ? [0, 1, 2, 3] : [0];
         if (task.kind === "sequence") {
-          const instruction = document.createElement("p");
-          instruction.textContent = `Repeat ${task.sequence!.join(" → ")} · Next: ${task.sequence![task.completedSteps % task.sequence!.length]}`;
-          row.append(instruction);
+          const pattern = document.createElement("small");
+          pattern.textContent = `Sequence: ${task.sequence.map(value => value + 1).join(" → ")}`;
+          item.append(pattern);
         }
-        const controls: HTMLButtonElement[] = [];
-        if (task.kind === "sequence" && task.active) {
-          for (const input of [1, 2, 3, 4] as const) {
-            const press = document.createElement("button");
-            press.type = "button";
-            press.textContent = String(input);
-            press.addEventListener("click", () => this.client.taskAction(game.round, task.taskId, task.completedSteps, `press_${input}`));
-            controls.push(press);
-            row.append(press);
-          }
-        } else {
-          row.append(button);
-          if (task.active) controls.push(button);
+        for (const value of values) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : task.kind === "sequence" ? `${value + 1}` : task.kind === "delivery" ? task.step % 2 === 0 ? "Pick up item" : "Deliver item" : "Finish repair step"
+            : task.kind === "sequence" ? "Start sequence" : task.kind === "delivery" ? task.step % 2 === 0 ? "Collect" : "Deliver" : "Repair";
+          button.disabled = !nearby[index] || active && seconds > 0;
+          button.addEventListener("click", () => { this.effects.play(active ? "click" : "select");
+            if (active) this.client.taskStep(game.round, task.taskId, task.step, value);
+            else this.client.openTask(game.round, task.taskId);
+          });
+          item.append(button);
         }
-        this.#controls.set(task.taskId, controls);
-        if (task.active) {
-          const cancel = document.createElement("button");
-          cancel.type = "button";
-          cancel.textContent = "Cancel repair";
-          cancel.addEventListener("click", () => this.client.taskAction(game.round, task.taskId, task.completedSteps, "cancel"));
-          row.append(cancel);
-        }
-        return row;
-      });
-      this.#list.replaceChildren(...rows);
+      }
+      list.append(item);
     }
-    for (const task of game.self.tasks ?? []) {
-      const timer = this.#timers.get(task.taskId);
-      const remaining = task.workRemainingMs === null ? 0 : Math.max(0, task.workRemainingMs - (now - world.gameReceivedAt));
-      if (timer) timer.textContent = task.workRemainingMs === null ? "" : `${Math.ceil(remaining / 1000)}s · `;
-      for (const control of this.#controls.get(task.taskId) ?? [])
-        control.disabled = game.phase !== "day" || game.self.status !== "living" || remaining > 0;
-    }
+    const cancel = document.createElement("button");
+    cancel.type = "button"; cancel.textContent = "Close interaction"; cancel.hidden = state.activeTaskId === null;
+    cancel.addEventListener("click", () => this.client.closeTask());
+    this.#root.replaceChildren(heading, list, cancel);
   }
 }

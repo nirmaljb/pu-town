@@ -11,7 +11,7 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState {
     int version();
     String type();
 
@@ -96,16 +96,16 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
      */
     record SelfView(Role role, Faction faction, ParticipantStatus status, boolean killedByMafia,
                     List<String> mafiaTeam, List<InvestigationView> investigations,
-                    boolean meetingVoted, String meetingVote, String nightChoice, List<dev.lpa.pu_go.game.TaskAssignment.View> tasks) {}
+                    boolean meetingVoted, String meetingVote, String nightChoice) {}
 
     record GameState(int version, String type, String mode, String phase, int round, Long remainingMs,
                      List<RosterView> players, OutcomeView outcome, List<BallotView> ballots,
-                     Faction winner, List<RoleView> roles, SelfView self, Game.TaskProgress taskProgress) implements ServerMessage {
+                     Faction winner, List<RoleView> roles, SelfView self) implements ServerMessage {
         public GameState(String mode, String phase, int round, Long remainingMs, List<RosterView> players, OutcomeView outcome,
-                         List<BallotView> ballots, Faction winner, List<RoleView> roles, SelfView self, Game.TaskProgress taskProgress) {
+                         List<BallotView> ballots, Faction winner, List<RoleView> roles, SelfView self) {
             this(1, "game_state", mode, phase, round, remainingMs, List.copyOf(players), outcome,
                     ballots == null ? null : List.copyOf(ballots), winner,
-                    roles == null ? null : List.copyOf(roles), self, taskProgress);
+                    roles == null ? null : List.copyOf(roles), self);
         }
     }
 
@@ -117,6 +117,17 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
                       Game.OwnField self) implements ServerMessage {
         public FieldState(int round, List<Game.FieldPlayer> players, Game.OwnField self) {
             this(1, "field_state", round, List.copyOf(players), self);
+        }
+    }
+
+    record PracticeState(int version, String type, List<Game.PracticeTarget> targets) implements ServerMessage {
+        public PracticeState(List<Game.PracticeTarget> targets) { this(1, "practice_state", List.copyOf(targets)); }
+    }
+
+    record TaskState(int version, String type, List<dev.lpa.pu_go.game.TaskBoard.TaskView> tasks,
+                     int completed, int total, String activeTaskId, Long remainingMs) implements ServerMessage {
+        public TaskState(dev.lpa.pu_go.game.TaskBoard.View view) {
+            this(1, "task_state", view.tasks(), view.completed(), view.total(), view.activeTaskId(), view.remainingMs());
         }
     }
 

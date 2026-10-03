@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, taskAction, type TaskAction, move, recoverRoom, sendChat, setRoleSetup, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { openTask, taskStep, startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type Role, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -194,10 +194,6 @@ export class ReconnectingGameClient {
   }
 
 
-  taskAction(round: number, taskId: string, step: number, action: TaskAction): void {
-    this.sendControl("playing", () => taskAction(round, taskId, step, action));
-  }
-
   meetingVote(round: number, targetPlayerId: string | null): void {
     this.sendControl("playing", () => meetingVote(round, targetPlayerId));
   }
@@ -205,6 +201,14 @@ export class ReconnectingGameClient {
   nightChoice(round: number, targetPlayerId: string | null): void {
     this.sendControl("playing", () => nightChoice(round, targetPlayerId));
   }
+
+  previewRole(role: Role): void { this.sendControl("playing", () => ({ version: 1, type: "preview_role", role })); }
+
+  openTask(round: number, taskId: string): void { this.sendControl("playing", () => openTask(round, taskId)); }
+  taskStep(round: number, taskId: string, step: number, value: number): void {
+    this.sendControl("playing", () => taskStep(round, taskId, step, value));
+  }
+  closeTask(): void { this.sendControl("playing", () => ({ version: 1, type: "close_task" })); }
 
   chat(channel: ChatChannel, text: string): void {
     this.sendControl("playing", () => sendChat(channel, text));
