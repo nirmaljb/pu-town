@@ -1044,7 +1044,67 @@ class MafiaGameTest {
         assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
     }
 
+    @Test
+    void sequenceTasksValidateOrderAndPersistEarnedInputsAcrossRecovery() throws Exception {
+        startTable("sequence-tasks", 4);
+        advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(1);
+        assertEquals("sequence", task.path("kind").asText());
+        walkToTask(1, task);
+        openTask(1, task.path("taskId").asText());
+        advance(1000);
+        taskStep(1, task.path("taskId").asText(), 0, 99);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        taskStep(1, task.path("taskId").asText(), 0, task.path("sequence").get(0).asInt());
+        assertEquals(1, latestOfType(table.get(1), "task_state").path("tasks").get(1).path("step").asInt());
+        taskStep(1, task.path("taskId").asText(), 0, task.path("sequence").get(0).asInt());
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var recovered = connect("sequence-recovered");
+        recover(recovered, code, tokens.get(1));
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(1).path("step").asInt());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
+
+    private void openTask(int seat, String taskId) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"open_task\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\"}");
+    }
+    private void taskStep(int seat, String taskId, int step, int value) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"task_step\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\",\"step\":" + step + ",\"value\":" + value + "}");
+    }
+    /** Navigate real move requests through the existing map, never mutate Game positions. */
+    private void walkToTask(int seat, JsonNode task) throws Exception {
+        record Cell(int x, int y) {}
+        handler.tickFields();
+        JsonNode position = field(seat).path("self");
+        Cell start = new Cell((int) Math.round(position.path("x").asDouble() / 16) * 16,
+                (int) Math.round(position.path("y").asDouble() / 16) * 16);
+        if (!RoomRules.walkable(start.x(), start.y())) throw new IllegalStateException("No walkable starting cell");
+        var queue = new java.util.ArrayDeque<Cell>();
+        var previous = new java.util.HashMap<Cell, Cell>();
+        queue.add(start); previous.put(start, start);
+        Cell goal = null;
+        while (!queue.isEmpty()) {
+            Cell cell = queue.remove();
+            if (Math.hypot(cell.x() - task.path("x").asDouble(), cell.y() - task.path("y").asDouble()) <= 48
+                    && RoomRules.areaAt(cell.x(), cell.y()).equals(RoomRules.areaAt(task.path("x").asDouble(), task.path("y").asDouble()))) { goal = cell; break; }
+            for (Cell next : List.of(new Cell(cell.x() + 16, cell.y()), new Cell(cell.x() - 16, cell.y()),
+                    new Cell(cell.x(), cell.y() + 16), new Cell(cell.x(), cell.y() - 16))) {
+                if (!previous.containsKey(next) && RoomRules.walkable(next.x(), next.y())) {
+                    previous.put(next, cell); queue.add(next);
+                }
+            }
+        }
+        if (goal == null) throw new IllegalStateException("No route to " + task);
+        var route = new ArrayList<Cell>();
+        for (Cell cell = goal; !cell.equals(start); cell = previous.get(cell)) route.add(cell);
+        route.add(start); java.util.Collections.reverse(route);
+        for (Cell cell : route) { advance(100); move(seat, cell.x(), cell.y()); }
+        handler.tickFields();
+        assertTrue(Math.hypot(field(seat).path("self").path("x").asDouble() - task.path("x").asDouble(),
+                field(seat).path("self").path("y").asDouble() - task.path("y").asDouble()) <= 64, "Task point must be reachable");
+    }
 
     private void startTable(String label, int players) throws Exception {
         if (players >= 5) startTable(label, players, 2, 1, 1);

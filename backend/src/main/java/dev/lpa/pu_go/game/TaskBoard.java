@@ -30,11 +30,16 @@ public final class TaskBoard {
         final String id;
         String owner;
         final Location location;
+        final String kind;
+        final List<Integer> sequence;
         int step;
-        Assignment(String id, String owner, Location location) {
-            this.id = id; this.owner = owner; this.location = location;
+        Assignment(String id, String owner, Location location, String kind) {
+            this.id = id; this.owner = owner; this.location = location; this.kind = kind;
+            this.sequence = kind.equals("sequence") ? List.of(2, 0, 3, 1) : List.of();
         }
-        TaskView view() { return new TaskView(id, location.name(), "repair", location.x(), location.y(), step, REPAIR_STEPS, false, List.of()); }
+        int steps() { return kind.equals("sequence") ? sequence.size() : REPAIR_STEPS; }
+        long duration() { return kind.equals("sequence") ? 1000 : REPAIR_MS; }
+        TaskView view() { return new TaskView(id, location.name(), kind, location.x(), location.y(), step, steps(), false, sequence); }
     }
     private record Interaction(String taskId, int step, long readyAt) {}
     private final List<Assignment> assignments = new ArrayList<>();
@@ -45,11 +50,11 @@ public final class TaskBoard {
             if (member.role() == Role.MAFIA) continue;
             for (int slot = 0; slot < 3; slot++) {
                 Location location = LOCATIONS.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % LOCATIONS.size());
-                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location));
+                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : "repair"));
             }
         }
     }
-    public int completed() { return (int) assignments.stream().filter(task -> task.step == REPAIR_STEPS).count(); }
+    public int completed() { return (int) assignments.stream().filter(task -> task.step == task.steps()).count(); }
     public int total() { return assignments.size(); }
     private Assignment owned(String playerId, String taskId) {
         return assignments.stream().filter(task -> task.owner.equals(playerId) && task.id.equals(taskId)).findFirst().orElse(null);
@@ -60,14 +65,15 @@ public final class TaskBoard {
     }
     public Game.Rejection open(Participant actor, String taskId, long now) {
         Assignment task = owned(actor.playerId(), taskId);
-        if (task == null || task.step == REPAIR_STEPS || !nearby(actor, task)) return INVALID;
-        interactions.put(actor.playerId(), new Interaction(task.id, task.step, now + REPAIR_MS));
+        if (task == null || task.step == task.steps() || !nearby(actor, task)) return INVALID;
+        interactions.put(actor.playerId(), new Interaction(task.id, task.step, now + task.duration()));
         return null;
     }
     public Game.Rejection step(Participant actor, String taskId, int step, int value, long now) {
         Assignment task = owned(actor.playerId(), taskId);
         Interaction interaction = interactions.get(actor.playerId());
-        if (task == null || task.step != step || value != 0 || !nearby(actor, task)
+        if (task == null || task.step != step || step >= task.steps() || !nearby(actor, task)
+                || value != (task.kind.equals("sequence") ? task.sequence.get(step) : 0)
                 || interaction == null || !interaction.taskId().equals(taskId) || interaction.step() != step
                 || now < interaction.readyAt()) return INVALID;
         task.step++;

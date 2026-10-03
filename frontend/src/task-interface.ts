@@ -34,12 +34,21 @@ export class TaskInterface {
       item.append(label);
       if (task.step < task.steps) {
         const active = state.activeTaskId === task.taskId;
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : "Finish repair step" : "Repair";
-        button.disabled = !nearby[index] || active && seconds > 0;
-        button.addEventListener("click", () => active ? this.client.taskStep(game.round, task.taskId, task.step, 0) : this.client.openTask(game.round, task.taskId));
-        item.append(button);
+        const values = active && task.kind === "sequence" ? [0, 1, 2, 3] : [0];
+        if (task.kind === "sequence") {
+          const pattern = document.createElement("small");
+          pattern.textContent = `Sequence: ${task.sequence.map(value => value + 1).join(" → ")}`;
+          item.append(pattern);
+        }
+        for (const value of values) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = active ? seconds > 0 ? `Working… ${seconds}s` : task.kind === "sequence" ? `${value + 1}` : "Finish repair step"
+            : task.kind === "sequence" ? "Start sequence" : "Repair";
+          button.disabled = !nearby[index] || active && seconds > 0;
+          button.addEventListener("click", () => active ? this.client.taskStep(game.round, task.taskId, task.step, value) : this.client.openTask(game.round, task.taskId));
+          item.append(button);
+        }
       }
       list.append(item);
     }
