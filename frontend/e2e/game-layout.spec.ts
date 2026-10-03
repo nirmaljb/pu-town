@@ -21,7 +21,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       }
       for (const [index, page] of pages.entries()) {
         await page.bringToFront();
-        await page.goto("/?ws=ws://localhost:18081/ws/game");
+        await page.goto(`/?ws=ws://localhost:${process.env.PU_TOWN_E2E_BACKEND_PORT ?? "18081"}/ws/game`);
         const name = index === 0 ? "Host with a lengthy name" : `Player ${index + 1}`;
         await page.getByLabel("Display Name", { exact: true }).fill(name);
         await expect(page.getByLabel("Display Name", { exact: true })).toHaveValue(name);

@@ -268,3 +268,32 @@ test("field presentation is queued through Day and Night and clears for Townhall
   assert.equal(boundary.world.field.round, 2);
   assert.equal(frames.length, 6);
 });
+
+
+test("ballot confirmation and the next round apply at frames without extending voting", () => {
+  let now = 1_000;
+  const inbox = new NetworkInbox(() => now);
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  inbox.enqueue(gameState({ phase: "voting", remainingMs: 30_000 }));
+  boundary.beginFrame();
+  const beforeConfirm = boundary.world;
+  now = 6_000;
+  inbox.enqueue(gameState({ phase: "voting", remainingMs: 25_000,
+    self: selfView({ meetingVoted: true, meetingVote: null }) }));
+  inbox.enqueue({ version: 1, type: "chat_message", channel: "public", round: 1,
+    senderPlayerId: "p", senderName: "Alex", text: "Still discussing" });
+  assert.equal(boundary.world, beforeConfirm);
+  assert.equal(boundary.world.game.self.meetingVoted, false);
+  now = 9_000;
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.meetingVoted, true);
+  assert.equal(boundary.world.game.self.meetingVote, null);
+  assert.equal(boundary.world.game.ballots, null);
+  assert.equal(boundary.world.phaseEndsAt, 31_000, "confirmation does not restart the countdown");
+  assert.equal(boundary.world.chat[0].text, "Still discussing");
+  inbox.enqueue(gameState({ phase: "day", round: 2, remainingMs: 180_000 }));
+  assert.equal(boundary.world.game.self.meetingVoted, true);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.round, 2);
+  assert.equal(boundary.world.game.self.meetingVoted, false);
+});

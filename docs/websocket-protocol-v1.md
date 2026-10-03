@@ -152,7 +152,9 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 
 ### Meetings
 
-`meeting_vote` carries its `round` and is accepted only in `voting`, only from a living Participant, and only once. `targetPlayerId: null` is an explicit Skip and locks exactly as a ballot for a Player does. A Player is eliminated only by a strict majority of the living; a plurality is not enough.
+`meeting_vote` carries its current positive `round` and is accepted only in `voting`, only from a living Participant, and only once. A non-null target must be a living Participant, including the voter themselves. `targetPlayerId: null` is an explicit Skip and locks exactly as a ballot for a Player does. The client sends this message only when Confirm ballot is pressed; selecting or changing a preview sends nothing. An unconfirmed preview whose target is no longer living is cleared. A Player is eliminated only by a strict majority of the living; a plurality is not enough.
+
+Wrong-phase or wrong-round submissions receive `invalid_phase`; ineligible voters receive `invalid_action`; a repeated ballot receives `already_submitted`; a non-living or unknown target receives `invalid_target`. A rejection is sent only to the submitter. Acceptance sends only that voter a `game_state` with `self.meetingVoted: true` and their `self.meetingVote` (null for Skip). `ballots` remains null until the result. Recovery restores the voter's lock and choice in their own `self` view. Public chat stays available during the full thirty-second voting phase, which never ends early because everyone confirmed.
 
 At Voting Result, `ballots` discloses every ballot cast, Skips included, and `outcome` is `{ "kind": "meeting", "eliminatedPlayerId": …, "eliminatedMafia": … }` with the other fields `null` or empty. An elimination reveals only that Player's Faction, never their Role.
 

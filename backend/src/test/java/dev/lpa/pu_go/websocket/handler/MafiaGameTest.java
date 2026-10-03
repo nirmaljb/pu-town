@@ -459,6 +459,96 @@ class MafiaGameTest {
         assertEquals("village", game(1).path("winner").asText());
     }
 
+    @Test
+    void votingKeepsConfirmedSkipPrivateAndRecoversItWithoutClosingDiscussion() throws Exception {
+        startTable("private-ballot", 4);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        assertEquals(30_000, game(1).path("remainingMs").asLong());
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, null);
+        for (int seat = 0; seat < 4; seat++) {
+            assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), table.get(seat).payloads().size());
+            assertTrue(game(seat).path("ballots").isNull());
+            assertEquals(seat == 1, game(seat).path("self").path("meetingVoted").asBoolean());
+            assertTrue(game(seat).path("self").path("meetingVote").isNull());
+        }
+        ballot(1, 1, 0);
+        assertEquals("already_submitted", latest(table.get(1)).path("code").asText());
+        ballot(2, 2, 0);
+        assertEquals("invalid_phase", latest(table.get(2)).path("code").asText());
+        assertFalse(game(2).path("self").path("meetingVoted").asBoolean());
+        // Choosing yourself is allowed: every living Participant is an eligible target.
+        ballot(2, 1, 2);
+        assertEquals(playerId(2), game(2).path("self").path("meetingVote").asText());
+        ballot(0, 1, null);
+        ballot(3, 1, null);
+        chat(1, "public", "Discussion stays open after Confirm");
+        for (var session : table) {
+            assertEquals("chat_message", latest(session).path("type").asText());
+            assertEquals("Discussion stays open after Confirm", latest(session).path("text").asText());
+        }
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var returned = connect("private-ballot-returned");
+        recover(returned, code, tokens.get(1));
+        JsonNode recovered = latestOfType(returned, "game_state");
+        assertTrue(recovered.path("self").path("meetingVoted").asBoolean());
+        assertTrue(recovered.path("self").path("meetingVote").isNull());
+        assertTrue(recovered.path("ballots").isNull());
+        assertEquals("Discussion stays open after Confirm",
+                latestOfType(returned, "chat_history").path("messages").get(0).path("text").asText());
+        send(returned, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"" + playerId(0) + "\"}");
+        assertEquals("already_submitted", latest(returned).path("code").asText());
+        advance(VOTING - 1);
+        assertEquals("voting", game(0).path("phase").asText());
+        advance(1);
+        assertEquals("voting_result", game(0).path("phase").asText());
+        assertTrue(game(0).path("outcome").path("eliminatedPlayerId").isNull());
+        assertEquals(4, game(0).path("ballots").size());
+    }
+
+    @Test
+    void rejectedBallotsDoNotRevealActivityToOtherRecipients() throws Exception {
+        startTable("rejected-ballots", 10);
+        ballot(1, 1, 0);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        send(table.get(9), "{\"version\":1,\"type\":\"leave_room\"}");
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, 9);
+        assertEquals("invalid_target", latest(table.get(1)).path("code").asText());
+        ballot(1, 2, null);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        assertFalse(game(1).path("self").path("meetingVoted").asBoolean());
+        for (int seat = 0; seat < 9; seat++) {
+            assertEquals(counts.get(seat) + (seat == 1 ? 2 : 0), table.get(seat).payloads().size());
+        }
+        advance(VOTING);
+        var afterDeadline = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, null);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        for (int seat = 0; seat < 9; seat++) {
+            assertEquals(afterDeadline.get(seat) + (seat == 1 ? 1 : 0), table.get(seat).payloads().size());
+        }
+    }
+
+    @Test
+    void anEliminatedParticipantCannotVoteButKeepsReceivingTownhallText() throws Exception {
+        startTable("eliminated-ballot", 10);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        for (int seat = 0; seat < 6; seat++) ballot(seat, 1, 9);
+        advance(VOTING + VOTING_RESULT + DAY + NIGHT + DISCUSSION);
+        assertEquals("voting", game(9).path("phase").asText());
+        assertEquals("eliminated", game(9).path("self").path("status").asText());
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(9, 2, null);
+        assertEquals("invalid_action", latest(table.get(9)).path("code").asText());
+        for (int seat = 0; seat < 9; seat++) assertEquals(counts.get(seat), table.get(seat).payloads().size());
+        chat(9, "public", "The dead cannot speak");
+        assertEquals("invalid_action", latest(table.get(9)).path("code").asText());
+        chat(1, "public", "The dead can listen");
+        assertEquals("The dead can listen", latest(table.get(9)).path("text").asText());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {

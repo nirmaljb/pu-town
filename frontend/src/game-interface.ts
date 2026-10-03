@@ -34,6 +34,7 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 export class GameInterface {
   readonly #root = document.createElement("div");
   #preview: Preview | null = null;
+  readonly #ballotItems = new Map<string | null, HTMLLIElement>();
   #lastGame: GameView | null = null;
   #lastWorld: WorldState | undefined;
   #self: LocalPosition | null = null;
@@ -44,8 +45,8 @@ export class GameInterface {
   // Whether this Player was living in the last Game state, so only a death seen live flashes red.
   #wasLiving: boolean | null = null;
   #deathUntil = 0;
-  // The scene renders every frame, but the target list holds focus and receives clicks, so
-  // it is rebuilt only when the Game, the world or the local selection behind it changed.
+  // Re-render personal panels only when their state changes. Ballot buttons are retained
+  // across these updates so selecting a choice and receiving chat preserve keyboard focus.
   #rendered: Readonly<{ game: GameView; world: WorldState; preview: Preview | null }> | null = null;
 
   constructor(private readonly client: ReconnectingGameClient, private readonly now: () => number = Date.now) {
@@ -132,6 +133,9 @@ export class GameInterface {
       this.#wasLiving = null;
       this.#deathUntil = 0;
       this.#lastGame = null;
+      this.#preview = null;
+      this.#ballotItems.clear();
+      this.element(".target-list").replaceChildren();
       this.#renderedChat = 0;
       this.#renderedInvestigations = -1;
       this.#rendered = null;
@@ -142,6 +146,11 @@ export class GameInterface {
         this.element<HTMLDetailsElement>(".role-card").open = game.phase === "role_reveal";
       }
       if (this.#lastGame === null || game.round !== this.#lastGame.round || game.phase !== this.#lastGame.phase) {
+        this.#preview = null;
+      }
+      const previewTarget = this.#preview?.targetPlayerId;
+      if (previewTarget != null && !game.players.some(entry =>
+        entry.playerId === previewTarget && entry.status === "living")) {
         this.#preview = null;
       }
       this.#lastGame = game;
@@ -277,39 +286,45 @@ export class GameInterface {
       ? `Locked in: ${accepted === null ? "Skip" : this.nameOf(game, accepted)}`
       : "Select a Player, then confirm. A confirmed ballot is final.";
     const list = this.element(".target-list");
-    list.replaceChildren(...living.map(target => this.targetButton(game, target, locked, accepted)));
-    if (!locked) list.append(this.skipButton());
+    const choices: readonly (RosterEntry | null)[] = [...living, null];
+    const available = new Set(choices.map(target => target?.playerId ?? null));
+    for (const [playerId, item] of this.#ballotItems) {
+      if (!available.has(playerId)) {
+        item.remove();
+        this.#ballotItems.delete(playerId);
+      }
+    }
+    for (const [index, target] of choices.entries()) {
+      const playerId = target?.playerId ?? null;
+      let item = this.#ballotItems.get(playerId);
+      if (!item) {
+        item = this.targetButton(playerId);
+        this.#ballotItems.set(playerId, item);
+      }
+      const button = item.querySelector<HTMLButtonElement>("button")!;
+      button.textContent = target?.displayName ?? "Skip — eliminate nobody";
+      button.style.borderLeft = target === null ? "" : `6px solid ${target.colour}`;
+      const chosen = locked ? accepted === playerId
+        : this.#preview !== null && this.#preview.targetPlayerId === playerId;
+      button.setAttribute("aria-pressed", String(chosen));
+      button.disabled = locked;
+      // Leave unaffected buttons in place, including when a preview or chat changes.
+      if (list.children[index] !== item) list.insertBefore(item, list.children[index] ?? null);
+    }
     const confirm = this.element<HTMLButtonElement>(".confirm-action");
     confirm.disabled = locked || this.#preview === null;
     confirm.hidden = locked;
   }
 
-  private targetButton(game: GameView, target: RosterEntry, locked: boolean, accepted: string | null): HTMLLIElement {
+  private targetButton(targetPlayerId: string | null): HTMLLIElement {
     const item = document.createElement("li");
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = target.displayName;
-    const chosen = locked ? accepted === target.playerId : this.#preview?.targetPlayerId === target.playerId;
-    button.setAttribute("aria-pressed", String(chosen));
-    button.disabled = locked;
-    button.style.borderLeft = `6px solid ${target.colour}`;
     // A click previews locally; nothing is submitted until the explicit confirmation.
     button.addEventListener("click", () => {
-      this.#preview = { round: game.round, phase: game.phase, targetPlayerId: target.playerId };
-      this.render(this.#lastWorld, this.#self);
-    });
-    item.append(button);
-    return item;
-  }
-
-  private skipButton(): HTMLLIElement {
-    const item = document.createElement("li");
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = "Skip — eliminate nobody";
-    button.setAttribute("aria-pressed", String(this.#preview !== null && this.#preview.targetPlayerId === null));
-    button.addEventListener("click", () => {
-      this.#preview = { round: this.#lastGame!.round, phase: this.#lastGame!.phase, targetPlayerId: null };
+      const game = this.#lastGame;
+      if (!game || game.phase !== "voting" || game.self.status !== "living" || game.self.meetingVoted) return;
+      this.#preview = { round: game.round, phase: game.phase, targetPlayerId };
       this.render(this.#lastWorld, this.#self);
     });
     item.append(button);
@@ -320,7 +335,9 @@ export class GameInterface {
     const game = this.#lastGame;
     const preview = this.#preview;
     if (!game || !preview || preview.round !== game.round || preview.phase !== game.phase) return;
-    if (game.phase !== "voting" || game.self.status !== "living") return;
+    if (game.phase !== "voting" || game.self.status !== "living" || game.self.meetingVoted) return;
+    if (preview.targetPlayerId !== null && !game.players.some(entry =>
+      entry.playerId === preview.targetPlayerId && entry.status === "living")) return;
     this.client.meetingVote(game.round, preview.targetPlayerId);
   }
 

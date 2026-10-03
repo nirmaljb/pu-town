@@ -79,6 +79,8 @@ Phases end at server deadlines even if a browser is hidden or reconnecting. Ther
 
 Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. The living currently see only Avatars within their Role's Vision: Mafia 440 px, Doctors 380, Sheriffs 330 and Villagers 270. Eliminated Participants can walk during Day and see the town, unseen by the living. Day and Night have no text channel; public text opens during Townhall discussion and voting.
 
+During Townhall voting, select any living Participant (including yourself) or Skip in the centered ballot panel. Selection is a private preview; only Confirm ballot submits it. Confirmed choices stay locked for the round, including after a same-tab refresh, and public chat remains open until the thirty-second voting deadline. If an unconfirmed target Leaves, select another target before confirming. Everyone sees the ballots when voting ends.
+
 A Meeting eliminates a Player only on a strict majority of the living and currently reveals their Faction; full eliminated Role disclosure follows in #26. Village wins when no Mafia remains living, and Mafia wins at parity. Voting results run for six seconds before a decided Game finishes and every Role is revealed. Forfeit can decide victory immediately.
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
@@ -151,7 +153,9 @@ checks `/health`, and closes both after testing. It requires JDK 17 and free por
 it never reuses an existing development server. If another checkout occupies the
 default loopback address on `5173`, use `PU_TOWN_E2E_HOST=127.0.0.2 npm run test:browser`
 to bind a separate loopback address while keeping the browser's supported
-`http://localhost:5173` origin.
+`http://localhost:5173` origin. When another harness occupies backend port `18081`,
+set `PU_TOWN_E2E_BACKEND_PORT` to a free port as well; both server startup and
+browser connections use it.
 
 Each viewport journey waits through a full cycle (about six minutes). The suite uses Phaser's Canvas renderer and four independent browser contexts
 at desktop and phone sizes, including ballot interaction after a landscape resize
@@ -160,7 +164,13 @@ and overlay geometry, Role disclosure, Day movement, sleeping Night and its move
 ballot preview/confirmation, the six-second result, Seat reset for Day two, Leave and a new Room. It waits for real server phase
 deadlines. Failures retain Playwright traces in `frontend/test-results/`; the
 voting and sleeping Night screens are also captured there. This is automated browser evidence for
-the timed cycle in #24; it does not verify the future Tasks, Night choices,
+the timed cycle in #24. The four-Player ballot journey covers keyboard
+selection, private previews, locked Skip and target ballots, target Leave,
+chat during voting, same-tab ballot recovery and public results for #25.
+The #25 browser run on this checkout has not passed acceptance: Chromium crashed
+before voting under host resource pressure. The trace is retained locally; the
+WebSocket and frame-boundary regressions provide separate deterministic evidence.
+The suite does not verify the future Tasks, Night choices,
 interiors or media features in epic #22, or constitute manual playtesting.
 
 Run the backend tests and create an executable JAR:
