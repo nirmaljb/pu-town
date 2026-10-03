@@ -18,17 +18,13 @@ export type PlayerView = Readonly<{
   facing: Direction;
 }>;
 
-export const GAME_PHASES = ["role_reveal", "roam", "meeting_call", "discussion", "voting", "voting_result", "finished"] as const;
+export const GAME_PHASES = ["role_reveal", "day", "night", "discussion", "voting", "voting_result", "finished"] as const;
 export type GamePhase = typeof GAME_PHASES[number];
 export const ROLES = ["mafia", "villager", "doctor", "sheriff"] as const;
 export type Role = typeof ROLES[number];
 export type Faction = "mafia" | "village";
 export type ParticipantStatus = "living" | "eliminated" | "left";
 export type ChatChannel = "public" | "mafia";
-export const ABILITIES = ["kill", "vanish", "shield", "scan", "report", "emergency"] as const;
-export type Ability = typeof ABILITIES[number];
-/** Only these name a target Player; the rest are sent with a null target. */
-export const TARGETED_ABILITIES: readonly Ability[] = ["kill", "shield", "scan"];
 export const MAX_CHAT_CHARACTERS = 240;
 
 /** One Game Roster entry: it outlives the Room Membership that created it. */
@@ -45,11 +41,10 @@ export type RosterEntry = Readonly<{
 export type Ballot = Readonly<{ voterPlayerId: string; targetPlayerId: string | null }>;
 
 /**
- * A Meeting Call (report, emergency or timeout) names its caller, the reported Body and every
- * death since the last Meeting; a Meeting names its verdict.
+ * Townhall announces Night deaths; a Meeting names its verdict.
  */
 export type GameOutcome = Readonly<{
-  kind: "report" | "emergency" | "timeout" | "meeting";
+  kind: "night" | "meeting";
   callerPlayerId: string | null;
   bodyPlayerId: string | null;
   deaths: readonly string[];
@@ -83,26 +78,10 @@ export type GameView = Readonly<{
   self: SelfView;
 }>;
 
-/** One Avatar this recipient is allowed to see during a Roam. */
-export type FieldPlayer = Readonly<{ playerId: string; x: number; y: number; facing: Direction; ghost: boolean; vanished: boolean }>;
-export type Body = Readonly<{ playerId: string; x: number; y: number }>;
-
-/** This recipient's own position and ability timers; null where their Role has no such ability. */
-export type OwnField = Readonly<{
-  x: number;
-  y: number;
-  facing: Direction;
-  correction: number;
-  crowding: number | null;
-  primaryCooldownMs: number | null;
-  vanishCooldownMs: number | null;
-  vanishedMs: number | null;
-  shieldTargetPlayerId: string | null;
-  shieldMs: number | null;
-  emergencyAvailable: boolean;
-}>;
-
-export type FieldView = Readonly<{ round: number; players: readonly FieldPlayer[]; bodies: readonly Body[]; self: OwnField }>;
+/** One Avatar this recipient is allowed to see during Day or sleeping Night. */
+export type FieldPlayer = Readonly<{ playerId: string; x: number; y: number; facing: Direction; ghost: boolean }>;
+export type OwnField = Readonly<{ x: number; y: number; facing: Direction; correction: number }>;
+export type FieldView = Readonly<{ round: number; players: readonly FieldPlayer[]; self: OwnField }>;
 
 /** The Host's deal: how many Mafia, Doctors and Sheriffs. Everyone else is a Villager. */
 export type RoleSetup = Readonly<{ mafia: number; doctors: number; sheriffs: number }>;
@@ -141,7 +120,6 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "join_room"; roomId: string; displayName: string }>
   | Readonly<{ version: 1; type: "leave_room" }>
   | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
-  | Readonly<{ version: 1; type: "use_ability"; ability: Ability; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
 
@@ -151,15 +129,6 @@ export function move(x: number, y: number, facing: Direction): ClientMessage {
     x: Math.round(requireFiniteNumber(x, "x") * 10) / 10,
     y: Math.round(requireFiniteNumber(y, "y") * 10) / 10,
     facing: requireFacing(facing)
-  };
-}
-
-export function useAbility(ability: Ability, round: number, targetPlayerId: string | null): ClientMessage {
-  const targeted = TARGETED_ABILITIES.includes(ability);
-  if (targeted !== (targetPlayerId !== null)) throw new Error(targeted ? "This ability needs a target" : "This ability takes no target");
-  return {
-    version: 1, type: "use_ability", ability: requireMember(ability, ABILITIES, "ability"), round: requireRound(round),
-    targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
   };
 }
 
@@ -178,7 +147,7 @@ export function sendChat(channel: ChatChannel, text: string): ClientMessage {
   return { version: 1, type: "send_chat", channel, text: message };
 }
 
-/** Rounds are numbered from one; only Role Reveal, which precedes the first Night, is round zero. */
+/** Rounds are numbered from one; only Role Reveal, which precedes the first Day, is round zero. */
 function requireRound(value: unknown): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1) throw new Error("Invalid Game round");
   return value;
@@ -325,50 +294,34 @@ function decodeRosterEntry(value: unknown): RosterEntry {
 }
 
 function decodeField(message: Record<string, unknown>): FieldView {
-  requireFields(message, ["version", "type", "round", "players", "bodies", "self"]);
+  requireFields(message, ["version", "type", "round", "players", "self"]);
   return {
     round: requireRound(message.round),
     players: requireArray(message.players, "players").map(value => {
       const player = requireRecord(value, "field player");
-      requireFields(player, ["playerId", "x", "y", "facing", "ghost", "vanished"]);
+      requireFields(player, ["playerId", "x", "y", "facing", "ghost"]);
       return {
         playerId: requireNonEmptyString(player.playerId, "playerId"),
         x: requireFiniteNumber(player.x, "x"), y: requireFiniteNumber(player.y, "y"),
-        facing: requireFacing(player.facing), ghost: requireBoolean(player.ghost), vanished: requireBoolean(player.vanished)
+        facing: requireFacing(player.facing), ghost: requireBoolean(player.ghost)
       };
-    }),
-    bodies: requireArray(message.bodies, "bodies").map(value => {
-      const body = requireRecord(value, "body");
-      requireFields(body, ["playerId", "x", "y"]);
-      return { playerId: requireNonEmptyString(body.playerId, "playerId"), x: requireFiniteNumber(body.x, "x"), y: requireFiniteNumber(body.y, "y") };
     }),
     self: decodeOwnField(requireRecord(message.self, "self"))
   };
 }
 
 function decodeOwnField(self: Record<string, unknown>): OwnField {
-  requireFields(self, ["x", "y", "facing", "correction", "crowding", "primaryCooldownMs", "vanishCooldownMs", "vanishedMs",
-    "shieldTargetPlayerId", "shieldMs", "emergencyAvailable"]);
-  const optionalCounter = (value: unknown) => value === null ? null : requireCounter(value);
+  requireFields(self, ["x", "y", "facing", "correction"]);
   return {
-    x: requireFiniteNumber(self.x, "x"),
-    y: requireFiniteNumber(self.y, "y"),
-    facing: requireFacing(self.facing),
-    correction: requireCounter(self.correction),
-    crowding: self.crowding === null ? null : requireFiniteNumber(self.crowding, "crowding"),
-    primaryCooldownMs: optionalCounter(self.primaryCooldownMs),
-    vanishCooldownMs: optionalCounter(self.vanishCooldownMs),
-    vanishedMs: optionalCounter(self.vanishedMs),
-    shieldTargetPlayerId: requireOptionalPlayerId(self.shieldTargetPlayerId),
-    shieldMs: optionalCounter(self.shieldMs),
-    emergencyAvailable: requireBoolean(self.emergencyAvailable)
+    x: requireFiniteNumber(self.x, "x"), y: requireFiniteNumber(self.y, "y"),
+    facing: requireFacing(self.facing), correction: requireCounter(self.correction)
   };
 }
 
 function decodeOutcome(outcome: Record<string, unknown>): GameOutcome {
   requireFields(outcome, ["kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedMafia"]);
   return {
-    kind: requireMember(outcome.kind, ["report", "emergency", "timeout", "meeting"] as const, "outcome kind"),
+    kind: requireMember(outcome.kind, ["night", "meeting"] as const, "outcome kind"),
     callerPlayerId: requireOptionalPlayerId(outcome.callerPlayerId),
     bodyPlayerId: requireOptionalPlayerId(outcome.bodyPlayerId),
     deaths: requireArray(outcome.deaths, "deaths").map(id => requireNonEmptyString(id, "playerId")),
@@ -516,7 +469,7 @@ function requireFacing(value: unknown): Direction {
   return value as Direction;
 }
 
-/** A Game round counts up from zero; only Role Reveal, before the first Night, is zero. */
+/** A Game round counts up from zero; only Role Reveal, before the first Day, is zero. */
 function decodeRoleSetup(value: unknown): RoleSetup {
   if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("roleSetup must be an object");
   const setup = value as Record<string, unknown>;

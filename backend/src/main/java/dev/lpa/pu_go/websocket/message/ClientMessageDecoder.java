@@ -1,6 +1,5 @@
 package dev.lpa.pu_go.websocket.message;
 
-import dev.lpa.pu_go.game.Ability;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -54,17 +53,6 @@ public final class ClientMessageDecoder {
                 if (!FACINGS.contains(facing))
                     throw new InvalidClientMessageException("malformed_message", "facing must be up, left, down or right.");
                 yield new ClientMessage.Move(1, type, coordinate(root, "x"), coordinate(root, "y"), facing);
-            }
-            case "use_ability" -> {
-                requireOnly(root, Set.of("version", "type", "ability", "round", "targetPlayerId"));
-                Ability ability = Ability.ofWireValue(requiredText(root, "ability"));
-                if (ability == null) throw new InvalidClientMessageException("malformed_message", "Unknown ability.");
-                JsonNode target = root.get("targetPlayerId");
-                boolean named = target.isTextual() && !target.asText().isBlank();
-                if (ability.targeted() ? !named : !target.isNull())
-                    throw new InvalidClientMessageException("malformed_message",
-                            ability.targeted() ? "This ability needs a targetPlayerId." : "This ability takes no target.");
-                yield new ClientMessage.UseAbility(1, type, ability, round(root), named ? target.asText() : null);
             }
             case "meeting_vote" -> {
                 requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));

@@ -10,7 +10,7 @@ public final class RoomRules {
     public static final int CAPACITY = 10;
     public static final int MIN_PLAYERS = 4;
 
-    /** The Emergency Meeting button stands in the middle of the Town Square; Meetings gather around it. */
+    /** The retained Seat circle is centred in the Town Square. */
     public static final double BUTTON_X = 1_280;
     public static final double BUTTON_Y = 742;
 

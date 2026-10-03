@@ -8,7 +8,7 @@ export const ROOM_HEIGHT = 720;
 export const WORLD_WIDTH = 2_560;
 export const WORLD_HEIGHT = 1_440;
 export const MIN_PLAYERS = 4;
-/** The Emergency Meeting button in the middle of the Town Square; Meetings gather around it. */
+/** The centre of the retained Seat circle in the Town Square. */
 export const BUTTON_X = 1_280;
 export const BUTTON_Y = 742;
 export const FOOT_RADIUS = 14;
@@ -17,12 +17,6 @@ export const FOOT_RADIUS = 14;
 export const WALK_SPEED = 220;
 /** How far a living Player sees, by Role: the Mafia furthest, Villagers least. */
 export const VISION: Readonly<Record<Role, number>> = { mafia: 440, doctor: 380, sheriff: 330, villager: 270 };
-export const KILL_RANGE = 90;
-export const SHIELD_RANGE = 120;
-export const SCAN_RANGE = 140;
-export const REPORT_RANGE = 120;
-export const EMERGENCY_RANGE = 150;
-
 export type Obstacle = Readonly<{ x: number; y: number; width: number; height: number }>;
 
 /** The map's collision layer, from public/maps/pu-town/pu-town.collision.json. */

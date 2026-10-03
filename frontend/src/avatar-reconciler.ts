@@ -18,7 +18,7 @@ type AvatarView = {
   status: Phaser.GameObjects.Text;
   seat: number;
   facing: Direction;
-  /** Where the latest field state put this Avatar during a Roam, or null when seated. */
+  /** Where the latest field state put this Avatar during Day and sleeping Night, or null when seated. */
   target: FieldPlayer | null;
   walkingUntil: number;
 };
@@ -64,21 +64,22 @@ function releaseAvatarCollection(scene: Phaser.Scene): void {
 export class AvatarReconciler implements WorldReconciler {
   readonly #avatars = new Map<string, AvatarView>();
   readonly #emptySeats = new Map<string, Phaser.GameObjects.Text>();
-  readonly #bodies = new Map<string, Phaser.GameObjects.Container>();
-  #roaming = false;
+  #onField = false;
+  #sleeping = false;
   #selfPlayerId: string | null = null;
 
   constructor(private readonly scene: Phaser.Scene) {}
 
   /**
    * A started Room draws its Game Roster, so an Eliminated Player keeps their Seat and a
-   * departed one leaves it empty without moving anyone else. During a Roam, only the
+   * departed one leaves it empty without moving anyone else. During Day and sleeping Night, only the
    * Avatars the server sent this recipient are drawn at all.
    */
   reconcile(world: WorldState, arrivals: ReadonlySet<string> = new Set()): void {
     this.#selfPlayerId = world.selfPlayerId;
-    const field = world.game?.phase === "roam" ? world.field : null;
-    this.#roaming = field !== null;
+    const field = (world.game?.phase === "day" || world.game?.phase === "night") ? world.field : null;
+    this.#onField = field !== null;
+    this.#sleeping = world.game?.phase === "night";
     const roster: readonly RosterEntry[] = world.game?.players
       ?? [...world.players.values()].map(player => ({
         playerId: player.playerId, displayName: player.displayName, colour: player.colour,
@@ -125,9 +126,9 @@ export class AvatarReconciler implements WorldReconciler {
         avatar.target = seen;
         if (seen) avatar.facing = seen.facing;
         avatar.container.setVisible(seen !== null);
-        avatar.container.setAlpha(seen?.ghost || seen?.vanished ? 0.4 : connected ? 1 : 0.6);
-        avatar.status.setVisible(Boolean(seen?.ghost || seen?.vanished || !connected))
-          .setText(seen?.ghost ? "Ghost" : seen?.vanished ? "Vanished" : "Reconnecting…").setColor("#fff0c9");
+        avatar.container.setAlpha(seen?.ghost ? 0.4 : connected ? 1 : 0.6);
+        avatar.status.setVisible(Boolean(this.#sleeping || seen?.ghost || !connected))
+          .setText(!connected ? "Reconnecting…" : this.#sleeping ? "Sleeping · Zzz" : "Ghost").setColor("#fff0c9");
         continue;
       }
       avatar.target = null;
@@ -140,31 +141,6 @@ export class AvatarReconciler implements WorldReconciler {
       avatar.container.setAlpha(eliminated ? 0.45 : connected ? 1 : 0.55);
       avatar.status.setVisible(true).setText(this.statusText(world, entry, connected))
         .setColor(eliminated ? "#d8b3b3" : member?.ready && world.phase === "lobby" ? "#b9f4c9" : "#fff0c9");
-    }
-    this.reconcileBodies(world, field?.bodies ?? []);
-  }
-
-  private reconcileBodies(world: WorldState, bodies: readonly Readonly<{ playerId: string; x: number; y: number }>[]): void {
-    const current = new Set(bodies.map(body => body.playerId));
-    for (const [playerId, body] of this.#bodies) {
-      if (!current.has(playerId)) {
-        body.destroy(true);
-        this.#bodies.delete(playerId);
-      }
-    }
-    for (const body of bodies) {
-      if (this.#bodies.has(body.playerId)) continue;
-      const entry = world.game?.players.find(player => player.playerId === body.playerId);
-      const colour = Number.parseInt((entry?.colour ?? "#FFFFFF").slice(1), 16);
-      const puddle = this.scene.add.ellipse(0, 6, 70, 26, 0x7a0d0d, 0.75);
-      const figure = this.scene.add.sprite(0, -4, entry?.avatarPreset ?? "", 18)
-        .setRotation(Math.PI / 2).setTint(0xb0a0a0);
-      const marker = this.scene.add.ellipse(0, 10, 30, 10, colour, 0.5);
-      const label = this.scene.add.text(0, -40, `${entry?.displayName ?? "Someone"} ✝`, {
-        color: "#ffd6d6", fontFamily: "sans-serif", fontSize: "13px", backgroundColor: "#3a1515", padding: { x: 5, y: 2 }
-      }).setOrigin(0.5);
-      const container = this.scene.add.container(body.x, body.y, [puddle, marker, figure, label]).setDepth(body.y - 1);
-      this.#bodies.set(body.playerId, container);
     }
   }
 
@@ -188,21 +164,21 @@ export class AvatarReconciler implements WorldReconciler {
   }
 
   /**
-   * Seated Avatars lower into their chair. During a Roam, other Avatars glide toward the
+   * Seated Avatars lower into their chair. During Day and sleeping Night, other Avatars glide toward the
    * position the server last sent, and this client's own Avatar follows local input.
    */
   updateAnimations(time: number, delta = 16, self: LocalPosition | null = null): void {
     const walkFrame = 1 + Math.floor(time / 90) % 8;
     for (const [playerId, avatar] of this.#avatars) {
       const { sprite } = avatar;
-      if (this.#roaming) {
-        sprite.setY(0).setCrop();
+      if (this.#onField) {
+        sprite.setY(0).setCrop().setAngle(this.#sleeping ? 90 : 0);
         avatar.legs.setVisible(false);
-        let walking = time < avatar.walkingUntil;
+        let walking = !this.#sleeping && time < avatar.walkingUntil;
         if (playerId === this.#selfPlayerId && self) {
           avatar.container.setPosition(self.x, self.y).setVisible(true);
           avatar.facing = self.facing;
-          walking = self.moving;
+          walking = !this.#sleeping && self.moving;
         } else if (avatar.target) {
           const blend = Math.min(1, delta / 1_000 * 14);
           avatar.container.setPosition(
@@ -213,6 +189,7 @@ export class AvatarReconciler implements WorldReconciler {
         sprite.setFrame(DIRECTIONS.indexOf(avatar.facing) * 9 + (walking ? walkFrame : 0));
         continue;
       }
+      sprite.setAngle(0);
       const sitting = avatar.seating.progress(time);
       sprite.setFrame(DIRECTIONS.indexOf(avatar.facing) * 9);
       const lowering = Math.round(10 * (1 - (1 - sitting) ** 3));

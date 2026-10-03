@@ -17,12 +17,11 @@ const rosterOf = (...players) => players.map(player => ({
 
 const selfView = (patch = {}) => ({
   role: "villager", faction: "village", status: "living", killedByMafia: false,
-  mafiaTeam: null, mafiaVotes: null, mafiaVote: null, protect: null, protectBlockedPlayerId: null,
-  investigate: null, investigations: null, meetingVoted: false, meetingVote: null, ...patch
+  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, ...patch
 });
 
 const gameState = (patch = {}) => ({
-  version: 1, type: "game_state", phase: "night", round: 1, remainingMs: 90_000,
+  version: 1, type: "game_state", phase: "night", round: 1, remainingMs: 20_000,
   players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), ...patch
 });
 
@@ -100,7 +99,7 @@ test("Game state, chat and Room state applied in one frame reconcile once, in tr
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world) { views.push(world); } });
   const player = seated("p", 0);
   inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
-  inbox.enqueue(gameState({ phase: "role_reveal", round: 0, remainingMs: 8_000, players: rosterOf(player), self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"], mafiaVotes: [] }) }));
+  inbox.enqueue(gameState({ phase: "role_reveal", round: 0, remainingMs: 8_000, players: rosterOf(player), self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"] }) }));
   inbox.enqueue({ version: 1, type: "chat_history", messages: [] });
   assert.equal(boundary.world.game, null);
   boundary.beginFrame();
@@ -111,15 +110,15 @@ test("Game state, chat and Room state applied in one frame reconcile once, in tr
   assert.equal("version" in boundary.world.game, false);
   assert.equal("type" in boundary.world.game, false);
 
-  inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"], mafiaVotes: [] }) }));
-  inbox.enqueue({ version: 1, type: "chat_message", channel: "mafia", round: 1, senderPlayerId: "p", senderName: "Alex", text: "Seat one." });
-  inbox.enqueue(gameState({ players: rosterOf(player), remainingMs: 60_000, self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"], mafiaVotes: [{ voterPlayerId: "p", targetPlayerId: "q" }], mafiaVote: "q" }) }));
+  inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"] }) }));
+  inbox.enqueue({ version: 1, type: "chat_message", channel: "public", round: 1, senderPlayerId: "p", senderName: "Alex", text: "Seat one." });
+  inbox.enqueue(gameState({ players: rosterOf(player), phase: "voting", remainingMs: 25_000, self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"], meetingVoted: true, meetingVote: "q" }) }));
   assert.equal(boundary.world.game.phase, "role_reveal");
   boundary.beginFrame();
   assert.equal(views.length, 2);
-  assert.equal(boundary.world.game.phase, "night");
-  assert.equal(boundary.world.game.remainingMs, 60_000, "the last Game state of the frame wins");
-  assert.equal(boundary.world.game.self.mafiaVote, "q");
+  assert.equal(boundary.world.game.phase, "voting");
+  assert.equal(boundary.world.game.remainingMs, 25_000, "the last Game state of the frame wins");
+  assert.equal(boundary.world.game.self.meetingVote, "q");
   assert.deepEqual(boundary.world.chat.map(entry => entry.text), ["Seat one."]);
 });
 
@@ -129,14 +128,14 @@ test("the phase countdown runs from when its Game state arrived, not when a fram
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
   inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
-  inbox.enqueue(gameState({ phase: "roam", remainingMs: 150_000, players: rosterOf(player) }));
+  inbox.enqueue(gameState({ phase: "day", remainingMs: 180_000, players: rosterOf(player) }));
   // A hidden tab runs no frames for 30 seconds.
   now += 30_000;
   boundary.beginFrame();
-  assert.equal(boundary.world.phaseEndsAt, 160_000);
+  assert.equal(boundary.world.phaseEndsAt, 190_000);
   inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
   boundary.beginFrame();
-  assert.equal(boundary.world.phaseEndsAt, 160_000, "a snapshot of the same Room keeps the deadline");
+  assert.equal(boundary.world.phaseEndsAt, 190_000, "a snapshot of the same Room keeps the deadline");
   inbox.enqueue(gameState({ phase: "finished", remainingMs: null, players: rosterOf(player) }));
   boundary.beginFrame();
   assert.equal(boundary.world.phaseEndsAt, null);
@@ -164,12 +163,12 @@ test("a snapshot for the same Room keeps private Game state until its replacemen
   const player = seated("p", 0);
   const snapshot = roomId => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId, selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
   inbox.enqueue(snapshot("ABC234"));
-  inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "doctor", protect: "p" }) }));
+  inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "doctor" }) }));
   inbox.enqueue({ version: 1, type: "chat_message", channel: "public", round: 1, senderPlayerId: "p", senderName: "Alex", text: "Seated." });
   boundary.beginFrame();
   inbox.enqueue(snapshot("ABC234"));
   boundary.beginFrame();
-  assert.equal(boundary.world.game.self.protect, "p", "recovery must not blank the Game between frames");
+  assert.equal(boundary.world.game.self.role, "doctor", "recovery must not blank the Game between frames");
   assert.equal(boundary.world.chat.length, 1);
   // A different Room is a different Game, so nothing carries over.
   inbox.enqueue(snapshot("ZZZ999"));
@@ -234,4 +233,67 @@ test('accepted appearance replaces existing Player only at the frame boundary an
   boundary.beginFrame();
   assert.equal(boundary.world.players.get('p').avatarPreset, 'townsperson-10');
   assert.equal(boundary.world.phase, 'playing');
+});
+
+
+test("field presentation is queued through Day and Night and clears for Townhall and new rounds", () => {
+  const inbox = new NetworkInbox();
+  const frames = [];
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world) { frames.push(world); } });
+  const field = round => ({ version: 1, type: "field_state", round, players: [], self: { x: 1300, y: 900, facing: "down", correction: 1 } });
+  inbox.enqueue(gameState({ phase: "day", round: 1 }));
+  inbox.enqueue(field(1));
+  assert.equal(boundary.world.field, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.field.self.x, 1300);
+  const day = boundary.world.field;
+  inbox.enqueue(gameState({ phase: "night", round: 1, remainingMs: 20_000 }));
+  assert.equal(boundary.world.game.phase, "day");
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.phase, "night");
+  assert.equal(boundary.world.field, day, "sleep preserves the current field");
+  inbox.enqueue(field(1));
+  boundary.beginFrame();
+  assert.equal(boundary.world.field.self.y, 900);
+  inbox.enqueue(gameState({ phase: "discussion", round: 1 }));
+  inbox.enqueue(field(1));
+  boundary.beginFrame();
+  assert.equal(boundary.world.field, null, "late fields cannot replace Townhall seating");
+  inbox.enqueue(gameState({ phase: "day", round: 2 }));
+  inbox.enqueue(field(1));
+  boundary.beginFrame();
+  assert.equal(boundary.world.field, null, "previous rounds cannot reappear");
+  inbox.enqueue(field(2));
+  boundary.beginFrame();
+  assert.equal(boundary.world.field.round, 2);
+  assert.equal(frames.length, 6);
+});
+
+
+test("ballot confirmation and the next round apply at frames without extending voting", () => {
+  let now = 1_000;
+  const inbox = new NetworkInbox(() => now);
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  inbox.enqueue(gameState({ phase: "voting", remainingMs: 30_000 }));
+  boundary.beginFrame();
+  const beforeConfirm = boundary.world;
+  now = 6_000;
+  inbox.enqueue(gameState({ phase: "voting", remainingMs: 25_000,
+    self: selfView({ meetingVoted: true, meetingVote: null }) }));
+  inbox.enqueue({ version: 1, type: "chat_message", channel: "public", round: 1,
+    senderPlayerId: "p", senderName: "Alex", text: "Still discussing" });
+  assert.equal(boundary.world, beforeConfirm);
+  assert.equal(boundary.world.game.self.meetingVoted, false);
+  now = 9_000;
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.meetingVoted, true);
+  assert.equal(boundary.world.game.self.meetingVote, null);
+  assert.equal(boundary.world.game.ballots, null);
+  assert.equal(boundary.world.phaseEndsAt, 31_000, "confirmation does not restart the countdown");
+  assert.equal(boundary.world.chat[0].text, "Still discussing");
+  inbox.enqueue(gameState({ phase: "day", round: 2, remainingMs: 180_000 }));
+  assert.equal(boundary.world.game.self.meetingVoted, true);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.round, 2);
+  assert.equal(boundary.world.game.self.meetingVoted, false);
 });

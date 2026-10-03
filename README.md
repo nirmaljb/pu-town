@@ -1,6 +1,6 @@
 # PU Town
 
-PU Town is a social deduction game for four to ten Players, played like Among Us. Players gather in an isolated Room around the Emergency button in the Town Square, then roam the town: the Mafia hunt and can vanish, the Doctor shields, the Sheriff scans, and anyone who finds a Body reports it and calls everyone back to the table to vote. A Spring Boot server owns the Roles, the clock, every position and every result, and tells each Player only what they are entitled to know, down to which Players they can see.
+PU Town is a social deduction game for four to ten Players. Players explore the town during Day, sleep in place during Night, and gather at retained Seats for Townhall discussion and voting. A Spring Boot server owns Roles, the clock, accepted positions and every result, and tells each Player only what they are entitled to know.
 
 The project currently targets local development. It consists of two processes:
 
@@ -42,7 +42,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a ring of ten inward-facing chairs around the red Emergency button in PU Town's Town Square. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; nobody walks.
+Open [http://localhost:5173](http://localhost:5173). Enter a Display Name, then Create Room or Join Lobby using a shared Room Code. Membership opens the Room's Lobby: a ring of ten inward-facing chairs in PU Town's Town Square. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; Day movement begins beside that Seat.
 
 The creator is Host. Start Game needs at least four Players present, all connected and Ready, and the Host is told which of those is missing until it is. An eleventh Join receives “Room is full”, and a started Room accepts no new Players.
 
@@ -83,30 +83,30 @@ Stop only these tunnels with `tailscale funnel --https=8443 off` and `tailscale 
 
 ## The Game
 
+The Game map fills the available width and stays centered, with phase information,
+ballots and chat over the town rather than in a reserved sidebar. Your Role opens
+during the reveal; click its heading to consult the instructions later. Retained
+results can be opened separately. During play the Room Code is plain selectable
+text, and Leave Room stays available. Copy code is available in the Lobby.
+Settings and microphone controls will arrive with their respective feature slices.
+
 In the Lobby the Host chooses the deal with the − / + controls under the Town Square: one or two Mafia, one or two Sheriffs and at least one Doctor, and everyone else is a Villager. Every Player sees the choice. There must always be at least one Villager, so the Game needs one more Player than the special Roles, and never fewer than four. A new Room deals one of each. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
 
 | Phase | Length | What you do |
 | --- | --- | --- |
-| Roam | up to 150 s | Walk the town with WASD or the arrow keys. Use your abilities, find Bodies. |
-| Meeting called | 5 s | Who called it, and everyone who died since the last Meeting. |
-| Discussion | 90 s | Everyone living talks in public chat, seated around the button. |
-| Voting | 30 s | One vote each, or Skip. |
+| Day | 180 s | Walk the town with WASD or arrow keys. |
+| Night | 20 s | Sleep where you stood; movement and conversation are closed. |
+| Townhall discussion | 90 s | Everyone living talks in public chat, seated around the Town Square. |
+| Townhall voting | 30 s | One confirmed ballot each, or Skip. |
 | Voting result | 6 s | The result, with every vote shown. |
 
-During the Roam:
+Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. Night target choices, Tasks, interiors, shared Day Vision, proximity text, voice and Solo Practice are subsequent slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22); they are not playable yet. The current Night resolves no Role choices and nobody dies during it.
 
-| Key | Who | What it does |
-| --- | --- | --- |
-| Q | Mafia | Kill a Village Player right next to you (25 s cooldown). They drop as a Body where they stood. |
-| E | Mafia | Vanish: nobody but the Mafia can see you for 10 s (30 s cooldown). |
-| Q | Doctor | Shield a nearby Player for 20 s: the next kill on them fails and uses up the Shield (30 s cooldown). |
-| Q | Sheriff | Scan a nearby Player and learn, privately, whether they are Mafia (30 s cooldown). |
-| R | Everyone living | Report a Body next to you, which calls a Meeting. |
-| F | Everyone living | At the red button in the Town Square: call an Emergency Meeting, once per Game. |
+Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. The living currently see only Avatars within their Role's Vision: Mafia 440 px, Doctors 380, Sheriffs 330 and Villagers 270. Eliminated Participants can walk during Day and see the town, unseen by the living. Day and Night have no text channel; public text opens during Townhall discussion and voting.
 
-Every cooldown starts 10 seconds in at the beginning of each Roam. Villagers have no ability, and they can't stay close to one Player for long: after about six seconds within arm's reach of someone, a Villager is pushed away. You only see Players within your Vision, a circle around you whose size depends on your Role: the Mafia see furthest, then the Doctor, then the Sheriff, and Villagers least. The server never sends anyone the positions it would hide. A kill is secret: only the Mafia and the victim know until someone finds the Body or a Meeting is called. The victim becomes a Ghost who can still walk and watch but is invisible to the living. The Mafia can whisper to each other during the Roam. If nobody reports anything before the Roam ends, a Meeting is called anyway, and every Roam starts with everyone standing up beside their Seat. When you die, your screen flashes red for two seconds to tell you.
+During Townhall voting, select any living Participant (including yourself) or Skip in the centered ballot panel. Selection is a private preview; only Confirm ballot submits it. Confirmed choices stay locked for the round, including after a same-tab refresh, and public chat remains open until the thirty-second voting deadline. If an unconfirmed target Leaves, select another target before confirming. Everyone sees the ballots when voting ends.
 
-A Meeting eliminates a Player only on a majority of the living, and reveals only their Faction. The Village wins when no Mafia is living; the Mafia win the moment they are at least as many as the Village. The Game then ends at once and every Role is revealed, including for Players who died or left.
+A Meeting eliminates a Player only on a strict majority of the living and currently reveals their Faction; full eliminated Role disclosure follows in #26. Village wins when no Mafia remains living, and Mafia wins at parity. Voting results run for six seconds before a decided Game finishes and every Role is revealed. Forfeit can decide victory immediately.
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 
@@ -120,7 +120,7 @@ Initial entry times out after ten seconds. During connection loss, controls stop
 
 Expired recovery shows “Your place in the Room expired” and “Back to lobby selection”, which clears recovery intent and returns to the Create Room / Join Lobby form without sending a fresh Join. A later Join from that form requires a Room still in its Lobby and begins a new membership. An unavailable Room produces a terminal explanation rather than creating a replacement Room. Leave Room during recovery immediately clears intent and returns to entry, with one bounded attempt to recover and Leave the reservation when reachable; otherwise it expires naturally. Closing/reopening tabs and cross-device recovery are not guaranteed.
 
-Players are stationary on both client and server. Leave and expiry free chairs without shifting other occupants; Disconnect reserves the chair. When the Host leaves or expires, the longest-present connected Player becomes Host if available. A disconnected Host retains authority for fifteen seconds. At the deadline it transfers to the longest-present connected Player; if none is connected, the first returning Player becomes Host. A returning former Host does not reclaim transferred authority. The Room Code and Leave control remain available in both phases. A started Room is removed after its final membership ends through Leave or expiry. Recoverable disconnected memberships keep it alive, even when nobody is connected; it never resets to a Lobby.
+Players are seated in the Lobby and Townhall, walk during Day, and sleep in place during Night. Leave and expiry free chairs without shifting other occupants; Disconnect reserves the chair. When the Host leaves or expires, the longest-present connected Player becomes Host if available. A disconnected Host retains authority for fifteen seconds. At the deadline it transfers to the longest-present connected Player; if none is connected, the first returning Player becomes Host. A returning former Host does not reclaim transferred authority. The Room Code and Leave control remain available in both phases. A started Room is removed after its final membership ends through Leave or expiry. Recoverable disconnected memberships keep it alive, even when nobody is connected; it never resets to a Lobby.
 
 ## Character artwork
 
@@ -163,6 +163,41 @@ npm run build
 
 The production frontend bundle is written to `frontend/dist/`.
 
+### Browser acceptance
+
+Install the Playwright browser and Linux dependencies once, then run the browser suite:
+
+```sh
+cd frontend
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+The harness starts this checkout's backend on port `18081` and Vite on `5173`,
+checks `/health`, and closes both after testing. It requires JDK 17 and free ports;
+it never reuses an existing development server. If another checkout occupies the
+default loopback address on `5173`, use `PU_TOWN_E2E_HOST=127.0.0.2 npm run test:browser`
+to bind a separate loopback address while keeping the browser's supported
+`http://localhost:5173` origin. When another harness occupies backend port `18081`,
+set `PU_TOWN_E2E_BACKEND_PORT` to a free port as well; both server startup and
+browser connections use it.
+
+Each viewport journey waits through a full cycle (about six minutes). The suite uses Phaser's Canvas renderer and four independent browser contexts
+at desktop and phone sizes, including ballot interaction after a landscape resize
+and announcements containing a long Display Name. It exercises Create/Join, Ready/Start, centered map
+and overlay geometry, Role disclosure, Day movement, sleeping Night and its movement lock, same-tab Night recovery, Townhall public chat,
+ballot preview/confirmation, the six-second result, Seat reset for Day two, Leave and a new Room. It waits for real server phase
+deadlines. Failures retain Playwright traces in `frontend/test-results/`; the
+voting and sleeping Night screens are also captured there. This is automated browser evidence for
+the timed cycle in #24. The four-Player ballot journey covers keyboard
+selection, private previews, locked Skip and target ballots, target Leave,
+chat during voting, same-tab ballot recovery and public results for #25.
+The #25 browser run on this checkout has not passed acceptance: Chromium crashed
+before voting under host resource pressure. The trace is retained locally; the
+WebSocket and frame-boundary regressions provide separate deterministic evidence.
+The suite does not verify the future Tasks, Night choices,
+interiors or media features in epic #22, or constitute manual playtesting.
+
 Run the backend tests and create an executable JAR:
 
 ```sh
@@ -179,7 +214,7 @@ java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
 
 ## Architecture
 
-The Phaser client applies every server event at a game-frame boundary and renders from that state alone; it predicts nothing. The Spring Boot server owns Room membership, the Game's Roles, its clock and every result, and builds a separate view for each recipient — a Player is never sent a Role, a Mafia vote or a private chat they are not entitled to, so concealment never depends on the client. Accepted choices update only the Players whose authorized view actually changed, so a timed phase cannot leak hidden activity through its own countdown. All server state is currently held in memory.
+The Phaser client applies every server event at a game-frame boundary and renders authorized views from that state; it predicts only its own Avatar's Day movement and adopts server corrections. The Spring Boot server owns Room membership, the Game's Roles, its clock and every result, and builds a separate view for each recipient — a Player is never sent a Role, a Mafia vote or a private chat they are not entitled to, so concealment never depends on the client. Accepted choices update only the Players whose authorized view actually changed, so a timed phase cannot leak hidden activity through its own countdown. All server state is currently held in memory.
 
 Important project documentation:
 

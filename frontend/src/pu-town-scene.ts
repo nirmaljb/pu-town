@@ -11,7 +11,7 @@ import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
 import { VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
 
-/** Outside a Roam the camera frames the Town Square, where the Players sit. */
+/** Outside Day and sleeping Night the camera frames the Town Square, where the Players sit. */
 const SQUARE_X = WORLD_WIDTH / 2;
 const SQUARE_Y = WORLD_HEIGHT / 2;
 
@@ -144,7 +144,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     this.#avatarReconciler?.updateAnimations(time, delta, self);
-    // During a Roam the camera follows this Player; otherwise it frames the Town Square.
+    // During Day and sleeping Night the camera follows this Player; otherwise it frames the Town Square.
     const camera = this.cameras.main;
     const focusX = self?.x ?? SQUARE_X;
     const focusY = self?.y ?? SQUARE_Y;

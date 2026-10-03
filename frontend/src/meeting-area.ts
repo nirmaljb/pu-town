@@ -44,10 +44,9 @@ export function meetingSeat(seat: number): { x: number; y: number; facing: Direc
   };
 }
 
-/** The town the Players roam; Meetings gather on chairs around the button in the Town Square. */
+/** The town the Players roam; Townhall gathers on retained chairs in the Town Square. */
 export class MeetingArea {
   readonly #town: Phaser.GameObjects.GameObject[] = [];
-  readonly #button: Phaser.GameObjects.Container;
   readonly #chairs: Phaser.GameObjects.Container;
 
   constructor(scene: Phaser.Scene) {
@@ -66,17 +65,6 @@ export class MeetingArea {
     // Buildings, trees and furniture sort by their bottom edge, as the Avatars sort by their feet,
     // so a Player walks behind a roof or a tree top and in front of its base.
     for (const object of map.getObjectLayer("objects")?.objects ?? []) this.spawn(scene, map, object, object.y ?? 0);
-
-    // The Emergency Meeting button stands in the open middle of the Town Square.
-    const button = scene.add.graphics();
-    button.fillStyle(0x2c2c34).fillEllipse(0, 8, 58, 26);
-    button.fillStyle(0x7a1f1f).fillEllipse(0, 0, 40, 22);
-    button.fillStyle(0xd93b3b).fillEllipse(0, -4, 34, 16);
-    button.fillStyle(0xff8a80, 0.8).fillEllipse(-6, -7, 10, 5);
-    const hint = scene.add.text(0, 38, "Emergency Meeting · press F here", {
-      fontFamily: "sans-serif", fontSize: "13px", color: "#fff0c9", stroke: "#2a2118", strokeThickness: 4
-    }).setOrigin(0.5);
-    this.#button = scene.add.container(BUTTON_X, BUTTON_Y, [button, hint]).setDepth(-1_000);
 
     this.#chairs = scene.add.container(0, 0).setDepth(-999);
     for (let seat = 0; seat < ROOM_CAPACITY; seat++) {
@@ -126,7 +114,6 @@ export class MeetingArea {
   /** The town shows while in a Room; the chairs only while the Players are seated. */
   setVisible(visible: boolean, seated: boolean): void {
     for (const part of this.#town) (part as unknown as Phaser.GameObjects.Components.Visible).setVisible(visible);
-    this.#button.setVisible(visible);
     this.#chairs.setVisible(visible && seated);
   }
 }

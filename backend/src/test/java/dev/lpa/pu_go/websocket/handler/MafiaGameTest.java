@@ -34,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class MafiaGameTest {
     private static final long REVEAL = 8_000;
-    private static final long ROAM = 150_000;
-    private static final long MEETING_CALL = 5_000;
+    private static final long DAY = 180_000;
+    private static final long NIGHT = 20_000;
     private static final long DISCUSSION = 90_000;
     private static final long VOTING = 30_000;
     private static final long VOTING_RESULT = 6_000;
@@ -209,12 +209,12 @@ class MafiaGameTest {
     // ----- the Roam: movement and sight ---------------------------------------------------
 
     @Test
-    void theRoamBeginsAtTheSeatsAndStreamsOnlyWhatEachPlayerCanSee() throws Exception {
+    void theDayBeginsAtTheSeatsAndStreamsOnlyWhatEachPlayerCanSee() throws Exception {
         startTable("sight", 10);
         advance(REVEAL);
-        assertEquals("roam", game(5).path("phase").asText());
+        assertEquals("day", game(5).path("phase").asText());
         assertEquals(1, game(5).path("round").asInt());
-        assertEquals(ROAM, game(5).path("remainingMs").asLong());
+        assertEquals(DAY, game(5).path("remainingMs").asLong());
         handler.tickFields();
         for (int seat = 0; seat < 10; seat++) {
             JsonNode self = field(seat).path("self");
@@ -265,7 +265,6 @@ class MafiaGameTest {
         assertTrue(FieldRules.MAFIA_VISION > FieldRules.DOCTOR_VISION);
         assertTrue(FieldRules.DOCTOR_VISION > FieldRules.SHERIFF_VISION);
         assertTrue(FieldRules.SHERIFF_VISION > FieldRules.VILLAGER_VISION);
-        assertTrue(FieldRules.VILLAGER_VISION > FieldRules.SCAN_RANGE, "every ability reaches only what its user can see");
         startTable("vision", 10);
         advance(REVEAL);
         // Seat 1, a Villager, walks just inside and then just outside each watcher's Vision,
@@ -287,248 +286,65 @@ class MafiaGameTest {
     // ----- kills, Bodies and Meetings -----------------------------------------------------
 
     @Test
-    void aKillLeavesABodyAndStaysSecretFromTheVillageUntilItIsReported() throws Exception {
-        startTable("kill", 10);
-        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        double bodyX = RoomRules.seatX(9);
-        double bodyY = RoomRules.seatY(9);
-        walk(0, bodyX + 40, bodyY);
-        int villageStates = countOfType(table.get(5), "game_state");
-        ability(0, "kill", 1, 9);
-        assertEquals("eliminated", game(9).path("self").path("status").asText());
-        assertTrue(game(9).path("self").path("killedByMafia").asBoolean());
-        // The Mafia learn at once; the living Village receives nothing at all.
-        assertEquals("eliminated", game(2).path("players").get(9).path("status").asText());
-        assertEquals(villageStates, countOfType(table.get(5), "game_state"));
-        assertEquals("living", game(5).path("players").get(9).path("status").asText());
-        handler.tickFields();
-        for (int seat = 0; seat < 9; seat++) {
-            JsonNode self = field(seat).path("self");
-            boolean near = Math.hypot(self.path("x").asDouble() - bodyX, self.path("y").asDouble() - bodyY) <= visionOf(seat);
-            assertEquals(near ? 1 : 0, field(seat).path("bodies").size(), "seat " + seat);
-            assertFalse(fieldIds(seat).contains(playerId(9)), "a ghost is invisible to the living");
-        }
-        // The ghost sees the whole town and can still walk.
-        assertEquals(10, field(9).path("players").size());
-        assertTrue(field(9).path("players").get(9).path("ghost").asBoolean());
-        // Recovery during the Roam keeps the death secret too.
-        handler.afterConnectionClosed(table.get(6), CloseStatus.NORMAL);
-        var returning = connect("kill-return");
-        recover(returning, code, tokens.get(6));
-        assertEquals("living", latestOfType(returning, "game_state").path("players").get(9).path("status").asText());
-        // Reporting needs a Body within reach.
-        ability(5, "report", 1, null);
-        assertEquals("invalid_target", latest(table.get(5)).path("code").asText());
-        walk(8, bodyX - 40, bodyY + 20);
-        ability(8, "report", 1, null);
-        for (int seat = 0; seat < 9; seat++) {
-            if (seat == 6) continue;
-            JsonNode state = game(seat);
-            assertEquals("meeting_call", state.path("phase").asText());
-            assertEquals("report", state.path("outcome").path("kind").asText());
-            assertEquals(playerId(8), state.path("outcome").path("callerPlayerId").asText());
-            assertEquals(playerId(9), state.path("outcome").path("bodyPlayerId").asText());
-            assertEquals(List.of(playerId(9)), names(state.path("outcome").path("deaths")));
-            assertEquals("eliminated", state.path("players").get(9).path("status").asText());
-        }
-        assertEquals(MEETING_CALL, game(5).path("remainingMs").asLong());
-    }
-
-    @Test
-    void killsRespectRoleReachTeamRoundAndCooldown() throws Exception {
-        startTable("rules", 10);
-        advance(REVEAL);
-        walk(0, RoomRules.seatX(9) + 40, RoomRules.seatY(9));
-        ability(0, "kill", 1, 9);
-        assertEquals("cooling_down", latest(table.get(0)).path("code").asText());
-        advance(FieldRules.OPENING_COOLDOWN);
-        ability(5, "kill", 1, 9);
-        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
-        ability(0, "kill", 1, 5);
-        assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
-        ability(0, "kill", 1, 2);
-        assertEquals("invalid_target", latest(table.get(0)).path("code").asText());
-        ability(0, "kill", 2, 9);
-        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
-        send(table.get(0), "{\"version\":1,\"type\":\"use_ability\",\"ability\":\"kill\",\"round\":1,\"targetPlayerId\":null}");
-        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
-        ability(0, "kill", 1, 9);
-        assertEquals("eliminated", game(9).path("self").path("status").asText());
-        walk(0, RoomRules.seatX(8) + 40, RoomRules.seatY(8));
-        ability(0, "kill", 1, 8);
-        assertEquals("cooling_down", latest(table.get(0)).path("code").asText());
-        assertEquals("living", game(8).path("self").path("status").asText());
-    }
-
-    @Test
-    void theRoamTimesOutIntoAMeetingAndTheCycleReturnsEveryoneToTheirSeat() throws Exception {
+    void dayNightAndTownhallKeepExactDeadlinesAndRetainedSeats() throws Exception {
         startTable("cycle", 10);
         advance(REVEAL);
+        assertEquals("day", game(5).path("phase").asText());
+        assertEquals(180_000, game(5).path("remainingMs").asLong());
         walk(5, 1_280, 1_000);
-        advance(ROAM);
-        assertEquals("meeting_call", game(5).path("phase").asText());
-        assertEquals("timeout", game(5).path("outcome").path("kind").asText());
-        assertEquals(0, game(5).path("outcome").path("deaths").size());
+        advance(REVEAL + 180_000 - milliseconds.get() - 1);
+        assertEquals("day", game(5).path("phase").asText());
+        advance(1);
+        assertEquals("night", game(5).path("phase").asText());
+        assertEquals(20_000, game(5).path("remainingMs").asLong());
+        handler.tickFields();
+        assertEquals(1_000, field(5).path("self").path("y").asDouble());
+        move(5, 1_280, 1_020);
+        handler.tickFields();
+        assertEquals(1_000, field(5).path("self").path("y").asDouble(), "Night freezes accepted positions");
+        chat(0, "mafia", "No Night whispers");
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+        chat(5, "public", "No Night text");
+        assertEquals("invalid_phase", latest(table.get(5)).path("code").asText());
+        advance(19_999);
+        assertEquals("night", game(5).path("phase").asText());
+        advance(1);
+        assertEquals("discussion", game(5).path("phase").asText());
+        assertEquals(DISCUSSION, game(5).path("remainingMs").asLong());
         int ticks = countOfType(table.get(5), "field_state");
         handler.tickFields();
-        assertEquals(ticks, countOfType(table.get(5), "field_state"), "fields stream only during a Roam");
-        advance(MEETING_CALL);
-        assertEquals("discussion", game(5).path("phase").asText());
+        assertEquals(ticks, countOfType(table.get(5), "field_state"));
         advance(DISCUSSION);
         assertEquals("voting", game(5).path("phase").asText());
         advance(VOTING);
         assertEquals("voting_result", game(5).path("phase").asText());
         assertTrue(game(5).path("outcome").path("eliminatedPlayerId").isNull());
-        advance(VOTING_RESULT);
-        assertEquals("roam", game(5).path("phase").asText());
+        advance(VOTING_RESULT + 700);
+        assertEquals("day", game(5).path("phase").asText());
         assertEquals(2, game(5).path("round").asInt());
+        assertEquals(179_300, game(5).path("remainingMs").asLong(), "deadlines do not drift after a delayed sweep");
         handler.tickFields();
         assertEquals(RoomRules.seatY(5), field(5).path("self").path("y").asDouble());
     }
 
     @Test
-    void anEmergencyMeetingNeedsTheButtonAndIsOncePerGame() throws Exception {
-        startTable("button", 10);
-        advance(REVEAL);
-        ability(5, "emergency", 1, null);
-        assertEquals("Stand by the button in the Town Square.", latest(table.get(5)).path("message").asText());
-        walk(5, RoomRules.BUTTON_X, RoomRules.BUTTON_Y + 50);
-        ability(5, "emergency", 1, null);
-        assertEquals("meeting_call", game(0).path("phase").asText());
-        assertEquals("emergency", game(0).path("outcome").path("kind").asText());
-        assertEquals(playerId(5), game(0).path("outcome").path("callerPlayerId").asText());
-        advance(MEETING_CALL + DISCUSSION + VOTING + VOTING_RESULT);
-        assertEquals(2, game(5).path("round").asInt());
-        handler.tickFields();
-        assertFalse(field(5).path("self").path("emergencyAvailable").asBoolean());
-        walk(5, RoomRules.BUTTON_X, RoomRules.BUTTON_Y + 50);
-        ability(5, "emergency", 2, null);
-        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
-        assertEquals("roam", game(5).path("phase").asText());
-    }
-
-    // ----- Vanish, Shield, Scan and Crowding ---------------------------------------------
-
-    @Test
-    void aVanishedMafiaDisappearsFromTheVillageButNotFromTheirTeam() throws Exception {
-        startTable("vanish", 10);
-        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        walk(4, RoomRules.seatX(0) + 60, RoomRules.seatY(0) + 40);
-        handler.tickFields();
-        assertTrue(fieldIds(9).contains(playerId(0)));
-        ability(0, "vanish", 1, null);
-        assertTrue(field(0).path("self").path("vanishedMs").asLong() > 0);
-        handler.tickFields();
-        assertFalse(fieldIds(9).contains(playerId(0)));
-        assertFalse(fieldIds(4).contains(playerId(0)));
-        JsonNode seenByTeam = fieldPlayer(2, playerId(0));
-        assertTrue(seenByTeam.path("vanished").asBoolean());
-        // Aiming at a Vanished Player reads exactly like aiming at nobody.
-        ability(4, "scan", 1, 0);
-        assertEquals("No such Player within reach.", latest(table.get(4)).path("message").asText());
-        ability(0, "vanish", 1, null);
-        assertEquals("cooling_down", latest(table.get(0)).path("code").asText());
-        advance(FieldRules.VANISH_DURATION);
-        handler.tickFields();
-        assertTrue(fieldIds(9).contains(playerId(0)));
-        assertTrue(field(5).path("self").path("vanishedMs").isNull(), "only the Mafia have a Vanish timer");
-    }
-
-    @Test
-    void aShieldMakesTheNextKillFailAndIsSpent() throws Exception {
-        startTable("shield", 10);
-        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        walk(4, 1_560, 740);
-        ability(3, "shield", 1, 3);
-        assertEquals("invalid_target", latest(table.get(3)).path("code").asText());
-        ability(3, "shield", 1, 4);
-        assertEquals(playerId(4), field(3).path("self").path("shieldTargetPlayerId").asText());
-        int sheriffStates = countOfType(table.get(4), "game_state");
-        ability(2, "kill", 1, 4);
-        assertEquals("target_shielded", latest(table.get(2)).path("code").asText());
-        assertEquals("living", game(4).path("self").path("status").asText());
-        assertEquals(sheriffStates, countOfType(table.get(4), "game_state"), "the target is not told");
-        handler.tickFields();
-        assertTrue(field(3).path("self").path("shieldTargetPlayerId").isNull());
-        ability(3, "shield", 1, 4);
-        assertEquals("cooling_down", latest(table.get(3)).path("code").asText());
-        advance(FieldRules.KILL_COOLDOWN);
-        ability(2, "kill", 1, 4);
-        assertEquals("eliminated", game(4).path("self").path("status").asText());
-    }
-
-    @Test
-    void aScanTellsOnlyTheSheriffWhetherTheTargetIsMafia() throws Exception {
-        startTable("scan", 10);
-        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        ability(4, "scan", 1, 2);
-        assertEquals("invalid_target", latest(table.get(4)).path("code").asText());
-        walk(4, 1_560, 740);
-        List<Integer> before = new ArrayList<>();
-        for (var member : table) before.add(countOfType(member, "game_state"));
-        ability(4, "scan", 1, 2);
-        JsonNode results = game(4).path("self").path("investigations");
-        assertEquals(1, results.size());
-        assertEquals(playerId(2), results.get(0).path("targetPlayerId").asText());
-        assertTrue(results.get(0).path("mafia").asBoolean());
-        for (int seat = 0; seat < 10; seat++) {
-            if (seat != 4) assertEquals(before.get(seat), countOfType(table.get(seat), "game_state"));
-        }
-        ability(4, "scan", 1, 3);
-        assertEquals("cooling_down", latest(table.get(4)).path("code").asText());
-        advance(FieldRules.SCAN_COOLDOWN);
-        ability(4, "scan", 1, 3);
-        assertFalse(game(4).path("self").path("investigations").get(1).path("mafia").asBoolean());
-        assertTrue(game(5).path("self").path("investigations").isNull());
-    }
-
-    @Test
-    void aVillagerWhoLingersBesideAnotherPlayerIsPushedAway() throws Exception {
-        startTable("crowd", 10);
-        advance(REVEAL);
-        walk(6, RoomRules.seatX(5) - 50, RoomRules.seatY(5));
-        handler.tickFields();
-        int correction = field(5).path("self").path("correction").asInt();
-        for (int tick = 0; tick < 30; tick++) {
-            milliseconds.addAndGet(100);
-            handler.tickFields();
-        }
-        assertTrue(field(5).path("self").path("crowding").asDouble() >= 0.45);
-        assertTrue(field(0).path("self").path("crowding").isNull(), "only Villagers crowd");
-        for (int tick = 0; tick < 40; tick++) {
-            milliseconds.addAndGet(100);
-            handler.tickFields();
-        }
-        JsonNode five = field(5).path("self");
-        JsonNode six = field(6).path("self");
-        assertEquals(correction + 1, five.path("correction").asInt());
-        assertTrue(Math.hypot(five.path("x").asDouble() - six.path("x").asDouble(),
-                five.path("y").asDouble() - six.path("y").asDouble()) > FieldRules.CROWD_RADIUS);
-        assertTrue(RoomRules.walkable(five.path("x").asDouble(), five.path("y").asDouble()));
-    }
-
-    // ----- chat, departures and victory ---------------------------------------------------
-
-    @Test
-    void mafiaWhisperDuringTheRoamAndEveryoneTalksInTheMeeting() throws Exception {
+    void chatIsSilentUntilTownhallAndDayHasNoPrivateMafiaChannel() throws Exception {
         startTable("chat", 10);
         advance(REVEAL);
-        chat(0, "mafia", "Take the Doctor.");
-        for (int seat = 0; seat < 10; seat++) {
-            boolean mafia = seat == 0 || seat == 2;
-            assertEquals(mafia, table.get(seat).payloads().stream().anyMatch(p -> p.contains("Take the Doctor.")), "seat " + seat);
-        }
+        chat(0, "mafia", "No private channel");
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
         chat(5, "public", "Hello?");
         assertEquals("invalid_phase", latest(table.get(5)).path("code").asText());
-        chat(5, "mafia", "Let me in");
-        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
-        advance(ROAM + MEETING_CALL);
+        for (var member : table) assertEquals(0, countOfType(member, "chat_message"));
+        advance(DAY + NIGHT);
+        chat(0, "mafia", "Still no private channel");
+        assertEquals("invalid_action", latest(table.get(0)).path("code").asText());
         chat(5, "public", "It was Player 0.");
         for (var member : table) assertTrue(member.payloads().stream().anyMatch(p -> p.contains("It was Player 0.")));
     }
 
     @Test
-    void leavingDuringTheRoamForfeitsAndRemovesTheAvatarFromTheField() throws Exception {
+    void leavingDuringDayForfeitsAndRemovesTheAvatarFromTheField() throws Exception {
         startTable("leave", 10);
         advance(REVEAL);
         send(table.get(7), "{\"version\":1,\"type\":\"leave_room\"}");
@@ -538,28 +354,9 @@ class MafiaGameTest {
     }
 
     @Test
-    void theMafiaWinTheMomentAKillReachesParity() throws Exception {
-        startTable("parity", 4);
-        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
-        walk(0, RoomRules.seatX(3) - 40, RoomRules.seatY(3));
-        ability(0, "kill", 1, 3);
-        assertEquals("roam", game(0).path("phase").asText());
-        advance(FieldRules.KILL_COOLDOWN);
-        walk(0, RoomRules.seatX(2) - 40, RoomRules.seatY(2));
-        ability(0, "kill", 1, 2);
-        for (int seat = 0; seat < 4; seat++) {
-            JsonNode state = game(seat);
-            assertEquals("finished", state.path("phase").asText());
-            assertEquals("mafia", state.path("winner").asText());
-            assertEquals(4, state.path("roles").size());
-            assertTrue(state.path("remainingMs").isNull());
-        }
-    }
-
-    @Test
     void theVillageWinsByVotingOutTheMafia() throws Exception {
         startTable("vote", 4);
-        advance(REVEAL + ROAM + MEETING_CALL + DISCUSSION);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
         assertEquals("voting", game(1).path("phase").asText());
         for (int seat = 1; seat < 4; seat++) ballot(seat, 1, 0);
         ballot(0, 1, null);
@@ -574,6 +371,182 @@ class MafiaGameTest {
         assertEquals("finished", game(1).path("phase").asText());
         assertEquals("village", game(1).path("winner").asText());
         assertEquals(List.of("mafia", "doctor", "sheriff", "villager"), revealedRoles(game(1)));
+    }
+
+    @Test
+    void nightRecoveryRestoresSleepingPositionAndPrivateRoleWithoutWaitingForATick() throws Exception {
+        startTable("night-recover", 10);
+        advance(REVEAL);
+        walk(5, 1_280, 1_000);
+        advance(REVEAL + DAY - milliseconds.get());
+        handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
+        advance(5_000);
+        var recovered = connect("night-recovered");
+        recover(recovered, code, tokens.get(5));
+        assertEquals(playerId(5), latestOfType(recovered, "room_snapshot").path("selfPlayerId").asText());
+        assertEquals("night", latestOfType(recovered, "game_state").path("phase").asText());
+        assertEquals(15_000, latestOfType(recovered, "game_state").path("remainingMs").asLong());
+        JsonNode sleeping = latestOfType(recovered, "field_state");
+        assertEquals(1_000, sleeping.path("self").path("y").asDouble());
+        assertNoHiddenRolesLeaked(recovered);
+        send(recovered, "{\"version\":1,\"type\":\"move\",\"x\":1280,\"y\":1020,\"facing\":\"down\"}");
+        handler.tickFields();
+        assertEquals(1_000, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+    }
+
+    @Test
+    void retiredAbilitiesCannotInterruptDayOrNightAndCrowdingNeverMovesPlayers() throws Exception {
+        startTable("retired", 10);
+        advance(REVEAL);
+        walk(6, RoomRules.seatX(5) - 50, RoomRules.seatY(5));
+        JsonNode before = field(5).path("self");
+        advance(10_000);
+        handler.tickFields();
+        assertEquals(before, field(5).path("self"), "standing nearby no longer causes a push");
+        for (String ability : List.of("kill", "shield", "scan", "vanish", "report", "emergency")) {
+            int othersBefore = countOfType(table.get(5), "game_state");
+            ability(0, ability, 1, ability.equals("kill") || ability.equals("shield") || ability.equals("scan") ? 5 : null);
+            assertEquals("unknown_message_type", latest(table.get(0)).path("code").asText());
+            assertEquals(othersBefore, countOfType(table.get(5), "game_state"));
+            assertEquals("day", game(0).path("phase").asText());
+        }
+        assertFalse(field(5).has("bodies"));
+        assertFalse(field(5).path("self").has("crowding"));
+        assertFalse(field(0).path("self").has("primaryCooldownMs"));
+        advance(REVEAL + DAY - milliseconds.get());
+        ability(0, "emergency", 1, null);
+        assertEquals("unknown_message_type", latest(table.get(0)).path("code").asText());
+        assertEquals("night", game(0).path("phase").asText());
+    }
+
+    @Test
+    void townhallBallotIsPrivateAndRecoveryRetainsItUntilTheResult() throws Exception {
+        startTable("ballot-recovery", 10);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        var before = table.stream().map(member -> countOfType(member, "game_state")).toList();
+        ballot(5, 1, null);
+        for (int seat = 0; seat < 10; seat++) {
+            assertEquals(before.get(seat) + (seat == 5 ? 1 : 0), countOfType(table.get(seat), "game_state"));
+        }
+        handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
+        var recovered = connect("ballot-recovered");
+        recover(recovered, code, tokens.get(5));
+        JsonNode self = latestOfType(recovered, "game_state").path("self");
+        assertTrue(self.path("meetingVoted").asBoolean());
+        assertTrue(self.path("meetingVote").isNull());
+        send(recovered, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"player-1\"}");
+        assertEquals("already_submitted", latest(recovered).path("code").asText());
+        advance(VOTING);
+        assertEquals("voting_result", game(0).path("phase").asText());
+        assertEquals(1, game(0).path("ballots").size());
+        assertTrue(game(0).path("ballots").get(0).path("targetPlayerId").isNull());
+    }
+
+    @Test
+    void forfeitsStillDecideImmediateParityAndVillageVictory() throws Exception {
+        startTable("parity", 4);
+        advance(REVEAL);
+        send(table.get(3), "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals("day", game(0).path("phase").asText());
+        send(table.get(2), "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals("finished", game(0).path("phase").asText());
+        assertEquals("mafia", game(0).path("winner").asText());
+        assertEquals(4, game(0).path("roles").size());
+        table.clear();
+        startTable("village-forfeit", 4);
+        send(table.get(0), "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals("finished", game(1).path("phase").asText());
+        assertEquals("village", game(1).path("winner").asText());
+    }
+
+    @Test
+    void votingKeepsConfirmedSkipPrivateAndRecoversItWithoutClosingDiscussion() throws Exception {
+        startTable("private-ballot", 4);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        assertEquals(30_000, game(1).path("remainingMs").asLong());
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, null);
+        for (int seat = 0; seat < 4; seat++) {
+            assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), table.get(seat).payloads().size());
+            assertTrue(game(seat).path("ballots").isNull());
+            assertEquals(seat == 1, game(seat).path("self").path("meetingVoted").asBoolean());
+            assertTrue(game(seat).path("self").path("meetingVote").isNull());
+        }
+        ballot(1, 1, 0);
+        assertEquals("already_submitted", latest(table.get(1)).path("code").asText());
+        ballot(2, 2, 0);
+        assertEquals("invalid_phase", latest(table.get(2)).path("code").asText());
+        assertFalse(game(2).path("self").path("meetingVoted").asBoolean());
+        // Choosing yourself is allowed: every living Participant is an eligible target.
+        ballot(2, 1, 2);
+        assertEquals(playerId(2), game(2).path("self").path("meetingVote").asText());
+        ballot(0, 1, null);
+        ballot(3, 1, null);
+        chat(1, "public", "Discussion stays open after Confirm");
+        for (var session : table) {
+            assertEquals("chat_message", latest(session).path("type").asText());
+            assertEquals("Discussion stays open after Confirm", latest(session).path("text").asText());
+        }
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var returned = connect("private-ballot-returned");
+        recover(returned, code, tokens.get(1));
+        JsonNode recovered = latestOfType(returned, "game_state");
+        assertTrue(recovered.path("self").path("meetingVoted").asBoolean());
+        assertTrue(recovered.path("self").path("meetingVote").isNull());
+        assertTrue(recovered.path("ballots").isNull());
+        assertEquals("Discussion stays open after Confirm",
+                latestOfType(returned, "chat_history").path("messages").get(0).path("text").asText());
+        send(returned, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"" + playerId(0) + "\"}");
+        assertEquals("already_submitted", latest(returned).path("code").asText());
+        advance(VOTING - 1);
+        assertEquals("voting", game(0).path("phase").asText());
+        advance(1);
+        assertEquals("voting_result", game(0).path("phase").asText());
+        assertTrue(game(0).path("outcome").path("eliminatedPlayerId").isNull());
+        assertEquals(4, game(0).path("ballots").size());
+    }
+
+    @Test
+    void rejectedBallotsDoNotRevealActivityToOtherRecipients() throws Exception {
+        startTable("rejected-ballots", 10);
+        ballot(1, 1, 0);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        send(table.get(9), "{\"version\":1,\"type\":\"leave_room\"}");
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, 9);
+        assertEquals("invalid_target", latest(table.get(1)).path("code").asText());
+        ballot(1, 2, null);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        assertFalse(game(1).path("self").path("meetingVoted").asBoolean());
+        for (int seat = 0; seat < 9; seat++) {
+            assertEquals(counts.get(seat) + (seat == 1 ? 2 : 0), table.get(seat).payloads().size());
+        }
+        advance(VOTING);
+        var afterDeadline = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(1, 1, null);
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        for (int seat = 0; seat < 9; seat++) {
+            assertEquals(afterDeadline.get(seat) + (seat == 1 ? 1 : 0), table.get(seat).payloads().size());
+        }
+    }
+
+    @Test
+    void anEliminatedParticipantCannotVoteButKeepsReceivingTownhallText() throws Exception {
+        startTable("eliminated-ballot", 10);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        for (int seat = 0; seat < 6; seat++) ballot(seat, 1, 9);
+        advance(VOTING + VOTING_RESULT + DAY + NIGHT + DISCUSSION);
+        assertEquals("voting", game(9).path("phase").asText());
+        assertEquals("eliminated", game(9).path("self").path("status").asText());
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        ballot(9, 2, null);
+        assertEquals("invalid_action", latest(table.get(9)).path("code").asText());
+        for (int seat = 0; seat < 9; seat++) assertEquals(counts.get(seat), table.get(seat).payloads().size());
+        chat(9, "public", "The dead cannot speak");
+        assertEquals("invalid_action", latest(table.get(9)).path("code").asText());
+        chat(1, "public", "The dead can listen");
+        assertEquals("The dead can listen", latest(table.get(9)).path("text").asText());
     }
 
     // ----- helpers ------------------------------------------------------------------------
