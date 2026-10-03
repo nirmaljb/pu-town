@@ -15,8 +15,20 @@ export const FOOT_RADIUS = 14;
 
 /** A little below the server's limit, so honest movement is never corrected. */
 export const WALK_SPEED = 220;
-/** How far a living Player sees, by Role: the Mafia furthest, Villagers least. */
-export const VISION: Readonly<Record<Role, number>> = { mafia: 440, doctor: 380, sheriff: 330, villager: 270 };
+/** Shared living Vision covers five-tile hearing (160px). */
+export const DAY_VISION = 320;
+export const VISION: Readonly<Record<Role, number>> = { mafia: DAY_VISION, doctor: DAY_VISION, sheriff: DAY_VISION, villager: DAY_VISION };
+/** The served Tiled map's room objects in its zones layer. */
+export const INTERIORS = [
+  { name: "Chapel", x: 1856, y: 96, width: 320, height: 320 },
+  { name: "Inn", x: 2080, y: 832, width: 384, height: 352 },
+  { name: "Smithy", x: 736, y: 864, width: 320, height: 288 },
+  { name: "General Store", x: 448, y: 832, width: 256, height: 320 }
+] as const;
+
+export function areaAt(x: number, y: number): string {
+  return INTERIORS.find(room => x >= room.x && x < room.x + room.width && y >= room.y && y < room.y + room.height)?.name ?? "Outdoors";
+}
 export type Obstacle = Readonly<{ x: number; y: number; width: number; height: number }>;
 
 /** The map's collision layer, from public/maps/pu-town/pu-town.collision.json. */

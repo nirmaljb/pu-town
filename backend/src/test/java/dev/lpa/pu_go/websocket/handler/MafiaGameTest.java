@@ -263,10 +263,7 @@ class MafiaGameTest {
     }
 
     @Test
-    void theMafiaSeeFurthestThenTheDoctorThenTheSheriffAndVillagersLeast() throws Exception {
-        assertTrue(FieldRules.MAFIA_VISION > FieldRules.DOCTOR_VISION);
-        assertTrue(FieldRules.DOCTOR_VISION > FieldRules.SHERIFF_VISION);
-        assertTrue(FieldRules.SHERIFF_VISION > FieldRules.VILLAGER_VISION);
+    void everyLivingRoleSeesOnlyWithinTheSharedVisionBoundary() throws Exception {
         startTable("vision", 10);
         advance(REVEAL);
         // Seat 1, a Villager, walks just inside and then just outside each watcher's Vision,
@@ -832,6 +829,30 @@ class MafiaGameTest {
         assertEquals(1, game(4).path("self").path("investigations").size(), "old choice must not investigate again");
     }
 
+    @Test
+    void allLivingRolesShareDayVisionAndBuildingWallsSeparateTheirViews() throws Exception {
+        startTable("shared-vision", 10);
+        advance(REVEAL);
+        for (int seat : List.of(0, 1, 3, 4)) walk(seat, 1280, 742);
+        walk(5, 1580, 742);
+        for (int seat : List.of(0, 1, 3, 4)) assertTrue(fieldIds(seat).contains(playerId(5)), "Role in seat " + seat);
+        walk(5, 1640, 742);
+        for (int seat : List.of(0, 1, 3, 4)) assertFalse(fieldIds(seat).contains(playerId(5)), "same 320px limit for every Role");
+        walk(0, 576, 742);
+        walk(0, 576, 800);
+        walk(1, 1280, 742);
+        walk(1, 576, 742);
+        walk(1, 576, 900);
+        assertFalse(fieldIds(0).contains(playerId(1)), "the outdoor Player cannot see inside the General Store");
+        assertFalse(fieldIds(1).contains(playerId(0)), "the indoor Player cannot see outside");
+        walk(0, 576, 900);
+        assertTrue(fieldIds(0).contains(playerId(1)));
+        assertTrue(fieldIds(1).contains(playerId(0)));
+        move(0, 448, 900);
+        handler.tickFields();
+        assertEquals(576, field(0).path("self").path("x").asDouble(), "wall crossing is corrected");
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {
@@ -839,9 +860,9 @@ class MafiaGameTest {
         else startTable(label, players, 1, 1, 1);
     }
 
-    /** How far this Seat's Player sees, by the Role they were dealt. */
+    /** All living Roles use the shared Vision boundary. */
     private double visionOf(int seat) {
-        return FieldRules.vision(Role.valueOf(game(seat).path("self").path("role").asText().toUpperCase()));
+        return FieldRules.DAY_VISION;
     }
 
     private void roleSetup(int seat, int mafia, int doctors, int sheriffs) throws Exception {

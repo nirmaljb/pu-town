@@ -27,6 +27,14 @@ class RoomRulesTest {
                     o.path("width").asDouble(), o.path("height").asDouble()));
         }
         assertEquals(obstacles, RoomRules.OBSTACLES);
+        JsonNode town = new ObjectMapper().readTree(Path.of("..", "frontend", "public", "maps", "pu-town", "pu-town.json").toFile());
+        List<RoomRules.Interior> interiors = new ArrayList<>();
+        for (JsonNode layer : town.path("layers")) if (layer.path("name").asText().equals("zones")) {
+            for (JsonNode room : layer.path("objects")) if (room.path("type").asText().equals("room"))
+                interiors.add(new RoomRules.Interior(room.path("name").asText(), room.path("x").asDouble(),
+                        room.path("y").asDouble(), room.path("width").asDouble(), room.path("height").asDouble()));
+        }
+        assertEquals(interiors, RoomRules.INTERIORS);
     }
 
     @Test

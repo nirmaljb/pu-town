@@ -3,6 +3,7 @@ import { MAX_CHAT_CHARACTERS } from "./protocol.js";
 import type { LocalPosition } from "./field-controller.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
+import { areaAt } from "./room-rules.js";
 
 const PHASE_TITLES: Record<GameView["phase"], string> = {
   role_reveal: "Your role",
@@ -173,7 +174,9 @@ export class GameInterface {
     this.element(".game-phase").textContent = PHASE_TITLES[game.phase];
     this.element(".game-round").textContent = game.round > 0 && game.phase !== "finished" ? `Round ${game.round}` : "";
     this.element(".game-countdown").textContent = this.countdown(world);
-    this.element(".game-announcement").textContent = this.announcement(game);
+    const field = world.field;
+    this.element(".game-announcement").textContent = game.phase === "day" && field
+      ? `${areaAt(field.self.x, field.self.y)} · ${this.announcement(game)}` : this.announcement(game);
   }
 
   /** The whole screen turns red for two seconds at the moment this Player dies. */

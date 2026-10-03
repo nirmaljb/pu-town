@@ -17,6 +17,24 @@ public final class RoomRules {
     /** Collision radius of an Avatar's feet. */
     public static final double FOOT_RADIUS = 14;
 
+    /** Interior rectangles copied from the served Tiled map's room objects in zones. */
+    public record Interior(String name, double x, double y, double width, double height) {
+        boolean contains(double px, double py) {
+            return px >= x && px < x + width && py >= y && py < y + height;
+        }
+    }
+
+    public static final List<Interior> INTERIORS = List.of(
+            new Interior("Chapel", 1856, 96, 320, 320),
+            new Interior("Inn", 2080, 832, 384, 352),
+            new Interior("Smithy", 736, 864, 320, 288),
+            new Interior("General Store", 448, 832, 256, 320));
+
+    public static String areaAt(double x, double y) {
+        return INTERIORS.stream().filter(room -> room.contains(x, y)).map(Interior::name)
+                .findFirst().orElse("Outdoors");
+    }
+
     /** One solid rectangle of the town, in world coordinates. */
     public record Obstacle(double x, double y, double width, double height) {
         boolean blocks(double px, double py, double radius) {

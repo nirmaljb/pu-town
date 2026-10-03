@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import { FieldController } from "../dist/field-controller.js";
-import { BUTTON_X, BUTTON_Y, OBSTACLES, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "../dist/room-rules.js";
+import { BUTTON_X, BUTTON_Y, OBSTACLES, INTERIORS, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "../dist/room-rules.js";
 
 const own = (patch = {}) => ({ x: 1280, y: 900, facing: "down", correction: 1, ...patch });
 const world = (self, round = 1, phase = "day") => ({
@@ -47,6 +47,10 @@ test("walls stop movement on their own axis only", () => {
 });
 
 test("the client's collision copy is the map's own collision layer", () => {
+  const town = JSON.parse(readFileSync(new URL("../public/maps/pu-town/pu-town.json", import.meta.url), "utf8"));
+  const rooms = town.layers.find(layer => layer.name === "zones").objects.filter(object => object.type === "room")
+    .map(({ name, x, y, width, height }) => ({ name, x, y, width, height }));
+  assert.deepEqual(INTERIORS, rooms);
   const map = JSON.parse(readFileSync(new URL("../public/maps/pu-town/pu-town.collision.json", import.meta.url), "utf8"));
   assert.deepEqual(OBSTACLES, map.obstacles);
   assert.deepEqual([WORLD_WIDTH, WORLD_HEIGHT], [map.world.width, map.world.height]);

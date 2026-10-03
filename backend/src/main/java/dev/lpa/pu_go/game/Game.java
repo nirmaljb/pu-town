@@ -182,7 +182,8 @@ public final class Game {
     private static boolean canSee(Participant viewer, Participant other) {
         if (other.status() == ParticipantStatus.LEFT) return false;
         if (other == viewer || !viewer.isLiving()) return true;
-        return other.isLiving() && viewer.distanceTo(other) <= vision(viewer.role());
+        return other.isLiving() && RoomRules.areaAt(viewer.x, viewer.y).equals(RoomRules.areaAt(other.x, other.y))
+                && viewer.distanceTo(other) <= DAY_VISION;
     }
 
     /** Every Avatar this recipient may see right now, themselves included. */
