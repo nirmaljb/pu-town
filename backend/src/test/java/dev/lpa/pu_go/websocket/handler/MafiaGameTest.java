@@ -1010,6 +1010,40 @@ class MafiaGameTest {
         assertEquals("Inside the store", latestOfType(table.get(1), "chat_message").path("text").asText());
     }
 
+    @Test
+    void repairTasksArePrivatePersistentAndRequireAssignedNearbyTimedSteps() throws Exception {
+        startTable("repair-tasks", 4);
+        JsonNode tasks = latestOfType(table.get(1), "task_state");
+        assertEquals(3, tasks.path("tasks").size());
+        assertEquals(9, tasks.path("total").asInt());
+        assertEquals(0, tasks.path("completed").asInt());
+        String taskId = tasks.path("tasks").get(0).path("taskId").asText();
+        send(table.get(1), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        advance(REVEAL);
+        send(table.get(0), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
+        JsonNode task = tasks.path("tasks").get(0);
+        walk(1, 1280, 742);
+        walk(1, task.path("x").asDouble(), task.path("y").asDouble());
+        send(table.get(1), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        String step = "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":0,\"value\":0}";
+        send(table.get(1), step);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        advance(4_000);
+        send(table.get(1), step);
+        assertEquals(1, latestOfType(table.get(1), "task_state").path("tasks").get(0).path("step").asInt());
+        send(table.get(1), step);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        var recovered = connect("task-recovered");
+        recover(recovered, code, tokens.get(1));
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
+        advance(REVEAL + DAY - milliseconds.get());
+        assertTrue(latestOfType(recovered, "task_state").path("activeTaskId").isNull());
+        assertEquals(1, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {

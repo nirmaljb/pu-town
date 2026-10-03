@@ -350,3 +350,9 @@ h2 { margin: 16px 0; font-size: 28px; }
 .reduced-motion *, .reduced-motion *::before, .reduced-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 .volume-label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .volume-label output { font-size: 13px; }
+
+.task-interface { position: absolute; bottom: 1rem; left: 1rem; z-index: 6; max-width: min(27rem, 85%); max-height: 30%; overflow: auto; padding: .8rem 1rem; background: rgba(16, 24, 32, .92); color: #f4f0df; border: 1px solid #68766a; border-radius: .6rem; font-size: .8rem; pointer-events: auto; }
+.task-interface[hidden] { display: none; }
+.task-interface ul { list-style: none; padding: 0; margin: .5rem 0; }
+.task-interface li { display: flex; align-items: center; gap: .7rem; margin: .5rem 0; }
+.task-interface li span { flex: 1; }

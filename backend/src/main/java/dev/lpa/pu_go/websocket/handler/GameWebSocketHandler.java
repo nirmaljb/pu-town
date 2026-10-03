@@ -116,6 +116,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
+                    else if (incoming instanceof ClientMessage.OpenTask task) handleTask(player, (game) -> game.openTask(player.getId(), task.round(), task.taskId(), roomManager.currentTimeMillis()));
+                    else if (incoming instanceof ClientMessage.TaskStep task) handleTask(player, (game) -> game.taskStep(player.getId(), task.round(), task.taskId(), task.step(), task.value(), roomManager.currentTimeMillis()));
+                    else if (incoming instanceof ClientMessage.CloseTask) handleTask(player, (game) -> { game.closeTask(player.getId()); return null; });
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
                 });
@@ -313,6 +316,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private void addPrivateGameEntry(Collection<Delivery> deliveries, Room room, String playerId) {
         Game game = room.getGame();
         if (game == null || game.participant(playerId) == null) return;
+        deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
         deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
         if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
         deliveries.add(new Delivery(playerId, new ServerMessage.ChatHistory(game.historyFor(playerId).stream()
@@ -519,6 +523,23 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private ServerMessage.TaskState taskStateFor(Game game, String playerId) {
+        return new ServerMessage.TaskState(game.tasksFor(playerId, roomManager.currentTimeMillis()));
+    }
+
+    private void handleTask(PlayerState player, java.util.function.Function<Game, Game.Rejection> action) {
+        withGame(player, (room, game) -> {
+            int completed = game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
+            Game.Rejection rejection = action.apply(game);
+            if (rejection != null) { deliver(error(player, rejection.code(), rejection.message())); return; }
+            List<Delivery> deliveries = new ArrayList<>();
+            boolean changed = completed != game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
+            for (String recipient : changed ? room.playerIdsSnapshot() : List.of(player.getId()))
+                deliveries.add(new Delivery(recipient, taskStateFor(game, recipient)));
+            deliverAll(deliveries);
+        });
+    }
+
     private void handleChat(PlayerState player, ClientMessage.SendChat message) {
         withGame(player, (room, game) -> {
             Game.Rejection rejection = game.submitChat(player.getId(), message.channel(), message.text());
@@ -563,6 +584,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void addGameState(Collection<Delivery> deliveries, Room room) {
+        Game game = room.getGame();
+        if (game != null) for (String playerId : room.playerIdsSnapshot())
+            if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
         addGameStateFor(deliveries, room, room.playerIdsSnapshot());
     }
 

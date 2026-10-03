@@ -1,4 +1,4 @@
-import type { ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
+import type { TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
@@ -13,6 +13,8 @@ export type WorldState = Readonly<{
   phaseEndsAt: number | null;
   /** The part of the town this recipient can see, during Day or sleeping Night. */
   field: FieldView | null;
+  tasks: TaskState | null;
+  taskEndsAt: number | null;
   chat: readonly ChatEntry[];
   lastError: Readonly<{ code: string; message: string }> | null;
 }>;
@@ -20,7 +22,7 @@ export type WorldState = Readonly<{
 export function emptyWorld(): WorldState {
   return {
     phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
-    players: new Map(), game: null, phaseEndsAt: null, field: null, chat: [], lastError: null
+    players: new Map(), game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, chat: [], lastError: null
   };
 }
 
@@ -60,6 +62,10 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       const { version, type, ...field } = event;
       if ((world.game?.phase !== "day" && world.game?.phase !== "night") || world.game.round !== field.round) return world;
       return { ...world, field };
+    }
+    case "task_state": {
+      const { version, type, ...tasks } = event;
+      return { ...world, tasks, taskEndsAt: tasks.remainingMs === null ? null : receivedAt + tasks.remainingMs };
     }
     case "chat_history":
       return { ...world, chat: event.messages };

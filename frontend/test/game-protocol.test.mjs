@@ -166,3 +166,13 @@ test("Solo Practice has an explicit mode and no countdown, with strict phase adv
   const { mode, ...incomplete } = GAME;
   assert.throws(() => decode(incomplete), /fields/);
 });
+
+test("private persistent Tasks decode strict assignments, aggregate progress and timed interaction", () => {
+  const task = { taskId: "task-1-0", name: "Sign the town ledger", kind: "repair", x: 1280, y: 544, step: 1, steps: 3, fake: false, sequence: [] };
+  const state = { version: 1, type: "task_state", tasks: [task], completed: 0, total: 9, activeTaskId: task.taskId, remainingMs: 4000 };
+  assert.deepEqual(decode(state), state);
+  for (const patch of [{ step: -1 }, { step: 4 }, { kind: "forged" }, { owner: "another-player" }])
+    assert.throws(() => decode({ ...state, tasks: [{ ...task, ...patch }] }));
+  assert.throws(() => decode({ ...state, completed: 10 }));
+  assert.throws(() => decode({ ...state, extra: true }));
+});

@@ -74,6 +74,18 @@ public final class ClientMessageDecoder {
                 yield type.equals("night_choice") ? new ClientMessage.NightChoice(1, type, round(root), targetId)
                         : new ClientMessage.MeetingVote(1, type, round(root), targetId);
             }
+            case "open_task" -> {
+                requireOnly(root, Set.of("version", "type", "round", "taskId"));
+                yield new ClientMessage.OpenTask(1, type, round(root), requiredText(root, "taskId"));
+            }
+            case "task_step" -> {
+                requireOnly(root, Set.of("version", "type", "round", "taskId", "step", "value"));
+                yield new ClientMessage.TaskStep(1, type, round(root), requiredText(root, "taskId"), count(root, "step"), count(root, "value"));
+            }
+            case "close_task" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.CloseTask(1, type);
+            }
             case "send_chat" -> {
                 requireOnly(root, Set.of("version", "type", "channel", "text"));
                 dev.lpa.pu_go.game.ChatChannel channel =

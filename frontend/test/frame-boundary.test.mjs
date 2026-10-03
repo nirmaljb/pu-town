@@ -332,3 +332,18 @@ test("practice mode and untimed previews apply only at a frame boundary", () => 
   assert.equal(boundary.world.game.phase, "night");
   assert.equal(boundary.world.phaseEndsAt, null);
 });
+
+test("Task snapshots apply only at frames and interaction timing begins at network arrival", () => {
+  const inbox = new NetworkInbox(() => 1000);
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const task = { taskId: "task-1", name: "Repair", kind: "repair", x: 1280, y: 544, step: 1, steps: 3, fake: false, sequence: [] };
+  inbox.enqueue({ version: 1, type: "task_state", tasks: [task], completed: 0, total: 9, activeTaskId: "task-1", remainingMs: 4000 });
+  assert.equal(boundary.world.tasks, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.tasks.tasks[0].step, 1);
+  assert.equal(boundary.world.taskEndsAt, 5000);
+  inbox.enqueue({ version: 1, type: "room_left", roomId: "ABC234" });
+  boundary.beginFrame();
+  assert.equal(boundary.world.tasks, null);
+  assert.equal(boundary.world.taskEndsAt, null);
+});

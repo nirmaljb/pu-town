@@ -11,7 +11,7 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState {
     int version();
     String type();
 
@@ -117,6 +117,13 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
                       Game.OwnField self) implements ServerMessage {
         public FieldState(int round, List<Game.FieldPlayer> players, Game.OwnField self) {
             this(1, "field_state", round, List.copyOf(players), self);
+        }
+    }
+
+    record TaskState(int version, String type, List<dev.lpa.pu_go.game.TaskBoard.TaskView> tasks,
+                     int completed, int total, String activeTaskId, Long remainingMs) implements ServerMessage {
+        public TaskState(dev.lpa.pu_go.game.TaskBoard.View view) {
+            this(1, "task_state", view.tasks(), view.completed(), view.total(), view.activeTaskId(), view.remainingMs());
         }
     }
 

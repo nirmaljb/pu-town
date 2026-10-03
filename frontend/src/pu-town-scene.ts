@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { AudioMixer } from "./audio-mixer.js";
 import { SettingsInterface } from "./settings-interface.js";
 import { loadTownMap, MeetingArea } from "./meeting-area.js";
+import { TaskInterface } from "./task-interface.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
 import { AvatarReconciler, loadAvatarCollection } from "./avatar-reconciler.js";
@@ -29,6 +30,7 @@ export class PuTownScene extends Phaser.Scene {
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
+  #taskInterface?: TaskInterface;
   #audio?: AudioMixer;
   #settings?: SettingsInterface;
   #frameBoundary?: NetworkFrameBoundary;
@@ -63,6 +65,7 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
+    this.#taskInterface = new TaskInterface(this.#client);
     this.#audio = new AudioMixer();
     this.#settings = new SettingsInterface(this.#audio);
     const client = this.#client;
@@ -98,6 +101,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#taskInterface?.destroy();
       this.#settings?.destroy();
       this.#audio?.destroy();
     });
@@ -150,6 +154,7 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
+    this.#taskInterface?.render(world);
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     const reducedMotion = this.#settings?.reducedMotion ?? false;

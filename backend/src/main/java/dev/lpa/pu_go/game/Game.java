@@ -34,6 +34,7 @@ public final class Game {
     private static final Rejection NOT_ALLOWED = new Rejection("invalid_action", "You cannot take that action.");
 
     private final boolean practice;
+    private final TaskBoard tasks;
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
     private final Map<String, String> nightChoices = new LinkedHashMap<>();
@@ -55,6 +56,7 @@ public final class Game {
 
     private Game(List<Participant> roster, long startedAt, boolean practice) {
         this.practice = practice;
+        tasks = new TaskBoard(roster);
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
             placeAtSeat(participant, startedAt);
@@ -167,6 +169,7 @@ public final class Game {
     }
 
     private void enter(GamePhase next, long boundary) {
+        tasks.closeAll();
         phase = next;
         phaseEndsAt = boundary + next.durationMillis();
     }
@@ -197,6 +200,7 @@ public final class Game {
         walker.y = y;
         walker.facing = facing;
         walker.lastMoveAt = now;
+        tasks.moved(walker);
         return true;
     }
 
@@ -216,6 +220,24 @@ public final class Game {
                         !other.isLiving()))
                 .toList();
     }
+
+    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, now); }
+
+    public Rejection openTask(String playerId, int submittedRound, String taskId, long now) {
+        if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
+        Participant actor = participants.get(playerId);
+        if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
+        return tasks.open(actor, taskId, now);
+    }
+
+    public Rejection taskStep(String playerId, int submittedRound, String taskId, int step, int value, long now) {
+        if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
+        Participant actor = participants.get(playerId);
+        if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
+        return tasks.step(actor, taskId, step, value, now);
+    }
+
+    public void closeTask(String playerId) { tasks.close(playerId); }
 
     // ----- Meetings and chat -------------------------------------------------------------
 
