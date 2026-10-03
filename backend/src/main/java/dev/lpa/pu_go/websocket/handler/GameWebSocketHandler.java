@@ -497,8 +497,13 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     /** Movement is answered only through the next field state, never with an error per step. */
     private void handleMove(PlayerState player, ClientMessage.Move message) {
-        withGame(player, (room, game) ->
-                game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
+        withGame(player, (room, game) -> {
+            long now = roomManager.currentTimeMillis();
+            var before = game.tasksFor(player.getId(), now);
+            game.move(player.getId(), message.x(), message.y(), message.facing(), now);
+            if (!java.util.Objects.equals(before, game.tasksFor(player.getId(), now)))
+                answerPrivateSubmission(player, room, null);
+        });
     }
 
     private void handleTaskAction(PlayerState player, ClientMessage.TaskAction message) {

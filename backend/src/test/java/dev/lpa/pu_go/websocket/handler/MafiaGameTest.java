@@ -1044,6 +1044,13 @@ class MafiaGameTest {
         assertEquals(1, latestOfType(recovered, "game_state").path("self").path("tasks").get(0).path("completedSteps").asInt());
         table.set(1, recovered);
         taskAction(1, id, 1, "start");
+        var counts = table.stream().map(session -> countOfType(session, "game_state")).toList();
+        walk(1, 1280, 610);
+        assertFalse(game(1).path("self").path("tasks").get(0).path("active").asBoolean());
+        for (int seat = 0; seat < 10; seat++)
+            assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), countOfType(table.get(seat), "game_state"));
+        walk(1, 1280, 544);
+        taskAction(1, id, 1, "start");
         advance(DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT);
         assertEquals("day", game(1).path("phase").asText());
         assertEquals(id, game(1).path("self").path("tasks").get(0).path("taskId").asText());
