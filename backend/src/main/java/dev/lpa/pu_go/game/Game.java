@@ -175,6 +175,7 @@ public final class Game {
     }
 
     private void finish() {
+        tasks.closeAll();
         phase = GamePhase.FINISHED;
     }
 
@@ -234,7 +235,12 @@ public final class Game {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
-        return tasks.step(actor, taskId, step, value, now);
+        Rejection rejection = tasks.step(actor, taskId, step, value, now);
+        if (rejection == null) {
+            checkVictory();
+            if (winner != null) finish();
+        }
+        return rejection;
     }
 
     public void closeTask(String playerId) { tasks.close(playerId); }
@@ -345,7 +351,7 @@ public final class Game {
         if (practice || winner != null) return;
         long livingMafia = livingMafia().count();
         long livingVillage = livingCount() - livingMafia;
-        if (livingMafia == 0) winner = Faction.VILLAGE;
+        if (tasks.total() > 0 && tasks.completed() == tasks.total() || livingMafia == 0) winner = Faction.VILLAGE;
         else if (livingMafia >= livingVillage) winner = Faction.MAFIA;
     }
 

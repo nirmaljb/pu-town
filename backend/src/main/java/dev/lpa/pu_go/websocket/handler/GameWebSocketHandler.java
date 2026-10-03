@@ -534,7 +534,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             if (rejection != null) { deliver(error(player, rejection.code(), rejection.message())); return; }
             List<Delivery> deliveries = new ArrayList<>();
             boolean changed = completed != game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
-            for (String recipient : changed ? room.playerIdsSnapshot() : List.of(player.getId()))
+            if (game.isFinished()) addGameState(deliveries, room);
+            else for (String recipient : changed ? room.playerIdsSnapshot() : List.of(player.getId()))
                 deliveries.add(new Delivery(recipient, taskStateFor(game, recipient)));
             deliverAll(deliveries);
         });

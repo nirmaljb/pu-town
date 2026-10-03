@@ -1119,7 +1119,51 @@ class MafiaGameTest {
         assertEquals("day", game(0).path("phase").asText());
     }
 
+    @Test
+    void completingTheLastOriginalRealTaskWinsImmediatelyWithoutANightOrRoundQuota() throws Exception {
+        startTable("task-victory", 4);
+        advance(REVEAL);
+        for (int seat = 1; seat < 4; seat++) {
+            List<String> taskIds = new ArrayList<>();
+            for (JsonNode task : latestOfType(table.get(seat), "task_state").path("tasks")) taskIds.add(task.path("taskId").asText());
+            for (String taskId : taskIds) completeTask(seat, taskId);
+        }
+        for (int seat = 0; seat < 4; seat++) {
+            assertEquals("finished", game(seat).path("phase").asText());
+            assertEquals("village", game(seat).path("winner").asText());
+            assertEquals(4, game(seat).path("roles").size());
+            assertEquals(9, latestOfType(table.get(seat), "task_state").path("completed").asInt());
+            assertTrue(game(seat).path("remainingMs").isNull());
+        }
+    }
+
     // ----- helpers ------------------------------------------------------------------------
+
+    private void ensureDay(int seat) {
+        while (!game(seat).path("phase").asText().equals("day")) {
+            assertNotEquals("finished", game(seat).path("phase").asText());
+            advance(Math.max(1, game(seat).path("remainingMs").asLong()));
+        }
+        if (game(seat).path("remainingMs").isNumber() && game(seat).path("remainingMs").asLong() < 60000) {
+            advance(game(seat).path("remainingMs").asLong()); ensureDay(seat);
+        }
+    }
+    private void completeTask(int seat, String taskId) throws Exception {
+        for (;;) {
+            JsonNode task = null;
+            for (JsonNode candidate : latestOfType(table.get(seat), "task_state").path("tasks"))
+                if (candidate.path("taskId").asText().equals(taskId)) task = candidate;
+            if (task == null) throw new IllegalStateException("Missing assignment " + taskId);
+            int step = task.path("step").asInt();
+            if (step == task.path("steps").asInt()) return;
+            ensureDay(seat);
+            walkToTask(seat, task); openTask(seat, taskId);
+            advance(task.path("kind").asText().equals("repair") ? 4000 : 1000);
+            int value = task.path("kind").asText().equals("sequence") ? task.path("sequence").get(step).asInt() : 0;
+            taskStep(seat, taskId, step, value);
+            assertNotEquals("error", latest(table.get(seat)).path("type").asText(), latest(table.get(seat)).toString());
+        }
+    }
 
     private void openTask(int seat, String taskId) throws Exception {
         send(table.get(seat), "{\"version\":1,\"type\":\"open_task\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\"}");
