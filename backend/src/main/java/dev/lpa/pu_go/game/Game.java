@@ -248,6 +248,22 @@ public final class Game {
                 .toList();
     }
 
+    /** Authorized per-speaker/listener gain, independent of any other conversation. */
+    public double hearingGain(String listenerId, String speakerId) {
+        Participant listener = participant(listenerId), speaker = participant(speakerId);
+        if (listener == null || speaker == null || listener.status() == ParticipantStatus.LEFT || !speaker.isLiving()) return 0;
+        if (phase == GamePhase.DISCUSSION || phase == GamePhase.VOTING) return 1;
+        if (phase != GamePhase.DAY || !listener.isLiving()
+                || !RoomRules.areaAt(listener.x(), listener.y()).equals(RoomRules.areaAt(speaker.x(), speaker.y()))) return 0;
+        double distance = listener.distanceTo(speaker);
+        return Math.max(0, Math.min(1, (HEARING_RANGE - distance) / (HEARING_RANGE - 64)));
+    }
+
+    public double movementSoundGain(String listenerId, String speakerId) {
+        if (phase != GamePhase.DAY) return 0;
+        return listenerId.equals(speakerId) ? 1 : hearingGain(listenerId, speakerId);
+    }
+
     public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, participant(playerId).role(), now); }
 
     public Rejection openTask(String playerId, int submittedRound, String taskId, long now) {

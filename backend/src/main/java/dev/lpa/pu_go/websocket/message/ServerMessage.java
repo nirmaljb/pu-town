@@ -11,7 +11,7 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState, ServerMessage.SoundEvent {
     int version();
     String type();
 
@@ -117,6 +117,12 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
                       Game.OwnField self) implements ServerMessage {
         public FieldState(int round, List<Game.FieldPlayer> players, Game.OwnField self) {
             this(1, "field_state", round, List.copyOf(players), self);
+        }
+    }
+
+    record SoundEvent(int version, String type, long eventId, int round, String kind, String playerId, double gain) implements ServerMessage {
+        public SoundEvent(long eventId, int round, String kind, String playerId, double gain) {
+            this(1, "sound_event", eventId, round, kind, playerId, gain);
         }
     }
 

@@ -44,6 +44,8 @@ import java.util.function.UnaryOperator;
 public class GameWebSocketHandler extends TextWebSocketHandler {
     private static final List<String> COLOURS = List.of("#4F8CFF", "#FF8066", "#FFD166", "#65D6A4", "#C792EA", "#56DDE0", "#F48FB1", "#D6D3C4", "#F29F38", "#A5CF45");
 
+    private final java.util.concurrent.atomic.AtomicLong soundIds = new java.util.concurrent.atomic.AtomicLong();
+    private final Map<String, Long> lastFootsteps = new ConcurrentHashMap<>();
     private final RoomManager roomManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
@@ -506,8 +508,25 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     /** Movement is answered only through the next field state, never with an error per step. */
     private void handleMove(PlayerState player, ClientMessage.Move message) {
-        withGame(player, (room, game) ->
-                game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
+        withGame(player, (room, game) -> {
+            Participant actor = game.participant(player.getId());
+            String before = RoomRules.areaAt(actor.x(), actor.y());
+            double x = actor.x(), y = actor.y();
+            long now = roomManager.currentTimeMillis();
+            if (!game.move(player.getId(), message.x(), message.y(), message.facing(), now)) return;
+            String area = RoomRules.areaAt(actor.x(), actor.y());
+            String kind = !before.equals(area) ? area.equals("Outdoors") ? "exit" : "enter"
+                    : Math.hypot(x - actor.x(), y - actor.y()) >= 16 && now - lastFootsteps.getOrDefault(player.getId(), 0L) >= 400 ? "footstep" : null;
+            if (kind == null) return;
+            lastFootsteps.put(player.getId(), now);
+            long eventId = soundIds.incrementAndGet();
+            List<Delivery> deliveries = new ArrayList<>();
+            for (String listenerId : room.playerIdsSnapshot()) {
+                double gain = game.movementSoundGain(listenerId, player.getId());
+                if (gain > 0) deliveries.add(new Delivery(listenerId, new ServerMessage.SoundEvent(eventId, game.round(), kind, player.getId(), gain)));
+            }
+            deliverAll(deliveries);
+        });
     }
 
     private void handleNightChoice(PlayerState player, ClientMessage.NightChoice message) {
@@ -654,7 +673,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 if (player.getSession() != session || !playersBySession.remove(session.getId(), player)) return null;
                 outboxes.remove(player.getId());
                 if (roomId == null) {
-                    playersById.remove(player.getId());
+                    lastFootsteps.remove(player.getId());
+        playersById.remove(player.getId());
                     return null;
                 }
                 player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);

@@ -41,6 +41,10 @@ export class SoundEffects {
     const previous = this.#previous;
     this.#previous = world;
     if (!previous || previous.roomId !== world.roomId || previous.snapshotSerial !== world.snapshotSerial) return;
+    if (world.game.phase === "day") {
+      const last = previous.sounds.at(-1)?.eventId ?? 0;
+      for (const sound of world.sounds) if (sound.eventId > last) this.play(sound.kind, sound.gain);
+    }
     if (previous.game?.phase !== world.game.phase) this.play("phase");
     if (!previous.game?.self.meetingVoted && world.game.self.meetingVoted) this.play("confirm");
     for (const task of world.tasks?.tasks ?? []) {

@@ -183,3 +183,10 @@ test("practice targets are a separate strict view rather than fabricated roster 
   assert.throws(() => decode({ ...state, targets: [{ ...state.targets[0], playerId: "forged" }] }));
   assert.throws(() => decode({ ...state, targets: [state.targets[0], state.targets[0]] }));
 });
+
+test("movement sounds disclose only an authorized source and gain, without positions", () => {
+  const sound = { version: 1, type: "sound_event", eventId: 1, round: 1, kind: "footstep", playerId: "p0", gain: .75 };
+  assert.deepEqual(decode(sound), sound);
+  for (const patch of [{ gain: 0 }, { gain: 2 }, { gain: -1 }, { eventId: 0 }, { x: 1280 }, { kind: "kill" }])
+    assert.throws(() => decode({ ...sound, ...patch }));
+});

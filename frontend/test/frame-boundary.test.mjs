@@ -347,3 +347,17 @@ test("Task snapshots apply only at frames and interaction timing begins at netwo
   assert.equal(boundary.world.tasks, null);
   assert.equal(boundary.world.taskEndsAt, null);
 });
+
+test("authorized movement cues wait for a frame and stale Night cues are ignored", () => {
+  const inbox = new NetworkInbox();
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  inbox.enqueue(gameState({ phase: "day", remainingMs: 180000 }));
+  inbox.enqueue({ version: 1, type: "sound_event", eventId: 1, round: 1, kind: "footstep", playerId: "p", gain: .5 });
+  assert.deepEqual(boundary.world.sounds, []);
+  boundary.beginFrame();
+  assert.equal(boundary.world.sounds.length, 1);
+  inbox.enqueue(gameState({ phase: "night" }));
+  inbox.enqueue({ version: 1, type: "sound_event", eventId: 2, round: 1, kind: "footstep", playerId: "p", gain: 1 });
+  boundary.beginFrame();
+  assert.equal(boundary.world.sounds.length, 1);
+});

@@ -99,6 +99,8 @@ export type ChatEntry = Readonly<{
   text: string;
 }>;
 
+export type MovementSound = Readonly<{ eventId: number; round: number; kind: "footstep" | "enter" | "exit"; playerId: string; gain: number }>;
+
 export type PracticeTarget = Readonly<{ targetId: string; displayName: string; role: Role }>;
 
 export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" | "sequence" | "delivery";
@@ -107,6 +109,7 @@ export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number
   activeTaskId: string | null; remainingMs: number | null }>;
 
 export type ServerMessage =
+  | (MovementSound & Readonly<{ version: 1; type: "sound_event" }>)
   | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
   | (TaskState & Readonly<{ version: 1; type: "task_state" }>)
   | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
@@ -266,6 +269,14 @@ export function decodeServerMessage(payload: string): ServerMessage {
       return { version: 1, type, ...decodeGameView(message) };
     case "field_state":
       return { version: 1, type, ...decodeField(message) };
+    case "sound_event": {
+      requireFields(message, ["version", "type", "eventId", "round", "kind", "playerId", "gain"]);
+      const gain = requireFiniteNumber(message.gain, "gain");
+      const eventId = requireNonNegativeInteger(message.eventId, "eventId");
+      if (gain <= 0 || gain > 1 || eventId === 0) throw new Error("Invalid sound authorization");
+      return { version: 1, type, eventId, round: requireRound(message.round), gain,
+        kind: requireMember(message.kind, ["footstep", "enter", "exit"] as const, "movement sound"), playerId: requireNonEmptyString(message.playerId, "playerId") };
+    }
     case "practice_state": {
       requireFields(message, ["version", "type", "targets"]);
       const targets = requireArray(message.targets, "targets").map(value => {
