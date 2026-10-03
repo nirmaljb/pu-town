@@ -9,6 +9,7 @@ export type WorldState = Readonly<{
   selfPlayerId: string | null;
   players: ReadonlyMap<string, PlayerView>;
   game: GameView | null;
+  gameReceivedAt: number;
   /** Local clock time the current phase ends: the server's remaining time, counted from arrival. */
   phaseEndsAt: number | null;
   /** The part of the town this recipient can see, during Day or sleeping Night. */
@@ -20,7 +21,7 @@ export type WorldState = Readonly<{
 export function emptyWorld(): WorldState {
   return {
     phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
-    players: new Map(), game: null, phaseEndsAt: null, field: null, chat: [], lastError: null
+    players: new Map(), game: null, gameReceivedAt: 0, phaseEndsAt: null, field: null, chat: [], lastError: null
   };
 }
 
@@ -54,7 +55,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       // A field belongs to one round of Day and Night; Townhall or a new Day discards it.
       const field = (game.phase === "day" || game.phase === "night") && world.field?.round === game.round ? world.field : null;
       const phaseEndsAt = game.remainingMs === null ? null : receivedAt + game.remainingMs;
-      return { ...world, game, phaseEndsAt, field };
+      return { ...world, game, gameReceivedAt: receivedAt, phaseEndsAt, field };
     }
     case "field_state": {
       const { version, type, ...field } = event;

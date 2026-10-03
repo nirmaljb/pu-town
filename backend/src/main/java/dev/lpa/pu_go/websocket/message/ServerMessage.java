@@ -96,16 +96,16 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
      */
     record SelfView(Role role, Faction faction, ParticipantStatus status, boolean killedByMafia,
                     List<String> mafiaTeam, List<InvestigationView> investigations,
-                    boolean meetingVoted, String meetingVote, String nightChoice) {}
+                    boolean meetingVoted, String meetingVote, String nightChoice, List<dev.lpa.pu_go.game.RepairTask.View> tasks) {}
 
     record GameState(int version, String type, String mode, String phase, int round, Long remainingMs,
                      List<RosterView> players, OutcomeView outcome, List<BallotView> ballots,
-                     Faction winner, List<RoleView> roles, SelfView self) implements ServerMessage {
+                     Faction winner, List<RoleView> roles, SelfView self, Game.TaskProgress taskProgress) implements ServerMessage {
         public GameState(String mode, String phase, int round, Long remainingMs, List<RosterView> players, OutcomeView outcome,
-                         List<BallotView> ballots, Faction winner, List<RoleView> roles, SelfView self) {
+                         List<BallotView> ballots, Faction winner, List<RoleView> roles, SelfView self, Game.TaskProgress taskProgress) {
             this(1, "game_state", mode, phase, round, remainingMs, List.copyOf(players), outcome,
                     ballots == null ? null : List.copyOf(ballots), winner,
-                    roles == null ? null : List.copyOf(roles), self);
+                    roles == null ? null : List.copyOf(roles), self, taskProgress);
         }
     }
 

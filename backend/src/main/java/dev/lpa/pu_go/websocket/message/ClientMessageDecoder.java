@@ -65,6 +65,13 @@ public final class ClientMessageDecoder {
                     throw new InvalidClientMessageException("malformed_message", "facing must be up, left, down or right.");
                 yield new ClientMessage.Move(1, type, coordinate(root, "x"), coordinate(root, "y"), facing);
             }
+            case "task_action" -> {
+                requireOnly(root, Set.of("version", "type", "round", "taskId", "step", "action"));
+                String action = requiredText(root, "action");
+                if (!Set.of("start", "complete", "cancel").contains(action))
+                    throw new InvalidClientMessageException("malformed_message", "Unknown Task action.");
+                yield new ClientMessage.TaskAction(1, type, round(root), requiredText(root, "taskId"), count(root, "step"), action);
+            }
             case "meeting_vote", "night_choice" -> {
                 requireOnly(root, Set.of("version", "type", "round", "targetPlayerId"));
                 JsonNode target = root.get("targetPlayerId");

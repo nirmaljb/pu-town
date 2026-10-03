@@ -116,6 +116,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
+                    else if (incoming instanceof ClientMessage.TaskAction task) handleTaskAction(player, task);
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
                     return null;
                 });
@@ -500,6 +501,20 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 game.move(player.getId(), message.x(), message.y(), message.facing(), roomManager.currentTimeMillis()));
     }
 
+    private void handleTaskAction(PlayerState player, ClientMessage.TaskAction message) {
+        withGame(player, (room, game) -> {
+            Game.TaskProgress before = game.taskProgress();
+            Game.Rejection rejection = game.submitTaskAction(player.getId(), message.round(), message.taskId(),
+                    message.step(), message.action(), roomManager.currentTimeMillis());
+            if (rejection != null || before.equals(game.taskProgress())) answerPrivateSubmission(player, room, rejection);
+            else {
+                List<Delivery> deliveries = new ArrayList<>();
+                addGameState(deliveries, room);
+                deliverAll(deliveries);
+            }
+        });
+    }
+
     private void handleNightChoice(PlayerState player, ClientMessage.NightChoice message) {
         withGame(player, (room, game) -> answerPrivateSubmission(player, room,
                 game.submitNightChoice(player.getId(), message.round(), message.targetPlayerId())));
@@ -594,14 +609,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.callerPlayerId(),
                         outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedRole()),
                 revealed == null ? null : revealed.stream().map(GameWebSocketHandler::ballotView).toList(),
-                game.winner(), roles, selfViewOf(game, self));
+                game.winner(), roles, selfViewOf(game, self, roomManager.currentTimeMillis()), game.taskProgress());
     }
 
     private static ServerMessage.BallotView ballotView(Game.Ballot ballot) {
         return new ServerMessage.BallotView(ballot.voterPlayerId(), ballot.targetPlayerId());
     }
 
-    private static ServerMessage.SelfView selfViewOf(Game game, Participant self) {
+    private static ServerMessage.SelfView selfViewOf(Game game, Participant self, long now) {
         boolean mafia = self.role() == Role.MAFIA;
         boolean sheriff = self.role() == Role.SHERIFF;
         return new ServerMessage.SelfView(self.role(), self.role().faction(), self.status(), self.killedByMafia(),
@@ -609,7 +624,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
                         result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
                 game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()),
-                game.nightChoiceFor(self.playerId()));
+                game.nightChoiceFor(self.playerId()), game.tasksFor(self.playerId(), now));
     }
 
     @Override

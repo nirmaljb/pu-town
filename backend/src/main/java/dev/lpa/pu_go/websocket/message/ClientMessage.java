@@ -2,7 +2,7 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat {
+public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.TaskAction, ClientMessage.SendChat {
     int version();
     String type();
 
@@ -25,6 +25,7 @@ public sealed interface ClientMessage permits ClientMessage.SelectAvatar, Client
     /** A Meeting ballot. A null target is an explicit Skip. */
     record MeetingVote(int version, String type, int round, String targetPlayerId) implements ClientMessage {}
     record NightChoice(int version, String type, int round, String targetPlayerId) implements ClientMessage {}
+    record TaskAction(int version, String type, int round, String taskId, int step, String action) implements ClientMessage {}
 
     record SendChat(int version, String type, ChatChannel channel, String text) implements ClientMessage {}
 }

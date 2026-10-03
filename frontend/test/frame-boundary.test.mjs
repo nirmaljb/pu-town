@@ -17,12 +17,12 @@ const rosterOf = (...players) => players.map(player => ({
 
 const selfView = (patch = {}) => ({
   role: "villager", faction: "village", status: "living", killedByMafia: false,
-  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, nightChoice: null, ...patch
+  mafiaTeam: null, investigations: null, meetingVoted: false, meetingVote: null, nightChoice: null, tasks: null, ...patch
 });
 
 const gameState = (patch = {}) => ({
   version: 1, type: "game_state", mode: "competitive", phase: "night", round: 1, remainingMs: 20_000,
-  players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), ...patch
+  players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), taskProgress: { completed: 0, total: 0 }, ...patch
 });
 
 test("private Night choices and a killed Sheriff's results apply only at a frame boundary", () => {

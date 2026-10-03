@@ -4,6 +4,7 @@ import type { LocalPosition } from "./field-controller.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
 import { areaAt } from "./room-rules.js";
+import { TaskInterface } from "./task-interface.js";
 
 const PHASE_TITLES: Record<GameView["phase"], string> = {
   role_reveal: "Your role",
@@ -34,6 +35,7 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 /** The Game's own controls. Every rule it presents is enforced again by the server. */
 export class GameInterface {
   readonly #root = document.createElement("div");
+  readonly #tasks: TaskInterface;
   #preview: Preview | null = null;
   readonly #ballotItems = new Map<string | null, HTMLLIElement>();
   #lastGame: GameView | null = null;
@@ -101,6 +103,8 @@ export class GameInterface {
         </div>
       </section>`;
     document.body.append(this.#root);
+    this.#tasks = new TaskInterface(client);
+    this.element(".personal-panels").append(this.#tasks.root);
     this.element(".role-everyone").textContent = EVERYONE_BRIEF;
     this.element(".next-practice-phase").addEventListener("click", () => {
       const game = this.#lastWorld?.game;
@@ -129,6 +133,7 @@ export class GameInterface {
     this.#self = self;
     const game = world?.game ?? null;
     const active = Boolean(game) && this.client.state.status === "playing";
+    this.#tasks.render(world, active, this.now());
     document.body.classList.toggle("in-game", active);
     document.body.classList.toggle("sleeping", active && game?.phase === "night");
     this.#root.dataset.phase = active ? game?.phase ?? "" : "";

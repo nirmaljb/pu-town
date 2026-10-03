@@ -35,6 +35,12 @@ class RoomRulesTest {
                         room.path("y").asDouble(), room.path("width").asDouble(), room.path("height").asDouble()));
         }
         assertEquals(interiors, RoomRules.INTERIORS);
+        List<RoomRules.TaskLocation> locations = new ArrayList<>();
+        for (JsonNode layer : town.path("layers")) if (layer.path("name").asText().equals("points")) {
+            for (JsonNode point : layer.path("objects")) if (point.path("type").asText().equals("task"))
+                locations.add(new RoomRules.TaskLocation(point.path("name").asText(), point.path("x").asDouble(), point.path("y").asDouble()));
+        }
+        assertEquals(new java.util.HashSet<>(locations), new java.util.HashSet<>(RoomRules.TASK_LOCATIONS));
     }
 
     @Test

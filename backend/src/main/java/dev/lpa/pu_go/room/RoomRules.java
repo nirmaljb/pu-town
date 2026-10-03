@@ -17,6 +17,24 @@ public final class RoomRules {
     /** Collision radius of an Avatar's feet. */
     public static final double FOOT_RADIUS = 14;
 
+    /** Existing task points copied from the served Tiled map's points layer. */
+    public record TaskLocation(String name, double x, double y) {}
+    public static final List<TaskLocation> TASK_LOCATIONS = List.of(
+            new TaskLocation("Sign the town ledger", 1280, 544),
+            new TaskLocation("Feed the sheep", 280, 600),
+            new TaskLocation("Harvest pumpkins", 300, 460),
+            new TaskLocation("Pick apples", 840, 420),
+            new TaskLocation("Pray at the altar", 2016, 300),
+            new TaskLocation("Restock the shelves", 560, 1000),
+            new TaskLocation("Fish from the dock", 288, 1110),
+            new TaskLocation("Stoke the forge", 800, 1030),
+            new TaskLocation("Chop firewood", 1570, 1110),
+            new TaskLocation("Mine gold", 1760, 300),
+            new TaskLocation("Practice archery", 1690, 560),
+            new TaskLocation("Serve drinks at the inn", 2190, 980),
+            new TaskLocation("Tidy the graves", 2260, 380),
+            new TaskLocation("Keep watch from the tower", 1540, 420));
+
     /** Interior rectangles copied from the served Tiled map's room objects in zones. */
     public record Interior(String name, double x, double y, double width, double height) {
         boolean contains(double px, double py) {

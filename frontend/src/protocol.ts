@@ -56,6 +56,12 @@ export type GameOutcome = Readonly<{
 export type Investigation = Readonly<{ round: number; targetPlayerId: string; mafia: boolean }>;
 
 /** Everything this recipient is entitled to know. Absent fields are absent from the wire. */
+export type TaskView = Readonly<{
+  taskId: string; name: string; kind: "repair"; x: number; y: number;
+  completedSteps: number; totalSteps: number; active: boolean; workRemainingMs: number | null;
+}>;
+export type TaskAction = "start" | "complete" | "cancel";
+
 export type SelfView = Readonly<{
   role: Role;
   faction: Faction;
@@ -66,6 +72,7 @@ export type SelfView = Readonly<{
   meetingVoted: boolean;
   meetingVote: string | null;
   nightChoice: string | null;
+  tasks: readonly TaskView[] | null;
 }>;
 
 export type GameView = Readonly<{
@@ -79,6 +86,7 @@ export type GameView = Readonly<{
   winner: Faction | null;
   roles: readonly Readonly<{ playerId: string; role: Role }>[] | null;
   self: SelfView;
+  taskProgress: Readonly<{ completed: number; total: number }>;
 }>;
 
 /** One Avatar this recipient is allowed to see during Day or sleeping Night. */
@@ -127,6 +135,7 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "night_choice"; round: number; targetPlayerId: string | null }>
+  | Readonly<{ version: 1; type: "task_action"; round: number; taskId: string; step: number; action: TaskAction }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
 
 export function startPractice(): ClientMessage {
@@ -161,6 +170,12 @@ export function nightChoice(round: number, targetPlayerId: string | null): Clien
     version: 1, type: "night_choice", round: requireRound(round),
     targetPlayerId: targetPlayerId === null ? null : requireNonEmptyString(targetPlayerId, "targetPlayerId")
   };
+}
+
+export function taskAction(round: number, taskId: string, step: number, action: TaskAction): ClientMessage {
+  return { version: 1, type: "task_action", round: requireRound(round),
+    taskId: requireNonEmptyString(taskId, "taskId"), step: requireCounter(step),
+    action: requireMember(action, ["start", "complete", "cancel"] as const, "Task action") };
 }
 
 export function sendChat(channel: ChatChannel, text: string): ClientMessage {
@@ -289,7 +304,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
 }
 
 function decodeGameView(message: Record<string, unknown>): GameView {
-  requireFields(message, ["version", "type", "mode", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self"]);
+  requireFields(message, ["version", "type", "mode", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self", "taskProgress"]);
   if (!Array.isArray(message.players)) throw new Error("players must be an array");
   return {
     mode: requireMember(message.mode, ["competitive", "practice"] as const, "Game mode"),
@@ -301,7 +316,8 @@ function decodeGameView(message: Record<string, unknown>): GameView {
     ballots: message.ballots === null ? null : requireArray(message.ballots, "ballots").map(decodeBallot),
     winner: message.winner === null ? null : requireMember(message.winner, ["mafia", "village"] as const, "Faction"),
     roles: message.roles === null ? null : requireArray(message.roles, "roles").map(decodeRoleReveal),
-    self: decodeSelf(requireRecord(message.self, "self"))
+    self: decodeSelf(requireRecord(message.self, "self")),
+    taskProgress: decodeTaskProgress(message.taskProgress)
   };
 }
 
@@ -371,7 +387,7 @@ function decodeRoleReveal(value: unknown): Readonly<{ playerId: string; role: Ro
 }
 
 function decodeSelf(self: Record<string, unknown>): SelfView {
-  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice"]);
+  requireFields(self, ["role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice", "tasks"]);
   return {
     role: requireMember(self.role, ROLES, "Role"),
     faction: requireMember(self.faction, ["mafia", "village"] as const, "Faction"),
@@ -381,8 +397,32 @@ function decodeSelf(self: Record<string, unknown>): SelfView {
     investigations: self.investigations === null ? null : requireArray(self.investigations, "investigations").map(decodeInvestigation),
     meetingVoted: requireBoolean(self.meetingVoted),
     meetingVote: requireOptionalPlayerId(self.meetingVote),
-    nightChoice: requireOptionalPlayerId(self.nightChoice)
+    nightChoice: requireOptionalPlayerId(self.nightChoice),
+    tasks: self.tasks === null ? null : requireArray(self.tasks, "tasks").map(decodeTask)
   };
+}
+
+function decodeTaskProgress(value: unknown): Readonly<{ completed: number; total: number }> {
+  const progress = requireRecord(value, "taskProgress");
+  requireFields(progress, ["completed", "total"]);
+  const completed = requireCounter(progress.completed);
+  const total = requireCounter(progress.total);
+  if (completed > total) throw new Error("Invalid Task progress");
+  return { completed, total };
+}
+
+function decodeTask(value: unknown): TaskView {
+  const task = requireRecord(value, "Task");
+  requireFields(task, ["taskId", "name", "kind", "x", "y", "completedSteps", "totalSteps", "active", "workRemainingMs"]);
+  const completedSteps = requireCounter(task.completedSteps);
+  const totalSteps = requireRound(task.totalSteps);
+  const active = requireBoolean(task.active);
+  const workRemainingMs = task.workRemainingMs === null ? null : requireCounter(task.workRemainingMs);
+  if (completedSteps > totalSteps || active !== (workRemainingMs !== null)) throw new Error("Invalid Task progress");
+  return { taskId: requireNonEmptyString(task.taskId, "taskId"), name: requireNonEmptyString(task.name, "name"),
+    kind: requireMember(task.kind, ["repair"] as const, "Task kind"),
+    x: requireFiniteNumber(task.x, "x"), y: requireFiniteNumber(task.y, "y"),
+    completedSteps, totalSteps, active, workRemainingMs };
 }
 
 function decodeInvestigation(value: unknown): Investigation {

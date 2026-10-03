@@ -18,6 +18,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `set_ready` | `ready: boolean` |
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
 | `move` | `x: number`, `y: number`, `facing: Facing` |
+| `task_action` | `round: integer`, `taskId: string`, `step: integer`, `action: "start" \| "complete" \| "cancel"` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
 | `night_choice` | `round: integer`, `targetPlayerId: string \| null` |
 | `send_chat` | `channel: "public" \| "mafia"`, `text: string` |
@@ -30,7 +31,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
-| `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
+| `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView`, `taskProgress: { completed: integer, total: integer }` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `self: OwnField` |
 | `chat_message` | `channel`, `round: integer`, `senderPlayerId: string`, `senderName: string`, `text: string` |
 | `chat_history` | `messages: ChatEntry[]` |
@@ -124,7 +125,7 @@ Outcome      { "kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPl
 RoleView     { "playerId", "role" }
 Investigation{ "round", "targetPlayerId", "mafia" }
 ChatEntry    { "channel", "round", "senderPlayerId", "senderName", "text" }
-SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice" }
+SelfView     { "role", "faction", "status", "killedByMafia", "mafiaTeam", "investigations", "meetingVoted", "meetingVote", "nightChoice", "tasks" }
 FieldPlayer  { "playerId", "x", "y", "facing", "ghost" }
 OwnField     { "x", "y", "facing", "correction" }
 ```
@@ -162,6 +163,16 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 **The field.** `field_state` is built per recipient. It holds only visible Avatars, themselves included, and the recipient's accepted position and `correction`. All living recipients share 320px Vision, covering the five-tile (160px) hearing range. They receive living Participants only within that distance and in the same interior or outdoor area. The four interiors are the served map's room rectangles: Chapel, Inn, Smithy and General Store; every other point is outdoors. Area membership uses accepted Avatar feet, includes top/left boundaries and excludes bottom/right boundaries. Existing doorways, walls and furniture use the same authoritative collision checks as outdoor movement. Eliminated recipients see every Participant who has not left; `ghost` marks eliminated Participants, who are invisible to the living. No Body, Vanish, ability timer or Crowding field is sent. Night retains the same authorized field at sleeping positions and the client disables movement prediction.
 
 **Retired requests.** `use_ability` is no longer a supported message type and receives `unknown_message_type`, including kill, shield, scan, vanish, report and emergency payloads. Neither Game rules nor the interface offer those live actions. `roam` and `meeting_call` are no longer phases.
+
+### Repair Tasks
+
+Each Village Participant, including Doctors and Sheriffs, receives three original assignments once per Game. The current repair-only slice uses existing map task points: the town ledger plus two distinct locations distributed by retained Seat. Only that Participant receives `self.tasks`; Mafia receive `null` until Fake Tasks arrive in #35. Public `taskProgress` contains only completed and total real steps, never per-Participant assignments or progress. The fixed denominator includes original assignments after Elimination or Forfeit; Ghost work and Forfeit transfers arrive in #37–#38, and completion victory in #36.
+
+Each private Task has exactly `taskId`, `name`, `kind: "repair"`, `x`, `y`, `completedSteps`, `totalSteps`, `active` and `workRemainingMs`. This slice uses 24 steps of 20 seconds per assignment, provisional workload for #56's later mixed-Task measurement. `workRemainingMs` is null unless active and otherwise counts down from message arrival; completed steps persist through phase changes and recovery.
+
+`task_action` carries the current positive round, an assigned Task ID, the expected non-negative completed-step counter, and `start`, `complete` or `cancel`. It is accepted only during Day from a living Village Participant, within 48px of the assigned location in the same accepted area. Starting one assignment interrupts work on another. Completion requires an active step whose server-owned twenty-second deadline has passed; a stale step or duplicate completion receives `invalid_action`. Wrong phase/round receives `invalid_phase`, an unassigned Task receives `invalid_target`, and an ineligible actor or unreachable location receives `invalid_action`. Unknown actions, extra/missing fields and malformed counters are `malformed_message`.
+
+Walking out of reach or into another phase interrupts unfinished work while retaining completed steps. Start, cancel and refusals reach only the actor. A completed step changes the aggregate view and therefore updates current recipients with their own private `game_state`. No Task assignment or individual progress is broadcast. Recovery restores only that Participant's assignments and earned progress.
 
 ### Night choices
 
