@@ -85,6 +85,12 @@ A Meeting eliminates a Player only on a majority of the living, and reveals only
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 
+## Display settings
+
+Display settings is available from entry, the Lobby and during play. Motion defaults to Follow system and responds to changes in the browser's system preference. Choose Reduce motion to remove fades, pulses, seated arrival and walking pose animations, and camera easing; choose Full motion to override the system preference. Avatar movement and the server's Game clock continue normally.
+
+Motion and Prefer fullscreen are remembered locally. Prefer fullscreen records intent; Enter fullscreen activates the browser only from a click. Refresh and recovery do not activate fullscreen automatically. Browser exits update the controls without clearing the preference, and unsupported or denied fullscreen access is explained in the panel. Preferences remain usable for the current page when local storage is unavailable.
+
 ## Client options
 
 The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to `ws://localhost:8080/ws/game`. The former `room` and `name` parameters are ignored.
@@ -137,6 +143,16 @@ npm run build
 ```
 
 The production frontend bundle is written to `frontend/dist/`.
+
+Browser acceptance checks start this checkout's frontend on `localhost:5173` and a dedicated backend on port `18082`. Free those ports first; the harness refuses to reuse existing processes. Install Chromium and its system dependencies once, then run:
+
+```sh
+cd frontend
+npx playwright install --with-deps chromium
+npm run test:browser
+```
+
+The presentation suite uses independent browser contexts for four Players and covers settings during entry, Lobby and play, local persistence, Join/Leave, Game countdown continuity and browser fullscreen activation. Chromium uses Phaser's Canvas fallback in this harness. On a shared development machine, `PU_TOWN_BROWSER_BIND=127.0.0.43 npm run test:browser` can bind a separate loopback address while retaining the supported `localhost:5173` browser origin. Browser runs are separate from the Node suite; traces from failed tests are written to `frontend/test-results/`.
 
 Run the backend tests and create an executable JAR:
 

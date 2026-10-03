@@ -8,9 +8,11 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "test": "npm run build:test && node --test test/*.test.mjs",
-    "avatars": "python3 ../tools/avatar-editor/server.py"
+    "avatars": "python3 ../tools/avatar-editor/server.py",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "typescript": "^5.7.2",
     "vite": "^8.2.2"
   },

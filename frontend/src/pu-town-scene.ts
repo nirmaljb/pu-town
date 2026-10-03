@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { PresentationSettings } from "./presentation-settings.js";
 import { loadTownMap, MeetingArea } from "./meeting-area.js";
 import { GameInterface } from "./game-interface.js";
 import { JoinInterface } from "./join-interface.js";
@@ -27,6 +28,7 @@ export class PuTownScene extends Phaser.Scene {
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
+  #presentation?: PresentationSettings;
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #field?: FieldController;
@@ -59,6 +61,7 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
+    this.#presentation = new PresentationSettings();
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
@@ -92,6 +95,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#presentation?.destroy();
     });
   }
 
@@ -143,12 +147,12 @@ export class PuTownScene extends Phaser.Scene {
     this.#gameInterface?.render(world, self);
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
-    this.#avatarReconciler?.updateAnimations(time, delta, self);
+    this.#avatarReconciler?.updateAnimations(time, delta, self, this.#presentation?.reducedMotion);
     // During a Roam the camera follows this Player; otherwise it frames the Town Square.
     const camera = this.cameras.main;
     const focusX = self?.x ?? SQUARE_X;
     const focusY = self?.y ?? SQUARE_Y;
-    const follow = Math.min(1, delta / 1_000 * (self ? 10 : 6));
+    const follow = this.#presentation?.reducedMotion ? 1 : Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);
     // The living see only a circle around themselves; the server sends nothing beyond it.
