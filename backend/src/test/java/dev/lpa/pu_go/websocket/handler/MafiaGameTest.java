@@ -1094,6 +1094,31 @@ class MafiaGameTest {
         assertEquals("invalid_task", latest(recovered).path("code").asText());
     }
 
+    @Test
+    void mafiaFakeTasksUseAllInteractionsWithoutAdvancingTheOriginalVillageWorkload() throws Exception {
+        startTable("fake-tasks", 4);
+        advance(REVEAL);
+        JsonNode state = latestOfType(table.get(0), "task_state");
+        assertEquals(3, state.path("tasks").size());
+        assertEquals(List.of("repair", "sequence", "delivery"),
+                java.util.stream.StreamSupport.stream(state.path("tasks").spliterator(), false).map(task -> task.path("kind").asText()).toList());
+        for (JsonNode task : state.path("tasks")) assertTrue(task.path("fake").asBoolean());
+        JsonNode task = state.path("tasks").get(0);
+        walkToTask(0, task);
+        int otherBefore = countOfType(table.get(1), "task_state");
+        for (int step = 0; step < task.path("steps").asInt(); step++) {
+            openTask(0, task.path("taskId").asText()); advance(4000);
+            taskStep(0, task.path("taskId").asText(), step, 0);
+        }
+        assertEquals(0, latestOfType(table.get(0), "task_state").path("completed").asInt());
+        assertEquals(9, latestOfType(table.get(0), "task_state").path("total").asInt());
+        assertEquals(otherBefore, countOfType(table.get(1), "task_state"), "Fake activity is private");
+        String realTask = latestOfType(table.get(1), "task_state").path("tasks").get(0).path("taskId").asText();
+        openTask(0, realTask);
+        assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
+        assertEquals("day", game(0).path("phase").asText());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void openTask(int seat, String taskId) throws Exception {

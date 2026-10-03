@@ -31,18 +31,19 @@ public final class TaskBoard {
         String owner;
         final Location location;
         final String kind;
+        final boolean fake;
         final Location destination;
         final List<Integer> sequence;
         int step;
-        Assignment(String id, String owner, Location location, String kind) {
-            this.id = id; this.owner = owner; this.location = location; this.kind = kind;
+        Assignment(String id, String owner, Location location, String kind, boolean fake) {
+            this.id = id; this.owner = owner; this.location = location; this.kind = kind; this.fake = fake;
             this.destination = LOCATIONS.get(0);
             this.sequence = kind.equals("sequence") ? List.of(2, 0, 3, 1) : List.of();
         }
         Location currentLocation() { return kind.equals("delivery") && step % 2 == 1 ? destination : location; }
         int steps() { return kind.equals("sequence") ? sequence.size() : kind.equals("delivery") ? 2 : REPAIR_STEPS; }
         long duration() { return kind.equals("repair") ? REPAIR_MS : 1000; }
-        TaskView view() { Location current = currentLocation(); return new TaskView(id, kind.equals("delivery") ? (step % 2 == 1 ? "Deliver " : "Collect ") + location.name() : location.name(), kind, current.x(), current.y(), step, steps(), false, sequence); }
+        TaskView view() { Location current = currentLocation(); return new TaskView(id, kind.equals("delivery") ? (step % 2 == 1 ? "Deliver " : "Collect ") + location.name() : location.name(), kind, current.x(), current.y(), step, steps(), fake, sequence); }
     }
     private record Interaction(String taskId, int step, long readyAt) {}
     private final List<Assignment> assignments = new ArrayList<>();
@@ -50,15 +51,14 @@ public final class TaskBoard {
 
     public TaskBoard(List<Participant> roster) {
         for (Participant member : roster) {
-            if (member.role() == Role.MAFIA) continue;
             for (int slot = 0; slot < 3; slot++) {
                 Location location = LOCATIONS.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % LOCATIONS.size());
-                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair"));
+                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", member.role() == Role.MAFIA));
             }
         }
     }
-    public int completed() { return (int) assignments.stream().filter(task -> task.step == task.steps()).count(); }
-    public int total() { return assignments.size(); }
+    public int completed() { return (int) assignments.stream().filter(task -> !task.fake && task.step == task.steps()).count(); }
+    public int total() { return (int) assignments.stream().filter(task -> !task.fake).count(); }
     private Assignment owned(String playerId, String taskId) {
         return assignments.stream().filter(task -> task.owner.equals(playerId) && task.id.equals(taskId)).findFirst().orElse(null);
     }
