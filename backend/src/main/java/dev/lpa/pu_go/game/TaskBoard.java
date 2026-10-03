@@ -49,11 +49,13 @@ public final class TaskBoard {
     private final List<Assignment> assignments = new ArrayList<>();
     private final Map<String, Interaction> interactions = new LinkedHashMap<>();
 
-    public TaskBoard(List<Participant> roster) {
+    public TaskBoard(List<Participant> roster, boolean practice) {
         for (Participant member : roster) {
-            for (int slot = 0; slot < 3; slot++) {
+            List<Boolean> banks = practice ? List.of(false, true) : List.of(member.role() == Role.MAFIA);
+            for (boolean fake : banks) for (int slot = 0; slot < 3; slot++) {
                 Location location = LOCATIONS.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % LOCATIONS.size());
-                assignments.add(new Assignment("task-" + member.seat() + "-" + slot, member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", member.role() == Role.MAFIA));
+                assignments.add(new Assignment((fake ? "fake-" : "task-") + member.seat() + "-" + slot,
+                        member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", fake));
             }
         }
     }
@@ -68,14 +70,14 @@ public final class TaskBoard {
     }
     public Game.Rejection open(Participant actor, String taskId, long now) {
         Assignment task = owned(actor.playerId(), taskId);
-        if (task == null || task.step == task.steps() || !nearby(actor, task)) return INVALID;
+        if (task == null || task.fake != (actor.role() == Role.MAFIA) || task.step == task.steps() || !nearby(actor, task)) return INVALID;
         interactions.put(actor.playerId(), new Interaction(task.id, task.step, now + task.duration()));
         return null;
     }
     public Game.Rejection step(Participant actor, String taskId, int step, int value, long now) {
         Assignment task = owned(actor.playerId(), taskId);
         Interaction interaction = interactions.get(actor.playerId());
-        if (task == null || task.step != step || step >= task.steps() || !nearby(actor, task)
+        if (task == null || task.fake != (actor.role() == Role.MAFIA) || task.step != step || step >= task.steps() || !nearby(actor, task)
                 || value != (task.kind.equals("sequence") ? task.sequence.get(step) : 0)
                 || interaction == null || !interaction.taskId().equals(taskId) || interaction.step() != step
                 || now < interaction.readyAt()) return INVALID;
@@ -106,9 +108,9 @@ public final class TaskBoard {
         }
     }
 
-    public View view(String playerId, long now) {
+    public View view(String playerId, Role role, long now) {
         Interaction active = interactions.get(playerId);
-        return new View(assignments.stream().filter(task -> task.owner.equals(playerId)).map(Assignment::view).toList(),
+        return new View(assignments.stream().filter(task -> task.owner.equals(playerId) && task.fake == (role == Role.MAFIA)).map(Assignment::view).toList(),
                 completed(), total(), active == null ? null : active.taskId(), active == null ? null : Math.max(0, active.readyAt() - now));
     }
 }

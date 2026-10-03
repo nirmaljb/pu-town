@@ -56,7 +56,7 @@ public final class Game {
 
     private Game(List<Participant> roster, long startedAt, boolean practice) {
         this.practice = practice;
-        tasks = new TaskBoard(roster);
+        tasks = new TaskBoard(roster, practice);
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
             placeAtSeat(participant, startedAt);
@@ -248,7 +248,7 @@ public final class Game {
                 .toList();
     }
 
-    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, now); }
+    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, participant(playerId).role(), now); }
 
     public Rejection openTask(String playerId, int submittedRound, String taskId, long now) {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;

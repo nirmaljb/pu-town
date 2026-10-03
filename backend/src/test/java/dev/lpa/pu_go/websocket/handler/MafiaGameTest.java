@@ -1226,6 +1226,31 @@ class MafiaGameTest {
         assertEquals("practice", game(0).path("mode").asText());
     }
 
+    @Test
+    void practiceRetainsSeparateRealAndFakeTaskProgressAcrossRolesAndRecoveryWithoutVictory() throws Exception {
+        var host = connect("practice-tasks");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText(); String token = latest(host).path("recoveryToken").asText(); table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        List<String> ids = new ArrayList<>();
+        for (JsonNode task : latestOfType(host, "task_state").path("tasks")) ids.add(task.path("taskId").asText());
+        completeTask(0, ids.get(0));
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"mafia\"}");
+        for (JsonNode task : latestOfType(host, "task_state").path("tasks")) assertTrue(task.path("fake").asBoolean());
+        assertEquals(1, latestOfType(host, "task_state").path("completed").asInt());
+        String fake = latestOfType(host, "task_state").path("tasks").get(0).path("taskId").asText();
+        completeTask(0, fake);
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"doctor\"}");
+        assertEquals(3, latestOfType(host, "task_state").path("tasks").get(0).path("step").asInt());
+        completeTask(0, ids.get(1)); completeTask(0, ids.get(2));
+        assertEquals(3, latestOfType(host, "task_state").path("completed").asInt());
+        assertEquals("day", game(0).path("phase").asText()); assertTrue(game(0).path("winner").isNull());
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        var recovered = connect("practice-tasks-recovered"); recover(recovered, code, token);
+        assertEquals(3, latestOfType(recovered, "task_state").path("completed").asInt());
+        assertEquals("doctor", latestOfType(recovered, "game_state").path("self").path("role").asText());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void ensureDay(int seat) {

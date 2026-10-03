@@ -281,3 +281,5 @@ Ticket #30's shared Vision, entrance transitions, indoor/outdoor field privacy, 
 Day text reaches living Players in the same indoor/outdoor area within five tiles. The sender’s accepted position determines delivery, and walking closer or reconnecting never reveals earlier messages. Townhall keeps public discussion and eliminated read-only access; Night is silent.
 
 Village Participants receive three persistent repair Tasks. The lower map overlay lists current locations and earned steps; approach a location, Repair, wait for the four-second interaction, then finish its step. Three earned steps complete a Task. Night closes unfinished interactions, while earned steps survive later Days and recovery. Only aggregate completed Tasks are public.
+
+Solo Practice includes a Preview Role selector and separate practice targets for Night choices and Townhall ballots. Mafia preview uses Fake Tasks; Village previews retain real assignments. Repair, ordered sequence and pickup/delivery steps persist through phase previews, Role switches and same-tab recovery. Finishing practice Tasks never ends practice.
