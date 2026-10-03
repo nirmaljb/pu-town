@@ -1166,6 +1166,37 @@ class MafiaGameTest {
         assertEquals(3, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"leave", "expiry"})
+    void forfeitTransfersUnfinishedOriginalTasksAndKeepsEarnedProgress(String cause) throws Exception {
+        startTable("transfer-" + cause, 4); advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(0);
+        String taskId = task.path("taskId").asText();
+        walkToTask(1, task); openTask(1, taskId); advance(4000); taskStep(1, taskId, 0, 0);
+        int two = latestOfType(table.get(2), "task_state").path("tasks").size();
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        assertEquals(two, latestOfType(table.get(2), "task_state").path("tasks").size(), "Disconnect keeps ownership");
+        if (cause.equals("leave")) {
+            var recovered = connect("transfer-recovered"); recover(recovered, code, tokens.get(1));
+            send(recovered, "{\"version\":1,\"type\":\"leave_room\"}");
+        } else advance(120000);
+        int received = 0;
+        boolean retainedStep = false;
+        for (int seat : List.of(2, 3)) {
+            JsonNode state = latestOfType(table.get(seat), "task_state");
+            assertEquals(9, state.path("total").asInt());
+            assertEquals(0, state.path("completed").asInt());
+            received += state.path("tasks").size();
+            for (JsonNode assignment : state.path("tasks")) if (assignment.path("taskId").asText().equals(taskId)) {
+                retainedStep = true; assertEquals(1, assignment.path("step").asInt());
+            }
+        }
+        assertEquals(9, received);
+        assertTrue(retainedStep, "Earned stages follow the original assignment");
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        assertEquals(9, latestOfType(table.get(2), "task_state").path("total").asInt());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void ensureDay(int seat) {

@@ -92,6 +92,20 @@ public final class TaskBoard {
             if (task == null || !nearby(actor, task)) close(actor.playerId());
         }
     }
+    public void transfer(String departingId, List<Participant> roster) {
+        close(departingId);
+        List<Participant> recipients = roster.stream().filter(Participant::isLiving)
+                .filter(member -> member.role() != Role.MAFIA && !member.playerId().equals(departingId)).toList();
+        if (recipients.isEmpty()) return;
+        for (Assignment task : assignments) {
+            if (task.fake || !task.owner.equals(departingId) || task.step == task.steps()) continue;
+            Participant recipient = recipients.stream().min(java.util.Comparator.comparingLong(member ->
+                    assignments.stream().filter(owned -> !owned.fake && owned.owner.equals(member.playerId())
+                            && owned.step < owned.steps()).count())).orElseThrow();
+            task.owner = recipient.playerId();
+        }
+    }
+
     public View view(String playerId, long now) {
         Interaction active = interactions.get(playerId);
         return new View(assignments.stream().filter(task -> task.owner.equals(playerId)).map(Assignment::view).toList(),

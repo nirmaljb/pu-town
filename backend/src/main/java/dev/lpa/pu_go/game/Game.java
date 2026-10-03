@@ -313,10 +313,11 @@ public final class Game {
         // A finished Game is final: later departures end Memberships, never the result.
         if (phase == GamePhase.FINISHED) return;
         Participant participant = participants.get(playerId);
-        if (participant == null || participant.status() != ParticipantStatus.LIVING) return;
+        if (participant == null || participant.status() == ParticipantStatus.LEFT) return;
         // An Elimination may already have decided the Game; its result phase still runs in full.
         boolean undecided = winner == null;
         participant.setStatus(ParticipantStatus.LEFT);
+        tasks.transfer(playerId, roster());
         ballots.remove(playerId);
         nightChoices.remove(playerId);
         checkVictory();
