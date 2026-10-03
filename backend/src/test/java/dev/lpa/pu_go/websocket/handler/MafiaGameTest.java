@@ -780,6 +780,58 @@ class MafiaGameTest {
         assertEquals(List.of(playerId(6)), names(game(0).path("outcome").path("deaths")));
     }
 
+    @Test
+    void sheriffsTimelyInvestigationResolvesPrivatelyEvenWhenKilledThatNight() throws Exception {
+        startTable("sheriff-night", 10);
+        advance(REVEAL + DAY);
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        nightChoice(4, 1, 5);
+        assertEquals(playerId(5), game(4).path("self").path("nightChoice").asText());
+        for (int seat = 0; seat < 10; seat++) if (seat != 4)
+            assertEquals(counts.get(seat), table.get(seat).payloads().size());
+        nightChoice(4, 1, 0);
+        nightChoice(0, 1, 4);
+        nightChoice(2, 1, 4);
+        advance(NIGHT);
+        assertEquals("eliminated", game(4).path("self").path("status").asText());
+        JsonNode result = game(4).path("self").path("investigations").get(0);
+        assertEquals(1, result.path("round").asInt());
+        assertEquals(playerId(0), result.path("targetPlayerId").asText());
+        assertTrue(result.path("mafia").asBoolean());
+        assertEquals(3, result.size(), "investigation reveals faction, never the exact Role");
+        for (int seat = 0; seat < 10; seat++) if (seat != 4) {
+            assertTrue(game(seat).path("self").path("investigations").isNull());
+            assertTrue(game(seat).path("self").path("nightChoice").isNull());
+        }
+        handler.afterConnectionClosed(table.get(4), CloseStatus.NORMAL);
+        var replacement = connect("sheriff-replacement");
+        recover(replacement, code, tokens.get(4));
+        assertEquals(result, latestOfType(replacement, "game_state").path("self").path("investigations").get(0));
+    }
+
+    @Test
+    void sheriffCannotInvestigateSelfAndMissingChoicesDoNotCreateResults() throws Exception {
+        startTable("sheriff-validation", 10);
+        advance(REVEAL + DAY);
+        nightChoice(4, 1, 4);
+        assertEquals("invalid_target", latest(table.get(4)).path("code").asText());
+        nightChoice(4, 2, 5);
+        assertEquals("invalid_phase", latest(table.get(4)).path("code").asText());
+        nightChoice(4, 1, 99);
+        assertEquals("invalid_target", latest(table.get(4)).path("code").asText());
+        nightChoice(4, 1, 5);
+        nightChoice(4, 1, null);
+        advance(NIGHT);
+        assertEquals(0, game(4).path("self").path("investigations").size());
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY);
+        nightChoice(4, 2, 3);
+        advance(NIGHT);
+        assertEquals(1, game(4).path("self").path("investigations").size());
+        assertFalse(game(4).path("self").path("investigations").get(0).path("mafia").asBoolean());
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY + NIGHT);
+        assertEquals(1, game(4).path("self").path("investigations").size(), "old choice must not investigate again");
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {

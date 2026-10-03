@@ -111,6 +111,13 @@ public final class Game {
 
 
     private void beginTownhall(long at) {
+        // Resolve every timely investigation before changing any Participant's living status.
+        for (Participant sheriff : participants.values()) {
+            if (!sheriff.isLiving() || sheriff.role() != Role.SHERIFF) continue;
+            Participant target = participants.get(nightChoices.get(sheriff.playerId()));
+            if (target != null && target.isLiving())
+                sheriff.addInvestigation(new Participant.Investigation(round, target.playerId(), target.role() == Role.MAFIA));
+        }
         Map<String, Integer> tally = new LinkedHashMap<>();
         livingMafia().forEach(member -> {
             Participant target = participants.get(nightChoices.get(member.playerId()));
@@ -193,13 +200,14 @@ public final class Game {
     public Rejection submitNightChoice(String playerId, int submittedRound, String targetPlayerId) {
         if (phase != GamePhase.NIGHT || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
-        if (actor == null || !actor.isLiving()
-                || (actor.role() != Role.MAFIA && actor.role() != Role.DOCTOR)) return NOT_ALLOWED;
+        if (actor == null || !actor.isLiving() || actor.role() == Role.VILLAGER) return NOT_ALLOWED;
         if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
-            if (target == null || !target.isLiving() || actor.role() == Role.MAFIA && target.role() == Role.MAFIA)
+            if (target == null || !target.isLiving() || actor.role() == Role.MAFIA && target.role() == Role.MAFIA
+                    || actor.role() == Role.SHERIFF && target == actor)
                 return new Rejection("invalid_target", actor.role() == Role.MAFIA
-                        ? "Choose a living Village Player." : "Choose a living Player.");
+                        ? "Choose a living Village Player." : actor.role() == Role.SHERIFF
+                        ? "Choose another living Player." : "Choose a living Player.");
             nightChoices.put(playerId, targetPlayerId);
         } else nightChoices.remove(playerId);
         return null;

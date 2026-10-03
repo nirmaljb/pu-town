@@ -25,6 +25,25 @@ const gameState = (patch = {}) => ({
   players: [], outcome: null, ballots: null, winner: null, roles: null, self: selfView(), ...patch
 });
 
+test("private Night choices and a killed Sheriff's results apply only at a frame boundary", () => {
+  const inbox = new NetworkInbox();
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const player = seated("p", 0);
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "sheriff", investigations: [], nightChoice: "q" }) }));
+  assert.equal(boundary.world.game, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.nightChoice, "q");
+  const result = { round: 1, targetPlayerId: "q", mafia: true };
+  inbox.enqueue(gameState({ phase: "discussion", remainingMs: 90_000, players: rosterOf(player), self: selfView({ role: "sheriff", status: "eliminated", killedByMafia: true, investigations: [result] }) }));
+  assert.equal(boundary.world.game.self.status, "living");
+  assert.deepEqual(boundary.world.game.self.investigations, []);
+  boundary.beginFrame();
+  assert.equal(boundary.world.game.self.status, "eliminated");
+  assert.equal(boundary.world.game.self.nightChoice, null);
+  assert.deepEqual(boundary.world.game.self.investigations, [result]);
+});
+
 test("network events affect the world only when a game frame begins", () => {
   const inbox = new NetworkInbox();
   const reconciled = [];
