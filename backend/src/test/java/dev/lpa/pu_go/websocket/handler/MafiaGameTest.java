@@ -72,6 +72,116 @@ class MafiaGameTest {
     private final List<String> tokens = new ArrayList<>();
     private String code;
 
+    @Test
+    void soloPracticeStartsWithoutReadyAndWalksWithoutACompetitiveRoster() throws Exception {
+        var host = connect("practice-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        assertEquals("start_blocked", latest(host).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("practice", game(0).path("mode").asText());
+        assertEquals("day", game(0).path("phase").asText());
+        assertEquals(1, game(0).path("players").size());
+        assertEquals(playerId(0), game(0).path("players").get(0).path("playerId").asText());
+        assertTrue(game(0).path("remainingMs").isNull());
+        handler.tickFields();
+        double x = field(0).path("self").path("x").asDouble();
+        double y = field(0).path("self").path("y").asDouble();
+        move(0, x + 10, y);
+        handler.tickFields();
+        assertEquals(x + 10, field(0).path("self").path("x").asDouble());
+        advance(DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT);
+        assertEquals("day", game(0).path("phase").asText());
+        assertTrue(game(0).path("winner").isNull());
+    }
+
+    @Test
+    void practicePreviewsCycleWithoutEliminationAndRecoverTheirPositionAndPhase() throws Exception {
+        var host = connect("preview-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        String token = latest(host).path("recoveryToken").asText();
+        table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        handler.tickFields();
+        double x = field(0).path("self").path("x").asDouble() + 10;
+        double y = field(0).path("self").path("y").asDouble();
+        move(0, x, y);
+        nextPractice(host, 1, "day");
+        assertEquals("night", game(0).path("phase").asText());
+        assertEquals(x, field(0).path("self").path("x").asDouble());
+        nextPractice(host, 1, "day");
+        assertEquals("invalid_phase", latest(host).path("code").asText());
+        nextPractice(host, 2, "night");
+        assertEquals("invalid_phase", latest(host).path("code").asText());
+        move(0, x + 10, y);
+        handler.tickFields();
+        assertEquals(x, field(0).path("self").path("x").asDouble(), "Night keeps the sleeping position");
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        advance(15_000);
+        var returned = connect("preview-returned");
+        recover(returned, code, token);
+        assertEquals(playerId(0), latestOfType(returned, "room_snapshot").path("selfPlayerId").asText());
+        assertEquals("practice", latestOfType(returned, "game_state").path("mode").asText());
+        assertEquals("night", latestOfType(returned, "game_state").path("phase").asText());
+        assertEquals(x, latestOfType(returned, "field_state").path("self").path("x").asDouble());
+        nextPractice(returned, 1, "night");
+        assertEquals("discussion", latestOfType(returned, "game_state").path("phase").asText());
+        nextPractice(returned, 1, "discussion");
+        send(returned, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"player-1\"}");
+        assertEquals("invalid_action", latest(returned).path("code").asText());
+        nextPractice(returned, 1, "voting");
+        assertEquals("voting_result", latestOfType(returned, "game_state").path("phase").asText());
+        assertTrue(latestOfType(returned, "game_state").path("outcome").path("eliminatedPlayerId").isNull());
+        nextPractice(returned, 1, "voting_result");
+        var day = latestOfType(returned, "game_state");
+        assertEquals("day", day.path("phase").asText());
+        assertEquals(2, day.path("round").asInt());
+        assertTrue(day.path("winner").isNull());
+        assertEquals("living", day.path("self").path("status").asText());
+        var outsider = connect("practice-outsider");
+        join(outsider, code);
+        assertEquals("invalid_phase", latest(outsider).path("code").asText());
+        send(returned, "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals("room_left", latest(returned).path("type").asText());
+        recover(outsider, code, token);
+        assertEquals("room_not_found", latest(outsider).path("code").asText());
+    }
+
+    @Test
+    void practiceEntryRequiresTheHostAloneAndCannotAdvanceACompetitiveGame() throws Exception {
+        var host = connect("practice-gates-host");
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("not_in_room", latest(host).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        var guest = connect("practice-gates-guest");
+        join(guest, code);
+        send(guest, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("not_host", latest(guest).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("practice_blocked", latest(host).path("code").asText());
+        handler.afterConnectionClosed(guest, CloseStatus.NORMAL);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("practice_blocked", latest(host).path("code").asText(), "Disconnected Membership still occupies the Room");
+        startTable("competitive-preview", 4, 1, 1, 1);
+        assertEquals("competitive", game(0).path("mode").asText());
+        nextPractice(table.get(0), 1, "day");
+        assertEquals("invalid_action", latest(table.get(0)).path("code").asText());
+        send(table.get(0), "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals("invalid_phase", latest(table.get(0)).path("code").asText());
+        send(table.get(0), "{\"version\":1,\"type\":\"start_practice\",\"ready\":true}");
+        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+        send(table.get(0), "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"roam\"}");
+        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+    }
+
+    private void nextPractice(RecordingWebSocketSession host, int round, String phase) throws Exception {
+        send(host, "{\"version\":1,\"type\":\"advance_practice\",\"round\":" + round + ",\"phase\":\"" + phase + "\"}");
+    }
+
     // ----- Start and the deal ------------------------------------------------------------
 
     @Test

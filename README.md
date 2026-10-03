@@ -110,6 +110,12 @@ Townhall eliminates a Participant only with a strict majority of the living. Tie
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 
+## Solo Practice
+
+Create a Room and, while you are its only Player, choose **Solo Practice** in the Lobby. Ready and the competitive Role Setup are not required. You enter Day as a Villager and can walk the existing map with WASD or arrow keys. **Next phase** previews sleeping Night, Townhall discussion, voting and results, then begins the next Day beside your retained Seat. Practice has no timers, ballots, elimination or faction victory. Role previews, practice targets and Task interactions are follow-up work (#40 and #41).
+
+Disconnect, refresh and recovery retain the same practice Membership and current phase, including your accepted position during Day or Night. Leave ends practice; create another Room to practice again or gather Players for a competitive Game. A guest's disconnected reservation still blocks Solo Practice entry. Competitive Start continues to need at least four connected, Ready Players and a valid Role Setup.
+
 ## Client options
 
 The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to `ws://localhost:8080/ws/game`. The former `room` and `name` parameters are ignored.

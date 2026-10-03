@@ -19,6 +19,7 @@ export type PlayerView = Readonly<{
 }>;
 
 export const GAME_PHASES = ["role_reveal", "day", "night", "discussion", "voting", "voting_result", "finished"] as const;
+export type PracticePhase = Exclude<GamePhase, "role_reveal" | "finished">;
 export type GamePhase = typeof GAME_PHASES[number];
 export const ROLES = ["mafia", "villager", "doctor", "sheriff"] as const;
 export type Role = typeof ROLES[number];
@@ -68,6 +69,7 @@ export type SelfView = Readonly<{
 }>;
 
 export type GameView = Readonly<{
+  mode: "competitive" | "practice";
   phase: GamePhase;
   round: number;
   remainingMs: number | null;
@@ -114,6 +116,8 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "select_avatar"; avatarPreset: AvatarPreset }>
   | Readonly<{ version: 1; type: "recover_room"; roomId: string; recoveryToken: string }>
   | Readonly<{ version: 1; type: "start_game" }>
+  | Readonly<{ version: 1; type: "start_practice" }>
+  | Readonly<{ version: 1; type: "advance_practice"; round: number; phase: PracticePhase }>
   | Readonly<{ version: 1; type: "set_ready"; ready: boolean }>
   | Readonly<{ version: 1; type: "set_role_setup"; mafia: number; doctors: number; sheriffs: number }>
   | Readonly<{ version: 1; type: "create_room"; displayName: string }>
@@ -124,6 +128,17 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "night_choice"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
+
+export function startPractice(): ClientMessage {
+  return { version: 1, type: "start_practice" };
+}
+
+export function advancePractice(round: number, phase: PracticePhase): ClientMessage {
+  return {
+    version: 1, type: "advance_practice", round: requireRound(round),
+    phase: requireMember(phase, ["day", "night", "discussion", "voting", "voting_result"] as const, "practice phase")
+  };
+}
 
 export function move(x: number, y: number, facing: Direction): ClientMessage {
   return {
@@ -274,9 +289,10 @@ export function decodeServerMessage(payload: string): ServerMessage {
 }
 
 function decodeGameView(message: Record<string, unknown>): GameView {
-  requireFields(message, ["version", "type", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self"]);
+  requireFields(message, ["version", "type", "mode", "phase", "round", "remainingMs", "players", "outcome", "ballots", "winner", "roles", "self"]);
   if (!Array.isArray(message.players)) throw new Error("players must be an array");
   return {
+    mode: requireMember(message.mode, ["competitive", "practice"] as const, "Game mode"),
     phase: requireMember(message.phase, GAME_PHASES, "Game phase"),
     round: requireCounter(message.round),
     remainingMs: message.remainingMs === null ? null : requireCounter(message.remainingMs),

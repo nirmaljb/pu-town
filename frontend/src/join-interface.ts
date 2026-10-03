@@ -77,6 +77,7 @@ export class JoinInterface {
         <div><strong>Gather in the Town Square</strong><p class="host-guidance"></p></div>
         <button type="button" class="ready-toggle" aria-pressed="false">Ready</button>
         <button type="button" class="primary start-game">Start Game</button>
+        <button type="button" class="start-practice" hidden>Solo Practice</button>
       </section>
       <section class="connection-overlay" hidden aria-labelledby="connection-title">
         <div class="connection-card">
@@ -118,6 +119,7 @@ export class JoinInterface {
       const self = this.#world?.players.get(this.#world.selfPlayerId ?? "");
       if (self) this.client.setReady(!self.ready);
     });
+    this.element(".start-practice").addEventListener("click", () => this.client.startPractice());
     this.element(".start-game").addEventListener("click", () => this.client.startGame());
     for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>(".role-step"))) {
       button.addEventListener("click", () => {
@@ -165,6 +167,9 @@ export class JoinInterface {
         ? `You are the Host. ${MIN_PLAYERS - gathered} more ${MIN_PLAYERS - gathered === 1 ? "Player" : "Players"} needed.`
         : waiting > 0 ? `You are the Host. Waiting for ${waiting} to be Ready and connected.` : "You are the Host. Everyone is Ready."
       : "Waiting for the Host to start";
+    if (host && gathered === 1) {
+      this.element(".host-guidance").textContent = "Explore alone with Solo Practice, or invite Players for a competitive Game.";
+    }
     const setup = this.#world?.roleSetup ?? null;
     const needed = setup ? Math.max(MIN_PLAYERS, specialRoles(setup) + 1) : MIN_PLAYERS;
     if (host && gathered >= MIN_PLAYERS && gathered < needed) {
@@ -174,6 +179,8 @@ export class JoinInterface {
     this.element<HTMLButtonElement>(".start-game").hidden = !host;
     this.element<HTMLButtonElement>(".start-game").disabled =
       state.status !== "playing" || gathered < needed || waiting > 0;
+    this.element<HTMLButtonElement>(".start-practice").hidden = !host || gathered !== 1;
+    this.element<HTMLButtonElement>(".start-practice").disabled = state.status !== "playing";
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
     ready.textContent = self?.ready ? "Not Ready" : "Ready";
