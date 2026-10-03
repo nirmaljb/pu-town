@@ -22,7 +22,7 @@ public final class Game {
      * Caller and Body fields remain null in this coordinated v1 release.
      */
     public record Outcome(String kind, String callerPlayerId, String bodyPlayerId, List<String> deaths,
-                          String eliminatedPlayerId, Boolean eliminatedMafia) {}
+                          String eliminatedPlayerId, Role eliminatedRole) {}
 
     /** One disclosed Meeting ballot. A null target is an explicit Skip. */
     public record Ballot(String voterPlayerId, String targetPlayerId) {}
@@ -229,13 +229,13 @@ public final class Game {
         // Strictly more than half of the living. A plurality is never enough.
         String eliminatedId = tally.entrySet().stream().filter(entry -> entry.getValue() * 2L > living)
                 .map(Map.Entry::getKey).findFirst().orElse(null);
-        Boolean eliminatedMafia = null;
+        Role eliminatedRole = null;
         if (eliminatedId != null) {
             Participant eliminated = participants.get(eliminatedId);
             eliminated.setStatus(ParticipantStatus.ELIMINATED);
-            eliminatedMafia = eliminated.role() == Role.MAFIA;
+            eliminatedRole = eliminated.role();
         }
-        outcome = new Outcome("meeting", null, null, List.of(), eliminatedId, eliminatedMafia);
+        outcome = new Outcome("meeting", null, null, List.of(), eliminatedId, eliminatedRole);
         checkVictory();
     }
 

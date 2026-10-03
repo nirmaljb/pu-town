@@ -81,7 +81,7 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
      * Townhall announces Night deaths or a Meeting verdict. Caller and Body fields are null.
      */
     record OutcomeView(String kind, String callerPlayerId, String bodyPlayerId, List<String> deaths,
-                       String eliminatedPlayerId, Boolean eliminatedMafia) {}
+                       String eliminatedPlayerId, Role eliminatedRole) {}
 
     /** A disclosed ballot or accepted Mafia vote. A null target is an explicit Skip. */
     record BallotView(String voterPlayerId, String targetPlayerId) {}

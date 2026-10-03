@@ -205,7 +205,7 @@ export class GameInterface {
     return outcome === null ? "" : [outcome.headline, outcome.verdict].filter(Boolean).join(" ");
   }
 
-  /** A Meeting Call names who was found dead, never their Role; a verdict reveals only Mafia or not. */
+  /** Night deaths do not disclose Roles; a Townhall verdict reveals the eliminated Role. */
   private outcomeText(game: GameView): Readonly<{ headline: string; verdict: string; mafia: boolean | null }> | null {
     const outcome = game.outcome;
     if (!outcome) return null;
@@ -220,8 +220,8 @@ export class GameInterface {
     }
     return {
       headline: `${this.nameOf(game, outcome.eliminatedPlayerId)} was eliminated.`,
-      verdict: outcome.eliminatedMafia ? "They were Mafia." : "They were not Mafia.",
-      mafia: outcome.eliminatedMafia
+      verdict: `Their Role was ${outcome.eliminatedRole === null ? "unknown" : capitalized(outcome.eliminatedRole)}.`,
+      mafia: outcome.eliminatedRole === "mafia"
     };
   }
 

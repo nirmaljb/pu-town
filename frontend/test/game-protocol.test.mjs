@@ -42,7 +42,7 @@ test("Night and Townhall are strict phases; retired Roam and Meeting Call are re
   assert.equal(decode({ ...GAME, phase: "night", remainingMs: 20_000 }).phase, "night");
   const discussion = {
     ...GAME, phase: "discussion",
-    outcome: { kind: "night", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: null, eliminatedMafia: null }
+    outcome: { kind: "night", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: null, eliminatedRole: null }
   };
   assert.deepEqual(decode(discussion), discussion);
   for (const phase of ["roam", "meeting_call"]) assert.throws(() => decode({ ...GAME, phase }));
@@ -53,7 +53,7 @@ test("a finished Game reveals every Role, the winning Faction and no countdown",
   const finished = {
     ...GAME, phase: "finished", remainingMs: null, winner: "village",
     roles: [{ playerId: "p0", role: "mafia" }, { playerId: "p1", role: "doctor" }],
-    outcome: { kind: "meeting", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: "p0", eliminatedMafia: true },
+    outcome: { kind: "meeting", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: "p0", eliminatedRole: "mafia" },
     ballots: [{ voterPlayerId: "p1", targetPlayerId: "p0" }, { voterPlayerId: "p2", targetPlayerId: null }]
   };
   assert.deepEqual(decode(finished), finished);
@@ -67,7 +67,7 @@ test("Game state is decoded strictly, field by field", () => {
     { remainingMs: -1 }, { remainingMs: "soon" }, { winner: "villagers" },
     { surprise: true }, { self: null }, { players: null },
     { roles: [{ playerId: "p0", role: "mayor" }] },
-    { outcome: { kind: "report", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: null, eliminatedMafia: null } },
+    { outcome: { kind: "report", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: null, eliminatedRole: null } },
     { ballots: [{ voterPlayerId: "p1" }] }
   ]) {
     assert.throws(() => decode({ ...GAME, ...patch }), undefined, JSON.stringify(patch));
@@ -132,4 +132,16 @@ test("steps, Meeting ballots and chat are built exactly", () => {
   assert.throws(() => sendChat("public", "x".repeat(MAX_CHAT_CHARACTERS + 1)), new RegExp(String(MAX_CHAT_CHARACTERS)));
   // Chat length is counted in code points, as Display Names are.
   assert.throws(() => sendChat("public", "\u{1F600}".repeat(MAX_CHAT_CHARACTERS + 1)), new RegExp(String(MAX_CHAT_CHARACTERS)));
+});
+
+test("Townhall results decode exact Roles and reject missing, unknown and retired reveal fields", () => {
+  const outcome = { kind: "meeting", callerPlayerId: null, bodyPlayerId: null, deaths: [], eliminatedPlayerId: "p1", eliminatedRole: "doctor" };
+  for (const role of ["mafia", "doctor", "sheriff", "villager"]) {
+    assert.equal(decode({ ...GAME, phase: "voting_result", outcome: { ...outcome, eliminatedRole: role } }).outcome.eliminatedRole, role);
+  }
+  assert.equal(decode({ ...GAME, outcome: { ...outcome, eliminatedPlayerId: null, eliminatedRole: null } }).outcome.eliminatedRole, null);
+  for (const role of [true, false, "village", "mayor", undefined]) {
+    assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedRole: role } }));
+  }
+  assert.throws(() => decode({ ...GAME, outcome: { ...outcome, eliminatedMafia: false } }), /fields/);
 });

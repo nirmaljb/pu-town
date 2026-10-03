@@ -542,7 +542,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         return new ServerMessage.GameState(game.phase().wireValue(), game.round(),
                 game.remainingMillis(roomManager.currentTimeMillis()), roster,
                 outcome == null ? null : new ServerMessage.OutcomeView(outcome.kind(), outcome.callerPlayerId(),
-                        outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedMafia()),
+                        outcome.bodyPlayerId(), outcome.deaths(), outcome.eliminatedPlayerId(), outcome.eliminatedRole()),
                 revealed == null ? null : revealed.stream().map(GameWebSocketHandler::ballotView).toList(),
                 game.winner(), roles, selfViewOf(game, self));
     }

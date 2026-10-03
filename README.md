@@ -106,7 +106,7 @@ Day starts beside retained Seats; Night preserves accepted positions; Townhall r
 
 During Townhall voting, select any living Participant (including yourself) or Skip in the centered ballot panel. Selection is a private preview; only Confirm ballot submits it. Confirmed choices stay locked for the round, including after a same-tab refresh, and public chat remains open until the thirty-second voting deadline. If an unconfirmed target Leaves, select another target before confirming. Everyone sees the ballots when voting ends.
 
-A Meeting eliminates a Player only on a strict majority of the living and currently reveals their Faction; full eliminated Role disclosure follows in #26. Village wins when no Mafia remains living, and Mafia wins at parity. Voting results run for six seconds before a decided Game finishes and every Role is revealed. Forfeit can decide victory immediately.
+Townhall eliminates a Participant only with a strict majority of the living. Ties, Skip and insufficient votes eliminate nobody. The six-second verdict reveals the eliminated Participant’s exact Role and retains their Game Roster entry. Village wins when no Mafia remains living, and Mafia wins at parity. A decided Game finishes after the full verdict and reveals every Role; otherwise the next Day begins. Forfeit can decide victory immediately.
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 

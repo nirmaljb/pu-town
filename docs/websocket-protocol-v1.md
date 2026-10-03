@@ -107,7 +107,7 @@ Every field below is always present; an absent value is explicitly `null`.
 ```json
 RosterView   { "playerId", "displayName", "colour", "avatarPreset", "seat", "status" }
 Ballot       { "voterPlayerId", "targetPlayerId" }
-Outcome      { "kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedMafia" }
+Outcome      { "kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedRole" }
 RoleView     { "playerId", "role" }
 Investigation{ "round", "targetPlayerId", "mafia" }
 ChatEntry    { "channel", "round", "senderPlayerId", "senderName", "text" }
@@ -156,7 +156,7 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 
 Wrong-phase or wrong-round submissions receive `invalid_phase`; ineligible voters receive `invalid_action`; a repeated ballot receives `already_submitted`; a non-living or unknown target receives `invalid_target`. A rejection is sent only to the submitter. Acceptance sends only that voter a `game_state` with `self.meetingVoted: true` and their `self.meetingVote` (null for Skip). `ballots` remains null until the result. Recovery restores the voter's lock and choice in their own `self` view. Public chat stays available during the full thirty-second voting phase, which never ends early because everyone confirmed.
 
-At Voting Result, `ballots` discloses every ballot cast, Skips included, and `outcome` is `{ "kind": "meeting", "eliminatedPlayerId": …, "eliminatedMafia": … }` with the other fields `null` or empty. An elimination reveals only that Player's Faction, never their Role.
+At Voting Result, `ballots` discloses every ballot cast, Skips included, and `outcome` is `{ "kind": "meeting", "eliminatedPlayerId": …, "eliminatedRole": … }` with the other fields `null` or empty. An elimination reveals exactly that Participant's Role (`mafia`, `doctor`, `sheriff` or `villager`) through `eliminatedRole`; when nobody is eliminated both elimination fields are `null`. Other Roles remain private until `finished`. The result lasts the full six seconds before the next Day or final victory presentation.
 
 ### Chat
 

@@ -8,6 +8,8 @@ import dev.lpa.pu_go.room.RoomManager;
 import dev.lpa.pu_go.room.RoomRules;
 import dev.lpa.pu_go.websocket.support.RecordingWebSocketSession;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import tools.jackson.databind.JsonNode;
@@ -365,12 +367,93 @@ class MafiaGameTest {
         advance(VOTING);
         assertEquals("voting_result", game(1).path("phase").asText());
         assertEquals(playerId(0), game(1).path("outcome").path("eliminatedPlayerId").asText());
-        assertTrue(game(1).path("outcome").path("eliminatedMafia").asBoolean());
+        assertEquals("mafia", game(1).path("outcome").path("eliminatedRole").asText());
         assertEquals(4, game(1).path("ballots").size());
-        advance(VOTING_RESULT);
+        advance(VOTING_RESULT - 1);
+        assertEquals("voting_result", game(1).path("phase").asText());
+        advance(1);
         assertEquals("finished", game(1).path("phase").asText());
         assertEquals("village", game(1).path("winner").asText());
         assertEquals(List.of("mafia", "doctor", "sheriff", "villager"), revealedRoles(game(1)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 3, 4, 9})
+    void townhallRevealsOnlyTheEliminatedRoleForSixSecondsAndRecoversIt(int target) throws Exception {
+        startTable("role-verdict", 10);
+        String role = game(target).path("self").path("role").asText();
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        for (int seat = 0; seat < 6; seat++) ballot(seat, 1, target);
+        for (int seat = 0; seat < 10; seat++) {
+            assertTrue(game(seat).path("roles").isNull());
+            assertTrue(game(seat).path("outcome").path("eliminatedPlayerId").isNull());
+        }
+        advance(VOTING);
+        for (int seat = 0; seat < 10; seat++) {
+            JsonNode result = game(seat);
+            assertEquals("voting_result", result.path("phase").asText());
+            assertEquals(6_000, result.path("remainingMs").asLong());
+            assertEquals(role, result.path("outcome").path("eliminatedRole").asText());
+            assertEquals(playerId(target), result.path("outcome").path("eliminatedPlayerId").asText());
+            assertEquals("eliminated", result.path("players").get(target).path("status").asText());
+            assertEquals(10, result.path("players").size());
+            assertTrue(result.path("roles").isNull(), "Other Roles remain private");
+        }
+        handler.afterConnectionClosed(table.get(target), CloseStatus.NORMAL);
+        var returned = connect("verdict-recovered");
+        recover(returned, code, tokens.get(target));
+        assertEquals(role, latestOfType(returned, "game_state").path("outcome").path("eliminatedRole").asText());
+        advance(VOTING_RESULT - 1);
+        assertEquals("voting_result", game(1).path("phase").asText());
+        advance(1);
+        assertEquals("day", game(1).path("phase").asText());
+        assertEquals(2, game(1).path("round").asInt());
+        assertTrue(game(1).path("outcome").isNull());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"tie", "plurality", "half", "skip-majority"})
+    void tiesPluralitiesHalfAndSkipMajoritiesEliminateNobody(String scenario) throws Exception {
+        startTable("no-majority", 10);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        int votesForTarget = switch (scenario) { case "tie" -> 3; case "half" -> 5; default -> 4; };
+        for (int seat = 0; seat < votesForTarget; seat++) ballot(seat, 1, 9);
+        if (scenario.equals("tie") || scenario.equals("plurality")) {
+            for (int seat = votesForTarget; seat < votesForTarget + 3; seat++) ballot(seat, 1, 8);
+        } else if (scenario.equals("skip-majority")) {
+            for (int seat = 4; seat < 10; seat++) ballot(seat, 1, null);
+        }
+        advance(VOTING);
+        for (int seat = 0; seat < 10; seat++) {
+            assertTrue(game(seat).path("outcome").path("eliminatedPlayerId").isNull());
+            assertTrue(game(seat).path("outcome").path("eliminatedRole").isNull());
+            assertEquals("living", game(seat).path("self").path("status").asText());
+        }
+        advance(VOTING_RESULT);
+        assertEquals("day", game(0).path("phase").asText());
+    }
+
+    @Test
+    void townhallParityVictoryWaitsForTheFullRoleVerdict() throws Exception {
+        startTable("townhall-parity", 4);
+        advance(REVEAL + DAY + NIGHT + DISCUSSION);
+        for (int seat = 0; seat < 3; seat++) ballot(seat, 1, 1);
+        advance(VOTING + VOTING_RESULT + DAY + NIGHT + DISCUSSION);
+        assertEquals("voting", game(0).path("phase").asText());
+        ballot(0, 2, 2);
+        ballot(3, 2, 2);
+        advance(VOTING);
+        for (int seat = 0; seat < 4; seat++) {
+            assertEquals("voting_result", game(seat).path("phase").asText());
+            assertEquals("sheriff", game(seat).path("outcome").path("eliminatedRole").asText());
+            assertTrue(game(seat).path("roles").isNull());
+        }
+        advance(VOTING_RESULT - 1);
+        assertEquals("voting_result", game(0).path("phase").asText());
+        advance(1);
+        assertEquals("finished", game(0).path("phase").asText());
+        assertEquals("mafia", game(0).path("winner").asText());
+        assertEquals(List.of("mafia", "doctor", "sheriff", "villager"), revealedRoles(game(0)));
     }
 
     @Test

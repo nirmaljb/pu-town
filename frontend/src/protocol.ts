@@ -49,7 +49,7 @@ export type GameOutcome = Readonly<{
   bodyPlayerId: string | null;
   deaths: readonly string[];
   eliminatedPlayerId: string | null;
-  eliminatedMafia: boolean | null;
+  eliminatedRole: Role | null;
 }>;
 
 export type Investigation = Readonly<{ round: number; targetPlayerId: string; mafia: boolean }>;
@@ -319,14 +319,14 @@ function decodeOwnField(self: Record<string, unknown>): OwnField {
 }
 
 function decodeOutcome(outcome: Record<string, unknown>): GameOutcome {
-  requireFields(outcome, ["kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedMafia"]);
+  requireFields(outcome, ["kind", "callerPlayerId", "bodyPlayerId", "deaths", "eliminatedPlayerId", "eliminatedRole"]);
   return {
     kind: requireMember(outcome.kind, ["night", "meeting"] as const, "outcome kind"),
     callerPlayerId: requireOptionalPlayerId(outcome.callerPlayerId),
     bodyPlayerId: requireOptionalPlayerId(outcome.bodyPlayerId),
     deaths: requireArray(outcome.deaths, "deaths").map(id => requireNonEmptyString(id, "playerId")),
     eliminatedPlayerId: requireOptionalPlayerId(outcome.eliminatedPlayerId),
-    eliminatedMafia: outcome.eliminatedMafia === null ? null : requireBoolean(outcome.eliminatedMafia)
+    eliminatedRole: outcome.eliminatedRole === null ? null : requireMember(outcome.eliminatedRole, ["mafia", "doctor", "sheriff", "villager"] as const, "eliminated Role")
   };
 }
 
