@@ -1137,6 +1137,35 @@ class MafiaGameTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"night", "meeting"})
+    void eliminatedVillageParticipantsContinueTasksAsInvisibleReadOnlyGhosts(String cause) throws Exception {
+        startTable("ghost-task-" + cause, 10);
+        advance(REVEAL + DAY);
+        if (cause.equals("night")) { nightChoice(0, 1, 5); nightChoice(2, 1, 5); }
+        advance(NIGHT + DISCUSSION);
+        if (cause.equals("meeting")) for (int seat = 0; seat < 6; seat++) ballot(seat, 1, 5);
+        advance(VOTING + VOTING_RESULT);
+        assertEquals("eliminated", game(5).path("self").path("status").asText());
+        String taskId = latestOfType(table.get(5), "task_state").path("tasks").get(0).path("taskId").asText();
+        completeTask(5, taskId);
+        assertEquals(1, latestOfType(table.get(0), "task_state").path("completed").asInt());
+        handler.tickFields();
+        for (int seat = 0; seat < 10; seat++) if (seat != 5) {
+            assertFalse(fieldIds(seat).contains(playerId(5)));
+            for (JsonNode task : latestOfType(table.get(seat), "task_state").path("tasks"))
+                assertNotEquals(taskId, task.path("taskId").asText());
+        }
+        chat(5, "public", "Ghost must not speak");
+        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
+        advance(game(5).path("remainingMs").asLong());
+        nightChoice(5, game(5).path("round").asInt(), 1);
+        assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
+        handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
+        var recovered = connect("ghost-task-recovered"); recover(recovered, code, tokens.get(5));
+        assertEquals(3, latestOfType(recovered, "task_state").path("tasks").get(0).path("step").asInt());
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void ensureDay(int seat) {
