@@ -1045,6 +1045,23 @@ class MafiaGameTest {
     }
 
     @Test
+    void walkingAwayClosesOnlyTheActorsTaskInteractionAndImpossibleMovementDoesNot() throws Exception {
+        startTable("task-interruption", 4);
+        advance(REVEAL);
+        JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(0);
+        walkToTask(1, task);
+        openTask(1, task.path("taskId").asText());
+        var counts = table.stream().map(session -> countOfType(session, "task_state")).toList();
+        move(1, 0, 0);
+        assertEquals(counts.get(1), countOfType(table.get(1), "task_state"));
+        walk(1, 1280, 630);
+        assertTrue(latestOfType(table.get(1), "task_state").path("activeTaskId").isNull());
+        for (int seat = 0; seat < table.size(); seat++)
+            assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), countOfType(table.get(seat), "task_state"));
+        assertEquals(0, latestOfType(table.get(1), "task_state").path("tasks").get(0).path("step").asInt());
+    }
+
+    @Test
     void sequenceTasksValidateOrderAndPersistEarnedInputsAcrossRecovery() throws Exception {
         startTable("sequence-tasks", 4);
         advance(REVEAL);

@@ -377,8 +377,10 @@ export class GameInterface {
       return;
     }
     if (game.phase !== "voting" || game.self.meetingVoted) return;
-    if (preview.targetPlayerId !== null && !game.players.some(entry =>
-      entry.playerId === preview.targetPlayerId && entry.status === "living")) return;
+    const eligible = game.mode === "practice"
+      ? this.#lastWorld?.practiceTargets.some(target => target.targetId === preview.targetPlayerId)
+      : game.players.some(entry => entry.playerId === preview.targetPlayerId && entry.status === "living");
+    if (preview.targetPlayerId !== null && !eligible) return;
     this.client.meetingVote(game.round, preview.targetPlayerId);
   }
 
