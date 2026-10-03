@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { GAME_URL } from "./environment.js";
 
 for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   test(`independent Players enter, play on a centered map and Leave at ${viewport.width}px`, async ({ browser }) => {
@@ -35,10 +36,12 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         await expect(page.getByRole("button", { name: "Copy code", exact: true })).toBeVisible();
         await page.getByRole("button", { name: "Ready", exact: true }).click();
       }
+      await host.bringToFront();
       await expect(host.locator(".occupancy")).toHaveText("4 / 10 Players");
       await expect(host.getByRole("button", { name: "Start Game" })).toBeEnabled();
       await host.getByRole("button", { name: "Start Game" }).click();
       for (const page of pages) {
+        await page.bringToFront();
         await expect(page.locator(".game-banner")).toBeVisible();
         await expect(page.getByRole("button", { name: "Copy code", exact: true })).toBeHidden();
         await expect(page.getByRole("button", { name: "Leave Room", exact: true })).toBeVisible();

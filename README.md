@@ -122,6 +122,26 @@ Expired recovery shows “Your place in the Room expired” and “Back to lobby
 
 Players are seated in the Lobby and Townhall, walk during Day, and sleep in place during Night. Leave and expiry free chairs without shifting other occupants; Disconnect reserves the chair. When the Host leaves or expires, the longest-present connected Player becomes Host if available. A disconnected Host retains authority for fifteen seconds. At the deadline it transfers to the longest-present connected Player; if none is connected, the first returning Player becomes Host. A returning former Host does not reclaim transferred authority. The Room Code and Leave control remain available in both phases. A started Room is removed after its final membership ends through Leave or expiry. Recoverable disconnected memberships keep it alive, even when nobody is connected; it never resets to a Lobby.
 
+## Local Settings
+
+Settings is available from entry, the Lobby and during a Game. It offers separate
+master, effects, ambience and voice volume sliders plus local sound previews.
+Levels are remembered on this browser and apply to current and newly created audio
+channels. Previews require a click and never send sound to other Players. Gameplay
+effects, ambience tracks and voice are implemented in subsequent tickets; this
+slice provides their shared volume controls and audio routing.
+
+Reduced motion defaults to the browser preference until you choose a value. The
+saved choice controls interface animation, camera easing, Avatar motion and town
+decoration without changing movement rules or Game deadlines. Prefer fullscreen
+remembers intent; Enter fullscreen still requires a click. The displayed state
+tracks actual browser activation, including external exits. Unsupported fullscreen
+and unavailable local storage do not prevent play; storage-disabled preferences
+last only for the current page.
+
+Settings keeps the Game clock running. Close Settings (or Escape) returns focus to
+its opener; movement and ability shortcuts are inactive while the dialog is open.
+
 ## Character artwork
 
 The ten published sprite sheets are composed from the [Universal LPC Spritesheet Character Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) assets. Each is a 576×256 PNG: four direction rows (up, left, down, right), each containing a standing pose and eight walking frames in 64×64 cells.
@@ -197,6 +217,18 @@ before voting under host resource pressure. The trace is retained locally; the
 WebSocket and frame-boundary regressions provide separate deterministic evidence.
 The suite does not verify the future Tasks, Night choices,
 interiors or media features in epic #22, or constitute manual playtesting.
+
+If trace capture causes Chromium failures in your environment,
+`npm run test:browser -- --trace off` runs the same browser actions and assertions
+without recording traces. Failed runs then have no trace archive to inspect.
+
+Settings acceptance covers independent Player preferences, refresh recovery,
+phase progression with the dialog open, actual fullscreen entry/exit and
+reduced-motion overrides. A browser analyser samples Web Audio output for master
+and category attenuation, mute and refreshed/new channels. These automated samples
+verify local audio routing; they do not establish physical-speaker audibility,
+voice privacy or task balance.
+
 
 Run the backend tests and create an executable JAR:
 
