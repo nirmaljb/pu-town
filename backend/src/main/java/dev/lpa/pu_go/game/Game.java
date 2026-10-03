@@ -118,8 +118,12 @@ public final class Game {
                 tally.merge(target.playerId(), 1, Integer::sum);
         });
         long mafia = livingMafia().count();
-        String victimId = tally.entrySet().stream().filter(entry -> entry.getValue() * 2L > mafia)
+        String chosenVictimId = tally.entrySet().stream().filter(entry -> entry.getValue() * 2L > mafia)
                 .map(Map.Entry::getKey).findFirst().orElse(null);
+        boolean protectedVictim = chosenVictimId != null && participants.values().stream()
+                .anyMatch(member -> member.isLiving() && member.role() == Role.DOCTOR
+                        && chosenVictimId.equals(nightChoices.get(member.playerId())));
+        String victimId = protectedVictim ? null : chosenVictimId;
         if (victimId != null) {
             Participant victim = participants.get(victimId);
             victim.setStatus(ParticipantStatus.ELIMINATED);
@@ -189,11 +193,13 @@ public final class Game {
     public Rejection submitNightChoice(String playerId, int submittedRound, String targetPlayerId) {
         if (phase != GamePhase.NIGHT || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
-        if (actor == null || !actor.isLiving() || actor.role() != Role.MAFIA) return NOT_ALLOWED;
+        if (actor == null || !actor.isLiving()
+                || (actor.role() != Role.MAFIA && actor.role() != Role.DOCTOR)) return NOT_ALLOWED;
         if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
-            if (target == null || !target.isLiving() || target.role() == Role.MAFIA)
-                return new Rejection("invalid_target", "Choose a living Village Player.");
+            if (target == null || !target.isLiving() || actor.role() == Role.MAFIA && target.role() == Role.MAFIA)
+                return new Rejection("invalid_target", actor.role() == Role.MAFIA
+                        ? "Choose a living Village Player." : "Choose a living Player.");
             nightChoices.put(playerId, targetPlayerId);
         } else nightChoices.remove(playerId);
         return null;

@@ -17,7 +17,7 @@ const PHASE_TITLES: Record<GameView["phase"], string> = {
 const ROLE_BRIEFS: Record<Role, string> = {
   mafia: "Choose a Village victim during Night. A strict majority of living Mafia must agree. Your team wins at parity.",
   villager: "Find the Mafia. Discuss at Townhall and vote to eliminate them.",
-  doctor: "You belong to the Village. Find the Mafia through Townhall discussion and voting.",
+  doctor: "Choose a living Player to protect each Night, including yourself. Protection prevents that Night's Mafia kill.",
   sheriff: "You belong to the Village. Find the Mafia through Townhall discussion and voting."
 };
 
@@ -280,13 +280,15 @@ export class GameInterface {
 
   private renderBallot(game: GameView): void {
     const panel = this.element(".action-panel");
-    const night = game.phase === "night" && game.self.role === "mafia";
+    const night = game.phase === "night" && (game.self.role === "mafia" || game.self.role === "doctor");
     const open = (game.phase === "voting" || night) && game.self.status === "living";
     panel.hidden = !open;
     if (!open) return;
-    this.element(".action-title").textContent = night ? "Choose tonight's victim" : "Cast your ballot";
+    this.element(".action-title").textContent = night
+      ? game.self.role === "doctor" ? "Choose tonight's protection" : "Choose tonight's victim"
+      : "Cast your ballot";
     const living = game.players.filter(entry => entry.status === "living"
-      && (!night || !game.self.mafiaTeam?.includes(entry.playerId)));
+      && (!night || game.self.role !== "mafia" || !game.self.mafiaTeam?.includes(entry.playerId)));
     const locked = !night && game.self.meetingVoted;
     const accepted = night ? game.self.nightChoice : game.self.meetingVote;
     this.element(".action-hint").textContent = locked
@@ -333,7 +335,8 @@ export class GameInterface {
     button.addEventListener("click", () => {
       const game = this.#lastGame;
       if (!game || game.self.status !== "living") return;
-      if (game.phase === "voting" ? game.self.meetingVoted : game.phase !== "night" || game.self.role !== "mafia") return;
+      if (game.phase === "voting" ? game.self.meetingVoted
+        : game.phase !== "night" || (game.self.role !== "mafia" && game.self.role !== "doctor")) return;
       this.#preview = { round: game.round, phase: game.phase, targetPlayerId };
       this.render(this.#lastWorld, this.#self);
     });
@@ -346,7 +349,7 @@ export class GameInterface {
     const preview = this.#preview;
     if (!game || !preview || preview.round !== game.round || preview.phase !== game.phase) return;
     if (game.self.status !== "living") return;
-    if (game.phase === "night" && game.self.role === "mafia") {
+    if (game.phase === "night" && (game.self.role === "mafia" || game.self.role === "doctor")) {
       this.client.nightChoice(game.round, preview.targetPlayerId);
       return;
     }

@@ -121,7 +121,7 @@ OwnField     { "x", "y", "facing", "correction" }
 
 ### Roles
 
-Start deals the Host's accepted Role Setup, shuffles it and deals in Seat order. Mafia belong to the Mafia Faction; the other Roles belong to the Village. Each recipient receives only their own Role and, for Mafia, their team. Complete Roles are disclosed when the Game finishes. Mafia choose victims at Night; Doctor protection and Sheriff investigation follow in #28–#29.
+Start deals the Host's accepted Role Setup, shuffles it and deals in Seat order. Mafia belong to the Mafia Faction; the other Roles belong to the Village. Each recipient receives only their own Role and, for Mafia, their team. Complete Roles are disclosed when the Game finishes. Mafia choose victims and Doctors choose protection at Night; Sheriff investigation follows in #29.
 
 ### Phases and the clock
 
@@ -153,11 +153,11 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 
 ### Night choices
 
-`night_choice` carries the current positive `round` and a living Village `targetPlayerId`, or `null` to withdraw. Only living Mafia can submit in this slice. Choices remain editable until the fixed twenty-second deadline; no submission shortens Night. Wrong phase or round receives `invalid_phase`, an ineligible actor receives `invalid_action`, and unknown, non-living or Mafia targets receive `invalid_target`. Missing fields, extra fields and malformed values receive `malformed_message`.
+`night_choice` carries the current positive `round` and a living `targetPlayerId`, or `null` to withdraw. Living Mafia choose Village victims; living Doctors choose protection for any living Participant, including themselves or a Mafia Participant. Choices remain editable until the fixed twenty-second deadline; no submission shortens Night. Wrong phase or round receives `invalid_phase`, an ineligible actor receives `invalid_action`, and unknown, non-living or Mafia victim targets receive `invalid_target`. Missing fields, extra fields and malformed values receive `malformed_message`.
 
 Acceptance sends only the submitter a `game_state`; `self.nightChoice` restores their own accepted target on recovery and is `null` for everyone else and after resolution. No teammate choice or activity count is disclosed. Disconnect preserves choices and keeps the Participant in the majority; Forfeit withdraws their choice and removes them from the denominator. Choices targeting a Participant who is no longer living do not count.
 
-At the deadline, a strict majority of all living Mafia must agree on one living Village victim. Missing choices, disagreement and an insufficient majority cause no kill. The server resolves the outcome under the Room lock, marks the victim eliminated and `killedByMafia`, and publishes `kind: "night"` with the victim's ID in `deaths`, or an empty list. All Participants return to retained Seats. Victory is checked after the complete outcome; parity enters `finished` immediately with that outcome, otherwise Townhall discussion begins. Choices clear at resolution and do not carry into later rounds.
+At the deadline, a strict majority of all living Mafia must agree on one living Village victim. Missing choices, disagreement and an insufficient majority cause no kill. Every living Doctor's accepted choice protects their target before the kill; protection by any one Doctor prevents that victim's death. A missed or withdrawn choice protects nobody. The server resolves the outcome under the Room lock, marks an unprotected victim eliminated and `killedByMafia`, and publishes `kind: "night"` with the victim's ID in `deaths`, or an empty list. All Participants return to retained Seats. Victory is checked after the complete outcome; parity enters `finished` immediately with that outcome, otherwise Townhall discussion begins. Choices clear at resolution and do not carry into later rounds.
 
 ### Meetings
 

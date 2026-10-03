@@ -727,6 +727,59 @@ class MafiaGameTest {
                 + (targetSeat == null ? "null" : "\"" + playerId(targetSeat) + "\"") + "}");
     }
 
+    @Test
+    void doctorCanRevisePrivateProtectionAndSaveThemselvesAtTheNightDeadline() throws Exception {
+        startTable("doctor-night", 10);
+        advance(REVEAL + DAY);
+        var counts = table.stream().map(session -> session.payloads().size()).toList();
+        nightChoice(3, 1, 5);
+        assertEquals(playerId(5), game(3).path("self").path("nightChoice").asText());
+        for (int seat = 0; seat < 10; seat++) if (seat != 3)
+            assertEquals(counts.get(seat), table.get(seat).payloads().size());
+        nightChoice(3, 1, 3);
+        nightChoice(0, 1, 3);
+        nightChoice(2, 1, 3);
+        handler.afterConnectionClosed(table.get(3), CloseStatus.NORMAL);
+        var replacement = connect("doctor-replacement");
+        recover(replacement, code, tokens.get(3));
+        assertEquals(playerId(3), latestOfType(replacement, "game_state").path("self").path("nightChoice").asText());
+        advance(NIGHT - 1);
+        assertEquals("night", game(0).path("phase").asText());
+        advance(1);
+        assertEquals(List.of(), names(game(0).path("outcome").path("deaths")));
+        assertEquals("living", latestOfType(replacement, "game_state").path("self").path("status").asText());
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY);
+        nightChoice(0, 2, 3);
+        nightChoice(2, 2, 3);
+        advance(NIGHT);
+        assertEquals(List.of(playerId(3)), names(game(0).path("outcome").path("deaths")));
+    }
+
+    @Test
+    void withdrawnProtectionAndForfeitedDoctorsCannotSaveAVictim() throws Exception {
+        startTable("doctor-withdrawal", 10);
+        advance(REVEAL + DAY);
+        nightChoice(3, 2, 5);
+        assertEquals("invalid_phase", latest(table.get(3)).path("code").asText());
+        nightChoice(3, 1, 99);
+        assertEquals("invalid_target", latest(table.get(3)).path("code").asText());
+        nightChoice(3, 1, 5);
+        nightChoice(3, 1, null);
+        nightChoice(0, 1, 5);
+        nightChoice(2, 1, 5);
+        advance(NIGHT);
+        assertEquals(List.of(playerId(5)), names(game(0).path("outcome").path("deaths")));
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY);
+        nightChoice(3, 2, 5);
+        assertEquals("invalid_target", latest(table.get(3)).path("code").asText());
+        nightChoice(3, 2, 6);
+        send(table.get(3), "{\"version\":1,\"type\":\"leave_room\"}");
+        nightChoice(0, 2, 6);
+        nightChoice(2, 2, 6);
+        advance(NIGHT);
+        assertEquals(List.of(playerId(6)), names(game(0).path("outcome").path("deaths")));
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void startTable(String label, int players) throws Exception {

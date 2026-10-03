@@ -567,7 +567,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 sheriff ? self.investigations().stream().map(result -> new ServerMessage.InvestigationView(
                         result.round(), result.targetPlayerId(), result.mafia())).toList() : null,
                 game.hasBallot(self.playerId()), game.acceptedBallot(self.playerId()),
-                mafia ? game.nightChoiceFor(self.playerId()) : null);
+                game.nightChoiceFor(self.playerId()));
     }
 
     @Override
