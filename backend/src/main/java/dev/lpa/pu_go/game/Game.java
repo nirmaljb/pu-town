@@ -65,6 +65,22 @@ public final class Game {
         if (practice) beginDay(startedAt);
     }
 
+    public record PracticeTarget(String targetId, String displayName, Role role) {}
+    private static final List<PracticeTarget> PRACTICE_TARGETS = List.of(
+            new PracticeTarget("practice-mafia", "Practice Mafia", Role.MAFIA),
+            new PracticeTarget("practice-villager", "Practice Villager", Role.VILLAGER),
+            new PracticeTarget("practice-doctor", "Practice Doctor", Role.DOCTOR));
+    public List<PracticeTarget> practiceTargets() { return PRACTICE_TARGETS; }
+    private PracticeTarget practiceTarget(String id) {
+        return PRACTICE_TARGETS.stream().filter(target -> target.targetId().equals(id)).findFirst().orElse(null);
+    }
+    public Rejection previewRole(String playerId, Role role) {
+        if (!practice) return NOT_ALLOWED;
+        participants.get(playerId).previewRole(role);
+        nightChoices.clear(); ballots.clear(); tasks.closeAll();
+        return null;
+    }
+
     public boolean isPractice() { return practice; }
 
     public GamePhase phase() { return phase; }
@@ -135,6 +151,16 @@ public final class Game {
 
 
     private void beginTownhall(long at) {
+        if (practice) {
+            Participant host = roster().get(0);
+            PracticeTarget target = practiceTarget(nightChoices.get(host.playerId()));
+            if (host.role() == Role.SHERIFF && target != null)
+                host.addInvestigation(new Participant.Investigation(round, target.targetId(), target.role() == Role.MAFIA));
+            outcome = new Outcome("night", null, null, host.role() == Role.MAFIA && target != null ? List.of(target.targetId()) : List.of(), null, null);
+            nightChoices.clear();
+            placeAtSeat(host, at); enter(GamePhase.DISCUSSION, at);
+            return;
+        }
         // Resolve every timely investigation before changing any Participant's living status.
         for (Participant sheriff : participants.values()) {
             if (!sheriff.isLiving() || sheriff.role() != Role.SHERIFF) continue;
@@ -252,6 +278,14 @@ public final class Game {
         if (phase != GamePhase.NIGHT || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || !actor.isLiving() || actor.role() == Role.VILLAGER) return NOT_ALLOWED;
+        if (targetPlayerId != null && practice) {
+            PracticeTarget target = practiceTarget(targetPlayerId);
+            boolean selfProtection = actor.role() == Role.DOCTOR && targetPlayerId.equals(playerId);
+            if (!selfProtection && (target == null || actor.role() == Role.MAFIA && target.role() == Role.MAFIA))
+                return new Rejection("invalid_target", "Choose an eligible practice target.");
+            nightChoices.put(playerId, targetPlayerId);
+            return null;
+        }
         if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
             if (target == null || !target.isLiving() || actor.role() == Role.MAFIA && target.role() == Role.MAFIA
@@ -269,11 +303,12 @@ public final class Game {
     /** A null target is an explicit Skip, which locks exactly like a ballot for a Player. */
     public Rejection submitBallot(String voterId, int submittedRound, String targetPlayerId) {
         Participant voter = participants.get(voterId);
-        if (practice) return NOT_ALLOWED;
         if (phase != GamePhase.VOTING || submittedRound != round) return WRONG_PHASE;
         if (voter == null || !voter.isLiving()) return NOT_ALLOWED;
         if (ballots.containsKey(voterId)) return new Rejection("already_submitted", "Your ballot is already final.");
-        if (targetPlayerId != null) {
+        if (targetPlayerId != null && practice) {
+            if (practiceTarget(targetPlayerId) == null) return new Rejection("invalid_target", "Choose a practice target.");
+        } else if (targetPlayerId != null) {
             Participant target = participants.get(targetPlayerId);
             if (target == null || !target.isLiving()) return new Rejection("invalid_target", "Choose a living Player.");
         }
@@ -325,6 +360,13 @@ public final class Game {
     }
 
     private void resolveMeeting() {
+        if (practice) {
+            Participant host = roster().get(0);
+            PracticeTarget target = practiceTarget(ballots.get(host.playerId()));
+            revealedBallots = hasBallot(host.playerId()) ? List.of(new Ballot(host.playerId(), acceptedBallot(host.playerId()))) : List.of();
+            outcome = new Outcome("meeting", null, null, List.of(), target == null ? null : target.targetId(), target == null ? null : target.role());
+            return;
+        }
         long living = livingCount();
         Map<String, Integer> tally = new LinkedHashMap<>();
         List<Ballot> disclosed = new ArrayList<>();

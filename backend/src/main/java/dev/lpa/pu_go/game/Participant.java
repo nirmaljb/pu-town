@@ -13,7 +13,7 @@ public final class Participant {
     private final String colour;
     private final String avatarPreset;
     private final int seat;
-    private final Role role;
+    private Role role;
     private final List<Investigation> investigations = new ArrayList<>();
     private ParticipantStatus status = ParticipantStatus.LIVING;
     private boolean killedByMafia;
@@ -39,6 +39,7 @@ public final class Participant {
     public String avatarPreset() { return avatarPreset; }
     public int seat() { return seat; }
     public Role role() { return role; }
+    void previewRole(Role role) { this.role = role; }
     public ParticipantStatus status() { return status; }
     public void setStatus(ParticipantStatus value) { status = value; }
     public boolean isLiving() { return status == ParticipantStatus.LIVING; }

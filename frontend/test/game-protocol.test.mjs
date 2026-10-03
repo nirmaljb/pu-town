@@ -176,3 +176,10 @@ test("private persistent Tasks decode strict assignments, aggregate progress and
   assert.throws(() => decode({ ...state, completed: 10 }));
   assert.throws(() => decode({ ...state, extra: true }));
 });
+
+test("practice targets are a separate strict view rather than fabricated roster Players", () => {
+  const state = { version: 1, type: "practice_state", targets: [{ targetId: "practice-mafia", displayName: "Practice Mafia", role: "mafia" }] };
+  assert.deepEqual(decode(state), state);
+  assert.throws(() => decode({ ...state, targets: [{ ...state.targets[0], playerId: "forged" }] }));
+  assert.throws(() => decode({ ...state, targets: [state.targets[0], state.targets[0]] }));
+});

@@ -99,12 +99,15 @@ export type ChatEntry = Readonly<{
   text: string;
 }>;
 
+export type PracticeTarget = Readonly<{ targetId: string; displayName: string; role: Role }>;
+
 export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" | "sequence" | "delivery";
   x: number; y: number; step: number; steps: number; fake: boolean; sequence: readonly number[] }>;
 export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number; total: number;
   activeTaskId: string | null; remainingMs: number | null }>;
 
 export type ServerMessage =
+  | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
   | (TaskState & Readonly<{ version: 1; type: "task_state" }>)
   | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
@@ -119,6 +122,7 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "preview_role"; role: Role }>
   | Readonly<{ version: 1; type: "open_task"; round: number; taskId: string }>
   | Readonly<{ version: 1; type: "task_step"; round: number; taskId: string; step: number; value: number }>
   | Readonly<{ version: 1; type: "close_task" }>
@@ -262,6 +266,16 @@ export function decodeServerMessage(payload: string): ServerMessage {
       return { version: 1, type, ...decodeGameView(message) };
     case "field_state":
       return { version: 1, type, ...decodeField(message) };
+    case "practice_state": {
+      requireFields(message, ["version", "type", "targets"]);
+      const targets = requireArray(message.targets, "targets").map(value => {
+        const target = requireRecord(value, "practice target");
+        requireFields(target, ["targetId", "displayName", "role"]);
+        return { targetId: requireNonEmptyString(target.targetId, "targetId"), displayName: requireNonEmptyString(target.displayName, "displayName"), role: requireMember(target.role, ROLES, "practice Role") };
+      });
+      if (new Set(targets.map(target => target.targetId)).size !== targets.length) throw new Error("Duplicate practice target");
+      return { version: 1, type, targets };
+    }
     case "task_state": {
       requireFields(message, ["version", "type", "tasks", "completed", "total", "activeTaskId", "remainingMs"]);
       const total = requireNonNegativeInteger(message.total, "total");

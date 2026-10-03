@@ -131,7 +131,7 @@ class MafiaGameTest {
         assertEquals("discussion", latestOfType(returned, "game_state").path("phase").asText());
         nextPractice(returned, 1, "discussion");
         send(returned, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"player-1\"}");
-        assertEquals("invalid_action", latest(returned).path("code").asText());
+        assertEquals("invalid_target", latest(returned).path("code").asText());
         nextPractice(returned, 1, "voting");
         assertEquals("voting_result", latestOfType(returned, "game_state").path("phase").asText());
         assertTrue(latestOfType(returned, "game_state").path("outcome").path("eliminatedPlayerId").isNull());
@@ -1195,6 +1195,35 @@ class MafiaGameTest {
         assertTrue(retainedStep, "Earned stages follow the original assignment");
         handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
         assertEquals(9, latestOfType(table.get(2), "task_state").path("total").asInt());
+    }
+
+    @Test
+    void practicePreviewsEveryRoleAndTargetWithoutAddingCompetitivePlayersOrVictory() throws Exception {
+        var host = connect("role-preview");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText(); table.add(host);
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        assertEquals(3, latestOfType(host, "practice_state").path("targets").size());
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"sheriff\"}");
+        assertEquals("sheriff", game(0).path("self").path("role").asText());
+        nextPractice(host, 1, "day");
+        send(host, "{\"version\":1,\"type\":\"night_choice\",\"round\":1,\"targetPlayerId\":\"practice-mafia\"}");
+        nextPractice(host, 1, "night");
+        assertTrue(game(0).path("self").path("investigations").get(0).path("mafia").asBoolean());
+        assertEquals(1, game(0).path("players").size());
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"doctor\"}");
+        nextPractice(host, 1, "discussion");
+        send(host, "{\"version\":1,\"type\":\"meeting_vote\",\"round\":1,\"targetPlayerId\":\"practice-mafia\"}");
+        nextPractice(host, 1, "voting");
+        assertEquals("mafia", game(0).path("outcome").path("eliminatedRole").asText());
+        nextPractice(host, 1, "voting_result");
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"mafia\"}");
+        nextPractice(host, 2, "day");
+        send(host, "{\"version\":1,\"type\":\"night_choice\",\"round\":2,\"targetPlayerId\":\"practice-villager\"}");
+        nextPractice(host, 2, "night");
+        assertEquals("practice-villager", game(0).path("outcome").path("deaths").get(0).asText());
+        assertTrue(game(0).path("winner").isNull());
+        assertEquals("practice", game(0).path("mode").asText());
     }
 
     // ----- helpers ------------------------------------------------------------------------

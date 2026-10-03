@@ -2,10 +2,11 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask {
+public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole {
     record OpenTask(int version, String type, int round, String taskId) implements ClientMessage {}
     record TaskStep(int version, String type, int round, String taskId, int step, int value) implements ClientMessage {}
     record CloseTask(int version, String type) implements ClientMessage {}
+    record PreviewRole(int version, String type, dev.lpa.pu_go.game.Role role) implements ClientMessage {}
     int version();
     String type();
 

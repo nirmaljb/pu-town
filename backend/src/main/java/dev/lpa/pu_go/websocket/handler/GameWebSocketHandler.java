@@ -116,6 +116,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
+                    else if (incoming instanceof ClientMessage.PreviewRole preview) withGame(player, (room, game) -> {
+                        Game.Rejection rejection = game.previewRole(player.getId(), preview.role());
+                        if (rejection != null) deliver(error(player, rejection.code(), rejection.message()));
+                        else { List<Delivery> deliveries = new ArrayList<>(); addGameState(deliveries, room); deliverAll(deliveries); }
+                    });
                     else if (incoming instanceof ClientMessage.OpenTask task) handleTask(player, (game) -> game.openTask(player.getId(), task.round(), task.taskId(), roomManager.currentTimeMillis()));
                     else if (incoming instanceof ClientMessage.TaskStep task) handleTask(player, (game) -> game.taskStep(player.getId(), task.round(), task.taskId(), task.step(), task.value(), roomManager.currentTimeMillis()));
                     else if (incoming instanceof ClientMessage.CloseTask) handleTask(player, (game) -> { game.closeTask(player.getId()); return null; });
@@ -317,6 +322,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Game game = room.getGame();
         if (game == null || game.participant(playerId) == null) return;
         deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
+        if (game.isPractice()) deliveries.add(new Delivery(playerId, new ServerMessage.PracticeState(game.practiceTargets())));
         deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
         if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
         deliveries.add(new Delivery(playerId, new ServerMessage.ChatHistory(game.historyFor(playerId).stream()
@@ -596,7 +602,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (game == null) return;
         for (String playerId : playerIds) {
             if (game.participant(playerId) != null) {
-                deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
+                if (game.isPractice()) deliveries.add(new Delivery(playerId, new ServerMessage.PracticeState(game.practiceTargets())));
+        deliveries.add(new Delivery(playerId, gameStateFor(game, playerId)));
                 if (game.hasField()) deliveries.add(new Delivery(playerId, fieldStateFor(game, playerId)));
             }
         }

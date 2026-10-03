@@ -43,6 +43,14 @@ public final class ClientMessageDecoder {
                 requireOnly(root, Set.of("version", "type", "mafia", "doctors", "sheriffs"));
                 yield new ClientMessage.SetRoleSetup(1, type, count(root, "mafia"), count(root, "doctors"), count(root, "sheriffs"));
             }
+            case "preview_role" -> {
+                requireOnly(root, Set.of("version", "type", "role"));
+                String role = requiredText(root, "role");
+                dev.lpa.pu_go.game.Role selected = java.util.Arrays.stream(dev.lpa.pu_go.game.Role.values())
+                        .filter(value -> value.wireValue().equals(role)).findFirst().orElse(null);
+                if (selected == null) throw new InvalidClientMessageException("malformed_message", "Unknown Role.");
+                yield new ClientMessage.PreviewRole(1, type, selected);
+            }
             case "start_practice" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.StartPractice(1, type);

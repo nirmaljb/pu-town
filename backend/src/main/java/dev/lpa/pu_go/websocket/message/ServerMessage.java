@@ -11,7 +11,7 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState {
     int version();
     String type();
 
@@ -118,6 +118,10 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
         public FieldState(int round, List<Game.FieldPlayer> players, Game.OwnField self) {
             this(1, "field_state", round, List.copyOf(players), self);
         }
+    }
+
+    record PracticeState(int version, String type, List<Game.PracticeTarget> targets) implements ServerMessage {
+        public PracticeState(List<Game.PracticeTarget> targets) { this(1, "practice_state", List.copyOf(targets)); }
     }
 
     record TaskState(int version, String type, List<dev.lpa.pu_go.game.TaskBoard.TaskView> tasks,
