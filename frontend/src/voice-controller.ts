@@ -12,6 +12,7 @@ export class VoiceController {
   readonly #leave = document.createElement("button");
   readonly #status = document.createElement("span");
   readonly #sources = new Map<RemoteTrack, MediaStreamAudioSourceNode>();
+  readonly #decoders = new Map<RemoteTrack, HTMLMediaElement>();
   #room: Room | null = null;
   #generation = 0;
   #round: number | null = null;
@@ -52,11 +53,17 @@ export class VoiceController {
     this.#busy = true; this.#text = "Joining voice…";
     room.on(RoomEvent.TrackSubscribed, track => {
       if (generation !== this.#generation || track.kind !== Track.Kind.Audio) return;
-      const source = this.mixer.context.createMediaStreamSource(new MediaStream([track.mediaStreamTrack]));
+      // Chromium needs a playing media element to pull decoded remote WebRTC
+      // audio. Its output stays muted; audible output uses our saved volume bus.
+      const decoder = document.createElement("audio"); decoder.muted = true; decoder.hidden = true;
+      track.attach(decoder); this.#root.append(decoder); this.#decoders.set(track, decoder);
+      const source = this.mixer.context.createMediaStreamSource(decoder.srcObject as MediaStream);
       source.connect(this.mixer.channel("voice")); this.#sources.set(track, source);
     });
     room.on(RoomEvent.TrackUnsubscribed, track => {
       this.#sources.get(track)?.disconnect(); this.#sources.delete(track);
+      const decoder = this.#decoders.get(track);
+      if (decoder) { track.detach(decoder); decoder.remove(); this.#decoders.delete(track); }
     });
     room.on(RoomEvent.Disconnected, () => {
       if (generation !== this.#generation) return;
@@ -93,6 +100,8 @@ export class VoiceController {
     const room = this.#room; this.#room = null;
     room?.removeAllListeners(); if (room) void room.disconnect().catch(() => {});
     for (const source of this.#sources.values()) source.disconnect();
+    for (const [track, decoder] of this.#decoders) { track.detach(decoder); decoder.remove(); }
+    this.#decoders.clear();
     this.#sources.clear(); this.#busy = false; this.#muted = true; this.#canPublish = false;
   }
 
