@@ -224,6 +224,31 @@ class MafiaGameTest {
         send(host, "{\"version\":1,\"type\":\"advance_practice\",\"round\":" + round + ",\"phase\":\"" + phase + "\"}");
     }
 
+    @Test
+    void daySleepsInPlaceAtNightThenReturnsToTownhallOnFixedDeadlines() throws Exception {
+        startTable("day-cycle", 4);
+        advance(REVEAL);
+        assertEquals("day", game(0).path("phase").asText());
+        assertEquals(180_000, game(0).path("remainingMs").asLong());
+        handler.tickFields();
+        JsonNode position = field(0).path("self");
+        advance(180_000);
+        assertEquals("night", game(0).path("phase").asText());
+        assertEquals(20_000, game(0).path("remainingMs").asLong());
+        handler.tickFields();
+        assertEquals(position.path("x"), field(0).path("self").path("x"));
+        assertEquals(position.path("y"), field(0).path("self").path("y"));
+        advance(20_000);
+        assertEquals("discussion", game(0).path("phase").asText());
+        assertEquals(90_000, game(0).path("remainingMs").asLong());
+        advance(90_000 + 30_000);
+        assertEquals("voting_result", game(0).path("phase").asText());
+        assertEquals(6_000, game(0).path("remainingMs").asLong());
+        advance(6_000);
+        assertEquals("day", game(0).path("phase").asText());
+        assertEquals(2, game(0).path("round").asInt());
+    }
+
     // ----- Start and the deal ------------------------------------------------------------
 
     @Test

@@ -14,3 +14,9 @@ __pycache__/
 
 # Local media downloads and private startup credentials.
 .scratch/voice/
+
+.scratch/worktree-integration-2026-10-04/
+.scratch/browsers/
+.scratch/browser-tmp/
+.scratch/integration-tmp/
+.scratch/npm-cache/

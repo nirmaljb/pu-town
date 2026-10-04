@@ -210,6 +210,10 @@ to bind a separate loopback address while keeping the browser's supported
 set `PU_TOWN_E2E_BACKEND_PORT` to a free port as well; both server startup and
 browser connections use it.
 
+For a short four-Player Create/Join, Ready/Start, centered layout and Leave smoke
+check, run `npm run test:browser -- e2e/game-entry.spec.ts`. It uses the same
+isolated servers and port overrides as the full browser suite.
+
 Each viewport journey waits through a full cycle (about six minutes). The suite uses Phaser's Canvas renderer and four independent browser contexts
 at desktop and phone sizes, including ballot interaction after a landscape resize
 and announcements containing a long Display Name. It exercises Create/Join, Ready/Start, centered map
