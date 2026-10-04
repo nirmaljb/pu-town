@@ -27,7 +27,7 @@ import java.util.function.BooleanSupplier;
 /** LiveKit credentials never authorize admission without a current Game connection. */
 @Component
 public class VoiceService {
-    public record Grant(String identity, String room, String playerId, BooleanSupplier allowed) {}
+    public record Grant(String identity, String room, String playerId, boolean canPublish, BooleanSupplier allowed) {}
     private final Map<String, Grant> grants = new ConcurrentHashMap<>();
     private final Map<String, Runnable> signals = new ConcurrentHashMap<>();
     private final ObjectMapper json = new ObjectMapper();
@@ -46,10 +46,10 @@ public class VoiceService {
 
     public boolean enabled() { return !key.isBlank() && secret.length() >= 32; }
 
-    public String issue(String room, String playerId, BooleanSupplier allowed) {
+    public String issue(String room, String playerId, boolean canPublish, BooleanSupplier allowed) {
         revokePlayer(playerId);
         String identity = UUID.randomUUID().toString();
-        Grant grant = new Grant(identity, room, playerId, allowed);
+        Grant grant = new Grant(identity, room, playerId, canPublish, allowed);
         grants.put(identity, grant);
         return gatewayToken(grant);
     }
@@ -58,7 +58,7 @@ public class VoiceService {
     public String mediaToken(Grant grant) { return sign(claimsOf(grant), secret); }
     private static Map<String, Object> claimsOf(Grant grant) {
         return Map.of("sub", grant.identity(), "video", Map.of("room", grant.room(), "roomJoin", true,
-                "canPublish", true, "canSubscribe", true, "canPublishData", false,
+                "canPublish", grant.canPublish(), "canSubscribe", true, "canPublishData", false,
                 "canPublishSources", List.of("microphone"), "canUpdateOwnMetadata", false));
     }
 

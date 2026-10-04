@@ -15,14 +15,22 @@ final class VoiceSignalPolicy {
     private VoiceSignalPolicy() {}
 
     static boolean allowsSignal(ByteString payload) {
+        return allowsSignal(payload, true);
+    }
+
+    static boolean allowsSignal(ByteString payload, boolean canPublish) {
         try {
             var request = UnknownFieldSet.parseFrom(payload);
             // SignalRequest.add_track = 4; offer = 1.
-            return audioTracks(request, 4) && audioOffers(request, 1);
+            return audioTracks(request, 4, canPublish) && audioOffers(request, 1, canPublish);
         } catch (Exception ignored) { return false; }
     }
 
     static boolean allowsJoin(String encoded) {
+        return allowsJoin(encoded, true);
+    }
+
+    static boolean allowsJoin(String encoded, boolean canPublish) {
         if (encoded == null) return true;
         try {
             if (encoded.length() > MAX_JOIN_BYTES) return false;
@@ -38,34 +46,34 @@ final class VoiceSignalPolicy {
                 if (join.length > MAX_JOIN_BYTES) return false;
                 var request = UnknownFieldSet.parseFrom(join);
                 // JoinRequest.add_track_requests = 5; publisher_offer = 6.
-                if (!audioTracks(request, 5) || !audioOffers(request, 6)) return false;
+                if (!audioTracks(request, 5, canPublish) || !audioOffers(request, 6, canPublish)) return false;
             }
             return true;
         } catch (Exception ignored) { return false; }
     }
 
-    private static boolean audioTracks(UnknownFieldSet request, int field) throws java.io.IOException {
+    private static boolean audioTracks(UnknownFieldSet request, int field, boolean canPublish) throws java.io.IOException {
         for (ByteString body : request.getField(field).getLengthDelimitedList()) {
             var track = UnknownFieldSet.parseFrom(body);
             // AddTrackRequest.type = 3; TrackType.AUDIO = 0. Source is independently
             // enforced by LiveKit; a declared microphone does not imply audio type.
-            if (value(track, 3) != 0) return false;
+            if (!canPublish || value(track, 3) != 0) return false;
         }
         return true;
     }
 
-    private static boolean audioOffers(UnknownFieldSet request, int field) throws java.io.IOException {
+    private static boolean audioOffers(UnknownFieldSet request, int field, boolean canPublish) throws java.io.IOException {
         for (ByteString body : request.getField(field).getLengthDelimitedList()) {
             var offer = UnknownFieldSet.parseFrom(body);
             // SDKs may pre-negotiate receive-only video sections. Reject sending
             // video, including SDP with the implicit default sendrecv direction.
             for (ByteString sdp : offer.getField(2).getLengthDelimitedList())
-                if (sendsVideo(sdp.toStringUtf8())) return false;
+                if (sendsForbiddenMedia(sdp.toStringUtf8(), canPublish)) return false;
         }
         return true;
     }
 
-    private static boolean sendsVideo(String sdp) {
+    private static boolean sendsForbiddenMedia(String sdp, boolean canPublish) {
         String sessionDirection = "sendrecv";
         String direction = sessionDirection;
         boolean media = false;
@@ -75,7 +83,7 @@ final class VoiceSignalPolicy {
             if (line.startsWith("m=")) {
                 if (video && !direction.equals("recvonly") && !direction.equals("inactive")) return true;
                 String[] fields = line.substring(2).split("\\s+");
-                video = fields.length >= 2 && fields[0].equals("video") && !fields[1].equals("0");
+                video = fields.length >= 2 && (fields[0].equals("video") || !canPublish && fields[0].equals("audio")) && !fields[1].equals("0");
                 media = true;
                 directionSeen = false;
                 direction = sessionDirection;

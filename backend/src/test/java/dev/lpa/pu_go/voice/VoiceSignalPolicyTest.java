@@ -25,6 +25,12 @@ class VoiceSignalPolicyTest {
         assertTrue(VoiceSignalPolicy.allowsSignal(nested(4, track(0))));
         assertFalse(VoiceSignalPolicy.allowsSignal(nested(4, track(1))));
     }
+    @Test void receiveOnlyGrantsRejectAudioPublicationAndSendingOffers() {
+        assertFalse(VoiceSignalPolicy.allowsSignal(nested(4, track(0)), false));
+        assertFalse(VoiceSignalPolicy.allowsSignal(offer("v=0\r\nm=audio 9 RTP/AVP 111\r\na=sendonly\r\n"), false));
+        assertFalse(VoiceSignalPolicy.allowsSignal(offer("v=0\r\nm=audio 9 RTP/AVP 111\r\n"), false));
+        assertTrue(VoiceSignalPolicy.allowsSignal(offer("v=0\r\nm=audio 9 RTP/AVP 111\r\na=recvonly\r\n"), false));
+    }
     @Test void acceptsReceiveOnlySdkSectionsButRejectsSendingAndInheritedDirections() {
         assertTrue(VoiceSignalPolicy.allowsSignal(offer("v=0\r\nm=video 9 RTP/AVP 96\r\na=recvonly\r\nm=audio 9 RTP/AVP 111\r\na=sendrecv\r\n")));
         assertTrue(VoiceSignalPolicy.allowsSignal(offer("v=0\r\na=inactive\r\nm=video 9 RTP/AVP 96\r\n")));
@@ -44,6 +50,7 @@ class VoiceSignalPolicyTest {
             var wrapped = UnknownFieldSet.newBuilder().addField(1, UnknownFieldSet.Field.newBuilder().addVarint(compression).build())
                     .addField(2, UnknownFieldSet.Field.newBuilder().addLengthDelimited(ByteString.copyFrom(body)).build()).build();
             assertEquals(type == 0, VoiceSignalPolicy.allowsJoin(Base64.getUrlEncoder().encodeToString(wrapped.toByteArray())));
+            assertFalse(VoiceSignalPolicy.allowsJoin(Base64.getUrlEncoder().encodeToString(wrapped.toByteArray()), false));
         }
         assertFalse(VoiceSignalPolicy.allowsJoin("malformed!"));
     }

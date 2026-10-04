@@ -57,7 +57,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
         chat: world.roomId === event.roomId ? world.chat : []
       };
     case "voice_state":
-      return { ...world, voice: event.token === null ? null : { url: event.url, token: event.token } };
+      return { ...world, voice: event.token === null ? null : { url: event.url, token: event.token, canPublish: event.canPublish } };
     case "game_state": {
       const { version, type, ...game } = event;
       // A field belongs to one round of Day and Night; Townhall or a new Day discards it.

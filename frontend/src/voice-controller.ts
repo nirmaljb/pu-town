@@ -18,6 +18,7 @@ export class VoiceController {
   #text = "Voice opens during Townhall";
   #muted = true;
   #busy = false;
+  #canPublish = false;
 
   constructor(private readonly client: ReconnectingGameClient, private readonly mixer: AudioMixer,
               private readonly gameUrl: string) {
@@ -45,6 +46,7 @@ export class VoiceController {
   private async applyGrant(state: VoiceState): Promise<void> {
     this.disconnect();
     if (state.token === null || state.url === null) { this.#text = "Voice access ended"; return; }
+    this.#canPublish = state.canPublish;
     const generation = this.#generation;
     const room = new Room(); this.#room = room;
     this.#busy = true; this.#text = "Joining voice…";
@@ -64,7 +66,7 @@ export class VoiceController {
       const url = new URL(state.url, this.gameUrl);
       await room.connect(url.toString(), state.token);
       if (generation !== this.#generation) { await room.disconnect(); return; }
-      this.#busy = false; this.#text = "Listening · microphone muted";
+      this.#busy = false; this.#text = this.#canPublish ? "Listening · microphone muted" : "Listening only · eliminated";
     } catch {
       if (generation !== this.#generation) return;
       this.disconnect(); this.#text = "Voice unavailable; continue with text";
@@ -73,7 +75,7 @@ export class VoiceController {
 
   private async toggleMicrophone(): Promise<void> {
     const room = this.#room;
-    if (!room || this.#busy) return;
+    if (!room || this.#busy || !this.#canPublish) return;
     const generation = this.#generation;
     this.#busy = true;
     try {
@@ -91,20 +93,20 @@ export class VoiceController {
     const room = this.#room; this.#room = null;
     room?.removeAllListeners(); if (room) void room.disconnect().catch(() => {});
     for (const source of this.#sources.values()) source.disconnect();
-    this.#sources.clear(); this.#busy = false; this.#muted = true;
+    this.#sources.clear(); this.#busy = false; this.#muted = true; this.#canPublish = false;
   }
 
   render(world: WorldState | undefined): void {
     this.#root.hidden = !world?.game;
     const game = world?.game;
-    this.#round = game?.self.status === "living" && (game.phase === "discussion" || game.phase === "voting") ? game.round : null;
+    this.#round = game && game.self.status !== "left" && (game.phase === "discussion" || game.phase === "voting") ? game.round : null;
     if (world?.lastError && ["voice_unavailable", "invalid_phase"].includes(world.lastError.code) && this.#busy && !this.#room) {
       this.#busy = false; this.#text = world.lastError.message;
     }
     this.#join.hidden = this.#room !== null;
     this.#join.disabled = this.#round === null || this.#busy;
     this.#mute.hidden = this.#leave.hidden = this.#room === null;
-    this.#mute.disabled = this.#busy;
+    this.#mute.disabled = this.#busy || !this.#canPublish;
     this.#mute.textContent = this.#muted ? "Unmute microphone" : "Mute microphone";
     this.#status.textContent = this.#text;
   }

@@ -13,7 +13,8 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
-    launchOptions: { args: [`--host-resolver-rules=MAP localhost ${host}`, "--disable-webgl"] }
+    launchOptions: { args: [`--host-resolver-rules=MAP localhost ${host}`, "--disable-webgl",
+      ...(process.env.PUTOWN_VOICE_KEY ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [])] }
   },
   webServer: [
     {

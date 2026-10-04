@@ -352,13 +352,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 .toList())));
     }
 
-    private boolean voiceAllowed(PlayerState player, String roomId, String sessionId, int round) {
+    private boolean voiceAllowed(PlayerState player, String roomId, String sessionId, int round, boolean canPublish) {
         return roomManager.serialized(List.of(roomId), () -> {
             Room room = roomManager.findRoom(roomId);
             Game game = room == null ? null : room.getGame();
             return room != null && room.containsPlayer(player.getId()) && player.isConnected()
                     && player.getSession().getId().equals(sessionId) && game != null && game.round() == round
-                    && game.participant(player.getId()).status() == ParticipantStatus.LIVING
+                    && (canPublish ? game.participant(player.getId()).status() == ParticipantStatus.LIVING
+                        : game.participant(player.getId()).status() == ParticipantStatus.ELIMINATED)
                     && (game.phase() == GamePhase.DISCUSSION || game.phase() == GamePhase.VOTING)
                     && (game.phaseDeadline() == null || roomManager.currentTimeMillis() < game.phaseDeadline());
         });
@@ -367,14 +368,15 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private void handleVoiceJoin(PlayerState player, ClientMessage.JoinVoice message) {
         String roomId = player.getRoomId();
         String sessionId = player.getSession().getId();
-        if (roomId == null || !voiceAllowed(player, roomId, sessionId, message.round())) {
-            deliver(error(player, "invalid_phase", "Voice is available to living Participants during Townhall discussion and voting."));
+        boolean canPublish = roomId != null && voiceAllowed(player, roomId, sessionId, message.round(), true);
+        if (roomId == null || !(canPublish || voiceAllowed(player, roomId, sessionId, message.round(), false))) {
+            deliver(error(player, "invalid_phase", "Voice is available during Townhall discussion and voting."));
         } else if (!voice.enabled()) {
             deliver(error(player, "voice_unavailable", "Voice service is unavailable. You can continue using text."));
         } else {
-            String token = voice.issue("pu-" + roomId + "-" + message.round(), player.getId(),
-                    () -> voiceAllowed(player, roomId, sessionId, message.round()));
-            deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(token)));
+            String token = voice.issue("pu-" + roomId + "-" + message.round(), player.getId(), canPublish,
+                    () -> voiceAllowed(player, roomId, sessionId, message.round(), canPublish));
+            deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(token, canPublish)));
         }
     }
 

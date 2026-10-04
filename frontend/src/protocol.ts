@@ -108,7 +108,7 @@ export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" |
 export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number; total: number;
   activeTaskId: string | null; remainingMs: number | null }>;
 
-export type VoiceState = Readonly<{ url: "/voice" | null; token: string | null }>;
+export type VoiceState = Readonly<{ url: "/voice" | null; token: string | null; canPublish: boolean }>;
 
 export type ServerMessage =
   | (VoiceState & Readonly<{ version: 1; type: "voice_state" }>)
@@ -274,10 +274,11 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type", "player"]);
       return { version: 1, type, player: decodePlayer(message.player) };
     case "voice_state": {
-      requireFields(message, ["version", "type", "url", "token"]);
-      if (message.url === null && message.token === null) return { version: 1, type, url: null, token: null };
+      requireFields(message, ["version", "type", "url", "token", "canPublish"]);
+      const canPublish = requireBoolean(message.canPublish);
+      if (message.url === null && message.token === null && !canPublish) return { version: 1, type, url: null, token: null, canPublish };
       if (message.url !== "/voice") throw new Error("Invalid voice gateway");
-      return { version: 1, type, url: "/voice", token: requireNonEmptyString(message.token, "token") };
+      return { version: 1, type, url: "/voice", token: requireNonEmptyString(message.token, "token"), canPublish };
     }
     case "game_state":
       return { version: 1, type, ...decodeGameView(message) };

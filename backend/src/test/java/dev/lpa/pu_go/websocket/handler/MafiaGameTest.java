@@ -27,6 +27,8 @@ import java.util.function.UnaryOperator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -71,6 +73,45 @@ class MafiaGameTest {
     private final List<RecordingWebSocketSession> table = new ArrayList<>();
     private final List<String> tokens = new ArrayList<>();
     private String code;
+
+    @Test
+    void eliminatedParticipantsRecoverReceiveOnlyTownhallVoiceAndRetireLivingGrants() throws Exception {
+        var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
+        handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
+                () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles), voice);
+        try {
+            startTable("ghost-voice", 10);
+            advance(REVEAL + DAY + NIGHT);
+            send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            JsonNode living = latestOfType(table.get(1), "voice_state");
+            assertTrue(living.path("canPublish").asBoolean());
+            String oldToken = living.path("token").asText();
+            advance(DISCUSSION);
+            for (int seat = 0; seat < 6; seat++) ballot(seat, 1, 1);
+            advance(VOTING);
+            assertNull(voice.authorize(oldToken));
+            assertTrue(latestOfType(table.get(1), "voice_state").path("token").isNull());
+            advance(VOTING_RESULT + DAY + NIGHT);
+            int others = table.get(0).payloads().size();
+            send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":2}");
+            JsonNode listening = latestOfType(table.get(1), "voice_state");
+            assertFalse(listening.path("canPublish").asBoolean());
+            String token = listening.path("token").asText();
+            assertNotNull(voice.authorize(token));
+            JsonNode claims = objectMapper.readTree(java.util.Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+            assertFalse(claims.path("video").path("canPublish").asBoolean());
+            assertEquals(others, table.get(0).payloads().size());
+            handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+            assertNull(voice.authorize(token));
+            var returned = connect("ghost-voice-recovered");
+            recover(returned, code, tokens.get(1));
+            send(returned, "{\"version\":1,\"type\":\"join_voice\",\"round\":2}");
+            JsonNode recovered = latestOfType(returned, "voice_state");
+            assertFalse(recovered.path("canPublish").asBoolean());
+            assertNotNull(voice.authorize(recovered.path("token").asText()));
+            assertNull(voice.authorize(oldToken));
+        } finally { voice.stop(); }
+    }
 
     @Test
     void enabledVoiceIssuesOnlyPrivateGrantsAndClearsThemAtTownhallEnd() throws Exception {

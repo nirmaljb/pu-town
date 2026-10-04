@@ -33,8 +33,8 @@ public class VoiceGateway extends AbstractWebSocketHandler implements HandshakeI
             if (authorization != null && authorization.startsWith("Bearer ")) token = authorization.substring(7);
         }
         String join = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams().getFirst("join_request");
-        VoiceService.Grant grant = VoiceSignalPolicy.allowsJoin(join) ? voice.authorize(token) : null;
-        if (grant == null) { response.setStatusCode(HttpStatus.FORBIDDEN); return false; }
+        VoiceService.Grant grant = voice.authorize(token);
+        if (grant == null || !VoiceSignalPolicy.allowsJoin(join, grant.canPublish())) { response.setStatusCode(HttpStatus.FORBIDDEN); return false; }
         attributes.put("grant", grant);
         return true;
     }
@@ -80,7 +80,8 @@ public class VoiceGateway extends AbstractWebSocketHandler implements HandshakeI
 
     @Override public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
         var grant = (VoiceService.Grant) session.getAttributes().get("grant");
-        if (!(message instanceof BinaryMessage binary) || !VoiceSignalPolicy.allowsSignal(ByteString.copyFrom(binary.getPayload().duplicate()))) {
+        if (!grant.allowed().getAsBoolean() || !(message instanceof BinaryMessage binary)
+                || !VoiceSignalPolicy.allowsSignal(ByteString.copyFrom(binary.getPayload().duplicate()), grant.canPublish())) {
             voice.revoke(grant); close(session); return;
         }
         WebSocketSession upstream = upstreams.get(session.getId());

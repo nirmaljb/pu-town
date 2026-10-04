@@ -12,8 +12,9 @@ import java.util.List;
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
         ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState, ServerMessage.SoundEvent, ServerMessage.VoiceState {
-    record VoiceState(int version, String type, String url, String token) implements ServerMessage {
-        public VoiceState(String token) { this(1, "voice_state", token == null ? null : "/voice", token); }
+    record VoiceState(int version, String type, String url, String token, boolean canPublish) implements ServerMessage {
+        public VoiceState(String token) { this(token, false); }
+        public VoiceState(String token, boolean canPublish) { this(1, "voice_state", token == null ? null : "/voice", token, token != null && canPublish); }
     }
     int version();
     String type();

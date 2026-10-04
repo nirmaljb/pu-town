@@ -495,7 +495,7 @@ test("voice transport receives grants immediately and stops on Game disconnect w
   client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
   client.joinVoice(1);
   assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "join_voice", round: 1 });
-  const grant = { version: 1, type: "voice_state", url: "/voice", token: "private-grant" };
+  const grant = { version: 1, type: "voice_state", url: "/voice", token: "private-grant", canPublish: true };
   sockets[0].message(grant);
   assert.equal(grants.at(-1).token, "private-grant");
   assert.equal(inbox.drain().at(-1).event.type, "voice_state");

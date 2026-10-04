@@ -1,12 +1,13 @@
 # Local Townhall voice
 
-LiveKit 1.13.7 runs as a separate, self-hosted process. Living Participants can
+LiveKit 1.13.7 runs as a separate, self-hosted process. Participants can
 choose **Join voice** during Townhall discussion and voting. They initially listen
 with their microphone muted. **Unmute microphone** requests browser permission;
 denial preserves listening, text, and the Game. **Mute microphone** and **Leave
 voice** are independent of Leave Room. Received audio uses the saved master and
-voice volume buses. Day voice and eliminated Participants' Townhall hearing are
-subsequent tickets.
+voice volume buses. Eliminated Participants can listen during Townhall, with publication denied by
+the server and the microphone control disabled. Recovery issues only current
+permissions; earlier grants cannot be reused. Day voice is a subsequent ticket.
 
 On Linux x86-64, from the repository root:
 

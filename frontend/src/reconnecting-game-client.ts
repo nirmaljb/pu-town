@@ -179,7 +179,7 @@ export class ReconnectingGameClient {
   }
 
   private closeConnection(): void {
-    this.onVoiceState({ url: null, token: null });
+    this.onVoiceState({ url: null, token: null, canPublish: false });
     this.#phase = null;
     this.#healthFailed = false;
     ++this.#generation;
