@@ -1288,6 +1288,32 @@ class MafiaGameTest {
         assertEquals(own, countOfType(table.get(0), "sound_event"), "Night is silent");
     }
 
+    @Test
+    void buildingSoundsReachOnlyListenersInTheActorsAcceptedArea() throws Exception {
+        startTable("building-sounds", 10);
+        advance(REVEAL);
+        walk(1, 1280, 742);
+        walk(1, 576, 742);
+        walk(1, 576, 900);
+        walk(2, 1280, 742);
+        walk(2, 576, 742);
+        walk(2, 576, 800);
+        walk(0, 1280, 742);
+        walk(0, 576, 742);
+        walk(0, 576, 800);
+        int outside = countOfType(table.get(2), "sound_event");
+        walk(0, 576, 860);
+        JsonNode enter = latestOfType(table.get(1), "sound_event");
+        assertEquals("enter", enter.path("kind").asText());
+        assertEquals(playerId(0), enter.path("playerId").asText());
+        assertEquals(1, enter.path("gain").asDouble());
+        assertEquals(outside, countOfType(table.get(2), "sound_event"), "Nearby outside listener cannot hear inside");
+        int inside = countOfType(table.get(1), "sound_event");
+        walk(0, 576, 800);
+        assertEquals("exit", latestOfType(table.get(2), "sound_event").path("kind").asText());
+        assertEquals(inside, countOfType(table.get(1), "sound_event"), "Nearby inside listener cannot hear outside");
+    }
+
     // ----- helpers ------------------------------------------------------------------------
 
     private void ensureDay(int seat) {
