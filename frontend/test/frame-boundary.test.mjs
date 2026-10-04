@@ -374,3 +374,17 @@ test("voice grant presentation waits for a frame and explicit revocation clears 
   boundary.beginFrame();
   assert.equal(boundary.world.voice, null);
 });
+
+test("nearby voice grants apply only at frames and revocation clears hearing", () => {
+  const inbox = new NetworkInbox();
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  const peers = [{ playerId: "p1", token: "private-listen", gain: .5 }];
+  inbox.enqueue({ version: 1, type: "voice_peers", peers });
+  assert.deepEqual(boundary.world.voicePeers, []);
+  boundary.beginFrame();
+  assert.deepEqual(boundary.world.voicePeers, peers);
+  inbox.enqueue({ version: 1, type: "voice_state", url: null, token: null, canPublish: false });
+  assert.deepEqual(boundary.world.voicePeers, peers);
+  boundary.beginFrame();
+  assert.deepEqual(boundary.world.voicePeers, []);
+});

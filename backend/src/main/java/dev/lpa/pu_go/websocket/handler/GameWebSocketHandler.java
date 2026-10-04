@@ -52,6 +52,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, Double> walkedSinceFootstep = new ConcurrentHashMap<>();
     private final RoomManager roomManager;
     private final VoiceService voice;
+    private final Map<String, List<ServerMessage.VoicePeerView>> dayVoicePeers = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
     private final Map<String, PlayerState> playersBySession = new ConcurrentHashMap<>();
@@ -131,6 +132,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.JoinVoice joinVoice) handleVoiceJoin(player, joinVoice);
                     else if (incoming instanceof ClientMessage.LeaveVoice) {
                         voice.revokePlayer(player.getId());
+                        dayVoicePeers.remove(player.getId());
                         deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(null)));
                     }
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
@@ -214,6 +216,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 Game game = room == null ? null : room.getGame();
                 if (game == null || !game.hasField()) return null;
                 List<Delivery> deliveries = new ArrayList<>();
+                refreshDayVoice(deliveries, room);
                 for (String memberId : room.playerIdsSnapshot()) {
                     if (game.participant(memberId) != null) deliveries.add(new Delivery(memberId, fieldStateFor(game, memberId)));
                 }
@@ -255,6 +258,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             if (connection.getRoomId() != null) { deliver(error(connection, "invalid_phase", "Leave before recovering another membership.")); return null; }
             boolean firstReturnAfterGrace = hostGraceElapsed(room);
             voice.revokePlayer(member.getId());
+            dayVoicePeers.remove(member.getId());
             WebSocketSession retiredSession = member.getSession();
             playersBySession.remove(retiredSession.getId(), member);
             ConnectionOutbox outbox = outboxes.remove(connection.getId());
@@ -360,7 +364,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     && player.getSession().getId().equals(sessionId) && game != null && game.round() == round
                     && (canPublish ? game.participant(player.getId()).status() == ParticipantStatus.LIVING
                         : game.participant(player.getId()).status() == ParticipantStatus.ELIMINATED)
-                    && (game.phase() == GamePhase.DISCUSSION || game.phase() == GamePhase.VOTING)
+                    && (game.phase() == GamePhase.DISCUSSION || game.phase() == GamePhase.VOTING || canPublish && game.phase() == GamePhase.DAY)
                     && (game.phaseDeadline() == null || roomManager.currentTimeMillis() < game.phaseDeadline());
         });
     }
@@ -370,13 +374,68 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String sessionId = player.getSession().getId();
         boolean canPublish = roomId != null && voiceAllowed(player, roomId, sessionId, message.round(), true);
         if (roomId == null || !(canPublish || voiceAllowed(player, roomId, sessionId, message.round(), false))) {
-            deliver(error(player, "invalid_phase", "Voice is available during Townhall discussion and voting."));
+            deliver(error(player, "invalid_phase", "Voice is available during Day and Townhall discussion and voting."));
         } else if (!voice.enabled()) {
             deliver(error(player, "voice_unavailable", "Voice service is unavailable. You can continue using text."));
         } else {
-            String token = voice.issue("pu-" + roomId + "-" + message.round(), player.getId(), canPublish,
-                    () -> voiceAllowed(player, roomId, sessionId, message.round(), canPublish));
-            deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(token, canPublish)));
+            Room room = roomManager.findRoom(roomId);
+            boolean day = room.getGame().phase() == GamePhase.DAY;
+            String token = day
+                    ? voice.issueDayPublication(dayVoiceRoom(roomId, message.round(), player.getId()), player.getId(),
+                        () -> dayVoiceAllowed(player, roomId, sessionId, message.round()))
+                    : voice.issue("pu-" + roomId + "-" + message.round(), player.getId(), canPublish,
+                        () -> voiceAllowed(player, roomId, sessionId, message.round(), canPublish));
+            List<Delivery> deliveries = new ArrayList<>();
+            deliveries.add(new Delivery(player.getId(), new ServerMessage.VoiceState(token, canPublish)));
+            refreshDayVoice(deliveries, room);
+            deliverAll(deliveries);
+        }
+    }
+
+    private static String dayVoiceRoom(String roomId, int round, String speakerId) {
+        return "pu-" + roomId + "-" + round + "-day-" + speakerId;
+    }
+
+    private boolean dayVoiceAllowed(PlayerState player, String roomId, String sessionId, int round) {
+        return roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            return room != null && room.getGame() != null && room.getGame().phase() == GamePhase.DAY
+                    && voiceAllowed(player, roomId, sessionId, round, true);
+        });
+    }
+
+    private boolean dayListenerAllowed(PlayerState listener, String roomId, String sessionId, int round, String speakerId) {
+        return roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            return dayVoiceAllowed(listener, roomId, sessionId, round) && voice.hasDayPublication(listener.getId())
+                    && voice.hasDayPublication(speakerId) && room.getGame().hearingGain(listener.getId(), speakerId) > 0;
+        });
+    }
+
+    private void refreshDayVoice(Collection<Delivery> deliveries, Room room) {
+        for (String id : voice.revokeInvalid(room.getRoomId()))
+            deliveries.add(new Delivery(id, new ServerMessage.VoiceState(null)));
+        Game game = room.getGame();
+        for (String listenerId : room.playerIdsSnapshot()) {
+            List<ServerMessage.VoicePeerView> peers = new ArrayList<>();
+            PlayerState listener = playersById.get(listenerId);
+            if (game != null && game.phase() == GamePhase.DAY && voice.hasDayPublication(listenerId)) {
+                String sessionId = listener.getSession().getId();
+                int round = game.round();
+                for (String speakerId : room.playerIdsSnapshot()) {
+                    if (listenerId.equals(speakerId) || !voice.hasDayPublication(speakerId)) continue;
+                    double gain = game.hearingGain(listenerId, speakerId);
+                    if (gain <= 0) continue;
+                    String token = voice.dayListenerToken(dayVoiceRoom(room.getRoomId(), round, speakerId), listenerId, speakerId,
+                            () -> dayListenerAllowed(listener, room.getRoomId(), sessionId, round, speakerId));
+                    peers.add(new ServerMessage.VoicePeerView(speakerId, token, gain));
+                }
+            }
+            List<ServerMessage.VoicePeerView> previous = dayVoicePeers.getOrDefault(listenerId, List.of());
+            if (!peers.equals(previous)) {
+                if (peers.isEmpty()) dayVoicePeers.remove(listenerId); else dayVoicePeers.put(listenerId, List.copyOf(peers));
+                deliveries.add(new Delivery(listenerId, new ServerMessage.VoicePeers(peers)));
+            }
         }
     }
 
@@ -663,8 +722,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void addGameState(Collection<Delivery> deliveries, Room room) {
-        for (String id : voice.revokeInvalid(room.getRoomId()))
-            deliveries.add(new Delivery(id, new ServerMessage.VoiceState(null)));
+        refreshDayVoice(deliveries, room);
         Game game = room.getGame();
         if (game != null) for (String playerId : room.playerIdsSnapshot())
             if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
@@ -734,6 +792,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     return null;
                 }
                 voice.revokePlayer(player.getId());
+                dayVoicePeers.remove(player.getId());
                 player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);
                 Room room = roomManager.findRoom(roomId);
                 List<Delivery> deliveries = new ArrayList<>();
@@ -747,6 +806,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private List<Delivery> endMembership(PlayerState player, String roomId,
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
         voice.revokePlayer(player.getId());
+        dayVoicePeers.remove(player.getId());
         Room room = roomManager.findRoom(roomId);
         boolean hostDeparted = player.getId().equals(room.getHostPlayerId());
         Game game = room.getGame();

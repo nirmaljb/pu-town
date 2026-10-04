@@ -1,13 +1,16 @@
-# Local Townhall voice
+# Local Game voice
 
 LiveKit 1.13.7 runs as a separate, self-hosted process. Participants can
-choose **Join voice** during Townhall discussion and voting. They initially listen
+choose **Join voice** during Day or Townhall discussion and voting. They initially listen
 with their microphone muted. **Unmute microphone** requests browser permission;
 denial preserves listening, text, and the Game. **Mute microphone** and **Leave
 voice** are independent of Leave Room. Received audio uses the saved master and
 voice volume buses. Eliminated Participants can listen during Townhall, with publication denied by
 the server and the microphone control disabled. Recovery issues only current
-permissions; earlier grants cannot be reused. Day voice is a subsequent ticket.
+permissions; earlier grants cannot be reused. During Day, living Participants publish in their own media room and listen
+through separate server-issued grants for nearby speakers. Hearing is full within
+two tiles, fades to zero at five tiles, and stops across building boundaries.
+Listener identities are hidden; old grants cannot regain hearing after movement.
 
 On Linux x86-64, from the repository root:
 
@@ -67,9 +70,10 @@ source .scratch/voice/local/local.env
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_audio_policy.py
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_tokens.py
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify.py
+PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_day.py
 ```
 
-The script uses four independent Game WebSockets and real native WebRTC clients.
+The Townhall script uses four independent Game WebSockets and real native WebRTC clients.
 It follows real deadlines (about six minutes), publishes a synthetic tone and
 checks nonzero received PCM, forbidden publication through raw signaling with
 a mandatory authorized control acknowledgement and continuing audio, Night
@@ -86,3 +90,7 @@ substitutes SFU credentials only upstream and replaces LiveKit's refreshed token
 field with a fresh gateway credential. Even a browser on the local server cannot
 reuse its token against the standalone LiveKit port. No SFU access token is sent
 to a Player; backend restart invalidates all prior gateway credentials.
+
+The Day script checks real received PCM, direct third-Player hearing, hidden
+listener identities, a modified client’s denied foreign-track subscription,
+gain changes, movement removal and refusal of retired listening credentials.

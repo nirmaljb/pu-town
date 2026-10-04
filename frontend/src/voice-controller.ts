@@ -1,6 +1,6 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 import { AudioMixer } from "./audio-mixer.js";
-import type { VoiceState } from "./protocol.js";
+import type { VoicePeer, VoiceState } from "./protocol.js";
 import type { WorldState } from "./world-state.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
 
@@ -13,10 +13,12 @@ export class VoiceController {
   readonly #status = document.createElement("span");
   readonly #sources = new Map<RemoteTrack, MediaStreamAudioSourceNode>();
   readonly #decoders = new Map<RemoteTrack, HTMLMediaElement>();
+  readonly #roomTracks = new Map<Room, Set<RemoteTrack>>();
+  readonly #peers = new Map<string, { token: string; room: Room; gain: GainNode }>();
   #room: Room | null = null;
   #generation = 0;
   #round: number | null = null;
-  #text = "Voice opens during Townhall";
+  #text = "Voice opens during Day and Townhall";
   #muted = true;
   #busy = false;
   #canPublish = false;
@@ -42,6 +44,7 @@ export class VoiceController {
       this.client.leaveVoice(); this.disconnect(); this.#text = "Voice left";
     });
     this.client.onVoiceState = state => { void this.applyGrant(state); };
+    this.client.onVoicePeers = peers => { this.applyPeers(peers); };
   }
 
   private async applyGrant(state: VoiceState): Promise<void> {
@@ -51,20 +54,7 @@ export class VoiceController {
     const generation = this.#generation;
     const room = new Room(); this.#room = room;
     this.#busy = true; this.#text = "Joining voice…";
-    room.on(RoomEvent.TrackSubscribed, track => {
-      if (generation !== this.#generation || track.kind !== Track.Kind.Audio) return;
-      // Chromium needs a playing media element to pull decoded remote WebRTC
-      // audio. Its output stays muted; audible output uses our saved volume bus.
-      const decoder = document.createElement("audio"); decoder.muted = true; decoder.hidden = true;
-      track.attach(decoder); this.#root.append(decoder); this.#decoders.set(track, decoder);
-      const source = this.mixer.context.createMediaStreamSource(decoder.srcObject as MediaStream);
-      source.connect(this.mixer.channel("voice")); this.#sources.set(track, source);
-    });
-    room.on(RoomEvent.TrackUnsubscribed, track => {
-      this.#sources.get(track)?.disconnect(); this.#sources.delete(track);
-      const decoder = this.#decoders.get(track);
-      if (decoder) { track.detach(decoder); decoder.remove(); this.#decoders.delete(track); }
-    });
+    this.attachAudio(room, generation, this.mixer.channel("voice"));
     room.on(RoomEvent.Disconnected, () => {
       if (generation !== this.#generation) return;
       this.disconnect(); this.#text = "Voice disconnected; text is still available";
@@ -77,6 +67,63 @@ export class VoiceController {
     } catch {
       if (generation !== this.#generation) return;
       this.disconnect(); this.#text = "Voice unavailable; continue with text";
+    }
+  }
+
+  private attachAudio(room: Room, generation: number, output: GainNode): void {
+    const tracks = new Set<RemoteTrack>(); this.#roomTracks.set(room, tracks);
+    room.on(RoomEvent.TrackSubscribed, track => {
+      if (generation !== this.#generation || track.kind !== Track.Kind.Audio) return;
+      // Chromium needs a playing media element to pull decoded remote WebRTC
+      // audio. Its output stays muted; audible output uses our saved volume bus.
+      const decoder = document.createElement("audio"); decoder.muted = true; decoder.hidden = true;
+      track.attach(decoder); this.#root.append(decoder); this.#decoders.set(track, decoder);
+      const source = this.mixer.context.createMediaStreamSource(decoder.srcObject as MediaStream);
+      source.connect(output); this.#sources.set(track, source); tracks.add(track);
+    });
+    room.on(RoomEvent.TrackUnsubscribed, track => {
+      this.removeTrack(track); tracks.delete(track);
+    });
+  }
+
+  private removeTrack(track: RemoteTrack): void {
+    this.#sources.get(track)?.disconnect(); this.#sources.delete(track);
+    const decoder = this.#decoders.get(track);
+    if (decoder) { track.detach(decoder); decoder.remove(); this.#decoders.delete(track); }
+  }
+
+  private closeRoom(room: Room): void {
+    room.removeAllListeners();
+    for (const track of this.#roomTracks.get(room) ?? []) this.removeTrack(track);
+    this.#roomTracks.delete(room);
+    void room.disconnect().catch(() => {});
+  }
+
+  private applyPeers(peers: readonly VoicePeer[]): void {
+    if (!this.#room) return;
+    const wanted = new Set(peers.map(peer => peer.playerId));
+    for (const [id, entry] of this.#peers) if (!wanted.has(id)) {
+      this.closeRoom(entry.room); entry.gain.disconnect(); this.#peers.delete(id);
+    }
+    for (const peer of peers) {
+      const old = this.#peers.get(peer.playerId);
+      if (old?.token === peer.token) {
+        old.gain.gain.setTargetAtTime(peer.gain, this.mixer.context.currentTime, 0.08); continue;
+      }
+      if (old) { this.closeRoom(old.room); old.gain.disconnect(); }
+      const room = new Room();
+      const gain = this.mixer.context.createGain(); gain.gain.value = peer.gain;
+      gain.connect(this.mixer.channel("voice"));
+      const entry = { token: peer.token, room, gain }; this.#peers.set(peer.playerId, entry);
+      const generation = this.#generation;
+      this.attachAudio(room, generation, gain);
+      void room.connect(new URL("/voice", this.gameUrl).toString(), peer.token).then(() => {
+        if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) this.closeRoom(room);
+      }).catch(() => {
+        if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) return;
+        this.closeRoom(room); gain.disconnect(); this.#peers.delete(peer.playerId);
+        this.#text = "Nearby voice unavailable; text is still available";
+      });
     }
   }
 
@@ -98,7 +145,9 @@ export class VoiceController {
   private disconnect(): void {
     ++this.#generation;
     const room = this.#room; this.#room = null;
-    room?.removeAllListeners(); if (room) void room.disconnect().catch(() => {});
+    if (room) this.closeRoom(room);
+    for (const peer of this.#peers.values()) { this.closeRoom(peer.room); peer.gain.disconnect(); }
+    this.#peers.clear();
     for (const source of this.#sources.values()) source.disconnect();
     for (const [track, decoder] of this.#decoders) { track.detach(decoder); decoder.remove(); }
     this.#decoders.clear();
@@ -108,7 +157,7 @@ export class VoiceController {
   render(world: WorldState | undefined): void {
     this.#root.hidden = !world?.game;
     const game = world?.game;
-    this.#round = game && game.self.status !== "left" && (game.phase === "discussion" || game.phase === "voting") ? game.round : null;
+    this.#round = game && game.self.status !== "left" && (game.phase === "discussion" || game.phase === "voting" || game.phase === "day" && game.self.status === "living") ? game.round : null;
     if (world?.lastError && ["voice_unavailable", "invalid_phase"].includes(world.lastError.code) && this.#busy && !this.#room) {
       this.#busy = false; this.#text = world.lastError.message;
     }
@@ -120,5 +169,5 @@ export class VoiceController {
     this.#status.textContent = this.#text;
   }
 
-  destroy(): void { this.client.onVoiceState = () => {}; this.disconnect(); this.#root.remove(); }
+  destroy(): void { this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
 }

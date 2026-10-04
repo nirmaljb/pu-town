@@ -27,7 +27,8 @@ import java.util.function.BooleanSupplier;
 /** LiveKit credentials never authorize admission without a current Game connection. */
 @Component
 public class VoiceService {
-    public record Grant(String identity, String room, String playerId, boolean canPublish, BooleanSupplier allowed) {}
+    public record Grant(String identity, String room, String playerId, boolean canPublish, String speakerId, BooleanSupplier allowed) {}
+    private final Map<String, String> initialTokens = new ConcurrentHashMap<>();
     private final Map<String, Grant> grants = new ConcurrentHashMap<>();
     private final Map<String, Runnable> signals = new ConcurrentHashMap<>();
     private final ObjectMapper json = new ObjectMapper();
@@ -49,16 +50,44 @@ public class VoiceService {
     public String issue(String room, String playerId, boolean canPublish, BooleanSupplier allowed) {
         revokePlayer(playerId);
         String identity = UUID.randomUUID().toString();
-        Grant grant = new Grant(identity, room, playerId, canPublish, allowed);
+        Grant grant = new Grant(identity, room, playerId, canPublish, null, allowed);
         grants.put(identity, grant);
         return gatewayToken(grant);
+    }
+
+    /** A Day publisher has one isolated room; listeners receive separate, hidden identities. */
+    public String issueDayPublication(String room, String playerId, BooleanSupplier allowed) {
+        revokePlayer(playerId);
+        Grant grant = new Grant(UUID.randomUUID().toString(), room, playerId, true, playerId, allowed);
+        grants.put(grant.identity(), grant);
+        return initialToken(grant);
+    }
+
+    public boolean hasDayPublication(String playerId) {
+        return grants.values().stream().anyMatch(g -> g.playerId().equals(playerId)
+                && playerId.equals(g.speakerId()) && g.canPublish() && g.allowed().getAsBoolean());
+    }
+
+    public String dayListenerToken(String room, String playerId, String speakerId, BooleanSupplier allowed) {
+        Grant grant = grants.values().stream().filter(g -> g.room().equals(room) && g.playerId().equals(playerId)
+                && speakerId.equals(g.speakerId()) && !g.canPublish()).findFirst().orElse(null);
+        if (grant == null) {
+            grant = new Grant(UUID.randomUUID().toString(), room, playerId, false, speakerId, allowed);
+            grants.put(grant.identity(), grant);
+        }
+        return initialToken(grant);
+    }
+
+    private String initialToken(Grant grant) {
+        return initialTokens.computeIfAbsent(grant.identity(), ignored -> gatewayToken(grant));
     }
 
     public String gatewayToken(Grant grant) { return sign(claimsOf(grant), gatewaySecret); }
     public String mediaToken(Grant grant) { return sign(claimsOf(grant), secret); }
     private static Map<String, Object> claimsOf(Grant grant) {
         return Map.of("sub", grant.identity(), "video", Map.of("room", grant.room(), "roomJoin", true,
-                "canPublish", grant.canPublish(), "canSubscribe", true, "canPublishData", false,
+                "canPublish", grant.canPublish(), "canSubscribe", grant.speakerId() == null || !grant.canPublish(), "canPublishData", false,
+                "hidden", grant.speakerId() != null && !grant.canPublish(),
                 "canPublishSources", grant.canPublish() ? List.of("microphone") : List.of(), "canUpdateOwnMetadata", false));
     }
 
@@ -82,11 +111,12 @@ public class VoiceService {
     public List<String> revokeInvalid(String room) {
         var invalid = grants.values().stream().filter(g -> g.room().startsWith("pu-" + room + "-") && !g.allowed().getAsBoolean()).toList();
         invalid.forEach(this::revoke);
-        return invalid.stream().map(Grant::playerId).distinct().toList();
+        return invalid.stream().filter(g -> g.speakerId() == null || g.canPublish()).map(Grant::playerId).distinct().toList();
     }
 
     public void revoke(Grant grant) {
         if (!grants.remove(grant.identity(), grant)) return;
+        initialTokens.remove(grant.identity());
         // Never perform signal socket writes or media HTTP calls under the Room lock.
         worker.execute(() -> remove(grant));
     }

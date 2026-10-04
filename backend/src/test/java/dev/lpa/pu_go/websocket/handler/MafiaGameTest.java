@@ -114,6 +114,37 @@ class MafiaGameTest {
     }
 
     @Test
+    void dayVoiceIssuesOnlyDirectHearingGrantsAndRevokesThemAfterMovement() throws Exception {
+        var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
+        handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
+                () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles), voice);
+        try {
+            startTable("day-voice", 10);
+            advance(REVEAL);
+            walk(0, 1280, 742); walk(1, 1400, 742); walk(2, 1480, 742);
+            for (int seat : List.of(0, 1, 2)) send(table.get(seat), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            handler.tickFields();
+            JsonNode peers = latestOfType(table.get(0), "voice_peers").path("peers");
+            assertEquals(1, peers.size());
+            assertEquals(playerId(1), peers.get(0).path("playerId").asText());
+            assertEquals(5.0 / 12, peers.get(0).path("gain").asDouble(), 0.001);
+            String token = peers.get(0).path("token").asText();
+            JsonNode claims = objectMapper.readTree(java.util.Base64.getUrlDecoder().decode(token.split("\\.")[1]));
+            assertFalse(claims.path("video").path("canPublish").asBoolean());
+            assertTrue(claims.path("video").path("hidden").asBoolean());
+            assertNotNull(voice.authorize(token));
+            assertEquals(2, latestOfType(table.get(1), "voice_peers").path("peers").size());
+            walk(1, 1340, 742); handler.tickFields();
+            assertEquals(1, latestOfType(table.get(0), "voice_peers").path("peers").get(0).path("gain").asDouble());
+            walk(1, 1500, 742); handler.tickFields();
+            assertEquals(0, latestOfType(table.get(0), "voice_peers").path("peers").size());
+            assertNull(voice.authorize(token));
+            advance(DAY);
+            assertTrue(latestOfType(table.get(0), "voice_state").path("token").isNull());
+        } finally { voice.stop(); }
+    }
+
+    @Test
     void enabledVoiceIssuesOnlyPrivateGrantsAndClearsThemAtTownhallEnd() throws Exception {
         var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
         handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,

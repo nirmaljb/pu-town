@@ -11,10 +11,14 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState, ServerMessage.SoundEvent, ServerMessage.VoiceState {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState, ServerMessage.SoundEvent, ServerMessage.VoiceState, ServerMessage.VoicePeers {
     record VoiceState(int version, String type, String url, String token, boolean canPublish) implements ServerMessage {
         public VoiceState(String token) { this(token, false); }
         public VoiceState(String token, boolean canPublish) { this(1, "voice_state", token == null ? null : "/voice", token, token != null && canPublish); }
+    }
+    record VoicePeerView(String playerId, String token, double gain) {}
+    record VoicePeers(int version, String type, List<VoicePeerView> peers) implements ServerMessage {
+        public VoicePeers(List<VoicePeerView> peers) { this(1, "voice_peers", List.copyOf(peers)); }
     }
     int version();
     String type();

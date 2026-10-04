@@ -108,9 +108,12 @@ export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" |
 export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number; total: number;
   activeTaskId: string | null; remainingMs: number | null }>;
 
+export type VoicePeer = Readonly<{ playerId: string; token: string; gain: number }>;
+
 export type VoiceState = Readonly<{ url: "/voice" | null; token: string | null; canPublish: boolean }>;
 
 export type ServerMessage =
+  | Readonly<{ version: 1; type: "voice_peers"; peers: readonly VoicePeer[] }>
   | (VoiceState & Readonly<{ version: 1; type: "voice_state" }>)
   | (MovementSound & Readonly<{ version: 1; type: "sound_event" }>)
   | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
@@ -273,6 +276,22 @@ export function decodeServerMessage(payload: string): ServerMessage {
     case "player_joined":
       requireFields(message, ["version", "type", "player"]);
       return { version: 1, type, player: decodePlayer(message.player) };
+    case "voice_peers": {
+      requireFields(message, ["version", "type", "peers"]);
+      if (!Array.isArray(message.peers) || message.peers.length > 9) throw new Error("Invalid voice peers");
+      const ids = new Set<string>();
+      const peers = message.peers.map((value: unknown) => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid voice peer");
+        const peer = value as Record<string, unknown>;
+        requireFields(peer, ["playerId", "token", "gain"]);
+        const playerId = requireNonEmptyString(peer.playerId, "playerId");
+        const gain = requireFiniteNumber(peer.gain, "gain");
+        if (gain <= 0 || gain > 1 || ids.has(playerId)) throw new Error("Invalid voice peer gain or identity");
+        ids.add(playerId);
+        return { playerId, token: requireNonEmptyString(peer.token, "token"), gain };
+      });
+      return { version: 1, type, peers };
+    }
     case "voice_state": {
       requireFields(message, ["version", "type", "url", "token", "canPublish"]);
       const canPublish = requireBoolean(message.canPublish);

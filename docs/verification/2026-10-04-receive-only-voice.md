@@ -13,8 +13,8 @@ Java, TypeScript, protocol documentation and ADR 0017 agree on these permissions
 Controlled-clock WebSocket tests cover private issuance, elimination, retired
 credentials and receive-only recovery. Gateway tests cover audio publication,
 sending SDP and plain/gzip fast-publish requests. Backend suite: 109 tests passed.
-Frontend suite: 86 tests passed, with typecheck and build; final playback change
-is being rechecked with the same frontend commands.
+Frontend suite: 86 tests passed, with typecheck and build, including the final
+playback change.
 
 Browser exploration exposed an existing Chromium playback defect: remote audio
 needs a playing media element before feeding Web Audio. A muted decoder element

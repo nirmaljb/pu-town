@@ -306,3 +306,29 @@ media failure never closes the Game WebSocket.
 Voice signaling enforces audio track type independently of the declared microphone
 source. Video sending SDP and video fast-publish Join requests (plain or gzip)
 are refused; receive-only SDK negotiation does not grant video publication.
+
+## Day voice routing (#48)
+
+Living Participants may request `join_voice` during Day using the current round.
+Their primary `voice_state` grants microphone publication in a media room for
+that speaker only, with subscription denied. Each listener receives a private
+replacement list when their directly authorized speakers or gains change:
+
+```json
+{"version":1,"type":"voice_peers","peers":[{"playerId":"p2","token":"PRIVATE_LISTENING_GRANT","gain":0.5}]}
+```
+
+Each peer has exactly `playerId`, a nonempty private `token`, and finite `gain`
+in `(0,1]`. The list contains at most nine distinct Player IDs. Its listening-only
+credential opens `/voice` against the Game origin, in that speaker's room. Other
+listeners use hidden media identities and publish nothing. Clients may fade
+per-speaker output to the given gain; they cannot choose who receives audio.
+
+The server uses accepted positions: full gain within 64 pixels (two tiles), a
+linear fade to zero at 160 pixels (five tiles), and the same interior/outdoor
+area. Each pair is independent. Reaching zero, crossing a building boundary,
+Leave, Disconnect, takeover or phase changes permanently retire old listening
+grants and remove their media identities. An empty list explicitly clears all
+nearby streams. Transport work runs independently of Phaser; presentation and
+private peer state also follow the inbox/frame-boundary path. Recovery requires
+fresh voice admission. Never persist or log listening tokens.

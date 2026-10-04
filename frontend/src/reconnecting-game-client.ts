@@ -32,6 +32,7 @@ export class ReconnectingGameClient {
   #foregroundRetry = false;
   #attemptDeadline = 0;
   #messages: ServerMessage[] = [];
+  onVoicePeers: (peers: readonly import("./protocol.js").VoicePeer[]) => void = () => {};
   onVoiceState: (state: import("./protocol.js").VoiceState) => void = () => {};
   #state: ConnectionState = { status: "join", roomId: null, error: null };
 
@@ -180,6 +181,7 @@ export class ReconnectingGameClient {
 
   private closeConnection(): void {
     this.onVoiceState({ url: null, token: null, canPublish: false });
+    this.onVoicePeers([]);
     this.#phase = null;
     this.#healthFailed = false;
     ++this.#generation;
@@ -330,6 +332,7 @@ export class ReconnectingGameClient {
         return;
       }
       if (message.type === "voice_state") this.onVoiceState(message);
+      if (message.type === "voice_peers") this.onVoicePeers(message.peers);
       this.#messages.push(message);
     }, () => generation === this.#generation);
     socket.addEventListener("close", event => {

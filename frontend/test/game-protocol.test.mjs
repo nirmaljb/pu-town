@@ -201,3 +201,12 @@ test("voice grants decode strictly and clearing a grant is explicit", () => {
     assert.throws(() => decode({ ...grant, ...patch }));
   }
 });
+
+test("Day voice peers are private strict listening grants with authorized gains", () => {
+  const state = { version: 1, type: "voice_peers", peers: [{ playerId: "p1", token: "private-listener", gain: 0.5 }] };
+  assert.deepEqual(decode(state), state);
+  assert.deepEqual(decode({ ...state, peers: [] }), { ...state, peers: [] });
+  for (const patch of [{ gain: 0 }, { gain: 2 }, { token: "" }, { canPublish: true }])
+    assert.throws(() => decode({ ...state, peers: [{ ...state.peers[0], ...patch }] }));
+  assert.throws(() => decode({ ...state, peers: [state.peers[0], state.peers[0]] }));
+});
