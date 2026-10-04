@@ -261,3 +261,46 @@ Solo Practice has separate persistent real and Fake assignment banks (#41). Vill
 ## Authorized movement sounds (#45)
 
 Only accepted Day movement creates ephemeral `sound_event:{version:1,type:"sound_event",eventId,round,kind,playerId,gain}`. `kind` is footstep, enter or exit. Footsteps are throttled to 400ms and require meaningful accepted displacement; map area changes produce a transition cue. Each recipient is evaluated independently against the speaker's accepted current position: same area, full gain within two tiles, fading to zero at five. An eliminated Avatar produces sound only for itself. Unknown sound requests are rejected; refused moves, Night and recovery snapshots create no sound events. There are no source coordinates, hidden Task details or Role information in these events. The client queues them for frame application, ignores stale phases/rounds, and uses the effects bus with the supplied gain.
+
+## Townhall voice (#46)
+
+Client messages:
+
+- `{"version":1,"type":"join_voice","round":1}` requests a private media grant.
+  `round` is a positive integer and must equal the current Game round. The sender
+  must hold a connected Membership and be living in discussion or voting.
+- `{"version":1,"type":"leave_voice"}` retires this connection's media grant.
+
+Unknown fields are rejected. Invalid authority returns `invalid_phase`; an
+unconfigured media service returns `voice_unavailable`. These errors do not change
+Game state or other recipients' countdowns.
+
+Server message, delivered only to the requesting/affected Player:
+
+```json
+{"version":1,"type":"voice_state","url":"/voice","token":"SIGNED_PRIVATE_GRANT"}
+```
+
+`url` is exactly `/voice`, resolved against the Game WebSocket origin. The private
+token grants microphone publication and group subscription only within this
+Townhall's media room. Never log or persist it. Revocation is explicit:
+
+```json
+{"version":1,"type":"voice_state","url":null,"token":null}
+```
+
+Both nullable fields are null together. Leaving voice or entering a phase without
+voice clears the grant. Leave, expiry, Disconnect and takeover retire media access
+on the backend; recovery requires a new explicit voice join. Eliminated
+Participants receive no grant in #46. LiveKit messages use its binary signaling
+protocol through `/voice/rtc` or `/voice/rtc/v1`, rather than the Game message
+contract. That gateway rejects missing, forged and retired grants, including
+refreshed gateway JWTs. The gateway substitutes a separate SFU credential upstream
+and rewrites LiveKit refresh-token responses; Player tokens cannot authenticate
+at LiveKit directly. Client media work starts/stops independently of game frames;
+`voice_state` is also queued for frame-boundary presentation. Audio denial or
+media failure never closes the Game WebSocket.
+
+Voice signaling enforces audio track type independently of the declared microphone
+source. Video sending SDP and video fast-publish Join requests (plain or gzip)
+are refused; receive-only SDK negotiation does not grant video publication.

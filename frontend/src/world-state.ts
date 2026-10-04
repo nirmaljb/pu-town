@@ -1,4 +1,4 @@
-import type { MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
+import type { VoiceState, MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
@@ -16,6 +16,7 @@ export type WorldState = Readonly<{
   /** The part of the town this recipient can see, during Day or sleeping Night. */
   field: FieldView | null;
   practiceTargets: readonly PracticeTarget[];
+  voice: VoiceState | null;
   tasks: TaskState | null;
   taskEndsAt: number | null;
   chat: readonly ChatEntry[];
@@ -25,7 +26,7 @@ export type WorldState = Readonly<{
 export function emptyWorld(): WorldState {
   return {
     snapshotSerial: 0, sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
-    players: new Map(), game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
+    players: new Map(), voice: null, game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
 
@@ -55,6 +56,8 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
         field: world.roomId === event.roomId ? world.field : null,
         chat: world.roomId === event.roomId ? world.chat : []
       };
+    case "voice_state":
+      return { ...world, voice: event.token === null ? null : { url: event.url, token: event.token } };
     case "game_state": {
       const { version, type, ...game } = event;
       // A field belongs to one round of Day and Night; Townhall or a new Day discards it.

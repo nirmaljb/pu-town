@@ -108,7 +108,10 @@ export type TaskView = Readonly<{ taskId: string; name: string; kind: "repair" |
 export type TaskState = Readonly<{ tasks: readonly TaskView[]; completed: number; total: number;
   activeTaskId: string | null; remainingMs: number | null }>;
 
+export type VoiceState = Readonly<{ url: "/voice" | null; token: string | null }>;
+
 export type ServerMessage =
+  | (VoiceState & Readonly<{ version: 1; type: "voice_state" }>)
   | (MovementSound & Readonly<{ version: 1; type: "sound_event" }>)
   | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
   | (TaskState & Readonly<{ version: 1; type: "task_state" }>)
@@ -125,6 +128,8 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "join_voice"; round: number }>
+  | Readonly<{ version: 1; type: "leave_voice" }>
   | Readonly<{ version: 1; type: "preview_role"; role: Role }>
   | Readonly<{ version: 1; type: "open_task"; round: number; taskId: string }>
   | Readonly<{ version: 1; type: "task_step"; round: number; taskId: string; step: number; value: number }>
@@ -144,6 +149,9 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "night_choice"; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
+
+export function joinVoice(round: number): ClientMessage { return { version: 1, type: "join_voice", round: requireRound(round) }; }
+export function leaveVoice(): ClientMessage { return { version: 1, type: "leave_voice" }; }
 
 export function startPractice(): ClientMessage {
   return { version: 1, type: "start_practice" };
@@ -265,6 +273,12 @@ export function decodeServerMessage(payload: string): ServerMessage {
     case "player_joined":
       requireFields(message, ["version", "type", "player"]);
       return { version: 1, type, player: decodePlayer(message.player) };
+    case "voice_state": {
+      requireFields(message, ["version", "type", "url", "token"]);
+      if (message.url === null && message.token === null) return { version: 1, type, url: null, token: null };
+      if (message.url !== "/voice") throw new Error("Invalid voice gateway");
+      return { version: 1, type, url: "/voice", token: requireNonEmptyString(message.token, "token") };
+    }
     case "game_state":
       return { version: 1, type, ...decodeGameView(message) };
     case "field_state":

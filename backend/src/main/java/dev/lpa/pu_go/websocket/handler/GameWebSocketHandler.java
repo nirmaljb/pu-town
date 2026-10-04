@@ -2,6 +2,9 @@ package dev.lpa.pu_go.websocket.handler;
 
 import dev.lpa.pu_go.game.ChatEntry;
 import dev.lpa.pu_go.game.Game;
+import dev.lpa.pu_go.game.GamePhase;
+import dev.lpa.pu_go.game.ParticipantStatus;
+import dev.lpa.pu_go.voice.VoiceService;
 import dev.lpa.pu_go.game.Participant;
 import dev.lpa.pu_go.game.Role;
 import dev.lpa.pu_go.game.RoleSetup;
@@ -48,6 +51,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, Long> lastFootsteps = new ConcurrentHashMap<>();
     private final Map<String, Double> walkedSinceFootstep = new ConcurrentHashMap<>();
     private final RoomManager roomManager;
+    private final VoiceService voice;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ClientMessageDecoder decoder = new ClientMessageDecoder(objectMapper);
     private final Map<String, PlayerState> playersBySession = new ConcurrentHashMap<>();
@@ -58,12 +62,20 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private final UnaryOperator<List<Role>> roleAssignment;
 
     @Autowired
-    public GameWebSocketHandler(RoomManager roomManager) {
-        this(roomManager, Executors.newCachedThreadPool(), () -> UUID.randomUUID().toString(), GameWebSocketHandler::shuffleRoles);
+    public GameWebSocketHandler(RoomManager roomManager, VoiceService voice) {
+        this(roomManager, Executors.newCachedThreadPool(), () -> UUID.randomUUID().toString(), GameWebSocketHandler::shuffleRoles, voice);
     }
 
     GameWebSocketHandler(RoomManager roomManager, Executor outboundExecutor,
                          Supplier<String> playerIdSupplier, UnaryOperator<List<Role>> roleAssignment) {
+        this(roomManager, outboundExecutor, playerIdSupplier, roleAssignment,
+                new VoiceService("http://127.0.0.1:7880", "", ""));
+    }
+
+    GameWebSocketHandler(RoomManager roomManager, Executor outboundExecutor,
+                         Supplier<String> playerIdSupplier, UnaryOperator<List<Role>> roleAssignment,
+                         VoiceService voice) {
+        this.voice = voice;
         this.roomManager = roomManager;
         this.outboundExecutor = outboundExecutor;
         this.playerIdSupplier = playerIdSupplier;
@@ -116,6 +128,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.StartPractice) handlePracticeStart(player);
                     else if (incoming instanceof ClientMessage.AdvancePractice preview) handlePracticeAdvance(player, preview);
                     else if (incoming instanceof ClientMessage.StartGame) handleStart(player);
+                    else if (incoming instanceof ClientMessage.JoinVoice joinVoice) handleVoiceJoin(player, joinVoice);
+                    else if (incoming instanceof ClientMessage.LeaveVoice) {
+                        voice.revokePlayer(player.getId());
+                        deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(null)));
+                    }
                     else if (incoming instanceof ClientMessage.Move move) handleMove(player, move);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.NightChoice choice) handleNightChoice(player, choice);
@@ -237,6 +254,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             if (member == null) { deliver(error(connection, "recovery_expired", "Your place in the Room expired")); return null; }
             if (connection.getRoomId() != null) { deliver(error(connection, "invalid_phase", "Leave before recovering another membership.")); return null; }
             boolean firstReturnAfterGrace = hostGraceElapsed(room);
+            voice.revokePlayer(member.getId());
             WebSocketSession retiredSession = member.getSession();
             playersBySession.remove(retiredSession.getId(), member);
             ConnectionOutbox outbox = outboxes.remove(connection.getId());
@@ -332,6 +350,32 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 .map(entry -> new ServerMessage.ChatView(entry.channel(), entry.round(),
                         entry.senderPlayerId(), entry.senderName(), entry.text()))
                 .toList())));
+    }
+
+    private boolean voiceAllowed(PlayerState player, String roomId, String sessionId, int round) {
+        return roomManager.serialized(List.of(roomId), () -> {
+            Room room = roomManager.findRoom(roomId);
+            Game game = room == null ? null : room.getGame();
+            return room != null && room.containsPlayer(player.getId()) && player.isConnected()
+                    && player.getSession().getId().equals(sessionId) && game != null && game.round() == round
+                    && game.participant(player.getId()).status() == ParticipantStatus.LIVING
+                    && (game.phase() == GamePhase.DISCUSSION || game.phase() == GamePhase.VOTING)
+                    && (game.phaseDeadline() == null || roomManager.currentTimeMillis() < game.phaseDeadline());
+        });
+    }
+
+    private void handleVoiceJoin(PlayerState player, ClientMessage.JoinVoice message) {
+        String roomId = player.getRoomId();
+        String sessionId = player.getSession().getId();
+        if (roomId == null || !voiceAllowed(player, roomId, sessionId, message.round())) {
+            deliver(error(player, "invalid_phase", "Voice is available to living Participants during Townhall discussion and voting."));
+        } else if (!voice.enabled()) {
+            deliver(error(player, "voice_unavailable", "Voice service is unavailable. You can continue using text."));
+        } else {
+            String token = voice.issue("pu-" + roomId + "-" + message.round(), player.getId(),
+                    () -> voiceAllowed(player, roomId, sessionId, message.round()));
+            deliver(new Delivery(player.getId(), new ServerMessage.VoiceState(token)));
+        }
     }
 
     private void handleLeave(PlayerState player) {
@@ -617,6 +661,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void addGameState(Collection<Delivery> deliveries, Room room) {
+        for (String id : voice.revokeInvalid(room.getRoomId()))
+            deliveries.add(new Delivery(id, new ServerMessage.VoiceState(null)));
         Game game = room.getGame();
         if (game != null) for (String playerId : room.playerIdsSnapshot())
             if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
@@ -685,6 +731,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     playersById.remove(player.getId());
                     return null;
                 }
+                voice.revokePlayer(player.getId());
                 player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);
                 Room room = roomManager.findRoom(roomId);
                 List<Delivery> deliveries = new ArrayList<>();
@@ -697,6 +744,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private List<Delivery> endMembership(PlayerState player, String roomId,
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
+        voice.revokePlayer(player.getId());
         Room room = roomManager.findRoom(roomId);
         boolean hostDeparted = player.getId().equals(room.getHostPlayerId());
         Game game = room.getGame();

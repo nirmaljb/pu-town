@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { openTask, taskStep, startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type Role, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { joinVoice, leaveVoice, openTask, taskStep, startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type Role, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -32,6 +32,7 @@ export class ReconnectingGameClient {
   #foregroundRetry = false;
   #attemptDeadline = 0;
   #messages: ServerMessage[] = [];
+  onVoiceState: (state: import("./protocol.js").VoiceState) => void = () => {};
   #state: ConnectionState = { status: "join", roomId: null, error: null };
 
   constructor(
@@ -178,6 +179,7 @@ export class ReconnectingGameClient {
   }
 
   private closeConnection(): void {
+    this.onVoiceState({ url: null, token: null });
     this.#phase = null;
     this.#healthFailed = false;
     ++this.#generation;
@@ -193,6 +195,9 @@ export class ReconnectingGameClient {
     this.sendControl("playing", () => move(x, y, facing));
   }
 
+
+  joinVoice(round: number): void { this.sendControl("playing", () => joinVoice(round)); }
+  leaveVoice(): void { this.sendControl("playing", () => leaveVoice()); }
 
   meetingVote(round: number, targetPlayerId: string | null): void {
     this.sendControl("playing", () => meetingVote(round, targetPlayerId));
@@ -324,6 +329,7 @@ export class ReconnectingGameClient {
         this.#suspensionGraceUsed = false;
         return;
       }
+      if (message.type === "voice_state") this.onVoiceState(message);
       this.#messages.push(message);
     }, () => generation === this.#generation);
     socket.addEventListener("close", event => {

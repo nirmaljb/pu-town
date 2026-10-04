@@ -82,6 +82,14 @@ public final class ClientMessageDecoder {
                 yield type.equals("night_choice") ? new ClientMessage.NightChoice(1, type, round(root), targetId)
                         : new ClientMessage.MeetingVote(1, type, round(root), targetId);
             }
+            case "join_voice" -> {
+                requireOnly(root, Set.of("version", "type", "round"));
+                yield new ClientMessage.JoinVoice(1, type, round(root));
+            }
+            case "leave_voice" -> {
+                requireOnly(root, Set.of("version", "type"));
+                yield new ClientMessage.LeaveVoice(1, type);
+            }
             case "open_task" -> {
                 requireOnly(root, Set.of("version", "type", "round", "taskId"));
                 yield new ClientMessage.OpenTask(1, type, round(root), requiredText(root, "taskId"));

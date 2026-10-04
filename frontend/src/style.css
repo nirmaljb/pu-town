@@ -356,3 +356,22 @@ h2 { margin: 16px 0; font-size: 28px; }
 .task-interface ul { list-style: none; padding: 0; margin: .5rem 0; }
 .task-interface li { display: flex; align-items: center; gap: .7rem; margin: .5rem 0; }
 .task-interface li span { flex: 1; }
+
+.voice-controls {
+  position: fixed;
+  z-index: 20;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #182132ee;
+  color: #fff;
+  flex-wrap: wrap;
+}
+.voice-controls[hidden] { display: none; }
+.voice-controls span { font-size: 0.8rem; }

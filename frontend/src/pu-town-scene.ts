@@ -1,3 +1,4 @@
+import { VoiceController } from "./voice-controller.js";
 import Phaser from "phaser";
 import { AudioMixer } from "./audio-mixer.js";
 import { SettingsInterface } from "./settings-interface.js";
@@ -34,6 +35,7 @@ export class PuTownScene extends Phaser.Scene {
   #taskInterface?: TaskInterface;
   #effects?: SoundEffects;
   #audio?: AudioMixer;
+  #voice?: VoiceController;
   #settings?: SettingsInterface;
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
@@ -69,6 +71,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#gameInterface = new GameInterface(this.#client);
 
     this.#audio = new AudioMixer();
+    this.#voice = new VoiceController(this.#client, this.#audio, this.#websocketUrl);
     this.#effects = new SoundEffects(this.#audio);
     this.#effects.start();
     this.#taskInterface = new TaskInterface(this.#client, this.#effects);
@@ -109,6 +112,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#taskInterface?.destroy();
       this.#settings?.destroy();
       this.#effects?.destroy();
+      this.#voice?.destroy();
       this.#audio?.destroy();
     });
   }
@@ -160,6 +164,7 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
+    this.#voice?.render(world);
     this.#taskInterface?.render(world);
     this.#effects?.update(world, this.#client?.state.status === "playing");
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);

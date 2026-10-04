@@ -487,3 +487,20 @@ test("practice entry and phase controls follow frame-applied membership and stop
   client.startPractice();
   assert.equal(sockets[0].sent.length, sent);
 });
+
+test("voice transport receives grants immediately and stops on Game disconnect without waiting for a frame", () => {
+  const { client, sockets, inbox } = setup();
+  const grants = [];
+  client.onVoiceState = state => grants.push(state);
+  client.create("Alex"); sockets[0].open(); sockets[0].message(snapshot); client.update();
+  client.joinVoice(1);
+  assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "join_voice", round: 1 });
+  const grant = { version: 1, type: "voice_state", url: "/voice", token: "private-grant" };
+  sockets[0].message(grant);
+  assert.equal(grants.at(-1).token, "private-grant");
+  assert.equal(inbox.drain().at(-1).event.type, "voice_state");
+  sockets[0].disconnect();
+  assert.equal(grants.at(-1).token, null);
+  sockets[0].message(grant);
+  assert.equal(grants.at(-1).token, null);
+});

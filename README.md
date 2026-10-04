@@ -2,10 +2,13 @@
 
 PU Town is a social deduction game for four to ten Players. Players explore the town during Day, sleep in place during Night, and gather at retained Seats for Townhall discussion and voting. A Spring Boot server owns Roles, the clock, accepted positions and every result, and tells each Player only what they are entitled to know.
 
-The project currently targets local development. It consists of two processes:
+The project currently targets local development. The Game runs in two processes:
 
 - a Java 17 Spring Boot WebSocket backend on `http://localhost:8080`
 - a TypeScript, Vite, and Phaser frontend on `http://localhost:5173`
+
+Optional Townhall voice adds a separate local LiveKit process; see
+[the voice setup guide](tools/voice/README.md).
 
 ## Prerequisites
 
@@ -88,7 +91,7 @@ ballots and chat over the town rather than in a reserved sidebar. Your Role open
 during the reveal; click its heading to consult the instructions later. Retained
 results can be opened separately. During play the Room Code is plain selectable
 text, and Leave Room stays available. Copy code is available in the Lobby.
-Settings and microphone controls will arrive with their respective feature slices.
+Settings and optional Townhall microphone controls are available during play.
 
 In the Lobby the Host chooses the deal with the − / + controls under the Town Square: one or two Mafia, one or two Sheriffs and at least one Doctor, and everyone else is a Villager. Every Player sees the choice. There must always be at least one Villager, so the Game needs one more Player than the special Roles, and never fewer than four. A new Room deals one of each. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
 
@@ -100,7 +103,7 @@ In the Lobby the Host chooses the deal with the − / + controls under the Town 
 | Townhall voting | 30 s | One confirmed ballot each, or Skip. |
 | Voting result | 6 s | The result, with every vote shown. |
 
-Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. During Night, living Mafia select a living Village victim and press Set Night choice. They can revise or withdraw it until the twenty-second deadline. A strict majority of living Mafia must agree; missing choices or disagreement cause no kill. Living Doctors use the same controls to protect one living Participant, including themselves; any Doctor's protection prevents that Night's kill on their target. Living Sheriffs investigate one other living Participant with the same controls; private Faction results appear in Results after Night, even if the Sheriff dies that Night. Deaths are announced at Townhall, and a kill that brings Mafia to parity ends the Game immediately. Recovery restores only the returning Player's own choice. Tasks, proximity text, voice and Solo Practice remain subsequent slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22).
+Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. During Night, living Mafia select a living Village victim and press Set Night choice. They can revise or withdraw it until the twenty-second deadline. A strict majority of living Mafia must agree; missing choices or disagreement cause no kill. Living Doctors use the same controls to protect one living Participant, including themselves; any Doctor's protection prevents that Night's kill on their target. Living Sheriffs investigate one other living Participant with the same controls; private Faction results appear in Results after Night, even if the Sheriff dies that Night. Deaths are announced at Townhall, and a kill that brings Mafia to parity ends the Game immediately. Recovery restores only the returning Player's own choice. Tasks, proximity text, Solo Practice and Townhall voice follow the slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22).
 
 Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. All living Roles see Avatars within 320px in the same interior or outdoor area. Walk through the existing entrances of the Chapel, Inn, Smithy and General Store; the Day banner names the accepted area. Walls and furniture still block movement. Eliminated Participants can walk during Day and see the town, unseen by the living. Day and Night have no text channel; public text opens during Townhall discussion and voting.
 
@@ -133,9 +136,8 @@ Players are seated in the Lobby and Townhall, walk during Day, and sleep in plac
 Settings is available from entry, the Lobby and during a Game. It offers separate
 master, effects, ambience and voice volume sliders plus local sound previews.
 Levels are remembered on this browser and apply to current and newly created audio
-channels. Previews require a click and never send sound to other Players. Gameplay
-effects, ambience tracks and voice are implemented in subsequent tickets; this
-slice provides their shared volume controls and audio routing.
+channels. Previews require a click and never send sound to other Players. Gameplay effects and Townhall voice use these shared controls and audio routing;
+ambience tracks remain a subsequent ticket.
 
 Reduced motion defaults to the browser preference until you choose a value. The
 saved choice controls interface animation, camera easing, Avatar motion and town
@@ -285,3 +287,18 @@ Village Participants receive three persistent repair Tasks. The lower map overla
 Solo Practice includes a Preview Role selector and separate practice targets for Night choices and Townhall ballots. Mafia preview uses Fake Tasks; Village previews retain real assignments. Repair, ordered sequence and pickup/delivery steps persist through phase previews, Role switches and same-tab recovery. Finishing practice Tasks never ends practice.
 
 Private Task selection/click/success, accepted ballot confirmation and phase transitions play local effects through saved master/effects volumes. Audio starts after a browser gesture; recovery establishes a silent baseline, so retained choices and completed Tasks do not replay cues.
+
+### Local Townhall voice
+
+Living Participants can choose Join voice during discussion/voting, listen with a
+muted microphone, and unmute or leave voice independently of the Game. Microphone
+permission is optional; denial preserves listening and text. Saved master/voice
+volumes apply to received audio. Start the separate local media process and
+configure the backend as described in [the voice setup guide](tools/voice/README.md).
+Without media configuration, the Game remains playable with text.
+
+Ticket #46 is verified through controlled-clock WebSocket privacy tests, frontend
+contract/frame/recovery tests and independent native clients against real LiveKit.
+Browser automation was excluded by request; microphone permission and the browser
+UI still require manual acceptance. This local configuration does not extend
+Tailscale Funnel to WebRTC transport; see the voice guide's ICE/TURN requirements.

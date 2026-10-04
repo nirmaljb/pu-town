@@ -361,3 +361,16 @@ test("authorized movement cues wait for a frame and stale Night cues are ignored
   boundary.beginFrame();
   assert.equal(boundary.world.sounds.length, 1);
 });
+
+test("voice grant presentation waits for a frame and explicit revocation clears it", () => {
+  const inbox = new NetworkInbox();
+  const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
+  inbox.enqueue({ version: 1, type: "voice_state", url: "/voice", token: "private-grant" });
+  assert.equal(boundary.world.voice, null);
+  boundary.beginFrame();
+  assert.equal(boundary.world.voice.token, "private-grant");
+  inbox.enqueue({ version: 1, type: "voice_state", url: null, token: null });
+  assert.equal(boundary.world.voice.token, "private-grant");
+  boundary.beginFrame();
+  assert.equal(boundary.world.voice, null);
+});

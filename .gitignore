@@ -11,3 +11,6 @@ __pycache__/
 .scratch/browser-temp/
 .scratch/playwright/
 .scratch/browser-libs/
+
+# Local media downloads and private startup credentials.
+.scratch/voice/

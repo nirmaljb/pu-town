@@ -64,13 +64,55 @@ class MafiaGameTest {
     };
 
     private final AtomicReference<UnaryOperator<List<Role>>> assignment = new AtomicReference<>(SEAT_LAYOUT);
-    private final GameWebSocketHandler handler = new GameWebSocketHandler(
+    private GameWebSocketHandler handler = new GameWebSocketHandler(
             new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
             () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles));
 
     private final List<RecordingWebSocketSession> table = new ArrayList<>();
     private final List<String> tokens = new ArrayList<>();
     private String code;
+
+    @Test
+    void enabledVoiceIssuesOnlyPrivateGrantsAndClearsThemAtTownhallEnd() throws Exception {
+        var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
+        handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
+                () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles), voice);
+        try {
+            startTable("enabled-voice", 6);
+            advance(REVEAL + DAY + NIGHT);
+            int others = table.get(0).payloads().size();
+            send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            JsonNode grant = latestOfType(table.get(1), "voice_state");
+            assertEquals("/voice", grant.path("url").asText());
+            assertFalse(grant.path("token").asText().isBlank());
+            assertEquals(others, table.get(0).payloads().size());
+            advance(DISCUSSION);
+            assertEquals(grant, latestOfType(table.get(1), "voice_state"));
+            advance(VOTING);
+            assertTrue(latestOfType(table.get(1), "voice_state").path("token").isNull());
+            send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        } finally { voice.stop(); }
+    }
+
+    @Test
+    void voiceRequestsRequireCurrentTownhallAndCannotChangeOtherRecipients() throws Exception {
+        startTable("voice", 5);
+        send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        advance(REVEAL + DAY + NIGHT);
+        int others = table.get(0).payloads().size();
+        send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":2}");
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+        send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1,\"canPublish\":true}");
+        assertEquals("malformed_message", latest(table.get(1)).path("code").asText());
+        send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+        assertEquals("voice_unavailable", latest(table.get(1)).path("code").asText());
+        assertEquals(others, table.get(0).payloads().size());
+        advance(DISCUSSION + VOTING + VOTING_RESULT + DAY);
+        send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":2}");
+        assertEquals("invalid_phase", latest(table.get(1)).path("code").asText());
+    }
 
     @Test
     void soloPracticeStartsWithoutReadyAndWalksWithoutACompetitiveRoster() throws Exception {

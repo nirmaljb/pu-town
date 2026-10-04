@@ -190,3 +190,12 @@ test("movement sounds disclose only an authorized source and gain, without posit
   for (const patch of [{ gain: 0 }, { gain: 2 }, { gain: -1 }, { eventId: 0 }, { x: 1280 }, { kind: "kill" }])
     assert.throws(() => decode({ ...sound, ...patch }));
 });
+
+test("voice grants decode strictly and clearing a grant is explicit", () => {
+  const grant = { version: 1, type: "voice_state", url: "/voice", token: "signed-grant" };
+  assert.deepEqual(decode(grant), grant);
+  assert.deepEqual(decode({ ...grant, url: null, token: null }), { ...grant, url: null, token: null });
+  for (const patch of [{ token: null }, { url: null }, { url: "ws://untrusted.example" }, { canPublish: true }, { token: "" }]) {
+    assert.throws(() => decode({ ...grant, ...patch }));
+  }
+});
