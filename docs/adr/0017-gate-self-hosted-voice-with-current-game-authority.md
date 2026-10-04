@@ -9,7 +9,10 @@ all Player signaling passing through the Game backend. LiveKit's self-hosted
 RemoveParticipant does not invalidate existing JWTs, so an SFU credential alone
 cannot prove current authorization. The gateway verifies signed credentials
 against a live, revocable grant tied to the issuing Game connection, Membership,
-round and living Townhall participation. Refreshed tokens do not resurrect a
+round and current Townhall participation. Living Participants may publish;
+eliminated Participants receive only subscription permission. Elimination and
+recovery retire earlier grants, and the signaling gateway also rejects audio
+publication and sending offers from receive-only grants. Refreshed tokens do not resurrect a
 retired grant. This trades a signaling proxy and asynchronous media cleanup for
 server-enforced admission and revocation without trusting voluntary client
 subscriptions. RemoveParticipant ends actual media; gateway denial prevents

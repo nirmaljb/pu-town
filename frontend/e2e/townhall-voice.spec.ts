@@ -45,6 +45,7 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     }
     await pages[0]!.bringToFront();
     await pages[0]!.getByRole("button", { name: "Start Game" }).click();
+    console.log("Five independent Players started; following real phase deadlines.");
     for (const page of pages) await expect(page.locator(".role-name")).not.toHaveText("");
     const roles = await Promise.all(pages.map(page => page.locator(".role-name").innerText()));
     const victimIndex = roles.indexOf("Villager");
@@ -59,6 +60,7 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     await victim.bringToFront();
     await victim.getByRole("button", { name: "Join voice", exact: true }).click();
     await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
+    console.log("Eliminated Participant joined receive-only Townhall voice.");
     await expect(victim.getByRole("button", { name: "Unmute microphone" })).toBeDisabled();
     expect(grants.get(victimIndex)?.canPublish).toBe(false);
     const oldToken = grants.get(victimIndex)!.token;
@@ -70,6 +72,7 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     await victim.bringToFront();
     const peak = () => victim.evaluate(() => (window as unknown as { receivedVoicePeak(): number }).receivedVoicePeak());
     await expect.poll(peak, { timeout: 20_000 }).toBeGreaterThan(0.01);
+    console.log("Eliminated browser received nonzero PCM from the living speaker.");
     await victim.reload();
     await expect(victim.locator(".game-banner")).toBeVisible();
     await victim.getByRole("button", { name: "Join voice", exact: true }).click();
@@ -94,5 +97,38 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     expect(rejection).toBe(4003);
     await speaker.bringToFront();
     await expect(speaker.locator(".voice-controls [role=status]")).toHaveText("Microphone on");
+    // Establish a living speaker's stream before a Townhall elimination, then
+    // prove its audio and credential are revoked rather than merely hidden.
+    await speaker.getByRole("button", { name: "Mute microphone", exact: true }).click();
+    const condemnedIndex = roles.indexOf("Doctor");
+    const condemned = pages[condemnedIndex]!;
+    await condemned.bringToFront();
+    await condemned.getByRole("button", { name: "Join voice", exact: true }).click();
+    await expect(condemned.getByRole("button", { name: "Unmute microphone" })).toBeEnabled({ timeout: 20_000 });
+    await condemned.getByRole("button", { name: "Unmute microphone" }).click();
+    const livingToken = grants.get(condemnedIndex)!.token;
+    await expect(condemned.locator(".voice-controls [role=status]")).toHaveText("Microphone on", { timeout: 15_000 });
+    await victim.bringToFront();
+    await victim.getByRole("button", { name: "Join voice", exact: true }).click();
+    await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
+    await expect.poll(peak, { timeout: 20_000 }).toBeGreaterThan(0.01);
+    await expect(speaker.locator(".game-phase")).toContainText("Voting", { timeout: 100_000 });
+    for (const [index, page] of pages.entries()) if (index !== victimIndex) {
+      await page.bringToFront();
+      await page.locator(".target-list").getByRole("button", { name: `Voice Player ${condemnedIndex}`, exact: true }).click();
+      await page.getByRole("button", { name: "Confirm ballot" }).click();
+    }
+    await expect(condemned.locator(".game-phase")).toHaveText("The verdict", { timeout: 35_000 });
+    await condemned.bringToFront();
+    await expect(condemned.locator(".voice-controls [role=status]")).toHaveText("Voice access ended");
+    await victim.bringToFront();
+    await expect.poll(peak, { timeout: 10_000 }).toBeLessThan(0.001);
+    const retired = await victim.evaluate(async ({ token, endpoint }) => {
+      const url = new URL(endpoint); url.pathname = "/voice/rtc/validate";
+      url.protocol = "http:"; url.search = new URLSearchParams({ access_token: token }).toString();
+      return (await fetch(url)).status;
+    }, { token: livingToken, endpoint: new URL(GAME_URL, "http://localhost:5173").searchParams.get("ws")! });
+    expect(retired).toBe(403);
+    console.log("Elimination stopped the established stream and retired its living credential.");
   } finally { await Promise.allSettled(contexts.map(context => context.close())); }
 });

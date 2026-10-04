@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { fileURLToPath } from "node:url";
 
 // A separate loopback address can isolate this harness from another checkout's Vite.
 // Browsers still use localhost so the backend's supported Origin remains unchanged.
@@ -14,7 +15,8 @@ export default defineConfig({
     baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
     launchOptions: { args: [`--host-resolver-rules=MAP localhost ${host}`, "--disable-webgl",
-      ...(process.env.PUTOWN_VOICE_KEY ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [])] }
+      ...(process.env.PUTOWN_VOICE_KEY ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream",
+        `--use-file-for-fake-audio-capture=${fileURLToPath(new URL("./e2e/fixtures/microphone.wav", import.meta.url))}`] : [])] }
   },
   webServer: [
     {

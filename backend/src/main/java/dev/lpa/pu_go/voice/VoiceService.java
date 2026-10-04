@@ -59,7 +59,7 @@ public class VoiceService {
     private static Map<String, Object> claimsOf(Grant grant) {
         return Map.of("sub", grant.identity(), "video", Map.of("room", grant.room(), "roomJoin", true,
                 "canPublish", grant.canPublish(), "canSubscribe", true, "canPublishData", false,
-                "canPublishSources", List.of("microphone"), "canUpdateOwnMetadata", false));
+                "canPublishSources", grant.canPublish() ? List.of("microphone") : List.of(), "canUpdateOwnMetadata", false));
     }
 
     public Grant authorize(String token) {

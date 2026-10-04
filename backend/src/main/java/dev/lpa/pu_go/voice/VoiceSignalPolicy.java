@@ -77,13 +77,13 @@ final class VoiceSignalPolicy {
         String sessionDirection = "sendrecv";
         String direction = sessionDirection;
         boolean media = false;
-        boolean video = false;
+        boolean forbiddenMedia = false;
         boolean directionSeen = false;
         for (String line : sdp.split("\\r?\\n")) {
             if (line.startsWith("m=")) {
-                if (video && !direction.equals("recvonly") && !direction.equals("inactive")) return true;
+                if (forbiddenMedia && !direction.equals("recvonly") && !direction.equals("inactive")) return true;
                 String[] fields = line.substring(2).split("\\s+");
-                video = fields.length >= 2 && (fields[0].equals("video") || !canPublish && fields[0].equals("audio")) && !fields[1].equals("0");
+                forbiddenMedia = fields.length >= 2 && (fields[0].equals("video") || !canPublish && fields[0].equals("audio")) && !fields[1].equals("0");
                 media = true;
                 directionSeen = false;
                 direction = sessionDirection;
@@ -95,7 +95,7 @@ final class VoiceSignalPolicy {
                 if (!media) sessionDirection = direction;
             }
         }
-        return video && !direction.equals("recvonly") && !direction.equals("inactive");
+        return forbiddenMedia && !direction.equals("recvonly") && !direction.equals("inactive");
     }
 
     private static long value(UnknownFieldSet fields, int field) {
