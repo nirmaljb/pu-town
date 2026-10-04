@@ -681,8 +681,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 outboxes.remove(player.getId());
                 if (roomId == null) {
                     lastFootsteps.remove(player.getId());
-        walkedSinceFootstep.remove(player.getId());
-        playersById.remove(player.getId());
+                    walkedSinceFootstep.remove(player.getId());
+                    playersById.remove(player.getId());
                     return null;
                 }
                 player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);
@@ -702,6 +702,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         Game game = room.getGame();
         // Leave and expiry end participation; the Game Roster entry and its Seat remain.
         if (game != null) game.forfeit(player.getId());
+        lastFootsteps.remove(player.getId());
+        walkedSinceFootstep.remove(player.getId());
         room.removePlayer(player.getId());
         if (hostDeparted) room.playerIdsSnapshot().stream().map(playersById::get)
                 .filter(PlayerState::isConnected).findFirst()

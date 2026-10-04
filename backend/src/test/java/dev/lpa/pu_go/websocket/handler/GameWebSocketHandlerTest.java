@@ -715,7 +715,7 @@ class GameWebSocketHandlerTest {
         assertEquals(initial.path("selfPlayerId"), recovered.path("selfPlayerId"));
         assertEquals(initial.path("players").get(1).path("avatarPreset"), recovered.path("players").get(1).path("avatarPreset"));
         join(returning, code);
-        assertEquals(recovered, json(returning.payloads().get(returning.payloads().size() - 3)));
+        assertEquals(recovered, latestOfType(returning, "room_snapshot"));
         handler.afterConnectionClosed(returning, org.springframework.web.socket.CloseStatus.NORMAL);
         milliseconds.addAndGet(120_000);
         var expired = connect("closed-expired");
