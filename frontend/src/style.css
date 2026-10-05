@@ -351,11 +351,32 @@ h2 { margin: 16px 0; font-size: 28px; }
 .volume-label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .volume-label output { font-size: 13px; }
 
-.task-interface { position: absolute; bottom: 1rem; left: 1rem; z-index: 6; max-width: min(27rem, 85%); max-height: 30%; overflow: auto; padding: .8rem 1rem; background: rgba(16, 24, 32, .92); color: #f4f0df; border: 1px solid #68766a; border-radius: .6rem; font-size: .8rem; pointer-events: auto; }
+.task-interface { position: fixed; bottom: 84px; left: 16px; z-index: 6; width: min(320px, calc(100% - 32px)); max-height: min(380px, 45vh); overflow-y: auto; padding: 12px; background: #302820f5; color: #fff0c9; border: 2px solid #9b784e; font-size: 13px; pointer-events: auto; }
 .task-interface[hidden] { display: none; }
+.task-interface summary { cursor: pointer; min-height: 24px; }
 .task-interface ul { list-style: none; padding: 0; margin: .5rem 0; }
-.task-interface li { display: flex; align-items: center; gap: .7rem; margin: .5rem 0; }
-.task-interface li span { flex: 1; }
+.task-interface li { display: grid; gap: 5px; padding: 12px 0; border-top: 1px solid #9b784e80; overflow-wrap: anywhere; }
+.task-interface li[hidden] { display: none; }
+.task-interface small { color: #e0cba9; }
+.task-interface .task-direction { color: #efbd72; }
+.task-controls { display: flex; gap: 6px; }
+.task-controls button { flex: 1; min-width: 0; min-height: 38px; padding: 8px; border-radius: 2px; border-color: #9b784e; background: #453726; color: #fff0c9; white-space: normal; }
+.task-interface > details > div > button { width: 100%; border-radius: 2px; }
+.task-timer { margin: 0; color: #9fe0b1; font-variant-numeric: tabular-nums; }
+.chat-panel { bottom: 84px; }
+@media (max-width: 700px) {
+  .chat-panel { bottom: 112px; max-height: 100px; }
+  .task-interface { bottom: 224px; left: 12px; width: calc(100% - 24px); max-height: min(260px, 30vh); }
+  .game-banner { gap: 6px 12px; padding: 8px 12px; }
+  .game-phase { font-size: 16px; }
+  .game-countdown { font-size: 18px; }
+  .game-announcement { font-size: 12px; min-height: 0; }
+  .practice-role-label { margin: 0; }
+}
+@media (max-height: 600px) {
+  .task-interface { bottom: 84px; max-height: 35vh; }
+  .game-panel { padding-bottom: 72px; }
+}
 
 .voice-controls {
   position: fixed;
@@ -367,6 +388,7 @@ h2 { margin: 16px 0; font-size: 28px; }
   align-items: center;
   gap: 0.5rem;
   max-width: calc(100vw - 2rem);
+  width: max-content;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   background: #182132ee;
