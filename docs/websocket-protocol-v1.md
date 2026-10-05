@@ -105,7 +105,7 @@ Fresh Join is restricted to the Lobby and uses ordinary ten-Player capacity and 
 
 `start_practice` enters Solo Practice only when the sender is the Host, the Room is a Lobby, and its sole Membership belongs to that Host. Ready and Role Setup do not gate practice. A disconnected guest still occupies a Membership and blocks entry. Rejections use `not_in_room`, `not_host`, `invalid_phase`, or `practice_blocked`; acceptance sends `room_state`, `game_state` and an immediate `field_state` in order.
 
-Every `game_state` includes `mode`, exactly `competitive` or `practice`. Practice starts at Day, round 1, with the Host as a Villager and its only Roster entry; it creates no target Players. `remainingMs` is null throughout practice. No phase advances with elapsed time, and no elimination or faction victory occurs. Practice rejects `meeting_vote` with `invalid_action` and shows no ballot controls. Role selection and practice targets follow in #40; Tasks follow in #41.
+Every `game_state` includes `mode`, exactly `competitive` or `practice`. Practice starts at Day, round 1, with the Host as a Villager and its only Roster entry; it creates no target Players. `remainingMs` is null throughout practice. No phase advances with elapsed time, and no elimination or faction victory occurs. Practice supports Role previews, separate targets, preview ballots and persistent real/Fake Tasks as specified below; these never produce competitive elimination or faction victory.
 
 The Host sends `advance_practice` with the current positive round and phase. Only practice accepts it. A wrong round or phase receives `invalid_phase`, preventing a repeated request from skipping a preview; a competitive Game receives `invalid_action`. Advancement cycles Day → Night → Discussion → Voting → Voting Result → Day, incrementing the round at each Day. Normal server movement checks and sleeping Night positions apply. Townhall restores retained Seats, and a new Day begins beside them. Practice movement timing resets at the actual manual transition time.
 
@@ -268,7 +268,8 @@ Client messages:
 
 - `{"version":1,"type":"join_voice","round":1}` requests a private media grant.
   `round` is a positive integer and must equal the current Game round. The sender
-  must hold a connected Membership and be living or eliminated in discussion or voting.
+  must hold a connected Membership and be living during Day, or living or eliminated
+  during discussion or voting. Day routing is specified below.
 - `{"version":1,"type":"leave_voice"}` retires this connection's media grant.
 
 Unknown fields are rejected. Invalid authority returns `invalid_phase`; an

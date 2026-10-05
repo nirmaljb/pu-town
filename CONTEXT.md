@@ -112,7 +112,7 @@ The Village Role that can protect a living Participant at Night.
 The Village Role that can investigate another living Participant at Night to learn their Faction privately.
 
 **Day**:
-The Game phase in which Players walk the town and explore before Night.
+The Game phase in which Players walk the town, work on Tasks and converse with nearby living Players before Night.
 _Avoid_: Roam
 
 **Night**:
@@ -124,6 +124,18 @@ _Avoid_: Lobby
 
 **Vision**:
 How far a living Player can see in the town. Nothing beyond it is disclosed to them.
+
+**Hearing**:
+The nearby conversation a living Player can hear during Day, confined to their indoor or outdoor area. Hearing is independent for each listener and speaker.
+_Avoid_: Vision
+
+**Task**:
+Persistent work assigned to a Village Participant. Earned progress survives later Days and Elimination; completing the Village's real workload wins the Game.
+_Avoid_: Night choice
+
+**Fake Task**:
+Work a Mafia Participant can perform to resemble Village activity, without contributing to Village Task victory.
+_Avoid_: Task when referring to real Village work
 
 **Ghost**:
 An eliminated Participant who walks unseen by the living during Day and sees the whole town.

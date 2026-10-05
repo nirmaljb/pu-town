@@ -71,6 +71,8 @@ PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_audio_polic
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_tokens.py
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify.py
 PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_day.py
+PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_capacity.py
+PUTOWN_TEST_WS=ws://localhost:8080/ws/game python tools/voice/verify_ghost.py
 ```
 
 The Townhall script uses four independent Game WebSockets and real native WebRTC clients.
@@ -123,3 +125,14 @@ requests fresh media grants. It remembers neither tokens nor an open microphone.
 Leave voice/Room or failed recovery clears that consent. Takeover retires the
 old publication and listening sessions; late old-socket closure cannot affect
 the replacement Player connection. The Day native verifier exercises this path.
+
+The capacity script creates ten Game Players and one hundred simultaneous native
+media connections. It samples nonzero PCM and authorized activity across all
+ninety directed hearing pairs, then checks eighteen movement revocations while
+the other seventy-two sessions stay connected. It is a routing/capacity smoke
+check, not a sustained load test or proof of ten-browser CPU/memory performance.
+The Ghost script follows real Night deadlines, checks eliminated Townhall reception
+with a receive-only grant, and probes denied microphone publication.
+
+See [the final verification record](../../docs/verification/2026-10-05-final-acceptance.md)
+for run results and explicit browser/manual/playtesting limitations.

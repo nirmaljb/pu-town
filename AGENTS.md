@@ -11,7 +11,7 @@ PU Town is a real-time Mafia game for four to ten Players, played like Among Us:
 - Players sit at their Seat in the Lobby and Meetings, and walk the town during Day; the client predicts only its own Avatar's steps.
 - The server owns Room membership, Roles, the Game clock, and every result.
 - Every Game message is built per recipient; client-side concealment is never the enforcement.
-- Server state is in memory; there is no database or external service.
+- Game state is in memory, with no database. Optional voice uses a separate self-hosted LiveKit process.
 
 Use the domain terms in [`CONTEXT.md`](CONTEXT.md). In particular, do not use **User** when the domain concept is **Player**, and do not confuse a **Player**, **Player ID**, **Display Name**, or **Avatar**.
 
@@ -142,7 +142,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 4. `game-transport.ts` decodes server messages into `network-inbox.ts`.
 5. `network-frame-boundary.ts` applies queued events to `world-state.ts` before the frame renders anything.
 6. `avatar-reconciler.ts` and `game-interface.ts` bring the Phaser objects and the DOM overlay into line with that state.
-7. During Day, `field-controller.ts` walks this client's Avatar and sends `move`; the backend accepts only reachable positions. Day lasts 180 seconds, followed by a silent 20-second Night that freezes accepted positions, then Townhall discussion (90 seconds), voting (30 seconds) and result (6 seconds). Day and Night stream recipient-specific position-only `field_state` ten times a second and include it immediately with transitions and recovery. Townhall returns to retained Seats and each new Day resets beside them. Live abilities, Bodies, Report, Emergency actions, Vanish and Crowding are removed from the contract and UI. Night choices, Tasks, interiors, shared Vision and proximity communication follow in dependent epic #22 slices.
+7. During Day, `field-controller.ts` walks this client's Avatar and sends `move`; the backend accepts only reachable positions. Day lasts 180 seconds, followed by a silent 20-second Night that freezes accepted positions, then Townhall discussion (90 seconds), voting (30 seconds) and result (6 seconds). Day and Night stream recipient-specific position-only `field_state` ten times a second and include it immediately with transitions and recovery. Townhall returns to retained Seats and each new Day resets beside them. Live abilities, Bodies, Report, Emergency actions, Vanish and Crowding are removed from the contract and UI. Night choices, persistent real/Fake Tasks, interiors, shared Vision and proximity text/voice are implemented; consult the protocol for their exact validation and recipient privacy. Optional media has its own revocable grants and never owns the Game clock.
 
 After an unexpected disconnect, the active client recovers its previous Room Membership using a private credential, retaining Player ID and appearance within the server-owned 120-second reservation. In a Game, recovery also restores the recipient's Role, locked ballot, retained investigation results, readable chat and, during Day or Night, their field; a Disconnect never Forfeits, and the Participant stays in every majority until the reservation ends. Disconnected memberships remain visible and consume capacity. Only Leave or expiry ends them. Same-tab refresh restores sessionStorage recovery intent; takeover retires the old socket with close code 4001. Host authority has a 15-second Disconnect grace. Recovery retries back off to five seconds until a server outcome; recovery Leave clears intent immediately and makes one isolated release attempt. An acknowledged Leave does not reconnect. Started Rooms reject new memberships, including fresh Join after Leave or expiry; valid recovery still follows the current phase. Start needs at least four Players present, all connected and Ready, and enough of them to leave one Villager after the Host's Role Setup (1–2 Mafia, 1+ Doctors, 1–2 Sheriffs); a blocked Start says which. Expired recovery returns to lobby selection without a Join again shortcut. Final Leave or expiry removes a started Room immediately, while recoverable disconnected memberships keep it alive. Never-started empty Lobbies retain their five-minute lifetime.
 
@@ -182,7 +182,7 @@ Do not claim an integration path was verified if only unit tests ran.
 - Production hosting, TLS termination, reverse-proxy configuration, and deployment automation are absent.
 - A deployed HTTPS frontend must use a `wss://` endpoint and a matching backend origin allow-list.
 - Some generated files under `backend/target/` are tracked and may be stale. Never edit them or treat them as architectural evidence.
-- There is no `.env` configuration, database, authentication, or persistent player identity in the current codebase. In-Game chat exists, but it lives only in its Room's memory and disappears with the Room.
+- There is no checked-in application `.env`, database, account authentication, or persistent player identity. Optional voice creates ignored local credentials as described in `tools/voice/README.md`. In-Game chat exists, but it lives only in its Room's memory and disappears with the Room.
 
 ## Agent skills
 

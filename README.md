@@ -7,7 +7,7 @@ The project currently targets local development. The Game runs in two processes:
 - a Java 17 Spring Boot WebSocket backend on `http://localhost:8080`
 - a TypeScript, Vite, and Phaser frontend on `http://localhost:5173`
 
-Optional Townhall voice adds a separate local LiveKit process; see
+Optional Day and Townhall voice adds a separate local LiveKit process; see
 [the voice setup guide](tools/voice/README.md).
 
 ## Prerequisites
@@ -17,6 +17,7 @@ Install the following before starting:
 - JDK 17, including `java` and `javac`
 - Node.js `^20.19.0` or `>=22.12.0`
 - npm
+- Python 3.10+ with `tools/avatar-editor/requirements.txt` installed for frontend tests
 
 Maven does not need to be installed globally; the repository includes Maven Wrapper. The first installation needs internet access to download Maven, Java dependencies, and npm packages.
 
@@ -91,21 +92,21 @@ ballots and chat over the town rather than in a reserved sidebar. Your Role open
 during the reveal; click its heading to consult the instructions later. Retained
 results can be opened separately. During play the Room Code is plain selectable
 text, and Leave Room stays available. Copy code is available in the Lobby.
-Settings and optional Townhall microphone controls are available during play.
+Settings and optional voice controls are available during play.
 
 In the Lobby the Host chooses the deal with the − / + controls under the Town Square: one or two Mafia, one or two Sheriffs and at least one Doctor, and everyone else is a Villager. Every Player sees the choice. There must always be at least one Villager, so the Game needs one more Player than the special Roles, and never fewer than four. A new Room deals one of each. Each Player privately sees their own Role for eight seconds, and the Mafia also see each other. The Game then runs on the server's clock, with the current phase and its countdown always on screen:
 
 | Phase | Length | What you do |
 | --- | --- | --- |
-| Day | 180 s | Walk the town with WASD or arrow keys. |
+| Day | 180 s | Walk with WASD or arrow keys, complete Tasks, and talk to nearby living Players. |
 | Night | 20 s | Sleep where you stood; movement and conversation are closed. |
-| Townhall discussion | 90 s | Everyone living talks in public chat, seated around the Town Square. |
+| Townhall discussion | 90 s | Living Players talk in public text and optional voice; eliminated Players read and listen. |
 | Townhall voting | 30 s | One confirmed ballot each, or Skip. |
 | Voting result | 6 s | The result, with every vote shown. |
 
-Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. During Night, living Mafia select a living Village victim and press Set Night choice. They can revise or withdraw it until the twenty-second deadline. A strict majority of living Mafia must agree; missing choices or disagreement cause no kill. Living Doctors use the same controls to protect one living Participant, including themselves; any Doctor's protection prevents that Night's kill on their target. Living Sheriffs investigate one other living Participant with the same controls; private Faction results appear in Results after Night, even if the Sheriff dies that Night. Deaths are announced at Townhall, and a kill that brings Mafia to parity ends the Game immediately. Recovery restores only the returning Player's own choice. Tasks, proximity text, Solo Practice and Townhall voice follow the slices of [epic #22](https://github.com/nirmaljb/pu-town/issues/22).
+Phases end at server deadlines even if a browser is hidden or reconnecting. There is no Emergency button, Report, Body, Vanish, Crowding or live daytime Role ability. During Night, living Mafia select a living Village victim and press Set Night choice. They can revise or withdraw it until the twenty-second deadline. A strict majority of living Mafia must agree; missing choices or disagreement cause no kill. Living Doctors use the same controls to protect one living Participant, including themselves; any Doctor's protection prevents that Night's kill on their target. Living Sheriffs investigate one other living Participant with the same controls; private Faction results appear in Results after Night, even if the Sheriff dies that Night. Deaths are announced at Townhall, and a kill that brings Mafia to parity ends the Game immediately. Recovery restores only the returning Player's own choice.
 
-Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. All living Roles see Avatars within 320px in the same interior or outdoor area. Walk through the existing entrances of the Chapel, Inn, Smithy and General Store; the Day banner names the accepted area. Walls and furniture still block movement. Eliminated Participants can walk during Day and see the town, unseen by the living. Day and Night have no text channel; public text opens during Townhall discussion and voting.
+Day starts beside retained Seats; Night preserves accepted positions; Townhall returns everyone to their Seat. Night dims the town and shows sleeping Avatars. A refresh during Day or Night restores accepted positions and the private Role immediately. All living Roles see Avatars within 320px in the same interior or outdoor area. Walk through the existing entrances of the Chapel, Inn, Smithy and General Store; the Day banner names the accepted area. Walls and furniture still block movement. Eliminated Participants can walk during Day and see the town, unseen by the living. Day text reaches living Players within five tiles in the same interior or outdoor area, with no earlier messages disclosed on arrival. Night has no conversation; public text opens during Townhall discussion and voting.
 
 During Townhall voting, select any living Participant (including yourself) or Skip in the centered ballot panel. Selection is a private preview; only Confirm ballot submits it. Confirmed choices stay locked for the round, including after a same-tab refresh, and public chat remains open until the thirty-second voting deadline. If an unconfirmed target Leaves, select another target before confirming. Everyone sees the ballots when voting ends.
 
@@ -115,7 +116,7 @@ Eliminated Players keep watching and keep reading the chat they could read while
 
 ## Solo Practice
 
-Create a Room and, while you are its only Player, choose **Solo Practice** in the Lobby. Ready and the competitive Role Setup are not required. You enter Day as a Villager and can walk the existing map with WASD or arrow keys. **Next phase** previews sleeping Night, Townhall discussion, voting and results, then begins the next Day beside your retained Seat. Practice has no timers, ballots, elimination or faction victory. Role previews, practice targets and Task interactions are follow-up work (#40 and #41).
+Create a Room and, while you are its only Player, choose **Solo Practice** in the Lobby. Ready and the competitive Role Setup are not required. You enter Day as a Villager and can walk the existing map with WASD or arrow keys. **Next phase** previews sleeping Night, Townhall discussion, voting and results, then begins the next Day beside your retained Seat. Practice phases have no automatic deadlines, elimination or faction victory. Preview Role changes the learning Role; separate practice targets let you try Night choices and Townhall ballots. All three Task types use server-timed interactions and retain earned progress. Mafia preview uses Fake Tasks; completing practice Tasks never ends practice.
 
 Disconnect, refresh and recovery retain the same practice Membership and current phase, including your accepted position during Day or Night. Leave ends practice; create another Room to practice again or gather Players for a competitive Game. A guest's disconnected reservation still blocks Solo Practice entry. Competitive Start continues to need at least four connected, Ready Players and a valid Role Setup.
 
@@ -125,7 +126,7 @@ The `ws` URL query parameter configures the backend WebSocket endpoint, defaulti
 
 Create Room generates a six-character Room Code. Join Lobby requires an existing code. Only Lobbies accept new memberships; a started game returns “Game already started”. Empty Lobbies expire five minutes after their final membership ends; started Rooms are removed immediately when their final membership ends; Disconnect reserves membership for two minutes and does not immediately empty a Room; server restart clears all Rooms.
 
-Initial entry times out after ten seconds. During connection loss, controls stop and a reconnecting overlay appears. Heartbeats run independently of game frames and detect ten seconds without a pong. Returning from suspension gives the socket one fresh heartbeat deadline; a healthy tab switch preserves the Player ID and Avatar Preset. Lifecycle effects still apply at game-frame boundaries. Recovery retries use increasing delays capped at five seconds and continue until the server confirms recovery or returns a terminal result. Returning to a visible tab makes a pending retry immediate. Recovery uses a private credential stored in sessionStorage for refresh in the same tab; it retains Player ID, Avatar Preset, Colour, Seat, readiness, and — in a Game — the Role, the locked choices, the Sheriff's results and the chat that Player may read. Other Players see a subdued Avatar labelled “Reconnecting…” until recovery or expiry. A valid replacement atomically takes over; the displaced tab shows that its connection was replaced and stops retrying. Ordinary new tabs join independently. Duplicated tabs that inherit the credential follow the takeover rule. Storage-disabled browsers retain in-memory recovery only.
+Initial entry times out after ten seconds. During connection loss, controls stop and a reconnecting overlay appears. Heartbeats run independently of game frames and detect ten seconds without a pong. Returning from suspension gives the socket one fresh heartbeat deadline; a healthy tab switch preserves the Player ID and Avatar Preset. Lifecycle effects still apply at game-frame boundaries. Recovery retries use increasing delays capped at five seconds and continue until the server confirms recovery or returns a terminal result. Returning to a visible tab makes a pending retry immediate. Recovery uses a private credential stored in sessionStorage for refresh in the same tab; it retains Player ID, Avatar Preset, Colour, Seat, readiness, and — in a Game — the Role, the current editable Night choice, the locked ballot, the Sheriff's results and the chat that Player may read. Other Players see a subdued Avatar labelled “Reconnecting…” until recovery or expiry. A valid replacement atomically takes over; the displaced tab shows that its connection was replaced and stops retrying. Ordinary new tabs join independently. Duplicated tabs that inherit the credential follow the takeover rule. Storage-disabled browsers retain in-memory recovery only.
 
 Expired recovery shows “Your place in the Room expired” and “Back to lobby selection”, which clears recovery intent and returns to the Create Room / Join Lobby form without sending a fresh Join. A later Join from that form requires a Room still in its Lobby and begins a new membership. An unavailable Room produces a terminal explanation rather than creating a replacement Room. Leave Room during recovery immediately clears intent and returns to entry, with one bounded attempt to recover and Leave the reservation when reachable; otherwise it expires naturally. Closing/reopening tabs and cross-device recovery are not guaranteed.
 
@@ -136,8 +137,8 @@ Players are seated in the Lobby and Townhall, walk during Day, and sleep in plac
 Settings is available from entry, the Lobby and during a Game. It offers separate
 master, effects, ambience and voice volume sliders plus local sound previews.
 Levels are remembered on this browser and apply to current and newly created audio
-channels. Previews require a click and never send sound to other Players. Gameplay effects and Townhall voice use these shared controls and audio routing;
-ambience tracks remain a subsequent ticket.
+channels. Previews require a click and never send sound to other Players. Gameplay effects and voice use these shared controls and audio routing;
+the ambience bus is available, but no ambient soundtrack is included.
 
 Reduced motion defaults to the browser preference until you choose a value. The
 saved choice controls interface animation, camera easing, Avatar motion and town
@@ -227,8 +228,9 @@ chat during voting, same-tab ballot recovery and public results for #25.
 The #25 browser run on this checkout has not passed acceptance: Chromium crashed
 before voting under host resource pressure. The trace is retained locally; the
 WebSocket and frame-boundary regressions provide separate deterministic evidence.
-The suite does not verify the future Tasks, Night choices,
-interiors or media features in epic #22, or constitute manual playtesting.
+That timed-cycle journey does not establish acceptance for Tasks, Night choices,
+interiors or media. Browser automation was skipped for the final integration at
+the user's request; see [the final verification record](docs/verification/2026-10-05-final-acceptance.md). No human playtesting is claimed.
 
 Ticket #27's editable Night choices, fixed deadline, strict majority, recipient privacy, recovery and parity are covered through controlled-clock WebSocket tests and frontend contract/frame tests. Browser automation and manual multi-browser acceptance were not run for #27; its Night controls and death announcements still need browser acceptance.
 
@@ -292,17 +294,27 @@ Solo Practice includes a Preview Role selector and separate practice targets for
 
 Private Task selection/click/success, accepted ballot confirmation and phase transitions play local effects through saved master/effects volumes. Audio starts after a browser gesture; recovery establishes a silent baseline, so retained choices and completed Tasks do not replay cues.
 
-### Local Townhall voice
+### Day and Townhall voice
 
-Living Participants can choose Join voice during discussion/voting, listen with a
-muted microphone, and unmute or leave voice independently of the Game. Microphone
-permission is optional; denial preserves listening and text. Saved master/voice
-volumes apply to received audio. Start the separate local media process and
-configure the backend as described in [the voice setup guide](tools/voice/README.md).
-Without media configuration, the Game remains playable with text.
+Choose Join voice during Day or Townhall discussion/voting. Living Participants
+may enable the microphone; eliminated Participants may only listen at Townhall.
+Day hearing is independent for each speaker/listener pair: full within two tiles,
+fading to zero at five, and confined to the same indoor/outdoor area. Visible,
+authorized Avatars show speaking dots. Night and results have no voice.
 
-Ticket #46 is verified through controlled-clock WebSocket privacy tests, frontend
-contract/frame/recovery tests and independent native clients against real LiveKit.
-Browser automation was excluded by request; microphone permission and the browser
-UI still require manual acceptance. This local configuration does not extend
-Tailscale Funnel to WebRTC transport; see the voice guide's ICE/TURN requirements.
+Settings remembers microphone selection, browser-supported noise suppression,
+and open microphone or configurable push-to-talk. Its local input test pauses
+publication and shows a meter without sending audio. Permission denial preserves
+listening, text and Game interaction. Saved master/voice volumes control reception;
+authorized speech temporarily lowers effects and ambience without changing saved
+levels. Focus loss, text entry, Settings and tab suspension release push-to-talk.
+
+Voice retries independently of the Game. Same-tab recovery restores opted-in
+listening with fresh grants and a muted microphone; Leave voice cancels that intent.
+Start the separate media process as described in [the voice setup guide](tools/voice/README.md).
+Without media configuration, text and Game play remain available. Tailscale Funnel
+alone does not provide remote WebRTC transport; the guide explains ICE/TURN needs.
+
+The [final verification record](docs/verification/2026-10-05-final-acceptance.md)
+separates deterministic rules/privacy tests, native real-media evidence, skipped
+browser acceptance and remaining human playtesting.
