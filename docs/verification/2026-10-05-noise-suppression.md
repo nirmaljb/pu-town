@@ -10,3 +10,6 @@ Frontend checks cover supported/unsupported constraints, storage across reload,
 retained device and speaking mode, getUserMedia constraints and an existing local
 test stream. Browser automation remains waived; hardware suppression quality and
 browser-specific constraint application remain unverified.
+
+Full frontend suite: 98 passed; typecheck and build passed. Standards and Spec
+reviews found no remaining findings.
