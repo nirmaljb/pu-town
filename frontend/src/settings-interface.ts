@@ -56,6 +56,9 @@ export class SettingsInterface {
         <button type="button" class="refresh-microphones">Refresh devices</button>
         <button type="button" class="test-microphone">Test microphone locally</button>
         <meter class="microphone-level" min="0" max="1" value="0" aria-label="Local microphone input level"></meter>
+        <label for="speaking-mode">Speaking mode</label><select id="speaking-mode"><option value="open">Open microphone</option><option value="push-to-talk">Push to talk</option></select>
+        <label for="talk-key">Push-to-talk key</label><button type="button" id="talk-key"></button>
+        <p class="hint">Enable the microphone in Voice controls first. Text, Settings and focus loss release push-to-talk.</p>
         <p class="microphone-status" role="status"></p>
       </fieldset>
       <fieldset><legend>Display</legend>
@@ -70,6 +73,18 @@ export class SettingsInterface {
     this.#dialog.querySelector<HTMLSelectElement>("#microphone-device")!.addEventListener("change", event => {
       this.stopMicrophoneTest();
       void microphone.select((event.target as HTMLSelectElement).value).then(() => { this.microphoneStatus.textContent = microphone.status || "Microphone selected."; });
+    });
+    const mode = this.#dialog.querySelector<HTMLSelectElement>("#speaking-mode")!;
+    const key = this.#dialog.querySelector<HTMLButtonElement>("#talk-key")!;
+    mode.value = microphone.mode; key.textContent = microphone.key;
+    mode.addEventListener("change", () => { void microphone.speakingMode(mode.value === "push-to-talk" ? "push-to-talk" : "open", microphone.key); });
+    let choosingKey = false;
+    key.addEventListener("click", () => { choosingKey = true; key.textContent = "Press a letter, digit, Space or Shift"; });
+    key.addEventListener("blur", () => { choosingKey = false; key.textContent = microphone.key; });
+    key.addEventListener("keydown", event => {
+      if (!choosingKey || !/^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(event.code)) return;
+      event.preventDefault(); event.stopPropagation(); choosingKey = false;
+      void microphone.speakingMode(microphone.mode, event.code); key.textContent = event.code;
     });
     this.#dialog.querySelector(".test-microphone")!.addEventListener("click", () => { void this.testMicrophone(); });
 

@@ -1,4 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
+import { PushToTalk } from "./push-to-talk.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
 import { visibleSpeakers } from "./voice-activity.js";
 import { AudioMixer } from "./audio-mixer.js";
@@ -25,12 +26,22 @@ export class VoiceController {
   #muted = true;
   #busy = false;
   #canPublish = false;
+  readonly #pushToTalk = new PushToTalk();
+  #captureNeedsRefresh = false;
   #captureChanges: Promise<void> = Promise.resolve();
   readonly #unsubscribeMicrophone: () => void;
 
   constructor(private readonly client: ReconnectingGameClient, private readonly mixer: AudioMixer,
               private readonly gameUrl: string, private readonly microphone: MicrophoneSettings) {
-    this.#unsubscribeMicrophone = microphone.subscribe(() => this.updateMicrophone());
+    this.#pushToTalk.configure(microphone.key);
+    this.#unsubscribeMicrophone = microphone.subscribe(() => {
+      this.releaseTalk(); this.#pushToTalk.configure(microphone.key); return this.updateMicrophone(true);
+    });
+    window.addEventListener("keydown", this.#keyDown);
+    window.addEventListener("keyup", this.#keyUp);
+    window.addEventListener("blur", this.#focusLost);
+    document.addEventListener("visibilitychange", this.#visibilityChanged);
+    document.addEventListener("focusin", this.#focusChanged);
     this.#root.className = "voice-controls";
     this.#root.setAttribute("aria-label", "Voice controls");
     this.#join.type = this.#mute.type = this.#leave.type = "button";
@@ -51,6 +62,26 @@ export class VoiceController {
     });
     this.client.onVoiceState = state => { void this.applyGrant(state); };
     this.client.onVoicePeers = peers => { this.applyPeers(peers); };
+  }
+
+  private inputBlocked(): boolean {
+    return Boolean(document.querySelector("dialog[open]") || document.activeElement?.closest("input,textarea,select,[contenteditable]:not([contenteditable=false])"));
+  }
+  readonly #keyDown = (event: KeyboardEvent) => {
+    if (this.microphone.mode !== "push-to-talk" || this.#muted || !this.#canPublish || this.microphone.testing) return;
+    if (this.#pushToTalk.press(event.code, this.inputBlocked(), event.repeat)) { event.preventDefault(); void this.updateMicrophone(); }
+  };
+  readonly #keyUp = (event: KeyboardEvent) => { if (this.#pushToTalk.release(event.code)) this.stopTransmission(); };
+  readonly #focusLost = () => this.releaseTalk();
+  readonly #visibilityChanged = () => { if (document.hidden) this.releaseTalk(); };
+  readonly #focusChanged = () => { if (this.inputBlocked()) this.releaseTalk(); };
+  private releaseTalk(): void { if (this.#pushToTalk.reset()) this.stopTransmission(); }
+  private stopTransmission(): void {
+    for (const publication of this.#room?.localParticipant.audioTrackPublications.values() ?? []) void publication.track?.mute().catch(() => {});
+    void this.updateMicrophone();
+  }
+  private transmissionEnabled(): boolean {
+    return !this.#muted && !this.microphone.testing && (this.microphone.mode === "open" || this.#pushToTalk.held);
   }
 
   private async applyGrant(state: VoiceState): Promise<void> {
@@ -149,13 +180,14 @@ export class VoiceController {
     await this.updateMicrophone();
   }
 
-  private updateMicrophone(): Promise<void> {
+  private updateMicrophone(reconfigure = false): Promise<void> {
+    this.#captureNeedsRefresh ||= reconfigure;
     const room = this.#room, generation = this.#generation;
     const update = async () => {
       if (!room || generation !== this.#generation || !this.#canPublish) return;
       this.#busy = true;
       try {
-        const enabled = !this.#muted && !this.microphone.testing;
+        const enabled = this.transmissionEnabled();
         if (!enabled) {
           await room.localParticipant.setMicrophoneEnabled(false);
           this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== room.localParticipant.name)));
@@ -163,11 +195,14 @@ export class VoiceController {
           const options = await this.microphone.captureOptions();
           if (generation !== this.#generation) return;
           const existing = [...room.localParticipant.audioTrackPublications.values()][0]?.track;
-          if (existing) await existing.restartTrack(options);
+          if (existing && this.#captureNeedsRefresh) await existing.restartTrack(options);
           if (generation !== this.#generation) return;
+          if (!this.transmissionEnabled()) { await room.localParticipant.setMicrophoneEnabled(false); return; }
           await room.localParticipant.setMicrophoneEnabled(true, options);
+          this.#captureNeedsRefresh = false;
+          if (!this.transmissionEnabled() || generation !== this.#generation) await room.localParticipant.setMicrophoneEnabled(false);
         }
-        if (generation === this.#generation) this.#text = enabled ? "Microphone on" : "Listening · microphone muted";
+        if (generation === this.#generation) this.#text = this.transmissionEnabled() ? "Microphone on" : this.#muted ? "Listening · microphone muted" : `Push to talk ready · hold ${this.microphone.key}`;
       } catch (error) {
         if (this.microphone.testing) throw error;
         if (generation === this.#generation) { this.#muted = true; this.#text = "Microphone unavailable; you can still listen and use text"; }
@@ -178,6 +213,7 @@ export class VoiceController {
   }
 
   private disconnect(): void {
+    this.#pushToTalk.reset();
     ++this.#generation;
     const room = this.#room; this.#room = null;
     if (room) this.closeRoom(room);
@@ -200,10 +236,15 @@ export class VoiceController {
     this.#join.disabled = this.#round === null || this.#busy;
     this.#mute.hidden = this.#leave.hidden = this.#room === null;
     this.#mute.disabled = this.#busy || !this.#canPublish;
-    this.#mute.textContent = this.#muted ? "Unmute microphone" : "Mute microphone";
+    if (this.inputBlocked()) this.releaseTalk();
+    this.#mute.textContent = this.microphone.mode === "push-to-talk" ? this.#muted ? "Enable push to talk" : "Disable push to talk" : this.#muted ? "Unmute microphone" : "Mute microphone";
     this.#status.textContent = this.#text;
     return visibleSpeakers(world, new Set([...this.#speakers.values()].flatMap(ids => [...ids])));
   }
 
-  destroy(): void { this.#unsubscribeMicrophone(); this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
+  destroy(): void {
+    window.removeEventListener("keydown", this.#keyDown); window.removeEventListener("keyup", this.#keyUp);
+    window.removeEventListener("blur", this.#focusLost); document.removeEventListener("visibilitychange", this.#visibilityChanged);
+    document.removeEventListener("focusin", this.#focusChanged);
+    this.#unsubscribeMicrophone(); this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
 }

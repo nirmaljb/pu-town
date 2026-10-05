@@ -34,3 +34,11 @@ test('canceling while publication is suspending never starts a new capture reque
  const pending=mic.startTest();mic.stopTest();release();
  assert.equal(await pending,null);assert.equal(requests,0);
 });
+test('speaking mode and key survive device changes and reload without enabling publication',async()=>{
+ let saved=null;const storage={getItem:()=>saved,setItem:(_key,value)=>saved=value};
+ const devices={enumerateDevices:async()=>[],getUserMedia:async()=>{throw new Error('No capture expected');}};
+ const mic=new MicrophoneSettings(devices,storage);
+ await mic.speakingMode('push-to-talk','KeyB');await mic.select('desk');
+ const restored=new MicrophoneSettings(devices,storage);
+ assert.equal(restored.mode,'push-to-talk');assert.equal(restored.key,'KeyB');assert.equal(restored.deviceId,'desk');assert.equal(restored.testing,false);
+});

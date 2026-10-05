@@ -99,3 +99,8 @@ Settings lists microphone inputs and remembers the selected device. A missing
 device uses the system default. The local input test pauses publication and
 shows an input meter without sending test audio; closing Settings stops capture.
 Permission denial leaves listening, text and Game interaction available.
+
+Settings remembers open microphone or push-to-talk and its key. Enable the
+microphone in Voice controls before speaking. Push-to-talk releases on key-up,
+Settings/text focus, tab suspension and focus loss; local mode never changes
+server phase or participation permissions.

@@ -6,6 +6,8 @@ type Preferences = Pick<Storage, "getItem" | "setItem">;
 /** Capture preferences and an isolated input test; this module never publishes media. */
 export class MicrophoneSettings {
   deviceId = "";
+  mode: "open" | "push-to-talk" = "open";
+  key = "KeyV";
   status = "";
   #stream: MediaStream | null = null;
   #testing = false;
@@ -17,6 +19,11 @@ export class MicrophoneSettings {
       const saved: unknown = JSON.parse(storage?.getItem(KEY) ?? "null");
       if (saved && typeof saved === "object" && typeof (saved as Record<string, unknown>).deviceId === "string")
         this.deviceId = (saved as {deviceId: string}).deviceId;
+      if (saved && typeof saved === "object") {
+        const values = saved as Record<string, unknown>;
+        if (values.mode === "push-to-talk") this.mode = values.mode;
+        if (typeof values.key === "string" && /^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(values.key)) this.key = values.key;
+      }
     } catch { /* Capture remains usable without storage. */ }
   }
   get testing(): boolean { return this.#testing; }
@@ -29,8 +36,15 @@ export class MicrophoneSettings {
   }
   async select(deviceId: string): Promise<void> {
     this.stopTest(); this.deviceId = deviceId;
-    try { this.storage?.setItem(KEY, JSON.stringify({deviceId})); } catch { /* Keep in memory. */ }
+    this.remember();
     await this.changed();
+  }
+  private remember(): void {
+    try { this.storage?.setItem(KEY, JSON.stringify({deviceId: this.deviceId, mode: this.mode, key: this.key})); } catch { /* Keep in memory. */ }
+  }
+  async speakingMode(mode: "open" | "push-to-talk", key: string): Promise<void> {
+    if (!/^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(key)) return;
+    this.mode = mode; this.key = key; this.remember(); await this.changed();
   }
   async captureOptions(): Promise<MediaTrackConstraints> {
     if (!this.deviceId) return {};
