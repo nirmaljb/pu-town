@@ -164,7 +164,7 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
-    this.#voice?.render(world);
+    this.#avatarReconciler?.setSpeaking(this.#voice?.render(world) ?? new Set());
     this.#taskInterface?.render(world);
     this.#effects?.update(world, this.#client?.state.status === "playing");
     this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);

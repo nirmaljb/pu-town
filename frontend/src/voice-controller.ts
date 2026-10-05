@@ -1,4 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
+import { visibleSpeakers } from "./voice-activity.js";
 import { AudioMixer } from "./audio-mixer.js";
 import type { VoicePeer, VoiceState } from "./protocol.js";
 import type { WorldState } from "./world-state.js";
@@ -13,6 +14,7 @@ export class VoiceController {
   readonly #status = document.createElement("span");
   readonly #sources = new Map<RemoteTrack, MediaStreamAudioSourceNode>();
   readonly #decoders = new Map<RemoteTrack, HTMLMediaElement>();
+  readonly #speakers = new Map<Room, ReadonlySet<string>>();
   readonly #roomTracks = new Map<Room, Set<RemoteTrack>>();
   readonly #peers = new Map<string, { token: string; room: Room; gain: GainNode }>();
   #room: Room | null = null;
@@ -72,6 +74,12 @@ export class VoiceController {
 
   private attachAudio(room: Room, generation: number, output: GainNode): void {
     const tracks = new Set<RemoteTrack>(); this.#roomTracks.set(room, tracks);
+    room.on(RoomEvent.ActiveSpeakersChanged, participants => {
+      this.#speakers.set(room, new Set(participants.filter(p => p === room.localParticipant
+        ? this.#canPublish && p.isMicrophoneEnabled
+        : [...p.audioTrackPublications.values()].some(t => t.isSubscribed && !t.isMuted))
+        .map(p => p.name).filter((id): id is string => Boolean(id))));
+    });
     room.on(RoomEvent.TrackSubscribed, track => {
       if (generation !== this.#generation || track.kind !== Track.Kind.Audio) return;
       // Chromium needs a playing media element to pull decoded remote WebRTC
@@ -81,7 +89,11 @@ export class VoiceController {
       const source = this.mixer.context.createMediaStreamSource(decoder.srcObject as MediaStream);
       source.connect(output); this.#sources.set(track, source); tracks.add(track);
     });
+    room.on(RoomEvent.TrackMuted, (_publication, participant) => {
+      this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== participant.name)));
+    });
     room.on(RoomEvent.TrackUnsubscribed, track => {
+      this.#speakers.delete(room);
       this.removeTrack(track); tracks.delete(track);
     });
   }
@@ -95,7 +107,7 @@ export class VoiceController {
   private closeRoom(room: Room): void {
     room.removeAllListeners();
     for (const track of this.#roomTracks.get(room) ?? []) this.removeTrack(track);
-    this.#roomTracks.delete(room);
+    this.#roomTracks.delete(room); this.#speakers.delete(room);
     void room.disconnect().catch(() => {});
   }
 
@@ -136,6 +148,7 @@ export class VoiceController {
       await room.localParticipant.setMicrophoneEnabled(this.#muted);
       if (generation !== this.#generation) return;
       this.#muted = !this.#muted;
+      if (this.#muted) this.#speakers.delete(room);
       this.#text = this.#muted ? "Listening · microphone muted" : "Microphone on";
     } catch {
       if (generation === this.#generation) this.#text = "Microphone unavailable; you can still listen and use text";
@@ -154,7 +167,7 @@ export class VoiceController {
     this.#sources.clear(); this.#busy = false; this.#muted = true; this.#canPublish = false;
   }
 
-  render(world: WorldState | undefined): void {
+  render(world: WorldState | undefined): ReadonlySet<string> {
     this.#root.hidden = !world?.game;
     const game = world?.game;
     this.#round = game && game.self.status !== "left" && (game.phase === "discussion" || game.phase === "voting" || game.phase === "day" && game.self.status === "living") ? game.round : null;
@@ -167,6 +180,7 @@ export class VoiceController {
     this.#mute.disabled = this.#busy || !this.#canPublish;
     this.#mute.textContent = this.#muted ? "Unmute microphone" : "Mute microphone";
     this.#status.textContent = this.#text;
+    return visibleSpeakers(world, new Set([...this.#speakers.values()].flatMap(ids => [...ids])));
   }
 
   destroy(): void { this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }

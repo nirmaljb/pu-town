@@ -332,3 +332,9 @@ grants and remove their media identities. An empty list explicitly clears all
 nearby streams. Transport work runs independently of Phaser; presentation and
 private peer state also follow the inbox/frame-boundary path. Recovery requires
 fresh voice admission. Never persist or log listening tokens.
+
+Media publisher identities have a server-owned `name` containing their Player ID;
+receive-only hidden identities have no name. The gateway refuses client metadata
+updates. SDK activity is sampled only during a Game frame, intersected with current
+connected living Roster entries and, during Day, current visible and audible peers.
+No activity from an inaudible speaker is sent through another speaker’s room.

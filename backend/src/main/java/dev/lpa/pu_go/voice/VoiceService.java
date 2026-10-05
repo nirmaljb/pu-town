@@ -85,7 +85,7 @@ public class VoiceService {
     public String gatewayToken(Grant grant) { return sign(claimsOf(grant), gatewaySecret); }
     public String mediaToken(Grant grant) { return sign(claimsOf(grant), secret); }
     private static Map<String, Object> claimsOf(Grant grant) {
-        return Map.of("sub", grant.identity(), "video", Map.of("room", grant.room(), "roomJoin", true,
+        return Map.of("sub", grant.identity(), "name", grant.canPublish() ? grant.playerId() : "", "video", Map.of("room", grant.room(), "roomJoin", true,
                 "canPublish", grant.canPublish(), "canSubscribe", grant.speakerId() == null || !grant.canPublish(), "canPublishData", false,
                 "hidden", grant.speakerId() != null && !grant.canPublish(),
                 "canPublishSources", grant.canPublish() ? List.of("microphone") : List.of(), "canUpdateOwnMetadata", false));

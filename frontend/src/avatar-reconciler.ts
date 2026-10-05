@@ -16,6 +16,7 @@ type AvatarView = {
   preset: AvatarPreset;
   label: Phaser.GameObjects.Text;
   status: Phaser.GameObjects.Text;
+  speaking: Phaser.GameObjects.Text;
   seat: number;
   facing: Direction;
   /** Where the latest field state put this Avatar during Day and sleeping Night, or null when seated. */
@@ -144,6 +145,10 @@ export class AvatarReconciler implements WorldReconciler {
     }
   }
 
+  setSpeaking(ids: ReadonlySet<string>): void {
+    for (const [id, avatar] of this.#avatars) avatar.speaking.setVisible(avatar.container.visible && ids.has(id));
+  }
+
   private statusText(world: WorldState, entry: RosterEntry, connected: boolean): string {
     if (entry.status === "eliminated") return "Eliminated";
     if (!connected) return "Reconnecting…";
@@ -218,11 +223,12 @@ export class AvatarReconciler implements WorldReconciler {
       color: "#fff0c9", fontFamily: "sans-serif", fontSize: "13px",
       backgroundColor: "#302820", padding: { x: 6, y: 3 }
     }).setOrigin(0.5);
+    const speaking = this.scene.add.text(0, -85, "● ● ●", { color: "#b9f4c9", fontSize: "12px" }).setOrigin(0.5).setVisible(false);
     // Fit the longest accepted Display Names within neighbouring seat labels.
     if (label.width > 210) label.setScale(210 / label.width);
     const avatar: AvatarView = {
-      container: this.scene.add.container(place.x, place.y, [marker, legs, sprite, label, status]),
-      sprite, legs, label, status, seat: entry.seat, seating: new AvatarSeating(),
+      container: this.scene.add.container(place.x, place.y, [marker, legs, sprite, label, status, speaking]),
+      sprite, legs, label, status, speaking, seat: entry.seat, seating: new AvatarSeating(),
       preset: entry.avatarPreset,
       facing: seatFacing(entry.seat),
       target: null,

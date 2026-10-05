@@ -163,6 +163,8 @@ class MafiaGameTest {
             send(table.get(1), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
             JsonNode grant = latestOfType(table.get(1), "voice_state");
             assertEquals("/voice", grant.path("url").asText());
+            JsonNode publisherClaims = objectMapper.readTree(java.util.Base64.getUrlDecoder().decode(grant.path("token").asText().split("\\.")[1]));
+            assertEquals(playerId(1), publisherClaims.path("name").asText());
             assertFalse(grant.path("token").asText().isBlank());
             assertEquals(others, table.get(0).payloads().size());
             advance(DISCUSSION);
