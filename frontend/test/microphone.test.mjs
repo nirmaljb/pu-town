@@ -42,3 +42,23 @@ test('speaking mode and key survive device changes and reload without enabling p
  const restored=new MicrophoneSettings(devices,storage);
  assert.equal(restored.mode,'push-to-talk');assert.equal(restored.key,'KeyB');assert.equal(restored.deviceId,'desk');assert.equal(restored.testing,false);
 });
+test('supported noise suppression is remembered without changing device or speaking mode',async()=>{
+ let saved=null;const storage={getItem:()=>saved,setItem:(_key,value)=>saved=value};
+ const devices={getSupportedConstraints:()=>({noiseSuppression:true}),enumerateDevices:async()=>[{kind:'audioinput',deviceId:'desk'}],getUserMedia:async()=>{throw new Error('No capture expected');}};
+ const mic=new MicrophoneSettings(devices,storage);await mic.select('desk');await mic.speakingMode('push-to-talk','KeyB');
+ await mic.suppressNoise(false);
+ assert.deepEqual(await mic.captureOptions(),{deviceId:{exact:'desk'},noiseSuppression:false});
+ const restored=new MicrophoneSettings(devices,storage);
+ assert.equal(restored.noiseSuppression,false);assert.equal(restored.mode,'push-to-talk');assert.equal(restored.key,'KeyB');
+ const unsupported=new MicrophoneSettings({...devices,getSupportedConstraints:()=>({})},storage);
+ assert.equal(unsupported.noiseSuppressionSupported,false);
+ assert.deepEqual(await unsupported.captureOptions(),{deviceId:{exact:'desk'}});
+});
+test('noise suppression reaches isolated capture and an existing test stream without changing its device',async()=>{
+ const applied=[];let capture;
+ const track={stop(){},applyConstraints:async value=>applied.push(value)};
+ const mic=new MicrophoneSettings({getSupportedConstraints:()=>({noiseSuppression:true}),enumerateDevices:async()=>[{kind:'audioinput',deviceId:'desk'}],getUserMedia:async options=>{capture=options;return {getTracks:()=>[track],getAudioTracks:()=>[track]};}},undefined);
+ await mic.select('desk');await mic.startTest();
+ assert.deepEqual(capture,{audio:{noiseSuppression:true,deviceId:{exact:'desk'}},video:false});
+ await mic.suppressNoise(false);assert.deepEqual(applied,[{noiseSuppression:false}]);assert.equal(mic.deviceId,'desk');assert.equal(mic.testing,true);mic.stopTest();
+});

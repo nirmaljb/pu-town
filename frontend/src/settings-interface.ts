@@ -60,6 +60,8 @@ export class SettingsInterface {
         <label for="speaking-mode">Speaking mode</label><select id="speaking-mode"><option value="open">Open microphone</option><option value="push-to-talk">Push to talk</option></select>
         <label for="talk-key">Push-to-talk key</label><button type="button" id="talk-key"></button>
         <p class="hint">Enable the microphone in Voice controls first. Text, Settings and focus loss release push-to-talk.</p>
+        <label class="settings-choice"><span>Microphone noise suppression</span><input type="checkbox" class="noise-suppression"></label>
+        <p class="noise-suppression-status hint"></p>
         <p class="microphone-status" role="status"></p>
       </fieldset>
       <fieldset><legend>Display</legend>
@@ -75,6 +77,12 @@ export class SettingsInterface {
       this.stopMicrophoneTest();
       void microphone.select((event.target as HTMLSelectElement).value).then(() => { this.microphoneStatus.textContent = microphone.status || "Microphone selected."; });
     });
+    const suppression = this.#dialog.querySelector<HTMLInputElement>(".noise-suppression")!;
+    suppression.checked = microphone.noiseSuppression;
+    suppression.disabled = !microphone.noiseSuppressionSupported;
+    this.#dialog.querySelector(".noise-suppression-status")!.textContent = microphone.noiseSuppressionSupported
+      ? "Uses this browser’s microphone noise suppression." : "Noise suppression is not supported by this browser.";
+    suppression.addEventListener("change", () => { void microphone.suppressNoise(suppression.checked); });
     const mode = this.#dialog.querySelector<HTMLSelectElement>("#speaking-mode")!;
     const key = this.#dialog.querySelector<HTMLButtonElement>("#talk-key")!;
     mode.value = microphone.mode; key.textContent = microphone.key;

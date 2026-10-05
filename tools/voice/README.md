@@ -104,3 +104,7 @@ Settings remembers open microphone or push-to-talk and its key. Enable the
 microphone in Voice controls before speaking. Push-to-talk releases on key-up,
 Settings/text focus, tab suspension and focus loss; local mode never changes
 server phase or participation permissions.
+
+Noise suppression is remembered and applied through browser-supported capture
+constraints. Unsupported browsers show the setting disabled; the Game and voice
+remain usable. This is browser processing, with no external audio service.
