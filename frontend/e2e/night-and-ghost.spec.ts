@@ -37,7 +37,8 @@ test("#26–29 #37–38 Night choices, Ghost Tasks, Forfeit transfer and Village
     expect(sheriff.latest("game_state")!.self.investigations).toHaveLength(1);
     expect(sheriff.latest("game_state")!.self.investigations![0]!.mafia).toBe(true);
     for (const player of players.filter(player => player !== sheriff)) expect(player.latest("game_state")!.self.investigations).toBeNull();
-    await expect(sheriff.page.getByRole("textbox", { name: "Chat message" })).toBeHidden();
+    await expect(sheriff.page.getByRole("textbox", { name: "Chat message" })).toBeDisabled();
+    await expect(sheriff.page.getByRole("button", { name: "Send", exact: true })).toBeDisabled();
     await doctor.page.bringToFront();
     await doctor.page.getByRole("textbox", { name: "Chat message" }).fill("Townhall survivors can speak");
     await doctor.page.getByRole("button", { name: "Send", exact: true }).click();

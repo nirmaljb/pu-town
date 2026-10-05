@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { GAME_URL } from "./environment.js";
 
-test.use({ launchOptions: { args: ["--use-fake-device-for-media-stream"] } });
+test.use({ launchOptions: { args: [`--host-resolver-rules=MAP localhost ${process.env.PU_TOWN_E2E_HOST ?? "127.0.0.1"}`, "--use-fake-device-for-media-stream"] } });
 test("#50 denied microphone permission leaves Settings and Room entry usable", async ({ page, context }) => {
   const cdp = await context.newCDPSession(page);
-  await cdp.send("Browser.setPermission", { permission: { name: "microphone" }, setting: "denied", origin: "http://localhost:5173" });
+  await cdp.send("Browser.setPermission", { permission: { name: "microphone" }, setting: "denied", origin: `http://localhost:${process.env.PU_TOWN_E2E_FRONTEND_PORT ?? "5173"}` });
   await page.goto(GAME_URL);
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Test microphone locally", exact: true }).click();

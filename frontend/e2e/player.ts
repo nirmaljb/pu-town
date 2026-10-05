@@ -26,6 +26,7 @@ export class Player {
   async phase(phase: string, timeout = 15_000): Promise<void> {
     await this.page.bringToFront();
     await expect.poll(() => this.latest("game_state")?.phase, { timeout }).toBe(phase);
+    await this.page.bringToFront();
     await expect(this.page.locator(".game-phase")).toContainText(phase === "day" ? "Day" : phase === "night" ? "Night" : phase === "finished" ? "Game over" : phase === "voting_result" ? "verdict" : "Townhall");
   }
   /** Keyboard movement stays on the production prediction/validation path. */
@@ -52,9 +53,10 @@ export class Player {
       if (Math.hypot(x - position.x, y - position.y) < 38) return;
       const next = route(position, { x, y });
       const dx = next.x - position.x, dy = next.y - position.y;
-      const keys = [Math.abs(dx) > 5 ? dx > 0 ? "d" : "a" : null, Math.abs(dy) > 5 ? dy > 0 ? "s" : "w" : null].filter((key): key is string => key !== null);
+      const keys = [Math.abs(dx) > .5 ? dx > 0 ? "d" : "a" : null, Math.abs(dy) > .5 ? dy > 0 ? "s" : "w" : null].filter((key): key is string => key !== null);
+      const distance = keys.length === 2 ? Math.min(Math.abs(dx), Math.abs(dy)) * Math.SQRT2 : Math.hypot(dx, dy);
       for (const key of keys) await this.page.keyboard.down(key);
-      try { await this.page.waitForTimeout(Math.min(160, Math.hypot(dx, dy) / 220 * 1000)); }
+      try { await this.page.waitForTimeout(Math.min(160, distance / 220 * 1000)); }
       finally { for (const key of keys) await this.page.keyboard.up(key); }
       await this.page.waitForTimeout(120);
     }
@@ -75,7 +77,21 @@ function route(start: { x: number; y: number }, target: { x: number; y: number }
       const path = [point];
       let parent = previous.get(key(point));
       while (parent) { path.unshift(parent); parent = previous.get(key(parent)); }
-      return path[Math.min(2, path.length - 1)]!;
+      // Never skip a bend by cutting an obstacle corner with diagonal key input.
+      const clear = (end: typeof origin) => {
+        const distance = Math.hypot(end.x - start.x, end.y - start.y);
+        const steps = Math.ceil(distance / 2);
+        for (let step = 1; step <= steps; step++) {
+          if (!walkable(start.x + (end.x - start.x) * step / steps, start.y + (end.y - start.y) * step / steps)) return false;
+        }
+        return true;
+      };
+      for (let index = Math.min(6, path.length - 1); index > 0; index--) {
+        const point = path[index]!;
+        if ((Math.abs(point.x - start.x) < .5 || Math.abs(point.y - start.y) < .5) && clear(point)) return point;
+      }
+      if (path[1] && clear(path[1])) return path[1];
+      return path[0]!;
     }
     for (const [dx, dy] of [[grid, 0], [-grid, 0], [0, grid], [0, -grid]]) {
       const next = { x: point.x + dx!, y: point.y + dy! };

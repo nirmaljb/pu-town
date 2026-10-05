@@ -25,12 +25,14 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
       })) });
     });
     const grants = new Map<number, { token: string; canPublish: boolean }>();
+    const phases: (string | undefined)[] = [];
     for (const [index, page] of pages.entries()) {
       page.on("websocket", socket => {
         if (!socket.url().includes("/ws/game")) return;
         socket.on("framereceived", frame => {
-          const event = JSON.parse(String(frame.payload)) as { type: string; token: string; canPublish: boolean };
+          const event = JSON.parse(String(frame.payload)) as { type: string; token: string; canPublish: boolean; phase?: string };
           if (event.type === "voice_state" && event.token) grants.set(index, event);
+          if (event.type === "game_state") phases[index] = event.phase;
         });
       });
       await page.bringToFront();
@@ -52,12 +54,14 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     const victim = pages[victimIndex]!;
     const speakerIndex = roles.indexOf("Mafia");
     const speaker = pages[speakerIndex]!;
-    await expect(speaker.locator(".game-phase")).toHaveText("Night · Sleeping", { timeout: 205_000 });
+    await expect.poll(() => phases[speakerIndex], { timeout: 205_000 }).toBe("night");
     await speaker.bringToFront();
+    await expect(speaker.locator(".game-phase")).toHaveText("Night · Sleeping");
     await speaker.locator(".target-list").getByRole("button", { name: `Voice Player ${victimIndex}`, exact: true }).click();
     await speaker.getByRole("button", { name: "Set Night choice" }).click();
-    await expect(victim.locator(".game-phase")).toContainText("Townhall", { timeout: 25_000 });
+    await expect.poll(() => phases[victimIndex], { timeout: 25_000 }).toBe("discussion");
     await victim.bringToFront();
+    await expect(victim.locator(".game-phase")).toContainText("Townhall");
     await victim.getByRole("button", { name: "Join voice", exact: true }).click();
     await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
     console.log("Eliminated Participant joined receive-only Townhall voice.");
@@ -111,14 +115,15 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     if (await victim.getByRole("button", { name: "Join voice", exact: true }).isVisible()) await victim.getByRole("button", { name: "Join voice", exact: true }).click();
     await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
     await expect.poll(peak, { timeout: 20_000 }).toBeGreaterThan(0.01);
-    await expect(speaker.locator(".game-phase")).toContainText("Voting", { timeout: 100_000 });
+    await expect.poll(() => phases[speakerIndex], { timeout: 100_000 }).toBe("voting");
     for (const [index, page] of pages.entries()) if (index !== victimIndex) {
       await page.bringToFront();
       await page.locator(".target-list").getByRole("button", { name: `Voice Player ${condemnedIndex}`, exact: true }).click();
       await page.getByRole("button", { name: "Confirm ballot" }).click();
     }
-    await expect(condemned.locator(".game-phase")).toHaveText("The verdict", { timeout: 35_000 });
+    await expect.poll(() => phases[condemnedIndex], { timeout: 35_000 }).toBe("voting_result");
     await condemned.bringToFront();
+    await expect(condemned.locator(".game-phase")).toHaveText("The verdict");
     await expect(condemned.locator(".voice-controls [role=status]")).toHaveText("Voice access ended");
     await victim.bringToFront();
     await expect.poll(peak, { timeout: 10_000 }).toBeLessThan(0.001);

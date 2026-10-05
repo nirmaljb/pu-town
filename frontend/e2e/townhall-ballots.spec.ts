@@ -7,12 +7,13 @@ test("Players preview, confirm and recover private Townhall ballots while chat s
     const pages = await Promise.all(contexts.map(context => context.newPage()));
     const host = pages[0]!;
     const roles: (string | undefined)[] = [];
+    const phases: (string | undefined)[] = [];
     const submitted: unknown[][] = pages.map(() => []);
     for (const [index, page] of pages.entries()) {
       page.on("websocket", socket => {
         socket.on("framereceived", ({ payload }) => {
-          const event = JSON.parse(String(payload)) as { type: string; self?: { role: string } };
-          if (event.type === "game_state") roles[index] = event.self!.role;
+          const event = JSON.parse(String(payload)) as { type: string; phase?: string; self?: { role: string } };
+          if (event.type === "game_state") { roles[index] = event.self!.role; phases[index] = event.phase; }
         });
         socket.on("framesent", ({ payload }) => {
           const event = JSON.parse(String(payload)) as { type: string };
@@ -35,7 +36,9 @@ test("Players preview, confirm and recover private Townhall ballots while chat s
     }
     await host.bringToFront();
     await host.getByRole("button", { name: "Start Game" }).click();
-    await expect(host.locator(".action-panel")).toBeVisible({ timeout: 315_000 });
+    await expect.poll(() => phases[0], { timeout: 315_000 }).toBe("voting");
+    await host.bringToFront();
+    await expect(host.locator(".action-panel")).toBeVisible();
     await expect(host.getByRole("button", { name: "Confirm ballot" })).toBeDisabled();
     const target = host.locator(".target-list").getByRole("button", { name: "Player 2", exact: true });
     await target.focus();

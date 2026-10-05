@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { Player } from "./player.js";
 import { observeAudio } from "./audio-boundary.js";
+import { setVolume } from "./volume-control.js";
 
 test.skip(!process.env.PUTOWN_VOICE_KEY, "Source the voice environment to verify actual Day audio.");
 
@@ -32,13 +33,24 @@ test("#31 #48 #55 Day voice fades per listener, text stays private and refresh r
     for (const player of [near, faded]) {
       await player.page.bringToFront();
       await expect.poll(() => player.page.evaluate(() => window.browserAudio.raw), { timeout: 20_000 }).toBeGreaterThan(.01);
+      await player.page.getByRole("button", { name: "Settings", exact: true }).click();
+      await setVolume(player.page, "Effects volume", 0);
+      await setVolume(player.page, "Ambience volume", 0);
+      await player.page.getByRole("button", { name: "Close Settings", exact: true }).click();
     }
     expect(near.latest("voice_peers")!.peers.find(peer => peer.playerId === speakerId)!.gain).toBe(1);
     expect(faded.latest("voice_peers")!.peers.find(peer => peer.playerId === speakerId)!.gain).toBeGreaterThan(0);
     expect(faded.latest("voice_peers")!.peers.find(peer => peer.playerId === speakerId)!.gain).toBeLessThan(.9);
+    // Compare actual output with the decoded source, so an ignored gain cannot pass.
+    await expect.poll(() => near.page.evaluate(() => window.browserAudio.rms / window.browserAudio.raw)).toBeGreaterThan(.9);
+    await expect.poll(() => faded.page.evaluate(() => window.browserAudio.rms / window.browserAudio.raw)).toBeGreaterThan(.1);
+    await expect.poll(() => faded.page.evaluate(() => window.browserAudio.rms / window.browserAudio.raw)).toBeLessThan(.8);
     expect(far.latest("voice_peers")!.peers.some(peer => peer.playerId === speakerId)).toBe(false);
     await far.page.bringToFront();
     await expect.poll(() => far.page.evaluate(() => window.browserAudio.raw)).toBeLessThan(.001);
+    await far.page.screenshot({ path: test.info().outputPath("distant-speaker.png") });
+    await near.page.bringToFront();
+    await near.page.screenshot({ path: test.info().outputPath("nearby-speaking.png") });
     await speaker.page.bringToFront();
     await speaker.page.getByRole("textbox", { name: "Chat message" }).fill("Only nearby listeners hear this");
     await speaker.page.getByRole("button", { name: "Send", exact: true }).click();
@@ -60,6 +72,25 @@ test("#31 #48 #55 Day voice fades per listener, text stays private and refresh r
     await far.page.reload();
     await far.phase("day");
     await expect(far.page.locator(".chat-log")).not.toContainText("Only nearby listeners hear this");
+    if (process.env.PU_TOWN_E2E_MEDIA_OUTAGE === "1") {
+      // The operator stops and restarts only the dedicated local SFU at these markers.
+      // The browsers and Game backend remain connected throughout the real outage.
+      await near.page.bringToFront();
+      console.log("MEDIA_OUTAGE_READY: stop the dedicated test SFU.");
+      await expect(near.page.locator(".voice-controls [role=status]")).toContainText(/reconnect|Joining|retry/i, { timeout: 40_000 });
+      await near.walkAxis("y", near.latest("field_state")!.self.y + 40);
+      await near.page.getByRole("textbox", { name: "Chat message" }).fill("The Game continues through the media outage");
+      await near.page.getByRole("button", { name: "Send", exact: true }).click();
+      await expect(near.page.locator(".chat-log")).toContainText("The Game continues through the media outage");
+      expect(near.latest("game_state")!.phase).toBe("day");
+      console.log("MEDIA_OUTAGE_RECOVER: movement and text passed; restart the dedicated test SFU.");
+      await expect(near.page.locator(".voice-controls [role=status]")).toHaveText("Listening · microphone muted", { timeout: 60_000 });
+      await speaker.page.bringToFront();
+      await expect(speaker.page.locator(".voice-controls [role=status]")).toHaveText("Listening · microphone muted", { timeout: 60_000 });
+      await speaker.page.getByRole("button", { name: "Unmute microphone", exact: true }).click();
+      await expect.poll(() => near.page.evaluate(() => window.browserAudio.raw), { timeout: 20_000 }).toBeGreaterThan(.01);
+      console.log("Actual browser audio recovered without resetting the Room or Game.");
+    }
     await speaker.page.bringToFront();
     await speaker.page.getByRole("button", { name: "Leave voice", exact: true }).click();
     await near.page.bringToFront();

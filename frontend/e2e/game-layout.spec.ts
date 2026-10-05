@@ -22,7 +22,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       }
       for (const [index, page] of pages.entries()) {
         await page.bringToFront();
-        await page.goto(`/?ws=ws://localhost:${process.env.PU_TOWN_E2E_BACKEND_PORT ?? "18081"}/ws/game`);
+        await page.goto(GAME_URL);
         const name = index === 0 ? "Host with a lengthy name" : `Player ${index + 1}`;
         await page.getByLabel("Display Name", { exact: true }).fill(name);
         await expect(page.getByLabel("Display Name", { exact: true })).toHaveValue(name);
@@ -100,7 +100,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await expect(host.locator("body")).toHaveClass(/sleeping/);
       expect(fields[0]!.self!.y).toBe(sleeping.y);
       expect(games[0]!.self!.role).toBe(role);
-      await expect(host.locator(".game-phase")).toHaveText("Townhall · Discussion", { timeout: 25_000 });
+      await expect.poll(() => games[0]?.phase, { timeout: 25_000 }).toBe("discussion");
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("Townhall · Discussion");
       await host.getByRole("textbox", { name: "Chat message" }).fill("Meet in the Town Square");
       await host.getByRole("button", { name: "Send", exact: true }).click();
       for (const page of pages) {
@@ -115,7 +117,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         expect(chat!.y).toBeGreaterThanOrEqual(76);
         expect(chat!.y + chat!.height).toBeLessThanOrEqual(viewport.height);
       }
-      await expect(host.locator(".game-phase")).toHaveText("Townhall · Voting", { timeout: 95_000 });
+      await expect.poll(() => games[0]?.phase, { timeout: 95_000 }).toBe("voting");
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("Townhall · Voting");
       if (viewport.width === 1280) await host.setViewportSize({ width: 844, height: 390 });
       await expect(host.getByRole("button", { name: "Confirm ballot" })).toBeDisabled();
       await host.getByRole("button", { name: "Skip — eliminate nobody" }).click();
@@ -130,9 +134,13 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       }
       await host.screenshot({ path: test.info().outputPath("game-layout.png") });
       await host.bringToFront();
-      await expect(host.locator(".game-phase")).toHaveText("The verdict", { timeout: 35_000 });
+      await expect.poll(() => games[0]?.phase, { timeout: 35_000 }).toBe("voting_result");
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("The verdict");
       await expect(host.locator(".game-announcement")).toContainText("Nobody was eliminated");
-      await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town", { timeout: 10_000 });
+      await expect.poll(() => games[0]?.phase, { timeout: 10_000 }).toBe("day");
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town");
       await expect.poll(() => fields[0]?.self?.y).toBe(start.y);
       await expect(host.locator(".game-round")).toHaveText("Round 2");
       await expect(host.locator("body")).not.toHaveClass(/sleeping/);
