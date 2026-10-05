@@ -16,3 +16,8 @@ automation remains waived; physical-device selection and microphone meter
 acceptance remain unverified.
 
 Full frontend suite: 93 tests passed. Typecheck and production build passed.
+
+Review fixes guard canceled work before getUserMedia, ignore stale Settings
+responses, and avoid reopening a newly enabled track. The early-cancellation
+regression failed before the fix and passed afterwards. Full frontend suite:
+94 passed, with typecheck and build. No documented Standards breaches found.

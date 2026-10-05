@@ -162,9 +162,10 @@ export class VoiceController {
         } else {
           const options = await this.microphone.captureOptions();
           if (generation !== this.#generation) return;
+          const existing = [...room.localParticipant.audioTrackPublications.values()][0]?.track;
+          if (existing) await existing.restartTrack(options);
+          if (generation !== this.#generation) return;
           await room.localParticipant.setMicrophoneEnabled(true, options);
-          const publication = [...room.localParticipant.audioTrackPublications.values()][0];
-          await publication?.track?.restartTrack(options);
         }
         if (generation === this.#generation) this.#text = enabled ? "Microphone on" : "Listening · microphone muted";
       } catch (error) {

@@ -27,3 +27,10 @@ test('permission denial leaves local testing off and play independent',async()=>
  const mic=new MicrophoneSettings({enumerateDevices:async()=>[],getUserMedia:async()=>{throw new Error('NotAllowedError');}},undefined);
  assert.equal(await mic.startTest(),null);assert.equal(mic.testing,false);assert.match(mic.status,/permission denied/);
 });
+test('canceling while publication is suspending never starts a new capture request',async()=>{
+ let release;let requests=0;
+ const mic=new MicrophoneSettings({enumerateDevices:async()=>[],getUserMedia:async()=>{requests++;return {getTracks:()=>[]};}},undefined);
+ mic.subscribe(()=>mic.testing?new Promise(resolve=>release=resolve):undefined);
+ const pending=mic.startTest();mic.stopTest();release();
+ assert.equal(await pending,null);assert.equal(requests,0);
+});

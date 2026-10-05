@@ -36,6 +36,7 @@ export class SettingsInterface {
   #testSource: MediaStreamAudioSourceNode | null = null;
   #testAnalyser: AnalyserNode | null = null;
   #testFrame = 0;
+  #testGeneration = 0;
 
   constructor(private readonly audio: AudioMixer, private readonly microphone: MicrophoneSettings) {
     this.#dialog.className = "settings-dialog";
@@ -155,8 +156,11 @@ export class SettingsInterface {
   }
   private async testMicrophone(): Promise<void> {
     if (this.microphone.testing) { this.stopMicrophoneTest(); return; }
+    const generation = ++this.#testGeneration;
     try { await this.audio.context.resume(); } catch { this.microphoneStatus.textContent = "Local audio test unavailable. You can keep playing."; return; }
+    if (generation !== this.#testGeneration) return;
     const stream = await this.microphone.startTest();
+    if (generation !== this.#testGeneration) return;
     this.microphoneStatus.textContent = this.microphone.status;
     if (!stream || !this.#dialog.open) { this.stopMicrophoneTest(); return; }
     this.#testSource = this.audio.context.createMediaStreamSource(stream);
@@ -175,6 +179,7 @@ export class SettingsInterface {
     await this.refreshMicrophones();
   }
   private stopMicrophoneTest(): void {
+    ++this.#testGeneration;
     cancelAnimationFrame(this.#testFrame); this.#testSource?.disconnect(); this.#testAnalyser?.disconnect();
     this.#testSource = null; this.#testAnalyser = null; this.microphone.stopTest();
     this.#dialog.querySelector<HTMLMeterElement>(".microphone-level")!.value = 0;

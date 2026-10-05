@@ -46,7 +46,9 @@ export class MicrophoneSettings {
     try {
       await this.changed();
       if (!this.devices) throw new Error("Capture unavailable");
-      const stream = await this.devices.getUserMedia({audio: await this.captureOptions(), video: false});
+      const options = await this.captureOptions();
+      if (generation !== this.#generation) return null;
+      const stream = await this.devices.getUserMedia({audio: options, video: false});
       if (generation !== this.#generation) { for (const track of stream.getTracks()) track.stop(); return null; }
       this.#stream = stream; this.status = "Local input test; your microphone is not published.";
       return stream;
