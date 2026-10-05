@@ -70,6 +70,11 @@ export class VoiceController {
     this.client.onVoicePeers = peers => { this.applyPeers(peers); };
   }
 
+  private recoverVoice(): void {
+    this.disconnect(); this.#text = "Voice reconnecting; text and Game remain available";
+    if (this.#voiceWanted) this.#retry.start();
+  }
+
   private requestVoice(): void {
     if (this.#round === null || this.client.state.status !== "playing") return;
     this.#busy = true; this.#joinDeadline = Date.now() + 10_000;
@@ -103,6 +108,7 @@ export class VoiceController {
   }
 
   private async applyGrant(state: VoiceState): Promise<void> {
+    if (state.token !== null && !this.#voiceWanted) { this.client.leaveVoice(); return; }
     this.disconnect();
     if (state.token === null || state.url === null) {
       this.#text = "Voice access ended"; if (this.#voiceWanted) this.#retry.start(); return;
@@ -114,8 +120,7 @@ export class VoiceController {
     this.attachAudio(room, generation, this.mixer.channel("voice"));
     room.on(RoomEvent.Disconnected, () => {
       if (generation !== this.#generation) return;
-      this.disconnect(); this.#text = "Voice reconnecting; text and Game remain available";
-      if (this.#voiceWanted) this.#retry.start();
+      this.recoverVoice();
     });
     try {
       const url = new URL(state.url, this.gameUrl);
@@ -124,8 +129,7 @@ export class VoiceController {
       this.#retry.stop(); this.#busy = false; this.#text = this.#canPublish ? "Listening · microphone muted" : "Listening only · eliminated";
     } catch {
       if (generation !== this.#generation) return;
-      this.disconnect(); this.#text = "Voice reconnecting; continue with text";
-      if (this.#voiceWanted) this.#retry.start();
+      this.recoverVoice();
     }
   }
 
@@ -192,15 +196,14 @@ export class VoiceController {
       const generation = this.#generation;
       room.on(RoomEvent.Disconnected, () => {
         if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) return;
-        this.disconnect(); if (this.#voiceWanted) this.#retry.start();
+        this.recoverVoice();
       });
       this.attachAudio(room, generation, gain);
       void room.connect(new URL("/voice", this.gameUrl).toString(), peer.token).then(() => {
         if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) this.closeRoom(room);
       }).catch(() => {
         if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) return;
-        this.disconnect(); this.#text = "Voice reconnecting; text and Game remain available";
-        if (this.#voiceWanted) this.#retry.start();
+        this.recoverVoice();
       });
     }
   }
