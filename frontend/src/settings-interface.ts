@@ -1,3 +1,4 @@
+import { MicrophoneSettings } from "./microphone-settings.js";
 import { AUDIO_CHANNELS, AudioMixer, type VolumeControl } from "./audio-mixer.js";
 
 const MOTION_KEY = "pu-town.reduced-motion";
@@ -32,7 +33,11 @@ export class SettingsInterface {
   };
   readonly #fullscreenChanged = () => this.renderFullscreen();
 
-  constructor(private readonly audio: AudioMixer) {
+  #testSource: MediaStreamAudioSourceNode | null = null;
+  #testAnalyser: AnalyserNode | null = null;
+  #testFrame = 0;
+
+  constructor(private readonly audio: AudioMixer, private readonly microphone: MicrophoneSettings) {
     this.#dialog.className = "settings-dialog";
     this.#dialog.setAttribute("aria-labelledby", "settings-title");
     this.#dialog.innerHTML = `
@@ -45,6 +50,13 @@ export class SettingsInterface {
         <div class="sound-previews">${AUDIO_CHANNELS.map(category => `<button type="button" data-preview="${category}">Preview ${category}</button>`).join("")}</div>
         <p class="hint">Previews play only on this device.</p>
       </fieldset>
+      <fieldset><legend>Microphone</legend>
+        <label for="microphone-device">Input device</label><select id="microphone-device"><option value="">System default</option></select>
+        <button type="button" class="refresh-microphones">Refresh devices</button>
+        <button type="button" class="test-microphone">Test microphone locally</button>
+        <meter class="microphone-level" min="0" max="1" value="0" aria-label="Local microphone input level"></meter>
+        <p class="microphone-status" role="status"></p>
+      </fieldset>
       <fieldset><legend>Display</legend>
         <label class="settings-choice"><span>Reduced motion</span><input type="checkbox" class="reduced-motion-control"></label>
         <label class="settings-choice"><span>Prefer fullscreen</span><input type="checkbox" class="prefer-fullscreen"></label>
@@ -53,6 +65,13 @@ export class SettingsInterface {
       </fieldset>
       <p class="settings-status" role="status" aria-label="Settings feedback" aria-live="polite"></p>`;
     document.body.append(this.#dialog);
+    this.#dialog.querySelector(".refresh-microphones")!.addEventListener("click", () => { void this.refreshMicrophones(); });
+    this.#dialog.querySelector<HTMLSelectElement>("#microphone-device")!.addEventListener("change", event => {
+      this.stopMicrophoneTest();
+      void microphone.select((event.target as HTMLSelectElement).value).then(() => { this.microphoneStatus.textContent = microphone.status || "Microphone selected."; });
+    });
+    this.#dialog.querySelector(".test-microphone")!.addEventListener("click", () => { void this.testMicrophone(); });
+
     this.applyMotion();
     this.#dialog.querySelector<HTMLInputElement>(".reduced-motion-control")!.addEventListener("change", event => {
       this.#reducedMotion = (event.target as HTMLInputElement).checked;
@@ -103,7 +122,7 @@ export class SettingsInterface {
       });
     }
     this.#dialog.querySelector(".close-settings")!.addEventListener("click", () => this.#dialog.close());
-    this.#dialog.addEventListener("close", () => { audio.stopPreview(); this.#opener?.focus(); });
+    this.#dialog.addEventListener("close", () => { this.stopMicrophoneTest(); audio.stopPreview(); this.#opener?.focus(); });
     for (const [selector, className] of [[".entry-panel", "entry-settings"], [".room-bar", "room-settings"]]) {
       const parent = document.querySelector(selector!);
       if (!parent) continue;
@@ -115,11 +134,51 @@ export class SettingsInterface {
         this.#opener = button;
         this.status.textContent = "";
         this.#dialog.showModal();
+        void this.refreshMicrophones();
       });
       if (className === "room-settings") parent.insertBefore(button, parent.querySelector(".leave-room"));
       else parent.append(button);
       this.#launchers.push(button);
     }
+  }
+
+  private get microphoneStatus(): HTMLElement { return this.#dialog.querySelector(".microphone-status")!; }
+  private async refreshMicrophones(): Promise<void> {
+    const select = this.#dialog.querySelector<HTMLSelectElement>("#microphone-device")!;
+    const devices = await this.microphone.microphones();
+    select.replaceChildren(new Option("System default", ""));
+    for (const [i, device] of devices.entries()) select.add(new Option(device.label || `Microphone ${i + 1}`, device.deviceId));
+    if (this.microphone.deviceId && !devices.some(d => d.deviceId === this.microphone.deviceId))
+      select.add(new Option("Saved microphone unavailable (system default used)", this.microphone.deviceId));
+    select.value = this.microphone.deviceId;
+    this.microphoneStatus.textContent = this.microphone.status;
+  }
+  private async testMicrophone(): Promise<void> {
+    if (this.microphone.testing) { this.stopMicrophoneTest(); return; }
+    try { await this.audio.context.resume(); } catch { this.microphoneStatus.textContent = "Local audio test unavailable. You can keep playing."; return; }
+    const stream = await this.microphone.startTest();
+    this.microphoneStatus.textContent = this.microphone.status;
+    if (!stream || !this.#dialog.open) { this.stopMicrophoneTest(); return; }
+    this.#testSource = this.audio.context.createMediaStreamSource(stream);
+    this.#testAnalyser = this.audio.context.createAnalyser(); this.#testAnalyser.fftSize = 256;
+    this.#testSource.connect(this.#testAnalyser); // No output or media publication.
+    const samples = new Float32Array(256);
+    const meter = this.#dialog.querySelector<HTMLMeterElement>(".microphone-level")!;
+    const sample = () => {
+      if (!this.#testAnalyser) return;
+      this.#testAnalyser.getFloatTimeDomainData(samples);
+      meter.value = Math.min(1, Math.sqrt(samples.reduce((sum, n) => sum + n * n, 0) / samples.length) * 4);
+      this.#testFrame = requestAnimationFrame(sample);
+    };
+    sample();
+    this.#dialog.querySelector(".test-microphone")!.textContent = "Stop local test";
+    await this.refreshMicrophones();
+  }
+  private stopMicrophoneTest(): void {
+    cancelAnimationFrame(this.#testFrame); this.#testSource?.disconnect(); this.#testAnalyser?.disconnect();
+    this.#testSource = null; this.#testAnalyser = null; this.microphone.stopTest();
+    this.#dialog.querySelector<HTMLMeterElement>(".microphone-level")!.value = 0;
+    this.#dialog.querySelector(".test-microphone")!.textContent = "Test microphone locally";
   }
 
   get reducedMotion(): boolean { return this.#reducedMotion; }
@@ -143,6 +202,7 @@ export class SettingsInterface {
   private get status(): HTMLElement { return this.#dialog.querySelector(".settings-status")!; }
 
   destroy(): void {
+    this.stopMicrophoneTest();
     document.removeEventListener("fullscreenchange", this.#fullscreenChanged);
     this.#systemMotion.removeEventListener("change", this.#motionChanged);
     document.documentElement.classList.remove("reduced-motion");

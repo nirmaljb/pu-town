@@ -1,4 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
+import { MicrophoneSettings } from "./microphone-settings.js";
 import { visibleSpeakers } from "./voice-activity.js";
 import { AudioMixer } from "./audio-mixer.js";
 import type { VoicePeer, VoiceState } from "./protocol.js";
@@ -24,9 +25,12 @@ export class VoiceController {
   #muted = true;
   #busy = false;
   #canPublish = false;
+  #captureChanges: Promise<void> = Promise.resolve();
+  readonly #unsubscribeMicrophone: () => void;
 
   constructor(private readonly client: ReconnectingGameClient, private readonly mixer: AudioMixer,
-              private readonly gameUrl: string) {
+              private readonly gameUrl: string, private readonly microphone: MicrophoneSettings) {
+    this.#unsubscribeMicrophone = microphone.subscribe(() => this.updateMicrophone());
     this.#root.className = "voice-controls";
     this.#root.setAttribute("aria-label", "Voice controls");
     this.#join.type = this.#mute.type = this.#leave.type = "button";
@@ -140,19 +144,36 @@ export class VoiceController {
   }
 
   private async toggleMicrophone(): Promise<void> {
-    const room = this.#room;
-    if (!room || this.#busy || !this.#canPublish) return;
-    const generation = this.#generation;
-    this.#busy = true;
-    try {
-      await room.localParticipant.setMicrophoneEnabled(this.#muted);
-      if (generation !== this.#generation) return;
-      this.#muted = !this.#muted;
-      if (this.#muted) this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== room.localParticipant.name)));
-      this.#text = this.#muted ? "Listening · microphone muted" : "Microphone on";
-    } catch {
-      if (generation === this.#generation) this.#text = "Microphone unavailable; you can still listen and use text";
-    } finally { if (generation === this.#generation) this.#busy = false; }
+    if (!this.#room || this.#busy || !this.#canPublish) return;
+    this.#muted = !this.#muted;
+    await this.updateMicrophone();
+  }
+
+  private updateMicrophone(): Promise<void> {
+    const room = this.#room, generation = this.#generation;
+    const update = async () => {
+      if (!room || generation !== this.#generation || !this.#canPublish) return;
+      this.#busy = true;
+      try {
+        const enabled = !this.#muted && !this.microphone.testing;
+        if (!enabled) {
+          await room.localParticipant.setMicrophoneEnabled(false);
+          this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== room.localParticipant.name)));
+        } else {
+          const options = await this.microphone.captureOptions();
+          if (generation !== this.#generation) return;
+          await room.localParticipant.setMicrophoneEnabled(true, options);
+          const publication = [...room.localParticipant.audioTrackPublications.values()][0];
+          await publication?.track?.restartTrack(options);
+        }
+        if (generation === this.#generation) this.#text = enabled ? "Microphone on" : "Listening · microphone muted";
+      } catch (error) {
+        if (this.microphone.testing) throw error;
+        if (generation === this.#generation) { this.#muted = true; this.#text = "Microphone unavailable; you can still listen and use text"; }
+      } finally { if (generation === this.#generation) this.#busy = false; }
+    };
+    this.#captureChanges = this.#captureChanges.then(update, update);
+    return this.#captureChanges;
   }
 
   private disconnect(): void {
@@ -183,5 +204,5 @@ export class VoiceController {
     return visibleSpeakers(world, new Set([...this.#speakers.values()].flatMap(ids => [...ids])));
   }
 
-  destroy(): void { this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
+  destroy(): void { this.#unsubscribeMicrophone(); this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
 }

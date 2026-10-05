@@ -94,3 +94,8 @@ to a Player; backend restart invalidates all prior gateway credentials.
 The Day script checks real received PCM, direct third-Player hearing, hidden
 listener identities, a modified client’s denied foreign-track subscription,
 gain changes, movement removal and refusal of retired listening credentials.
+
+Settings lists microphone inputs and remembers the selected device. A missing
+device uses the system default. The local input test pauses publication and
+shows an input meter without sending test audio; closing Settings stops capture.
+Permission denial leaves listening, text and Game interaction available.

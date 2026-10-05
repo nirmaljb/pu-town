@@ -1,3 +1,4 @@
+import { MicrophoneSettings } from "./microphone-settings.js";
 import { VoiceController } from "./voice-controller.js";
 import Phaser from "phaser";
 import { AudioMixer } from "./audio-mixer.js";
@@ -71,11 +72,12 @@ export class PuTownScene extends Phaser.Scene {
     this.#gameInterface = new GameInterface(this.#client);
 
     this.#audio = new AudioMixer();
-    this.#voice = new VoiceController(this.#client, this.#audio, this.#websocketUrl);
+    const microphone = new MicrophoneSettings();
+    this.#voice = new VoiceController(this.#client, this.#audio, this.#websocketUrl, microphone);
     this.#effects = new SoundEffects(this.#audio);
     this.#effects.start();
     this.#taskInterface = new TaskInterface(this.#client, this.#effects);
-    this.#settings = new SettingsInterface(this.#audio);
+    this.#settings = new SettingsInterface(this.#audio, microphone);
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
