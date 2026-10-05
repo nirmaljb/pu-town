@@ -4,7 +4,7 @@ import { observeAudio } from "./audio-boundary.js";
 
 test.skip(!process.env.PUTOWN_VOICE_KEY, "Source the local voice environment for actual media checks.");
 
-test("#50–52 Real push-to-talk releases on keyup and text focus; microphone tests stay private", async ({ browser }) => {
+test("#50–53 Real push-to-talk releases, local tests stay private and speaking ducks output", async ({ browser }) => {
   const contexts = await Promise.all(Array.from({ length: 4 }, () => browser.newContext({ permissions: ["microphone"] })));
   try {
     const players = await Promise.all(contexts.map(async (context, index) => {
@@ -51,7 +51,31 @@ test("#50–52 Real push-to-talk releases on keyup and text focus; microphone te
     await speaker.page.getByRole("button", { name: "Stop local test", exact: true }).click();
     await speaker.page.getByRole("button", { name: "Close Settings", exact: true }).click();
     await expect.poll(() => listener.page.evaluate(() => window.browserAudio.raw), { timeout: 15_000 }).toBeGreaterThan(.01);
+    // The speaking browser has no remote publisher, so its output contains only
+    // the real previews. Compare their amplitude before and after microphone mute.
+    await speaker.page.getByRole("button", { name: "Settings", exact: true }).click();
+    // Activity notification and the mixer ramp follow capture asynchronously.
+    await speaker.page.waitForTimeout(1500);
+    const preview = async (category: string) => {
+      await speaker.page.evaluate(() => { window.browserAudio.peak = 0; });
+      await speaker.page.getByRole("button", { name: `Preview ${category}`, exact: true }).click();
+      await speaker.page.waitForTimeout(800);
+      return speaker.page.evaluate(() => window.browserAudio.peak);
+    };
+    // Detected speech activity can pause: require a complete
+    // attenuated preview during a speaking interval, rather than a pause edge.
+    for (const category of ["effects", "ambience"]) await expect(async () => {
+      const ducked = await preview(category);
+      expect(ducked).toBeGreaterThan(.02);
+      expect(ducked).toBeLessThan(.04);
+    }).toPass({ timeout: 15_000, intervals: [500] });
+    expect(await listener.page.evaluate(() => window.browserAudio.raw)).toBeGreaterThan(.01);
+    await speaker.page.getByRole("button", { name: "Close Settings", exact: true }).click();
     await speaker.page.getByRole("button", { name: "Mute microphone", exact: true }).click();
     await expect.poll(() => listener.page.evaluate(() => window.browserAudio.raw), { timeout: 10_000 }).toBeLessThan(.001);
+    await speaker.page.getByRole("button", { name: "Settings", exact: true }).click();
+    await speaker.page.waitForTimeout(1000);
+    expect(await preview("effects")).toBeGreaterThan(.08);
+    expect(await preview("ambience")).toBeGreaterThan(.08);
   } finally { await Promise.allSettled(contexts.map(context => context.close())); }
 });
