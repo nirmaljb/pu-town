@@ -15,3 +15,8 @@ remain unverified. The existing server permissions remain independent of local
 mode and are covered by the backend voice policy and WebSocket suites.
 
 Full frontend suite: 96 passed; typecheck and production build passed.
+
+Review replaced the shared refresh flag with configuration revisions, so a new
+device change survives an older in-flight enable. Supported key validation is
+shared by storage and Settings. Standards found no documented breach. The full
+frontend rerun passed all 96 tests, with typecheck and build.

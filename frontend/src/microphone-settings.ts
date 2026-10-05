@@ -1,3 +1,4 @@
+import { isSupportedTalkKey } from "./push-to-talk.js";
 const KEY = "pu-town.microphone";
 type Devices = Pick<MediaDevices, "enumerateDevices" | "getUserMedia">;
 function localPreferences(): Storage | undefined { try { return globalThis.localStorage; } catch { return undefined; } }
@@ -22,7 +23,7 @@ export class MicrophoneSettings {
       if (saved && typeof saved === "object") {
         const values = saved as Record<string, unknown>;
         if (values.mode === "push-to-talk") this.mode = values.mode;
-        if (typeof values.key === "string" && /^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(values.key)) this.key = values.key;
+        if (typeof values.key === "string" && isSupportedTalkKey(values.key)) this.key = values.key;
       }
     } catch { /* Capture remains usable without storage. */ }
   }
@@ -43,7 +44,7 @@ export class MicrophoneSettings {
     try { this.storage?.setItem(KEY, JSON.stringify({deviceId: this.deviceId, mode: this.mode, key: this.key})); } catch { /* Keep in memory. */ }
   }
   async speakingMode(mode: "open" | "push-to-talk", key: string): Promise<void> {
-    if (!/^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(key)) return;
+    if (!isSupportedTalkKey(key)) return;
     this.mode = mode; this.key = key; this.remember(); await this.changed();
   }
   async captureOptions(): Promise<MediaTrackConstraints> {

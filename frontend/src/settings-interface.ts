@@ -1,3 +1,4 @@
+import { isSupportedTalkKey } from "./push-to-talk.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
 import { AUDIO_CHANNELS, AudioMixer, type VolumeControl } from "./audio-mixer.js";
 
@@ -82,7 +83,7 @@ export class SettingsInterface {
     key.addEventListener("click", () => { choosingKey = true; key.textContent = "Press a letter, digit, Space or Shift"; });
     key.addEventListener("blur", () => { choosingKey = false; key.textContent = microphone.key; });
     key.addEventListener("keydown", event => {
-      if (!choosingKey || !/^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(event.code)) return;
+      if (!choosingKey || !isSupportedTalkKey(event.code)) return;
       event.preventDefault(); event.stopPropagation(); choosingKey = false;
       void microphone.speakingMode(microphone.mode, event.code); key.textContent = event.code;
     });

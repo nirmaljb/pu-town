@@ -27,7 +27,8 @@ export class VoiceController {
   #busy = false;
   #canPublish = false;
   readonly #pushToTalk = new PushToTalk();
-  #captureNeedsRefresh = false;
+  #captureRevision = 0;
+  #appliedCaptureRevision = -1;
   #captureChanges: Promise<void> = Promise.resolve();
   readonly #unsubscribeMicrophone: () => void;
 
@@ -181,7 +182,7 @@ export class VoiceController {
   }
 
   private updateMicrophone(reconfigure = false): Promise<void> {
-    this.#captureNeedsRefresh ||= reconfigure;
+    if (reconfigure) ++this.#captureRevision;
     const room = this.#room, generation = this.#generation;
     const update = async () => {
       if (!room || generation !== this.#generation || !this.#canPublish) return;
@@ -192,14 +193,15 @@ export class VoiceController {
           await room.localParticipant.setMicrophoneEnabled(false);
           this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== room.localParticipant.name)));
         } else {
+          const revision = this.#captureRevision;
           const options = await this.microphone.captureOptions();
           if (generation !== this.#generation) return;
           const existing = [...room.localParticipant.audioTrackPublications.values()][0]?.track;
-          if (existing && this.#captureNeedsRefresh) await existing.restartTrack(options);
+          if (existing && this.#appliedCaptureRevision !== revision) await existing.restartTrack(options);
           if (generation !== this.#generation) return;
           if (!this.transmissionEnabled()) { await room.localParticipant.setMicrophoneEnabled(false); return; }
           await room.localParticipant.setMicrophoneEnabled(true, options);
-          this.#captureNeedsRefresh = false;
+          if (generation === this.#generation) this.#appliedCaptureRevision = revision;
           if (!this.transmissionEnabled() || generation !== this.#generation) await room.localParticipant.setMicrophoneEnabled(false);
         }
         if (generation === this.#generation) this.#text = this.transmissionEnabled() ? "Microphone on" : this.#muted ? "Listening · microphone muted" : `Push to talk ready · hold ${this.microphone.key}`;
