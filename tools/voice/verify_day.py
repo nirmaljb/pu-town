@@ -54,6 +54,10 @@ async def main():
         await asyncio.wait_for(sender.connect(url, players[0].latest["voice_state"]["token"]), 20)
         listener = rtc.Room(); media.append(listener)
         received = asyncio.Event()
+        speaking = asyncio.Event()
+        @listener.on("active_speakers_changed")
+        def active_speakers(participants):
+            if any(p.name == ids[0] for p in participants): speaking.set()
         frames = [0]
         async def consume(track):
             async for event in rtc.AudioStream(track):
@@ -77,10 +81,12 @@ async def main():
                 await asyncio.sleep(0.02)
         tone = asyncio.create_task(publish())
         await asyncio.wait_for(received.wait(), 15)
+        await asyncio.wait_for(speaking.wait(), 10)
+        assert next(iter(listener.remote_participants.values())).name == ids[0]
         assert not sender.remote_participants, "Hidden listeners leaked to the speaker"
         assert len(listener.remote_participants) == 1
         assert all(p["playerId"] != ids[0] for p in players[2].latest["voice_peers"]["peers"])
-        print("PASS: real Day PCM delivery, independent third-Player hearing and hidden listener identities", flush=True)
+        print("PASS: real Day PCM delivery, independent third-Player hearing, authorized speaker activity and hidden listener identities", flush=True)
         options = dict(access_token=players[2].latest["voice_state"]["token"], protocol=16,
                        sdk="python", version="1.1.20", auto_subscribe=1)
         before = frames[0]
