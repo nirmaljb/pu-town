@@ -204,37 +204,28 @@ npm run test:browser
 
 The harness starts this checkout's backend on port `18081` and Vite on `5173`,
 checks `/health`, and closes both after testing. It requires JDK 17 and free ports;
-it never reuses an existing development server. If another checkout occupies the
+it refuses existing servers by default. Set `PU_TOWN_E2E_REUSE=1` only when those servers run this checkout and use the same media configuration. If another checkout occupies the
 default loopback address on `5173`, use `PU_TOWN_E2E_HOST=127.0.0.2 npm run test:browser`
 to bind a separate loopback address while keeping the browser's supported
 `http://localhost:5173` origin. When another harness occupies backend port `18081`,
 set `PU_TOWN_E2E_BACKEND_PORT` to a free port as well; both server startup and
-browser connections use it.
+browser connections use it. `PU_TOWN_E2E_FRONTEND_PORT` also overrides Vite and the backend origin allow-list.
 
 For a short four-Player Create/Join, Ready/Start, centered layout and Leave smoke
 check, run `npm run test:browser -- e2e/game-entry.spec.ts`. It uses the same
 isolated servers and port overrides as the full browser suite.
 
-Each viewport journey waits through a full cycle (about six minutes). The suite uses Phaser's Canvas renderer and four independent browser contexts
+Each viewport journey waits through a full cycle (about six minutes). The suite uses full Chromium with Phaser's normal WebGL renderer and four independent browser contexts
 at desktop and phone sizes, including ballot interaction after a landscape resize
 and announcements containing a long Display Name. It exercises Create/Join, Ready/Start, centered map
 and overlay geometry, Role disclosure, Day movement, sleeping Night and its movement lock, same-tab Night recovery, Townhall public chat,
 ballot preview/confirmation, the six-second result, Seat reset for Day two, Leave and a new Room. It waits for real server phase
 deadlines. Failures retain Playwright traces in `frontend/test-results/`; the
-voting and sleeping Night screens are also captured there. This is automated browser evidence for
+voting, sleeping Night and Task screens are also captured there. The complete practice Task journey takes about twenty-five minutes because it follows real server interaction timers. Competitive Task victory follows complete rounds and can take fifty minutes or more (`e2e/task-victory.spec.ts`); the full sequential suite is correspondingly longer. Run multiplayer journeys sequentially on machines with limited memory. This is automated browser evidence for
 the timed cycle in #24. The four-Player ballot journey covers keyboard
 selection, private previews, locked Skip and target ballots, target Leave,
 chat during voting, same-tab ballot recovery and public results for #25.
-The #25 browser run on this checkout has not passed acceptance: Chromium crashed
-before voting under host resource pressure. The trace is retained locally; the
-WebSocket and frame-boundary regressions provide separate deterministic evidence.
-That timed-cycle journey does not establish acceptance for Tasks, Night choices,
-interiors or media. Browser automation was skipped for the final integration at
-the user's request; see [the final verification record](docs/verification/2026-10-05-final-acceptance.md). No human playtesting is claimed.
-
-Ticket #27's editable Night choices, fixed deadline, strict majority, recipient privacy, recovery and parity are covered through controlled-clock WebSocket tests and frontend contract/frame tests. Browser automation and manual multi-browser acceptance were not run for #27; its Night controls and death announcements still need browser acceptance.
-
-Ticket #28's editable private protection, self-protection, recovery and ordering before the kill are covered through the controlled-clock WebSocket seam. Browser acceptance was not run for this slice.
+The original integration record used native media and deterministic tests with browser automation waived. Keep that historical record separate from the subsequent [browser audit](docs/verification/2026-10-05-browser-audit.md), which records actual browser results, fixes, and remaining human-playtesting limits.
 
 If trace capture causes Chromium failures in your environment,
 `npm run test:browser -- --trace off` runs the same browser actions and assertions
@@ -315,6 +306,4 @@ Start the separate media process as described in [the voice setup guide](tools/v
 Without media configuration, text and Game play remain available. Tailscale Funnel
 alone does not provide remote WebRTC transport; the guide explains ICE/TURN needs.
 
-The [final verification record](docs/verification/2026-10-05-final-acceptance.md)
-separates deterministic rules/privacy tests, native real-media evidence, skipped
-browser acceptance and remaining human playtesting.
+The [original integration record](docs/verification/2026-10-05-final-acceptance.md) and subsequent [browser audit](docs/verification/2026-10-05-browser-audit.md) distinguish deterministic rules/privacy tests, native media, browser automation and remaining human playtesting.

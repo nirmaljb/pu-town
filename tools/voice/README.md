@@ -22,8 +22,15 @@ The script downloads a pinned, checksum-verified server into `.scratch/voice/loc
 generates private local credentials, and starts loopback signaling on 7880 with
 WebRTC UDP on 7882 and TCP fallback on 7881. It needs curl, tar, sha256sum, and
 openssl; Docker and administrative privileges are unnecessary. Stop it with Ctrl-C.
-Other platforms can download the corresponding [official release](https://github.com/livekit/livekit/releases/tag/v1.13.7)
-and run the generated configuration with their native executable.
+Other supported release platforms can download the corresponding [official release](https://github.com/livekit/livekit/releases/tag/v1.13.7) and use their native executable. Version 1.13.7 has no macOS release binary. On macOS, build the official pinned source with a compatible Go toolchain:
+
+```sh
+git clone --depth 1 --branch v1.13.7 https://github.com/livekit/livekit.git /tmp/putown-livekit
+cd /tmp/putown-livekit
+go build -o /tmp/putown-livekit-server ./cmd/server
+```
+
+Run that executable with `--config` pointing to a private local LiveKit configuration. Use loopback ports 7880/7881/7882 and matching backend credentials; keep the configuration and credentials outside tracked files. This checkout’s browser run used Go 1.26.3.
 
 In a second terminal, start the Game backend with the same credentials:
 
@@ -134,5 +141,14 @@ check, not a sustained load test or proof of ten-browser CPU/memory performance.
 The Ghost script follows real Night deadlines, checks eliminated Townhall reception
 with a receive-only grant, and probes denied microphone publication.
 
-See [the final verification record](../../docs/verification/2026-10-05-final-acceptance.md)
-for run results and explicit browser/manual/playtesting limitations.
+For actual browser media checks, export the same private voice environment before
+running the [browser harness](../../README.md#browser-acceptance). Keep the SFU running;
+the harness manages Game and Vite, but does not start media. A configured voice
+key enables Chromium's synthetic microphone fixture. Without it, tests requiring
+actual media are explicitly skipped. Use `PU_TOWN_E2E_REUSE=1` only for services
+running this checkout with matching configuration.
+
+See the [original native verification record](../../docs/verification/2026-10-05-final-acceptance.md)
+and the subsequent [browser audit](../../docs/verification/2026-10-05-browser-audit.md)
+for results and the remaining physical-device, remote networking and human
+playtesting limits. The browser audit also describes the opt-in SFU outage markers.
