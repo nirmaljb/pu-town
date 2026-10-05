@@ -1,4 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
+import { VoiceRetry } from "./voice-retry.js";
 import { PushToTalk } from "./push-to-talk.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
 import { audibleSpeakers, visibleSpeakers } from "./voice-activity.js";
@@ -22,6 +23,10 @@ export class VoiceController {
   #room: Room | null = null;
   #generation = 0;
   #round: number | null = null;
+  #voiceWanted = false;
+  #joinDeadline = 0;
+  readonly #retry = new VoiceRetry(() => this.retryVoice());
+  readonly #reconnectingRooms = new Set<Room>();
   #text = "Voice opens during Day and Townhall";
   #muted = true;
   #busy = false;
@@ -54,15 +59,27 @@ export class VoiceController {
     this.#join.addEventListener("click", () => {
       if (this.#round === null) return;
       void this.mixer.context.resume().catch(() => {});
-      this.#busy = true; this.#text = "Joining voice…";
-      this.client.joinVoice(this.#round);
+      this.#voiceWanted = true; this.requestVoice();
     });
     this.#mute.addEventListener("click", () => { void this.toggleMicrophone(); });
     this.#leave.addEventListener("click", () => {
+      this.#voiceWanted = false; this.#retry.stop();
       this.client.leaveVoice(); this.disconnect(); this.#text = "Voice left";
     });
     this.client.onVoiceState = state => { void this.applyGrant(state); };
     this.client.onVoicePeers = peers => { this.applyPeers(peers); };
+  }
+
+  private requestVoice(): void {
+    if (this.#round === null || this.client.state.status !== "playing") return;
+    this.#busy = true; this.#joinDeadline = Date.now() + 10_000;
+    this.#text = "Voice reconnecting; text and Game remain available";
+    this.client.joinVoice(this.#round); this.#retry.start();
+  }
+  private retryVoice(): void {
+    if (!this.#voiceWanted) { this.#retry.stop(); return; }
+    if (this.#room || this.#busy && Date.now() < this.#joinDeadline) return;
+    this.requestVoice();
   }
 
   private inputBlocked(): boolean {
@@ -87,7 +104,9 @@ export class VoiceController {
 
   private async applyGrant(state: VoiceState): Promise<void> {
     this.disconnect();
-    if (state.token === null || state.url === null) { this.#text = "Voice access ended"; return; }
+    if (state.token === null || state.url === null) {
+      this.#text = "Voice access ended"; if (this.#voiceWanted) this.#retry.start(); return;
+    }
     this.#canPublish = state.canPublish;
     const generation = this.#generation;
     const room = new Room(); this.#room = room;
@@ -95,20 +114,27 @@ export class VoiceController {
     this.attachAudio(room, generation, this.mixer.channel("voice"));
     room.on(RoomEvent.Disconnected, () => {
       if (generation !== this.#generation) return;
-      this.disconnect(); this.#text = "Voice disconnected; text is still available";
+      this.disconnect(); this.#text = "Voice reconnecting; text and Game remain available";
+      if (this.#voiceWanted) this.#retry.start();
     });
     try {
       const url = new URL(state.url, this.gameUrl);
       await room.connect(url.toString(), state.token);
       if (generation !== this.#generation) { await room.disconnect(); return; }
-      this.#busy = false; this.#text = this.#canPublish ? "Listening · microphone muted" : "Listening only · eliminated";
+      this.#retry.stop(); this.#busy = false; this.#text = this.#canPublish ? "Listening · microphone muted" : "Listening only · eliminated";
     } catch {
       if (generation !== this.#generation) return;
-      this.disconnect(); this.#text = "Voice unavailable; continue with text";
+      this.disconnect(); this.#text = "Voice reconnecting; continue with text";
+      if (this.#voiceWanted) this.#retry.start();
     }
   }
 
   private attachAudio(room: Room, generation: number, output: GainNode): void {
+    room.on(RoomEvent.Reconnecting, () => {
+      if (generation !== this.#generation) return;
+      this.#reconnectingRooms.add(room); this.#speakers.delete(room); this.mixer.voiceActive(false);
+    });
+    room.on(RoomEvent.Reconnected, () => { this.#reconnectingRooms.delete(room); });
     const tracks = new Set<RemoteTrack>(); this.#roomTracks.set(room, tracks);
     room.on(RoomEvent.ActiveSpeakersChanged, participants => {
       this.#speakers.set(room, new Set(participants.filter(p => p === room.localParticipant
@@ -143,7 +169,7 @@ export class VoiceController {
   private closeRoom(room: Room): void {
     room.removeAllListeners();
     for (const track of this.#roomTracks.get(room) ?? []) this.removeTrack(track);
-    this.#roomTracks.delete(room); this.#speakers.delete(room);
+    this.#roomTracks.delete(room); this.#speakers.delete(room); this.#reconnectingRooms.delete(room);
     void room.disconnect().catch(() => {});
   }
 
@@ -164,13 +190,17 @@ export class VoiceController {
       gain.connect(this.mixer.channel("voice"));
       const entry = { token: peer.token, room, gain }; this.#peers.set(peer.playerId, entry);
       const generation = this.#generation;
+      room.on(RoomEvent.Disconnected, () => {
+        if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) return;
+        this.disconnect(); if (this.#voiceWanted) this.#retry.start();
+      });
       this.attachAudio(room, generation, gain);
       void room.connect(new URL("/voice", this.gameUrl).toString(), peer.token).then(() => {
         if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) this.closeRoom(room);
       }).catch(() => {
         if (generation !== this.#generation || this.#peers.get(peer.playerId) !== entry) return;
-        this.closeRoom(room); gain.disconnect(); this.#peers.delete(peer.playerId);
-        this.#text = "Nearby voice unavailable; text is still available";
+        this.disconnect(); this.#text = "Voice reconnecting; text and Game remain available";
+        if (this.#voiceWanted) this.#retry.start();
       });
     }
   }
@@ -234,13 +264,17 @@ export class VoiceController {
     if (world?.lastError && ["voice_unavailable", "invalid_phase"].includes(world.lastError.code) && this.#busy && !this.#room) {
       this.#busy = false; this.#text = world.lastError.message;
     }
-    this.#join.hidden = this.#room !== null;
+    this.#join.hidden = this.#voiceWanted;
     this.#join.disabled = this.#round === null || this.#busy;
-    this.#mute.hidden = this.#leave.hidden = this.#room === null;
+    this.#mute.hidden = this.#room === null;
+    this.#leave.hidden = !this.#voiceWanted;
     this.#mute.disabled = this.#busy || !this.#canPublish;
     if (this.inputBlocked()) this.releaseTalk();
     this.#mute.textContent = this.microphone.mode === "push-to-talk" ? this.#muted ? "Enable push to talk" : "Disable push to talk" : this.#muted ? "Unmute microphone" : "Mute microphone";
-    this.#status.textContent = this.#text;
+    if (this.client.state.status === "join" || this.client.state.status === "failed" || this.client.state.status === "leaving") {
+      this.#voiceWanted = false; this.#retry.stop();
+    }
+    this.#status.textContent = this.#reconnectingRooms.size > 0 ? "Voice reconnecting; text and Game remain available" : this.#text;
     const active = new Set([...this.#speakers.values()].flatMap(ids => [...ids]));
     const audible = audibleSpeakers(world, active);
     const localSpeaking = Boolean(world?.selfPlayerId && audible.has(world.selfPlayerId));
@@ -252,5 +286,5 @@ export class VoiceController {
     window.removeEventListener("keydown", this.#keyDown); window.removeEventListener("keyup", this.#keyUp);
     window.removeEventListener("blur", this.#focusLost); document.removeEventListener("visibilitychange", this.#visibilityChanged);
     document.removeEventListener("focusin", this.#focusChanged);
-    this.#unsubscribeMicrophone(); this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
+    this.#voiceWanted = false; this.#retry.stop(); this.#unsubscribeMicrophone(); this.client.onVoiceState = () => {}; this.client.onVoicePeers = () => {}; this.disconnect(); this.#root.remove(); }
 }

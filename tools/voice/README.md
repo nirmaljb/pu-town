@@ -111,3 +111,9 @@ remain usable. This is browser processing, with no external audio service.
 
 Authorized speaking temporarily lowers effects and ambience without changing
 saved slider values. Levels recover when speech stops or voice access ends.
+
+Voice reconnects independently with bounded retries; movement, Tasks, text and
+the Game clock continue. Leave voice cancels recovery. Restored voice starts
+muted and requests current hearing rights. For a native outage proof, stop the
+normal local SFU first, then run `tools/voice/verify_outage.py` in the configured
+Python environment; it starts and stops only its own dedicated SFU child.
