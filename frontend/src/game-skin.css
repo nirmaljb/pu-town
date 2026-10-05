@@ -5,17 +5,17 @@
   font-display: swap;
 }
 
-/* One material palette, from the title sign to the Townhall ballot. Layout remains in style.css. */
+/* Moonlit slate palette; the evidence-to-decision record lives in docs/ui-design.md. */
 :root {
-  --ink: #171e1b;
-  --wood: #382d23;
-  --wood-light: #654b32;
-  --paper: #f1ddb0;
-  --gold: #e1b66e;
-  --leaf: #486349;
-  --muted: #d8c49e;
+  --ink: #11131d;
+  --wood: #222530;
+  --wood-light: #343845;
+  --paper: #f0e9da;
+  --gold: #e1b58a;
+  --leaf: #465c54;
+  --muted: #c1bbc5;
   --lobby-controls-height: 180px;
-  --frame: url("/assets/ui/timber.svg") 12 / 12px / 3px stretch;
+  --frame: url("/assets/ui/kenney-weathered-grey.png") 6 / 12px / 0 stretch;
   font-family: "Trebuchet MS", Verdana, sans-serif;
   background: var(--ink);
   color: var(--paper);
@@ -27,7 +27,7 @@ button {
   color: var(--paper); min-height: 44px; box-shadow: 0 3px 0 var(--ink), inset 0 2px 0 #d9b37b30;
   transition: background-color 100ms, transform 80ms, box-shadow 80ms;
 }
-button:hover:not(:disabled) { background: #7a5c3b; border-color: var(--gold); }
+button:hover:not(:disabled) { background: #474754; border-color: var(--gold); }
 button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 button.primary, .lobby-controls .primary, .confirm-action {
   background: var(--gold); border: 2px solid #ffe0a0; border-bottom-color: #9b713f; color: #30251b;
@@ -38,7 +38,7 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .6; }
   outline: 3px solid #ffe0a0; outline-offset: 4px;
 }
 input:not([type="range"]):not([type="checkbox"]), select {
-  background: #251f19; border: 2px solid #96734d; color: var(--paper); padding: 10px 12px;
+  background: #171923; border: 2px solid #747281; color: var(--paper); padding: 10px 12px;
   box-shadow: inset 0 3px 0 #171e1b70;
 }
 input::placeholder { color: #c3b28f; }
@@ -51,46 +51,45 @@ summary { padding-block: 6px; }
   position: relative; isolation: isolate; pointer-events: auto; display: flex; flex-direction: column;
   min-height: 100%; padding: clamp(28px, 6vh, 64px) max(28px, calc((100vw - 1200px) / 2));
   align-items: flex-start; justify-content: center; gap: 16px; color: var(--paper);
-  background: linear-gradient(90deg, #10261ced 0%, #14251ede 32%, #14251e70 56%, #14251e12 80%);
+  background: linear-gradient(90deg, #11131df5 0%, #11131de0 30%, #11131d80 55%, #11131d00 82%);
 }
 .entry-panel::before { display: none; }
 .menu-heading { width: min(380px, 100%); text-align: left; margin: 0 0 12px; }
 .entry-panel h1 {
   font: 400 clamp(40px, 5.5vw, 64px)/1.15 Silkscreen, monospace; letter-spacing: -3px;
-  color: #ffe6ac; text-shadow: 0 4px 0 #6f442c, 0 8px 0 var(--ink); margin-bottom: 16px;
+  color: var(--paper); text-shadow: 0 4px 0 #343845, 0 8px 0 var(--ink); margin-bottom: 16px;
 }
 .entry-panel .intro { color: var(--paper); font-size: 15px; margin: 0; letter-spacing: 0; }
 .menu-choices { width: min(380px, 100%); display: grid; gap: 16px; }
 .entry-panel .menu-choice {
-  position: relative; width: 100%; min-height: 84px; text-align: left; padding: 16px 28px;
-  border: 12px solid transparent; border-image: var(--frame); background: var(--wood);
-  font: 400 19px/1.35 Silkscreen, monospace; box-shadow: 0 6px 0 #171e1b70;
+  position: relative; width: 100%; min-height: 74px; text-align: left; padding: 12px 20px;
+  border: 0; border-left: 3px solid #747281; background: #171923b8;
+  color: var(--paper); font: 400 19px/1.35 Silkscreen, monospace; box-shadow: none;
 }
-.entry-panel .menu-choice.primary { background: #405a3c; color: #fff0c9; }
-.entry-panel .menu-choice:hover:not(:disabled), .entry-panel .menu-choice:focus-visible { background: #536c42; }
-.entry-panel .menu-choice::after { content: "›"; position: absolute; right: 12px; top: 20px; color: var(--gold); }
-.entry-panel .menu-choice span { display: block; font: 13px/1.5 "Trebuchet MS", Verdana, sans-serif; color: #e0d2b2; margin-top: 6px; }
+.entry-panel .menu-choice.primary { background: #34303abd; border-left-color: var(--gold); color: var(--paper); }
+.entry-panel .menu-choice:hover:not(:disabled), .entry-panel .menu-choice:focus-visible { background: #45404ded; border-left-color: #ffe0a0; }
+.entry-panel .menu-choice span { display: block; font: 14px/1.5 "Trebuchet MS", Verdana, sans-serif; color: var(--muted); margin-top: 6px; }
 .menu-card {
-  width: min(380px, 100%); padding: 18px 22px; background: var(--paper); color: #352c21;
-  border: 12px solid transparent; border-image: url("/assets/ui/paper.svg") 12 / 12px / 3px stretch;
+  width: min(380px, 100%); padding: 18px 22px; background: var(--wood); color: var(--paper);
+  border: 12px solid transparent; border-image: var(--frame);
   outline: 0; box-shadow: 0 6px 0 #171e1b70;
 }
 .menu-card::before { display: none; }
 .entry-panel .menu-title { font: 400 19px/1.4 Silkscreen, monospace; margin: 10px 0; letter-spacing: -1px; }
-.menu-description { color: #5e4934; font-size: 14px; margin-bottom: 20px; }
-.entry-panel label { color: #352c21; font-size: 14px; }
-.entry-panel input { background: #fff0d1; color: #352c21; border-color: #947045; box-shadow: inset 0 3px 0 #8e68352b; font-size: 16px; }
-.entry-panel input::placeholder { color: #806348; }
-.entry-panel .hint { color: #614b33; font-size: 12px; }
+.menu-description { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+.entry-panel label { color: var(--paper); font-size: 14px; }
+.entry-panel input { background: #171923; color: var(--paper); border-color: #747281; box-shadow: inset 0 3px 0 #8e68352b; font-size: 16px; }
+.entry-panel input::placeholder { color: var(--muted); }
+.entry-panel .hint { color: var(--muted); font-size: 12px; }
 .entry-panel button { border-radius: 0; }
 .entry-panel .menu-back {
   display: inline-block; width: auto; min-height: 36px; margin: 0; padding: 4px 0;
-  border: 0; background: none; box-shadow: none; color: #5a422b; text-align: left;
+  border: 0; background: none; box-shadow: none; color: var(--muted); text-align: left;
 }
-.entry-panel .menu-back:hover:not(:disabled) { background: none; color: #171e1b; text-decoration: underline; }
-.entry-panel .enter-room { width: 100%; margin-top: 20px; padding: 12px; background: #486349; border-color: #70926a; border-bottom-color: #2f4831; color: #fff0c9; justify-content: center; }
-.entry-panel .enter-room:hover:not(:disabled) { background: #58764e; }
-.entry-panel .menu-card :focus-visible { outline-color: #486349; }
+.entry-panel .menu-back:hover:not(:disabled) { background: none; color: var(--paper); text-decoration: underline; }
+.entry-panel .enter-room { width: 100%; margin-top: 20px; padding: 12px; background: #555063; border-color: #a9a2b8; border-bottom-color: #34313e; color: var(--paper); justify-content: center; }
+.entry-panel .enter-room:hover:not(:disabled) { background: #686175; }
+.entry-panel .menu-card :focus-visible { outline-color: #ffe0a0; }
 .entry-panel .entry-status { width: min(380px, 100%); margin: 0; color: #ffe0a0; font-size: 14px; }
 .entry-panel .entry-status:empty { display: none; }
 .menu-help { width: min(380px, 100%); color: var(--muted); font-size: 14px; }
@@ -99,26 +98,23 @@ summary { padding-block: 6px; }
 .entry-panel .footnote { justify-content: flex-start; width: min(380px, 100%); margin: 0; gap: 8px 18px; color: #d9ceac; font-size: 12px; }
 .entry-settings { margin-top: 0; min-height: 38px; padding: 6px 16px; }
 
-/* Nine-sliced frames preserve crisp corners at every panel size. */
-.room-bar, .lobby-controls, .avatar-chooser, .role-card, .results-panel, .action-panel,
+/* Kenney Ancient grey: six source pixels per corner, rendered at 2x. */
+.room-dialog, .lobby-controls, .avatar-chooser, .role-card, .results-panel, .action-panel,
 .chat-panel, .settings-dialog, .connection-card, .task-interface, .outcome-card, .voice-controls {
   background: var(--wood); color: var(--paper); border: 12px solid transparent;
   border-image: var(--frame); border-radius: 0; box-shadow: 0 4px 0 #171e1b80;
 }
-.room-bar { padding: 6px 16px; gap: 10px; }
-.wordmark { font: 400 17px Silkscreen, monospace; color: var(--gold); }
 .room-code-label { color: var(--muted); }
-.active-code { color: #ffe8b4; font: 400 19px Silkscreen, monospace; letter-spacing: 1px; }
-.room-status { color: var(--gold); }
-.room-bar button { min-height: 36px; padding: 6px 12px; }
-.room-bar .leave-room { color: #ffd0b9; }
+.active-code { color: var(--paper); font: 400 22px Silkscreen, monospace; letter-spacing: 1px; margin-left: 8px; user-select: all; }
+.room-status { color: var(--gold); min-height: 20px; }
 .lobby-controls { padding: 12px 16px; bottom: 28px; }
 .lobby-scene-space { display: none; }
+/* Keep the seated circle in the space left by Lobby controls; active Game/title use the full viewport. */
 .in-lobby #stage {
-  top: calc(var(--room-bar-height, 76px) + 12px);
-  height: max(80px, calc(100% - var(--room-bar-height, 76px) - var(--lobby-controls-height) - 72px));
+  position: fixed; inset: auto; top: 64px; left: 0; width: calc(100% - 284px);
+  height: max(80px, calc(100% - var(--lobby-controls-height) - 112px));
 }
-.avatar-chooser { top: calc(var(--room-bar-height, 76px) + 12px); bottom: calc(var(--lobby-controls-height) + 52px); }
+.avatar-chooser { top: 76px; bottom: calc(var(--lobby-controls-height) + 52px); }
 .lobby-controls .role-step { width: 32px; height: 32px; min-height: 32px; }
 .lobby-controls > .role-setup { border-color: #9b784e70; }
 .lobby-controls button { border-color: #b18b5c; }
@@ -126,8 +122,8 @@ summary { padding-block: 6px; }
 .avatar-chooser h2, .connection-card h2, .settings-dialog h2, .outcome-headline { font-family: Silkscreen, monospace; font-weight: 400; font-size: 18px; line-height: 1.5; }
 .avatar-chooser { padding: 10px; }
 .avatar-options { gap: 10px; }
-.avatar-options button { background: #493b2b; border-color: #846342; min-height: 106px; position: relative; }
-.avatar-options button:hover:not(:disabled), .avatar-options button:focus-visible { background: #655132; }
+.avatar-options button { background: #30323e; border-color: #747281; min-height: 106px; position: relative; }
+.avatar-options button:hover:not(:disabled), .avatar-options button:focus-visible { background: #454655; }
 .avatar-options button[aria-pressed="true"] { background: #40563c; border-color: #c9dfa0; }
 .avatar-options button[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 4px; right: 6px; color: #def0b8; }
 .avatar-options button.requested { border-style: dashed; border-color: var(--gold); }
@@ -136,48 +132,91 @@ summary { padding-block: 6px; }
 .avatar-selection-status { color: #deebb9 !important; font-size: 13px !important; }
 
 .game-banner {
-  background: #314836f2; color: #fff0c9; border: 3px solid #789268; border-bottom: 5px solid #233527;
+  background: #303b3cf2; color: #fff0c9; border: 2px solid #7c8b84; border-bottom: 3px solid #1e2929;
   box-shadow: 0 3px 0 var(--ink); margin-top: 8px;
 }
 .game-phase { font: 400 16px/1.5 Silkscreen, monospace; }
 .game-countdown { font: 400 20px Silkscreen, monospace; color: #ffe0a0; }
-.game-interface[data-phase="night"] .game-banner { background: #2e3448f2; border-color: #8392b0; }
+.game-interface[data-phase="night"] .game-banner { background: #322d40f2; border-color: #a09ab5; }
 .role-name { font: 400 17px/1.5 Silkscreen, monospace; }
 .role-card, .results-panel, .action-panel, .chat-panel { padding: 10px; }
 .role-brief, .role-team, .action-hint, .chat-log, .results-panel { font-size: 13px; }
 .eyebrow { color: #bcd39b; text-transform: none; letter-spacing: 0; font-size: 13px; }
-.target-list button { display: flex; align-items: center; gap: 8px; min-height: 76px; background: #493b2b; border-color: #96734d; }
-.target-list button:hover:not(:disabled) { background: #665334; }
+.target-list button { display: flex; align-items: center; gap: 8px; min-height: 76px; background: #30323e; border-color: #96734d; }
+.target-list button:hover:not(:disabled) { background: #454655; }
 .target-list button[aria-pressed="true"] { background: #40563c; border-color: #d5e7a9; box-shadow: inset 0 0 0 2px #92ad69; }
 .target-portrait { flex: 0 0 64px; }
 .target-name { min-width: 0; }
 .action-hint { padding: 8px 0; }
 .chat-log strong { color: var(--gold); }
-.chat-form button, .task-controls button { background: #654b32; border-color: #b18b5c; }
-.chat-form button:hover:not(:disabled), .task-controls button:hover:not(:disabled) { background: #7a5c3b; }
+.chat-form button, .task-controls button { background: #343845; border-color: #b18b5c; }
+.chat-form button:hover:not(:disabled), .task-controls button:hover:not(:disabled) { background: #474754; }
 .settings-dialog fieldset { border-color: #9b784e80; }
 .settings-dialog select { width: 100%; margin-bottom: 12px; }
 .settings-dialog button { white-space: normal; }
 .settings-dialog label { align-items: center; line-height: 1.5; }
-.connection-overlay { z-index: 30; background: #101e18c9; }
+.connection-overlay { z-index: 30; background: #11131de0; }
 .connection-card { padding: 24px; }
 .connection-description { color: var(--muted); }
 .voice-controls { padding: 6px 12px; }
 .art-credits { color: #efe0b8; background: #171e1bcc; padding: 4px 8px; }
 
+
+/* Full scene, with decorative shade confined to the world rather than control text. */
+#game { width: 100%; height: 100%; }
+#stage::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 58% 46%, transparent 32%, #11131d50 76%, #11131da6 100%);
+}
+.at-title #stage canvas, .in-lobby #stage canvas { filter: brightness(.64) saturate(.55); }
+.in-game #stage, .game-interface, .outcome-reveal { inset: 0; width: 100%; height: 100%; }
+.game-banner { margin: 12px 152px 8px 16px; }
+.in-game .art-credits { display: none; }
+.room-launcher { position: fixed; right: 16px; top: 12px; z-index: 21; pointer-events: auto; width: 124px; }
+.room-menu-toggle { width: 100%; background: #222530ed; border-color: #747281; }
+.room-alert { font-size: 13px; line-height: 1.4; margin: 8px 0; background: #222530ed; }
+.room-alert:empty { display: none; }
+.room-dialog { pointer-events: auto; width: min(460px, calc(100% - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 20px; color: var(--paper); }
+.room-dialog::backdrop, .settings-dialog::backdrop { background: #080a13c9; }
+.room-dialog header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.room-dialog h2 { font: 400 20px Silkscreen, monospace; margin: 0; }
+.room-info { display: grid; gap: 12px; margin: 28px 0; }
+.room-actions { display: grid; gap: 12px; }
+.room-actions .leave-room { margin-top: 16px; border-color: #b48181; color: #ffd4cd; }
+.settings-dialog { width: min(680px, calc(100% - 24px)); padding: 24px; }
+.settings-dialog header { position: sticky; top: -24px; background: var(--wood); padding-block: 12px; z-index: 1; }
+.settings-pages { display: flex; gap: 8px; margin: 20px 0; }
+.settings-pages button { flex: 1; background: #171923; border-color: #747281; }
+.settings-pages button[aria-pressed="true"] { background: #555063; color: #fff4dd; border-color: #e1b58a; box-shadow: inset 0 -3px 0 #e1b58a; }
+.settings-dialog fieldset { margin: 0; padding: 16px 20px; border: 1px solid #747281; background: #171923; }
+.settings-dialog legend { color: var(--gold); padding-inline: 8px; font-size: 16px; }
+.settings-dialog .hint { color: var(--muted); font-size: 14px; }
+.settings-dialog label { font-size: 15px; }
+.settings-dialog input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--gold); }
+.settings-dialog input[type="checkbox"] { accent-color: var(--gold); }
+.settings-choice { padding-block: 10px; }
+.settings-dialog .microphone-level { display: block; width: 100%; height: 20px; margin: 12px 0; }
+.settings-dialog .fullscreen-toggle { width: 100%; margin-top: 16px; }
+.settings-status { margin-bottom: 0; }
+
 @media (max-width: 700px) {
-  :root { --lobby-scene-height: clamp(80px, calc((100dvh - var(--room-bar-height, 76px) - var(--lobby-controls-height) - 72px) / 2), 220px); }
-  .in-lobby #stage { height: var(--lobby-scene-height); }
-  .avatar-chooser { top: calc(var(--room-bar-height, 76px) + var(--lobby-scene-height) + 24px); }
-  .entry-panel { align-items: center; background: #11251ccc; padding: 28px 24px; }
+  .entry-panel { align-items: center; background: #11131dbd; padding: 28px 24px; }
   .menu-heading { text-align: center; }
   .entry-panel .footnote { justify-content: center; }
   .entry-panel h1 { font-size: clamp(36px, 10vw, 56px); }
   .game-phase { font-size: 13px; }
   .game-countdown { font-size: 16px; }
+  .game-banner { margin-left: 12px; margin-right: 140px; }
+  .game-announcement { overflow-wrap: anywhere; }
+  .room-launcher { right: 12px; width: 116px; }
   .target-list button { flex-direction: column; justify-content: center; text-align: center; }
   .lobby-controls { gap: 10px; }
   .lobby-controls > button { flex: 1; white-space: normal; }
+  .settings-dialog { padding: 16px; }
+  .settings-dialog header { top: -16px; }
+  .settings-pages { flex-wrap: wrap; }
+  .settings-pages button { min-width: 110px; }
+  .settings-dialog fieldset { padding: 12px; }
 }
 @media (max-height: 700px) and (min-width: 701px) {
   .entry-panel { padding-block: 20px; gap: 10px; }
@@ -187,13 +226,12 @@ summary { padding-block: 6px; }
   .menu-description { margin-bottom: 12px; }
 }
 
-/* Small Lobbies scroll in normal flow; the chooser always retains a usable thumbnail grid. */
+/* Small Lobbies scroll over the full scene; controls keep their usable grid. */
 @media (max-width: 700px), (max-height: 650px) {
   :root { --lobby-scene-height: clamp(120px, 28vh, 220px); }
-  .in-lobby .interface { display: flex; flex-direction: column; overflow-y: auto; }
-  .in-lobby .room-bar { position: sticky; top: 0; z-index: 2; order: 0; flex-shrink: 0; }
-  .in-lobby .lobby-scene-space { display: block; height: calc(var(--lobby-scene-height) + 12px); flex-shrink: 0; order: 1; }
   .in-lobby #stage { width: 100%; height: var(--lobby-scene-height); }
+  .in-lobby .interface { display: flex; flex-direction: column; overflow-y: auto; }
+  .in-lobby .lobby-scene-space { display: block; height: calc(var(--lobby-scene-height) + 64px); flex-shrink: 0; order: 1; }
   .in-lobby .avatar-chooser {
     position: relative; inset: auto; order: 2; flex-shrink: 0;
     width: min(660px, calc(100% - 32px)); height: 280px; min-height: 280px; margin: 16px auto;

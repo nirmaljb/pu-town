@@ -1,27 +1,43 @@
-# Village interface
+# PU Town: a town you cannot trust
 
-The title, Lobby and Game controls should feel like part of PU Town's illustrated village. This refresh follows the requested menu and interactivity recommendation on `live-619e990-tailscale`, adapted to that branch's Day, Night and Townhall rules. It does not restore the retired live Roam abilities.
+The requested direction is a viewport-filling horror/thriller game, with better title and settings interactions, no site header, and design decisions grounded in creator work and research. This applies to `live-619e990-tailscale` and its Day, Night and Townhall rules.
 
-## Presentation and interaction
+## Evidence and application
 
-- Show the existing animated town behind the title. Present Create Room and Join Room first, then the relevant Display Name and Room Code inputs. Back or Escape returns to those choices before connecting. Retain the remembered Display Name and existing recovery flow.
-- Use original pixel-grid timber and paper frames, a forest-green ribbon palette and local Silkscreen headings. Keep longer instructions and chat in readable system text. Artwork and font provenance live in `frontend/public/assets/ui/README.md`.
-- Share materials, visible keyboard focus, hover, pressed and unavailable states across Lobby, Game, tasks, voice, settings and recovery controls. Keep text alongside icons and colour cues.
-- Animate character thumbnails on hover or keyboard focus. Reduced motion disables the animation and the town's decorative movement. Accepted character and Ready state remain server-owned; local animation never changes a cosmetic selection.
-- Add portraits from the Room's pinned collection to Night and Townhall choices. Retain ballot DOM elements so incoming chat and state updates preserve focus. Selection is a local preview; explicit confirmation sends the existing request and accepted state follows the frame boundary.
-- Reuse the saved effects volume for quiet press/selection cues and a separate cue for an accepted Ready or character change. Recovery snapshots establish a silent baseline. Existing task sounds and sound previews keep their own cues.
-- Measure the Room bar and Lobby controls to reserve space for the scene and chooser as controls wrap. Narrow or short windows stack the scene, a usable character chooser and Host controls in a scrolling Lobby, with a sticky Room bar.
+The source findings below are distinct from our application to PU Town. None establishes that these particular colours, dimensions or layouts will increase fear in this multiplayer game; those are bounded design inferences requiring manual acceptance.
 
-## Verification
+| Primary source | Evidence available | Application in PU Town |
+| --- | --- | --- |
+| [Thomas Grip, Frictional: 9 Years, 9 Lessons on Horror](https://frictionalgames.com/2019-10-9-years-9-lessons-on-horror/) (2019), lessons 3, 5, 6 | Anticipation and narrative context can make ordinary environments threatening; repeated scares alone do not sustain horror. The article specifically discusses recontextualizing a quaint town. | Retain the familiar animated town, but use a moonlit grade and the premise “Night falls. The Mafia is among you.” Keep the title's actions quiet and legible. No random flashes, fabricated threats or changed Game rules. |
+| [Alistair Hope, Creative Assembly: Building Fear in Alien: Isolation](https://www.gdcvault.com/play/1021852/Building-Fear-in-Aliens) (GDC 2015) | The creator's published session overview identifies visual and aural immersion as central to the intended horror experience. | Reduce site chrome, make the world fill the viewport, keep existing sound feedback and independent audio controls. This refresh does not add or claim an ambient soundtrack. |
+| [Chris Bourassa, Red Hook: A Torch in the Dark](https://media.gdcvault.com/gdc2016/Presentations/Bourassa_Chris_a%20torch%20in.pdf) (GDC 2016), slides 3–11 | Art, presentation and writing should follow an externalized creative core; wide views reduced tension in their specific game; uncertainty supported its horror. | One shared moonlit slate/copper palette for title, settings, Room and gameplay panels. Leave space for the town instead of surrounding it with permanent navigation. Do not transplant their camera or mechanics wholesale. |
+| [Iacovides et al.: Removing the HUD](https://eprints.whiterose.ac.uk/id/eprint/130581/1/Diegesis_and_immersion_final.pdf) (CHI PLAY 2015), discussion and limitations | HUD removal affected expert involvement and control in a particular FPS level. The authors caution about small samples, expertise and generalizing across genres. | Move administrative Room controls into an explicit corner menu. Retain phase/countdown, Role information, ballot confirmation, task/chat feedback and visible connection errors. This is an inference, not a proven immersion gain for Mafia. |
+| [Charles Lee: Running scared](https://intellectdiscover.com/content/journals/10.1386/jgvw_00030_1) (2021), published abstract | An analytical case study connects constrained space, limited visibility and vague UI in Amnesia with disorientation. | Use peripheral shade on the scene. Preserve the existing server-owned Vision and fog. Keep menus and failure instructions explicit because competitive choices need clarity. Full paper is paywalled; claims here are restricted to its abstract. |
+| [Pedro Medeiros: Consistency](https://saint11.art/blog/consistency/) (2023), screen size, colour and world consistency sections | Pixel-art scaling has tradeoffs; changing camera size/cropping is one option. UI and game worlds can have distinct consistent styles. | Resize the canvas to the viewport, adjust camera zoom to cover it during exploration/title and fit the Town Square during seated phases, preserve sprite proportions and pixel rendering. Use local Silkscreen for short headings and readable system text for instructions. The unusual-aspect-ratio framing still needs manual inspection. |
+| [Xbox XAG 112: UI navigation](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/112) | Consistent structure, logical focus order and keyboard navigation help Players find and configure options. | Three named Settings page buttons with pressed state and associated panels; native modal focus containment; explicit Close/Back and Escape; restore focus to a visible launcher. Stop local microphone and sound previews when switching pages. |
+| [Xbox XAG 102: Contrast](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/102) | Important standard text should have at least 4.5:1 contrast; controls need interpretable visual states. | Bright text on opaque slate panels; title shading sits behind text, scene grading does not dim DOM controls. Preserve visible keyboard outlines and text/checkmarks with colour selection cues. This is not a claim of complete XAG compliance. |
+| [Xbox XAG 105: Audio accessibility](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/105) | Independent effects, ambience and voice levels let Players control competing sound and speech. | Preserve the existing master/category mixer, local previews and voice ducking. Sound settings remain immediately available from entry and the Room menu. |
 
-Run `npm run typecheck`, `npm test` and `npm run build` from `frontend/`, with the documented Pillow dependency available to Python. Browser automation is explicitly excluded by the request. Passing these checks does not establish browser appearance or multiplayer integration acceptance.
+## Design pattern and asset decisions
 
-For manual acceptance, check entry/Back/Enter with mouse and keyboard, invalid entry and retry, Lobby selection/Ready, narrow and short windows, sound volume zero, reduced motion, Night and Townhall choices, Leave and reconnect. Use two Players when inspecting accepted shared changes and recovery. This checklist records remaining manual verification, not a claim that it was performed.
+Creative core: a familiar village under suspicion. Slate `#222530` frames sit above ink `#11131d`; off-white `#f0e9da` and muted `#c1bbc5` carry text; copper `#e1b58a` marks focus and primary choices; sage `#465c54` retains accepted-state meaning. Exact values are implementation choices, not findings from a paper.
 
-## Design references
+Title: a left-aligned title and two linear Play choices over the actual town. Create/Join reveals only the relevant inputs; Back/Escape returns before connecting. Existing name memory and recovery stay intact. Settings remains available before Room entry.
 
-- [Consistency — Pedro Medeiros](https://saint11.art/blog/consistency/)
-- [Juice It or Lose It — Jonasson and Purho](https://gdcvault.com/play/1016487/Juice-It-or-Lose)
-- [The User Interface Continuum — Kristine Jørgensen](https://www.gamedeveloper.com/design/the-user-interface-continuum-a-study-of-player-preference)
-- [Game Accessibility Guidelines](https://gameaccessibilityguidelines.com/full-list/)
-- [Tiny Swords — Pixel Frog](https://pixelfrog-assets.itch.io/tiny-swords), the town's existing art family; no new third-party pack is redistributed by this refresh.
+Settings: a native dialog with stable heading and Close control, three category buttons and one fieldset visible at a time. Display contains fullscreen and reduced motion; Sound keeps master/effects/ambience/voice sliders; Microphone retains devices, tests, input level, speaking mode, binding and suppression. Buttons use native Tab/Enter/Space behavior, not an incomplete ARIA tab widget. Changes apply immediately; Game time continues.
+
+Lobby: reserve the unobscured Town Square area beside the character chooser and above the Ready/Host controls. Small windows stack these controls in a scrolling layout. The canvas fills its scene area; during active Game and title it fills the entire viewport. This preserves seated visibility rather than drawing the Seat circle underneath interactive panels.
+
+Room: the full-width header is removed from the DOM. One corner button opens Room details, Copy code, Settings and Leave. Errors remain visible outside the closed dialog. Opening a dialog releases movement and push-to-talk through the existing input guards. A settings launch closes the Room dialog, and Close Settings returns to the visible Room button. Interrupted connections close the Room dialog so recovery controls remain accessible.
+
+Recommended assets:
+
+- [Kenney Pixel UI Pack](https://kenney.nl/assets/pixel-ui-pack): 750 files, CC0, with existing button/frame states. Selected the original `9-Slice/Ancient/grey.png` for weathered panel corners after inspecting its pixels. It is included locally with the creator's license and provenance. No newly invented bitmap artwork.
+- [Pixel Frog Tiny Swords](https://pixelfrog-assets.itch.io/tiny-swords): the existing town's family includes stretchable wood tables, papers, ribbons and buttons. It is the best first source for future map-matched illustrations. Its brighter wood/paper presentation suits a lighter village direction; the grey Kenney frame better serves this requested moonlit direction. No additional Tiny Swords files are redistributed here.
+- Keep the existing published character collection and local licensed Silkscreen font. New Avatar artwork must still go through the authoring/publication workflow.
+
+## Verification and acceptance
+
+Required: `npm run typecheck`, `npm test` and `npm run build` from `frontend/`, with Pillow available to Python. Browser automation is excluded by the request. Code/source review and these checks do not establish visual or multiplayer integration acceptance.
+
+Manual acceptance remaining: inspect title and Lobby at wide, portrait and short sizes; ensure the world fills the window without stretching; open/close Room and Settings with mouse and keyboard; switch categories and verify preview cleanup; enter/exit real fullscreen; check reduced motion; Copy code, Ready, avatar selection, ballots and Leave; disconnect while the Room dialog is open and confirm recovery controls are usable. Inspect accepted shared actions and recovery with two Players.

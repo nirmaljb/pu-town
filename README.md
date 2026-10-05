@@ -46,7 +46,7 @@ cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The title menu overlooks the animated town. Choose Create Room or Join Room, then enter a Display Name and, when joining, a shared Room Code. Back or Escape returns to the title choices before connecting. How to play explains the Day, Night and Townhall cycle; Settings controls sound and reduced motion. Membership opens the Room's Lobby: a ring of ten inward-facing chairs in PU Town's Town Square. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; Day movement begins beside that Seat.
+Open [http://localhost:5173](http://localhost:5173). The title menu overlooks the animated, moonlit town. Choose Create Room or Join Room, then enter a Display Name and, when joining, a shared Room Code. Back or Escape returns to the title choices before connecting. How to play explains the Day, Night and Townhall cycle; Settings controls sound and reduced motion. Membership opens the Room's Lobby: a ring of ten inward-facing chairs in PU Town's Town Square. Players sit immediately, clockwise in the first vacant chair, and can toggle Ready. Names, distinct Player Colours and readiness identify each occupant. A Player keeps that chair for the whole Room, Lobby and Game alike; Day movement begins beside that Seat.
 
 The creator is Host. Start Game needs at least four Players present, all connected and Ready, and the Host is told which of those is missing until it is. An eleventh Join receives “Room is full”, and a started Room accepts no new Players.
 
@@ -136,7 +136,9 @@ Players are seated in the Lobby and Townhall, walk during Day, and sleep in plac
 
 ## Local Settings
 
-Settings is available from entry, the Lobby and during a Game. It offers separate
+The title and active Game fill the viewport without a site header or fixed-aspect letterboxing. The Lobby reserves a visible Town Square area beside or above the character and Host controls. A corner Room menu holds the Room Code, occupancy, Copy code (in the Lobby), Settings and Leave Room. Back to town or Escape closes it. The canvas resizes to the viewport and the camera adjusts its zoom; exploration crops unusual aspect ratios rather than stretching sprites, while seated phases fit the Town Square so the Seat circle remains within the camera. The server still limits visible Participants.
+
+Settings is available from entry and the Room menu in the Lobby and during a Game. Display, Sound and Microphone pages keep related controls together. It offers separate
 master, effects, ambience and voice volume sliders plus local sound previews.
 Levels are remembered on this browser and apply to current and newly created audio
 channels. Previews require a click and never send sound to other Players. Gameplay effects and voice use these shared controls and audio routing;

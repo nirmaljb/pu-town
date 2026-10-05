@@ -12,18 +12,16 @@ const game = new Phaser.Game({
   height: ROOM_HEIGHT,
   scene: [PuTownScene],
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
 });
 
 
-// The Lobby leaves room beside the Meeting Area for the character panel. Phaser sizes its own
-// parent from the stage, so the Room is refitted from the stage's measured box rather than the window.
+// Fill the available viewport; camera zoom preserves the town's intended visual scale.
 const stage = document.getElementById("stage")!;
 const resize = new ResizeObserver(() => {
-  game.scale.setParentSize(stage.clientWidth, stage.clientHeight);
-  game.scale.refresh();
+  if (stage.clientWidth > 0 && stage.clientHeight > 0) game.scale.setParentSize(stage.clientWidth, stage.clientHeight);
 });
 resize.observe(stage);
 game.events.once(Phaser.Core.Events.DESTROY, () => resize.disconnect());

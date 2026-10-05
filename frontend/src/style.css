@@ -25,8 +25,6 @@ button:disabled, input:disabled { opacity: .55; cursor: wait; }
 .join-row { display: flex; gap: 10px; }
 #room-code { text-transform: uppercase; letter-spacing: .14em; min-width: 0; font-family: ui-monospace, monospace; }
 .entry-status { min-height: 20px; color: #ffc99e; font-size: 13px; margin: 16px 0 0; }
-.room-bar { pointer-events: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; background: #101725ed; padding: 12px 20px; border-bottom: 1px solid #344258; }
-.wordmark { font-weight: 800; margin-right: auto; }
 .room-code-label { color: #b9c5d6; font-size: 12px; }
 .active-code { color: #fff; margin-left: 8px; font: 700 18px ui-monospace, monospace; letter-spacing: .12em; user-select: all; }
 .room-status { font-size: 12px; color: #ffc99e; }
@@ -35,11 +33,10 @@ button:disabled, input:disabled { opacity: .55; cursor: wait; }
 h2 { margin: 16px 0; font-size: 28px; }
 .connection-description { color: #b9c5d6; line-height: 1.6; }
 .connection-actions { display: flex; gap: 12px; margin-top: 24px; }
-@media (max-width: 480px) { .wordmark { width: 100%; } .room-bar { gap: 8px; padding: 10px; } }
 
 .art-credits { position: fixed; right: 14px; bottom: 10px; pointer-events: auto; color: #bbc5d8; font-size: 11px; }
 
-/* The Meeting Area keeps the same stepped timber-and-amber vocabulary as entry. */
+/* Lobby structure; shared panel materials are supplied by game-skin.css. */
 .lobby-controls {
   position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
   width: min(660px, calc(100% - 32px)); pointer-events: auto;
@@ -70,12 +67,8 @@ h2 { margin: 16px 0; font-size: 28px; }
 @media (max-width: 600px) {
   .lobby-controls { flex-wrap: wrap; gap: 10px; padding: 12px; bottom: 32px; }
   .lobby-controls > div { width: 100%; }
-  .room-bar .wordmark { display: none; }
-  .room-bar { gap: 8px; padding: 8px; }
-  .room-bar button { padding-inline: 10px; }
 }
 
-.in-lobby #stage { position: fixed; top: 76px; left: 0; width: calc(100% - 284px); height: calc(100% - 250px); }
 /* The thumbnails scroll, so the accepted-character line stays on screen at any Lobby height. */
 .avatar-chooser { position: absolute; right: 16px; top: 80px; bottom: 180px; width: 256px; display: flex; flex-direction: column; overflow: hidden; pointer-events: auto; padding: 14px; background: #302820; color: #fff0c9; border: 3px solid #9b784e; }
 .avatar-chooser h2 { font-size: 20px; margin: 0 0 8px; }
@@ -88,7 +81,6 @@ h2 { margin: 16px 0; font-size: 28px; }
 .avatar-selection-status { flex: 0 0 auto; text-align: center; margin: 10px 0 0; border-top: 1px solid #9b784e; padding-top: 8px; min-height: 1.5em; }
 .avatar-chooser :focus-visible { outline-color: #ffe0a0; }
 @media (max-width: 700px) {
-  .in-lobby #stage { top: 116px; width: 100%; height: 32vh; }
   .avatar-chooser { top: calc(116px + 32vh); bottom: 166px; left: 12px; right: 12px; width: auto; min-height: 90px; }
   .avatar-options { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .avatar-chooser h2 { font-size: 16px; }
@@ -96,9 +88,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ---- The Game ------------------------------------------------------------------ */
-.game-interface { position: fixed; inset: var(--room-bar-height, 76px) 0 0; pointer-events: none; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-.in-game #stage { position: fixed; inset: var(--room-bar-height, 76px) 0 0; width: 100%; height: calc(100% - var(--room-bar-height, 76px)); }
-.in-game .room-bar { position: relative; z-index: 2; }
+.game-interface { position: fixed; inset: 0; pointer-events: none; display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .game-banner {
   pointer-events: auto; position: relative; grid-row: 1; margin: 0 16px 8px;
   display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
@@ -110,7 +100,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 .game-announcement { flex: 1 0 100%; margin: 4px 0 0; font-size: 14px; color: #ffe6bb; min-height: 1.2em; }
 /* The Meeting Call and verdict, drawn over the table they describe. */
 .outcome-reveal {
-  position: fixed; inset: var(--room-bar-height, 76px) 0 0;
+  position: fixed; inset: 0;
   display: grid; place-items: center; padding: 20px; background: #060911a0; text-align: center;
 }
 .outcome-card {
@@ -211,7 +201,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 #stage canvas { transition: filter 180ms ease-out; }
 .sleeping #stage canvas { filter: brightness(.5) saturate(.65); }
 .game-interface[data-phase="night"] .game-banner { border-color: #9eafe0; }
-/* Preferences share the menu's timber framing and stay usable at short heights. */
+/* Preferences layout; shared panel materials are supplied by game-skin.css. */
 .entry-settings { margin-top: 20px; }
 .settings-dialog { width: min(520px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow-y: auto; padding: 20px; color: #fff0c9; background: #302820; border: 3px solid #9b784e; box-shadow: 0 6px 0 #191b25; }
 .settings-dialog::backdrop { background: #09111bbd; }
@@ -258,7 +248,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 }
 @media (max-height: 600px) and (max-width: 700px) {
   .game-interface[data-phase="day"] .chat-panel { left: 12px; right: 12px; bottom: 112px; width: auto; }
-  .task-interface { bottom: 224px; max-height: clamp(56px, calc(100dvh - var(--room-bar-height, 76px) - 330px), 180px); }
+  .task-interface { bottom: 224px; max-height: clamp(56px, calc(100dvh - 330px), 180px); }
 }
 
 .voice-controls {

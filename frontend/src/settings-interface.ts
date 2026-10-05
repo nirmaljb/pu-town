@@ -45,14 +45,19 @@ export class SettingsInterface {
     this.#dialog.innerHTML = `
       <header><h2 id="settings-title">Settings</h2><button type="button" class="close-settings">Close Settings</button></header>
       <p class="hint">The Game keeps running while Settings is open.</p>
-      <fieldset><legend>Sound</legend>
+      <nav class="settings-pages" aria-label="Settings pages">
+        <button type="button" data-settings-page="display" aria-pressed="true" aria-controls="settings-display">Display</button>
+        <button type="button" data-settings-page="sound" aria-pressed="false" aria-controls="settings-sound">Sound</button>
+        <button type="button" data-settings-page="microphone" aria-pressed="false" aria-controls="settings-microphone">Microphone</button>
+      </nav>
+      <fieldset id="settings-sound" data-settings-panel="sound" hidden><legend>Sound</legend>
         ${(["master", ...AUDIO_CHANNELS] as const).map(category => `
           <div class="volume-label"><label for="volume-${category}">${category[0]!.toUpperCase() + category.slice(1)} volume</label><output for="volume-${category}" aria-hidden="true"></output></div>
           <input id="volume-${category}" type="range" min="0" max="100" step="1" data-volume="${category}">`).join("")}
         <div class="sound-previews">${AUDIO_CHANNELS.map(category => `<button type="button" data-preview="${category}">Preview ${category}</button>`).join("")}</div>
         <p class="hint">Previews play only on this device.</p>
       </fieldset>
-      <fieldset><legend>Microphone</legend>
+      <fieldset id="settings-microphone" data-settings-panel="microphone" hidden><legend>Microphone</legend>
         <label for="microphone-device">Input device</label><select id="microphone-device"><option value="">System default</option></select>
         <button type="button" class="refresh-microphones">Refresh devices</button>
         <button type="button" class="test-microphone">Test microphone locally</button>
@@ -64,7 +69,7 @@ export class SettingsInterface {
         <p class="noise-suppression-status hint"></p>
         <p class="microphone-status" role="status"></p>
       </fieldset>
-      <fieldset><legend>Display</legend>
+      <fieldset id="settings-display" data-settings-panel="display"><legend>Display</legend>
         <label class="settings-choice"><span>Reduced motion</span><input type="checkbox" class="reduced-motion-control"></label>
         <label class="settings-choice"><span>Prefer fullscreen</span><input type="checkbox" class="prefer-fullscreen"></label>
         <button type="button" class="fullscreen-toggle">Enter fullscreen</button>
@@ -72,6 +77,19 @@ export class SettingsInterface {
       </fieldset>
       <p class="settings-status" role="status" aria-label="Settings feedback" aria-live="polite"></p>`;
     document.body.append(this.#dialog);
+    for (const button of Array.from(this.#dialog.querySelectorAll<HTMLButtonElement>("[data-settings-page]"))) {
+      button.addEventListener("click", () => {
+        const page = button.dataset.settingsPage;
+        this.stopMicrophoneTest();
+        audio.stopPreview();
+        for (const choice of Array.from(this.#dialog.querySelectorAll<HTMLButtonElement>("[data-settings-page]"))) {
+          choice.setAttribute("aria-pressed", String(choice === button));
+        }
+        for (const panel of Array.from(this.#dialog.querySelectorAll<HTMLElement>("[data-settings-panel]"))) {
+          panel.hidden = panel.dataset.settingsPanel !== page;
+        }
+      });
+    }
     this.#dialog.querySelector(".refresh-microphones")!.addEventListener("click", () => { void this.refreshMicrophones(); });
     this.#dialog.querySelector<HTMLSelectElement>("#microphone-device")!.addEventListener("change", event => {
       this.stopMicrophoneTest();
@@ -148,7 +166,7 @@ export class SettingsInterface {
     }
     this.#dialog.querySelector(".close-settings")!.addEventListener("click", () => this.#dialog.close());
     this.#dialog.addEventListener("close", () => { this.stopMicrophoneTest(); audio.stopPreview(); this.#opener?.focus(); });
-    for (const [selector, className] of [[".entry-panel", "entry-settings"], [".room-bar", "room-settings"]]) {
+    for (const [selector, className] of [[".entry-panel", "entry-settings"], [".room-actions", "room-settings"]]) {
       const parent = document.querySelector(selector!);
       if (!parent) continue;
       const button = document.createElement("button");
@@ -156,7 +174,10 @@ export class SettingsInterface {
       button.className = className!;
       button.textContent = "Settings";
       button.addEventListener("click", () => {
-        this.#opener = button;
+        const roomDialog = document.querySelector<HTMLDialogElement>(".room-dialog");
+        if (roomDialog?.open) roomDialog.close();
+        this.#opener = className === "room-settings"
+          ? document.querySelector<HTMLButtonElement>(".room-menu-toggle") : button;
         this.status.textContent = "";
         this.#dialog.showModal();
         void this.refreshMicrophones();

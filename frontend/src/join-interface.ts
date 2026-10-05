@@ -37,10 +37,10 @@ export class JoinInterface {
       <section class="entry-panel" aria-labelledby="entry-title">
         <div class="menu-heading">
           <h1 id="entry-title">PU Town</h1>
-          <p class="intro">Friendly faces. Hidden intentions.</p>
+          <p class="intro">Night falls. The Mafia is among you.</p>
         </div>
         <nav class="menu-choices" aria-label="Play PU Town">
-          <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>Bring your friends to town</span></button>
+          <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>Gather your friends before nightfall</span></button>
           <button class="menu-choice" type="button" data-entry="join">Join Room <span>Enter a friend's Room Code</span></button>
         </nav>
         <form class="menu-card" novalidate hidden aria-describedby="entry-status">
@@ -61,14 +61,23 @@ export class JoinInterface {
         <details class="menu-help"><summary>How to play</summary><p>Explore and complete Tasks by Day. Make your private Role choice at Night. Discuss and vote at Townhall to find the Mafia.</p><p>Walk with WASD or arrow keys. Try Solo Practice from your own Lobby.</p></details>
         <p class="footnote"><span>4–10 Players</span><span>One town. Who can you trust?</span></p>
       </section>
-      <header class="room-bar" hidden>
-        <span class="wordmark">PU Town.</span>
-        <div class="room-code-label">Room Code <strong class="active-code"></strong></div>
-        <button type="button" class="copy-code">Copy code</button>
-        <span class="occupancy"></span>
-        <span class="room-status" role="status"></span>
-        <button type="button" class="leave-room">Leave Room</button>
-      </header>
+      <div class="room-launcher" hidden>
+        <button type="button" class="room-menu-toggle" aria-haspopup="dialog">Room menu</button>
+        <p class="room-alert" role="status" aria-live="polite"></p>
+      </div>
+      <dialog class="room-dialog" aria-labelledby="room-menu-title">
+        <header><h2 id="room-menu-title">Room</h2><button type="button" class="close-room-menu">Back to town</button></header>
+        <div class="room-info">
+          <div class="room-code-label">Room Code <strong class="active-code"></strong></div>
+          <span class="occupancy"></span>
+        </div>
+        <p class="hint">The Game keeps running while this menu is open.</p>
+        <div class="room-actions">
+          <button type="button" class="copy-code">Copy code</button>
+          <button type="button" class="leave-room">Leave Room</button>
+        </div>
+        <p class="room-status" role="status" aria-live="polite"></p>
+      </dialog>
       <div class="lobby-scene-space" aria-hidden="true" hidden></div>
       <section class="lobby-controls" hidden aria-label="Lobby controls">
         <div class="role-setup" role="group" aria-label="Roles">
@@ -101,13 +110,10 @@ export class JoinInterface {
     this.#chooser = new AvatarChooser(id => this.client.selectAvatar(id));
     this.#root.insertBefore(this.#chooser.element, this.element(".connection-overlay"));
     document.body.append(this.#root);
-    const roomBar = this.element(".room-bar");
     const lobbyControls = this.element(".lobby-controls");
     this.#layoutResize = new ResizeObserver(() => {
-      if (!roomBar.hidden) document.documentElement.style.setProperty("--room-bar-height", `${Math.ceil(roomBar.getBoundingClientRect().height)}px`);
       if (!lobbyControls.hidden) document.documentElement.style.setProperty("--lobby-controls-height", `${Math.ceil(lobbyControls.getBoundingClientRect().height)}px`);
     });
-    this.#layoutResize.observe(roomBar);
     this.#layoutResize.observe(lobbyControls);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");
@@ -156,6 +162,13 @@ export class JoinInterface {
         this.client.setRoleSetup({ ...setup, [role]: setup[role] + Number(button.dataset.step) });
       });
     }
+    const roomDialog = this.element<HTMLDialogElement>(".room-dialog");
+    const roomToggle = this.element<HTMLButtonElement>(".room-menu-toggle");
+    roomToggle.addEventListener("click", () => roomDialog.showModal());
+    this.element(".close-room-menu").addEventListener("click", () => roomDialog.close());
+    roomDialog.addEventListener("close", () => {
+      if (!this.element(".room-launcher").hidden && !document.querySelector("dialog:modal")) roomToggle.focus();
+    });
     this.element(".leave-room").addEventListener("click", () => { this.client.leave(); this.render(); });
     this.element(".back").addEventListener("click", () => { this.client.leave(); this.render(); });
     this.element(".copy-code").addEventListener("click", () => {
@@ -237,7 +250,9 @@ export class JoinInterface {
     const entry = state.status === "join" || state.status === "connecting";
     const interrupted = state.status === "reconnecting" || state.status === "failed";
     this.element(".entry-panel").hidden = !entry;
-    this.element(".room-bar").hidden = entry;
+    this.element(".room-launcher").hidden = entry;
+    if ((entry || interrupted) && this.element<HTMLDialogElement>(".room-dialog").open) this.element<HTMLDialogElement>(".room-dialog").close();
+    this.element(".room-alert").textContent = state.status === "leaving" ? "Leaving…" : state.error ?? "";
     this.element(".connection-overlay").hidden = !interrupted;
     document.body.classList.toggle("at-title", entry);
     document.getElementById("stage")!.style.visibility = "visible";

@@ -15,7 +15,7 @@ import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
-import { VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
+import { ROOM_HEIGHT, ROOM_WIDTH, VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
 
 /** Outside Day and sleeping Night the camera frames the Town Square, where the Players sit. */
 const SQUARE_X = WORLD_WIDTH / 2;
@@ -177,6 +177,13 @@ export class PuTownScene extends Phaser.Scene {
     this.#meetingArea?.setReducedMotion(reducedMotion);
     // During Day and sleeping Night the camera follows this Player; otherwise it frames the Town Square.
     const camera = this.cameras.main;
+    // Seated phases must keep the whole Town Square visible, including on portrait displays.
+    // Exploration/title cover the viewport; a seated view expands the camera instead of cropping Seats.
+    const seated = !atTitle && !world?.field;
+    const horizontalZoom = this.scale.width / ROOM_WIDTH;
+    const verticalZoom = this.scale.height / ROOM_HEIGHT;
+    const zoom = seated ? Math.min(horizontalZoom, verticalZoom) : Math.max(horizontalZoom, verticalZoom);
+    if (camera.zoom !== zoom) camera.setZoom(zoom);
     const focusX = self?.x ?? SQUARE_X;
     const focusY = self?.y ?? SQUARE_Y;
     const follow = reducedMotion ? 1 : Math.min(1, delta / 1_000 * (self ? 10 : 6));
