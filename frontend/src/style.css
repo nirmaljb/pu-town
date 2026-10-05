@@ -218,8 +218,8 @@ h2 { margin: 16px 0; font-size: 28px; }
 @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ---- The Game ------------------------------------------------------------------ */
-.game-interface { position: fixed; inset: 76px 0 0; pointer-events: none; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-.in-game #stage { position: fixed; inset: 76px 0 0; width: 100%; height: calc(100% - 76px); }
+.game-interface { position: fixed; inset: var(--room-bar-height, 76px) 0 0; pointer-events: none; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.in-game #stage { position: fixed; inset: var(--room-bar-height, 76px) 0 0; width: 100%; height: calc(100% - var(--room-bar-height, 76px)); }
 .in-game .room-bar { position: relative; z-index: 2; }
 .game-banner {
   pointer-events: auto; position: relative; grid-row: 1; margin: 0 16px 8px;
@@ -232,7 +232,7 @@ h2 { margin: 16px 0; font-size: 28px; }
 .game-announcement { flex: 1 0 100%; margin: 4px 0 0; font-size: 14px; color: #ffe6bb; min-height: 1.2em; }
 /* The Meeting Call and verdict, drawn over the table they describe. */
 .outcome-reveal {
-  position: fixed; inset: 76px 0 0;
+  position: fixed; inset: var(--room-bar-height, 76px) 0 0;
   display: grid; place-items: center; padding: 20px; background: #060911a0; text-align: center;
 }
 .outcome-card {

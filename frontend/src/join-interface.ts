@@ -25,6 +25,7 @@ export class JoinInterface {
   readonly #form: HTMLFormElement;
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
+  readonly #roomBarResize: ResizeObserver;
   #lastState: ConnectionState | null = null;
   #world?: WorldState;
   #lastWorld?: WorldState;
@@ -93,6 +94,11 @@ export class JoinInterface {
     this.#chooser = new AvatarChooser(id => this.client.selectAvatar(id));
     this.#root.insertBefore(this.#chooser.element, this.element(".connection-overlay"));
     document.body.append(this.#root);
+    const roomBar = this.element(".room-bar");
+    this.#roomBarResize = new ResizeObserver(() => {
+      if (!roomBar.hidden) document.documentElement.style.setProperty("--room-bar-height", `${Math.ceil(roomBar.getBoundingClientRect().height)}px`);
+    });
+    this.#roomBarResize.observe(roomBar);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");
     this.#code = this.element("#room-code");
@@ -229,7 +235,7 @@ export class JoinInterface {
     this.element(".role-villagers").classList.toggle("short", villagers < 1);
   }
 
-  destroy(): void { this.#root.remove(); document.body.classList.remove("in-lobby"); }
+  destroy(): void { this.#roomBarResize.disconnect(); this.#root.remove(); document.body.classList.remove("in-lobby"); }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {
     return this.#root.querySelector<T>(selector)!;

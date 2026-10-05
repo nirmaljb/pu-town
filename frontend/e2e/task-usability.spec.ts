@@ -21,3 +21,18 @@ test("Task countdowns preserve keyboard focus and do not cover chat or voice", a
   expect(chat!.y + chat!.height).toBeLessThanOrEqual(voice!.y);
   await page.screenshot({ path: test.info().outputPath("task-ledger.png") });
 });
+
+test("#23 A wrapped Room bar keeps Settings and Leave Room above the phase banner", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const player = new Player(page, "Phone Player");
+  await player.enter();
+  await page.getByRole("button", { name: "Solo Practice", exact: true }).click();
+  await player.phase("day");
+  const header = await page.locator(".room-bar").boundingBox();
+  await expect.poll(async () => (await page.locator(".game-banner").boundingBox())!.y).toBeGreaterThanOrEqual(header!.y + header!.height);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "Close Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Leave Room", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Create Room", exact: true })).toBeVisible();
+});
