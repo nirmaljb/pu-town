@@ -1183,6 +1183,66 @@ class MafiaGameTest {
         assertEquals("Inside the store", latestOfType(table.get(1), "chat_message").path("text").asText());
     }
 
+    /** Optimistic focused agents: accepted 16-pixel moves each 100 ms, correct inputs,
+     * no kills or votes; everyone advances concurrently through actual public requests. */
+    @ParameterizedTest
+    @ValueSource(ints = {4, 5, 6, 7, 8, 9, 10})
+    void mixedTaskWorkloadMeasuresNineToTenRoundsWithConcurrentMapTravel(int count) throws Exception {
+        startTable("workload-" + count, count); advance(REVEAL);
+        List<Integer> workers = java.util.stream.IntStream.range(0, count).boxed()
+                .filter(seat -> !game(seat).path("self").path("role").asText().equals("mafia")).toList();
+        int maximumRound = 0;
+        long walkedTicks = 0;
+        while (!game(0).path("phase").asText().equals("finished")) {
+            int round = game(0).path("round").asInt();
+            assertTrue(round <= 15, "Workload did not finish within measurement window");
+            maximumRound = round;
+            long deadline = REVEAL + (round - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY;
+            var chosen = new java.util.LinkedHashMap<Integer, JsonNode>();
+            var routes = new java.util.LinkedHashMap<Integer, List<TaskCell>>();
+            for (int seat : workers) {
+                JsonNode personal = latestOfType(table.get(seat), "task_state").path("tasks");
+                assertEquals(3, personal.size());
+                for (JsonNode task : personal) if (task.path("step").asInt() < task.path("steps").asInt()) {
+                    chosen.put(seat, task); routes.put(seat, routeToTask(seat, task)); break;
+                }
+            }
+            int travelTicks = routes.values().stream().mapToInt(List::size).max().orElse(0);
+            if (milliseconds.get() + travelTicks * 100L >= deadline) {
+                advance(deadline - milliseconds.get() + NIGHT + DISCUSSION + VOTING + VOTING_RESULT); continue;
+            }
+            for (int tick = 0; tick < travelTicks; tick++) {
+                advance(100);
+                for (var route : routes.entrySet()) if (tick < route.getValue().size()) {
+                    TaskCell cell = route.getValue().get(tick); move(route.getKey(), cell.x(), cell.y());
+                }
+            }
+            walkedTicks += travelTicks; handler.tickFields();
+            long wait = 0;
+            for (var selection : chosen.entrySet()) {
+                openTask(selection.getKey(), selection.getValue().path("taskId").asText());
+                JsonNode state = latestOfType(table.get(selection.getKey()), "task_state");
+                assertEquals(selection.getValue().path("taskId").asText(), state.path("activeTaskId").asText());
+                wait = Math.max(wait, state.path("remainingMs").asLong());
+            }
+            if (milliseconds.get() + wait >= deadline) {
+                advance(deadline - milliseconds.get() + NIGHT + DISCUSSION + VOTING + VOTING_RESULT); continue;
+            }
+            advance(wait);
+            for (var selection : chosen.entrySet()) {
+                JsonNode task = selection.getValue(); int step = task.path("step").asInt();
+                taskStep(selection.getKey(), task.path("taskId").asText(), step,
+                        task.path("kind").asText().equals("sequence") ? task.path("sequence").get(step).asInt() : 0);
+                assertNotEquals("error", latest(table.get(selection.getKey())).path("type").asText());
+            }
+        }
+        assertEquals("village", game(0).path("winner").asText());
+        JsonNode result = latestOfType(table.get(0), "task_state");
+        assertEquals(result.path("total").asInt(), result.path("completed").asInt());
+        System.out.println("TASK_MEASUREMENT players=" + count + " rounds=" + maximumRound + " concurrentTravelMs=" + walkedTicks * 100 + " completionElapsedMs=" + (milliseconds.get() - REVEAL));
+        assertTrue(maximumRound >= 9 && maximumRound <= 10, "Measured focused workload: " + maximumRound + " rounds");
+    }
+
     @Test
     void repairTasksArePrivatePersistentAndRequireAssignedNearbyTimedSteps() throws Exception {
         startTable("repair-tasks", 4);
@@ -1203,7 +1263,10 @@ class MafiaGameTest {
         String step = "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":0,\"value\":0}";
         send(table.get(1), step);
         assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
-        advance(4_000);
+        advance(119_999);
+        send(table.get(1), step);
+        assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
+        advance(1);
         send(table.get(1), step);
         assertEquals(1, latestOfType(table.get(1), "task_state").path("tasks").get(0).path("step").asInt());
         send(table.get(1), step);
@@ -1242,7 +1305,7 @@ class MafiaGameTest {
         assertEquals("sequence", task.path("kind").asText());
         walkToTask(1, task);
         openTask(1, task.path("taskId").asText());
-        advance(1000);
+        advance(120_000);
         taskStep(1, task.path("taskId").asText(), 0, 99);
         assertEquals("invalid_task", latest(table.get(1)).path("code").asText());
         taskStep(1, task.path("taskId").asText(), 0, task.path("sequence").get(0).asInt());
@@ -1263,7 +1326,7 @@ class MafiaGameTest {
         assertEquals("delivery", task.path("kind").asText());
         walkToTask(1, task);
         openTask(1, task.path("taskId").asText());
-        advance(1000);
+        advance(120_000);
         taskStep(1, task.path("taskId").asText(), 0, 0);
         JsonNode carrying = latestOfType(table.get(1), "task_state").path("tasks").get(2);
         assertEquals(1, carrying.path("step").asInt());
@@ -1275,9 +1338,10 @@ class MafiaGameTest {
         recover(recovered, code, tokens.get(1));
         table.set(1, recovered);
         assertEquals(carrying, latestOfType(recovered, "task_state").path("tasks").get(2));
+        ensureDay(1);
         walkToTask(1, carrying);
         openTask(1, carrying.path("taskId").asText());
-        advance(1000);
+        advance(120_000);
         taskStep(1, carrying.path("taskId").asText(), 1, 0);
         assertEquals(2, latestOfType(recovered, "task_state").path("tasks").get(2).path("step").asInt());
         taskStep(1, carrying.path("taskId").asText(), 1, 0);
@@ -1295,14 +1359,15 @@ class MafiaGameTest {
         for (JsonNode task : state.path("tasks")) assertTrue(task.path("fake").asBoolean());
         JsonNode task = state.path("tasks").get(0);
         walkToTask(0, task);
-        int otherBefore = countOfType(table.get(1), "task_state");
         for (int step = 0; step < task.path("steps").asInt(); step++) {
-            openTask(0, task.path("taskId").asText()); advance(4000);
+            ensureDay(0); walkToTask(0, task);
+            int otherBefore = countOfType(table.get(1), "task_state");
+            openTask(0, task.path("taskId").asText()); advance(120_000);
             taskStep(0, task.path("taskId").asText(), step, 0);
+            assertEquals(otherBefore, countOfType(table.get(1), "task_state"), "Fake activity is private");
         }
         assertEquals(0, latestOfType(table.get(0), "task_state").path("completed").asInt());
         assertEquals(9, latestOfType(table.get(0), "task_state").path("total").asInt());
-        assertEquals(otherBefore, countOfType(table.get(1), "task_state"), "Fake activity is private");
         String realTask = latestOfType(table.get(1), "task_state").path("tasks").get(0).path("taskId").asText();
         openTask(0, realTask);
         assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
@@ -1348,7 +1413,7 @@ class MafiaGameTest {
         }
         chat(5, "public", "Ghost must not speak");
         assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
-        advance(game(5).path("remainingMs").asLong());
+        advance(REVEAL + (game(5).path("round").asInt() - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY - milliseconds.get());
         nightChoice(5, game(5).path("round").asInt(), 1);
         assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
         handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
@@ -1362,7 +1427,7 @@ class MafiaGameTest {
         startTable("transfer-" + cause, 4); advance(REVEAL);
         JsonNode task = latestOfType(table.get(1), "task_state").path("tasks").get(0);
         String taskId = task.path("taskId").asText();
-        walkToTask(1, task); openTask(1, taskId); advance(4000); taskStep(1, taskId, 0, 0);
+        walkToTask(1, task); openTask(1, taskId); advance(120_000); taskStep(1, taskId, 0, 0);
         int two = latestOfType(table.get(2), "task_state").path("tasks").size();
         handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
         assertEquals(two, latestOfType(table.get(2), "task_state").path("tasks").size(), "Disconnect keeps ownership");
@@ -1494,8 +1559,10 @@ class MafiaGameTest {
             assertNotEquals("finished", game(seat).path("phase").asText());
             advance(Math.max(1, game(seat).path("remainingMs").asLong()));
         }
-        if (game(seat).path("remainingMs").isNumber() && game(seat).path("remainingMs").asLong() < 60000) {
-            advance(game(seat).path("remainingMs").asLong()); ensureDay(seat);
+        if (game(seat).path("mode").asText().equals("practice")) return;
+        long deadline = REVEAL + (game(seat).path("round").asInt() - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY;
+        if (deadline - milliseconds.get() < 160_000) {
+            advance(deadline - milliseconds.get()); ensureDay(seat);
         }
     }
     private void completeTask(int seat, String taskId) throws Exception {
@@ -1508,7 +1575,7 @@ class MafiaGameTest {
             if (step == task.path("steps").asInt()) return;
             ensureDay(seat);
             walkToTask(seat, task); openTask(seat, taskId);
-            advance(task.path("kind").asText().equals("repair") ? 4000 : 1000);
+            advance(latestOfType(table.get(seat), "task_state").path("remainingMs").asLong());
             int value = task.path("kind").asText().equals("sequence") ? task.path("sequence").get(step).asInt() : 0;
             taskStep(seat, taskId, step, value);
             assertNotEquals("error", latest(table.get(seat)).path("type").asText(), latest(table.get(seat)).toString());
@@ -1522,33 +1589,38 @@ class MafiaGameTest {
         send(table.get(seat), "{\"version\":1,\"type\":\"task_step\",\"round\":" + game(seat).path("round").asInt() + ",\"taskId\":\"" + taskId + "\",\"step\":" + step + ",\"value\":" + value + "}");
     }
     /** Navigate real move requests through the existing map, never mutate Game positions. */
-    private void walkToTask(int seat, JsonNode task) throws Exception {
-        record Cell(int x, int y) {}
+    private record TaskCell(int x, int y) {}
+
+    private List<TaskCell> routeToTask(int seat, JsonNode task) throws Exception {
         handler.tickFields();
         JsonNode position = field(seat).path("self");
-        Cell start = new Cell((int) Math.round(position.path("x").asDouble() / 16) * 16,
+        TaskCell start = new TaskCell((int) Math.round(position.path("x").asDouble() / 16) * 16,
                 (int) Math.round(position.path("y").asDouble() / 16) * 16);
         if (!RoomRules.walkable(start.x(), start.y())) throw new IllegalStateException("No walkable starting cell");
-        var queue = new java.util.ArrayDeque<Cell>();
-        var previous = new java.util.HashMap<Cell, Cell>();
+        var queue = new java.util.ArrayDeque<TaskCell>();
+        var previous = new java.util.HashMap<TaskCell, TaskCell>();
         queue.add(start); previous.put(start, start);
-        Cell goal = null;
+        TaskCell goal = null;
         while (!queue.isEmpty()) {
-            Cell cell = queue.remove();
+            TaskCell cell = queue.remove();
             if (Math.hypot(cell.x() - task.path("x").asDouble(), cell.y() - task.path("y").asDouble()) <= 48
                     && RoomRules.areaAt(cell.x(), cell.y()).equals(RoomRules.areaAt(task.path("x").asDouble(), task.path("y").asDouble()))) { goal = cell; break; }
-            for (Cell next : List.of(new Cell(cell.x() + 16, cell.y()), new Cell(cell.x() - 16, cell.y()),
-                    new Cell(cell.x(), cell.y() + 16), new Cell(cell.x(), cell.y() - 16))) {
+            for (TaskCell next : List.of(new TaskCell(cell.x() + 16, cell.y()), new TaskCell(cell.x() - 16, cell.y()),
+                    new TaskCell(cell.x(), cell.y() + 16), new TaskCell(cell.x(), cell.y() - 16))) {
                 if (!previous.containsKey(next) && RoomRules.walkable(next.x(), next.y())) {
                     previous.put(next, cell); queue.add(next);
                 }
             }
         }
         if (goal == null) throw new IllegalStateException("No route to " + task);
-        var route = new ArrayList<Cell>();
-        for (Cell cell = goal; !cell.equals(start); cell = previous.get(cell)) route.add(cell);
+        var route = new ArrayList<TaskCell>();
+        for (TaskCell cell = goal; !cell.equals(start); cell = previous.get(cell)) route.add(cell);
         route.add(start); java.util.Collections.reverse(route);
-        for (Cell cell : route) { advance(100); move(seat, cell.x(), cell.y()); }
+        return route;
+    }
+
+    private void walkToTask(int seat, JsonNode task) throws Exception {
+        for (TaskCell cell : routeToTask(seat, task)) { advance(100); move(seat, cell.x(), cell.y()); }
         handler.tickFields();
         assertTrue(Math.hypot(field(seat).path("self").path("x").asDouble() - task.path("x").asDouble(),
                 field(seat).path("self").path("y").asDouble() - task.path("y").asDouble()) <= 64, "Task point must be reachable");

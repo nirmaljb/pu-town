@@ -23,7 +23,7 @@ public final class TaskBoard {
                            int step, int steps, boolean fake, List<Integer> sequence) {}
     public record View(List<TaskView> tasks, int completed, int total, String activeTaskId, Long remainingMs) {}
     private static final double RANGE = 64;
-    private static final long REPAIR_MS = 4000;
+    private static final long INTERACTION_MS = 120_000;
     private static final int REPAIR_STEPS = 3;
     private static final Game.Rejection INVALID = new Game.Rejection("invalid_task", "Choose your current nearby Task step and finish its interaction first.");
     private static final class Assignment {
@@ -42,7 +42,7 @@ public final class TaskBoard {
         }
         Location currentLocation() { return kind.equals("delivery") && step % 2 == 1 ? destination : location; }
         int steps() { return kind.equals("sequence") ? sequence.size() : kind.equals("delivery") ? 2 : REPAIR_STEPS; }
-        long duration() { return kind.equals("repair") ? REPAIR_MS : 1000; }
+        long duration() { return INTERACTION_MS; }
         TaskView view() { Location current = currentLocation(); return new TaskView(id, kind.equals("delivery") ? (step % 2 == 1 ? "Deliver " : "Collect ") + location.name() : location.name(), kind, current.x(), current.y(), step, steps(), fake, sequence); }
     }
     private record Interaction(String taskId, int step, long readyAt) {}
