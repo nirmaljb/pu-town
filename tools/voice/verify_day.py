@@ -109,6 +109,38 @@ async def main():
         await asyncio.sleep(0.5)
         assert frames[0] > before
         print("PASS: real SFU denies a modified client's foreign-track subscription while authorized audio continues", flush=True)
+        old_primary = players[1].latest["voice_state"]["token"]
+        old_player = players[1]
+        replacement = await Player().connect()
+        await replacement.send("recover_room", roomId=snapshot["roomId"], recoveryToken=old_player.latest["room_snapshot"]["recoveryToken"])
+        recovered = await replacement.wait("room_snapshot")
+        assert recovered["selfPlayerId"] == ids[1]
+        players[1] = replacement
+        old_player.reader.cancel()
+        async def retired():
+            while listener.isconnected(): await asyncio.sleep(0.1)
+        await asyncio.wait_for(retired(), 10)
+        for retired_token in [old_primary, token]:
+            stale = rtc.Room()
+            try:
+                await asyncio.wait_for(stale.connect(url, retired_token), 10)
+            except rtc.ConnectError as error:
+                assert "403" in str(error), str(error)
+            else:
+                await stale.disconnect()
+                raise AssertionError("Takeover retained an old voice credential")
+        await replacement.send("join_voice", round=1)
+        await replacement.wait("voice_state", lambda e:e["token"] is not None)
+        peers = await replacement.wait("voice_peers", lambda e:any(p["playerId"] == ids[0] for p in e["peers"]))
+        fresh_token = next(p["token"] for p in peers["peers"] if p["playerId"] == ids[0])
+        assert fresh_token != token
+        listener = rtc.Room(); media.append(listener)
+        listener.on("track_subscribed", subscribed)
+        received.clear()
+        await listener.connect(url, fresh_token)
+        await asyncio.wait_for(received.wait(), 15)
+        token = fresh_token
+        print("PASS: takeover retires actual listening media and both old grants; the same Player receives fresh authorized PCM", flush=True)
         await walk(players[1], 1340, 742)
         await players[1].wait("voice_peers", lambda e: any(p["playerId"] == ids[0] and p["gain"] == 1 for p in e["peers"]))
         await walk(players[1], 1500, 742)

@@ -1,4 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
+import { VoiceIntent, voiceIntentStorage } from "./voice-intent.js";
 import { VoiceRetry } from "./voice-retry.js";
 import { PushToTalk } from "./push-to-talk.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
@@ -24,6 +25,7 @@ export class VoiceController {
   #generation = 0;
   #round: number | null = null;
   #voiceWanted = false;
+  readonly #intent: VoiceIntent;
   #joinDeadline = 0;
   readonly #retry = new VoiceRetry(() => this.retryVoice());
   readonly #reconnectingRooms = new Set<Room>();
@@ -39,6 +41,9 @@ export class VoiceController {
 
   constructor(private readonly client: ReconnectingGameClient, private readonly mixer: AudioMixer,
               private readonly gameUrl: string, private readonly microphone: MicrophoneSettings) {
+    this.#intent = new VoiceIntent(voiceIntentStorage(), client.state.roomId, client.state.status === "reconnecting");
+    this.#voiceWanted = this.#intent.wanted;
+    if (this.#voiceWanted) this.#retry.start();
     this.#pushToTalk.configure(microphone.key);
     this.#unsubscribeMicrophone = microphone.subscribe(() => {
       this.releaseTalk(); this.#pushToTalk.configure(microphone.key); return this.updateMicrophone(true);
@@ -59,11 +64,11 @@ export class VoiceController {
     this.#join.addEventListener("click", () => {
       if (this.#round === null) return;
       void this.mixer.context.resume().catch(() => {});
-      this.#voiceWanted = true; this.requestVoice();
+      this.#voiceWanted = true; this.#intent.remember(this.client.state.roomId, true); this.requestVoice();
     });
     this.#mute.addEventListener("click", () => { void this.toggleMicrophone(); });
     this.#leave.addEventListener("click", () => {
-      this.#voiceWanted = false; this.#retry.stop();
+      this.#voiceWanted = false; this.#intent.remember(null, false); this.#retry.stop();
       this.client.leaveVoice(); this.disconnect(); this.#text = "Voice left";
     });
     this.client.onVoiceState = state => { void this.applyGrant(state); };
@@ -275,7 +280,7 @@ export class VoiceController {
     if (this.inputBlocked()) this.releaseTalk();
     this.#mute.textContent = this.microphone.mode === "push-to-talk" ? this.#muted ? "Enable push to talk" : "Disable push to talk" : this.#muted ? "Unmute microphone" : "Mute microphone";
     if (this.client.state.status === "join" || this.client.state.status === "failed" || this.client.state.status === "leaving") {
-      this.#voiceWanted = false; this.#retry.stop();
+      this.#voiceWanted = false; this.#intent.remember(null, false); this.#retry.stop();
     }
     this.#status.textContent = this.#reconnectingRooms.size > 0 ? "Voice reconnecting; text and Game remain available" : this.#text;
     const active = new Set([...this.#speakers.values()].flatMap(ids => [...ids]));

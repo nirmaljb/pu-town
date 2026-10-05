@@ -114,6 +114,31 @@ class MafiaGameTest {
     }
 
     @Test
+    void dayVoiceTakeoverRetiresPublicationAndListeningBeforeFreshAdmission() throws Exception {
+        var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
+        handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,
+                () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles), voice);
+        try {
+            startTable("day-takeover", 10); advance(REVEAL);
+            walk(0, 1280, 742); walk(1, 1340, 742);
+            for (int seat : List.of(0, 1)) send(table.get(seat), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            String primary = latestOfType(table.get(1), "voice_state").path("token").asText();
+            String listening = latestOfType(table.get(1), "voice_peers").path("peers").get(0).path("token").asText();
+            assertNotNull(voice.authorize(primary)); assertNotNull(voice.authorize(listening));
+            var replacement = connect("day-takeover-replacement"); recover(replacement, code, tokens.get(1));
+            assertNull(voice.authorize(primary)); assertNull(voice.authorize(listening));
+            assertEquals(playerId(1), latestOfType(replacement, "room_snapshot").path("selfPlayerId").asText());
+            send(replacement, "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
+            String current = latestOfType(replacement, "voice_peers").path("peers").get(0).path("token").asText();
+            assertNotEquals(listening, current); assertNotNull(voice.authorize(current));
+            handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+            assertNotNull(voice.authorize(current));
+            send(replacement, "{\"version\":1,\"type\":\"leave_voice\"}");
+            assertNull(voice.authorize(current)); assertNull(voice.authorize(primary));
+        } finally { voice.stop(); }
+    }
+
+    @Test
     void dayVoiceIssuesOnlyDirectHearingGrantsAndRevokesThemAfterMovement() throws Exception {
         var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
         handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,

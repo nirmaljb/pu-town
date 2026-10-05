@@ -293,7 +293,9 @@ A cleared grant always has `canPublish:false`. Never log or persist it. Revocati
 
 Both nullable fields are null together. Leaving voice or entering a phase without
 voice clears the grant. Leave, expiry, Disconnect and takeover retire media access
-on the backend; recovery requires a new explicit voice join. Eliminated
+on the backend; recovery requires fresh `join_voice` admission. The client may
+retain opted-in listening intent for its same-tab Room recovery, but never stores
+voice credentials or an enabled microphone. Leave voice or Room clears that intent. Eliminated
 Participants receive only a listening grant; recovery never restores living permissions. LiveKit messages use its binary signaling
 protocol through `/voice/rtc` or `/voice/rtc/v1`, rather than the Game message
 contract. That gateway rejects missing, forged and retired grants, including

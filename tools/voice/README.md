@@ -117,3 +117,9 @@ the Game clock continue. Leave voice cancels recovery. Restored voice starts
 muted and requests current hearing rights. For a native outage proof, stop the
 normal local SFU first, then run `tools/voice/verify_outage.py` in the configured
 Python environment; it starts and stops only its own dedicated SFU child.
+
+Same-tab refresh remembers opted-in listening for the recovering Room and
+requests fresh media grants. It remembers neither tokens nor an open microphone.
+Leave voice/Room or failed recovery clears that consent. Takeover retires the
+old publication and listening sessions; late old-socket closure cannot affect
+the replacement Player connection. The Day native verifier exercises this path.
