@@ -9,13 +9,22 @@ export class SoundEffects {
   readonly #unlock = () => {
     try { void this.audio.context.resume().catch(() => {}); } catch { /* Play remains available without audio. */ }
   };
+  readonly #menuClick = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const control = target.closest<HTMLButtonElement | HTMLElement>("button, summary");
+    if (!control || control.matches(":disabled") || control.closest(".task-interface, .sound-previews")) return;
+    this.play(control.matches("summary") || control.closest(".avatar-options, .target-list") ? "select" : "click");
+  };
   start(): void {
     document.addEventListener("pointerdown", this.#unlock);
     document.addEventListener("keydown", this.#unlock);
+    document.addEventListener("click", this.#menuClick);
   }
   destroy(): void {
     document.removeEventListener("pointerdown", this.#unlock);
     document.removeEventListener("keydown", this.#unlock);
+    document.removeEventListener("click", this.#menuClick);
   }
   play(cue: SoundCue, volume = 1): void {
     try {
@@ -37,10 +46,14 @@ export class SoundEffects {
     } catch { /* Unsupported output never blocks Game controls. */ }
   }
   update(world: WorldState | undefined, playing: boolean): void {
-    if (!world || !playing || !world.game) { this.#previous = null; return; }
+    if (!world || !playing) { this.#previous = null; return; }
     const previous = this.#previous;
     this.#previous = world;
     if (!previous || previous.roomId !== world.roomId || previous.snapshotSerial !== world.snapshotSerial) return;
+    const own = world.players.get(world.selfPlayerId ?? "");
+    const before = previous.players.get(previous.selfPlayerId ?? "");
+    if (own && before && (own.ready !== before.ready || own.avatarPreset !== before.avatarPreset)) this.play("confirm");
+    if (!world.game) return;
     if (world.game.phase === "day") {
       const last = previous.sounds.at(-1)?.eventId ?? 0;
       for (const sound of world.sounds) if (sound.eventId > last) this.play(sound.kind, sound.gain);

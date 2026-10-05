@@ -169,7 +169,8 @@ export class PuTownScene extends Phaser.Scene {
     this.#avatarReconciler?.setSpeaking(this.#voice?.render(world) ?? new Set());
     this.#taskInterface?.render(world);
     this.#effects?.update(world, this.#client?.state.status === "playing");
-    this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
+    const atTitle = this.#client?.state.status === "join" || this.#client?.state.status === "connecting";
+    this.#meetingArea?.setVisible(atTitle || (world?.phase !== null && world?.phase !== undefined), !atTitle && !world?.field);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     const reducedMotion = this.#settings?.reducedMotion ?? false;
     this.#avatarReconciler?.updateAnimations(time, delta, self, reducedMotion);

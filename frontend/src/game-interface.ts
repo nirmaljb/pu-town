@@ -4,6 +4,7 @@ import type { LocalPosition } from "./field-controller.js";
 import type { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import type { WorldState } from "./world-state.js";
 import { areaAt } from "./room-rules.js";
+import { activeAvatarCollection } from "./avatar-presets.js";
 
 const PHASE_TITLES: Record<GameView["phase"], string> = {
   role_reveal: "Your role",
@@ -335,7 +336,11 @@ export class GameInterface {
         this.#ballotItems.set(playerId, item);
       }
       const button = item.querySelector<HTMLButtonElement>("button")!;
-      button.textContent = target?.displayName ?? (night ? "Nobody — withdraw choice" : "Skip — eliminate nobody");
+      button.querySelector(".target-name")!.textContent = target?.displayName ?? (night ? "Nobody — withdraw choice" : "Skip — eliminate nobody");
+      const portrait = button.querySelector<HTMLElement>(".target-portrait")!;
+      const preset = target === null ? null : activeAvatarCollection()?.presets.find(preset => preset.id === target.avatarPreset);
+      portrait.hidden = !preset;
+      portrait.style.backgroundImage = preset ? `url("${preset.sprite}")` : "";
       button.style.borderLeft = target === null ? "" : `6px solid ${target.colour}`;
       const chosen = locked || (night && this.#preview === null) ? accepted === playerId
         : this.#preview !== null && this.#preview.targetPlayerId === playerId;
@@ -354,6 +359,12 @@ export class GameInterface {
     const item = document.createElement("li");
     const button = document.createElement("button");
     button.type = "button";
+    const portrait = document.createElement("span");
+    portrait.className = "avatar-thumbnail target-portrait";
+    portrait.setAttribute("aria-hidden", "true");
+    const name = document.createElement("span");
+    name.className = "target-name";
+    button.append(portrait, name);
     // A click previews locally; nothing is submitted until the explicit confirmation.
     button.addEventListener("click", () => {
       const game = this.#lastGame;

@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { PuTownScene } from "./pu-town-scene.js";
 import { ROOM_HEIGHT, ROOM_WIDTH } from "./room-rules.js";
 import "./style.css";
+import "./game-skin.css";
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

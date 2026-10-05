@@ -25,7 +25,8 @@ export class JoinInterface {
   readonly #form: HTMLFormElement;
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
-  readonly #roomBarResize: ResizeObserver;
+  readonly #layoutResize: ResizeObserver;
+  #entryMode: "create" | "join" | null = null;
   #lastState: ConnectionState | null = null;
   #world?: WorldState;
   #lastWorld?: WorldState;
@@ -36,24 +37,29 @@ export class JoinInterface {
       <section class="entry-panel" aria-labelledby="entry-title">
         <div class="menu-heading">
           <h1 id="entry-title">PU Town</h1>
-          <p class="intro">A little place to be together.</p>
+          <p class="intro">Friendly faces. Hidden intentions.</p>
         </div>
-        <form class="menu-card" novalidate>
-          <h2 class="menu-title">Meet you in town</h2>
-          <p class="menu-description">Create a Room, or join your friends.</p>
+        <nav class="menu-choices" aria-label="Play PU Town">
+          <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>Bring your friends to town</span></button>
+          <button class="menu-choice" type="button" data-entry="join">Join Room <span>Enter a friend's Room Code</span></button>
+        </nav>
+        <form class="menu-card" novalidate hidden aria-describedby="entry-status">
+          <button class="menu-back" type="button">← Back</button>
+          <h2 class="menu-title">Create Room</h2>
+          <p class="menu-description">A place for you and your friends.</p>
           <label for="display-name">Display Name</label>
           <input id="display-name" name="displayName" autocomplete="nickname" placeholder="What should we call you?" aria-describedby="name-hint" required>
-          <p id="name-hint" class="hint">1–24 characters. No account needed.</p>
-          <button class="primary" type="submit" value="create"><span aria-hidden="true" class="play-marker">▶</span> Create Room</button>
-          <div class="divider"><span>or join your friends</span></div>
-          <label for="room-code">Room Code</label>
-          <div class="join-row">
-            <input id="room-code" name="roomCode" autocomplete="off" spellcheck="false" placeholder="ABC234">
-            <button type="submit" value="join">Join Lobby</button>
+          <p id="name-hint" class="hint">1–24 characters. This is how Players see you.</p>
+          <div class="room-code-field" hidden>
+            <label for="room-code">Room Code</label>
+            <input id="room-code" name="roomCode" autocomplete="off" spellcheck="false" placeholder="ABC234" aria-describedby="code-hint">
+            <p id="code-hint" class="hint">The 6-character code from your Host.</p>
           </div>
-          <p class="entry-status" role="status" aria-live="polite"></p>
+          <button class="primary enter-room" type="submit">Create Room</button>
         </form>
-        <p class="footnote"><span>4–10 Players</span><span>Roam the town. Find the Mafia.</span></p>
+        <p id="entry-status" class="entry-status" role="status" aria-live="polite"></p>
+        <details class="menu-help"><summary>How to play</summary><p>Explore and complete Tasks by Day. Make your private Role choice at Night. Discuss and vote at Townhall to find the Mafia.</p><p>Walk with WASD or arrow keys. Try Solo Practice from your own Lobby.</p></details>
+        <p class="footnote"><span>4–10 Players</span><span>One town. Who can you trust?</span></p>
       </section>
       <header class="room-bar" hidden>
         <span class="wordmark">PU Town.</span>
@@ -63,6 +69,7 @@ export class JoinInterface {
         <span class="room-status" role="status"></span>
         <button type="button" class="leave-room">Leave Room</button>
       </header>
+      <div class="lobby-scene-space" aria-hidden="true" hidden></div>
       <section class="lobby-controls" hidden aria-label="Lobby controls">
         <div class="role-setup" role="group" aria-label="Roles">
           <span class="role-setup-title">Roles</span>
@@ -95,10 +102,13 @@ export class JoinInterface {
     this.#root.insertBefore(this.#chooser.element, this.element(".connection-overlay"));
     document.body.append(this.#root);
     const roomBar = this.element(".room-bar");
-    this.#roomBarResize = new ResizeObserver(() => {
+    const lobbyControls = this.element(".lobby-controls");
+    this.#layoutResize = new ResizeObserver(() => {
       if (!roomBar.hidden) document.documentElement.style.setProperty("--room-bar-height", `${Math.ceil(roomBar.getBoundingClientRect().height)}px`);
+      if (!lobbyControls.hidden) document.documentElement.style.setProperty("--lobby-controls-height", `${Math.ceil(lobbyControls.getBoundingClientRect().height)}px`);
     });
-    this.#roomBarResize.observe(roomBar);
+    this.#layoutResize.observe(roomBar);
+    this.#layoutResize.observe(lobbyControls);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");
     this.#code = this.element("#room-code");
@@ -108,7 +118,8 @@ export class JoinInterface {
       if (this.client.state.status !== "join") return;
       try {
         const name = normalizeDisplayName(this.#name.value);
-        const action = (event.submitter as HTMLButtonElement | null)?.value ?? "create";
+        const action = this.#entryMode;
+        if (action === null) return;
         if (action === "join" && !/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/.test(this.#code.value.trim().toUpperCase())) {
           throw new Error("Enter a 6-character Room Code.");
         }
@@ -119,6 +130,16 @@ export class JoinInterface {
         this.render();
       } catch (error) {
         this.element(".entry-status").textContent = error instanceof Error ? error.message : String(error);
+      }
+    });
+    for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>("[data-entry]"))) {
+      button.addEventListener("click", () => this.chooseEntry(button.dataset.entry === "join" ? "join" : "create"));
+    }
+    this.element(".menu-back").addEventListener("click", () => this.chooseEntry(null));
+    this.#root.addEventListener("keydown", event => {
+      if (event.key === "Escape" && this.#entryMode !== null && this.client.state.status === "join") {
+        event.preventDefault();
+        this.chooseEntry(null);
       }
     });
     this.element(".ready-toggle").addEventListener("click", () => {
@@ -140,6 +161,10 @@ export class JoinInterface {
     this.element(".copy-code").addEventListener("click", () => {
       const code = this.client.state.roomId;
       if (!code) return;
+      if (!navigator.clipboard) {
+        this.element(".room-status").textContent = "Select the Room Code to copy it.";
+        return;
+      }
       void navigator.clipboard.writeText(code).then(
         () => { this.element(".room-status").textContent = "Code copied"; },
         () => { this.element(".room-status").textContent = "Could not copy. Select the Room Code to copy it."; }
@@ -150,6 +175,21 @@ export class JoinInterface {
 
   setAvatarCollection(collection: AvatarCollection): void {
     this.#chooser.setCollection(collection);
+  }
+
+  private chooseEntry(mode: "create" | "join" | null): void {
+    if (this.client.state.status !== "join") return;
+    this.#entryMode = mode;
+    this.element(".menu-choices").hidden = mode !== null;
+    this.#form.hidden = mode === null;
+    this.element(".room-code-field").hidden = mode !== "join";
+    this.element(".menu-title").textContent = mode === "join" ? "Join Room" : "Create Room";
+    this.element(".menu-description").textContent = mode === "join" ? "Your friends saved you a Seat." : "A place for you and your friends.";
+    this.element(".enter-room").textContent = mode === "join" ? "Join Room" : "Create Room";
+    this.element(".entry-status").textContent = "";
+    if (mode === null) this.element<HTMLButtonElement>("[data-entry=create]").focus();
+    else if (mode === "join" && this.#name.value.trim()) this.#code.focus();
+    else this.#name.focus();
   }
 
   render(world?: WorldState): void {
@@ -164,6 +204,7 @@ export class JoinInterface {
     this.#chooser.render(self, choosing);
     document.body.classList.toggle("in-lobby", Boolean(lobby && state.status !== "join" && state.status !== "connecting"));
     this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
+    this.element(".lobby-scene-space").hidden = this.element(".lobby-controls").hidden;
     this.element(".copy-code").hidden = !lobby;
     this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
     const gathered = this.#world?.players.size ?? 0;
@@ -189,7 +230,7 @@ export class JoinInterface {
     this.element<HTMLButtonElement>(".start-practice").disabled = state.status !== "playing";
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
-    ready.textContent = self?.ready ? "Not Ready" : "Ready";
+    ready.textContent = self?.ready ? "✓ Ready · Undo" : "I'm Ready";
     ready.setAttribute("aria-pressed", String(self?.ready ?? false));
     const previous = this.#lastState;
     this.#lastState = state;
@@ -198,8 +239,10 @@ export class JoinInterface {
     this.element(".entry-panel").hidden = !entry;
     this.element(".room-bar").hidden = entry;
     this.element(".connection-overlay").hidden = !interrupted;
-    document.getElementById("stage")!.style.visibility = entry ? "hidden" : "visible";
-    for (const control of Array.from(this.#form.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button"))) {
+    document.body.classList.toggle("at-title", entry);
+    document.getElementById("stage")!.style.visibility = "visible";
+    this.#form.setAttribute("aria-busy", String(state.status === "connecting"));
+    for (const control of Array.from(this.#root.querySelectorAll<HTMLInputElement | HTMLButtonElement>(".entry-panel input, .entry-panel button"))) {
       control.disabled = state.status === "connecting";
     }
     this.element(".entry-status").textContent = state.status === "connecting" ? "Connecting…" : state.error ?? "";
@@ -211,7 +254,10 @@ export class JoinInterface {
     this.element(".connection-description").textContent = state.status === "failed"
       ? state.error ?? "Recovery cannot continue."
       : "Your place is held while we bring you back.";
-    if (state.status === "join" && previous?.status !== "join") this.#name.focus();
+    if (state.status === "join" && previous?.status !== "join") {
+      if (previous?.status === "connecting" && this.#entryMode !== null) this.#name.focus();
+      else this.chooseEntry(null);
+    }
     if (interrupted && previous?.status !== state.status) this.element<HTMLButtonElement>(".back").focus();
   }
 
@@ -235,7 +281,7 @@ export class JoinInterface {
     this.element(".role-villagers").classList.toggle("short", villagers < 1);
   }
 
-  destroy(): void { this.#roomBarResize.disconnect(); this.#root.remove(); document.body.classList.remove("in-lobby"); }
+  destroy(): void { this.#layoutResize.disconnect(); this.#root.remove(); document.body.classList.remove("in-lobby", "at-title"); }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {
     return this.#root.querySelector<T>(selector)!;
