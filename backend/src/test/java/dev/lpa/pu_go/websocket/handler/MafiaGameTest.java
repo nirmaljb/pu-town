@@ -139,6 +139,13 @@ class MafiaGameTest {
             walk(1, 1500, 742); handler.tickFields();
             assertEquals(0, latestOfType(table.get(0), "voice_peers").path("peers").size());
             assertNull(voice.authorize(token));
+            walk(0, 576, 742); walk(0, 576, 800);
+            walk(1, 576, 742); walk(1, 576, 900);
+            handler.tickFields();
+            assertEquals(0, latestOfType(table.get(0), "voice_peers").path("peers").size());
+            walk(0, 576, 900);
+            handler.tickFields();
+            assertEquals(1, latestOfType(table.get(0), "voice_peers").path("peers").size());
             advance(DAY);
             assertTrue(latestOfType(table.get(0), "voice_state").path("token").isNull());
         } finally { voice.stop(); }
