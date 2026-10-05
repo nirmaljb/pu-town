@@ -20,6 +20,11 @@ test("Task countdowns preserve keyboard focus and do not cover chat or voice", a
   expect(tasks!.y + tasks!.height).toBeLessThanOrEqual(chat!.y);
   expect(chat!.y + chat!.height).toBeLessThanOrEqual(voice!.y);
   await page.screenshot({ path: test.info().outputPath("task-ledger.png") });
+  await page.setViewportSize({ width: 550, height: 600 });
+  const shortTasks = await ledger.boundingBox(), shortChat = await page.locator(".chat-panel").boundingBox();
+  expect(shortTasks!.y + shortTasks!.height).toBeLessThanOrEqual(shortChat!.y);
+  await close.click();
+  await expect(close).toBeHidden();
 });
 
 test("#23 A wrapped Room bar keeps Settings and Leave Room above the phase banner", async ({ page }) => {

@@ -376,6 +376,11 @@ h2 { margin: 16px 0; font-size: 28px; }
 @media (max-height: 600px) {
   .task-interface { bottom: 84px; max-height: 35vh; }
   .game-panel { padding-bottom: 72px; }
+  .game-interface[data-phase="day"] .chat-panel { position: fixed; left: auto; right: 16px; bottom: 84px; width: 280px; max-height: 100px; }
+}
+@media (max-height: 600px) and (max-width: 700px) {
+  .game-interface[data-phase="day"] .chat-panel { left: 12px; right: 12px; bottom: 112px; width: auto; }
+  .task-interface { bottom: 224px; max-height: clamp(56px, calc(100dvh - var(--room-bar-height, 76px) - 330px), 180px); }
 }
 
 .voice-controls {
