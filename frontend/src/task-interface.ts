@@ -10,7 +10,7 @@ export class TaskInterface {
   constructor(private readonly client: ReconnectingGameClient, private readonly effects: SoundEffects, private readonly now = Date.now) {
     this.#root.className = "task-interface";
     this.#root.setAttribute("aria-label", "Tasks");
-    document.querySelector("#game-container")?.append(this.#root);
+    document.body.append(this.#root);
   }
   destroy(): void { this.#root.remove(); }
   render(world: WorldState | undefined): void {
