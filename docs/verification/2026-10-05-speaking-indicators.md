@@ -11,3 +11,8 @@ Townhall activity, disconnected membership and absent recovery grants. The
 backend asserts server-owned publisher identity. Browser automation remains
 waived by the user; physical microphone and visual multi-browser acceptance
 remain unverified.
+
+Frontend full suite: 90 passed, typecheck and build passed. Backend full suite:
+110 passed. Standards found no documented breaches. The Spec review found that
+a local mute or one unsubscription cleared unrelated Townhall dots; both now
+remove only the affected Participant from the cached activity.

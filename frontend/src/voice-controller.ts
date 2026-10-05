@@ -92,8 +92,8 @@ export class VoiceController {
     room.on(RoomEvent.TrackMuted, (_publication, participant) => {
       this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== participant.name)));
     });
-    room.on(RoomEvent.TrackUnsubscribed, track => {
-      this.#speakers.delete(room);
+    room.on(RoomEvent.TrackUnsubscribed, (track, _publication, participant) => {
+      this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== participant.name)));
       this.removeTrack(track); tracks.delete(track);
     });
   }
@@ -148,7 +148,7 @@ export class VoiceController {
       await room.localParticipant.setMicrophoneEnabled(this.#muted);
       if (generation !== this.#generation) return;
       this.#muted = !this.#muted;
-      if (this.#muted) this.#speakers.delete(room);
+      if (this.#muted) this.#speakers.set(room, new Set([...this.#speakers.get(room) ?? []].filter(id => id !== room.localParticipant.name)));
       this.#text = this.#muted ? "Listening · microphone muted" : "Microphone on";
     } catch {
       if (generation === this.#generation) this.#text = "Microphone unavailable; you can still listen and use text";
