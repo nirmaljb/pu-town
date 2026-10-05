@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { visibleSpeakers } from '../dist/voice-activity.js';
+import { audibleSpeakers, visibleSpeakers } from '../dist/voice-activity.js';
 import { emptyWorld } from '../dist/world-state.js';
 const world = phase => ({...emptyWorld(), selfPlayerId:'self', voice:{token:'grant',url:'/voice',canPublish:true},
  players:new Map(['self','near','hidden','ghost'].map(id=>[id,{connected:true}])),
@@ -18,4 +18,13 @@ test('Townhall allows living speakers, and transitions, recovery and disconnect 
  for(const phase of ['night','reveal','finished']) assert.equal(visibleSpeakers({...w,game:{...w.game,phase}},ids).size,0);
  assert.equal(visibleSpeakers({...w,voice:null},ids).size,0);
  w.players.set('near',{connected:false});assert.equal(visibleSpeakers(w,ids).size,0);
+});
+
+test('ducking activity includes authorized heard speakers beyond Vision but never absent hearing grants',()=>{
+ const w=world('day');w.voicePeers.push({playerId:'hidden',gain:0.2,token:'authorized'});
+ const active=new Set(['hidden','ghost']);
+ assert.deepEqual([...audibleSpeakers(w,active)],['hidden']);
+ assert.equal(visibleSpeakers(w,active).size,0);
+ assert.equal(audibleSpeakers({...w,voicePeers:[]},active).size,0);
+ assert.equal(audibleSpeakers({...w,game:{...w.game,phase:'night'}},active).size,0);
 });

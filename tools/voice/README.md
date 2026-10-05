@@ -108,3 +108,6 @@ server phase or participation permissions.
 Noise suppression is remembered and applied through browser-supported capture
 constraints. Unsupported browsers show the setting disabled; the Game and voice
 remain usable. This is browser processing, with no external audio service.
+
+Authorized speaking temporarily lowers effects and ambience without changing
+saved slider values. Levels recover when speech stops or voice access ends.

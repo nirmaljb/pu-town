@@ -9,6 +9,7 @@ export class AudioMixer {
   #context: AudioContext | null = null;
   #master: GainNode | null = null;
   readonly #channels = new Map<AudioChannel, GainNode>();
+  #ducked = false;
   #preview: OscillatorNode | null = null;
 
   constructor() {
@@ -29,7 +30,7 @@ export class AudioMixer {
     if (!Number.isFinite(value) || value < 0 || value > 100) return;
     this.#volumes[control] = value;
     const gain = control === "master" ? this.#master : this.#channels.get(control);
-    if (gain && this.#context) gain.gain.setValueAtTime(value / 100, this.#context.currentTime);
+    if (gain && this.#context) gain.gain.setValueAtTime(value / 100 * this.factor(control), this.#context.currentTime);
     try { localStorage.setItem(VOLUME_KEY, JSON.stringify(this.#volumes)); } catch { /* In-memory preferences still work. */ }
   }
 
@@ -50,11 +51,23 @@ export class AudioMixer {
     let gain = this.#channels.get(category);
     if (!gain) {
       gain = this.context.createGain();
-      gain.gain.value = this.#volumes[category] / 100;
+      gain.gain.value = this.#volumes[category] / 100 * this.factor(category);
       gain.connect(this.#master!);
       this.#channels.set(category, gain);
     }
     return gain;
+  }
+
+  private factor(control: VolumeControl): number {
+    return this.#ducked && (control === "effects" || control === "ambience") ? 0.25 : 1;
+  }
+  voiceActive(active: boolean): void {
+    if (this.#ducked === active) return;
+    this.#ducked = active;
+    for (const category of ["effects", "ambience"] as const) {
+      this.#channels.get(category)?.gain.setTargetAtTime(this.#volumes[category] / 100 * this.factor(category),
+        this.#context?.currentTime ?? 0, active ? 0.06 : 0.2);
+    }
   }
 
   async preview(category: AudioChannel): Promise<void> {

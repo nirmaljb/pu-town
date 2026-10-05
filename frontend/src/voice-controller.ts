@@ -1,7 +1,7 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 import { PushToTalk } from "./push-to-talk.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
-import { visibleSpeakers } from "./voice-activity.js";
+import { audibleSpeakers, visibleSpeakers } from "./voice-activity.js";
 import { AudioMixer } from "./audio-mixer.js";
 import type { VoicePeer, VoiceState } from "./protocol.js";
 import type { WorldState } from "./world-state.js";
@@ -215,7 +215,7 @@ export class VoiceController {
   }
 
   private disconnect(): void {
-    this.#pushToTalk.reset();
+    this.#pushToTalk.reset(); this.mixer.voiceActive(false);
     ++this.#generation;
     const room = this.#room; this.#room = null;
     if (room) this.closeRoom(room);
@@ -241,7 +241,11 @@ export class VoiceController {
     if (this.inputBlocked()) this.releaseTalk();
     this.#mute.textContent = this.microphone.mode === "push-to-talk" ? this.#muted ? "Enable push to talk" : "Disable push to talk" : this.#muted ? "Unmute microphone" : "Mute microphone";
     this.#status.textContent = this.#text;
-    return visibleSpeakers(world, new Set([...this.#speakers.values()].flatMap(ids => [...ids])));
+    const active = new Set([...this.#speakers.values()].flatMap(ids => [...ids]));
+    const audible = audibleSpeakers(world, active);
+    const localSpeaking = Boolean(world?.selfPlayerId && audible.has(world.selfPlayerId));
+    this.mixer.voiceActive(localSpeaking || this.mixer.volume("voice") > 0 && this.mixer.volume("master") > 0 && audible.size > 0);
+    return visibleSpeakers(world, active);
   }
 
   destroy(): void {
