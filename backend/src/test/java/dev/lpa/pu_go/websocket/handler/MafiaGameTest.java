@@ -1197,7 +1197,7 @@ class MafiaGameTest {
             int round = game(0).path("round").asInt();
             assertTrue(round <= 15, "Workload did not finish within measurement window");
             maximumRound = round;
-            long deadline = REVEAL + (round - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY;
+            long deadline = dayDeadline(round);
             var chosen = new java.util.LinkedHashMap<Integer, JsonNode>();
             var routes = new java.util.LinkedHashMap<Integer, List<TaskCell>>();
             for (int seat : workers) {
@@ -1413,7 +1413,7 @@ class MafiaGameTest {
         }
         chat(5, "public", "Ghost must not speak");
         assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
-        advance(REVEAL + (game(5).path("round").asInt() - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY - milliseconds.get());
+        advance(dayDeadline(game(5).path("round").asInt()) - milliseconds.get());
         nightChoice(5, game(5).path("round").asInt(), 1);
         assertEquals("invalid_action", latest(table.get(5)).path("code").asText());
         handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
@@ -1554,13 +1554,15 @@ class MafiaGameTest {
 
     // ----- helpers ------------------------------------------------------------------------
 
+    private static long dayDeadline(int round) { return REVEAL + (round - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY; }
+
     private void ensureDay(int seat) {
         while (!game(seat).path("phase").asText().equals("day")) {
             assertNotEquals("finished", game(seat).path("phase").asText());
             advance(Math.max(1, game(seat).path("remainingMs").asLong()));
         }
         if (game(seat).path("mode").asText().equals("practice")) return;
-        long deadline = REVEAL + (game(seat).path("round").asInt() - 1) * (DAY + NIGHT + DISCUSSION + VOTING + VOTING_RESULT) + DAY;
+        long deadline = dayDeadline(game(seat).path("round").asInt());
         if (deadline - milliseconds.get() < 160_000) {
             advance(deadline - milliseconds.get()); ensureDay(seat);
         }

@@ -42,3 +42,7 @@ Ghost earned steps, Forfeit accounting, Fake Task privacy and immediate victory.
 Frontend full suite: 103 passed; typecheck and production build passed. Clients
 already render the server timer, so the timing change needs no hard-coded client
 constant or wire-shape change. Protocol and gameplay documentation were updated.
+
+Review corrected the original sequence/delivery protocol timing paragraphs and
+shared test deadline arithmetic. Full backend rerun: 119 passed. No remaining
+functional Spec finding; human balance acceptance remains explicitly unverified.
