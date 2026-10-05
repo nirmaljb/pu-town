@@ -32,6 +32,7 @@ async def main():
         listener, _, token = await ghost.voice(); rooms.append(listener)
         assert ghost.latest['voice_state']['canPublish'] is False
         received = asyncio.Event()
+        privacy_errors = []
         async def consume(track):
             stream = rtc.AudioStream(track)
             try:
@@ -43,7 +44,8 @@ async def main():
                 await stream.aclose()
         @listener.on('track_subscribed')
         def subscribed(track, publication, participant):
-            assert participant.name == mafia.latest['room_snapshot']['selfPlayerId']
+            if participant.name != mafia.latest['room_snapshot']['selfPlayerId']:
+                privacy_errors.append('Unexpected Townhall publisher'); return
             consumers.append(asyncio.create_task(consume(track)))
         source = rtc.AudioSource(48000, 1)
         track = rtc.LocalAudioTrack.create_audio_track('Living Townhall tone', source)
@@ -54,6 +56,7 @@ async def main():
                 await source.capture_frame(rtc.AudioFrame(wave,48000,1,960)); await asyncio.sleep(.02)
         tone = asyncio.create_task(publish())
         await asyncio.wait_for(received.wait(), 15)
+        assert not privacy_errors, privacy_errors
         print('PASS: Night-eliminated Participant receives living Townhall PCM with canPublish false', flush=True)
         # Replace only the Ghost media connection with hostile raw signaling.
         await listener.disconnect()

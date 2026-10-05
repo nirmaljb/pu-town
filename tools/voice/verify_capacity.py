@@ -30,13 +30,14 @@ async def main():
         ids=[player.latest['room_snapshot']['selfPlayerId'] for player in players]
         parts=urlsplit(GAME);url=urlunsplit((parts.scheme,parts.netloc,'/voice','',''))
         limit=asyncio.Semaphore(10)
-        received=set();activity=set()
+        received=set();activity=set();privacy_errors=[]
         async def connect(key,token,speaker=None):
             room=rtc.Room();rooms[key]=room
             if speaker is not None:
                 @room.on('track_subscribed')
                 def subscribed(track,publication,participant):
-                    assert participant.name==ids[speaker], 'A listener received an unrelated speaker'
+                    if participant.name!=ids[speaker]:
+                        privacy_errors.append('A listener received an unrelated speaker'); return
                     async def consume():
                         stream=rtc.AudioStream(track)
                         try:
@@ -49,7 +50,8 @@ async def main():
                 @room.on('active_speakers_changed')
                 def speaking(participants):
                     for participant in participants:
-                        assert participant.name==ids[speaker], 'Unrelated speaker activity leaked'
+                        if participant.name!=ids[speaker]:
+                            privacy_errors.append('Unrelated speaker activity leaked'); continue
                         activity.add(key)
             async with limit:await asyncio.wait_for(room.connect(url,token),30)
         await asyncio.gather(*(connect(('publish',i),p.latest['voice_state']['token']) for i,p in enumerate(players)))
@@ -74,8 +76,11 @@ async def main():
                     await audio.capture_frame(rtc.AudioFrame(wave,48000,1,960));await asyncio.sleep(.02)
             tones.append(asyncio.create_task(publish()))
         async def complete():
-            while len(received)<90 or len(activity)<90:await asyncio.sleep(.1)
+            while len(received)<90 or len(activity)<90:
+                assert not privacy_errors, privacy_errors
+                await asyncio.sleep(.1)
         await asyncio.wait_for(complete(),20)
+        assert not privacy_errors, privacy_errors
         assert len(rooms)==100
         assert all(not rooms[('publish',i)].remote_participants for i in range(10))
         print('PASS: ten Game Players, 100 simultaneous media connections, all 90 authorized PCM and speaker-activity pairs, hidden listeners',flush=True)
@@ -87,6 +92,7 @@ async def main():
             while any(room.isconnected() for room in retired):await asyncio.sleep(.1)
         await asyncio.wait_for(removed(),15)
         assert all(rooms[(i,j)].isconnected() for i in range(9) for j in range(9) if i!=j)
+        assert not privacy_errors, privacy_errors
         print('PASS: movement retires all 18 obsolete directed hearing sessions while 72 authorized sessions remain connected',flush=True)
     finally:
         for tone in tones:tone.cancel()

@@ -46,7 +46,7 @@ Game endpoint or browser automation was used.
 | `verify_capacity.py` | Ten Game Players, 100 concurrent connections, all 90 authorized directed PCM/activity pairs. Moving one Player out of range retired all 18 affected listener sessions; 72 authorized listener sessions remained connected. |
 | `verify_ghost.py` | A real Night-eliminated Participant received living Townhall PCM with `canPublish:false`. A hostile microphone request closed signaling with 4003 and retired the grant; the living publisher stayed connected. |
 
-Day and capacity proofs ran against the final packaged backend. The Ghost and
+Day, capacity and Ghost proofs ran against the final packaged backend. The
 policy/token proofs used the existing isolated backend with the same final voice
 implementation; its older Task timing is irrelevant to those checks. Capacity
 sampling closes each decoded audio stream after its first positive PCM frame;
@@ -82,3 +82,18 @@ is a tuning target, not a claim of enjoyable or balanced nine-round play.
 README, operational guidance, the protocol, voice setup and ADR 0018 were reconciled
 with implemented behavior and these limits. The glossary adds domain-only Task,
 Fake Task and Hearing terms.
+
+## Required two-axis review
+
+The code-review skill reviewed `d5d1504...41f2ce7` in parallel, followed by the
+callback-error hardening diff. Standards found zero documented violations and
+one optional duplication smell: the two native scripts repeat tone generation
+and capture loops. That small duplication remains local to the proofs; sharing
+a tone helper is an optional refactor. Spec found no missing behavior or scope
+creep within the user's browser waiver. Both follow-up reviews approved recording
+SDK callback errors and asserting them in the main coroutine, rather than relying
+on callback exceptions that the SDK can swallow. Both hardened native proofs
+passed against the final packaged backend.
+
+Review totals: Standards one optional heuristic finding, no hard violations;
+Spec zero findings. The remaining acceptance limits are listed above.
