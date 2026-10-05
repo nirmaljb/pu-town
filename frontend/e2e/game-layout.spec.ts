@@ -73,7 +73,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
         await host.keyboard.up("s");
       }
       // The clock is real: Day cannot be interrupted by an Emergency or Report.
-      await expect(host.locator(".game-phase")).toHaveText("Night · Sleeping", { timeout: 185_000 });
+      await expect.poll(() => games[0]?.phase, { timeout: 185_000 }).toBe("night");
+      await host.bringToFront();
+      await expect(host.locator(".game-phase")).toHaveText("Night · Sleeping");
       for (const page of pages) {
         await page.bringToFront();
         await expect(page.locator(".game-phase")).toHaveText("Night · Sleeping");

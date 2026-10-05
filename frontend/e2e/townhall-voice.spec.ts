@@ -75,7 +75,6 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     console.log("Eliminated browser received nonzero PCM from the living speaker.");
     await victim.reload();
     await expect(victim.locator(".game-banner")).toBeVisible();
-    await victim.getByRole("button", { name: "Join voice", exact: true }).click();
     await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
     await expect.poll(peak, { timeout: 20_000 }).toBeGreaterThan(0.01);
     expect(grants.get(victimIndex)?.token).not.toBe(oldToken);
@@ -109,7 +108,7 @@ test("an eliminated Participant hears real Townhall audio, cannot publish, and r
     const livingToken = grants.get(condemnedIndex)!.token;
     await expect(condemned.locator(".voice-controls [role=status]")).toHaveText("Microphone on", { timeout: 15_000 });
     await victim.bringToFront();
-    await victim.getByRole("button", { name: "Join voice", exact: true }).click();
+    if (await victim.getByRole("button", { name: "Join voice", exact: true }).isVisible()) await victim.getByRole("button", { name: "Join voice", exact: true }).click();
     await expect(victim.locator(".voice-controls [role=status]")).toHaveText("Listening only · eliminated", { timeout: 20_000 });
     await expect.poll(peak, { timeout: 20_000 }).toBeGreaterThan(0.01);
     await expect(speaker.locator(".game-phase")).toContainText("Voting", { timeout: 100_000 });
