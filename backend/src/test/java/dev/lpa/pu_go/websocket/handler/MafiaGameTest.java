@@ -120,7 +120,7 @@ class MafiaGameTest {
                 () -> "player-" + playerIds.incrementAndGet(), roles -> assignment.get().apply(roles), voice);
         try {
             startTable("day-takeover", 10); advance(REVEAL);
-            walk(0, 1280, 742); walk(1, 1340, 742);
+            walk(0, townX(1280), townY(742)); walk(1, townX(1340), townY(742));
             for (int seat : List.of(0, 1)) send(table.get(seat), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
             String primary = latestOfType(table.get(1), "voice_state").path("token").asText();
             String listening = latestOfType(table.get(1), "voice_peers").path("peers").get(0).path("token").asText();
@@ -146,7 +146,7 @@ class MafiaGameTest {
         try {
             startTable("day-voice", 10);
             advance(REVEAL);
-            walk(0, 1280, 742); walk(1, 1400, 742); walk(2, 1480, 742);
+            walk(0, townX(1280), townY(742)); walk(1, townX(1400), townY(742)); walk(2, townX(1480), townY(742));
             for (int seat : List.of(0, 1, 2)) send(table.get(seat), "{\"version\":1,\"type\":\"join_voice\",\"round\":1}");
             handler.tickFields();
             JsonNode peers = latestOfType(table.get(0), "voice_peers").path("peers");
@@ -159,16 +159,16 @@ class MafiaGameTest {
             assertTrue(claims.path("video").path("hidden").asBoolean());
             assertNotNull(voice.authorize(token));
             assertEquals(2, latestOfType(table.get(1), "voice_peers").path("peers").size());
-            walk(1, 1340, 742); handler.tickFields();
+            walk(1, townX(1340), townY(742)); handler.tickFields();
             assertEquals(1, latestOfType(table.get(0), "voice_peers").path("peers").get(0).path("gain").asDouble());
-            walk(1, 1500, 742); handler.tickFields();
+            walk(1, townX(1500), townY(742)); handler.tickFields();
             assertEquals(0, latestOfType(table.get(0), "voice_peers").path("peers").size());
             assertNull(voice.authorize(token));
-            walk(0, 576, 742); walk(0, 576, 800);
-            walk(1, 576, 742); walk(1, 576, 900);
+            walk(0, townX(576), townY(742)); walk(0, townX(576), townY(800));
+            walk(1, townX(576), townY(742)); walk(1, townX(576), townY(900));
             handler.tickFields();
             assertEquals(0, latestOfType(table.get(0), "voice_peers").path("peers").size());
-            walk(0, 576, 900);
+            walk(0, townX(576), townY(900));
             handler.tickFields();
             assertEquals(1, latestOfType(table.get(0), "voice_peers").path("peers").size());
             advance(DAY);
@@ -389,6 +389,55 @@ class MafiaGameTest {
     }
 
     @Test
+    void automaticDealsFollowRosterSizeAndRevealOnlyEachRecipientsRole() throws Exception {
+        assignment.set(UnaryOperator.identity());
+        for (int players = 4; players <= 10; players++) {
+            table.clear();
+            startTable("auto-" + players, players, -1, 1, 1);
+            var counts = roleCounts(players);
+            int mafia = players == 10 ? 3 : players >= 7 ? 2 : 1;
+            assertEquals(mafia, counts.get(Role.MAFIA));
+            assertEquals(1, counts.get(Role.DOCTOR));
+            assertEquals(1, counts.get(Role.SHERIFF));
+            assertEquals(players - mafia - 2, counts.get(Role.VILLAGER));
+            for (int seat = mafia; seat < players; seat++) assertNoHiddenRolesLeaked(table.get(seat));
+        }
+    }
+
+    @Test
+    void automaticCountsTrackMembershipsAndHostOverridesRemainAcceptedAcrossJoinsAndLeaves() throws Exception {
+        var host = connect("auto-members-0");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        table.add(host);
+        for (int seat = 1; seat <= 6; seat++) {
+            var guest = connect("auto-members-" + seat);
+            join(guest, code);
+            table.add(guest);
+            assertEquals(seat == 6 ? 2 : 1, latestOfType(guest, "room_snapshot").path("roleSetup").path("mafia").asInt());
+        }
+        assertEquals(2, latestOfType(host, "room_state").path("roleSetup").path("mafia").asInt());
+        var seventh = table.get(6);
+        String token = latestOfType(seventh, "room_snapshot").path("recoveryToken").asText();
+        handler.afterConnectionClosed(seventh, CloseStatus.NORMAL);
+        assertEquals(2, latestOfType(host, "room_state").path("roleSetup").path("mafia").asInt(), "Disconnect retains the Membership");
+        var recovered = connect("auto-members-returned");
+        recover(recovered, code, token);
+        assertEquals(2, latestOfType(recovered, "room_snapshot").path("roleSetup").path("mafia").asInt());
+        send(recovered, "{\"version\":1,\"type\":\"leave_room\"}");
+        assertEquals(1, latestOfType(host, "room_state").path("roleSetup").path("mafia").asInt());
+        for (int seat = 6; seat < 10; seat++) join(connect("auto-more-" + seat), code);
+        assertEquals(3, latestOfType(host, "room_state").path("roleSetup").path("mafia").asInt());
+        roleSetup(0, 3, 1, 1);
+        assertEquals(3, latestOfType(host, "room_state").path("roleSetup").path("mafia").asInt());
+        roleSetup(0, 1, 1, 1);
+        send(table.get(5), "{\"version\":1,\"type\":\"leave_room\"}");
+        var newcomer = connect("auto-after-override");
+        join(newcomer, code);
+        assertEquals(1, latestOfType(newcomer, "room_snapshot").path("roleSetup").path("mafia").asInt());
+    }
+
+    @Test
     void theDealFollowsTheHostsRoleSetupAndIsIndependentOfSeats() throws Exception {
         for (int players = 4; players <= 10; players++) {
             table.clear();
@@ -442,7 +491,7 @@ class MafiaGameTest {
         }
         roleSetup(1, 2, 1, 1);
         assertEquals("not_host", latest(table.get(1)).path("code").asText());
-        for (int[] invalid : new int[][] {{3, 1, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 3}, {2, 6, 2}}) {
+        for (int[] invalid : new int[][] {{4, 1, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 3}, {2, 6, 2}}) {
             roleSetup(0, invalid[0], invalid[1], invalid[2]);
             assertEquals("invalid_role_setup", latest(host).path("code").asText(), java.util.Arrays.toString(invalid));
         }
@@ -508,12 +557,12 @@ class MafiaGameTest {
             Set<String> expected = new HashSet<>();
             for (int other = 0; other < 10; other++) {
                 double distance = Math.hypot(RoomRules.seatX(other) - RoomRules.seatX(seat), RoomRules.seatY(other) - RoomRules.seatY(seat));
-                if (distance <= visionOf(seat)) expected.add(playerId(other));
+                expected.add(playerId(other));
             }
             assertEquals(expected, fieldIds(seat), "seat " + seat);
         }
-        // Opposite sides of the Town Square are out of each other's sight.
-        assertFalse(fieldIds(2).contains(playerId(7)));
+        // Opposite sides of the Town Square remain visible.
+        assertTrue(fieldIds(2).contains(playerId(7)));
         // Nobody's field ever names a Role.
         for (var member : table) assertTrue(member.payloads().stream().filter(p -> p.contains("field_state")).noneMatch(p -> p.contains("\"role\"")));
     }
@@ -526,43 +575,33 @@ class MafiaGameTest {
         int correction = field(5).path("self").path("correction").asInt();
         // A teleport across the town is not a step.
         milliseconds.addAndGet(100);
-        move(5, 2_300, 1_300);
+        move(5, townX(2_300), townY(1_300));
         handler.tickFields();
         assertEquals(RoomRules.seatX(5), field(5).path("self").path("x").asDouble());
         assertEquals(correction + 1, field(5).path("self").path("correction").asInt());
         // Walking into the Town Hall's wall is refused too.
-        walk(5, 1_280, 545);
+        walk(5, townX(1_280), townY(545));
         milliseconds.addAndGet(100);
-        move(5, 1_280, 505);
+        move(5, townX(1_280), townY(505));
         handler.tickFields();
-        assertEquals(545, field(5).path("self").path("y").asDouble(), 0.5);
+        assertEquals(townY(545), field(5).path("self").path("y").asDouble(), 0.5);
         // A reachable step is accepted and seen by others.
         milliseconds.addAndGet(100);
-        move(5, 1_280, 530);
+        move(5, townX(1_280), townY(530));
         handler.tickFields();
-        assertEquals(530, field(5).path("self").path("y").asDouble(), 0.5);
+        assertEquals(townY(530), field(5).path("self").path("y").asDouble(), 0.5);
         send(table.get(5), "{\"version\":1,\"type\":\"move\",\"x\":\"far\",\"y\":1,\"facing\":\"up\"}");
         assertEquals("malformed_message", latest(table.get(5)).path("code").asText());
     }
 
     @Test
-    void everyLivingRoleSeesOnlyWithinTheSharedVisionBoundary() throws Exception {
+    void everyLivingRoleSeesDistantOutdoorPlayersWithoutGrantingHearing() throws Exception {
         startTable("vision", 10);
         advance(REVEAL);
-        // Seat 1, a Villager, walks just inside and then just outside each watcher's Vision,
-        // heading from that watcher toward the button across the open square.
-        for (int watcher : new int[] {0, 3, 4, 6}) {
-            double reach = visionOf(watcher);
-            double toX = RoomRules.BUTTON_X - RoomRules.seatX(watcher);
-            double toY = RoomRules.BUTTON_Y - RoomRules.seatY(watcher);
-            double length = Math.hypot(toX, toY);
-            for (double offset : new double[] {-20, 20}) {
-                walk(1, Math.round(RoomRules.seatX(watcher) + toX / length * (reach + offset)),
-                        Math.round(RoomRules.seatY(watcher) + toY / length * (reach + offset)));
-                assertEquals(offset < 0, fieldIds(watcher).contains(playerId(1)),
-                        game(watcher).path("self").path("role").asText() + " at " + (reach + offset));
-            }
-        }
+        walk(1, townX(1280), townY(1200));
+        for (int watcher : new int[] {0, 3, 4, 6}) assertTrue(fieldIds(watcher).contains(playerId(1)));
+        chat(1, "public", "Visible but too far to hear");
+        for (int watcher : new int[] {0, 3, 4, 6}) assertEquals(0, countOfType(table.get(watcher), "chat_message"));
     }
 
     // ----- kills, Bodies and Meetings -----------------------------------------------------
@@ -573,17 +612,17 @@ class MafiaGameTest {
         advance(REVEAL);
         assertEquals("day", game(5).path("phase").asText());
         assertEquals(180_000, game(5).path("remainingMs").asLong());
-        walk(5, 1_280, 1_000);
+        walk(5, townX(1_280), townY(1_000));
         advance(REVEAL + 180_000 - milliseconds.get() - 1);
         assertEquals("day", game(5).path("phase").asText());
         advance(1);
         assertEquals("night", game(5).path("phase").asText());
         assertEquals(20_000, game(5).path("remainingMs").asLong());
         handler.tickFields();
-        assertEquals(1_000, field(5).path("self").path("y").asDouble());
-        move(5, 1_280, 1_020);
+        assertEquals(townY(1_000), field(5).path("self").path("y").asDouble());
+        move(5, townX(1_280), townY(1_020));
         handler.tickFields();
-        assertEquals(1_000, field(5).path("self").path("y").asDouble(), "Night freezes accepted positions");
+        assertEquals(townY(1_000), field(5).path("self").path("y").asDouble(), "Night freezes accepted positions");
         chat(0, "mafia", "No Night whispers");
         assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
         chat(5, "public", "No Night text");
@@ -739,7 +778,7 @@ class MafiaGameTest {
     void nightRecoveryRestoresSleepingPositionAndPrivateRoleWithoutWaitingForATick() throws Exception {
         startTable("night-recover", 10);
         advance(REVEAL);
-        walk(5, 1_280, 1_000);
+        walk(5, townX(1_280), townY(1_000));
         advance(REVEAL + DAY - milliseconds.get());
         handler.afterConnectionClosed(table.get(5), CloseStatus.NORMAL);
         advance(5_000);
@@ -749,11 +788,11 @@ class MafiaGameTest {
         assertEquals("night", latestOfType(recovered, "game_state").path("phase").asText());
         assertEquals(15_000, latestOfType(recovered, "game_state").path("remainingMs").asLong());
         JsonNode sleeping = latestOfType(recovered, "field_state");
-        assertEquals(1_000, sleeping.path("self").path("y").asDouble());
+        assertEquals(townY(1_000), sleeping.path("self").path("y").asDouble());
         assertNoHiddenRolesLeaked(recovered);
         send(recovered, "{\"version\":1,\"type\":\"move\",\"x\":1280,\"y\":1020,\"facing\":\"down\"}");
         handler.tickFields();
-        assertEquals(1_000, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        assertEquals(townY(1_000), latestOfType(recovered, "field_state").path("self").path("y").asDouble());
     }
 
     @Test
@@ -1112,42 +1151,42 @@ class MafiaGameTest {
     }
 
     @Test
-    void allLivingRolesShareDayVisionAndBuildingWallsSeparateTheirViews() throws Exception {
+    void distantLivingPlayersRemainVisibleButBuildingWallsSeparateTheirViews() throws Exception {
         startTable("shared-vision", 10);
         advance(REVEAL);
-        for (int seat : List.of(0, 1, 3, 4)) walk(seat, 1280, 742);
-        walk(5, 1580, 742);
+        for (int seat : List.of(0, 1, 3, 4)) walk(seat, townX(1280), townY(742));
+        walk(5, townX(1580), townY(742));
         for (int seat : List.of(0, 1, 3, 4)) assertTrue(fieldIds(seat).contains(playerId(5)), "Role in seat " + seat);
-        walk(5, 1640, 742);
-        for (int seat : List.of(0, 1, 3, 4)) assertFalse(fieldIds(seat).contains(playerId(5)), "same 320px limit for every Role");
-        walk(0, 576, 742);
-        walk(0, 576, 800);
-        walk(1, 1280, 742);
-        walk(1, 576, 742);
-        walk(1, 576, 900);
+        walk(5, townX(1640), townY(742));
+        for (int seat : List.of(0, 1, 3, 4)) assertTrue(fieldIds(seat).contains(playerId(5)), "no distance limit for any Role");
+        walk(0, townX(576), townY(742));
+        walk(0, townX(576), townY(800));
+        walk(1, townX(1280), townY(742));
+        walk(1, townX(576), townY(742));
+        walk(1, townX(576), townY(900));
         assertFalse(fieldIds(0).contains(playerId(1)), "the outdoor Player cannot see inside the General Store");
         assertFalse(fieldIds(1).contains(playerId(0)), "the indoor Player cannot see outside");
-        walk(0, 576, 900);
+        walk(0, townX(576), townY(900));
         assertTrue(fieldIds(0).contains(playerId(1)));
         assertTrue(fieldIds(1).contains(playerId(0)));
-        move(0, 448, 900);
+        move(0, townX(448), townY(900));
         handler.tickFields();
-        assertEquals(576, field(0).path("self").path("x").asDouble(), "wall crossing is corrected");
+        assertEquals(townX(576), field(0).path("self").path("x").asDouble(), "wall crossing is corrected");
     }
 
     @Test
     void dayTextUsesAcceptedProximityAtSendTimeAndRecoveryNeverWidensHistory() throws Exception {
         startTable("proximity-text", 10);
         advance(REVEAL);
-        walk(0, 1280, 742);
-        walk(1, 1400, 742);
-        walk(2, 1480, 742);
-        walk(5, 1280, 1200);
+        walk(0, townX(1280), townY(742));
+        walk(1, townX(1400), townY(742));
+        walk(2, townX(1480), townY(742));
+        walk(5, townX(1280), townY(1200));
         chat(0, "public", "Only nearby listeners");
         assertEquals("chat_message", latest(table.get(0)).path("type").asText());
         assertEquals("Only nearby listeners", latestOfType(table.get(1), "chat_message").path("text").asText());
         assertEquals(0, countOfType(table.get(2), "chat_message"));
-        walk(2, 1320, 742);
+        walk(2, townX(1320), townY(742));
         handler.afterConnectionClosed(table.get(2), CloseStatus.NORMAL);
         var recovered = connect("proximity-recovered");
         recover(recovered, code, tokens.get(2));
@@ -1157,7 +1196,7 @@ class MafiaGameTest {
         recover(listener, code, tokens.get(1));
         assertEquals("Only nearby listeners", latestOfType(listener, "chat_history").path("messages").get(0).path("text").asText());
         var distantBefore = countOfType(table.get(5), "chat_message");
-        move(5, 1280, 742); // an impossible teleport must not grant hearing
+        move(5, townX(1280), townY(742)); // an impossible teleport must not grant hearing
         chat(0, "public", "Accepted positions only");
         assertEquals(distantBefore, countOfType(table.get(5), "chat_message"));
         chat(0, "mafia", "No private channel");
@@ -1171,16 +1210,38 @@ class MafiaGameTest {
     void buildingBoundariesExcludeDayTextEvenInsideHearingRange() throws Exception {
         startTable("interior-text", 10);
         advance(REVEAL);
-        walk(0, 576, 742);
-        walk(0, 576, 800);
-        walk(1, 1280, 742);
-        walk(1, 576, 742);
-        walk(1, 576, 900);
+        walk(0, townX(576), townY(742));
+        walk(0, townX(576), townY(800));
+        walk(1, townX(1280), townY(742));
+        walk(1, townX(576), townY(742));
+        walk(1, townX(576), townY(900));
         chat(0, "public", "Outside the store");
         assertEquals(0, countOfType(table.get(1), "chat_message"));
-        walk(0, 576, 900);
+        walk(0, townX(576), townY(900));
         chat(0, "public", "Inside the store");
         assertEquals("Inside the store", latestOfType(table.get(1), "chat_message").path("text").asText());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Mill house", "Farmhouse", "Market tavern", "Woodland lodge", "Harbor store", "Workshop"})
+    void furnishedDistrictInteriorsKeepVisionAndHearingInsideTheirArea(String name) throws Exception {
+        startTable("district-interior", 4);
+        advance(REVEAL);
+        var room = RoomRules.INTERIORS.stream().filter(r -> r.name().equals(name)).findFirst().orElseThrow();
+        double doorwayX = room.x() + room.width() / 2 - 16;
+        JsonNode outside = json("{\"x\":" + doorwayX + ",\"y\":" + (room.y() + room.height() + 16) + "}");
+        JsonNode inside = json("{\"x\":" + doorwayX + ",\"y\":" + (room.y() + room.height() - 48) + "}");
+        walkToTask(0, outside);
+        walkToTask(1, inside);
+        assertFalse(fieldIds(0).contains(playerId(1)), "outdoor view excludes " + name);
+        assertFalse(fieldIds(1).contains(playerId(0)), "indoor view excludes outdoors");
+        chat(0, "public", "Outside the district room");
+        assertEquals(0, countOfType(table.get(1), "chat_message"));
+        walkToTask(0, inside);
+        assertTrue(fieldIds(0).contains(playerId(1)));
+        assertTrue(fieldIds(1).contains(playerId(0)));
+        chat(0, "public", "Inside the district room");
+        assertEquals("Inside the district room", latestOfType(table.get(1), "chat_message").path("text").asText());
     }
 
     /** Optimistic focused agents: accepted 16-pixel moves each 100 ms, correct inputs,
@@ -1257,7 +1318,7 @@ class MafiaGameTest {
         send(table.get(0), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
         assertEquals("invalid_task", latest(table.get(0)).path("code").asText());
         JsonNode task = tasks.path("tasks").get(0);
-        walk(1, 1280, 742);
+        walk(1, townX(1280), townY(742));
         walk(1, task.path("x").asDouble(), task.path("y").asDouble());
         send(table.get(1), "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
         String step = "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":0,\"value\":0}";
@@ -1288,9 +1349,9 @@ class MafiaGameTest {
         walkToTask(1, task);
         openTask(1, task.path("taskId").asText());
         var counts = table.stream().map(session -> countOfType(session, "task_state")).toList();
-        move(1, 0, 0);
+        move(1, townX(0), townY(0));
         assertEquals(counts.get(1), countOfType(table.get(1), "task_state"));
-        walk(1, 1280, 630);
+        walk(1, townX(1280), townY(630));
         assertTrue(latestOfType(table.get(1), "task_state").path("activeTaskId").isNull());
         for (int seat = 0; seat < table.size(); seat++)
             assertEquals(counts.get(seat) + (seat == 1 ? 1 : 0), countOfType(table.get(seat), "task_state"));
@@ -1509,9 +1570,9 @@ class MafiaGameTest {
     @Test
     void acceptedFootstepsReachOnlySameAreaNearbyListenersAndImpossibleMovesProduceNoSound() throws Exception {
         startTable("footsteps", 10); advance(REVEAL);
-        walk(0, 1280, 742); walk(1, 1400, 742); walk(2, 1520, 742);
+        walk(0, townX(1280), townY(742)); walk(1, townX(1400), townY(742)); walk(2, townX(1520), townY(742));
         int nearby = countOfType(table.get(1), "sound_event"), distant = countOfType(table.get(2), "sound_event");
-        advance(600); move(0, 1312, 742);
+        advance(600); move(0, townX(1312), townY(742));
         assertEquals(nearby + 1, countOfType(table.get(1), "sound_event"));
         JsonNode sound = latestOfType(table.get(1), "sound_event");
         assertEquals("footstep", sound.path("kind").asText());
@@ -1519,10 +1580,10 @@ class MafiaGameTest {
         assertFalse(sound.has("x")); assertFalse(sound.has("y"));
         assertEquals(distant, countOfType(table.get(2), "sound_event"));
         int own = countOfType(table.get(0), "sound_event");
-        move(0, 300, 300);
+        move(0, townX(300), townY(300));
         assertEquals(own, countOfType(table.get(0), "sound_event"));
         advance(REVEAL + DAY - milliseconds.get());
-        move(0, 1328, 742);
+        move(0, townX(1328), townY(742));
         assertEquals(own, countOfType(table.get(0), "sound_event"), "Night is silent");
     }
 
@@ -1530,24 +1591,24 @@ class MafiaGameTest {
     void buildingSoundsReachOnlyListenersInTheActorsAcceptedArea() throws Exception {
         startTable("building-sounds", 10);
         advance(REVEAL);
-        walk(1, 1280, 742);
-        walk(1, 576, 742);
-        walk(1, 576, 900);
-        walk(2, 1280, 742);
-        walk(2, 576, 742);
-        walk(2, 576, 800);
-        walk(0, 1280, 742);
-        walk(0, 576, 742);
-        walk(0, 576, 800);
+        walk(1, townX(1280), townY(742));
+        walk(1, townX(576), townY(742));
+        walk(1, townX(576), townY(900));
+        walk(2, townX(1280), townY(742));
+        walk(2, townX(576), townY(742));
+        walk(2, townX(576), townY(800));
+        walk(0, townX(1280), townY(742));
+        walk(0, townX(576), townY(742));
+        walk(0, townX(576), townY(800));
         int outside = countOfType(table.get(2), "sound_event");
-        walk(0, 576, 860);
+        walk(0, townX(576), townY(860));
         JsonNode enter = latestOfType(table.get(1), "sound_event");
         assertEquals("enter", enter.path("kind").asText());
         assertEquals(playerId(0), enter.path("playerId").asText());
         assertEquals(1, enter.path("gain").asDouble());
         assertEquals(outside, countOfType(table.get(2), "sound_event"), "Nearby outside listener cannot hear inside");
         int inside = countOfType(table.get(1), "sound_event");
-        walk(0, 576, 800);
+        walk(0, townX(576), townY(800));
         assertEquals("exit", latestOfType(table.get(2), "sound_event").path("kind").asText());
         assertEquals(inside, countOfType(table.get(1), "sound_event"), "Nearby inside listener cannot hear outside");
     }
@@ -1633,10 +1694,9 @@ class MafiaGameTest {
         else startTable(label, players, 1, 1, 1);
     }
 
-    /** All living Roles use the shared Vision boundary. */
-    private double visionOf(int seat) {
-        return FieldRules.DAY_VISION;
-    }
+    // Original starting-village coordinates, translated with its geometry to the town centre.
+    private static double townX(double x) { return x + 2560; }
+    private static double townY(double y) { return y + 1440; }
 
     private void roleSetup(int seat, int mafia, int doctors, int sheriffs) throws Exception {
         send(table.get(seat), "{\"version\":1,\"type\":\"set_role_setup\",\"mafia\":" + mafia
@@ -1666,7 +1726,7 @@ class MafiaGameTest {
             tokens.add(json(guest.payloads().get(0)).path("recoveryToken").asText());
             table.add(guest);
         }
-        roleSetup(0, mafia, doctors, sheriffs);
+        if (mafia >= 0) roleSetup(0, mafia, doctors, sheriffs);
         for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
         send(host, "{\"version\":1,\"type\":\"start_game\"}");
     }

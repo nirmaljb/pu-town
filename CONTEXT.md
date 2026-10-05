@@ -91,7 +91,7 @@ A Player's assigned identity and abilities within a Game: Mafia, Villager, Docto
 _Avoid_: Faction, Avatar Preset
 
 **Role Setup**:
-The Host's choice, in the Lobby, of how many Mafia, Doctors and Sheriffs a Game deals. Every Role is dealt at least once, and everyone else is a Villager.
+The counts of Mafia, Doctors and Sheriffs a Game deals. They follow the number of Players by default; the Host may override them in the Lobby. Every Role is dealt at least once, and everyone else is a Villager.
 _Avoid_: Deal size, table size
 
 **Mafia**:
@@ -123,7 +123,7 @@ The gathering at retained Seats after Night, for public discussion, voting and t
 _Avoid_: Lobby
 
 **Vision**:
-How far a living Player can see in the town. Nothing beyond it is disclosed to them.
+A living Player's view of the town and other living Players, without a distance limit. Ghosts remain unseen by the living. An interior and the outdoors have separate views.
 
 **Hearing**:
 The nearby conversation a living Player can hear during Day, confined to their indoor or outdoor area. Hearing is independent for each listener and speaker.

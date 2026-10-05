@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Data exchange",
+    "type": "room",
+    "x": 960,
+    "y": 544,
+    "width": 384,
+    "height": 320,
+    "kind": "server",
+    "doors": [
+      {
+        "x": 1136.0,
+        "y": 832
+      },
+      {
+        "x": 960,
+        "y": 736
+      }
+    ]
+  },
+  {
+    "name": "Hydroponics lab",
+    "type": "room",
+    "x": 5440,
+    "y": 512,
+    "width": 384,
+    "height": 320,
+    "kind": "hydro",
+    "doors": [
+      {
+        "x": 5616.0,
+        "y": 800
+      },
+      {
+        "x": 5440,
+        "y": 704
+      }
+    ]
+  },
+  {
+    "name": "Night market lounge",
+    "type": "room",
+    "x": 1088,
+    "y": 1696,
+    "width": 384,
+    "height": 320,
+    "kind": "market",
+    "doors": [
+      {
+        "x": 1264.0,
+        "y": 1984
+      },
+      {
+        "x": 1088,
+        "y": 1888
+      }
+    ]
+  },
+  {
+    "name": "Transit control",
+    "type": "room",
+    "x": 992,
+    "y": 3040,
+    "width": 384,
+    "height": 320,
+    "kind": "server",
+    "doors": [
+      {
+        "x": 1168.0,
+        "y": 3328
+      },
+      {
+        "x": 992,
+        "y": 3232
+      }
+    ]
+  },
+  {
+    "name": "Canal power station",
+    "type": "room",
+    "x": 5600,
+    "y": 3104,
+    "width": 384,
+    "height": 320,
+    "kind": "power",
+    "doors": [
+      {
+        "x": 5776.0,
+        "y": 3392
+      },
+      {
+        "x": 5600,
+        "y": 3296
+      }
+    ]
+  },
+  {
+    "name": "Repair bay",
+    "type": "room",
+    "x": 5568,
+    "y": 1824,
+    "width": 384,
+    "height": 320,
+    "kind": "repair",
+    "doors": [
+      {
+        "x": 5744.0,
+        "y": 2112
+      },
+      {
+        "x": 5568,
+        "y": 2016
+      }
+    ]
+  }
+]

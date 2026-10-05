@@ -16,14 +16,14 @@ public class Room {
     private Game game;
     private String hostPlayerId;
     // The Host's deal, chosen in the Lobby and fixed once the Game starts.
-    private RoleSetup roleSetup = RoleSetup.DEFAULT;
-    public RoleSetup getRoleSetup() { return roleSetup; }
+    private RoleSetup roleSetup;
+    public RoleSetup getRoleSetup() { return roleSetup == null ? RoleSetup.forPlayers(playerIds.size()) : roleSetup; }
     public void setRoleSetup(RoleSetup value) { roleSetup = value; }
     public void setHostPlayerId(String value) { hostPlayerId = value; }
     public String getPhase() { return phase; }
     public String getHostPlayerId() { return hostPlayerId; }
     public Game getGame() { return game; }
-    public void startGame(Game startedGame) { phase = "playing"; game = startedGame; }
+    public void startGame(Game startedGame) { roleSetup = getRoleSetup(); phase = "playing"; game = startedGame; }
     private long emptySince;
     public long getEmptySince() { return emptySince; }
     public void setEmptySince(long value) { emptySince = value; }

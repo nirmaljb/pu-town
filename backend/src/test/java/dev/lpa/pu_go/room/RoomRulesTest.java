@@ -38,6 +38,28 @@ class RoomRulesTest {
     }
 
     @Test
+    void indexedCollisionMatchesTheCompleteGeometryAtEdgesAndAcrossTheTown() {
+        var random = new java.util.Random(42);
+        for (int sample = 0; sample < 3000; sample++) {
+            double x = random.nextDouble() * RoomRules.WIDTH;
+            double y = random.nextDouble() * RoomRules.HEIGHT;
+            boolean expected = x >= RoomRules.FOOT_RADIUS && y >= RoomRules.FOOT_RADIUS
+                    && x <= RoomRules.WIDTH - RoomRules.FOOT_RADIUS && y <= RoomRules.HEIGHT - RoomRules.FOOT_RADIUS
+                    && RoomRules.OBSTACLES.stream().noneMatch(o -> o.blocks(x, y, RoomRules.FOOT_RADIUS));
+            assertEquals(expected, RoomRules.walkable(x, y), "point " + x + "," + y);
+        }
+        for (RoomRules.Obstacle o : RoomRules.OBSTACLES) {
+            for (double x : new double[] {o.x() - RoomRules.FOOT_RADIUS, o.x() - RoomRules.FOOT_RADIUS + 0.01}) {
+                double y = o.y() + o.height() / 2;
+                boolean expected = x >= RoomRules.FOOT_RADIUS && y >= RoomRules.FOOT_RADIUS
+                        && x <= RoomRules.WIDTH - RoomRules.FOOT_RADIUS && y <= RoomRules.HEIGHT - RoomRules.FOOT_RADIUS
+                        && RoomRules.OBSTACLES.stream().noneMatch(other -> other.blocks(x, y, RoomRules.FOOT_RADIUS));
+                assertEquals(expected, RoomRules.walkable(x, y));
+            }
+        }
+    }
+
+    @Test
     void everySeatIsOpenGroundAndNobodyStandsUpCrowded() {
         for (int seat = 0; seat < RoomRules.CAPACITY; seat++) {
             double x = RoomRules.seatX(seat);

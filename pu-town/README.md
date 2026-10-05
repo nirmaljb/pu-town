@@ -1,8 +1,23 @@
-# PU Town map (Tiny Swords)
+# PU Town maps
+
+The current playable map is **Sunwater Village**, 7680×4320px: nine times the original area. Its ten furnished interiors, twenty Task destinations, Seats and collision data are synchronized with both components.
+
+See [variants/README.md](variants/README.md) for the village, horror and cyberpunk exports, research, CC0 asset provenance, previews and authoring instructions. Regenerate and publish from the repository root:
+
+```sh
+python3 pu-town/variants/generate.py
+python3 pu-town/variants/publish.py
+```
+
+The files described below preserve the former 2560×1440 map for reference. Its generator does not publish the current map.
+
+---
+
+# Former map (Tiny Swords)
 
 2560×1440 px (80×45 tiles, 32 px): an island town built from **Tiny Swords** (Free Pack + Update 010 for sand,
 the dock, the gold mine, the scarecrow and small decorations), with four open-top rooms (Chapel, Inn, Smithy,
-General Store) furnished from the **SuperRetroWorld Interior Pack**. Matches the game's world size and keeps the emergency
+General Store) furnished from the **SuperRetroWorld Interior Pack**. Matched the former world size and keeps the emergency
 button spot (1280, 742) open in the middle of the Town Square. The previous Pipoya map is in `old-pipoya/`.
 
 | File | Use |

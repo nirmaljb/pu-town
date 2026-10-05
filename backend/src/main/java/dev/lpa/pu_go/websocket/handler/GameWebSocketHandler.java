@@ -323,10 +323,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 player.setSeat(seat);
                 player.setX(RoomRules.seatX(seat));
                 player.setY(RoomRules.seatY(seat));
+                RoleSetup previousSetup = room.getRoleSetup();
                 room.addPlayer(player.getId());
                 List<String> existingPlayers = room.playerIdsSnapshot().stream()
                         .filter(playerId -> !playerId.equals(player.getId())).toList();
                 addForPlayers(pendingDeliveries, existingPlayers, new ServerMessage.PlayerJoined(viewOf(player)));
+                if (!previousSetup.equals(room.getRoleSetup())) addForPlayers(pendingDeliveries, existingPlayers, stateOf(room));
             }
             List<ServerMessage.PlayerView> snapshotPlayers = room.playerIdsSnapshot().stream()
                     .map(playersById::get)
@@ -814,6 +816,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (game != null) game.forfeit(player.getId());
         lastFootsteps.remove(player.getId());
         walkedSinceFootstep.remove(player.getId());
+        RoleSetup previousSetup = room.getRoleSetup();
         room.removePlayer(player.getId());
         if (hostDeparted) room.playerIdsSnapshot().stream().map(playersById::get)
                 .filter(PlayerState::isConnected).findFirst()
@@ -822,7 +825,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         List<Delivery> pendingDeliveries = new ArrayList<>();
         addForPlayers(pendingDeliveries, room.playerIdsSnapshot(),
                 new ServerMessage.PlayerLeft(player.getId(), reason));
-        if (hostDeparted && !room.playerIdsSnapshot().isEmpty()) {
+        if ((hostDeparted || !previousSetup.equals(room.getRoleSetup())) && !room.playerIdsSnapshot().isEmpty()) {
             addForPlayers(pendingDeliveries, room.playerIdsSnapshot(), stateOf(room));
         }
         if (game != null) addGameState(pendingDeliveries, room);

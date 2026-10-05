@@ -11,14 +11,26 @@ public final class TaskBoard {
     public record Location(String name, double x, double y) {}
     /** Coordinates are the task points in the existing served Tiled map. */
     public static final List<Location> LOCATIONS = List.of(
-            new Location("Sign the town ledger", 1280, 544),
-            new Location("Feed the sheep", 280, 600), new Location("Harvest pumpkins", 300, 460),
-            new Location("Pick apples", 840, 420), new Location("Pray at the altar", 2016, 300),
-            new Location("Restock the shelves", 560, 1000), new Location("Fish from the dock", 288, 1110),
-            new Location("Stoke the forge", 800, 1030), new Location("Chop firewood", 1570, 1110),
-            new Location("Mine gold", 1760, 300), new Location("Practice archery", 1690, 560),
-            new Location("Serve drinks at the inn", 2190, 980), new Location("Tidy the graves", 2260, 380),
-            new Location("Keep watch from the tower", 1540, 420));
+            new Location("Sign the town ledger", 3824, 1968),
+            new Location("Feed the sheep", 2832, 2032),
+            new Location("Harvest pumpkins", 2864, 1904),
+            new Location("Pick apples", 3408, 1872),
+            new Location("Pray at the altar", 4560, 1744),
+            new Location("Restock the shelves", 3120, 2448),
+            new Location("Fish from the dock", 2832, 2544),
+            new Location("Stoke the forge", 3344, 2480),
+            new Location("Chop firewood", 4144, 2544),
+            new Location("Mine gold", 4336, 1744),
+            new Location("Practice archery", 4240, 2000),
+            new Location("Serve drinks at the inn", 4752, 2416),
+            new Location("Tidy the graves", 4816, 1808),
+            new Location("Keep watch from the tower", 4112, 1872),
+            new Location("Orchard & mill", 1424, 912),
+            new Location("Riverside farm", 5904, 880),
+            new Location("Market green", 1552, 2064),
+            new Location("Woodland lodge", 1456, 3408),
+            new Location("Harbor & fishery", 6064, 3472),
+            new Location("Workshop lane", 6032, 2192));
     public record TaskView(String taskId, String name, String kind, double x, double y,
                            int step, int steps, boolean fake, List<Integer> sequence) {}
     public record View(List<TaskView> tasks, int completed, int total, String activeTaskId, Long remainingMs) {}

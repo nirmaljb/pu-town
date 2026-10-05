@@ -8,14 +8,19 @@ import java.util.List;
  * Player the special Roles leave over is a Villager, so a table always has at least one.
  */
 public record RoleSetup(int mafia, int doctors, int sheriffs) {
-    public static final int MAX_MAFIA = 2;
+    public static final int MAX_MAFIA = 3;
     public static final int MAX_SHERIFFS = 2;
     /** The deal a new Room offers until its Host changes it. */
     public static final RoleSetup DEFAULT = new RoleSetup(1, 1, 1);
 
+    /** Automatic Lobby deal, including reserved disconnected Memberships. */
+    public static RoleSetup forPlayers(int players) {
+        return new RoleSetup(players >= 10 ? 3 : players >= 7 ? 2 : 1, 1, 1);
+    }
+
     /** Why this setup can never be dealt, whatever the table, or null when it can. */
     public String invalidReason(int capacity) {
-        if (mafia < 1 || mafia > MAX_MAFIA) return "Deal one or two Mafia.";
+        if (mafia < 1 || mafia > MAX_MAFIA) return "Deal one to three Mafia.";
         if (sheriffs < 1 || sheriffs > MAX_SHERIFFS) return "Deal one or two Sheriffs.";
         if (doctors < 1) return "Deal at least one Doctor.";
         if (specialRoles() > capacity - 1) return "Leave room for at least one Villager.";

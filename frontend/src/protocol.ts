@@ -88,7 +88,7 @@ export type FieldView = Readonly<{ round: number; players: readonly FieldPlayer[
 
 /** The Host's deal: how many Mafia, Doctors and Sheriffs. Everyone else is a Villager. */
 export type RoleSetup = Readonly<{ mafia: number; doctors: number; sheriffs: number }>;
-export const MAX_MAFIA = 2;
+export const MAX_MAFIA = 3;
 export const MAX_SHERIFFS = 2;
 
 export type ChatEntry = Readonly<{

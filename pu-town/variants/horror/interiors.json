@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Abandoned abbey",
+    "type": "room",
+    "x": 832,
+    "y": 512,
+    "width": 384,
+    "height": 320,
+    "kind": "chapel",
+    "doors": [
+      {
+        "x": 1008.0,
+        "y": 800
+      },
+      {
+        "x": 832,
+        "y": 704
+      }
+    ]
+  },
+  {
+    "name": "Mortuary",
+    "type": "room",
+    "x": 5248,
+    "y": 512,
+    "width": 384,
+    "height": 320,
+    "kind": "store",
+    "doors": [
+      {
+        "x": 5424.0,
+        "y": 800
+      },
+      {
+        "x": 5248,
+        "y": 704
+      }
+    ]
+  },
+  {
+    "name": "Old infirmary",
+    "type": "room",
+    "x": 1152,
+    "y": 1696,
+    "width": 384,
+    "height": 320,
+    "kind": "infirmary",
+    "doors": [
+      {
+        "x": 1328.0,
+        "y": 1984
+      },
+      {
+        "x": 1152,
+        "y": 1888
+      }
+    ]
+  },
+  {
+    "name": "Deadwood refuge",
+    "type": "room",
+    "x": 800,
+    "y": 3040,
+    "width": 384,
+    "height": 320,
+    "kind": "lodge",
+    "doors": [
+      {
+        "x": 976.0,
+        "y": 3328
+      },
+      {
+        "x": 800,
+        "y": 3232
+      }
+    ]
+  },
+  {
+    "name": "Flooded mill",
+    "type": "room",
+    "x": 5568,
+    "y": 3040,
+    "width": 384,
+    "height": 320,
+    "kind": "forge",
+    "doors": [
+      {
+        "x": 5744.0,
+        "y": 3328
+      },
+      {
+        "x": 5568,
+        "y": 3232
+      }
+    ]
+  },
+  {
+    "name": "Quarantine ward",
+    "type": "room",
+    "x": 5440,
+    "y": 1856,
+    "width": 384,
+    "height": 320,
+    "kind": "infirmary",
+    "doors": [
+      {
+        "x": 5616.0,
+        "y": 2144
+      },
+      {
+        "x": 5440,
+        "y": 2048
+      }
+    ]
+  }
+]

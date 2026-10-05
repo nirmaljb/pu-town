@@ -243,3 +243,33 @@ summary { padding-block: 6px; }
   }
   .in-lobby .art-credits { position: static; order: 4; align-self: center; margin-bottom: 12px; }
 }
+
+/* Lobby options overlay the full-size canvas; controls never change the stage dimensions. */
+.in-lobby #stage { position: fixed; inset: 0; width: 100%; height: 100%; }
+.in-lobby .interface { display: block; overflow: visible; }
+.in-lobby .lobby-scene-space { display: none; }
+.lobby-sidebar {
+  position: absolute; right: 12px; top: 72px; bottom: 44px;
+  width: min(300px, 42vw); overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 12px; pointer-events: auto;
+}
+.lobby-sidebar[hidden] { display: none; }
+.in-lobby .lobby-sidebar .lobby-controls,
+.in-lobby .lobby-sidebar .avatar-chooser {
+  position: static; inset: auto; transform: none; margin: 0; width: 100%;
+  height: auto; min-height: auto; flex-shrink: 0;
+}
+.lobby-sidebar .lobby-controls { display: flex; flex-direction: column; align-items: stretch; padding: 8px; }
+.lobby-sidebar .lobby-controls > div { width: auto; margin: 0; }
+.lobby-sidebar .lobby-controls > .role-setup { display: flex; flex-direction: column; align-items: stretch; width: auto; gap: 7px; }
+.lobby-sidebar .role-count { display: grid; grid-template-columns: 1fr 32px 18px 32px; align-items: center; gap: 4px; }
+.lobby-sidebar .avatar-options { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
+.in-lobby #stage canvas { filter: none; }
+@media (max-width: 500px) {
+  .lobby-sidebar { right: 6px; top: 64px; bottom: 48px; width: 42vw; }
+  .lobby-sidebar .lobby-controls, .lobby-sidebar .avatar-chooser { border-width: 6px; padding: 5px; }
+  .lobby-sidebar .role-count { grid-template-columns: 1fr 24px 14px 24px; gap: 1px; font-size: 11px; }
+  .lobby-sidebar .lobby-controls .role-step { width: 24px; height: 30px; min-height: 30px; }
+  .lobby-sidebar .lobby-controls strong, .lobby-sidebar button { font-size: 12px; }
+}
+.map-art-credits { position: fixed; left: 14px; bottom: 10px; pointer-events: auto; color: var(--muted); font-size: 11px; }

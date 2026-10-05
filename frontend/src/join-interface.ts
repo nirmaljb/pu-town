@@ -25,7 +25,6 @@ export class JoinInterface {
   readonly #form: HTMLFormElement;
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
-  readonly #layoutResize: ResizeObserver;
   #entryMode: "create" | "join" | null = null;
   #lastState: ConnectionState | null = null;
   #world?: WorldState;
@@ -82,6 +81,7 @@ export class JoinInterface {
       <section class="lobby-controls" hidden aria-label="Lobby controls">
         <div class="role-setup" role="group" aria-label="Roles">
           <span class="role-setup-title">Roles</span>
+          <p class="role-default-hint">Counts follow Players by default. The Host can override them.</p>
           ${SETUP_ROLES.map(({ role, label }) => `
           <span class="role-count">
             <span>${label}</span>
@@ -106,15 +106,16 @@ export class JoinInterface {
           </div>
         </div>
       </section>
-      <a class="art-credits" href="assets/avatars/credits.html" target="_blank" rel="noopener">Character art credits</a>`;
+      <a class="art-credits" href="assets/avatars/credits.html" target="_blank" rel="noopener">Character art credits</a>
+      <a class="map-art-credits" href="maps/pu-town/credits.html" target="_blank" rel="noopener">Map art credits</a>`;
     this.#chooser = new AvatarChooser(id => this.client.selectAvatar(id));
-    this.#root.insertBefore(this.#chooser.element, this.element(".connection-overlay"));
+    const sidebar = document.createElement("aside");
+    sidebar.className = "lobby-sidebar";
+    sidebar.setAttribute("aria-label", "Lobby options");
+    sidebar.hidden = true;
+    sidebar.append(this.element(".lobby-controls"), this.#chooser.element);
+    this.#root.insertBefore(sidebar, this.element(".connection-overlay"));
     document.body.append(this.#root);
-    const lobbyControls = this.element(".lobby-controls");
-    this.#layoutResize = new ResizeObserver(() => {
-      if (!lobbyControls.hidden) document.documentElement.style.setProperty("--lobby-controls-height", `${Math.ceil(lobbyControls.getBoundingClientRect().height)}px`);
-    });
-    this.#layoutResize.observe(lobbyControls);
     this.#form = this.element("form");
     this.#name = this.element("#display-name");
     this.#code = this.element("#room-code");
@@ -217,6 +218,7 @@ export class JoinInterface {
     this.#chooser.render(self, choosing);
     document.body.classList.toggle("in-lobby", Boolean(lobby && state.status !== "join" && state.status !== "connecting"));
     this.element(".lobby-controls").hidden = !lobby || state.status === "join" || state.status === "connecting";
+    this.element(".lobby-sidebar").hidden = this.element(".lobby-controls").hidden;
     this.element(".lobby-scene-space").hidden = this.element(".lobby-controls").hidden;
     this.element(".copy-code").hidden = !lobby;
     this.element(".occupancy").textContent = this.#world ? this.#world.players.size + " / " + ROOM_CAPACITY + " Players" : "";
@@ -296,7 +298,7 @@ export class JoinInterface {
     this.element(".role-villagers").classList.toggle("short", villagers < 1);
   }
 
-  destroy(): void { this.#layoutResize.disconnect(); this.#root.remove(); document.body.classList.remove("in-lobby", "at-title"); }
+  destroy(): void { this.#root.remove(); document.body.classList.remove("in-lobby", "at-title"); }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {
     return this.#root.querySelector<T>(selector)!;

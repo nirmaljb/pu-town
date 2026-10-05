@@ -7,7 +7,7 @@ export const ROOM_CAPACITY = 10;
 const MAP_KEY = "pu-town";
 const MAP_ROOT = "maps/pu-town/";
 /** Tile layers, bottom to top, all beneath the Avatars. */
-const TILE_LAYERS = ["water", "sand", "grass", "bridge", "floor", "walls"];
+const TILE_LAYERS = ["ground", "paths", "scenery", "buildings", "details"];
 const LAYER_DEPTH = -1_100;
 /** Surf is drawn between the sea and the island; rugs and doormats lie beneath everyone. */
 const FOAM_DEPTH = LAYER_DEPTH + 0.5;
@@ -48,6 +48,8 @@ export function meetingSeat(seat: number): { x: number; y: number; facing: Direc
 export class MeetingArea {
   readonly #town: Phaser.GameObjects.GameObject[] = [];
   readonly #animated: Phaser.GameObjects.Sprite[] = [];
+  readonly #sprites: Phaser.GameObjects.Sprite[] = [];
+  #visible: boolean | null = null;
   #reducedMotion = false;
   readonly #chairs: Phaser.GameObjects.Container;
 
@@ -98,9 +100,9 @@ export class MeetingArea {
     const sprite = scene.add.sprite(object.x ?? 0, object.y ?? 0, key, gid - tileset.firstgid)
       .setOrigin(0, 1).setDepth(depth).setFlip(Boolean(object.flippedHorizontal), Boolean(object.flippedVertical));
     if (object.width && object.height) sprite.setDisplaySize(object.width, object.height);
-    const frames = (tileset.tileData as Record<number, { animation?: { tileid: number; duration: number }[] }>)[0]?.animation;
+    const frames = (tileset.tileData as Record<number, { animation?: { tileid: number; duration: number }[] }>)[gid - tileset.firstgid]?.animation;
     if (frames && frames.length > 1) {
-      const animation = `${key}-loop`;
+      const animation = `${key}-${gid - tileset.firstgid}-loop`;
       if (!scene.anims.exists(animation)) {
         scene.anims.create({
           key: animation, repeat: -1,
@@ -111,6 +113,8 @@ export class MeetingArea {
       sprite.play({ key: animation, startFrame: Math.floor(Math.random() * frames.length) });
       this.#animated.push(sprite);
     }
+    this.#sprites.push(sprite);
+    sprite.setActive(false);
     this.#town.push(sprite);
   }
 
@@ -123,9 +127,24 @@ export class MeetingArea {
     }
   }
 
+  /** Animate only scenery near the camera; distant trees keep their fixed collision footprints. */
+  update(camera: Phaser.Cameras.Scene2D.Camera): void {
+    if (!this.#visible) return;
+    const view = camera.worldView;
+    for (const sprite of this.#sprites) {
+      const visible = sprite.x + sprite.displayWidth >= view.left - 192 && sprite.x <= view.right + 192
+        && sprite.y >= view.top - 192 && sprite.y - sprite.displayHeight <= view.bottom + 192;
+      sprite.setVisible(visible).setActive(visible);
+    }
+  }
+
   /** The town shows while in a Room; the chairs only while the Players are seated. */
   setVisible(visible: boolean, seated: boolean): void {
-    for (const part of this.#town) (part as unknown as Phaser.GameObjects.Components.Visible).setVisible(visible);
+    if (this.#visible !== visible) {
+      this.#visible = visible;
+      for (const part of this.#town) (part as unknown as Phaser.GameObjects.Components.Visible).setVisible(visible);
+      if (!visible) for (const sprite of this.#sprites) sprite.setActive(false);
+    }
     this.#chairs.setVisible(visible && seated);
   }
 }

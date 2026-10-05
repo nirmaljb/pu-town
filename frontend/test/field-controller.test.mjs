@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { FieldController } from "../dist/field-controller.js";
 import { BUTTON_X, BUTTON_Y, OBSTACLES, INTERIORS, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "../dist/room-rules.js";
 
-const own = (patch = {}) => ({ x: 1280, y: 900, facing: "down", correction: 1, ...patch });
+const own = (patch = {}) => ({ x: BUTTON_X, y: BUTTON_Y + 158, facing: "down", correction: 1, ...patch });
 const world = (self, round = 1, phase = "day") => ({
   game: { phase, round }, field: { round, players: [], self }
 });
@@ -15,7 +15,7 @@ test("walking starts from the server's position and sends throttled steps", () =
   const sent = [];
   const controller = new FieldController((x, y, facing) => sent.push({ x, y, facing }));
   controller.update(world(own()), { ...idle, right: true }, 100, 1_000);
-  assert.ok(controller.position.x > 1280);
+  assert.ok(controller.position.x > BUTTON_X);
   assert.equal(controller.position.facing, "right");
   assert.equal(sent.length, 1);
   controller.update(world(own()), { ...idle, right: true }, 16, 1_016);
@@ -39,11 +39,11 @@ test("a server correction or a new Day replaces the local position", () => {
 test("walls stop movement on their own axis only", () => {
   // The Town Hall's front wall ends at y 512, so a Player just below it can only slide.
   const controller = new FieldController(() => {});
-  controller.update(world(own({ x: 1280, y: 530 })), { ...idle, up: true, right: true }, 100, 0);
-  assert.ok(controller.position.x > 1280, "slides along the wall");
-  assert.equal(controller.position.y, 530);
+  controller.update(world(own({ x: BUTTON_X, y: BUTTON_Y - 212 })), { ...idle, up: true, right: true }, 100, 0);
+  assert.ok(controller.position.x > BUTTON_X, "slides along the wall");
+  assert.equal(controller.position.y, BUTTON_Y - 212);
   assert.ok(walkable(controller.position.x, controller.position.y));
-  assert.equal(walkable(1280, 500), false);
+  assert.equal(walkable(BUTTON_X, BUTTON_Y - 242), false);
 });
 
 test("the client's collision copy is the map's own collision layer", () => {

@@ -15,11 +15,11 @@ import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
-import { ROOM_HEIGHT, ROOM_WIDTH, VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
+import { BUTTON_X, BUTTON_Y, ROOM_HEIGHT, ROOM_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
 
 /** Outside Day and sleeping Night the camera frames the Town Square, where the Players sit. */
-const SQUARE_X = WORLD_WIDTH / 2;
-const SQUARE_Y = WORLD_HEIGHT / 2;
+const SQUARE_X = BUTTON_X;
+const SQUARE_Y = BUTTON_Y;
 
 /** Keys that walk; anything typed into a text field is left alone. */
 const MOVEMENT_KEYS: Readonly<Record<string, "up" | "down" | "left" | "right">> = {
@@ -41,7 +41,6 @@ export class PuTownScene extends Phaser.Scene {
   #frameBoundary?: NetworkFrameBoundary;
   #avatarReconciler?: AvatarReconciler;
   #field?: FieldController;
-  #fog?: Phaser.GameObjects.Graphics;
   readonly #held = { up: false, down: false, left: false, right: false };
   #websocketUrl = "";
   // The Room whose pinned collection is loaded and active, and the one being fetched.
@@ -80,7 +79,6 @@ export class PuTownScene extends Phaser.Scene {
     this.#settings = new SettingsInterface(this.#audio, microphone);
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
-    this.#fog = this.add.graphics().setDepth(6_000);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
@@ -180,23 +178,23 @@ export class PuTownScene extends Phaser.Scene {
     // Seated phases must keep the whole Town Square visible, including on portrait displays.
     // Exploration/title cover the viewport; a seated view expands the camera instead of cropping Seats.
     const seated = !atTitle && !world?.field;
-    const horizontalZoom = this.scale.width / ROOM_WIDTH;
-    const verticalZoom = this.scale.height / ROOM_HEIGHT;
-    const zoom = seated ? Math.min(horizontalZoom, verticalZoom) : Math.max(horizontalZoom, verticalZoom);
+    const occupants = world?.phase === "lobby" ? [...world.players.values()] : [];
+    const left = occupants.length ? Math.min(...occupants.map(player => player.x)) : SQUARE_X - 330;
+    const right = occupants.length ? Math.max(...occupants.map(player => player.x)) : SQUARE_X + 330;
+    const top = occupants.length ? Math.min(...occupants.map(player => player.y)) : SQUARE_Y - 205;
+    const bottom = occupants.length ? Math.max(...occupants.map(player => player.y)) : SQUARE_Y + 205;
+    const seatedWidth = Math.max(420, right - left + 190);
+    const seatedHeight = Math.max(320, bottom - top + 190);
+    const overlayWidth = world?.phase === "lobby" ? Math.min(316, this.scale.width * 0.42 + 16) : 0;
+    const horizontalZoom = (this.scale.width - overlayWidth - (seated ? 32 : 0)) / (seated ? seatedWidth : ROOM_WIDTH);
+    const verticalZoom = (this.scale.height - (seated ? 150 : 0)) / (seated ? seatedHeight : ROOM_HEIGHT);
+    const zoom = seated ? Math.max(0.1, Math.min(horizontalZoom, verticalZoom)) : Math.max(horizontalZoom, verticalZoom);
     if (camera.zoom !== zoom) camera.setZoom(zoom);
-    const focusX = self?.x ?? SQUARE_X;
-    const focusY = self?.y ?? SQUARE_Y;
+    const focusX = self?.x ?? (left + right) / 2 + (seated ? overlayWidth / (2 * zoom) : 0);
+    const focusY = self?.y ?? (top + bottom) / 2 - 20;
     const follow = reducedMotion ? 1 : Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);
-    // The living see only a circle around themselves; the server sends nothing beyond it.
-    this.#fog?.clear();
-    const own = world?.game?.self;
-    if (self && own?.status === "living") {
-      // Each Role sees its own distance; the server sends nothing beyond it.
-      const vision = VISION[own.role];
-      this.#fog?.lineStyle(3_000, 0x05070d, 0.86).strokeCircle(self.x, self.y, vision + 1_500);
-      this.#fog?.lineStyle(60, 0x05070d, 0.45).strokeCircle(self.x, self.y, vision - 30);
-    }
+    this.#meetingArea?.update(camera);
   }
 }

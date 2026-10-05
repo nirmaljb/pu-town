@@ -231,12 +231,11 @@ public final class Game {
         return true;
     }
 
-    /** The living see living Participants within Vision; the eliminated see the town. */
+    /** The living see living Participants in their area, without a distance cutoff. */
     private static boolean canSee(Participant viewer, Participant other) {
         if (other.status() == ParticipantStatus.LEFT) return false;
         if (other == viewer || !viewer.isLiving()) return true;
-        return other.isLiving() && RoomRules.areaAt(viewer.x, viewer.y).equals(RoomRules.areaAt(other.x, other.y))
-                && viewer.distanceTo(other) <= DAY_VISION;
+        return other.isLiving() && RoomRules.areaAt(viewer.x, viewer.y).equals(RoomRules.areaAt(other.x, other.y));
     }
 
     /** Every Avatar this recipient may see right now, themselves included. */

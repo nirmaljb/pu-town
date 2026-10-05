@@ -1,0 +1,192 @@
+[
+  {
+    "name": "Chapel",
+    "type": "room",
+    "x": 4416,
+    "y": 1536,
+    "width": 320,
+    "height": 320,
+    "kind": "chapel",
+    "doors": [
+      {
+        "x": 4560.0,
+        "y": 1824
+      },
+      {
+        "x": 4416,
+        "y": 1728
+      }
+    ]
+  },
+  {
+    "name": "Inn",
+    "type": "room",
+    "x": 4640,
+    "y": 2272,
+    "width": 384,
+    "height": 352,
+    "kind": "inn",
+    "doors": [
+      {
+        "x": 4816.0,
+        "y": 2592
+      },
+      {
+        "x": 4640,
+        "y": 2464
+      }
+    ]
+  },
+  {
+    "name": "Smithy",
+    "type": "room",
+    "x": 3296,
+    "y": 2304,
+    "width": 320,
+    "height": 288,
+    "kind": "forge",
+    "doors": [
+      {
+        "x": 3440.0,
+        "y": 2560
+      },
+      {
+        "x": 3296,
+        "y": 2464
+      }
+    ]
+  },
+  {
+    "name": "General Store",
+    "type": "room",
+    "x": 3008,
+    "y": 2272,
+    "width": 256,
+    "height": 320,
+    "kind": "store",
+    "doors": [
+      {
+        "x": 3120.0,
+        "y": 2560
+      },
+      {
+        "x": 3008,
+        "y": 2464
+      }
+    ]
+  },
+  {
+    "name": "Mill house",
+    "type": "room",
+    "x": 960,
+    "y": 544,
+    "width": 384,
+    "height": 320,
+    "kind": "store",
+    "doors": [
+      {
+        "x": 1136.0,
+        "y": 832
+      },
+      {
+        "x": 960,
+        "y": 736
+      }
+    ]
+  },
+  {
+    "name": "Farmhouse",
+    "type": "room",
+    "x": 5440,
+    "y": 512,
+    "width": 384,
+    "height": 320,
+    "kind": "farm",
+    "doors": [
+      {
+        "x": 5616.0,
+        "y": 800
+      },
+      {
+        "x": 5440,
+        "y": 704
+      }
+    ]
+  },
+  {
+    "name": "Market tavern",
+    "type": "room",
+    "x": 1088,
+    "y": 1696,
+    "width": 384,
+    "height": 320,
+    "kind": "market",
+    "doors": [
+      {
+        "x": 1264.0,
+        "y": 1984
+      },
+      {
+        "x": 1088,
+        "y": 1888
+      }
+    ]
+  },
+  {
+    "name": "Woodland lodge",
+    "type": "room",
+    "x": 992,
+    "y": 3040,
+    "width": 384,
+    "height": 320,
+    "kind": "lodge",
+    "doors": [
+      {
+        "x": 1168.0,
+        "y": 3328
+      },
+      {
+        "x": 992,
+        "y": 3232
+      }
+    ]
+  },
+  {
+    "name": "Harbor store",
+    "type": "room",
+    "x": 5600,
+    "y": 3104,
+    "width": 384,
+    "height": 320,
+    "kind": "store",
+    "doors": [
+      {
+        "x": 5776.0,
+        "y": 3392
+      },
+      {
+        "x": 5600,
+        "y": 3296
+      }
+    ]
+  },
+  {
+    "name": "Workshop",
+    "type": "room",
+    "x": 5568,
+    "y": 1824,
+    "width": 384,
+    "height": 320,
+    "kind": "forge",
+    "doors": [
+      {
+        "x": 5744.0,
+        "y": 2112
+      },
+      {
+        "x": 5568,
+        "y": 2016
+      }
+    ]
+  }
+]
