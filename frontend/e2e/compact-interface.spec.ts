@@ -65,6 +65,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await host.keyboard.press("m");
       await expect(host.locator(".map-dialog")).not.toBeVisible();
       await host.locator(".chat-input").blur();
+      await expect(host.locator(".phase-transition")).not.toBeVisible();
       await host.keyboard.down("d");
       await expect.poll(() => latest[0]!("field_state")!.self.x).toBeGreaterThan(start.x + 10);
       await host.keyboard.up("d");

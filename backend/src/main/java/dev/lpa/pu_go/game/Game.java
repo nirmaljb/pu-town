@@ -96,6 +96,7 @@ public final class Game {
     private final boolean practice;
     private TaskBoard tasks;
     private final TownMap townMap;
+    public TownMap townMap() { return townMap; }
     public String areaAt(double x, double y) { return townMap.areaAt(x, y); }
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();

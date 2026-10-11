@@ -108,7 +108,7 @@ export class DeveloperInterface {
       const steps = this.input(form, "Required steps", task.steps, 1, 100), duration = this.input(form, "Seconds per step", task.durationMs / 1000, 0, 3600), progress = this.input(form, "Progress", task.step, 0, 100);
       this.button(form, "Apply Task", () => {}).type = "submit";
       form.addEventListener("submit", event => { event.preventDefault(); this.command({ action: "task", playerId: player.playerId, taskId: task.taskId, location: Number(location.value), kind: kind.value as "repair", steps: Number(steps.value), durationMs: Number(duration.value) * 1000, step: Number(progress.value) }); });
-      this.button(form, "Teleport to Task", () => { const place = world.inspector!.locations[task.location]!; this.command({ action: "teleport", playerId: player.playerId, x: place.x, y: place.y }); });
+      this.button(form, "Teleport to Task", () => { const place = world.inspector!.locations[task.currentLocation]!; this.command({ action: "teleport", playerId: player.playerId, x: place.x, y: place.y }); });
       this.button(form, "Begin simulated work", () => this.command({ action: "open_task", playerId: player.playerId, round: world.game!.round, taskId: task.taskId }), !player.simulated || world.game?.phase !== "day");
       this.button(form, "Finish simulated step", () => this.command({ action: "task_step", playerId: player.playerId, round: world.game!.round, taskId: task.taskId, step: task.step, value: task.kind === "sequence" ? [2,0,3,1][task.step % 4]! : 0 }), !player.simulated || world.game?.phase !== "day" || world.developer?.paused);
       tasks.append(form);

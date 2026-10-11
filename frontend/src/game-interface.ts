@@ -36,6 +36,7 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 /** The Game's own controls. Every rule it presents is enforced again by the server. */
 export class GameInterface {
   readonly #root = document.createElement("div");
+  readonly #phaseOverlay: HTMLElement;
   readonly #transition = new PhaseTransition();
   #preview: Preview | null = null;
   readonly #ballotItems = new Map<string | null, HTMLLIElement>();
@@ -105,7 +106,9 @@ export class GameInterface {
           </form>
         </div>
       </section>`;
-    document.body.append(this.#root);
+    this.#phaseOverlay = this.element(".phase-transition");
+    // Outside the fixed Game surface so it covers every HUD stacking context.
+    document.body.append(this.#root, this.#phaseOverlay);
     this.element(".role-everyone").textContent = EVERYONE_BRIEF;
     this.element(".next-practice-phase").addEventListener("click", () => {
       const game = this.#lastWorld?.game;
@@ -127,6 +130,7 @@ export class GameInterface {
 
   destroy(): void {
     this.#root.remove();
+    this.#phaseOverlay.remove();
     document.body.classList.remove("in-game", "sleeping");
   }
 
@@ -488,6 +492,6 @@ export class GameInterface {
   }
 
   private element<T extends HTMLElement = HTMLElement>(selector: string): T {
-    return this.#root.querySelector<T>(selector)!;
+    return (this.#root.querySelector<T>(selector) ?? (selector === ".phase-transition" ? this.#phaseOverlay : this.#phaseOverlay?.querySelector<T>(selector))) as T;
   }
 }

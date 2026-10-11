@@ -667,7 +667,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         try {
             switch (action) {
                 case "inspect", "claim" -> { }
-                case "add_player" -> addSimulated(room, args.get("displayName").asText(), roleOf(args.get("role").asText()));
+                case "add_player" -> addSimulated(room, args.get("displayName").asText().strip(), roleOf(args.get("role").asText()));
                 case "remove_player" -> {
                     if (playerId.equals(controller.getId())) throw new IllegalArgumentException("Use Leave Room for the controller.");
                     PlayerState departing = playersById.get(playerId);
@@ -682,7 +682,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 case "lobby" -> { room.returnToLobby(); dev.revision++; }
                 case "reset" -> {
                     if (dev.startingState == null) throw new IllegalArgumentException("Start a scenario first.");
-                    game = dev.startingState.copyDeveloper(now); dev.settings = game.developerSettings();
+                    game = dev.startingState.copyDeveloper(now); room.setTownMap(game.townMap()); dev.settings = game.developerSettings();
                     // Preserve current connections and Seats; reset only current memberships.
                     for (Participant actor : game.roster()) if (!room.containsPlayer(actor.playerId())) game.removeDeveloper(actor.playerId());
                     for (String id : room.playerIdsSnapshot()) if (game.participant(id) == null) game.addDeveloper(participantOf(playersById.get(id), dev.roles.get(id)), now);

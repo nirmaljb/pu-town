@@ -2,7 +2,7 @@ import type { Role, ParticipantStatus } from "./protocol.js";
 
 export const DEVELOPER_SETTINGS = ["automatic", "factionVictory", "taskVictory", "taskRange", "taskDuration", "nightMovement"] as const;
 export type DeveloperSetting = typeof DEVELOPER_SETTINGS[number];
-export type DeveloperTask = Readonly<{ playerId: string; taskId: string; location: number; kind: "repair" | "sequence" | "delivery"; steps: number; durationMs: number; step: number; fake: boolean }>;
+export type DeveloperTask = Readonly<{ playerId: string; taskId: string; location: number; currentLocation: number; kind: "repair" | "sequence" | "delivery"; steps: number; durationMs: number; step: number; fake: boolean }>;
 export type DeveloperPlayer = Readonly<{ playerId: string; displayName: string; role: Role; status: ParticipantStatus; simulated: boolean; x: number; y: number;
   nightChoice: string | null; voted: boolean; vote: string | null; tasks: readonly DeveloperTask[] }>;
 export type DeveloperStatus = Readonly<{ controllerId: string | null; paused: boolean; nightMovement: boolean; taskRange: boolean; scenario: string; revision: number; simulatedPlayerIds: readonly string[] }>;
@@ -20,7 +20,7 @@ export type DeveloperCommand =
   | Readonly<{ action: "night_choice" | "vote"; playerId: string; round: number; targetPlayerId: string | null }>
   | Readonly<{ action: "open_task"; playerId: string; round: number; taskId: string }>
   | Readonly<{ action: "task_step"; playerId: string; round: number; taskId: string; step: number; value: number }>
-  | (Omit<DeveloperTask, "fake"> & Readonly<{ action: "task" }>);
+  | (Omit<DeveloperTask, "fake" | "currentLocation"> & Readonly<{ action: "task" }>);
 
 function record(value: unknown, fields: readonly string[]): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid developer object");
@@ -47,10 +47,10 @@ export function decodeDeveloperState(value: unknown): DeveloperState {
   const players = array(data.players).map(value => {
     const data = record(value, ["playerId", "displayName", "role", "status", "simulated", "x", "y", "nightChoice", "voted", "vote", "tasks"]);
     const tasks = array(data.tasks).map(value => {
-      const task = record(value, ["playerId", "taskId", "location", "kind", "steps", "durationMs", "step", "fake"]);
-      const steps = counter(task.steps), step = counter(task.step), location = counter(task.location), durationMs = counter(task.durationMs);
-      if (steps < 1 || steps > 100 || step > steps || location >= locations.length || durationMs > 3_600_000) throw new Error("Invalid developer Task");
-      return { playerId: text(task.playerId), taskId: text(task.taskId), location, kind: member(task.kind, ["repair", "sequence", "delivery"] as const), steps, durationMs, step, fake: bool(task.fake) };
+      const task = record(value, ["playerId", "taskId", "location", "kind", "steps", "durationMs", "step", "fake", "currentLocation"]);
+      const steps = counter(task.steps), step = counter(task.step), location = counter(task.location), durationMs = counter(task.durationMs), currentLocation = counter(task.currentLocation);
+      if (steps < 1 || steps > 100 || step > steps || location >= locations.length || currentLocation >= locations.length || durationMs > 3_600_000) throw new Error("Invalid developer Task");
+      return { playerId: text(task.playerId), taskId: text(task.taskId), location, currentLocation, kind: member(task.kind, ["repair", "sequence", "delivery"] as const), steps, durationMs, step, fake: bool(task.fake) };
     });
     if (new Set(tasks.map(task => task.taskId)).size !== tasks.length || tasks.some(task => task.playerId !== data.playerId)) throw new Error("Invalid developer assignments");
     return { playerId: text(data.playerId), displayName: text(data.displayName), role: member(data.role, ["mafia", "villager", "doctor", "sheriff"] as const),

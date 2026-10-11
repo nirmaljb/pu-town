@@ -8,7 +8,7 @@ const status = { version: 1, type: 'developer_status', controllerId: 'controller
   nightMovement: false, taskRange: true, scenario: 'four_roles', revision: 1, simulatedPlayerIds: ['sim'] };
 const inspector = { version: 1, type: 'developer_state', settings: { automatic: true, factionVictory: true, taskVictory: true, taskRange: true, taskDuration: true, nightMovement: false },
   players: [{ playerId: 'sim', displayName: 'Doctor', role: 'doctor', status: 'living', simulated: true, x: 10, y: 20, nightChoice: null, voted: false, vote: null,
-    tasks: [{ playerId: 'sim', taskId: 'task', location: 0, kind: 'repair', steps: 2, durationMs: 5000, step: 1, fake: false }] }], locations: [{ name: 'Ledger', x: 10, y: 20 }] };
+    tasks: [{ playerId: 'sim', taskId: 'task', location: 0, currentLocation: 0, kind: 'repair', steps: 2, durationMs: 5000, step: 1, fake: false }] }], locations: [{ name: 'Ledger', x: 10, y: 20 }] };
 test('developer inspector and public status decode exact independent schemas', () => {
   assert.deepEqual(decodeServerMessage(JSON.stringify(status)), status);
   assert.deepEqual(decodeServerMessage(JSON.stringify(inspector)), inspector);

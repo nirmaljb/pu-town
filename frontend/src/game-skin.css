@@ -298,3 +298,9 @@ summary { padding-block: 6px; }
   .map-dialog { padding: 10px; }
   .map-dialog h2 { font-size: 14px; }
 }
+
+/* Phase titles own the large presentation; only timing remains in the HUD. */
+.game-interface .game-banner { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); margin: 0; padding: 5px 10px; gap: 4px 10px; max-width: calc(100vw - 220px); }
+.game-interface .game-countdown { font-size: 15px; }
+.game-interface .role-card:not([open]) { width: max-content; padding: 5px 9px; }
+@media (max-width: 600px) { .game-interface .game-banner { top: 54px; max-width: calc(100vw - 24px); } }

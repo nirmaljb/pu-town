@@ -259,12 +259,17 @@ export class JoinInterface {
       button.setAttribute("aria-pressed", String(button.dataset.map === this.#world?.mapId));
     }
     this.renderRoleSetup(setup, host && state.status === "playing", gathered);
+    if (this.#world?.developer) {
+      this.element(".role-setup").hidden = true;
+      this.element(".host-guidance").textContent = "Use the Developer Room panel to assign Roles and start setup.";
+    }
     this.element<HTMLButtonElement>(".start-game").hidden = Boolean(this.#world?.developer) || !host;
     this.element<HTMLButtonElement>(".start-game").disabled =
       state.status !== "playing" || gathered < needed || waiting > 0;
     this.element<HTMLButtonElement>(".start-practice").hidden = Boolean(this.#world?.developer) || !host || gathered !== 1;
     this.element<HTMLButtonElement>(".start-practice").disabled = state.status !== "playing";
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
+    ready.hidden = Boolean(this.#world?.developer);
     ready.disabled = state.status !== "playing";
     ready.textContent = self?.ready ? "Ready ✓" : "Ready";
     ready.setAttribute("aria-pressed", String(self?.ready ?? false));

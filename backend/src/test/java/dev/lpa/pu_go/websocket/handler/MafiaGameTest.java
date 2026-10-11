@@ -87,6 +87,8 @@ class MafiaGameTest {
         String room = latestOfType(host, "room_snapshot").path("roomId").asText();
         dev(host, "\"action\":\"add_player\",\"displayName\":\"Doctor\",\"role\":\"doctor\"");
         assertEquals(2, latestOfType(host, "developer_state").path("players").size());
+        dev(host, "\"action\":\"add_player\",\"displayName\":\"  Alice  \",\"role\":\"villager\"");
+        assertEquals("Alice", latestOfType(host, "room_state").path("players").get(2).path("displayName").asText());
         dev(host, "\"action\":\"start\"");
         assertEquals("role_reveal", latestOfType(host, "game_state").path("phase").asText());
         var guest = connect("developer-guest");
@@ -94,7 +96,7 @@ class MafiaGameTest {
         assertEquals("developer_unavailable", latest(guest).path("code").asText());
         guest.getAttributes().put("developerLocal", true);
         join(guest, room);
-        assertEquals(3, latestOfType(guest, "game_state").path("players").size());
+        assertEquals(4, latestOfType(guest, "game_state").path("players").size());
         dev(guest, "\"action\":\"advance\"");
         assertEquals("not_controller", latest(guest).path("code").asText());
         assertEquals(0, countOfType(guest, "developer_state"));
@@ -109,6 +111,33 @@ class MafiaGameTest {
         assertEquals("day", latestOfType(guest, "game_state").path("phase").asText());
         dev(host, "\"action\":\"lobby\"");
         assertEquals("lobby", latestOfType(guest, "room_state").path("phase").asText());
+    }
+
+    @Test
+    void developerResetRestoresMapAndDeliveryInspectionTracksBothSteps() throws Exception {
+        handler.setDeveloperEnabled(true);
+        var host = connect("dev-map-host"); host.getAttributes().put("developerLocal", true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        dev(host, "\"action\":\"scenario\",\"name\":\"four_roles\"");
+        dev(host, "\"action\":\"lobby\"");
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"horror\"}");
+        dev(host, "\"action\":\"reset\"");
+        assertEquals("village", latestOfType(host, "room_state").path("mapId").asText());
+        dev(host, "\"action\":\"advance\"");
+        JsonNode actor = latestOfType(host, "developer_state").path("players").get(1);
+        String id = actor.path("playerId").asText();
+        String taskId = actor.path("tasks").get(2).path("taskId").asText();
+        dev(host, "\"action\":\"task\",\"playerId\":\"" + id + "\",\"taskId\":\"" + taskId + "\",\"location\":2,\"kind\":\"delivery\",\"steps\":2,\"durationMs\":0,\"step\":0");
+        for (int step = 0; step < 2; step++) {
+            JsonNode inspector = latestOfType(host, "developer_state");
+            JsonNode task = inspector.path("players").get(1).path("tasks").get(2);
+            assertEquals(step == 0 ? 2 : 0, task.path("currentLocation").asInt(-1));
+            JsonNode point = inspector.path("locations").get(task.path("currentLocation").asInt());
+            dev(host, "\"action\":\"teleport\",\"playerId\":\"" + id + "\",\"x\":" + point.path("x") + ",\"y\":" + point.path("y"));
+            dev(host, "\"action\":\"open_task\",\"playerId\":\"" + id + "\",\"round\":1,\"taskId\":\"" + taskId + "\"");
+            dev(host, "\"action\":\"task_step\",\"playerId\":\"" + id + "\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":" + step + ",\"value\":0");
+            assertEquals(step + 1, latestOfType(host, "developer_state").path("players").get(1).path("tasks").get(2).path("step").asInt());
+        }
     }
 
     @Test

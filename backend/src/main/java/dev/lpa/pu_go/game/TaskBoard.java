@@ -83,9 +83,9 @@ public final class TaskBoard {
     }
     public void roleChanged(Participant member) { roles.put(member.playerId(), member.role()); close(member.playerId()); }
     private boolean counts(Assignment task) { return !task.fake && (developer == null || roles.get(task.owner) != Role.MAFIA && roles.containsKey(task.owner)); }
-    public record Configuration(String playerId, String taskId, int location, String kind, int steps, long durationMs, int step, boolean fake) {}
+    public record Configuration(String playerId, String taskId, int location, String kind, int steps, long durationMs, int step, boolean fake, int currentLocation) {}
     public List<Configuration> configurations() {
-        return assignments.stream().map(task -> new Configuration(task.owner, task.id, townMap.tasks().indexOf(task.location), task.kind, task.steps(), task.durationMs, task.step, task.fake)).toList();
+        return assignments.stream().map(task -> new Configuration(task.owner, task.id, townMap.tasks().indexOf(task.location), task.kind, task.steps(), task.durationMs, task.step, task.fake, townMap.tasks().indexOf(task.currentLocation()))).toList();
     }
     public Game.Rejection configure(String playerId, String taskId, int location, String kind, int steps, long duration, int step) {
         Assignment task = owned(playerId, taskId);
