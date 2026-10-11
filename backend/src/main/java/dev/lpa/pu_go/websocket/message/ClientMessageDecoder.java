@@ -29,6 +29,55 @@ public final class ClientMessageDecoder {
         }
         String type = requiredText(root, "type");
         return switch (type) {
+            case "create_developer_room" -> {
+                requireOnly(root, Set.of("version", "type", "displayName"));
+                yield new ClientMessage.CreateDeveloperRoom(1, type, displayName(root));
+            }
+            case "take_developer_player" -> {
+                requireOnly(root, Set.of("version", "type", "roomId", "playerId"));
+                yield new ClientMessage.TakeDeveloperPlayer(1, type, requiredText(root, "roomId"), requiredText(root, "playerId"));
+            }
+            case "developer_command" -> {
+                String action = requiredText(root, "action");
+                java.util.HashSet<String> fields = new java.util.HashSet<>(Set.of("version", "type", "action"));
+                fields.addAll(switch (action) {
+                    case "start", "advance", "reset", "lobby", "inspect", "claim", "release" -> Set.of();
+                    case "pause" -> Set.of("enabled");
+                    case "setting" -> Set.of("name", "enabled");
+                    case "scenario" -> Set.of("name");
+                    case "add_player" -> Set.of("displayName", "role");
+                    case "remove_player" -> Set.of("playerId");
+                    case "role" -> Set.of("playerId", "role");
+                    case "status" -> Set.of("playerId", "living");
+                    case "teleport" -> Set.of("playerId", "x", "y");
+                    case "night_choice", "vote" -> Set.of("playerId", "round", "targetPlayerId");
+                    case "open_task" -> Set.of("playerId", "round", "taskId");
+                    case "task_step" -> Set.of("playerId", "round", "taskId", "step", "value");
+                    case "task" -> Set.of("playerId", "taskId", "location", "kind", "steps", "durationMs", "step");
+                    default -> throw new InvalidClientMessageException("malformed_message", "Unknown developer action.");
+                });
+                requireOnly(root, fields);
+                for (String field : fields) {
+                    switch (field) {
+                        case "enabled", "living" -> { if (!root.get(field).isBoolean()) throw new InvalidClientMessageException("malformed_message", field + " must be boolean."); }
+                        case "x", "y" -> coordinate(root, field);
+                        case "round" -> round(root);
+                        case "step", "value", "location", "steps", "durationMs" -> count(root, field);
+                        case "targetPlayerId" -> { if (!root.get(field).isNull()) requiredText(root, field); }
+                        case "playerId", "taskId", "name", "kind" -> requiredText(root, field);
+                        case "displayName" -> displayName(root);
+                        case "role" -> { if (!Set.of("mafia", "villager", "doctor", "sheriff").contains(requiredText(root, field))) throw new InvalidClientMessageException("malformed_message", "Unknown Role."); }
+                        default -> { }
+                    }
+                }
+                if (action.equals("setting") && !Set.of("automatic", "factionVictory", "taskVictory", "taskRange", "taskDuration", "nightMovement").contains(root.get("name").asText()))
+                    throw new InvalidClientMessageException("malformed_message", "Unknown developer setting.");
+                if (action.equals("scenario") && !Set.of("four_roles", "protection", "voting", "tasks", "recovery").contains(root.get("name").asText()))
+                    throw new InvalidClientMessageException("malformed_message", "Unknown scenario.");
+                if (action.equals("task") && (!Set.of("repair", "sequence", "delivery").contains(root.get("kind").asText()) || root.get("steps").asInt() < 1 || root.get("steps").asInt() > 100 || root.get("step").asInt() > root.get("steps").asInt() || root.get("durationMs").asInt() > 3_600_000))
+                    throw new InvalidClientMessageException("malformed_message", "Invalid Task configuration.");
+                yield new ClientMessage.DeveloperCommand(1, type, action, root);
+            }
             case "select_map" -> {
                 requireOnly(root, Set.of("version", "type", "mapId"));
                 String mapId = requiredText(root, "mapId");

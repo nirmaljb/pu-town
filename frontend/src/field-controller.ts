@@ -48,7 +48,7 @@ export class FieldController {
       this.#sent = { x: this.#x, y: this.#y, facing: this.#facing };
       this.#active = true;
     }
-    if (sleeping) {
+    if (world?.developer?.paused || sleeping && !world?.developer?.nightMovement) {
       this.#x = field.self.x;
       this.#y = field.self.y;
       this.#facing = field.self.facing;

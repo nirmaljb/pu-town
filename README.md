@@ -87,6 +87,34 @@ Open `https://YOUR-MACHINE.YOUR-TAILNET.ts.net:8443/?ws=wss%3A%2F%2FYOUR-MACHINE
 
 Stop only these tunnels with `tailscale funnel --https=8443 off` and `tailscale funnel --https=10000 off`.
 
+## Local Developer Rooms
+
+Keep Solo Practice for lightweight exploration. For multi-Player testing, start a separate local backend explicitly:
+
+```sh
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.address=127.0.0.1 --putown.developer.enabled=true"
+```
+
+Open `http://localhost:5173` with the usual local Vite server. Developer Room appears only when the selected local backend confirms that it is enabled. Public/Tailscale connections cannot create, enter, recover, control or inspect Developer Rooms, even when their proxy connects from loopback. Ordinary Rooms retain their normal rules.
+
+Create a Developer Room and open its collapsible panel. Add idle Simulated Players, assign exact Roles, or load Four Roles, Protection and investigation, Townhall voting, Near-complete Task victory, or Disconnect and recovery. Start setup accepts any Player count up to ten without Ready requirements. The controller can add/remove Players after Start, teleport, eliminate/revive, advance or pause phases, and independently switch automatic phases, faction victory, Task victory, timed Task work, Task range and Night movement. Normal rules are the initial defaults.
+
+Select a Player to inspect Roles, private choices and both Task banks. Task controls choose locations and kind, required steps, seconds per step and progress. Role changes close unfinished interaction and clear pending choices while retaining earned progress in each bank. Simulated work and choices use the same Game validation as browser actions.
+
+Open local browser as this Player hands an idle simulation to a real browser without changing identity or Game state. That browser sees only its own authorized view. Release to idle simulation returns control explicitly; unexpected Disconnect and same-tab refresh use the normal 120-second membership recovery. The controller keeps authority throughout its recovery window; after expiry another real Player can take over. Simulations alone never retain an abandoned Room.
+
+Pause freezes phase time, movement and timed Task work while heartbeat and recovery continue. Reset scenario restores the captured starting Game and settings while retaining current browser connections and memberships; it does not resurrect Players who left. Return to Lobby clears the Game and permits rebuilding setup. Phase titles fade to black for 350 ms, hold for 800 ms and reveal over 350 ms in every mode; gameplay input is blocked during that presentation while the server clock continues. Recovery/foregrounding skip stale transitions; reduced motion shows a brief title card. A small countdown and compact Role control remain available.
+
+Run the local two-browser acceptance test with:
+
+```sh
+cd frontend
+PU_TOWN_E2E_DEVELOPER=1 npm run test:browser -- e2e/developer-rooms.spec.ts
+```
+
+The harness starts an isolated backend, checks `/health` and serves this checkout on port 5173. Choose an unused backend port with `PU_TOWN_E2E_BACKEND_PORT` if necessary. Keep Developer Mode disabled on public deployments.
+
 ## The Game
 
 The Game map fills the available width and stays centered, with phase information,

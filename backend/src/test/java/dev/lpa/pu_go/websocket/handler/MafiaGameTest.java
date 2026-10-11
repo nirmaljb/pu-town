@@ -74,6 +74,123 @@ class MafiaGameTest {
     private final List<String> tokens = new ArrayList<>();
     private String code;
 
+    @Test
+    void developerRoomsRequireExplicitLocalAccessAndKeepInspectorPrivate() throws Exception {
+        var host = connect("developer-host");
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        assertEquals("developer_unavailable", latest(host).path("code").asText());
+        handler.setDeveloperEnabled(true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        assertEquals("developer_unavailable", latest(host).path("code").asText());
+        host.getAttributes().put("developerLocal", true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        String room = latestOfType(host, "room_snapshot").path("roomId").asText();
+        dev(host, "\"action\":\"add_player\",\"displayName\":\"Doctor\",\"role\":\"doctor\"");
+        assertEquals(2, latestOfType(host, "developer_state").path("players").size());
+        dev(host, "\"action\":\"start\"");
+        assertEquals("role_reveal", latestOfType(host, "game_state").path("phase").asText());
+        var guest = connect("developer-guest");
+        join(guest, room);
+        assertEquals("developer_unavailable", latest(guest).path("code").asText());
+        guest.getAttributes().put("developerLocal", true);
+        join(guest, room);
+        assertEquals(3, latestOfType(guest, "game_state").path("players").size());
+        dev(guest, "\"action\":\"advance\"");
+        assertEquals("not_controller", latest(guest).path("code").asText());
+        assertEquals(0, countOfType(guest, "developer_state"));
+        assertNull(latestOfType(guest, "game_state").get("roles").isNull() ? null : "leaked");
+        dev(host, "\"action\":\"pause\",\"enabled\":true");
+        long remaining = latestOfType(host, "game_state").path("remainingMs").asLong();
+        advance(200_000);
+        dev(host, "\"action\":\"inspect\"");
+        assertEquals(remaining, latestOfType(host, "game_state").path("remainingMs").asLong());
+        dev(host, "\"action\":\"pause\",\"enabled\":false");
+        advance(remaining);
+        assertEquals("day", latestOfType(guest, "game_state").path("phase").asText());
+        dev(host, "\"action\":\"lobby\"");
+        assertEquals("lobby", latestOfType(guest, "room_state").path("phase").asText());
+    }
+
+    @Test
+    void developerHandoffPauseTasksRoleBanksResetAndControllerRecoveryUseMemberships() throws Exception {
+        handler.setDeveloperEnabled(true);
+        var host = connect("dev-clock-host"); host.getAttributes().put("developerLocal", true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        String room = latestOfType(host, "room_snapshot").path("roomId").asText();
+        String hostToken = latestOfType(host, "room_snapshot").path("recoveryToken").asText();
+        dev(host, "\"action\":\"scenario\",\"name\":\"four_roles\"");
+        String simulatedId = latestOfType(host, "developer_state").path("players").get(1).path("playerId").asText();
+        var browser = connect("dev-clock-browser"); browser.getAttributes().put("developerLocal", true);
+        send(browser, "{\"version\":1,\"type\":\"take_developer_player\",\"roomId\":\"" + room + "\",\"playerId\":\"" + simulatedId + "\"}");
+        assertEquals(simulatedId, latestOfType(browser, "room_snapshot").path("selfPlayerId").asText());
+        assertEquals("doctor", latestOfType(browser, "game_state").path("self").path("role").asText());
+        String token = latestOfType(browser, "room_snapshot").path("recoveryToken").asText();
+        dev(host, "\"action\":\"advance\"");
+        dev(host, "\"action\":\"setting\",\"name\":\"taskRange\",\"enabled\":false");
+        String taskId = latestOfType(browser, "task_state").path("tasks").get(0).path("taskId").asText();
+        send(browser, "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"" + taskId + "\"}");
+        advance(10_000);
+        dev(host, "\"action\":\"pause\",\"enabled\":true");
+        assertEquals(110_000, latestOfType(browser, "task_state").path("remainingMs").asLong());
+        advance(70_000);
+        handler.afterConnectionClosed(browser, CloseStatus.NORMAL);
+        var returned = connect("dev-clock-returned"); returned.getAttributes().put("developerLocal", true);
+        recover(returned, room, token);
+        assertEquals(110_000, latestOfType(returned, "task_state").path("remainingMs").asLong());
+        dev(host, "\"action\":\"pause\",\"enabled\":false");
+        advance(110_000);
+        send(returned, "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"" + taskId + "\",\"step\":0,\"value\":0}");
+        assertEquals(1, latestOfType(returned, "task_state").path("tasks").get(0).path("step").asInt());
+        dev(host, "\"action\":\"role\",\"playerId\":\"" + simulatedId + "\",\"role\":\"mafia\"");
+        assertTrue(latestOfType(returned, "task_state").path("tasks").get(0).path("fake").asBoolean());
+        dev(host, "\"action\":\"role\",\"playerId\":\"" + simulatedId + "\",\"role\":\"doctor\"");
+        assertEquals(1, latestOfType(returned, "task_state").path("tasks").get(0).path("step").asInt());
+        dev(host, "\"action\":\"reset\"");
+        assertEquals("role_reveal", latestOfType(returned, "game_state").path("phase").asText());
+        assertEquals(8_000, latestOfType(returned, "game_state").path("remainingMs").asLong());
+        assertEquals(0, latestOfType(returned, "task_state").path("tasks").get(0).path("step").asInt());
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL); advance(16_000);
+        dev(returned, "\"action\":\"claim\"");
+        assertEquals("not_controller", latest(returned).path("code").asText());
+        var hostReturned = connect("dev-controller-returned"); hostReturned.getAttributes().put("developerLocal", true);
+        recover(hostReturned, room, hostToken);
+        assertTrue(countOfType(hostReturned, "developer_state") > 0);
+        dev(returned, "\"action\":\"release\"");
+        assertEquals("room_left", latest(returned).path("type").asText());
+        assertTrue(latestOfType(hostReturned, "developer_state").path("players").get(1).path("simulated").asBoolean());
+        var oldCredential = connect("dev-old-credential"); oldCredential.getAttributes().put("developerLocal", true);
+        recover(oldCredential, room, token);
+        assertEquals("recovery_expired", latest(oldCredential).path("code").asText());
+        send(hostReturned, "{\"version\":1,\"type\":\"leave_room\"}");
+        var newcomer = connect("dev-abandoned"); newcomer.getAttributes().put("developerLocal", true); join(newcomer, room);
+        assertEquals("room_not_found", latest(newcomer).path("code").asText());
+    }
+
+    @Test
+    void simulatedPrivateChoicesDoNotNotifyOrdinaryBrowsersAndControllerExpiresIndependently() throws Exception {
+        handler.setDeveloperEnabled(true);
+        var host = connect("dev-private-host"); host.getAttributes().put("developerLocal", true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        String room = latestOfType(host, "room_snapshot").path("roomId").asText();
+        dev(host, "\"action\":\"scenario\",\"name\":\"protection\"");
+        var guest = connect("dev-private-guest"); guest.getAttributes().put("developerLocal", true); join(guest, room);
+        String doctor = latestOfType(host, "developer_state").path("players").get(1).path("playerId").asText();
+        String victim = latestOfType(host, "developer_state").path("players").get(3).path("playerId").asText();
+        int before = guest.payloads().size();
+        dev(host, "\"action\":\"night_choice\",\"playerId\":\"" + doctor + "\",\"round\":1,\"targetPlayerId\":\"" + victim + "\"");
+        assertEquals(before, guest.payloads().size());
+        assertEquals(0, countOfType(guest, "developer_state"));
+        dev(host, "\"action\":\"pause\",\"enabled\":true");
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL); advance(120_000);
+        assertTrue(latestOfType(guest, "developer_status").path("controllerId").isNull());
+        dev(guest, "\"action\":\"claim\"");
+        assertTrue(countOfType(guest, "developer_state") > 0);
+    }
+
+    private void dev(RecordingWebSocketSession session, String fields) throws Exception {
+        send(session, "{\"version\":1,\"type\":\"developer_command\"," + fields + "}");
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"village", "horror", "cyberpunk"})
     void hostSelectsSharedTownBeforeStartAndRecoveryRetainsIt(String mapId) throws Exception {

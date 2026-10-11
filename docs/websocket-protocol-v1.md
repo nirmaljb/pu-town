@@ -356,3 +356,48 @@ Earned stages persist; a phase or movement interruption cancels only the pending
 interaction. Clients display the authoritative `task_state.remainingMs` rather
 than hard-coding this tuning. Nine to ten rounds is a measured balancing target,
 not a deadline or victory restriction; completion still wins immediately.
+
+## Local Developer Rooms (ADR 0021)
+
+These messages remain protocol v1 and use exact field sets. They require an explicitly enabled backend (`putown.developer.enabled=true`) and a direct local WebSocket handshake: loopback peer, local request authority and HTTP(S) browser Origin, and no `Forwarded`, `X-Forwarded-*` or `Tailscale-*` headers. Public/proxied access is refused even if the proxy connects from loopback. Local `GET /developer/capabilities` returns `{"enabled":true}` only inside this boundary; unavailable access returns 404. Developer Rooms also require this boundary for ordinary Join and recovery. Ordinary Rooms never accept developer operations.
+
+| Client type | Additional fields |
+| --- | --- |
+| `create_developer_room` | `displayName: string` (ordinary Display Name validation) |
+| `take_developer_player` | `roomId: string`, `playerId: string` (an idle simulation in that Room; the connection must have no membership) |
+| `developer_command` | `action: string` and exactly the fields in the following table |
+
+| Developer action | Fields beyond `version`, `type`, `action` |
+| --- | --- |
+| `start`, `advance`, `reset`, `lobby`, `inspect`, `claim`, `release` | none |
+| `pause` | `enabled: boolean` |
+| `setting` | `name: "automatic" \| "factionVictory" \| "taskVictory" \| "taskRange" \| "taskDuration" \| "nightMovement"`, `enabled: boolean` |
+| `scenario` | `name: "four_roles" \| "protection" \| "voting" \| "tasks" \| "recovery"` |
+| `add_player` | `displayName: string`, `role: Role` |
+| `remove_player` | `playerId: string` |
+| `role` | `playerId: string`, `role: Role` |
+| `status` | `playerId: string`, `living: boolean` |
+| `teleport` | `playerId: string`, `x: finite number`, `y: finite number` (walkable map position) |
+| `night_choice`, `vote` | `playerId: string`, `round: positive integer`, `targetPlayerId: string \| null` |
+| `open_task` | `playerId: string`, `round: positive integer`, `taskId: string` |
+| `task_step` | `playerId: string`, `round: positive integer`, `taskId: string`, `step: nonnegative integer`, `value: nonnegative integer` |
+| `task` | `playerId: string`, `taskId: string`, `location: nonnegative integer`, `kind: "repair" \| "sequence" \| "delivery"`, `steps: 1–100 integer`, `durationMs: 0–3600000 integer`, `step: 0–steps integer` |
+
+Every action except `claim` and `release` requires current controller authority. `claim` succeeds only after the previous controller's membership ends. `release` applies only to a taken Simulated Player who is not controller; it sends `room_left`, rotates the recovery credential and retains idle membership. Taking a Player sends an ordinary `room_snapshot` with the same Player ID, appearance, Seat, Role and state plus its private recovery credential. The ordinary snapshot fields remain unchanged. Any non-controller browser can act only for itself; simulated actions require idle simulation and use ordinary Game phase, round, target and Task validation.
+
+Start accepts any count up to ten and exact assigned Roles without Ready checks. Independent defaults: automatic phases, faction victory, Task victory, Task range and Task duration enabled; Night movement disabled. Pause freezes phase/Task work and ordinary movement; real-time heartbeats and membership expiry continue. Resume shifts gameplay deadlines by the pause duration. Automatic phases can be disabled separately; their countdown can reach zero without transitioning. Manual advance enters the next phase at the current gameplay time. Role changes clear pending choices and the affected unfinished Task interaction while preserving both banks' progress. The aggregate Village Task count includes only real assignments currently held by Village Players. Completed real/Fake banks remain independently retained.
+
+Task `location` indexes the inspector's pinned map locations. It reassigns the selected Task's work location; delivery alternates that location with the map's first Task location. Sequence work repeats the existing `2,0,3,1` pattern for the chosen step count. A Task edit closes its active interaction. Progress edits prepare a scenario; victory is resolved on the next successful gameplay Task step or other normal resolution. No new victory rule is introduced.
+
+Reset captures the setup at Start or scenario load (Roles, status, positions, banks/progress, settings, phase/round and remaining phase time) and restores it for current memberships. Browser connections and identity remain. Removed memberships are not resurrected; late members remain and join the restored Game. Lobby discards Game state; clients clear field, Tasks, chat and choices at the frame boundary. The `recovery` scenario prepares a four-Role Day for real browser handoff and normal Disconnect/refresh recovery.
+
+| Server type | Additional fields |
+| --- | --- |
+| `developer_status` | `controllerId: string \| null`, `paused: boolean`, `nightMovement: boolean`, `taskRange: boolean`, `scenario: string`, `revision: nonnegative integer`, `simulatedPlayerIds: string[]` |
+| `developer_state` | `settings: DeveloperSettings`, `players: DeveloperPlayer[]`, `locations: TaskLocation[]` |
+
+`developer_status` contains only nonsecret metadata for Developer Room members; `simulatedPlayerIds` identifies memberships originating as simulations, including those currently controlled by browsers. `revision` advances on reset, scenario load or return to Lobby. `developer_state` reaches **only** the connected, local controller. Ordinary `game_state` and `task_state` remain recipient-specific; Developer Rooms use the existing competitive Game view with separate developer metadata. Pause retains numeric `remainingMs`; clients hold that value while paused rather than running their local countdown.
+
+`DeveloperSettings` contains exactly the six boolean setting names above. `DeveloperPlayer` contains exactly `playerId`, `displayName`, `role`, `status`, `simulated` (currently idle), `x`, `y`, `nightChoice: string|null`, `voted: boolean`, `vote: string|null`, `tasks: TaskConfiguration[]`. `TaskLocation` contains exactly `name`, `x`, `y`. `TaskConfiguration` contains exactly `playerId`, `taskId`, `location`, `kind`, `steps`, `durationMs`, `step`, `fake`. Both banks are present only in inspection; ordinary Task views disclose only the recipient's active bank. Simulated private choices notify only their actor's authorized view and the controller inspector. Public Task aggregate changes retain the ordinary disclosure rules.
+
+Unavailable/nonlocal operations receive `developer_unavailable`; unauthorized controller operations receive `not_controller`. Unknown actions/settings/scenarios, missing/extra fields, unknown Roles and malformed bounds receive `malformed_message`. Missing members receive `invalid_target`; invalid setup/operation receives `invalid_action`, and Task/phase/target validation uses ordinary Game error codes. Idle simulations alone cannot retain a Room after all real memberships end.

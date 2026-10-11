@@ -34,8 +34,67 @@ public final class Game {
     private static final Rejection WRONG_PHASE = new Rejection("invalid_phase", "That action does not belong to this phase.");
     private static final Rejection NOT_ALLOWED = new Rejection("invalid_action", "You cannot take that action.");
 
+    private dev.lpa.pu_go.developer.DeveloperSettings developer;
+    private Long pausedAt;
+    private Long snapshotAt;
+    public void activateDeveloperSnapshot() { snapshotAt = null; }
+    public boolean isDeveloper() { return developer != null; }
+    public boolean isPaused() { return pausedAt != null; }
+    private long gameplayTime(long now) { return pausedAt == null ? now : pausedAt; }
+    public void pause(boolean enabled, long now) {
+        if (!isDeveloper()) throw new IllegalStateException("Only Developer Rooms can pause");
+        if (enabled && pausedAt == null) pausedAt = now;
+        else if (!enabled && pausedAt != null) {
+            long delta = now - pausedAt;
+            phaseEndsAt += delta; tasks.shiftTime(delta);
+            participants.values().forEach(member -> member.lastMoveAt += delta);
+            pausedAt = null;
+        }
+    }
+    public static Game developer(List<Participant> roster, long now, TownMap townMap, dev.lpa.pu_go.developer.DeveloperSettings settings) {
+        Game game = new Game(roster, now, false, townMap);
+        game.developer = settings; game.tasks.enableDeveloper(settings, roster); return game;
+    }
+    public Game copyDeveloper(long now) {
+        List<Participant> roster = roster().stream().map(Participant::copy).toList();
+        Game copy = developer(roster, now, townMap, developer.copy());
+        copy.phase = phase; copy.round = round; copy.phaseEndsAt = now + Math.max(0, phaseEndsAt - gameplayTime(snapshotAt == null ? now : snapshotAt));
+        copy.pausedAt = pausedAt == null ? null : now; copy.snapshotAt = now;
+        for (int index = 0; index < roster.size(); index++) {
+            Participant original = roster().get(index), cloned = roster.get(index);
+            cloned.x = original.x; cloned.y = original.y; cloned.facing = original.facing;
+        }
+        copy.tasks = tasks.copy(roster, copy.developer);
+        copy.ballots.putAll(ballots); copy.nightChoices.putAll(nightChoices); copy.chat.addAll(chat);
+        copy.winner = winner; copy.outcome = outcome; copy.revealedBallots = revealedBallots;
+        return copy;
+    }
+    public dev.lpa.pu_go.developer.DeveloperSettings developerSettings() { return developer; }
+    public void addDeveloper(Participant member, long now) {
+        participants.put(member.playerId(), member); placeAtSeat(member, gameplayTime(now)); tasks.addDeveloper(member);
+    }
+    public void removeDeveloper(String playerId) {
+        participants.remove(playerId); tasks.removeDeveloper(playerId); ballots.remove(playerId); nightChoices.remove(playerId);
+    }
+    public void developerRole(String playerId, Role role) {
+        Participant actor = participants.get(playerId); actor.previewRole(role); tasks.roleChanged(actor);
+        nightChoices.clear(); ballots.clear(); revealedBallots = null;
+    }
+    public Rejection developerTeleport(String playerId, double x, double y) {
+        if (!townMap.walkable(x, y)) return new Rejection("invalid_position", "Choose a walkable position.");
+        Participant actor = participants.get(playerId); actor.x = x; actor.y = y; actor.correction++; tasks.moved(actor); return null;
+    }
+    public void developerStatus(String playerId, boolean living) {
+        Participant actor = participants.get(playerId); actor.setStatus(living ? ParticipantStatus.LIVING : ParticipantStatus.ELIMINATED);
+        actor.setKilledByMafia(false); ballots.clear(); nightChoices.clear(); tasks.close(playerId);
+    }
+    public void advanceDeveloper(long now) { advanceAt(gameplayTime(now)); }
+    public List<TaskBoard.Configuration> taskConfigurations() { return tasks.configurations(); }
+    public Rejection configureTask(String playerId, String taskId, int location, String kind, int steps, long duration, int step) {
+        return tasks.configure(playerId, taskId, location, kind, steps, duration, step);
+    }
     private final boolean practice;
-    private final TaskBoard tasks;
+    private TaskBoard tasks;
     private final TownMap townMap;
     public String areaAt(double x, double y) { return townMap.areaAt(x, y); }
     private final Map<String, Participant> participants = new LinkedHashMap<>();
@@ -106,11 +165,11 @@ public final class Game {
     public boolean hasField() { return phase == GamePhase.DAY || phase == GamePhase.NIGHT; }
 
     public Long remainingMillis(long now) {
-        return practice || phase == GamePhase.FINISHED ? null : Math.max(0, phaseEndsAt - now);
+        return practice || phase == GamePhase.FINISHED ? null : Math.max(0, phaseEndsAt - gameplayTime(now));
     }
 
     /** The competitive phase deadline; null throughout practice and after the Game finishes. */
-    public Long phaseDeadline() { return practice || phase == GamePhase.FINISHED ? null : phaseEndsAt; }
+    public Long phaseDeadline() { return practice || phase == GamePhase.FINISHED || pausedAt != null || developer != null && !developer.automatic ? null : phaseEndsAt; }
 
     /** Advances exactly one expired phase. Callers repeat while a deadline remains due. */
     public void advance() {
@@ -226,7 +285,7 @@ public final class Game {
      */
     public boolean move(String playerId, double x, double y, String facing, long now) {
         Participant walker = participants.get(playerId);
-        if (phase != GamePhase.DAY || walker == null || walker.status() == ParticipantStatus.LEFT) return false;
+        if (pausedAt != null || (phase != GamePhase.DAY && !(developer != null && developer.nightMovement && phase == GamePhase.NIGHT)) || walker == null || walker.status() == ParticipantStatus.LEFT) return false;
         double elapsed = Math.min(1_000, Math.max(50, now - walker.lastMoveAt));
         double allowance = SPEED * elapsed / 1_000 * 1.4 + 24;
         boolean reachable = walker.distanceTo(x, y) <= allowance
@@ -275,20 +334,21 @@ public final class Game {
         return listenerId.equals(speakerId) ? 1 : hearingGain(listenerId, speakerId);
     }
 
-    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, participant(playerId).role(), now); }
+    public TaskBoard.View tasksFor(String playerId, long now) { return tasks.view(playerId, participant(playerId).role(), gameplayTime(now)); }
 
     public Rejection openTask(String playerId, int submittedRound, String taskId, long now) {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
-        return tasks.open(actor, taskId, now);
+        return tasks.open(actor, taskId, gameplayTime(now));
     }
 
     public Rejection taskStep(String playerId, int submittedRound, String taskId, int step, int value, long now) {
         if (phase != GamePhase.DAY || submittedRound != round) return WRONG_PHASE;
         Participant actor = participants.get(playerId);
         if (actor == null || actor.status() == ParticipantStatus.LEFT) return NOT_ALLOWED;
-        Rejection rejection = tasks.step(actor, taskId, step, value, now);
+        if (isPaused()) return NOT_ALLOWED;
+        Rejection rejection = tasks.step(actor, taskId, step, value, gameplayTime(now));
         if (rejection == null) {
             checkVictory();
             if (winner != null) finish();
@@ -421,8 +481,11 @@ public final class Game {
         if (practice || winner != null) return;
         long livingMafia = livingMafia().count();
         long livingVillage = livingCount() - livingMafia;
-        if (tasks.total() > 0 && tasks.completed() == tasks.total() || livingMafia == 0) winner = Faction.VILLAGE;
-        else if (livingMafia >= livingVillage) winner = Faction.MAFIA;
+        if ((developer == null || developer.taskVictory) && tasks.total() > 0 && tasks.completed() == tasks.total()) winner = Faction.VILLAGE;
+        else if (developer == null || developer.factionVictory) {
+            if (livingMafia == 0) winner = Faction.VILLAGE;
+            else if (livingMafia >= livingVillage) winner = Faction.MAFIA;
+        }
     }
 
     private long livingCount() {

@@ -1,3 +1,4 @@
+import { DeveloperInterface } from "./developer-interface.js";
 import { MapInterface } from "./map-interface.js";
 import type { MapId } from "./protocol.js";
 import { setTownGeometry } from "./room-rules.js";
@@ -37,6 +38,7 @@ export class PuTownScene extends Phaser.Scene {
   #mapId: MapId = "village";
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
+  #developerInterface?: DeveloperInterface;
   #gameInterface?: GameInterface;
   #taskInterface?: TaskInterface;
   #effects?: SoundEffects;
@@ -75,6 +77,13 @@ export class PuTownScene extends Phaser.Scene {
     const healthTimer = window.setInterval(() => this.#client?.checkHealth(), 1_000);
     this.#interface = new JoinInterface(this.#client);
     this.#gameInterface = new GameInterface(this.#client);
+    this.#developerInterface = new DeveloperInterface(this.#client);
+    const backend = new URL(this.#websocketUrl);
+    if (["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) && ["localhost", "127.0.0.1", "[::1]"].includes(backend.hostname)) {
+      backend.protocol = backend.protocol === "wss:" ? "https:" : "http:"; backend.pathname = "/developer/capabilities"; backend.search = "";
+      void fetch(backend).then(response => response.ok ? response.json() : null).then(data => this.#interface?.setDeveloperAvailable(data?.enabled === true)).catch(() => {});
+      if (parameters.has("devRoom") && parameters.has("devPlayer") && this.#client.state.status === "join") this.#client.takeDeveloper(parameters.get("devRoom")!, parameters.get("devPlayer")!);
+    }
 
     this.#audio = new AudioMixer();
     const microphone = new MicrophoneSettings();
@@ -102,7 +111,7 @@ export class PuTownScene extends Phaser.Scene {
     window.addEventListener("keydown", keyDown);
     window.addEventListener("keyup", keyUp);
     window.addEventListener("blur", release);
-    const resumed = () => this.#client?.checkHealth(true);
+    const resumed = () => { this.#client?.checkHealth(true); this.#gameInterface?.foregrounded(); };
     const visibilityChanged = () => { if (!document.hidden) resumed(); };
     window.addEventListener("focus", resumed);
     document.addEventListener("visibilitychange", visibilityChanged);
@@ -116,6 +125,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#developerInterface?.destroy();
       this.#taskInterface?.destroy();
       this.#settings?.destroy();
       this.#mapInterface?.destroy();
@@ -176,11 +186,13 @@ export class PuTownScene extends Phaser.Scene {
       this.#mapId = mapId;
     }
     this.#mapInterface?.render(world, this.#client?.state.status === "playing", this.#field?.position ?? null);
-    if (document.querySelector("dialog:modal") || this.#mapInterface?.open) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
+    const phaseBlocked = this.#gameInterface?.prepareFrame(world, this.#settings?.reducedMotion ?? false);
+    if (phaseBlocked || document.querySelector("dialog:modal") || this.#mapInterface?.open || (document.activeElement?.matches("input, textarea, select") && document.activeElement.closest(".developer-panel"))) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
     this.#field?.update(world, this.#held, delta, time);
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
+    this.#developerInterface?.render(world);
     this.#avatarReconciler?.setSpeaking(this.#voice?.render(world) ?? new Set());
     this.#taskInterface?.render(world);
     this.#effects?.update(world, this.#client?.state.status === "playing");

@@ -26,6 +26,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(voiceGateway, "/voice/rtc", "/voice/rtc/v1")
                 .addInterceptors(voiceGateway).setAllowedOrigins(allowedOrigins);
         registry.addHandler(gameWebSocketHandler, "/ws/game")
-                .setAllowedOrigins(allowedOrigins);
+                .addInterceptors(new dev.lpa.pu_go.developer.DeveloperHandshake()).setAllowedOrigins(allowedOrigins);
     }
 }

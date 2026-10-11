@@ -62,6 +62,8 @@ public class RoomManager {
         return room;
     }
 
+    public void removeDeveloperRoom(Room room) { if (room.developer() == null) throw new IllegalStateException(); rooms.remove(room.getRoomId(), room); }
+
     public void membershipEnded(Room room) {
         if (room.playerIdsSnapshot().isEmpty()) {
             if (room.getPhase().equals("playing")) rooms.remove(room.getRoomId(), room);

@@ -196,3 +196,13 @@ See `docs/agents/issue-tracker.md`.
 
 Single-context layout: root `CONTEXT.md` and `docs/adr/`.
 See `docs/agents/domain.md`.
+
+## Local Developer Rooms (ADR 0021)
+
+Developer Rooms require `putown.developer.enabled=true` and a direct local browser handshake (loopback peer, local request authority and Origin, no forwarding headers). Never authorize developer operations or inspection merely because a reverse proxy connects from loopback. `DeveloperHandshake`, `LocalDeveloperAccess` and the capability endpoint share this boundary.
+
+`DeveloperRoom` owns controller authority, simulated memberships, exact Roles, independent settings and the captured Test Scenario. Only these Rooms allow late additions/removals, Role changes, gameplay pause, manual advancement, reset and return to Lobby. Ordinary Rooms and Solo Practice retain their rules. Controller authority survives the full 120-second recovery window independently of Host grace; idle simulations do not keep an abandoned Developer Room alive. Taking/releasing simulation changes control, not Player identity.
+
+`developer_state` is sent only to the authorized local controller; `developer_status` is nonsecret Room metadata. Private simulated choices update only their affected Player and the controller inspector, never ordinary browsers. Pausing freezes phase and Task deadlines while membership expiry and heartbeat use real time. Role changes retain earned real/Fake Task banks but clear pending choices and unfinished interaction. Reset restores captured Game state for current memberships without creating new connections or resurrecting departed Players.
+
+The frontend developer panel and phase cards apply events through the existing inbox and frame boundary. Phase presentation never changes a server deadline. Verify local access rejection, inspector privacy, handoff/Release, late membership changes, pause and recovery, Role banks, reset and abandoned Room cleanup at the WebSocket boundary. Run `PU_TOWN_E2E_DEVELOPER=1 npm run test:browser -- e2e/developer-rooms.spec.ts` for two real browser clients with simulated Players.

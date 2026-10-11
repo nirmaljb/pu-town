@@ -1,6 +1,10 @@
+import type { DeveloperStatus, DeveloperState } from "./developer-protocol.js";
 import type { MapId, VoicePeer, VoiceState, MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
+  developer: DeveloperStatus | null;
+  inspector: DeveloperState | null;
+  phaseReceivedAt: number;
   roomId: string | null;
   mapId: MapId;
   snapshotSerial: number;
@@ -27,16 +31,25 @@ export type WorldState = Readonly<{
 
 export function emptyWorld(): WorldState {
   return {
-    snapshotSerial: 0, mapId: "village", sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
+    developer: null, inspector: null, phaseReceivedAt: 0, snapshotSerial: 0, mapId: "village", sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
     players: new Map(), voice: null, voicePeers: [], game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
 
 export function reduceWorldEvent(world: WorldState, event: ServerMessage, receivedAt: number = Date.now()): WorldState {
   switch (event.type) {
+    case "developer_status": {
+      const { version, type, ...developer } = event;
+      return { ...world, developer, inspector: developer.controllerId === world.selfPlayerId ? world.inspector : null };
+    }
+    case "developer_state": {
+      if (world.developer?.controllerId !== world.selfPlayerId) return world;
+      const { version, type, ...inspector } = event;
+      return { ...world, inspector };
+    }
     case "room_state":
       return {
-        ...world, mapId: event.mapId, phase: event.phase, hostPlayerId: event.hostPlayerId, roleSetup: event.roleSetup,
+        ...world, ...(event.phase === "lobby" ? { game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, chat: [], practiceTargets: [] } : {}), mapId: event.mapId, phase: event.phase, hostPlayerId: event.hostPlayerId, roleSetup: event.roleSetup,
         players: new Map(event.players.map(player => [player.playerId, player])),
         lastError: null
       };
@@ -68,7 +81,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
       // A field belongs to one round of Day and Night; Townhall or a new Day discards it.
       const field = (game.phase === "day" || game.phase === "night") && world.field?.round === game.round ? world.field : null;
       const phaseEndsAt = game.remainingMs === null ? null : receivedAt + game.remainingMs;
-      return { ...world, game, phaseEndsAt, field };
+      return { ...world, game, phaseEndsAt, field, phaseReceivedAt: world.game?.phase === game.phase && world.game.round === game.round ? world.phaseReceivedAt : receivedAt };
     }
     case "field_state": {
       const { version, type, ...field } = event;

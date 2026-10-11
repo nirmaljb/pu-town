@@ -27,7 +27,7 @@ export class JoinInterface {
   readonly #form: HTMLFormElement;
   readonly #name: HTMLInputElement;
   readonly #code: HTMLInputElement;
-  #entryMode: "create" | "join" | null = null;
+  #entryMode: "create" | "join" | "developer" | null = null;
   #lastState: ConnectionState | null = null;
   #world?: WorldState;
   #lastWorld?: WorldState;
@@ -42,6 +42,7 @@ export class JoinInterface {
         </div>
         <nav class="menu-choices" aria-label="Play PU Town">
           <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>4–10 Players</span></button>
+          <button class="menu-choice developer-entry" type="button" data-entry="developer" hidden>Developer Room <span>Local Game testing</span></button>
           <button class="menu-choice" type="button" data-entry="join">Join Room <span>Enter a friend's Room Code</span></button>
         </nav>
         <form class="menu-card" novalidate hidden aria-describedby="entry-status">
@@ -143,6 +144,7 @@ export class JoinInterface {
         this.#name.value = name;
         try { localStorage.setItem(NAME_KEY, name); } catch { /* Joining works without storage. */ }
         if (action === "join") this.client.join(this.#code.value, name);
+        else if (action === "developer") this.client.createDeveloper(name);
         else this.client.create(name);
         this.render();
       } catch (error) {
@@ -150,7 +152,7 @@ export class JoinInterface {
       }
     });
     for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>("[data-entry]"))) {
-      button.addEventListener("click", () => this.chooseEntry(button.dataset.entry === "join" ? "join" : "create"));
+      button.addEventListener("click", () => this.chooseEntry(button.dataset.entry as "create" | "join" | "developer"));
     }
     this.element(".menu-back").addEventListener("click", () => this.chooseEntry(null));
     this.#root.addEventListener("keydown", event => {
@@ -200,19 +202,21 @@ export class JoinInterface {
     this.render();
   }
 
+  setDeveloperAvailable(available: boolean): void { this.element(".developer-entry").hidden = !available; }
+
   setAvatarCollection(collection: AvatarCollection): void {
     this.#chooser.setCollection(collection);
   }
 
-  private chooseEntry(mode: "create" | "join" | null): void {
+  private chooseEntry(mode: "create" | "join" | "developer" | null): void {
     if (this.client.state.status !== "join") return;
     this.#entryMode = mode;
     this.element(".menu-choices").hidden = mode !== null;
     this.#form.hidden = mode === null;
     this.element(".room-code-field").hidden = mode !== "join";
-    this.element(".menu-title").textContent = mode === "join" ? "Join Room" : "Create Room";
-    this.element(".menu-description").textContent = mode === "join" ? "Your friends saved you a Seat." : "A place for you and your friends.";
-    this.element(".enter-room").textContent = mode === "join" ? "Join Room" : "Create Room";
+    this.element(".menu-title").textContent = mode === "join" ? "Join Room" : mode === "developer" ? "Developer Room" : "Create Room";
+    this.element(".menu-description").textContent = mode === "join" ? "Your friends saved you a Seat." : mode === "developer" ? "Arrange a Game with simulated Players and local browsers." : "A place for you and your friends.";
+    this.element(".enter-room").textContent = mode === "join" ? "Join Room" : mode === "developer" ? "Developer Room" : "Create Room";
     this.element(".entry-status").textContent = "";
     if (mode === null) this.element<HTMLButtonElement>("[data-entry=create]").focus();
     else if (mode === "join" && this.#name.value.trim()) this.#code.focus();
@@ -255,10 +259,10 @@ export class JoinInterface {
       button.setAttribute("aria-pressed", String(button.dataset.map === this.#world?.mapId));
     }
     this.renderRoleSetup(setup, host && state.status === "playing", gathered);
-    this.element<HTMLButtonElement>(".start-game").hidden = !host;
+    this.element<HTMLButtonElement>(".start-game").hidden = Boolean(this.#world?.developer) || !host;
     this.element<HTMLButtonElement>(".start-game").disabled =
       state.status !== "playing" || gathered < needed || waiting > 0;
-    this.element<HTMLButtonElement>(".start-practice").hidden = !host || gathered !== 1;
+    this.element<HTMLButtonElement>(".start-practice").hidden = Boolean(this.#world?.developer) || !host || gathered !== 1;
     this.element<HTMLButtonElement>(".start-practice").disabled = state.status !== "playing";
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";

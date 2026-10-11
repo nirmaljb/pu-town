@@ -24,7 +24,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: `./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=${backendPort} --putown.allowed-origins=http://localhost:${frontendPort}"`,
+      command: `./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=${backendPort} --putown.allowed-origins=http://localhost:${frontendPort} --putown.developer.enabled=${process.env.PU_TOWN_E2E_DEVELOPER === "1"}"`,
       cwd: "../backend",
       url: `http://localhost:${backendPort}/health`,
       timeout: 120_000,

@@ -41,20 +41,22 @@ public final class TaskBoard {
     private static final class Assignment {
         final String id;
         String owner;
-        final Location location;
-        final String kind;
+        Location location;
+        String kind;
         final boolean fake;
         final Location destination;
-        final List<Integer> sequence;
+        List<Integer> sequence;
         int step;
+        int required;
+        long durationMs = INTERACTION_MS;
         Assignment(String id, String owner, Location location, String kind, boolean fake, Location destination) {
             this.id = id; this.owner = owner; this.location = location; this.kind = kind; this.fake = fake;
             this.destination = destination;
             this.sequence = kind.equals("sequence") ? List.of(2, 0, 3, 1) : List.of();
         }
         Location currentLocation() { return kind.equals("delivery") && step % 2 == 1 ? destination : location; }
-        int steps() { return kind.equals("sequence") ? sequence.size() : kind.equals("delivery") ? 2 : REPAIR_STEPS; }
-        long duration() { return INTERACTION_MS; }
+        int steps() { if (required > 0) return required; return kind.equals("sequence") ? sequence.size() : kind.equals("delivery") ? 2 : REPAIR_STEPS; }
+        long duration() { return durationMs; }
         TaskView view() { Location current = currentLocation(); return new TaskView(id, kind.equals("delivery") ? (step % 2 == 1 ? "Deliver " : "Collect ") + location.name() : location.name(), kind, current.x(), current.y(), step, steps(), fake, sequence); }
     }
     private record Interaction(String taskId, int step, long readyAt) {}
@@ -62,6 +64,51 @@ public final class TaskBoard {
     private final Map<String, Interaction> interactions = new LinkedHashMap<>();
 
     private final TownMap townMap;
+    private dev.lpa.pu_go.developer.DeveloperSettings developer;
+    private final Map<String, Role> roles = new LinkedHashMap<>();
+    public void enableDeveloper(dev.lpa.pu_go.developer.DeveloperSettings settings, List<Participant> roster) {
+        developer = settings;
+        for (Participant member : roster) addDeveloper(member);
+    }
+    public void addDeveloper(Participant member) {
+        roles.put(member.playerId(), member.role());
+        List<Location> locations = townMap.tasks();
+        for (boolean fake : List.of(false, true)) {
+            if (assignments.stream().anyMatch(task -> task.owner.equals(member.playerId()) && task.fake == fake)) continue;
+            for (int slot = 0; slot < 3; slot++) {
+                String id = (fake ? "fake-" : "task-") + member.playerId() + "-" + slot;
+                assignments.add(new Assignment(id, member.playerId(), locations.get(slot), slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", fake, locations.get(0)));
+            }
+        }
+    }
+    public void roleChanged(Participant member) { roles.put(member.playerId(), member.role()); close(member.playerId()); }
+    private boolean counts(Assignment task) { return !task.fake && (developer == null || roles.get(task.owner) != Role.MAFIA && roles.containsKey(task.owner)); }
+    public record Configuration(String playerId, String taskId, int location, String kind, int steps, long durationMs, int step, boolean fake) {}
+    public List<Configuration> configurations() {
+        return assignments.stream().map(task -> new Configuration(task.owner, task.id, townMap.tasks().indexOf(task.location), task.kind, task.steps(), task.durationMs, task.step, task.fake)).toList();
+    }
+    public Game.Rejection configure(String playerId, String taskId, int location, String kind, int steps, long duration, int step) {
+        Assignment task = owned(playerId, taskId);
+        if (task == null || location < 0 || location >= townMap.tasks().size() || steps < 1 || steps > 100 || step < 0 || step > steps || duration < 0 || duration > 3_600_000) return INVALID;
+        close(playerId);
+        task.location = townMap.tasks().get(location); task.kind = kind; task.required = steps; task.durationMs = duration; task.step = step;
+        task.sequence = kind.equals("sequence") ? java.util.stream.IntStream.range(0, steps).map(index -> new int[]{2,0,3,1}[index % 4]).boxed().toList() : List.of();
+        return null;
+    }
+    public void removeDeveloper(String playerId) { assignments.removeIf(task -> task.owner.equals(playerId)); roles.remove(playerId); close(playerId); }
+    public void shiftTime(long delta) { interactions.replaceAll((id, active) -> new Interaction(active.taskId(), active.step(), active.readyAt() + delta)); }
+    public TaskBoard copy(List<Participant> roster, dev.lpa.pu_go.developer.DeveloperSettings settings) {
+        TaskBoard copy = new TaskBoard(List.of(), false, townMap);
+        copy.developer = settings;
+        copy.roles.putAll(roles);
+        for (Assignment task : assignments) {
+            Assignment cloned = new Assignment(task.id, task.owner, task.location, task.kind, task.fake, task.destination);
+            cloned.sequence = task.sequence; cloned.step = task.step; cloned.required = task.required; cloned.durationMs = task.durationMs;
+            copy.assignments.add(cloned);
+        }
+        return copy;
+    }
+
 
     public TaskBoard(List<Participant> roster, boolean practice, TownMap townMap) {
         this.townMap = townMap;
@@ -75,19 +122,20 @@ public final class TaskBoard {
             }
         }
     }
-    public int completed() { return (int) assignments.stream().filter(task -> !task.fake && task.step == task.steps()).count(); }
-    public int total() { return (int) assignments.stream().filter(task -> !task.fake).count(); }
+    public int completed() { return (int) assignments.stream().filter(task -> counts(task) && task.step == task.steps()).count(); }
+    public int total() { return (int) assignments.stream().filter(this::counts).count(); }
     private Assignment owned(String playerId, String taskId) {
         return assignments.stream().filter(task -> task.owner.equals(playerId) && task.id.equals(taskId)).findFirst().orElse(null);
     }
     private boolean nearby(Participant actor, Assignment task) {
+        if (developer != null && !developer.taskRange) return true;
         return Math.hypot(actor.x() - task.currentLocation().x(), actor.y() - task.currentLocation().y()) <= RANGE
                 && townMap.areaAt(actor.x(), actor.y()).equals(townMap.areaAt(task.currentLocation().x(), task.currentLocation().y()));
     }
     public Game.Rejection open(Participant actor, String taskId, long now) {
         Assignment task = owned(actor.playerId(), taskId);
         if (task == null || task.fake != (actor.role() == Role.MAFIA) || task.step == task.steps() || !nearby(actor, task)) return INVALID;
-        interactions.put(actor.playerId(), new Interaction(task.id, task.step, now + task.duration()));
+        interactions.put(actor.playerId(), new Interaction(task.id, task.step, now + (developer != null && !developer.taskDuration ? 0 : task.duration())));
         return null;
     }
     public Game.Rejection step(Participant actor, String taskId, int step, int value, long now) {
@@ -111,6 +159,7 @@ public final class TaskBoard {
         }
     }
     public void transfer(String departingId, List<Participant> roster) {
+        if (developer != null) { removeDeveloper(departingId); return; }
         close(departingId);
         List<Participant> recipients = roster.stream().filter(Participant::isLiving)
                 .filter(member -> member.role() != Role.MAFIA && !member.playerId().equals(departingId)).toList();

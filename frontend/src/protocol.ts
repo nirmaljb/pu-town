@@ -1,3 +1,4 @@
+import { decodeDeveloperState, decodeDeveloperStatus, type DeveloperState, type DeveloperStatus, type DeveloperCommand } from "./developer-protocol.js";
 import { DIRECTIONS, type Direction } from "./avatar-facing.js";
 import { requireAvatarPreset, requireSelectableAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
@@ -121,6 +122,8 @@ export type VoicePeer = Readonly<{ playerId: string; token: string; gain: number
 export type VoiceState = Readonly<{ url: "/voice" | null; token: string | null; canPublish: boolean }>;
 
 export type ServerMessage =
+  | (DeveloperStatus & Readonly<{ version: 1; type: "developer_status" }>)
+  | (DeveloperState & Readonly<{ version: 1; type: "developer_state" }>)
   | Readonly<{ version: 1; type: "voice_peers"; peers: readonly VoicePeer[] }>
   | (VoiceState & Readonly<{ version: 1; type: "voice_state" }>)
   | (MovementSound & Readonly<{ version: 1; type: "sound_event" }>)
@@ -139,6 +142,9 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "create_developer_room"; displayName: string }>
+  | Readonly<{ version: 1; type: "take_developer_player"; roomId: string; playerId: string }>
+  | (DeveloperCommand & Readonly<{ version: 1; type: "developer_command" }>)
   | Readonly<{ version: 1; type: "select_map"; mapId: MapId }>
   | Readonly<{ version: 1; type: "join_voice"; round: number }>
   | Readonly<{ version: 1; type: "leave_voice" }>
@@ -255,6 +261,8 @@ export function decodeServerMessage(payload: string): ServerMessage {
   const type = requireNonEmptyString(message.type, "type");
 
   switch (type) {
+    case "developer_status": return { version: 1, type, ...decodeDeveloperStatus(message) };
+    case "developer_state": return { version: 1, type, ...decodeDeveloperState(message) };
     case "pong":
       requireFields(message, ["version", "type"]);
       return { version: 1, type };

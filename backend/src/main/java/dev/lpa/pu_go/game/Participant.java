@@ -33,6 +33,12 @@ public final class Participant {
         this.role = role;
     }
 
+    public Participant copy() {
+        Participant copy = new Participant(playerId, displayName, colour, avatarPreset, seat, role);
+        copy.status = status; copy.killedByMafia = killedByMafia; copy.investigations.addAll(investigations);
+        copy.x = x; copy.y = y; copy.facing = facing; copy.correction = correction + 1; copy.lastMoveAt = lastMoveAt;
+        return copy;
+    }
     public String playerId() { return playerId; }
     public String displayName() { return displayName; }
     public String colour() { return colour; }

@@ -184,3 +184,19 @@ _Avoid_: Disconnect, logout
 **Reconnect**:
 The restoration of a Player's connection after a Disconnect, recovering the existing Room Membership when it remains available.
 _Avoid_: New Join
+
+**Developer Room**:
+A Room used to arrange and exercise test Games with real and Simulated Players, under a Developer Controller's direction.
+_Avoid_: Solo Practice, ordinary Room
+
+**Developer Controller**:
+The Player who directs a Developer Room's setup, testing rules and Test Scenario, and may inspect hidden Game information separately from their own Role.
+_Avoid_: Host, simulated Player
+
+**Simulated Player**:
+A Player in a Developer Room whose actions are supplied by its Developer Controller until a person takes control. Taking or releasing control preserves the Player's identity.
+_Avoid_: Practice target, Avatar
+
+**Test Scenario**:
+A prepared Developer Room setup for exercising existing Game behavior, with a starting state that can be restored.
+_Avoid_: Game mode, new gameplay rule

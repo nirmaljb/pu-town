@@ -50,6 +50,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private final java.util.concurrent.atomic.AtomicLong soundIds = new java.util.concurrent.atomic.AtomicLong();
     private final Map<String, Long> lastFootsteps = new ConcurrentHashMap<>();
     private final Map<String, Double> walkedSinceFootstep = new ConcurrentHashMap<>();
+    @org.springframework.beans.factory.annotation.Value("${putown.developer.enabled:false}")
+    private boolean developerEnabled;
+    void setDeveloperEnabled(boolean enabled) { developerEnabled = enabled; }
+    private boolean developerLocal(PlayerState player) {
+        return developerEnabled && player.getSession() != null && Boolean.TRUE.equals(player.getSession().getAttributes().get("developerLocal"));
+    }
     private final RoomManager roomManager;
     private final VoiceService voice;
     private final Map<String, List<ServerMessage.VoicePeerView>> dayVoicePeers = new ConcurrentHashMap<>();
@@ -110,16 +116,32 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             if (player == null) return;
             try {
                 ClientMessage decoded = decoder.decode(message.getPayload());
+                if (decoded instanceof ClientMessage.CreateDeveloperRoom && !developerLocal(player)) {
+                    deliver(error(player, "developer_unavailable", "Developer Rooms require an explicitly enabled local backend and a direct local browser.")); return;
+                }
+                if (decoded instanceof ClientMessage.CreateDeveloperRoom create) {
+                    if (player.getRoomId() != null) { deliver(error(player, "invalid_phase", "Leave before creating a Developer Room.")); return; }
+                    Room created = roomManager.createRoom();
+                    roomManager.serialized(List.of(created.getRoomId()), () -> {
+                        created.enableDeveloper(player.getId());
+                        created.developer().roles.put(player.getId(), Role.VILLAGER);
+                        handleJoin(player, new ClientMessage.JoinRoom(1, "join_room", created.getRoomId(), create.displayName()));
+                        publishDeveloper(created); return null;
+                    }); return;
+                }
                 ClientMessage incoming = decoded instanceof ClientMessage.CreateRoom create
                         ? new ClientMessage.JoinRoom(1, "join_room", roomManager.createRoom().getRoomId(), create.displayName()) : decoded;
                 List<String> rooms = new ArrayList<>();
                 if (player.getRoomId() != null) rooms.add(player.getRoomId());
                 if (incoming instanceof ClientMessage.JoinRoom join) rooms.add(join.roomId());
                 if (incoming instanceof ClientMessage.RecoverRoom recover) rooms.add(recover.roomId());
+                if (incoming instanceof ClientMessage.TakeDeveloperPlayer take) rooms.add(take.roomId());
                 roomManager.serialized(rooms, () -> {
                     if (playersBySession.get(session.getId()) != player || player.getSession() != session) return null;
                     if (player.getRoomId() != null) settleRoom(player.getRoomId());
-                    if (incoming instanceof ClientMessage.RecoverRoom recover) handleRecovery(player, recover);
+                    if (incoming instanceof ClientMessage.DeveloperCommand command) handleDeveloper(player, command);
+                    else if (incoming instanceof ClientMessage.TakeDeveloperPlayer take) handleDeveloperTake(player, take);
+                    else if (incoming instanceof ClientMessage.RecoverRoom recover) handleRecovery(player, recover);
                     else if (incoming instanceof ClientMessage.JoinRoom join) handleJoin(player, join);
                     else if (incoming instanceof ClientMessage.Ping) deliver(new Delivery(player.getId(), new ServerMessage.Pong()));
                     else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
@@ -239,7 +261,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void transferDisconnectedHost(Room room) {
-        if (room.playerIdsSnapshot().isEmpty() || !hostGraceElapsed(room)) return;
+        if (room.developer() != null || room.playerIdsSnapshot().isEmpty() || !hostGraceElapsed(room)) return;
         room.playerIdsSnapshot().stream().map(playersById::get).filter(PlayerState::isConnected)
                 .findFirst().ifPresent(successor -> {
                     room.setHostPlayerId(successor.getId());
@@ -253,23 +275,24 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         roomManager.serialized(List.of(message.roomId()), () -> {
             Room room = settleRoom(message.roomId());
             if (room == null) { deliver(error(connection, "room_not_found", "Room not found")); return null; }
+            if (room.developer() != null && !developerLocal(connection)) { deliver(error(connection, "developer_unavailable", "Developer Rooms are local-only.")); return null; }
             PlayerState member = room.playerIdsSnapshot().stream().map(playersById::get)
                     .filter(candidate -> message.recoveryToken().equals(candidate.getRecoveryToken())).findFirst().orElse(null);
-            if (member == null) { deliver(error(connection, "recovery_expired", "Your place in the Room expired")); return null; }
+            if (member == null || member.isSimulated()) { deliver(error(connection, "recovery_expired", "Your place in the Room expired")); return null; }
             if (connection.getRoomId() != null) { deliver(error(connection, "invalid_phase", "Leave before recovering another membership.")); return null; }
             boolean firstReturnAfterGrace = hostGraceElapsed(room);
             voice.revokePlayer(member.getId());
             dayVoicePeers.remove(member.getId());
             WebSocketSession retiredSession = member.getSession();
-            playersBySession.remove(retiredSession.getId(), member);
+            if (retiredSession != null) playersBySession.remove(retiredSession.getId(), member);
             ConnectionOutbox outbox = outboxes.remove(connection.getId());
             playersById.remove(connection.getId());
             member.setSession(connection.getSession());
             member.setDisconnectedUntil(null);
-            if (firstReturnAfterGrace) room.setHostPlayerId(member.getId());
+            if (firstReturnAfterGrace && room.developer() == null) room.setHostPlayerId(member.getId());
             playersBySession.put(member.getSession().getId(), member);
             outboxes.put(member.getId(), outbox);
-            if (retiredSession.isOpen()) outboundExecutor.execute(() -> {
+            if (retiredSession != null && retiredSession.isOpen()) outboundExecutor.execute(() -> {
                 try { retiredSession.close(new CloseStatus(4001, "Connection replaced")); }
                 catch (IOException ignored) { /* Retired sessions already have no authority. */ }
             });
@@ -280,6 +303,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             addPrivateGameEntry(deliveries, room, member.getId());
             addForPlayers(deliveries, room.playerIdsSnapshot().stream().filter(id -> !id.equals(member.getId())).toList(), stateOf(room));
             deliverAll(deliveries);
+            publishDeveloper(room);
             return null;
         });
     }
@@ -293,7 +317,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 deliver(error(player, "room_not_found", "Room not found"));
                 return null;
             }
-            if (!room.containsPlayer(player.getId()) && !room.getPhase().equals("lobby")) {
+            if (room.developer() != null && !player.isSimulated() && !developerLocal(player)) { deliver(error(player, "developer_unavailable", "Developer Rooms are local-only.")); return null; }
+            if (!room.containsPlayer(player.getId()) && room.developer() == null && !room.getPhase().equals("lobby")) {
                 deliver(error(player, "invalid_phase", "Game already started"));
                 return null;
             }
@@ -326,6 +351,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 player.setY(RoomRules.seatY(seat));
                 RoleSetup previousSetup = room.getRoleSetup();
                 room.addPlayer(player.getId());
+                if (room.developer() != null) {
+                    Role role = room.developer().roles.computeIfAbsent(player.getId(), id -> Role.VILLAGER);
+                    if (room.getGame() != null) room.getGame().addDeveloper(participantOf(player, role), roomManager.currentTimeMillis());
+                }
                 List<String> existingPlayers = room.playerIdsSnapshot().stream()
                         .filter(playerId -> !playerId.equals(player.getId())).toList();
                 addForPlayers(pendingDeliveries, existingPlayers, new ServerMessage.PlayerJoined(viewOf(player)));
@@ -340,7 +369,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(),
                             ServerMessage.RoleSetupView.of(room.getRoleSetup()), room.getTownMap().id(), snapshotPlayers)));
             addPrivateGameEntry(pendingDeliveries, room, player.getId());
+            if (room.developer() != null && room.getGame() != null) addGameState(pendingDeliveries, room);
             deliverAll(pendingDeliveries);
+            publishDeveloper(room);
             return null;
         });
     }
@@ -348,6 +379,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     /** A Room Snapshot is followed by exactly the Game state and history its recipient may read. */
     private void addPrivateGameEntry(Collection<Delivery> deliveries, Room room, String playerId) {
         Game game = room.getGame();
+        if (room.developer() != null) deliveries.add(new Delivery(playerId, developerStatus(room)));
         if (game == null || game.participant(playerId) == null) return;
         deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
         if (game.isPractice()) deliveries.add(new Delivery(playerId, new ServerMessage.PracticeState(game.practiceTargets())));
@@ -467,6 +499,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             deliver(error(player, "invalid_phase", "The town is chosen in the Lobby."));
         } else {
             room.setTownMap(dev.lpa.pu_go.room.TownMap.find(message.mapId()));
+            publishDeveloper(room);
             List<Delivery> deliveries = new ArrayList<>();
             addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
             deliverAll(deliveries);
@@ -535,7 +568,189 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private Participant participantOf(PlayerState player, Role role) {
+        return new Participant(player.getId(), player.getDisplayName(), player.getColour(), player.getAvatarPreset(), player.getSeat(), role);
+    }
+
+    private ServerMessage.DeveloperStatus developerStatus(Room room) {
+        var dev = room.developer();
+        return new ServerMessage.DeveloperStatus(1, "developer_status", dev.controllerId,
+                room.getGame() != null && room.getGame().isPaused(), dev.settings.nightMovement, dev.settings.taskRange, dev.scenario, dev.revision, List.copyOf(dev.simulated));
+    }
+
+    private void addDeveloperInspector(Collection<Delivery> deliveries, Room room) {
+        var dev = room.developer();
+        if (dev == null || dev.controllerId == null) return;
+        PlayerState controller = playersById.get(dev.controllerId);
+        if (controller == null || !developerLocal(controller) || !controller.isConnected()) return;
+        Game game = room.getGame();
+        var players = room.playerIdsSnapshot().stream().map(playersById::get).map(member -> {
+            Participant actor = game == null ? null : game.participant(member.getId());
+            return new ServerMessage.DeveloperPlayer(member.getId(), member.getDisplayName(), actor == null ? dev.roles.get(member.getId()) : actor.role(),
+                    actor == null ? ParticipantStatus.LIVING : actor.status(), member.isSimulated(), actor == null ? member.getX() : actor.x(),
+                    actor == null ? member.getY() : actor.y(), actor == null ? null : game.nightChoiceFor(member.getId()),
+                    actor != null && game.hasBallot(member.getId()), actor == null ? null : game.acceptedBallot(member.getId()),
+                    game == null ? List.of() : game.taskConfigurations().stream().filter(task -> task.playerId().equals(member.getId())).toList());
+        }).toList();
+        deliveries.add(new Delivery(dev.controllerId, new ServerMessage.DeveloperState(1, "developer_state", dev.settings, players, room.getTownMap().tasks())));
+    }
+
+    private void publishDeveloperInspector(Room room) {
+        List<Delivery> deliveries = new ArrayList<>(); addDeveloperInspector(deliveries, room); deliverAll(deliveries);
+    }
+
+    private void publishDeveloper(Room room) {
+        if (room.developer() == null) return;
+        List<Delivery> deliveries = new ArrayList<>();
+        addForPlayers(deliveries, room.playerIdsSnapshot(), developerStatus(room));
+        addDeveloperInspector(deliveries, room); deliverAll(deliveries);
+    }
+
+    private void addSimulated(Room room, String name, Role role) {
+        if (room.playerIdsSnapshot().size() >= RoomRules.CAPACITY) throw new IllegalArgumentException("Room is full");
+        PlayerState simulated = new PlayerState(playerIdSupplier.get(), null);
+        simulated.setSimulated(true); playersById.put(simulated.getId(), simulated);
+        room.developer().simulated.add(simulated.getId()); room.developer().roles.put(simulated.getId(), role);
+        handleJoin(simulated, new ClientMessage.JoinRoom(1, "join_room", room.getRoomId(), name));
+    }
+
+    private void startDeveloper(Room room) {
+        var dev = room.developer();
+        List<Participant> roster = room.playerIdsSnapshot().stream().map(playersById::get)
+                .map(member -> participantOf(member, dev.roles.get(member.getId()))).toList();
+        room.startGame(Game.developer(roster, roomManager.currentTimeMillis(), room.getTownMap(), dev.settings));
+    }
+
+    private void handleDeveloperTake(PlayerState connection, ClientMessage.TakeDeveloperPlayer take) {
+        Room room = settleRoom(take.roomId());
+        if (!developerLocal(connection) || room == null || room.developer() == null) {
+            deliver(error(connection, "developer_unavailable", "Developer Rooms are local-only.")); return;
+        }
+        PlayerState member = playersById.get(take.playerId());
+        if (connection.getRoomId() != null || member == null || !room.containsPlayer(member.getId()) || !member.isSimulated()) {
+            deliver(error(connection, "invalid_action", "Choose an idle Simulated Player from this Room.")); return;
+        }
+        member.setSession(connection.getSession()); member.setSimulated(false);
+        playersById.remove(connection.getId());
+        playersBySession.put(member.getSession().getId(), member);
+        outboxes.put(member.getId(), outboxes.remove(connection.getId()));
+        deliver(new Delivery(member.getId(), new ServerMessage.RoomSnapshot(member.getId(), room.getRoomId(), member.getRecoveryToken(),
+                room.getPhase(), room.getHostPlayerId(), ServerMessage.RoleSetupView.of(room.getRoleSetup()), room.getTownMap().id(), stateOf(room).players())));
+        List<Delivery> deliveries = new ArrayList<>(); addPrivateGameEntry(deliveries, room, member.getId());
+        addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room)); deliverAll(deliveries); publishDeveloper(room);
+    }
+
+    private void handleDeveloper(PlayerState controller, ClientMessage.DeveloperCommand command) {
+        Room room = controller.getRoomId() == null ? null : roomManager.findRoom(controller.getRoomId());
+        if (!developerLocal(controller) || room == null || room.developer() == null) {
+            deliver(error(controller, "developer_unavailable", "Developer commands require a local Developer Room.")); return;
+        }
+        var dev = room.developer();
+        String action = command.action(); var args = command.arguments();
+        if (action.equals("claim") && dev.controllerId == null) dev.controllerId = controller.getId();
+        if (action.equals("release")) {
+            if (controller.getId().equals(dev.controllerId) || !dev.simulated.contains(controller.getId())) { deliver(error(controller, "invalid_action", "Only a non-controller taken Simulated Player can be released.")); return; }
+            deliver(new Delivery(controller.getId(), new ServerMessage.RoomLeft(room.getRoomId())));
+            voice.revokePlayer(controller.getId()); dayVoicePeers.remove(controller.getId());
+            playersBySession.remove(controller.getSession().getId()); outboxes.remove(controller.getId());
+            controller.setSimulated(true); controller.setSession(null); controller.setDisconnectedUntil(null);
+            controller.setRecoveryToken((UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", ""));
+            retireAbandonedDeveloperRoom(room);
+            publishDeveloper(room); return;
+        }
+        if (!controller.getId().equals(dev.controllerId)) { deliver(error(controller, "not_controller", "Only the developer controller can do that.")); return; }
+        Game game = room.getGame(); long now = roomManager.currentTimeMillis();
+        String playerId = args.has("playerId") ? args.get("playerId").asText() : null;
+        if (playerId != null && !room.containsPlayer(playerId)) { deliver(error(controller, "invalid_target", "Choose a current Room Player.")); return; }
+        Game.Rejection rejection = null;
+        int completedBefore = game == null ? 0 : game.tasksFor(controller.getId(), now).completed();
+        try {
+            switch (action) {
+                case "inspect", "claim" -> { }
+                case "add_player" -> addSimulated(room, args.get("displayName").asText(), roleOf(args.get("role").asText()));
+                case "remove_player" -> {
+                    if (playerId.equals(controller.getId())) throw new IllegalArgumentException("Use Leave Room for the controller.");
+                    PlayerState departing = playersById.get(playerId);
+                    deliverAll(endMembership(departing, room.getRoomId(), ServerMessage.DepartureReason.LEFT, true));
+                    departing.setRoomId(null); departing.setRecoveryToken(null);
+                    if (departing.isSimulated()) playersById.remove(playerId);
+                }
+                case "start" -> {
+                    if (game != null) throw new IllegalArgumentException("Return to Lobby before starting.");
+                    startDeveloper(room); dev.startingState = room.getGame().copyDeveloper(now);
+                }
+                case "lobby" -> { room.returnToLobby(); dev.revision++; }
+                case "reset" -> {
+                    if (dev.startingState == null) throw new IllegalArgumentException("Start a scenario first.");
+                    game = dev.startingState.copyDeveloper(now); dev.settings = game.developerSettings();
+                    // Preserve current connections and Seats; reset only current memberships.
+                    for (Participant actor : game.roster()) if (!room.containsPlayer(actor.playerId())) game.removeDeveloper(actor.playerId());
+                    for (String id : room.playerIdsSnapshot()) if (game.participant(id) == null) game.addDeveloper(participantOf(playersById.get(id), dev.roles.get(id)), now);
+                    for (Participant actor : game.roster()) dev.roles.put(actor.playerId(), actor.role());
+                    room.startGame(game); dev.revision++;
+                }
+                case "scenario" -> {
+                    dev.scenario = args.get("name").asText();
+                    while (room.playerIdsSnapshot().size() < 4) addSimulated(room, "Simulated " + (room.playerIdsSnapshot().size() + 1), Role.VILLAGER);
+                    Role[] roles = {Role.MAFIA, Role.DOCTOR, Role.SHERIFF, Role.VILLAGER}; int index = 0;
+                    for (String id : room.playerIdsSnapshot()) dev.roles.put(id, index < 4 ? roles[index++] : Role.VILLAGER);
+                    dev.settings = new dev.lpa.pu_go.developer.DeveloperSettings(); startDeveloper(room); game = room.getGame();
+                    if (!dev.scenario.equals("four_roles")) game.advanceDeveloper(now);
+                    if (dev.scenario.equals("protection")) game.advanceDeveloper(now);
+                    if (dev.scenario.equals("voting")) { game.advanceDeveloper(now); game.advanceDeveloper(now); game.advanceDeveloper(now); }
+                    if (dev.scenario.equals("tasks")) {
+                        for (var task : game.taskConfigurations()) if (!task.fake()) game.configureTask(task.playerId(), task.taskId(), task.location(), task.kind(), task.steps(), 0, task.steps());
+                        var task = game.taskConfigurations().stream().filter(value -> !value.fake() && gameRole(room, value.playerId()) != Role.MAFIA).findFirst().orElseThrow();
+                        game.configureTask(task.playerId(), task.taskId(), task.location(), task.kind(), task.steps(), 0, task.steps() - 1);
+                    }
+                    dev.startingState = game.copyDeveloper(now); dev.revision++;
+                }
+                case "role" -> {
+                    Role role = roleOf(args.get("role").asText()); dev.roles.put(playerId, role);
+                    if (game != null) game.developerRole(playerId, role);
+                }
+                case "setting" -> dev.settings.set(args.get("name").asText(), args.get("enabled").asBoolean());
+                default -> {
+                    if (game == null) throw new IllegalArgumentException("Start a Developer Game first.");
+                    switch (action) {
+                        case "pause" -> game.pause(args.get("enabled").asBoolean(), now);
+                        case "advance" -> game.advanceDeveloper(now);
+                        case "teleport" -> rejection = game.developerTeleport(playerId, args.get("x").asDouble(), args.get("y").asDouble());
+                        case "status" -> game.developerStatus(playerId, args.get("living").asBoolean());
+                        case "task" -> rejection = game.configureTask(playerId, args.get("taskId").asText(), args.get("location").asInt(), args.get("kind").asText(), args.get("steps").asInt(), args.get("durationMs").asLong(), args.get("step").asInt());
+                        case "night_choice", "vote", "open_task", "task_step" -> {
+                            if (!playersById.get(playerId).isSimulated()) throw new IllegalArgumentException("Release that Player to simulation before acting for them.");
+                            int round = args.get("round").asInt();
+                            if (action.equals("night_choice")) rejection = game.submitNightChoice(playerId, round, args.get("targetPlayerId").isNull() ? null : args.get("targetPlayerId").asText());
+                            if (action.equals("vote")) rejection = game.submitBallot(playerId, round, args.get("targetPlayerId").isNull() ? null : args.get("targetPlayerId").asText());
+                            if (action.equals("open_task")) rejection = game.openTask(playerId, round, args.get("taskId").asText(), now);
+                            if (action.equals("task_step")) rejection = game.taskStep(playerId, round, args.get("taskId").asText(), args.get("step").asInt(), args.get("value").asInt(), now);
+                        }
+                        default -> throw new IllegalArgumentException("Unknown action");
+                    }
+                }
+            }
+        } catch (IllegalArgumentException exception) { deliver(error(controller, "invalid_action", exception.getMessage())); return; }
+        if (rejection != null) { deliver(error(controller, rejection.code(), rejection.message())); return; }
+        List<Delivery> deliveries = new ArrayList<>();
+        if (java.util.Set.of("night_choice", "vote", "open_task", "task_step").contains(action)) {
+            Game current = room.getGame();
+            if (current.isFinished()) addGameState(deliveries, room);
+            else if (action.equals("task_step") || action.equals("open_task")) {
+                boolean changed = completedBefore != current.tasksFor(controller.getId(), now).completed();
+                for (String recipient : changed ? room.playerIdsSnapshot() : List.of(playerId)) deliveries.add(new Delivery(recipient, taskStateFor(current, recipient)));
+            } else addGameStateFor(deliveries, room, List.of(playerId));
+            addDeveloperInspector(deliveries, room); deliverAll(deliveries);
+        } else {
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room)); addGameState(deliveries, room); deliverAll(deliveries); publishDeveloper(room);
+        }
+    }
+    private Role gameRole(Room room, String id) { return room.getGame().participant(id).role(); }
+    private Role roleOf(String wire) { return java.util.Arrays.stream(Role.values()).filter(role -> role.wireValue().equals(wire)).findFirst().orElseThrow(); }
+
     private void handlePracticeStart(PlayerState player) {
+        Room existing = player.getRoomId() == null ? null : roomManager.findRoom(player.getRoomId());
+        if (existing != null && existing.developer() != null) { deliver(error(player, "invalid_action", "Solo Practice uses an ordinary Room.")); return; }
         if (player.getRoomId() == null) {
             deliver(error(player, "not_in_room", "Join a Room before practicing."));
             return;
@@ -576,6 +791,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handleStart(PlayerState player) {
+        Room existing = player.getRoomId() == null ? null : roomManager.findRoom(player.getRoomId());
+        if (existing != null && existing.developer() != null) { deliver(error(player, "invalid_action", "Use Start setup in the developer panel.")); return; }
         String roomId = player.getRoomId();
         if (roomId == null) {
             deliver(error(player, "not_in_room", "Join a Room before starting."));
@@ -677,6 +894,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         else {
             List<Delivery> deliveries = new ArrayList<>();
             addGameStateFor(deliveries, room, List.of(player.getId()));
+            publishDeveloperInspector(room);
             deliverAll(deliveries);
         }
     }
@@ -691,6 +909,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             Game.Rejection rejection = action.apply(game);
             if (rejection != null) { deliver(error(player, rejection.code(), rejection.message())); return; }
             List<Delivery> deliveries = new ArrayList<>();
+            publishDeveloperInspector(room);
             boolean changed = completed != game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
             if (game.isFinished()) addGameState(deliveries, room);
             else for (String recipient : changed ? room.playerIdsSnapshot() : List.of(player.getId()))
@@ -744,6 +963,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private void addGameState(Collection<Delivery> deliveries, Room room) {
         refreshDayVoice(deliveries, room);
+        if (room.developer() != null) {
+            addForPlayers(deliveries, room.playerIdsSnapshot(), developerStatus(room));
+            addDeveloperInspector(deliveries, room);
+        }
         Game game = room.getGame();
         if (game != null) for (String playerId : room.playerIdsSnapshot())
             if (game.participant(playerId) != null) deliveries.add(new Delivery(playerId, taskStateFor(game, playerId)));
@@ -824,6 +1047,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private void retireAbandonedDeveloperRoom(Room room) {
+        if (room.developer() == null || room.playerIdsSnapshot().stream().map(playersById::get).anyMatch(member -> !member.isSimulated())) return;
+        for (String id : room.playerIdsSnapshot()) { room.removePlayer(id); playersById.remove(id); }
+        roomManager.removeDeveloperRoom(room);
+    }
+
     private List<Delivery> endMembership(PlayerState player, String roomId,
                                          ServerMessage.DepartureReason reason, boolean acknowledgeLeave) {
         voice.revokePlayer(player.getId());
@@ -832,13 +1061,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         boolean hostDeparted = player.getId().equals(room.getHostPlayerId());
         Game game = room.getGame();
         // Leave and expiry end participation; the Game Roster entry and its Seat remain.
-        if (game != null) game.forfeit(player.getId());
+        if (game != null) { if (room.developer() == null) game.forfeit(player.getId()); else game.removeDeveloper(player.getId()); }
         lastFootsteps.remove(player.getId());
         walkedSinceFootstep.remove(player.getId());
         RoleSetup previousSetup = room.getRoleSetup();
         room.removePlayer(player.getId());
+        if (room.developer() != null) {
+            room.developer().roles.remove(player.getId()); room.developer().simulated.remove(player.getId());
+            if (player.getId().equals(room.developer().controllerId)) room.developer().controllerId = null;
+            retireAbandonedDeveloperRoom(room);
+        }
         if (hostDeparted) room.playerIdsSnapshot().stream().map(playersById::get)
-                .filter(PlayerState::isConnected).findFirst()
+                .filter(member -> member.isConnected() && !member.isSimulated()).findFirst()
                 .ifPresent(successor -> room.setHostPlayerId(successor.getId()));
         roomManager.membershipEnded(room);
         List<Delivery> pendingDeliveries = new ArrayList<>();
@@ -851,6 +1085,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         if (acknowledgeLeave) {
             pendingDeliveries.add(new Delivery(player.getId(), new ServerMessage.RoomLeft(roomId)));
         }
+        publishDeveloper(room);
         return pendingDeliveries;
     }
 

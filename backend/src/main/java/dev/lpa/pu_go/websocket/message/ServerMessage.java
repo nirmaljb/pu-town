@@ -9,7 +9,7 @@ import dev.lpa.pu_go.game.Role;
 
 import java.util.List;
 
-public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
+public sealed interface ServerMessage permits ServerMessage.DeveloperStatus, ServerMessage.DeveloperState, ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
         ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory, ServerMessage.TaskState, ServerMessage.PracticeState, ServerMessage.SoundEvent, ServerMessage.VoiceState, ServerMessage.VoicePeers {
     record VoiceState(int version, String type, String url, String token, boolean canPublish) implements ServerMessage {
@@ -20,6 +20,11 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
     record VoicePeers(int version, String type, List<VoicePeerView> peers) implements ServerMessage {
         public VoicePeers(List<VoicePeerView> peers) { this(1, "voice_peers", List.copyOf(peers)); }
     }
+    record DeveloperStatus(int version, String type, String controllerId, boolean paused, boolean nightMovement, boolean taskRange, String scenario, int revision, List<String> simulatedPlayerIds) implements ServerMessage {}
+    record DeveloperPlayer(String playerId, String displayName, Role role, ParticipantStatus status, boolean simulated,
+                           double x, double y, String nightChoice, boolean voted, String vote, List<dev.lpa.pu_go.game.TaskBoard.Configuration> tasks) {}
+    record DeveloperState(int version, String type, dev.lpa.pu_go.developer.DeveloperSettings settings,
+                          List<DeveloperPlayer> players, List<dev.lpa.pu_go.game.TaskBoard.Location> locations) implements ServerMessage {}
     int version();
     String type();
 

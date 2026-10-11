@@ -14,6 +14,10 @@ public class Room {
     private final AvatarCollection avatarCollection;
     private String phase = "lobby";
     private Game game;
+    private dev.lpa.pu_go.developer.DeveloperRoom developer;
+    public dev.lpa.pu_go.developer.DeveloperRoom developer() { return developer; }
+    public void enableDeveloper(String controllerId) { developer = new dev.lpa.pu_go.developer.DeveloperRoom(controllerId); }
+    public void returnToLobby() { game = null; phase = "lobby"; }
     private TownMap townMap = TownMap.village();
     public TownMap getTownMap() { return townMap; }
     public void setTownMap(TownMap value) { townMap = value; }
@@ -26,7 +30,7 @@ public class Room {
     public String getPhase() { return phase; }
     public String getHostPlayerId() { return hostPlayerId; }
     public Game getGame() { return game; }
-    public void startGame(Game startedGame) { roleSetup = getRoleSetup(); phase = "playing"; game = startedGame; }
+    public void startGame(Game startedGame) { startedGame.activateDeveloperSnapshot(); roleSetup = getRoleSetup(); phase = "playing"; game = startedGame; }
     private long emptySince;
     public long getEmptySince() { return emptySince; }
     public void setEmptySince(long value) { emptySince = value; }

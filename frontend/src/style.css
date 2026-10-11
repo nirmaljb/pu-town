@@ -270,3 +270,25 @@ h2 { margin: 16px 0; font-size: 28px; }
 }
 .voice-controls[hidden] { display: none; }
 .voice-controls span { font-size: 0.8rem; }
+
+/* Phase titles mark a change; the town remains the persistent focus. */
+.phase-transition { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; color: #fff; pointer-events: auto; }
+.phase-transition h2 { font-family: Silkscreen, monospace; font-size: clamp(20px, 4vw, 40px); text-align: center; }
+.phase-transition p { font-size: 22px; }
+.game-banner { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 220px); margin: 0; padding: 5px 10px; gap: 4px 10px; background: #17232adb; box-shadow: none; }
+.game-countdown { font-size: 15px; }
+.game-round, .game-announcement { font-size: 12px; margin: 0; }
+.role-card:not([open]) { padding: 5px 9px; width: max-content; background: #17232adb; }
+.role-card[open] { max-width: 340px; }
+.developer-panel { position: fixed; top: 70px; right: 12px; z-index: 80; width: min(420px, calc(100vw - 24px)); background: #17232af5; border: 2px solid #6f8985; color: #e4eee1; pointer-events: auto; }
+.developer-panel > summary { padding: 8px 12px; cursor: pointer; font-family: Silkscreen, monospace; }
+.developer-body { padding: 12px; max-height: calc(100dvh - 150px); overflow-y: auto; }
+.developer-body label { display: flex; align-items: center; gap: 8px; margin-block: 6px; font-size: 13px; }
+.developer-body input:not([type=checkbox]), .developer-body select { min-width: 0; flex: 1; }
+.developer-body fieldset { margin-block: 12px; }
+.developer-body form { border-top: 1px solid #6f8985; padding-block: 10px; }
+.developer-body button { font-size: 12px; margin: 3px; padding: 6px 8px; }
+.developer-error { color: #ffaf9d; }
+@media (max-width: 600px) { .game-banner { top: 54px; max-width: calc(100vw - 24px); } .game-announcement { display: none; } .developer-panel { top: 100px; } }
+.role-card:not([open]) .role-name { font-size: 13px; }
+.developer-body input[type=checkbox] { width: 20px; height: 20px; min-height: 0; flex: 0 0 20px; padding: 0; margin: 0; }

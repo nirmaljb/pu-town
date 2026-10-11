@@ -4,6 +4,9 @@ import org.springframework.web.socket.WebSocketSession;
 
 public class PlayerState {
     private final String playerId;
+    private boolean simulated;
+    public boolean isSimulated() { return simulated; }
+    public void setSimulated(boolean value) { simulated = value; }
     private WebSocketSession session;
     private String recoveryToken;
     private Long disconnectedUntil;

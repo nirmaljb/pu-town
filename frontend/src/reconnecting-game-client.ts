@@ -1,3 +1,4 @@
+import type { DeveloperCommand } from "./developer-protocol.js";
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
@@ -13,6 +14,7 @@ export type ConnectionState = Readonly<{
 }>;
 
 export class ReconnectingGameClient {
+  gameplayBlocked = false;
   #phase: RoomPhase | null = null;
   #socket: WebSocket | null = null;
   #transport: GameTransport | null = null;
@@ -60,6 +62,15 @@ export class ReconnectingGameClient {
 
   get state(): ConnectionState { return this.#state; }
 
+  createDeveloper(displayName: string): void { this.start({ version: 1, type: "create_developer_room", displayName }); }
+  takeDeveloper(roomId: string, playerId: string): void { this.start({ version: 1, type: "take_developer_player", roomId, playerId }); }
+  developer(command: DeveloperCommand): void {
+    if (this.#state.status === "playing" && this.#socket?.readyState === 1) this.#socket.send(JSON.stringify({ version: 1, type: "developer_command", ...command }));
+  }
+  releaseDeveloper(): void {
+    this.developer({ action: "release" }); this.clearStoredRecovery();
+    this.#state = { ...this.#state, status: "leaving", error: null }; this.#deadline = this.now() + 10_000;
+  }
   create(displayName: string): void { this.start(createRoom(displayName)); }
   join(roomId: string, displayName: string): void { this.start(joinRoom(roomId, displayName)); }
 
@@ -86,7 +97,7 @@ export class ReconnectingGameClient {
     }
     if (this.#state.status === "leaving" && this.now() >= this.#deadline) { this.cancel(); return; }
     for (const message of this.#messages.splice(0)) {
-      if (message.type === "room_left" && this.#state.status === "leaving") { this.cancel(); return; }
+      if (message.type === "room_left" && (this.#state.status === "leaving" || this.#state.status === "playing")) { this.cancel(); return; }
       if (message.type === "error") {
         if (message.code === "recovery_in_use" && this.#state.status === "reconnecting") {
           this.disconnected();
@@ -244,7 +255,7 @@ export class ReconnectingGameClient {
    * this client has applied, not one the caller believes it is in.
    */
   private sendControl(phase: RoomPhase, build: () => ClientMessage): void {
-    if (this.#phase === phase && this.#state.status === "playing" && this.#socket?.readyState === 1) {
+    if (!this.gameplayBlocked && this.#phase === phase && this.#state.status === "playing" && this.#socket?.readyState === 1) {
       this.#socket.send(JSON.stringify(build()));
     }
   }

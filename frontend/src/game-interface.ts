@@ -1,3 +1,4 @@
+import { PhaseTransition } from "./phase-transition.js";
 import type { ChatChannel, ChatEntry, GameView, Role, RosterEntry } from "./protocol.js";
 import { MAX_CHAT_CHARACTERS, ROLES } from "./protocol.js";
 import type { LocalPosition } from "./field-controller.js";
@@ -35,6 +36,7 @@ type Preview = Readonly<{ round: number; phase: GameView["phase"]; targetPlayerI
 /** The Game's own controls. Every rule it presents is enforced again by the server. */
 export class GameInterface {
   readonly #root = document.createElement("div");
+  readonly #transition = new PhaseTransition();
   #preview: Preview | null = null;
   readonly #ballotItems = new Map<string | null, HTMLLIElement>();
   #lastGame: GameView | null = null;
@@ -54,8 +56,9 @@ export class GameInterface {
   constructor(private readonly client: ReconnectingGameClient, private readonly now: () => number = Date.now) {
     this.#root.className = "game-interface";
     this.#root.innerHTML = `
+      <section class="phase-transition" hidden aria-live="polite"><h2 class="transition-title"></h2><p class="transition-role"></p></section>
       <section class="game-banner" hidden aria-live="polite">
-        <strong class="game-phase"></strong>
+        <strong class="game-phase" hidden></strong>
         <span class="game-countdown"></span>
         <span class="game-round"></span>
         <p class="game-announcement"></p>
@@ -127,6 +130,18 @@ export class GameInterface {
     document.body.classList.remove("in-game", "sleeping");
   }
 
+  foregrounded(): void { this.#transition.foregrounded(); }
+
+  prepareFrame(world: WorldState | undefined, reducedMotion = false): boolean {
+    const card = this.#transition.update(world, this.now(), !document.hidden && this.client.state.status === "playing", reducedMotion);
+    const overlay = this.element(".phase-transition");
+    overlay.hidden = !card.blocked; overlay.style.opacity = String(card.opacity);
+    this.element(".transition-title").textContent = card.titleVisible && card.phase ? PHASE_TITLES[card.phase] : "";
+    this.element(".transition-role").textContent = card.titleVisible && card.role ? `You are the ${capitalized(card.role)}` : "";
+    this.client.gameplayBlocked = card.blocked;
+    return card.blocked;
+  }
+
   render(world: WorldState | undefined, self: LocalPosition | null = null): void {
     this.#lastWorld = world;
     this.#self = self;
@@ -154,7 +169,7 @@ export class GameInterface {
     }
     if (game !== this.#lastGame) {
       if (this.#lastGame?.phase !== game.phase) {
-        this.element<HTMLDetailsElement>(".role-card").open = game.phase === "role_reveal";
+        this.element<HTMLDetailsElement>(".role-card").open = false;
       }
       if (this.#lastGame === null || game.round !== this.#lastGame.round || game.phase !== this.#lastGame.phase) {
         this.#preview = null;
@@ -209,9 +224,9 @@ export class GameInterface {
   /** The server owns the deadline; this counts down to it from when its message arrived. */
   private countdown(world: WorldState): string {
     if (world.phaseEndsAt === null) return world.game?.mode === "practice" ? "Advance when ready" : "";
-    const left = Math.max(0, world.phaseEndsAt - this.now());
+    const left = world.developer?.paused ? world.game?.remainingMs ?? 0 : Math.max(0, world.phaseEndsAt - this.now());
     const seconds = Math.ceil(left / 1_000);
-    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    return `${world.developer?.paused ? "Paused · " : ""}${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   }
 
   private announcement(game: GameView): string {
@@ -351,7 +366,7 @@ export class GameInterface {
     }
     const confirm = this.element<HTMLButtonElement>(".confirm-action");
     confirm.textContent = night ? "Set Night choice" : "Confirm ballot";
-    confirm.disabled = locked || this.#preview === null;
+    confirm.disabled = this.client.gameplayBlocked || locked || this.#preview === null;
     confirm.hidden = locked;
   }
 

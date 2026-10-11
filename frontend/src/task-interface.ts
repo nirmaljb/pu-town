@@ -29,8 +29,8 @@ export class TaskInterface {
     this.#root.hidden = !game || !state || game.phase !== "day";
     if (!game || !state) return;
     const pos = world.field?.self;
-    const seconds = Math.ceil(Math.max(0, (world.taskEndsAt ?? this.now()) - this.now()) / 1000);
-    const available = game.phase === "day" && game.self.status !== "left" && this.client.state.status === "playing";
+    const seconds = Math.ceil((world.developer?.paused ? state.remainingMs ?? 0 : Math.max(0, (world.taskEndsAt ?? this.now()) - this.now())) / 1000);
+    const available = game.phase === "day" && game.self.status !== "left" && this.client.state.status === "playing" && !world.developer?.paused;
     this.#heading.textContent = `Village Tasks: ${state.completed}/${state.total}`;
     // A ticking countdown or a movement update must not replace a focused control.
     const signature = JSON.stringify([game.round, game.phase, state.tasks, state.activeTaskId]);
@@ -91,7 +91,7 @@ export class TaskInterface {
     for (const item of Array.from(this.#content.querySelectorAll<HTMLLIElement>("li"))) {
       const task = state.tasks.find(task => task.taskId === item.dataset.taskId)!;
       const distance = pos ? Math.hypot(task.x - pos.x, task.y - pos.y) : Infinity;
-      const nearby = available && !!pos && distance <= 64 && areaAt(task.x, task.y) === areaAt(pos.x, pos.y);
+      const nearby = available && !!pos && (world.developer?.taskRange === false || distance <= 64 && areaAt(task.x, task.y) === areaAt(pos.x, pos.y));
       const active = state.activeTaskId === task.taskId;
       for (const button of Array.from(item.querySelectorAll<HTMLButtonElement>("button"))) button.disabled = !nearby || active && seconds > 0;
       const timer = item.querySelector(".task-timer");

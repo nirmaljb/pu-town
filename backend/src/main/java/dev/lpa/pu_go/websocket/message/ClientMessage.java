@@ -2,13 +2,16 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectMap, ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole, ClientMessage.JoinVoice, ClientMessage.LeaveVoice {
+public sealed interface ClientMessage permits ClientMessage.CreateDeveloperRoom, ClientMessage.DeveloperCommand, ClientMessage.TakeDeveloperPlayer, ClientMessage.SelectMap, ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole, ClientMessage.JoinVoice, ClientMessage.LeaveVoice {
     record OpenTask(int version, String type, int round, String taskId) implements ClientMessage {}
     record TaskStep(int version, String type, int round, String taskId, int step, int value) implements ClientMessage {}
     record CloseTask(int version, String type) implements ClientMessage {}
     record PreviewRole(int version, String type, dev.lpa.pu_go.game.Role role) implements ClientMessage {}
     record JoinVoice(int version, String type, int round) implements ClientMessage {}
     record LeaveVoice(int version, String type) implements ClientMessage {}
+    record CreateDeveloperRoom(int version, String type, String displayName) implements ClientMessage {}
+    record TakeDeveloperPlayer(int version, String type, String roomId, String playerId) implements ClientMessage {}
+    record DeveloperCommand(int version, String type, String action, tools.jackson.databind.JsonNode arguments) implements ClientMessage {}
     int version();
     String type();
 
