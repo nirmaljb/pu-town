@@ -74,6 +74,49 @@ class MafiaGameTest {
     private final List<String> tokens = new ArrayList<>();
     private String code;
 
+    @ParameterizedTest
+    @ValueSource(strings = {"village", "horror", "cyberpunk"})
+    void hostSelectsSharedTownBeforeStartAndRecoveryRetainsIt(String mapId) throws Exception {
+        var host = connect("map-host");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        String room = latest(host).path("roomId").asText();
+        String token = latest(host).path("recoveryToken").asText();
+        var guest = connect("map-guest");
+        join(guest, room);
+        String selection = "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"" + mapId + "\"}";
+        send(guest, selection);
+        assertEquals("not_host", latest(guest).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"unknown\"}");
+        assertEquals("malformed_message", latest(host).path("code").asText());
+        send(host, selection);
+        assertEquals(mapId, latestOfType(host, "room_state").path("mapId").asText());
+        assertEquals(mapId, latestOfType(guest, "room_state").path("mapId").asText());
+        var third = connect("map-third"); join(third, room);
+        var fourth = connect("map-fourth"); join(fourth, room);
+        for (var member : List.of(host, guest, third, fourth))
+            send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        assertEquals("role_reveal", latestOfType(host, "game_state").path("phase").asText());
+        send(host, selection);
+        assertEquals("invalid_phase", latest(host).path("code").asText());
+        advance(REVEAL);
+        String task = latestOfType(guest, "task_state").path("tasks").get(0).path("name").asText();
+        assertEquals(switch (mapId) { case "horror" -> "Abandoned abbey"; case "cyberpunk" -> "Data exchange"; default -> "Sign the town ledger"; }, task);
+        walkIntoSelectedInterior(guest, mapId);
+        handler.tickFields();
+        var guestField = latestOfType(guest, "field_state");
+        var hostField = latestOfType(host, "field_state");
+        assertFalse(guestField.path("players").valueStream().anyMatch(node -> node.path("playerId").asText().equals("player-1")));
+        assertFalse(hostField.path("players").valueStream().anyMatch(node -> node.path("playerId").asText().equals("player-2")));
+        int chats = countOfType(host, "chat_message");
+        send(guest, "{\"version\":1,\"type\":\"send_chat\",\"channel\":\"public\",\"text\":\"Inside only\"}");
+        assertEquals(chats, countOfType(host, "chat_message"));
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        var replacement = connect("map-recovered"); recover(replacement, room, token);
+        assertEquals(mapId, latestOfType(replacement, "room_snapshot").path("mapId").asText());
+        assertNoHiddenRolesLeaked(guest);
+    }
+
     @Test
     void eliminatedParticipantsRecoverReceiveOnlyTownhallVoiceAndRetireLivingGrants() throws Exception {
         var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
@@ -1687,6 +1730,60 @@ class MafiaGameTest {
         handler.tickFields();
         assertTrue(Math.hypot(field(seat).path("self").path("x").asDouble() - task.path("x").asDouble(),
                 field(seat).path("self").path("y").asDouble() - task.path("y").asDouble()) <= 64, "Task point must be reachable");
+    }
+
+    private record MapPoint(int x, int y) {}
+
+    /** Route from the independent authoring map, then observe accepted movement at the WebSocket. */
+    private void walkIntoSelectedInterior(RecordingWebSocketSession session, String mapId) throws Exception {
+        var source = java.nio.file.Path.of("..", "pu-town", "variants", mapId);
+        JsonNode map = objectMapper.readTree(source.resolve("map.json").toFile());
+        JsonNode collision = objectMapper.readTree(source.resolve("collision.json").toFile());
+        JsonNode room = map.path("layers").valueStream().filter(layer -> layer.path("name").asText().equals("zones"))
+                .findFirst().orElseThrow().path("objects").valueStream().filter(node -> node.path("type").asText().equals("room"))
+                .findFirst().orElseThrow();
+        java.util.function.Predicate<MapPoint> inside = point -> point.x() >= room.path("x").asInt()
+                && point.x() < room.path("x").asInt() + room.path("width").asInt()
+                && point.y() >= room.path("y").asInt() && point.y() < room.path("y").asInt() + room.path("height").asInt();
+        java.util.function.Predicate<MapPoint> open = point -> point.x() >= 14 && point.y() >= 14
+                && point.x() <= 7666 && point.y() <= 4306 && collision.path("obstacles").valueStream().noneMatch(rect ->
+                point.x() > rect.path("x").asInt() - 14 && point.x() < rect.path("x").asInt() + rect.path("width").asInt() + 14
+                        && point.y() > rect.path("y").asInt() - 14 && point.y() < rect.path("y").asInt() + rect.path("height").asInt() + 14);
+        JsonNode self = latestOfType(session, "field_state").path("self");
+        var start = new MapPoint((int) Math.round(self.path("x").asDouble() / 32) * 32,
+                (int) Math.round(self.path("y").asDouble() / 32) * 32);
+        var previous = new java.util.HashMap<MapPoint, MapPoint>();
+        var queue = new java.util.ArrayDeque<MapPoint>(); queue.add(start); previous.put(start, null);
+        MapPoint goal = null;
+        while (!queue.isEmpty()) {
+            MapPoint point = queue.removeFirst();
+            if (inside.test(point)) { goal = point; break; }
+            for (var next : List.of(new MapPoint(point.x() + 32, point.y()), new MapPoint(point.x() - 32, point.y()),
+                    new MapPoint(point.x(), point.y() + 32), new MapPoint(point.x(), point.y() - 32))) {
+                if (!previous.containsKey(next) && open.test(next)) { previous.put(next, point); queue.add(next); }
+            }
+        }
+        assertNotNull(goal, "The chosen map must have a reachable interior");
+        var route = new java.util.ArrayDeque<MapPoint>();
+        for (MapPoint point = goal; point != null; point = previous.get(point)) route.addFirst(point);
+        for (MapPoint point : route) {
+            milliseconds.addAndGet(150);
+            send(session, "{\"version\":1,\"type\":\"move\",\"x\":" + point.x() + ",\"y\":" + point.y() + ",\"facing\":\"down\"}");
+        }
+        handler.tickFields();
+        self = latestOfType(session, "field_state").path("self");
+        assertEquals(goal.x(), self.path("x").asDouble(), 0.01);
+        assertEquals(goal.y(), self.path("y").asDouble(), 0.01);
+        // A solid point beside this route cannot be accepted even after a full movement allowance.
+        MapPoint destination = goal;
+        var blocked = collision.path("obstacles").valueStream().filter(rect -> Math.hypot(
+                rect.path("x").asDouble() + rect.path("width").asDouble() / 2 - destination.x(),
+                rect.path("y").asDouble() + rect.path("height").asDouble() / 2 - destination.y()) < 300).findFirst().orElseThrow();
+        milliseconds.addAndGet(1000);
+        send(session, "{\"version\":1,\"type\":\"move\",\"x\":" + (blocked.path("x").asDouble() + blocked.path("width").asDouble() / 2)
+                + ",\"y\":" + (blocked.path("y").asDouble() + blocked.path("height").asDouble() / 2) + ",\"facing\":\"down\"}");
+        handler.tickFields();
+        assertEquals(goal.x(), latestOfType(session, "field_state").path("self").path("x").asDouble(), 0.01);
     }
 
     private void startTable(String label, int players) throws Exception {

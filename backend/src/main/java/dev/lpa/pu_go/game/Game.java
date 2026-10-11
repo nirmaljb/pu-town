@@ -1,6 +1,7 @@
 package dev.lpa.pu_go.game;
 
 import dev.lpa.pu_go.room.RoomRules;
+import dev.lpa.pu_go.room.TownMap;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -35,6 +36,8 @@ public final class Game {
 
     private final boolean practice;
     private final TaskBoard tasks;
+    private final TownMap townMap;
+    public String areaAt(double x, double y) { return townMap.areaAt(x, y); }
     private final Map<String, Participant> participants = new LinkedHashMap<>();
     private final Map<String, String> ballots = new LinkedHashMap<>();
     private final Map<String, String> nightChoices = new LinkedHashMap<>();
@@ -47,16 +50,25 @@ public final class Game {
     private Outcome outcome;
 
     public Game(List<Participant> roster, long startedAt) {
-        this(roster, startedAt, false);
+        this(roster, startedAt, false, TownMap.village());
+    }
+
+    public Game(List<Participant> roster, long startedAt, TownMap townMap) {
+        this(roster, startedAt, false, townMap);
     }
 
     public static Game soloPractice(Participant host, long startedAt) {
-        return new Game(List.of(host), startedAt, true);
+        return new Game(List.of(host), startedAt, true, TownMap.village());
     }
 
-    private Game(List<Participant> roster, long startedAt, boolean practice) {
+    public static Game soloPractice(Participant host, long startedAt, TownMap townMap) {
+        return new Game(List.of(host), startedAt, true, townMap);
+    }
+
+    private Game(List<Participant> roster, long startedAt, boolean practice, TownMap townMap) {
+        this.townMap = townMap;
         this.practice = practice;
-        tasks = new TaskBoard(roster, practice);
+        tasks = new TaskBoard(roster, practice, townMap);
         for (Participant participant : roster) {
             participants.put(participant.playerId(), participant);
             placeAtSeat(participant, startedAt);
@@ -218,7 +230,7 @@ public final class Game {
         double elapsed = Math.min(1_000, Math.max(50, now - walker.lastMoveAt));
         double allowance = SPEED * elapsed / 1_000 * 1.4 + 24;
         boolean reachable = walker.distanceTo(x, y) <= allowance
-                && RoomRules.walkable(x, y) && RoomRules.walkable((walker.x + x) / 2, (walker.y + y) / 2);
+                && townMap.walkable(x, y) && townMap.walkable((walker.x + x) / 2, (walker.y + y) / 2);
         if (!reachable) {
             walker.correction++;
             return false;
@@ -232,10 +244,10 @@ public final class Game {
     }
 
     /** The living see living Participants in their area, without a distance cutoff. */
-    private static boolean canSee(Participant viewer, Participant other) {
+    private boolean canSee(Participant viewer, Participant other) {
         if (other.status() == ParticipantStatus.LEFT) return false;
         if (other == viewer || !viewer.isLiving()) return true;
-        return other.isLiving() && RoomRules.areaAt(viewer.x, viewer.y).equals(RoomRules.areaAt(other.x, other.y));
+        return other.isLiving() && townMap.areaAt(viewer.x, viewer.y).equals(townMap.areaAt(other.x, other.y));
     }
 
     /** Every Avatar this recipient may see right now, themselves included. */
@@ -253,7 +265,7 @@ public final class Game {
         if (listener == null || speaker == null || listener.status() == ParticipantStatus.LEFT || !speaker.isLiving()) return 0;
         if (phase == GamePhase.DISCUSSION || phase == GamePhase.VOTING) return 1;
         if (phase != GamePhase.DAY || !listener.isLiving()
-                || !RoomRules.areaAt(listener.x(), listener.y()).equals(RoomRules.areaAt(speaker.x(), speaker.y()))) return 0;
+                || !townMap.areaAt(listener.x(), listener.y()).equals(townMap.areaAt(speaker.x(), speaker.y()))) return 0;
         double distance = listener.distanceTo(speaker);
         return Math.max(0, Math.min(1, (HEARING_RANGE - distance) / (HEARING_RANGE - 64)));
     }
@@ -340,7 +352,7 @@ public final class Game {
                 .filter(member -> member.status() != ParticipantStatus.LEFT)
                 .filter(member -> phase != GamePhase.DAY || member.isLiving()
                         && sender.distanceTo(member) <= HEARING_RANGE
-                        && RoomRules.areaAt(sender.x, sender.y).equals(RoomRules.areaAt(member.x, member.y)))
+                        && townMap.areaAt(sender.x, sender.y).equals(townMap.areaAt(member.x, member.y)))
                 .map(Participant::playerId).collect(java.util.stream.Collectors.toSet());
         chat.add(new ChatEntry(ChatChannel.PUBLIC, round, senderId, sender.displayName(), text, recipients));
         return null;

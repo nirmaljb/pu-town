@@ -162,7 +162,7 @@ export class AvatarReconciler implements WorldReconciler {
     const existing = this.#emptySeats.get(entry.playerId);
     if (existing) return;
     const marker = this.scene.add.text(place.x, place.y - 46, `${entry.displayName} • Left`, {
-      color: "#c8c2b4", fontFamily: "sans-serif", fontSize: "13px",
+      color: "#c8c2b4", fontFamily: "Silkscreen", fontSize: "13px",
       backgroundColor: "#2a2118", padding: { x: 6, y: 3 }
     }).setOrigin(0.5).setDepth(place.y);
     this.#emptySeats.set(entry.playerId, marker);
@@ -216,14 +216,14 @@ export class AvatarReconciler implements WorldReconciler {
     const sprite = this.scene.add.sprite(0, 0, entry.avatarPreset, 18).setOrigin(0.5, 56 / 64);
     const legs = this.scene.add.sprite(0, 0, `${entry.avatarPreset}-seated`, 0).setOrigin(0.5, 40 / 64).setVisible(false);
     const label = this.scene.add.text(0, -66, entry.displayName, {
-      color: "#ffffff", fontFamily: "sans-serif", fontSize: "14px",
+      color: "#ffffff", fontFamily: "Silkscreen", fontSize: "14px",
       stroke: "#101725", strokeThickness: 3, backgroundColor: "#302820", padding: { x: 5, y: 3 }
     }).setOrigin(0.5);
     const status = this.scene.add.text(0, -46, "", {
-      color: "#fff0c9", fontFamily: "sans-serif", fontSize: "13px",
+      color: "#fff0c9", fontFamily: "Silkscreen", fontSize: "13px",
       backgroundColor: "#302820", padding: { x: 6, y: 3 }
     }).setOrigin(0.5);
-    const speaking = this.scene.add.text(0, -85, "● ● ●", { color: "#b9f4c9", fontSize: "12px" }).setOrigin(0.5).setVisible(false);
+    const speaking = this.scene.add.text(0, -85, "● ● ●", { color: "#b9f4c9", fontFamily: "Silkscreen", fontSize: "12px" }).setOrigin(0.5).setVisible(false);
     // Fit the longest accepted Display Names within neighbouring seat labels.
     if (label.width > 210) label.setScale(210 / label.width);
     const avatar: AvatarView = {

@@ -16,7 +16,7 @@
   --muted: #c1bbc5;
   --lobby-controls-height: 180px;
   --frame: url("/assets/ui/kenney-weathered-grey.png") 6 / 12px / 0 stretch;
-  font-family: "Trebuchet MS", Verdana, sans-serif;
+  font-family: Silkscreen, monospace;
   background: var(--ink);
   color: var(--paper);
 }
@@ -68,7 +68,7 @@ summary { padding-block: 6px; }
 }
 .entry-panel .menu-choice.primary { background: #34303abd; border-left-color: var(--gold); color: var(--paper); }
 .entry-panel .menu-choice:hover:not(:disabled), .entry-panel .menu-choice:focus-visible { background: #45404ded; border-left-color: #ffe0a0; }
-.entry-panel .menu-choice span { display: block; font: 14px/1.5 "Trebuchet MS", Verdana, sans-serif; color: var(--muted); margin-top: 6px; }
+.entry-panel .menu-choice span { display: block; font: 14px/1.5 Silkscreen, monospace; color: var(--muted); margin-top: 6px; }
 .menu-card {
   width: min(380px, 100%); padding: 18px 22px; background: var(--wood); color: var(--paper);
   border: 12px solid transparent; border-image: var(--frame);
@@ -226,50 +226,75 @@ summary { padding-block: 6px; }
   .menu-description { margin-bottom: 12px; }
 }
 
-/* Small Lobbies scroll over the full scene; controls keep their usable grid. */
-@media (max-width: 700px), (max-height: 650px) {
-  :root { --lobby-scene-height: clamp(120px, 28vh, 220px); }
-  .in-lobby #stage { width: 100%; height: var(--lobby-scene-height); }
-  .in-lobby .interface { display: flex; flex-direction: column; overflow-y: auto; }
-  .in-lobby .lobby-scene-space { display: block; height: calc(var(--lobby-scene-height) + 64px); flex-shrink: 0; order: 1; }
-  .in-lobby .avatar-chooser {
-    position: relative; inset: auto; order: 2; flex-shrink: 0;
-    width: min(660px, calc(100% - 32px)); height: 280px; min-height: 280px; margin: 16px auto;
-  }
-  .in-lobby .avatar-options { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); }
-  .in-lobby .lobby-controls {
-    position: relative; inset: auto; transform: none; order: 3; flex-shrink: 0;
-    width: min(660px, calc(100% - 32px)); margin: 0 auto 24px;
-  }
-  .in-lobby .art-credits { position: static; order: 4; align-self: center; margin-bottom: 12px; }
-}
-
-/* Lobby options overlay the full-size canvas; controls never change the stage dimensions. */
+/* Lobby choice is centered beneath the town; secondary controls open upwards. */
 .in-lobby #stage { position: fixed; inset: 0; width: 100%; height: 100%; }
 .in-lobby .interface { display: block; overflow: visible; }
 .in-lobby .lobby-scene-space { display: none; }
 .lobby-sidebar {
-  position: absolute; right: 12px; top: 72px; bottom: 44px;
-  width: min(300px, 42vw); overflow-y: auto; overflow-x: hidden;
-  display: flex; flex-direction: column; gap: 12px; pointer-events: auto;
+  position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%);
+  width: min(660px, calc(100% - 24px)); pointer-events: auto;
 }
 .lobby-sidebar[hidden] { display: none; }
-.in-lobby .lobby-sidebar .lobby-controls,
-.in-lobby .lobby-sidebar .avatar-chooser {
+.in-lobby .lobby-sidebar .lobby-controls {
   position: static; inset: auto; transform: none; margin: 0; width: 100%;
-  height: auto; min-height: auto; flex-shrink: 0;
+  display: grid; gap: 10px; padding: 12px; border: 0; border-image: none;
+  background: #11131de8; box-shadow: none;
 }
-.lobby-sidebar .lobby-controls { display: flex; flex-direction: column; align-items: stretch; padding: 8px; }
 .lobby-sidebar .lobby-controls > div { width: auto; margin: 0; }
-.lobby-sidebar .lobby-controls > .role-setup { display: flex; flex-direction: column; align-items: stretch; width: auto; gap: 7px; }
-.lobby-sidebar .role-count { display: grid; grid-template-columns: 1fr 32px 18px 32px; align-items: center; gap: 4px; }
-.lobby-sidebar .avatar-options { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
-.in-lobby #stage canvas { filter: none; }
-@media (max-width: 500px) {
-  .lobby-sidebar { right: 6px; top: 64px; bottom: 48px; width: 42vw; }
-  .lobby-sidebar .lobby-controls, .lobby-sidebar .avatar-chooser { border-width: 6px; padding: 5px; }
-  .lobby-sidebar .role-count { grid-template-columns: 1fr 24px 14px 24px; gap: 1px; font-size: 11px; }
-  .lobby-sidebar .lobby-controls .role-step { width: 24px; height: 30px; min-height: 30px; }
-  .lobby-sidebar .lobby-controls strong, .lobby-sidebar button { font-size: 12px; }
+.map-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.map-option { display: grid; gap: 6px; padding: 6px; min-width: 0; white-space: normal; font-size: 12px; line-height: 1.5; border-color: #747281; box-shadow: none; }
+.map-option img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; image-rendering: pixelated; }
+.map-option[aria-pressed="true"] { border-color: var(--gold); background: #465c54; }
+.map-option:disabled { opacity: 1; cursor: default; }
+.lobby-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+.lobby-actions > details > summary { padding: 10px 6px; cursor: pointer; }
+.lobby-actions > details > summary:hover { color: var(--gold); }
+.lobby-detail-body {
+  position: absolute; left: 50%; bottom: calc(100% + 12px); transform: translateX(-50%);
+  width: min(520px, calc(100vw - 24px)); max-height: min(460px, 55dvh); overflow-y: auto;
+  padding: 16px; background: var(--wood); border: 2px solid #747281;
+  display: grid; gap: 12px; z-index: 2;
 }
+.lobby-sidebar .role-count { display: grid; grid-template-columns: 1fr 32px 32px 32px; align-items: center; gap: 8px; }
+.lobby-sidebar .avatar-chooser { position: static; inset: auto; width: 100%; height: auto; min-height: 0; padding: 0; border: 0; border-image: none; box-shadow: none; }
+.lobby-sidebar .avatar-options { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
+.lobby-sidebar .host-guidance { text-align: center; margin: 0; color: var(--muted); font-size: 12px; }
+.in-lobby #stage canvas { filter: none; }
+.in-lobby .art-credits, .in-lobby .map-art-credits, .in-game .map-art-credits { display: none; }
+.room-credits { margin-top: 24px; font-size: 12px; line-height: 1.6; }
 .map-art-credits { position: fixed; left: 14px; bottom: 10px; pointer-events: auto; color: var(--muted); font-size: 11px; }
+
+/* Quiet collapsed controls leave the playfield clear. */
+.chat-log:empty { display: none; }
+.chat-panel:has(.chat-log:empty) { height: auto; }
+.game-banner { width: fit-content; max-width: calc(100% - 180px); padding: 8px 12px; border: 0; box-shadow: none; background: #11131de6; gap: 8px 16px; }
+.game-banner .game-announcement:empty { display: none; }
+.game-round { font-size: 12px; }
+.role-card:not([open]), .results-panel:not([open]), .task-interface:has(details:not([open])) {
+  border: 0; border-image: none; background: #11131de6; box-shadow: none; padding: 8px 12px;
+}
+.role-name { font-size: 14px; }
+.voice-controls { border: 0; border-image: none; background: #11131de6; box-shadow: none; }
+.map-toggle { position: fixed; left: 16px; bottom: 18px; z-index: 21; min-height: 40px; background: #11131de6; border: 1px solid #747281; font-size: 12px; }
+.map-dialog { padding: 16px; width: min(1200px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; color: var(--paper); border: 2px solid #747281; background: var(--ink); }
+.map-dialog::backdrop { background: #080a13db; }
+.map-dialog header { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.map-dialog h2 { margin: 0; font-size: 16px; font-weight: 400; }
+.map-surface { position: relative; width: min(100%, calc((100dvh - 180px) * 16 / 9)); margin-inline: auto; }
+.map-surface img { display: block; width: 100%; image-rendering: pixelated; }
+.map-markers { position: absolute; inset: 0; pointer-events: none; }
+.map-marker { position: absolute; transform: translate(-50%, -50%); font: 18px Silkscreen, monospace; line-height: 1; text-shadow: 0 1px 2px #000, 0 -1px 2px #000; pointer-events: auto; }
+.map-marker-self { color: #fff; z-index: 1; }
+.map-marker-task { color: #ffe0a0; }
+.map-legend { margin: 12px 0 0; font-size: 12px; line-height: 1.6; }
+@media (max-width: 500px) {
+  .lobby-sidebar { bottom: 56px; }
+  .lobby-sidebar .lobby-controls { padding: 8px; }
+  .map-options { gap: 4px; }
+  .map-option { font-size: 11px; padding: 4px; }
+  .lobby-actions { gap: 4px 8px; }
+  .lobby-actions button { font-size: 12px; padding: 6px 8px; }
+  .game-banner { max-width: calc(100% - 152px); }
+  .map-dialog { padding: 10px; }
+  .map-dialog h2 { font-size: 14px; }
+}

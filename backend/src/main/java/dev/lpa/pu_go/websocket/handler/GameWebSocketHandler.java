@@ -125,6 +125,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.LeaveRoom) handleLeave(player);
                     else if (incoming instanceof ClientMessage.SelectAvatar selection) handleAvatarSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetReady ready) handleReady(player, ready);
+                    else if (incoming instanceof ClientMessage.SelectMap selection) handleMapSelection(player, selection);
                     else if (incoming instanceof ClientMessage.SetRoleSetup setup) handleRoleSetup(player, setup);
                     else if (incoming instanceof ClientMessage.StartPractice) handlePracticeStart(player);
                     else if (incoming instanceof ClientMessage.AdvancePractice preview) handlePracticeAdvance(player, preview);
@@ -274,7 +275,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             });
             deliver(new Delivery(member.getId(), new ServerMessage.RoomSnapshot(member.getId(), message.roomId(),
                     member.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(),
-                    ServerMessage.RoleSetupView.of(room.getRoleSetup()), stateOf(room).players())));
+                    ServerMessage.RoleSetupView.of(room.getRoleSetup()), room.getTownMap().id(), stateOf(room).players())));
             List<Delivery> deliveries = new ArrayList<>();
             addPrivateGameEntry(deliveries, room, member.getId());
             addForPlayers(deliveries, room.playerIdsSnapshot().stream().filter(id -> !id.equals(member.getId())).toList(), stateOf(room));
@@ -337,7 +338,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     .toList();
             pendingDeliveries.add(new Delivery(player.getId(),
                     new ServerMessage.RoomSnapshot(player.getId(), message.roomId(), player.getRecoveryToken(), room.getPhase(), room.getHostPlayerId(),
-                            ServerMessage.RoleSetupView.of(room.getRoleSetup()), snapshotPlayers)));
+                            ServerMessage.RoleSetupView.of(room.getRoleSetup()), room.getTownMap().id(), snapshotPlayers)));
             addPrivateGameEntry(pendingDeliveries, room, player.getId());
             deliverAll(pendingDeliveries);
             return null;
@@ -454,6 +455,24 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
+    private void handleMapSelection(PlayerState player, ClientMessage.SelectMap message) {
+        if (player.getRoomId() == null) {
+            deliver(error(player, "not_in_room", "Join a Room before choosing the town."));
+            return;
+        }
+        Room room = roomManager.findRoom(player.getRoomId());
+        if (!player.getId().equals(room.getHostPlayerId())) {
+            deliver(error(player, "not_host", "Only the Host can choose the town."));
+        } else if (!room.getPhase().equals("lobby")) {
+            deliver(error(player, "invalid_phase", "The town is chosen in the Lobby."));
+        } else {
+            room.setTownMap(dev.lpa.pu_go.room.TownMap.find(message.mapId()));
+            List<Delivery> deliveries = new ArrayList<>();
+            addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
+            deliverAll(deliveries);
+        }
+    }
+
     // Called under the same per-Room serialization as Start and recovery.
     private void handleAvatarSelection(PlayerState player, ClientMessage.SelectAvatar message) {
         if (player.getRoomId() == null) {
@@ -531,7 +550,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         } else {
             Participant host = new Participant(player.getId(), player.getDisplayName(), player.getColour(),
                     player.getAvatarPreset(), player.getSeat(), Role.VILLAGER);
-            room.startGame(Game.soloPractice(host, roomManager.currentTimeMillis()));
+            room.startGame(Game.soloPractice(host, roomManager.currentTimeMillis(), room.getTownMap()));
             List<Delivery> deliveries = new ArrayList<>();
             addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
             addGameState(deliveries, room);
@@ -587,7 +606,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 roster.add(new Participant(member.getId(), member.getDisplayName(), member.getColour(),
                         member.getAvatarPreset(), member.getSeat(), roles.get(index)));
             }
-            room.startGame(new Game(roster, roomManager.currentTimeMillis()));
+            room.startGame(new Game(roster, roomManager.currentTimeMillis(), room.getTownMap()));
             List<Delivery> deliveries = new ArrayList<>();
             addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
             addGameState(deliveries, room);
@@ -618,7 +637,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private void handleMove(PlayerState player, ClientMessage.Move message) {
         withGame(player, (room, game) -> {
             Participant actor = game.participant(player.getId());
-            String before = RoomRules.areaAt(actor.x(), actor.y());
+            String before = game.areaAt(actor.x(), actor.y());
             double x = actor.x(), y = actor.y();
             long now = roomManager.currentTimeMillis();
             var beforeTasks = game.tasksFor(player.getId(), now);
@@ -626,7 +645,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             var afterTasks = game.tasksFor(player.getId(), now);
             if (!java.util.Objects.equals(beforeTasks.activeTaskId(), afterTasks.activeTaskId()))
                 deliverAll(List.of(new Delivery(player.getId(), new ServerMessage.TaskState(afterTasks))));
-            String area = RoomRules.areaAt(actor.x(), actor.y());
+            String area = game.areaAt(actor.x(), actor.y());
             double walked = walkedSinceFootstep.merge(player.getId(), Math.hypot(x - actor.x(), y - actor.y()), Double::sum);
             String kind = !before.equals(area) ? area.equals("Outdoors") ? "exit" : "enter"
                     : walked >= 24 && now - lastFootsteps.getOrDefault(player.getId(), 0L) >= 400 ? "footstep" : null;
@@ -719,7 +738,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
 
     private ServerMessage.RoomState stateOf(Room room) {
-        return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(), ServerMessage.RoleSetupView.of(room.getRoleSetup()),
+        return new ServerMessage.RoomState(room.getPhase(), room.getHostPlayerId(), ServerMessage.RoleSetupView.of(room.getRoleSetup()), room.getTownMap().id(),
                 room.playerIdsSnapshot().stream().map(playersById::get).map(this::viewOf).toList());
     }
 

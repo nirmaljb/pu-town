@@ -1,3 +1,5 @@
+import { TOWN_MAPS, mapRoot } from "./town-maps.js";
+import type { MapId } from "./protocol.js";
 import { AvatarChooser } from "./avatar-chooser.js";
 import type { AvatarCollection } from "./avatar-presets.js";
 import { ROOM_CAPACITY } from "./meeting-area.js";
@@ -39,7 +41,7 @@ export class JoinInterface {
           <p class="intro">Night falls. The Mafia is among you.</p>
         </div>
         <nav class="menu-choices" aria-label="Play PU Town">
-          <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>Gather your friends before nightfall</span></button>
+          <button class="primary menu-choice" type="button" data-entry="create">Create Room <span>4–10 Players</span></button>
           <button class="menu-choice" type="button" data-entry="join">Join Room <span>Enter a friend's Room Code</span></button>
         </nav>
         <form class="menu-card" novalidate hidden aria-describedby="entry-status">
@@ -57,7 +59,7 @@ export class JoinInterface {
           <button class="primary enter-room" type="submit">Create Room</button>
         </form>
         <p id="entry-status" class="entry-status" role="status" aria-live="polite"></p>
-        <details class="menu-help"><summary>How to play</summary><p>Explore and complete Tasks by Day. Make your private Role choice at Night. Discuss and vote at Townhall to find the Mafia.</p><p>Walk with WASD or arrow keys. Try Solo Practice from your own Lobby.</p></details>
+        <details class="menu-help"><summary>How to play</summary><p>Explore and complete Tasks by Day. Make your private Role choice at Night. Discuss and vote at Townhall to find the Mafia.</p><p>Walk with WASD or arrow keys. Press M for the full map. Try Solo Practice from your own Lobby.</p></details>
         <p class="footnote"><span>4–10 Players</span><span>One town. Who can you trust?</span></p>
       </section>
       <div class="room-launcher" hidden>
@@ -76,12 +78,17 @@ export class JoinInterface {
           <button type="button" class="leave-room">Leave Room</button>
         </div>
         <p class="room-status" role="status" aria-live="polite"></p>
+        <p class="room-credits"><a href="assets/avatars/credits.html" target="_blank" rel="noopener">Character credits</a> · <a href="maps/pu-town/credits.html" target="_blank" rel="noopener">Map credits</a></p>
       </dialog>
       <div class="lobby-scene-space" aria-hidden="true" hidden></div>
       <section class="lobby-controls" hidden aria-label="Lobby controls">
-        <div class="role-setup" role="group" aria-label="Roles">
-          <span class="role-setup-title">Roles</span>
-          <p class="role-default-hint">Counts follow Players by default. The Host can override them.</p>
+        <div class="map-options" role="group" aria-label="Town Map">
+          ${TOWN_MAPS.map(map => `<button type="button" class="map-option" data-map="${map.id}" aria-pressed="false"><img src="${mapRoot(map.id)}overview.png" alt="" loading="lazy"><span>${map.name}</span></button>`).join("")}
+        </div>
+        <div class="lobby-actions">
+        <details class="role-setup">
+          <summary>Roles</summary><div class="lobby-detail-body" role="group" aria-label="Roles">
+          <p class="role-default-hint">Automatic counts. Host can adjust.</p>
           ${SETUP_ROLES.map(({ role, label }) => `
           <span class="role-count">
             <span>${label}</span>
@@ -90,11 +97,13 @@ export class JoinInterface {
             <button type="button" class="role-step" data-role="${role}" data-step="1" aria-label="More ${label}">+</button>
           </span>`).join("")}
           <span class="role-villagers"></span>
-        </div>
-        <div><strong>Gather in the Town Square</strong><p class="host-guidance"></p></div>
+        </div></details>
+        <details class="character-options"><summary>Character</summary><div class="lobby-detail-body"></div></details>
         <button type="button" class="ready-toggle" aria-pressed="false">Ready</button>
         <button type="button" class="primary start-game">Start Game</button>
         <button type="button" class="start-practice" hidden>Solo Practice</button>
+        </div>
+        <p class="host-guidance"></p>
       </section>
       <section class="connection-overlay" hidden aria-labelledby="connection-title">
         <div class="connection-card">
@@ -113,7 +122,8 @@ export class JoinInterface {
     sidebar.className = "lobby-sidebar";
     sidebar.setAttribute("aria-label", "Lobby options");
     sidebar.hidden = true;
-    sidebar.append(this.element(".lobby-controls"), this.#chooser.element);
+    this.element(".character-options .lobby-detail-body").append(this.#chooser.element);
+    sidebar.append(this.element(".lobby-controls"));
     this.#root.insertBefore(sidebar, this.element(".connection-overlay"));
     document.body.append(this.#root);
     this.#form = this.element("form");
@@ -153,6 +163,9 @@ export class JoinInterface {
       const self = this.#world?.players.get(this.#world.selfPlayerId ?? "");
       if (self) this.client.setReady(!self.ready);
     });
+    for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>("[data-map]"))) {
+      button.addEventListener("click", () => this.client.selectMap(button.dataset.map as MapId));
+    }
     this.element(".start-practice").addEventListener("click", () => this.client.startPractice());
     this.element(".start-game").addEventListener("click", () => this.client.startGame());
     for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>(".role-step"))) {
@@ -226,16 +239,20 @@ export class JoinInterface {
     const waiting = [...(this.#world?.players.values() ?? [])].filter(player => !player.ready || !player.connected).length;
     this.element(".host-guidance").textContent = host
       ? gathered < MIN_PLAYERS
-        ? `You are the Host. ${MIN_PLAYERS - gathered} more ${MIN_PLAYERS - gathered === 1 ? "Player" : "Players"} needed.`
-        : waiting > 0 ? `You are the Host. Waiting for ${waiting} to be Ready and connected.` : "You are the Host. Everyone is Ready."
+        ? `${MIN_PLAYERS - gathered} more ${MIN_PLAYERS - gathered === 1 ? "Player" : "Players"} needed.`
+        : waiting > 0 ? `Waiting for ${waiting} to be Ready and connected.` : "Everyone is Ready."
       : "Waiting for the Host to start";
     if (host && gathered === 1) {
-      this.element(".host-guidance").textContent = "Explore alone with Solo Practice, or invite Players for a competitive Game.";
+      this.element(".host-guidance").textContent = "Invite friends or try Solo Practice.";
     }
     const setup = this.#world?.roleSetup ?? null;
     const needed = setup ? Math.max(MIN_PLAYERS, specialRoles(setup) + 1) : MIN_PLAYERS;
     if (host && gathered >= MIN_PLAYERS && gathered < needed) {
       this.element(".host-guidance").textContent = `You are the Host. These Roles need ${needed} Players, so one is left a Villager.`;
+    }
+    for (const button of Array.from(this.#root.querySelectorAll<HTMLButtonElement>("[data-map]"))) {
+      button.disabled = !host || state.status !== "playing";
+      button.setAttribute("aria-pressed", String(button.dataset.map === this.#world?.mapId));
     }
     this.renderRoleSetup(setup, host && state.status === "playing", gathered);
     this.element<HTMLButtonElement>(".start-game").hidden = !host;
@@ -245,7 +262,7 @@ export class JoinInterface {
     this.element<HTMLButtonElement>(".start-practice").disabled = state.status !== "playing";
     const ready = this.element<HTMLButtonElement>(".ready-toggle");
     ready.disabled = state.status !== "playing";
-    ready.textContent = self?.ready ? "✓ Ready · Undo" : "I'm Ready";
+    ready.textContent = self?.ready ? "Ready ✓" : "Ready";
     ready.setAttribute("aria-pressed", String(self?.ready ?? false));
     const previous = this.#lastState;
     this.#lastState = state;

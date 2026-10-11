@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { joinVoice, leaveVoice, openTask, taskStep, startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type Role, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectMap, type MapId, joinVoice, leaveVoice, openTask, taskStep, startPractice, advancePractice, type PracticePhase, selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, nightChoice, move, recoverRoom, sendChat, setRoleSetup, type Role, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -226,6 +226,8 @@ export class ReconnectingGameClient {
   setReady(ready: boolean): void { this.sendControl("lobby", () => ({ version: 1, type: "set_ready", ready })); }
 
   /** The Host's deal; the server checks the limits and that the sender is the Host. */
+  selectMap(mapId: MapId): void { this.sendControl("lobby", () => selectMap(mapId)); }
+
   setRoleSetup(setup: RoleSetup): void { this.sendControl("lobby", () => setRoleSetup(setup)); }
 
   startPractice(): void { this.sendControl("lobby", startPractice); }

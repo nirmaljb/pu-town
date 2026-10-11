@@ -14,6 +14,9 @@ public class Room {
     private final AvatarCollection avatarCollection;
     private String phase = "lobby";
     private Game game;
+    private TownMap townMap = TownMap.village();
+    public TownMap getTownMap() { return townMap; }
+    public void setTownMap(TownMap value) { townMap = value; }
     private String hostPlayerId;
     // The Host's deal, chosen in the Lobby and fixed once the Game starts.
     private RoleSetup roleSetup;

@@ -16,7 +16,7 @@ function setup(storage) {
     client.update();
   } };
 }
-const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, roomId: "ABC234", selfPlayerId: "p",
+const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", roomId: "ABC234", selfPlayerId: "p",
   players: [{ playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: 0, ready: false, facing: "up", x: 640, y: 177 }] };
 
 test("initial create prevents duplicates and waits for membership confirmation", () => {
@@ -476,7 +476,7 @@ test("practice entry and phase controls follow frame-applied membership and stop
   client.update();
   client.startPractice();
   assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "start_practice" });
-  sockets[0].message({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "p", roleSetup: snapshot.roleSetup, players: snapshot.players });
+  sockets[0].message({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "p", roleSetup: snapshot.roleSetup, mapId: snapshot.mapId, players: snapshot.players });
   client.update();
   client.advancePractice(1, "day");
   assert.deepEqual(JSON.parse(sockets[0].sent.at(-1)), { version: 1, type: "advance_practice", round: 1, phase: "day" });

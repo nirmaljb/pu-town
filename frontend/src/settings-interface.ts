@@ -64,7 +64,7 @@ export class SettingsInterface {
         <meter class="microphone-level" min="0" max="1" value="0" aria-label="Local microphone input level"></meter>
         <label for="speaking-mode">Speaking mode</label><select id="speaking-mode"><option value="open">Open microphone</option><option value="push-to-talk">Push to talk</option></select>
         <label for="talk-key">Push-to-talk key</label><button type="button" id="talk-key"></button>
-        <p class="hint">Enable the microphone in Voice controls first. Text, Settings and focus loss release push-to-talk.</p>
+        <p class="hint">Enable the microphone in Voice controls first. Text, menus and focus loss release push-to-talk. M is reserved for the map.</p>
         <label class="settings-choice"><span>Microphone noise suppression</span><input type="checkbox" class="noise-suppression"></label>
         <p class="noise-suppression-status hint"></p>
         <p class="microphone-status" role="status"></p>

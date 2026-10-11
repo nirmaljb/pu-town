@@ -59,6 +59,10 @@ _Avoid_: Room owner
 A Player's declaration that they are prepared for the game to start. A Player who has not made or has withdrawn that declaration is Not Ready.
 _Avoid_: Connected, joined
 
+**Town Map**:
+The town layout shared by a Room, chosen by its Host in the Lobby and retained for the Game. Sunwater Village, Blackthorn Hollow and Neon Ward are the available towns.
+_Avoid_: Avatar Preset, personal preview
+
 **Town Square**:
 The open square at the centre of the town, that holds the Meeting Area.
 

@@ -43,18 +43,18 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
     }
 
     record RoomSnapshot(int version, String type, String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
-                        RoleSetupView roleSetup, List<PlayerView> players)
+                        RoleSetupView roleSetup, String mapId, List<PlayerView> players)
             implements ServerMessage {
         public RoomSnapshot(String selfPlayerId, String roomId, String recoveryToken, String phase, String hostPlayerId,
-                            RoleSetupView roleSetup, List<PlayerView> players) {
-            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, roleSetup, List.copyOf(players));
+                            RoleSetupView roleSetup, String mapId, List<PlayerView> players) {
+            this(1, "room_snapshot", selfPlayerId, roomId, recoveryToken, phase, hostPlayerId, roleSetup, mapId, List.copyOf(players));
         }
     }
 
-    record RoomState(int version, String type, String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players)
+    record RoomState(int version, String type, String phase, String hostPlayerId, RoleSetupView roleSetup, String mapId, List<PlayerView> players)
             implements ServerMessage {
-        public RoomState(String phase, String hostPlayerId, RoleSetupView roleSetup, List<PlayerView> players) {
-            this(1, "room_state", phase, hostPlayerId, roleSetup, List.copyOf(players));
+        public RoomState(String phase, String hostPlayerId, RoleSetupView roleSetup, String mapId, List<PlayerView> players) {
+            this(1, "room_state", phase, hostPlayerId, roleSetup, mapId, List.copyOf(players));
         }
     }
 

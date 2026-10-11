@@ -1,4 +1,4 @@
-:root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #eef2f8; background: #101725; color-scheme: dark; }
+:root { font-family: Silkscreen, monospace; color: #eef2f8; background: #101725; color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body, #stage { width: 100%; height: 100%; margin: 0; }
 body { overflow: hidden; }
@@ -23,10 +23,10 @@ button:disabled, input:disabled { opacity: .55; cursor: wait; }
 .divider { display: flex; align-items: center; gap: 12px; color: #9aabc1; font-size: 11px; margin: 24px 0; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #35445b; }
 .join-row { display: flex; gap: 10px; }
-#room-code { text-transform: uppercase; letter-spacing: .14em; min-width: 0; font-family: ui-monospace, monospace; }
+#room-code { text-transform: uppercase; letter-spacing: .14em; min-width: 0; font-family: Silkscreen, monospace; }
 .entry-status { min-height: 20px; color: #ffc99e; font-size: 13px; margin: 16px 0 0; }
 .room-code-label { color: #b9c5d6; font-size: 12px; }
-.active-code { color: #fff; margin-left: 8px; font: 700 18px ui-monospace, monospace; letter-spacing: .12em; user-select: all; }
+.active-code { color: #fff; margin-left: 8px; font: 700 18px Silkscreen, monospace; letter-spacing: .12em; user-select: all; }
 .room-status { font-size: 12px; color: #ffc99e; }
 .connection-overlay { pointer-events: auto; position: fixed; inset: 0; background: #09111bd9; display: grid; place-items: center; padding: 24px; }
 .connection-card { width: min(420px, 100%); padding: 32px; background: #1a2536; border: 1px solid #526078; border-radius: 20px; }
@@ -95,7 +95,7 @@ h2 { margin: 16px 0; font-size: 28px; }
   padding: 10px 20px; background: #221a15e8; border-bottom: 2px solid #9b784e; color: #fff0c9;
 }
 .game-phase { font-size: 19px; letter-spacing: .02em; }
-.game-countdown { font: 700 22px ui-monospace, monospace; color: #efbd72; }
+.game-countdown { font: 700 22px Silkscreen, monospace; color: #efbd72; }
 .game-round { font-size: 12px; color: #e0cba9; }
 .game-announcement { flex: 1 0 100%; margin: 4px 0 0; font-size: 14px; color: #ffe6bb; min-height: 1.2em; }
 /* The Meeting Call and verdict, drawn over the table they describe. */

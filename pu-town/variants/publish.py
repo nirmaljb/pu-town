@@ -32,3 +32,7 @@ p=REPO/'backend/src/main/java/dev/lpa/pu_go/game/TaskBoard.java';s=p.read_text()
 locations=[t for t in c['tasks'] if t['name']!='Town Square'];new='public static final List<Location> LOCATIONS = List.of(\n            '+',\n            '.join('new Location('+json.dumps(t['name'])+', '+str(t['x'])+', '+str(t['y'])+')' for t in locations)+');'
 s=re.sub(r'public static final List<Location> LOCATIONS = List.of\(.*?\);',lambda _:new,s,flags=re.S);p.write_text(s)
 print('Published village geometry:',c['width'],c['height'],len(c['obstacles']),'rectangles',len(locations),'Task locations')
+
+# Keep all playable alternatives and packaged server geometry synchronized.
+from publish_catalogue import publish_catalogue
+publish_catalogue()

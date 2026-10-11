@@ -1,11 +1,12 @@
 import Phaser from "phaser";
+import { TOWN_MAPS, mapRoot } from "./town-maps.js";
+import type { MapId } from "./protocol.js";
 import { seatFacing, type Direction } from "./avatar-facing.js";
 import { BUTTON_X, BUTTON_Y } from "./room-rules.js";
 
 export const ROOM_CAPACITY = 10;
 
-const MAP_KEY = "pu-town";
-const MAP_ROOT = "maps/pu-town/";
+function mapKey(id: MapId): string { return `town-${id}`; }
 /** Tile layers, bottom to top, all beneath the Avatars. */
 const TILE_LAYERS = ["ground", "paths", "scenery", "buildings", "details"];
 const LAYER_DEPTH = -1_100;
@@ -16,8 +17,8 @@ const FLOOR_DECOR_DEPTH = -1_050;
 type TiledTileset = Readonly<{ name: string; image: string; tilewidth: number; tileheight: number }>;
 
 /** Every tileset image the map names, as a texture key. */
-function textureOf(tileset: string): string {
-  return `${MAP_KEY}-${tileset}`;
+function textureOf(id: MapId, tileset: string): string {
+  return `${mapKey(id)}-${tileset}`;
 }
 
 /**
@@ -25,14 +26,18 @@ function textureOf(tileset: string): string {
  * spritesheet cut to that tileset's tile size. Call from the scene's preload.
  */
 export function loadTownMap(scene: Phaser.Scene): void {
-  scene.load.once(`filecomplete-tilemapJSON-${MAP_KEY}`, () => {
-    const data = scene.cache.tilemap.get(MAP_KEY)?.data as { tilesets?: TiledTileset[] } | undefined;
-    for (const tileset of data?.tilesets ?? []) {
-      scene.load.spritesheet(textureOf(tileset.name), MAP_ROOT + tileset.image,
-        { frameWidth: tileset.tilewidth, frameHeight: tileset.tileheight });
-    }
-  });
-  scene.load.tilemapTiledJSON(MAP_KEY, `${MAP_ROOT}pu-town.json`);
+  for (const { id } of TOWN_MAPS) {
+    const key = mapKey(id);
+    scene.load.once(`filecomplete-tilemapJSON-${key}`, () => {
+      const data = scene.cache.tilemap.get(key)?.data as { tilesets?: TiledTileset[] } | undefined;
+      for (const tileset of data?.tilesets ?? []) {
+        scene.load.spritesheet(textureOf(id, tileset.name), mapRoot(id) + tileset.image,
+          { frameWidth: tileset.tilewidth, frameHeight: tileset.tileheight });
+      }
+    });
+    scene.load.tilemapTiledJSON(key, `${mapRoot(id)}map.json`);
+    scene.load.json(`rules-${id}`, `${mapRoot(id)}rules.json`);
+  }
 }
 
 /** Seat zero is north; clockwise geometry mirrors authoritative RoomRules, in town coordinates. */
@@ -53,10 +58,10 @@ export class MeetingArea {
   #reducedMotion = false;
   readonly #chairs: Phaser.GameObjects.Container;
 
-  constructor(scene: Phaser.Scene) {
-    const map = scene.make.tilemap({ key: MAP_KEY });
+  constructor(scene: Phaser.Scene, private readonly mapId: MapId = "village") {
+    const map = scene.make.tilemap({ key: mapKey(mapId) });
     const tilesets = map.tilesets.map(tileset => {
-      const added = map.addTilesetImage(tileset.name, textureOf(tileset.name));
+      const added = map.addTilesetImage(tileset.name, textureOf(this.mapId, tileset.name));
       if (!added) throw new Error(`Missing tileset ${tileset.name}`);
       return added;
     });
@@ -96,7 +101,7 @@ export class MeetingArea {
     if (gid === undefined) return;
     const tileset = map.tilesets.find(candidate => gid >= candidate.firstgid && gid < candidate.firstgid + candidate.total);
     if (!tileset) return;
-    const key = textureOf(tileset.name);
+    const key = textureOf(this.mapId, tileset.name);
     const sprite = scene.add.sprite(object.x ?? 0, object.y ?? 0, key, gid - tileset.firstgid)
       .setOrigin(0, 1).setDepth(depth).setFlip(Boolean(object.flippedHorizontal), Boolean(object.flippedVertical));
     if (object.width && object.height) sprite.setDisplaySize(object.width, object.height);
@@ -116,6 +121,11 @@ export class MeetingArea {
     this.#sprites.push(sprite);
     sprite.setActive(false);
     this.#town.push(sprite);
+  }
+
+  destroy(): void {
+    for (const part of this.#town) part.destroy();
+    this.#chairs.destroy();
   }
 
   setReducedMotion(reduced: boolean): void {

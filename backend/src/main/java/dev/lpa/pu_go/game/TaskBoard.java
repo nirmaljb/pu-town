@@ -1,6 +1,6 @@
 package dev.lpa.pu_go.game;
 
-import dev.lpa.pu_go.room.RoomRules;
+import dev.lpa.pu_go.room.TownMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,9 +47,9 @@ public final class TaskBoard {
         final Location destination;
         final List<Integer> sequence;
         int step;
-        Assignment(String id, String owner, Location location, String kind, boolean fake) {
+        Assignment(String id, String owner, Location location, String kind, boolean fake, Location destination) {
             this.id = id; this.owner = owner; this.location = location; this.kind = kind; this.fake = fake;
-            this.destination = LOCATIONS.get(0);
+            this.destination = destination;
             this.sequence = kind.equals("sequence") ? List.of(2, 0, 3, 1) : List.of();
         }
         Location currentLocation() { return kind.equals("delivery") && step % 2 == 1 ? destination : location; }
@@ -61,13 +61,17 @@ public final class TaskBoard {
     private final List<Assignment> assignments = new ArrayList<>();
     private final Map<String, Interaction> interactions = new LinkedHashMap<>();
 
-    public TaskBoard(List<Participant> roster, boolean practice) {
+    private final TownMap townMap;
+
+    public TaskBoard(List<Participant> roster, boolean practice, TownMap townMap) {
+        this.townMap = townMap;
+        List<Location> locations = townMap.tasks();
         for (Participant member : roster) {
             List<Boolean> banks = practice ? List.of(false, true) : List.of(member.role() == Role.MAFIA);
             for (boolean fake : banks) for (int slot = 0; slot < 3; slot++) {
-                Location location = LOCATIONS.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % LOCATIONS.size());
+                Location location = locations.get(slot == 0 ? 0 : (member.seat() * 3 + slot) % locations.size());
                 assignments.add(new Assignment((fake ? "fake-" : "task-") + member.seat() + "-" + slot,
-                        member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", fake));
+                        member.playerId(), location, slot == 1 ? "sequence" : slot == 2 ? "delivery" : "repair", fake, locations.get(0)));
             }
         }
     }
@@ -78,7 +82,7 @@ public final class TaskBoard {
     }
     private boolean nearby(Participant actor, Assignment task) {
         return Math.hypot(actor.x() - task.currentLocation().x(), actor.y() - task.currentLocation().y()) <= RANGE
-                && RoomRules.areaAt(actor.x(), actor.y()).equals(RoomRules.areaAt(task.currentLocation().x(), task.currentLocation().y()));
+                && townMap.areaAt(actor.x(), actor.y()).equals(townMap.areaAt(task.currentLocation().x(), task.currentLocation().y()));
     }
     public Game.Rejection open(Participant actor, String taskId, long now) {
         Assignment task = owned(actor.playerId(), taskId);

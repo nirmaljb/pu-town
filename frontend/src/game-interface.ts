@@ -190,7 +190,7 @@ export class GameInterface {
     this.element(".game-countdown").textContent = this.countdown(world);
     const field = world.field;
     this.element(".game-announcement").textContent = game.phase === "day" && field
-      ? `${areaAt(field.self.x, field.self.y)} · ${this.announcement(game)}` : this.announcement(game);
+      ? areaAt(field.self.x, field.self.y) : this.announcement(game);
   }
 
   /** The whole screen turns red for two seconds at the moment this Player dies. */
@@ -220,8 +220,8 @@ export class GameInterface {
       const outcome = this.outcomeText(game);
       return outcome === null ? winner : [outcome.verdict || outcome.headline, winner].join(" ");
     }
-    if (game.phase === "day") return "Explore the town. Townhall follows Night.";
-    if (game.phase === "night") return "Everyone sleeps in place. Movement and conversation are closed.";
+    if (game.phase === "day") return "";
+    if (game.phase === "night") return "Sleeping · Choose your Night action";
     const outcome = this.outcomeText(game);
     return outcome === null ? "" : [outcome.headline, outcome.verdict].filter(Boolean).join(" ");
   }

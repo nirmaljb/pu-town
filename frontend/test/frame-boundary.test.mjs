@@ -29,7 +29,7 @@ test("private Night choices and a killed Sheriff's results apply only at a frame
   const inbox = new NetworkInbox();
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "sheriff", investigations: [], nightChoice: "q" }) }));
   assert.equal(boundary.world.game, null);
   boundary.beginFrame();
@@ -53,7 +53,7 @@ test("network events affect the world only when a game frame begins", () => {
 
   inbox.enqueue({
     version: 1,
-    type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 },
+    type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village",
     selfPlayerId: "player-1",
     roomId: "plaza",
     players: [seated("player-1", 0)]
@@ -90,12 +90,12 @@ test("Lobby seats, readiness, Host succession and Start apply in order at frame 
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world) { views.push(world); } });
   const host = seated("h", 0);
   const guest = seated("g", 1, { colour: "#FF8066", x: 869, y: 216 });
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "g", phase: "lobby", hostPlayerId: "h", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [host, guest] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "g", phase: "lobby", hostPlayerId: "h", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [host, guest] });
   boundary.beginFrame();
   assert.equal(boundary.world.phase, "lobby");
-  inbox.enqueue({ version: 1, type: "room_state", phase: "lobby", hostPlayerId: "h", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [host, { ...guest, ready: true }] });
+  inbox.enqueue({ version: 1, type: "room_state", phase: "lobby", hostPlayerId: "h", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [host, { ...guest, ready: true }] });
   inbox.enqueue({ version: 1, type: "player_left", playerId: "h", reason: "disconnected" });
-  inbox.enqueue({ version: 1, type: "room_state", phase: "lobby", hostPlayerId: "g", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [{ ...guest, ready: true }] });
+  inbox.enqueue({ version: 1, type: "room_state", phase: "lobby", hostPlayerId: "g", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [{ ...guest, ready: true }] });
   assert.equal(boundary.world.hostPlayerId, "h");
   assert.equal(boundary.world.players.get("g").ready, false);
   boundary.beginFrame();
@@ -103,7 +103,7 @@ test("Lobby seats, readiness, Host succession and Start apply in order at frame 
   assert.equal(boundary.world.players.get("g").seat, 1);
   assert.equal(boundary.world.players.get("g").ready, true);
   // Starting the Game leaves every Player exactly where the Lobby seated them.
-  inbox.enqueue({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "g", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [{ ...guest, ready: true }] });
+  inbox.enqueue({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "g", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [{ ...guest, ready: true }] });
   boundary.beginFrame();
   assert.equal(boundary.world.phase, "playing");
   assert.equal(boundary.world.selfPlayerId, "g");
@@ -117,7 +117,7 @@ test("Game state, chat and Room state applied in one frame reconcile once, in tr
   const views = [];
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world) { views.push(world); } });
   const player = seated("p", 0);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(gameState({ phase: "role_reveal", round: 0, remainingMs: 8_000, players: rosterOf(player), self: selfView({ role: "mafia", faction: "mafia", mafiaTeam: ["p"] }) }));
   inbox.enqueue({ version: 1, type: "chat_history", messages: [] });
   assert.equal(boundary.world.game, null);
@@ -146,13 +146,13 @@ test("the phase countdown runs from when its Game state arrived, not when a fram
   const inbox = new NetworkInbox(() => now);
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(gameState({ phase: "day", remainingMs: 180_000, players: rosterOf(player) }));
   // A hidden tab runs no frames for 30 seconds.
   now += 30_000;
   boundary.beginFrame();
   assert.equal(boundary.world.phaseEndsAt, 190_000);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   boundary.beginFrame();
   assert.equal(boundary.world.phaseEndsAt, 190_000, "a snapshot of the same Room keeps the deadline");
   inbox.enqueue(gameState({ phase: "finished", remainingMs: null, players: rosterOf(player) }));
@@ -164,7 +164,7 @@ test("chat history replaces the readable log and later messages append to it", (
   const inbox = new NetworkInbox();
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const spoken = (text, channel = "public") => ({ version: 1, type: "chat_message", channel, round: 1, senderPlayerId: "p", senderName: "Alex", text });
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [seated("p", 0)] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [seated("p", 0)] });
   inbox.enqueue(spoken("first"));
   inbox.enqueue(spoken("second"));
   boundary.beginFrame();
@@ -180,7 +180,7 @@ test("a snapshot for the same Room keeps private Game state until its replacemen
   const inbox = new NetworkInbox();
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
-  const snapshot = roomId => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId, selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  const snapshot = roomId => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId, selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(snapshot("ABC234"));
   inbox.enqueue(gameState({ players: rosterOf(player), self: selfView({ role: "doctor" }) }));
   inbox.enqueue({ version: 1, type: "chat_message", channel: "public", round: 1, senderPlayerId: "p", senderName: "Alex", text: "Seated." });
@@ -201,10 +201,10 @@ test("disconnected presence stays in the world while the Game Roster keeps the P
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
   const roster = rosterOf(player);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(gameState({ players: roster }));
   boundary.beginFrame();
-  inbox.enqueue({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [{ ...player, connected: false }] });
+  inbox.enqueue({ version: 1, type: "room_state", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [{ ...player, connected: false }] });
   assert.equal(boundary.world.players.get("p").connected, true);
   boundary.beginFrame();
   assert.equal(boundary.world.players.get("p").connected, false);
@@ -221,7 +221,7 @@ test("Leaving the Room clears the Game and a reset discards everything queued be
   const inbox = new NetworkInbox();
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile() {} });
   const player = seated("p", 0);
-  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), roomId: "ABC234", selfPlayerId: "p", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   inbox.enqueue(gameState({ players: rosterOf(player) }));
   boundary.beginFrame();
   inbox.enqueue({ version: 1, type: "room_left", roomId: "ABC234" });
@@ -240,15 +240,15 @@ test('accepted appearance replaces existing Player only at the frame boundary an
   const frames = [];
   const boundary = new NetworkFrameBoundary(inbox, emptyWorld(), { reconcile(world, arrivals) { frames.push({world, arrivals}); } });
   const player = seated('p', 0, { ready: true, facing: 'left' });
-  inbox.enqueue({ version: 1, type: 'room_snapshot', recoveryToken: 'a'.repeat(64), roomId: 'ABC234', selfPlayerId: 'p', phase: 'lobby', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] });
+  inbox.enqueue({ version: 1, type: 'room_snapshot', recoveryToken: 'a'.repeat(64), roomId: 'ABC234', selfPlayerId: 'p', phase: 'lobby', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] });
   boundary.beginFrame();
   const chosen = { ...player, avatarPreset: 'townsperson-10' };
-  inbox.enqueue({ version: 1, type: 'room_state', phase: 'lobby', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [chosen] });
+  inbox.enqueue({ version: 1, type: 'room_state', phase: 'lobby', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [chosen] });
   assert.equal(boundary.world.players.get('p').avatarPreset, 'townsperson-1');
   boundary.beginFrame();
   assert.deepEqual(boundary.world.players.get('p'), chosen);
   assert.equal(frames.at(-1).arrivals.size, 0, 'appearance is not a membership arrival');
-  inbox.enqueue({ version: 1, type: 'room_state', phase: 'playing', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [chosen] });
+  inbox.enqueue({ version: 1, type: 'room_state', phase: 'playing', hostPlayerId: 'p', roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [chosen] });
   boundary.beginFrame();
   assert.equal(boundary.world.players.get('p').avatarPreset, 'townsperson-10');
   assert.equal(boundary.world.phase, 'playing');

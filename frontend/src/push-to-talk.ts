@@ -1,4 +1,4 @@
-export function isSupportedTalkKey(key: string): boolean { return /^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(key); }
+export function isSupportedTalkKey(key: string): boolean { return key !== "KeyM" && /^(Key[A-Z]|Digit[0-9]|Space|ShiftLeft|ShiftRight)$/.test(key); }
 
 /** Key ownership ends on release, focus loss, configuration or a blocking surface. */
 export class PushToTalk {

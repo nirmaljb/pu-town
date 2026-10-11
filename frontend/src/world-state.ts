@@ -1,7 +1,8 @@
-import type { VoicePeer, VoiceState, MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
+import type { MapId, VoicePeer, VoiceState, MovementSound, PracticeTarget, TaskState, ChatEntry, FieldView, GameView, PlayerView, RoleSetup, RoomPhase, ServerMessage } from "./protocol.js";
 
 export type WorldState = Readonly<{
   roomId: string | null;
+  mapId: MapId;
   snapshotSerial: number;
   sounds: readonly MovementSound[];
   phase: RoomPhase | null;
@@ -26,7 +27,7 @@ export type WorldState = Readonly<{
 
 export function emptyWorld(): WorldState {
   return {
-    snapshotSerial: 0, sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
+    snapshotSerial: 0, mapId: "village", sounds: [], phase: null, hostPlayerId: null, roleSetup: null, roomId: null, selfPlayerId: null,
     players: new Map(), voice: null, voicePeers: [], game: null, phaseEndsAt: null, field: null, tasks: null, taskEndsAt: null, practiceTargets: [], chat: [], lastError: null
   };
 }
@@ -35,7 +36,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
   switch (event.type) {
     case "room_state":
       return {
-        ...world, phase: event.phase, hostPlayerId: event.hostPlayerId, roleSetup: event.roleSetup,
+        ...world, mapId: event.mapId, phase: event.phase, hostPlayerId: event.hostPlayerId, roleSetup: event.roleSetup,
         players: new Map(event.players.map(player => [player.playerId, player])),
         lastError: null
       };
@@ -46,6 +47,7 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
         ...emptyWorld(),
         snapshotSerial: world.snapshotSerial + 1,
         roomId: event.roomId,
+        mapId: event.mapId,
         phase: event.phase,
         hostPlayerId: event.hostPlayerId,
         roleSetup: event.roleSetup,

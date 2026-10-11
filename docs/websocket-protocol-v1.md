@@ -14,6 +14,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `start_game` | none |
 | `start_practice` | none |
 | `advance_practice` | `round: integer`, `phase: "day" \| "night" \| "discussion" \| "voting" \| "voting_result" |
+| `select_map` | `mapId: "village" \| "horror" \| "cyberpunk"` |
 | `select_avatar` | `avatarPreset: string` |
 | `set_ready` | `ready: boolean` |
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
@@ -27,8 +28,8 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | Type | Additional fields |
 | --- | --- |
 | `pong` | none |
-| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
-| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `players: PlayerView[]` |
+| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk"`, `players: PlayerView[]` |
+| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk"`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
 | `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `self: OwnField` |
@@ -46,9 +47,16 @@ The server randomly assigns an Avatar Preset when a new Room Membership begins, 
 
 `Facing` is exactly `"up"`, `"left"`, `"down"`, or `"right"`. The server retains it alongside position and sends it in Player Views. Seated Avatars face inward: seat 0 down, seats 1–4 left, seat 5 up, seats 6–9 right. Start changes neither Seat nor Facing. Positions mark Avatar feet, in town coordinates.
 
+## Town Map selection
+
+`select_map` is `{ "version": 1, "type": "select_map", "mapId": "horror" }`.
+`mapId` is exactly `village` (Sunwater Village), `horror` (Blackthorn Hollow), or `cyberpunk` (Neon Ward). Unknown identifiers, missing fields and extra fields are `malformed_message`. Only the current Host in a Lobby can select: a non-Host receives `not_host`, a started Room `invalid_phase`, and a connection without Membership `not_in_room`.
+
+Both `room_snapshot` and `room_state` require `mapId` alongside `roleSetup`. New Rooms default to `village`. An accepted selection broadcasts structural `room_state`, preserves readiness and Seats, locks with Start (including Solo Practice), and survives Disconnect, Host transfer and recovery. Each Game enforces the selected town's obstacles, interiors and Task locations; Hearing and recipient privacy use those same interiors. All towns share bounds and Seat geometry.
+
 ## Seats, Day and sleeping Night
 
-The town is the 7680 × 4320 PU Town map (`frontend/public/maps/pu-town/`); its obstacles come from that map's collision layer. The Town Square Seat circle remains centred on (3840, 2182), with no Emergency button. Room State's Player Views describe retained Seats; accepted town positions travel only in `move` and recipient-specific `field_state`. Players walk only during Day and sleep at their last accepted position during Night.
+The selected Town Map is 7680 × 4320 (`frontend/public/maps/{mapId}/`); its obstacles come from its generated rules and collision layer. The Town Square Seat circle remains centred on (3840, 2182), with no Emergency button. Room State's Player Views describe retained Seats; accepted town positions travel only in `move` and recipient-specific `field_state`. Players walk only during Day and sleep at their last accepted position during Night.
 
 The Room's shared state is its Player Views plus each recipient's `game_state`, with `field_state` during Day and Night. A transition into Day or Night and recovery in either phase include an immediate authorized field snapshot, followed by ten snapshots a second. Townhall uses retained Seats and sends no field snapshots.
 
@@ -159,7 +167,7 @@ Every Day begins with Participants standing beside their own retained Seats. Tow
 
 **Movement.** `move` carries only the sender's position. The server accepts it only during `day`, from a Participant who has not left, when the point and midpoint from the last accepted position are clear of obstacles and inside the town, and the distance is within `240 px/s × 1.4 × elapsed + 24 px` (elapsed clamped to 50 ms – 1 s). A refused Day step keeps the position and increments `correction`; the start of Day and return to Seats also increment it. Clients adopt the server position when that counter changes. Night movement is ignored without changing accepted position; other seated phases also accept no movement. Outside a started Game, `move` receives `invalid_phase`. Non-finite coordinates, invalid Facing or extra fields are `malformed_message`.
 
-**The field.** `field_state` is built per recipient. It holds only visible Avatars, themselves included, and the recipient's accepted position and `correction`. Living recipients receive all living Participants in the same interior or outdoor area, without a distance cutoff. The client draws no proximity fog. Hearing remains limited to five tiles (160px) independently of visibility. The four interiors are the served map's room rectangles: Chapel, Inn, Smithy and General Store; every other point is outdoors. Area membership uses accepted Avatar feet, includes top/left boundaries and excludes bottom/right boundaries. Existing doorways, walls and furniture use the same authoritative collision checks as outdoor movement. Eliminated recipients see every Participant who has not left; `ghost` marks eliminated Participants, who are invisible to the living. No Body, Vanish, ability timer or Crowding field is sent. Night retains the same authorized field at sleeping positions and the client disables movement prediction.
+**The field.** `field_state` is built per recipient. It holds only visible Avatars, themselves included, and the recipient's accepted position and `correction`. Living recipients receive all living Participants in the same interior or outdoor area, without a distance cutoff. The client draws no proximity fog. Hearing remains limited to five tiles (160px) independently of visibility. The the selected town’s interiors are the served map's room rectangles: Chapel, Inn, Smithy and General Store; every other point is outdoors. Area membership uses accepted Avatar feet, includes top/left boundaries and excludes bottom/right boundaries. Existing doorways, walls and furniture use the same authoritative collision checks as outdoor movement. Eliminated recipients see every Participant who has not left; `ghost` marks eliminated Participants, who are invisible to the living. No Body, Vanish, ability timer or Crowding field is sent. Night retains the same authorized field at sleeping positions and the client disables movement prediction.
 
 **Retired requests.** `use_ability` is no longer a supported message type and receives `unknown_message_type`, including kill, shield, scan, vanish, report and emergency payloads. Neither Game rules nor the interface offer those live actions. `roam` and `meeting_call` are no longer phases.
 

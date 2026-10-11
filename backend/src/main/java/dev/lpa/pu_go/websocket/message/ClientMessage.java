@@ -2,7 +2,7 @@ package dev.lpa.pu_go.websocket.message;
 
 import dev.lpa.pu_go.game.ChatChannel;
 
-public sealed interface ClientMessage permits ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole, ClientMessage.JoinVoice, ClientMessage.LeaveVoice {
+public sealed interface ClientMessage permits ClientMessage.SelectMap, ClientMessage.SelectAvatar, ClientMessage.RecoverRoom, ClientMessage.SetReady, ClientMessage.SetRoleSetup, ClientMessage.StartGame, ClientMessage.StartPractice, ClientMessage.AdvancePractice, ClientMessage.Ping, ClientMessage.CreateRoom, ClientMessage.JoinRoom, ClientMessage.LeaveRoom, ClientMessage.Move, ClientMessage.MeetingVote, ClientMessage.NightChoice, ClientMessage.SendChat, ClientMessage.OpenTask, ClientMessage.TaskStep, ClientMessage.CloseTask, ClientMessage.PreviewRole, ClientMessage.JoinVoice, ClientMessage.LeaveVoice {
     record OpenTask(int version, String type, int round, String taskId) implements ClientMessage {}
     record TaskStep(int version, String type, int round, String taskId, int step, int value) implements ClientMessage {}
     record CloseTask(int version, String type) implements ClientMessage {}
@@ -12,6 +12,7 @@ public sealed interface ClientMessage permits ClientMessage.SelectAvatar, Client
     int version();
     String type();
 
+    record SelectMap(int version, String type, String mapId) implements ClientMessage {}
     record SelectAvatar(int version, String type, String avatarPreset) implements ClientMessage {}
     record RecoverRoom(int version, String type, String roomId, String recoveryToken) implements ClientMessage {}
     record SetReady(int version, String type, boolean ready) implements ClientMessage {}

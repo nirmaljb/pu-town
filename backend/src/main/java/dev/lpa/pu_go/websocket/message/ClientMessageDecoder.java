@@ -29,6 +29,13 @@ public final class ClientMessageDecoder {
         }
         String type = requiredText(root, "type");
         return switch (type) {
+            case "select_map" -> {
+                requireOnly(root, Set.of("version", "type", "mapId"));
+                String mapId = requiredText(root, "mapId");
+                if (dev.lpa.pu_go.room.TownMap.find(mapId) == null)
+                    throw new InvalidClientMessageException("malformed_message", "Unknown mapId.");
+                yield new ClientMessage.SelectMap(1, type, mapId);
+            }
             case "select_avatar" -> {
                 requireOnly(root, Set.of("version", "type", "avatarPreset"));
                 yield new ClientMessage.SelectAvatar(1, type, requiredText(root, "avatarPreset"));

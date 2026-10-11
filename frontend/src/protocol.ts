@@ -1,6 +1,14 @@
 import { DIRECTIONS, type Direction } from "./avatar-facing.js";
 import { requireAvatarPreset, requireSelectableAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
+export const MAP_IDS = ["village", "horror", "cyberpunk"] as const;
+export type MapId = typeof MAP_IDS[number];
+export function requireMapId(value: unknown): MapId {
+  if (typeof value !== "string" || !MAP_IDS.includes(value as MapId)) throw new Error("Unknown mapId");
+  return value as MapId;
+}
+export function selectMap(mapId: MapId): ClientMessage { return { version: 1, type: "select_map", mapId: requireMapId(mapId) }; }
+
 export const PROTOCOL_VERSION = 1 as const;
 
 export type RoomPhase = "lobby" | "playing";
@@ -118,9 +126,9 @@ export type ServerMessage =
   | (MovementSound & Readonly<{ version: 1; type: "sound_event" }>)
   | Readonly<{ version: 1; type: "practice_state"; targets: readonly PracticeTarget[] }>
   | (TaskState & Readonly<{ version: 1; type: "task_state" }>)
-  | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; mapId: MapId; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
-  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
+  | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; mapId: MapId; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "player_joined"; player: PlayerView }>
   | (GameView & Readonly<{ version: 1; type: "game_state" }>)
   | (FieldView & Readonly<{ version: 1; type: "field_state" }>)
@@ -131,6 +139,7 @@ export type ServerMessage =
   | Readonly<{ version: 1; type: "error"; code: string; message: string }>;
 
 export type ClientMessage =
+  | Readonly<{ version: 1; type: "select_map"; mapId: MapId }>
   | Readonly<{ version: 1; type: "join_voice"; round: number }>
   | Readonly<{ version: 1; type: "leave_voice" }>
   | Readonly<{ version: 1; type: "preview_role"; role: Role }>
@@ -250,7 +259,7 @@ export function decodeServerMessage(payload: string): ServerMessage {
       requireFields(message, ["version", "type"]);
       return { version: 1, type };
     case "room_snapshot": {
-      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "recoveryToken", "phase", "hostPlayerId", "roleSetup", "players"]);
+      requireFields(message, ["version", "type", "selfPlayerId", "roomId", "recoveryToken", "phase", "hostPlayerId", "roleSetup", "mapId", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1,
@@ -261,16 +270,18 @@ export function decodeServerMessage(payload: string): ServerMessage {
         phase: requirePhase(message.phase),
         hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
         roleSetup: decodeRoleSetup(message.roleSetup),
+        mapId: requireMapId(message.mapId),
         players: decodeRoomPlayers(message.players)
       };
     }
     case "room_state":
-      requireFields(message, ["version", "type", "phase", "hostPlayerId", "roleSetup", "players"]);
+      requireFields(message, ["version", "type", "phase", "hostPlayerId", "roleSetup", "mapId", "players"]);
       if (!Array.isArray(message.players)) throw new Error("players must be an array");
       return {
         version: 1, type, phase: requirePhase(message.phase),
         hostPlayerId: requireNonEmptyString(message.hostPlayerId, "hostPlayerId"),
         roleSetup: decodeRoleSetup(message.roleSetup),
+        mapId: requireMapId(message.mapId),
         players: decodeRoomPlayers(message.players)
       };
     case "player_joined":

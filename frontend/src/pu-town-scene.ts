@@ -1,3 +1,6 @@
+import { MapInterface } from "./map-interface.js";
+import type { MapId } from "./protocol.js";
+import { setTownGeometry } from "./room-rules.js";
 import { MicrophoneSettings } from "./microphone-settings.js";
 import { VoiceController } from "./voice-controller.js";
 import Phaser from "phaser";
@@ -30,6 +33,8 @@ const MOVEMENT_KEYS: Readonly<Record<string, "up" | "down" | "left" | "right">> 
 export class PuTownScene extends Phaser.Scene {
   readonly #inbox = new NetworkInbox();
   #meetingArea?: MeetingArea;
+  #mapInterface?: MapInterface;
+  #mapId: MapId = "village";
   #client?: ReconnectingGameClient;
   #interface?: JoinInterface;
   #gameInterface?: GameInterface;
@@ -58,6 +63,7 @@ export class PuTownScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(0x182132);
     this.#meetingArea = new MeetingArea(this);
+    setTownGeometry(this.cache.json.get("rules-village"));
     this.#avatarReconciler = new AvatarReconciler(this);
     this.#frameBoundary = new NetworkFrameBoundary(this.#inbox, emptyWorld(), this.#avatarReconciler);
 
@@ -77,12 +83,13 @@ export class PuTownScene extends Phaser.Scene {
     this.#effects.start();
     this.#taskInterface = new TaskInterface(this.#client, this.#effects);
     this.#settings = new SettingsInterface(this.#audio, microphone);
+    this.#mapInterface = new MapInterface();
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
-    const typing = (event: KeyboardEvent) => event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement;
+    const typing = (event: KeyboardEvent) => event.target instanceof HTMLElement && Boolean(event.target.closest("input, textarea, select, [contenteditable]"));
     const keyChanged = (held: boolean) => (event: KeyboardEvent) => {
       const direction = MOVEMENT_KEYS[event.code];
       if (!direction || (held && (typing(event) || document.querySelector("dialog:modal")))) return;
@@ -111,6 +118,8 @@ export class PuTownScene extends Phaser.Scene {
       this.#gameInterface?.destroy();
       this.#taskInterface?.destroy();
       this.#settings?.destroy();
+      this.#mapInterface?.destroy();
+      this.#meetingArea?.destroy();
       this.#effects?.destroy();
       this.#voice?.destroy();
       this.#audio?.destroy();
@@ -159,7 +168,15 @@ export class PuTownScene extends Phaser.Scene {
     if (!this.readyForRoomArtwork()) return;
     this.#frameBoundary?.beginFrame();
     const world = this.#frameBoundary?.world;
-    if (document.querySelector("dialog:modal")) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
+    const mapId = world?.mapId ?? "village";
+    if (mapId !== this.#mapId) {
+      this.#meetingArea?.destroy();
+      this.#meetingArea = new MeetingArea(this, mapId);
+      setTownGeometry(this.cache.json.get(`rules-${mapId}`));
+      this.#mapId = mapId;
+    }
+    this.#mapInterface?.render(world, this.#client?.state.status === "playing", this.#field?.position ?? null);
+    if (document.querySelector("dialog:modal") || this.#mapInterface?.open) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
     this.#field?.update(world, this.#held, delta, time);
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
@@ -178,20 +195,19 @@ export class PuTownScene extends Phaser.Scene {
     // Seated phases must keep the whole Town Square visible, including on portrait displays.
     // Exploration/title cover the viewport; a seated view expands the camera instead of cropping Seats.
     const seated = !atTitle && !world?.field;
-    const occupants = world?.phase === "lobby" ? [...world.players.values()] : [];
-    const left = occupants.length ? Math.min(...occupants.map(player => player.x)) : SQUARE_X - 330;
-    const right = occupants.length ? Math.max(...occupants.map(player => player.x)) : SQUARE_X + 330;
-    const top = occupants.length ? Math.min(...occupants.map(player => player.y)) : SQUARE_Y - 205;
-    const bottom = occupants.length ? Math.max(...occupants.map(player => player.y)) : SQUARE_Y + 205;
+    const left = SQUARE_X - 330;
+    const right = SQUARE_X + 330;
+    const top = SQUARE_Y - 205;
+    const bottom = SQUARE_Y + 205;
     const seatedWidth = Math.max(420, right - left + 190);
     const seatedHeight = Math.max(320, bottom - top + 190);
-    const overlayWidth = world?.phase === "lobby" ? Math.min(316, this.scale.width * 0.42 + 16) : 0;
-    const horizontalZoom = (this.scale.width - overlayWidth - (seated ? 32 : 0)) / (seated ? seatedWidth : ROOM_WIDTH);
-    const verticalZoom = (this.scale.height - (seated ? 150 : 0)) / (seated ? seatedHeight : ROOM_HEIGHT);
+    const lobbyHeight = world?.phase === "lobby" ? document.querySelector(".lobby-sidebar")?.getBoundingClientRect().height ?? 220 : 0;
+    const horizontalZoom = (this.scale.width - (seated ? 32 : 0)) / (seated ? seatedWidth : ROOM_WIDTH);
+    const verticalZoom = (this.scale.height - (seated ? Math.max(150, lobbyHeight + 90) : 0)) / (seated ? seatedHeight : ROOM_HEIGHT);
     const zoom = seated ? Math.max(0.1, Math.min(horizontalZoom, verticalZoom)) : Math.max(horizontalZoom, verticalZoom);
     if (camera.zoom !== zoom) camera.setZoom(zoom);
-    const focusX = self?.x ?? (left + right) / 2 + (seated ? overlayWidth / (2 * zoom) : 0);
-    const focusY = self?.y ?? (top + bottom) / 2 - 20;
+    const focusX = self?.x ?? (left + right) / 2;
+    const focusY = self?.y ?? (top + bottom) / 2 + (world?.phase === "lobby" ? lobbyHeight / (2 * zoom) : -20);
     const follow = reducedMotion ? 1 : Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);

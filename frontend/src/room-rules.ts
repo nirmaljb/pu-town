@@ -14,7 +14,7 @@ export const FOOT_RADIUS = 14;
 /** A little below the server's limit, so honest movement is never corrected. */
 export const WALK_SPEED = 220;
 /** The served Tiled map's room objects in its zones layer. */
-export const INTERIORS = [
+export let INTERIORS: readonly Readonly<{ name: string; x: number; y: number; width: number; height: number }>[] = [
   {
     "name": "Chapel",
     "x": 4416,
@@ -93,7 +93,7 @@ export function areaAt(x: number, y: number): string {
 export type Obstacle = Readonly<{ x: number; y: number; width: number; height: number }>;
 
 /** The map's collision layer, from public/maps/pu-town/pu-town.collision.json. */
-export const OBSTACLES: readonly Obstacle[] = [
+export let OBSTACLES: readonly Obstacle[] = [
   { x: 0, y: 0, width: 7680, height: 32 }, { x: 0, y: 32, width: 32, height: 4256 }, { x: 7648, y: 32, width: 32, height: 4256 }, { x: 96, y: 64, width: 32, height: 64 },
   { x: 256, y: 64, width: 32, height: 64 }, { x: 512, y: 64, width: 32, height: 64 }, { x: 736, y: 64, width: 64, height: 32 }, { x: 832, y: 64, width: 32, height: 64 },
   { x: 1024, y: 64, width: 32, height: 32 }, { x: 1184, y: 64, width: 64, height: 64 }, { x: 1440, y: 64, width: 32, height: 32 }, { x: 1664, y: 64, width: 32, height: 64 },
@@ -718,4 +718,9 @@ export function walkable(x: number, y: number): boolean {
   if (x < FOOT_RADIUS || y < FOOT_RADIUS || x > WORLD_WIDTH - FOOT_RADIUS || y > WORLD_HEIGHT - FOOT_RADIUS) return false;
   return !OBSTACLES.some(o => x > o.x - FOOT_RADIUS && x < o.x + o.width + FOOT_RADIUS
     && y > o.y - FOOT_RADIUS && y < o.y + o.height + FOOT_RADIUS);
+}
+
+export function setTownGeometry(rules: Readonly<{ obstacles: readonly Obstacle[]; interiors: typeof INTERIORS }>): void {
+  OBSTACLES = rules.obstacles;
+  INTERIORS = rules.interiors;
 }

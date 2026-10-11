@@ -1,6 +1,6 @@
 # Three furnished, animated PU Town maps
 
-Each map is 7680 × 4320px (240 × 135 tiles at 32px), nine times the original area. **Sunwater Village** is the playable default. **Blackthorn Hollow** and **Neon Ward** are editable alternatives.
+Each map is 7680 × 4320px (240 × 135 tiles at 32px), nine times the original area. **Sunwater Village** is the playable default. **Blackthorn Hollow** and **Neon Ward** are playable alternatives.
 
 All three now use the supplied `tilesets.rar` terrain, detailed whole-building and furniture sprites, and multi-frame trees, bushes, animals and water effects. The former 16px exterior studies are superseded. Village uses the original warm colors; horror uses desaturated slate and autumn colors; cyberpunk uses blue/cyan recolors with neon details. Moving scenery remains cosmetic; collision footprints are fixed and server-owned.
 
@@ -25,7 +25,7 @@ python3 pu-town/variants/generate.py
 python3 pu-town/variants/publish.py
 ```
 
-The deterministic generator validates flood-fill connectivity and 14px foot clearance at Seat/Task destinations. `publish.py` copies the village and all referenced sheets, then regenerates shared collision rectangles, ten interior areas and twenty backend Task locations. Alternative interior markers are design locations, not runtime map-selection options. Multiplayer travel balance still needs human playtesting.
+The deterministic generator validates flood-fill connectivity and 14px foot clearance at Seat/Task destinations. `publish.py` copies the village and all referenced sheets, then regenerates shared collision rectangles, ten interior areas and twenty backend Task locations. The Host can choose each theme in the Lobby. The publisher also emits each town’s rules into frontend assets and backend resources, so movement, Tasks and interior privacy follow the accepted selection. Multiplayer travel balance still needs human playtesting.
 
 ## Sources and rights
 

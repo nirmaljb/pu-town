@@ -46,7 +46,7 @@ test("snapshots and join announcements require a well-formed Avatar Preset ident
   const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-6", connected: true, seat: 0, ready: false, facing: "down", x: 640, y: 177 };
   for (const envelope of [
     p => ({ version: 1, type: "player_joined", player: p }),
-    p => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, selfPlayerId: "p", roomId: "ABC234", players: [p] })
+    p => ({ version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", selfPlayerId: "p", roomId: "ABC234", players: [p] })
   ]) {
     assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope(player))));
     // A snapshot can arrive before the Room's collection does, so membership is the
@@ -60,7 +60,7 @@ test("snapshots and join announcements require a well-formed Avatar Preset ident
 
 test("Lobby state validates phase, Host, seats and readiness strictly", () => {
   const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: 0, ready: false, facing: "down", x: 640, y: 177 };
-  const state = { version: 1, type: "room_state", phase: "lobby", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] };
+  const state = { version: 1, type: "room_state", phase: "lobby", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] };
   assert.deepEqual(decodeServerMessage(JSON.stringify(state)), state);
   for (const phase of [undefined, null, "morning", 1]) {
     assert.throws(() => decodeServerMessage(JSON.stringify({ ...state, phase })));
@@ -88,7 +88,7 @@ test("every Player holds one Seat in either phase and no two Players share it", 
   const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: true, seat: 0, ready: false, facing: "down", x: 640, y: 177 };
   const other = { ...player, playerId: "q", colour: "#FF8066", seat: 1, x: 869, y: 216 };
   for (const type of ["room_state", "room_snapshot"]) {
-    const envelope = { version: 1, type, phase: "lobby", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player, other],
+    const envelope = { version: 1, type, phase: "lobby", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player, other],
       ...(type === "room_snapshot" ? { roomId: "ABC234", selfPlayerId: "p", recoveryToken: "a".repeat(64) } : {}) };
     assert.doesNotThrow(() => decodeServerMessage(JSON.stringify(envelope)));
     // Starting the Game keeps every Seat, so nothing about seating changes phase to phase.
@@ -117,7 +117,7 @@ test("recovery snapshots require a private credential and explicit connected pre
   });
   assert.throws(() => recoverRoom("ABC234", "player-1"));
   const player = { playerId: "p", displayName: "Alex", colour: "#4F8CFF", avatarPreset: "townsperson-1", connected: false, seat: 0, ready: false, facing: "down", x: 640, y: 177 };
-  const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), selfPlayerId: "p", roomId: "ABC234", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, players: [player] };
+  const snapshot = { version: 1, type: "room_snapshot", recoveryToken: "a".repeat(64), selfPlayerId: "p", roomId: "ABC234", phase: "playing", hostPlayerId: "p", roleSetup: { mafia: 1, doctors: 1, sheriffs: 1 }, mapId: "village", players: [player] };
   assert.deepEqual(decodeServerMessage(JSON.stringify(snapshot)), snapshot);
   for (const recoveryToken of [undefined, "player-1", "", 1]) {
     assert.throws(() => decodeServerMessage(JSON.stringify({ ...snapshot, recoveryToken })));
