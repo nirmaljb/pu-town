@@ -36,10 +36,8 @@ public final class RoomRules {
             new Interior("Harbor store", 5600, 3104, 384, 320),
             new Interior("Workshop", 5568, 1824, 384, 320));
 
-    public static String areaAt(double x, double y) {
-        return INTERIORS.stream().filter(room -> room.contains(x, y)).map(Interior::name)
-                .findFirst().orElse("Outdoors");
-    }
+    /** Default-town compatibility; each Game uses its pinned TownMap directly. */
+    public static String areaAt(double x, double y) { return TownMap.village().areaAt(x, y); }
 
     /** One solid rectangle of the town, in world coordinates. */
     public record Obstacle(double x, double y, double width, double height) {
@@ -2552,31 +2550,8 @@ public final class RoomRules {
             new Obstacle(6816, 4192, 32, 32),
             new Obstacle(0, 4288, 7680, 32)); }
 
-    // Static map geometry is indexed once, so a step examines only nearby rectangles.
-    private static final java.util.Map<Long, List<Obstacle>> OBSTACLES_BY_CELL = indexObstacles();
-    private static long cellKey(int x, int y) { return ((long) x << 32) ^ (y & 0xffffffffL); }
-    private static java.util.Map<Long, List<Obstacle>> indexObstacles() {
-        var cells = new java.util.HashMap<Long, List<Obstacle>>();
-        for (Obstacle obstacle : OBSTACLES) {
-            int left = (int) Math.floor((obstacle.x() - FOOT_RADIUS) / 64);
-            int right = (int) Math.floor((obstacle.x() + obstacle.width() + FOOT_RADIUS) / 64);
-            int top = (int) Math.floor((obstacle.y() - FOOT_RADIUS) / 64);
-            int bottom = (int) Math.floor((obstacle.y() + obstacle.height() + FOOT_RADIUS) / 64);
-            for (int y = top; y <= bottom; y++) for (int x = left; x <= right; x++)
-                cells.computeIfAbsent(cellKey(x, y), ignored -> new java.util.ArrayList<>()).add(obstacle);
-        }
-        cells.replaceAll((key, value) -> List.copyOf(value));
-        return java.util.Map.copyOf(cells);
-    }
-
-    /** Whether an Avatar's feet may stand at this point. */
-    public static boolean walkable(double x, double y) {
-        if (!Double.isFinite(x) || !Double.isFinite(y)) return false;
-        if (x < FOOT_RADIUS || y < FOOT_RADIUS || x > WIDTH - FOOT_RADIUS || y > HEIGHT - FOOT_RADIUS) return false;
-        for (Obstacle obstacle : OBSTACLES_BY_CELL.getOrDefault(cellKey((int) Math.floor(x / 64), (int) Math.floor(y / 64)), List.of()))
-            if (obstacle.blocks(x, y, FOOT_RADIUS)) return false;
-        return true;
-    }
+    /** Default-town compatibility; the shared collision implementation belongs to TownMap. */
+    public static boolean walkable(double x, double y) { return TownMap.village().walkable(x, y); }
 
     // Seat zero is north; indices run clockwise around the button in the Town Square.
     public static double seatX(int seat) { return BUTTON_X + Math.round(330 * Math.sin(seat * 2 * Math.PI / CAPACITY)); }

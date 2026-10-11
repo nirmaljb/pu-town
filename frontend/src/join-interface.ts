@@ -86,7 +86,7 @@ export class JoinInterface {
           ${TOWN_MAPS.map(map => `<button type="button" class="map-option" data-map="${map.id}" aria-pressed="false"><img src="${mapRoot(map.id)}overview.png" alt="" loading="lazy"><span>${map.name}</span></button>`).join("")}
         </div>
         <div class="lobby-actions">
-        <details class="role-setup">
+        <details class="role-setup" name="lobby-options">
           <summary>Roles</summary><div class="lobby-detail-body" role="group" aria-label="Roles">
           <p class="role-default-hint">Automatic counts. Host can adjust.</p>
           ${SETUP_ROLES.map(({ role, label }) => `
@@ -98,7 +98,7 @@ export class JoinInterface {
           </span>`).join("")}
           <span class="role-villagers"></span>
         </div></details>
-        <details class="character-options"><summary>Character</summary><div class="lobby-detail-body"></div></details>
+        <details class="character-options" name="lobby-options"><summary>Character</summary><div class="lobby-detail-body"></div></details>
         <button type="button" class="ready-toggle" aria-pressed="false">Ready</button>
         <button type="button" class="primary start-game">Start Game</button>
         <button type="button" class="start-practice" hidden>Solo Practice</button>
