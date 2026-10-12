@@ -12,25 +12,22 @@ through separate server-issued grants for nearby speakers. Hearing is full withi
 two tiles, fades to zero at five tiles, and stops across building boundaries.
 Listener identities are hidden; old grants cannot regain hearing after movement.
 
-On Linux x86-64, from the repository root:
+On Linux x86-64 or macOS (Apple Silicon or Intel), from the repository root:
 
 ```sh
 ./tools/voice/start-local.sh
 ```
 
-The script downloads a pinned, checksum-verified server into `.scratch/voice/local`,
+On Linux the script downloads a pinned, checksum-verified server into `.scratch/voice/local`,
 generates private local credentials, and starts loopback signaling on 7880 with
 WebRTC UDP on 7882 and TCP fallback on 7881. It needs curl, tar, sha256sum, and
 openssl; Docker and administrative privileges are unnecessary. Stop it with Ctrl-C.
-Other supported release platforms can download the corresponding [official release](https://github.com/livekit/livekit/releases/tag/v1.13.7) and use their native executable. Version 1.13.7 has no macOS release binary. On macOS, build the official pinned source with a compatible Go toolchain:
-
-```sh
-git clone --depth 1 --branch v1.13.7 https://github.com/livekit/livekit.git /tmp/putown-livekit
-cd /tmp/putown-livekit
-go build -o /tmp/putown-livekit-server ./cmd/server
-```
-
-Run that executable with `--config` pointing to a private local LiveKit configuration. Use loopback ports 7880/7881/7882 and matching backend credentials; keep the configuration and credentials outside tracked files. This checkout’s browser run used Go 1.26.3.
+Version 1.13.7 has no macOS release binary. On macOS the same script requires
+Git and a compatible Go toolchain, checks out the official release at pinned
+commit `8d11efdfcd4220092b6ac7b8a21af28526da5a6b`, and builds it locally before
+starting it with the same private configuration. Go 1.26.3 was verified. The
+first build needs internet access and takes longer; subsequent starts reuse the
+binary. Other platforms can use the corresponding [official release](https://github.com/livekit/livekit/releases/tag/v1.13.7).
 
 In a second terminal, start the Game backend with the same credentials:
 
@@ -44,6 +41,12 @@ Start the frontend normally with `cd frontend && npm run dev`. Without these
 backend settings voice reports unavailable and text/Game play continue.
 `PUTOWN_VOICE_SERVER`, `PUTOWN_VOICE_KEY`, and `PUTOWN_VOICE_SECRET` can also point
 the backend at an existing private LiveKit instance.
+
+If voice reports unavailable locally, check both processes: LiveKit must be
+listening on `127.0.0.1:7880`, and the Game backend must have been **started after
+sourcing** `local.env` from the same checkout. Sourcing it in a new terminal does
+not configure an already-running backend; restart that backend with the environment
+loaded. The Game's `/health` only establishes Game backend health, not media health.
 
 The public signaling entrance is the Game backend's `/voice/rtc` (and `/voice/rtc/v1`).
 Do not expose LiveKit's port 7880: direct access would bypass current Membership,
@@ -147,6 +150,17 @@ the harness manages Game and Vite, but does not start media. A configured voice
 key enables Chromium's synthetic microphone fixture. Without it, tests requiring
 actual media are explicitly skipped. Use `PU_TOWN_E2E_REUSE=1` only for services
 running this checkout with matching configuration.
+
+For a short check through the current title menu, run from `frontend/` with the
+voice environment loaded:
+
+```sh
+npm run test:browser -- e2e/local-voice.spec.ts
+```
+
+It uses four browser clients and verifies received microphone audio, mute,
+same-tab listening recovery and Leave voice. The microphone is synthetic; this
+does not establish physical microphone or speaker behavior.
 
 See the [original native verification record](../../docs/verification/2026-10-05-final-acceptance.md)
 and the subsequent [browser audit](../../docs/verification/2026-10-05-browser-audit.md)
