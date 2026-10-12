@@ -2,7 +2,7 @@
 
 **Sunwater Village** is the playable default. Village and **Blackthorn Hollow** are 7680 × 4320px (240 × 135 tiles at 32px). **Silver Jubilee Campus**, retained under the `cyberpunk` asset/wire identifier, is 4096 × 4480px (128 × 140 tiles).
 
-Village and horror use the supplied `tilesets.rar` terrain, detailed whole-building and furniture sprites, and multi-frame trees, bushes, animals and water effects. The former 16px exterior studies are superseded. Village uses the original warm colors; horror uses desaturated slate and autumn colors; Silver Jubilee Campus uses original generated night artwork, warm streetlights, academic rooms and dark trees based on the owner’s campus layout references. The screenshots are design references only and are not redistributed as map textures. Moving scenery remains cosmetic; collision footprints are fixed and server-owned.
+All three maps use the supplied `tilesets.rar` terrain, detailed whole-building and furniture sprites, and multi-frame trees, bushes, animals and water effects. The former 16px exterior studies are superseded. Village uses the original warm colors; horror uses desaturated slate and autumn colors; Silver Jubilee Campus uses the same supplied grass, interior floors/brickwork, barracks roof artwork, desks, chairs, shelving, windows and animated oak/pine/bush sheets, with a warm night tint. Its road geometry and radial building footprints follow the owner’s campus references. The screenshots are design references only and are not redistributed as map textures. Moving scenery remains cosmetic; collision footprints are fixed and server-owned.
 
 ## Interiors
 
@@ -10,13 +10,13 @@ Village and horror use the supplied `tilesets.rar` terrain, detailed whole-build
 - Horror: Abandoned abbey, Mortuary, Old infirmary, Deadwood refuge, Flooded mill and Quarantine ward.
 - Silver Jubilee Campus: Block A Seminar Room, Block B Research Lab, School of Social Sciences, Electronic Media, UMSARC and Central Building. Unidentified buildings use neutral names and all interiors are gameplay interpretations.
 
-Open-top rooms use differentiated floors and furniture; campus teaching rooms and labs use original generated desks and workstations. Their entrances and central aisles remain open. Existing village Task destinations and four original interior identities are retained. Village district interiors are also synchronized with backend/frontend area boundaries. All room centres, retained Seats and Task markers are reachable from the square.
+Open-top rooms use differentiated floors and furniture; campus teaching rooms and labs reuse the supplied furniture. Their entrances and central aisles remain open. Existing village Task destinations and four original interior identities are retained. Village district interiors are also synchronized with backend/frontend area boundaries. All room centres, retained Seats and Task markers are reachable from the square.
 
 ## Preview and authoring
 
 Serve this folder with `python3 -m http.server 5188 --bind 127.0.0.1` and visit http://127.0.0.1:5188. The viewer supports live animation, pan/zoom, theme selection, direct interior navigation and landmarks. It honors the operating system's reduced-motion preference. The Player app honors its own reduced-motion setting.
 
-Each theme contains `map.json` (editable Tiled JSON), `collision.json`, `tiles.png`, `supplied/` object sheets (village/horror) or `campus-tree-*.png` sheets (campus), `interiors.json`, `motion.json`, `base-map.png`, `full-map.png`, `overview.png`, `square-detail.png` and individual `interior-*.png` previews. `base-map.png` omits animated sprites, allowing the viewer to play frames without painting duplicates. The Tiled objects retain their actual frame metadata for Phaser. Copy the complete theme directory when editing it outside the repository.
+Each theme contains `map.json` (editable Tiled JSON), `collision.json`, `tiles.png`, `supplied/` object sheets, `interiors.json`, `motion.json`, `base-map.png`, `full-map.png`, `overview.png`, `square-detail.png` and individual `interior-*.png` previews. `base-map.png` omits animated sprites, allowing the viewer to play frames without painting duplicates. The Tiled objects retain their actual frame metadata for Phaser. Copy the complete theme directory when editing it outside the repository.
 
 From the repository root, with Pillow installed:
 

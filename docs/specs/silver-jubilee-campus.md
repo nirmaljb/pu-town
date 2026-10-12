@@ -12,3 +12,7 @@ Replace the Night City / Neon Ward map with **Silver Jubilee Campus**, using the
 - Record the per-map geometry trade-off in an ADR and update available Town Map names in the glossary.
 
 The user confirmed all of these choices and corrected the proposed name to the exact name above. Artwork details and exact playable dimensions are implementation choices. Screenshots are design references; provider imagery is not shipped as terrain.
+
+## Artwork follow-up
+
+The owner requested reuse of the existing assets from the other Town Maps. Use the supplied terrain, building surfaces, furniture and animated vegetation with a grounded night tint; retain the confirmed campus layout, name, bounds, Meeting Area and gameplay.

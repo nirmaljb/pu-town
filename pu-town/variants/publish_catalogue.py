@@ -15,6 +15,7 @@ def publish_catalogue():
         target.mkdir(parents=True, exist_ok=True)
         if map_id == 'cyberpunk':
             shutil.rmtree(target / 'supplied', ignore_errors=True)
+            for old_tree in target.glob('campus-tree-*.png'): old_tree.unlink()
         tilemap = json.loads((source / 'map.json').read_text())
         collision = json.loads((source / 'collision.json').read_text())
         interiors = [

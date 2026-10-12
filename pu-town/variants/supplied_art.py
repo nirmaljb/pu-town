@@ -15,6 +15,11 @@ class Art:
   self.nextgid=math.ceil(len(m.tiles)/32)*32+1
   self.out=m.out/'supplied';self.out.mkdir(exist_ok=True)
  def tint(self,im):
+  if getattr(self.m,'campus',False):
+   alpha=im.getchannel('A')
+   night=ImageOps.colorize(ImageOps.grayscale(im),'#102822','#c4b88a').convert('RGBA')
+   rgb=ImageEnhance.Brightness(Image.blend(im,night,.42)).enhance(.55)
+   rgb.putalpha(alpha);return rgb
   if self.theme=='village':return im
   alpha=im.getchannel('A');gray=ImageOps.grayscale(im)
   if self.theme=='horror':rgb=ImageOps.colorize(gray,'#17212e','#9daba3').convert('RGBA');rgb=Image.blend(im,rgb,.72)
