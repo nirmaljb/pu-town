@@ -21,10 +21,6 @@ import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
 import { BUTTON_X, BUTTON_Y, ROOM_HEIGHT, ROOM_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
 
-/** Outside Day and sleeping Night the camera frames the Town Square, where the Players sit. */
-const SQUARE_X = BUTTON_X;
-const SQUARE_Y = BUTTON_Y;
-
 /** Keys that walk; anything typed into a text field is left alone. */
 const MOVEMENT_KEYS: Readonly<Record<string, "up" | "down" | "left" | "right">> = {
   KeyW: "up", ArrowUp: "up", KeyS: "down", ArrowDown: "down",
@@ -64,10 +60,16 @@ export class PuTownScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor(0x182132);
-    this.#meetingArea = new MeetingArea(this);
     setTownGeometry(this.cache.json.get("rules-village"));
+    this.#meetingArea = new MeetingArea(this);
     this.#avatarReconciler = new AvatarReconciler(this);
-    this.#frameBoundary = new NetworkFrameBoundary(this.#inbox, emptyWorld(), this.#avatarReconciler);
+    this.#frameBoundary = new NetworkFrameBoundary(this.#inbox, emptyWorld(), {
+      reconcile: (world, arrivals) => {
+        // Select geometry before chairs and Avatars reconcile, at this same frame boundary.
+        this.selectTownMap(world.mapId);
+        this.#avatarReconciler?.reconcile(world, arrivals);
+      }
+    });
 
     const parameters = new URLSearchParams(window.location.search);
     this.#websocketUrl = parameters.get("ws") || "ws://localhost:8080/ws/game";
@@ -96,7 +98,7 @@ export class PuTownScene extends Phaser.Scene {
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
+    this.cameras.main.centerOn(BUTTON_X, BUTTON_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
     const typing = (event: KeyboardEvent) => event.target instanceof HTMLElement && Boolean(event.target.closest("input, textarea, select, [contenteditable]"));
     const keyChanged = (held: boolean) => (event: KeyboardEvent) => {
@@ -172,19 +174,22 @@ export class PuTownScene extends Phaser.Scene {
     }
   }
 
+  private selectTownMap(mapId: MapId): void {
+    if (mapId === this.#mapId) return;
+    setTownGeometry(this.cache.json.get(`rules-${mapId}`));
+    this.#meetingArea?.destroy();
+    this.#meetingArea = new MeetingArea(this, mapId);
+    this.#mapId = mapId;
+    this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    this.cameras.main.centerOn(BUTTON_X, BUTTON_Y);
+  }
+
   update(time: number, delta: number): void {
     // Network state is always applied before this frame renders controls or Avatars.
     this.#client?.update();
     if (!this.readyForRoomArtwork()) return;
     this.#frameBoundary?.beginFrame();
     const world = this.#frameBoundary?.world;
-    const mapId = world?.mapId ?? "village";
-    if (mapId !== this.#mapId) {
-      this.#meetingArea?.destroy();
-      this.#meetingArea = new MeetingArea(this, mapId);
-      setTownGeometry(this.cache.json.get(`rules-${mapId}`));
-      this.#mapId = mapId;
-    }
     this.#mapInterface?.render(world, this.#client?.state.status === "playing", this.#field?.position ?? null);
     const phaseBlocked = this.#gameInterface?.prepareFrame(world, this.#settings?.reducedMotion ?? false);
     if (phaseBlocked || document.querySelector("dialog:modal") || this.#mapInterface?.open || (document.activeElement?.matches("input, textarea, select") && document.activeElement.closest(".developer-panel"))) this.#held.up = this.#held.down = this.#held.left = this.#held.right = false;
@@ -207,10 +212,10 @@ export class PuTownScene extends Phaser.Scene {
     // Seated phases must keep the whole Town Square visible, including on portrait displays.
     // Exploration/title cover the viewport; a seated view expands the camera instead of cropping Seats.
     const seated = !atTitle && !world?.field;
-    const left = SQUARE_X - 330;
-    const right = SQUARE_X + 330;
-    const top = SQUARE_Y - 205;
-    const bottom = SQUARE_Y + 205;
+    const left = BUTTON_X - 330;
+    const right = BUTTON_X + 330;
+    const top = BUTTON_Y - 205;
+    const bottom = BUTTON_Y + 205;
     const seatedWidth = Math.max(420, right - left + 190);
     const seatedHeight = Math.max(320, bottom - top + 190);
     const lobbyHeight = world?.phase === "lobby" ? document.querySelector(".lobby-sidebar")?.getBoundingClientRect().height ?? 220 : 0;

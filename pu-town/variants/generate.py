@@ -215,7 +215,7 @@ class Map:
     if 0<p[0]<W-1 and 0<p[1]<H-1 and p not in self.block and p not in seen:seen.add(p);q.append(p)
   room_centres=[(r['x']//T+r['width']//T//2,r['y']//T+r['height']//T//2) for r in self.interiors]
   targets=[(p['x']//T,p['y']//T) for p in self.tasks+self.seats]+room_centres
-  assert all(p in seen for p in targets),(self.theme,'unreachable Task or Seat')
+  assert all(p in seen for p in targets),(self.theme,'unreachable Task or Seat',[p for p in targets if p not in seen])
   # Make isolated decorative pockets impassable instead of permitting stranded movement.
   for y in range(H):
    for x in range(W):
@@ -226,7 +226,7 @@ class Map:
     assert not (bx*T-14<px<(bx+1)*T+14 and by*T-14<py<(by+1)*T+14),(self.theme,'blocked destination',point)
   self.report=dict(furnishedInteriors=len(self.interiors),allInteriorsReachable=True,walkableTiles=len(seen),taskDestinations=len(self.tasks),seats=len(self.seats),allDestinationsReachable=True,exactDestinationClearancePixels=14)
  def export(self):
-  cols=32;rows=math.ceil(len(self.tiles)/cols);atlas=Image.new('RGBA',(cols*T,rows*T))
+  cols=64 if getattr(self,'campus',False) else 32;rows=math.ceil(len(self.tiles)/cols);atlas=Image.new('RGBA',(cols*T,rows*T))
   for i,tile in enumerate(self.tiles):atlas.alpha_composite(tile,((i%cols)*T,(i//cols)*T))
   atlas.save(self.out/'tiles.png')
   data=dict(type='map',version='1.10',tiledversion='1.11.2',orientation='orthogonal',renderorder='right-down',width=W,height=H,tilewidth=T,tileheight=T,infinite=False,
@@ -275,9 +275,9 @@ class Map:
   # Lighting belongs to the preview, not the tilemap or visibility rules.
   if self.theme=='horror':
    shade=Image.new('RGBA',canvas.size,(12,20,34,65));canvas=Image.alpha_composite(canvas,shade)
-  elif self.theme=='cyberpunk':
+  elif self.theme=='cyberpunk' and not getattr(self,'campus',False):
    shade=Image.new('RGBA',canvas.size,(9,12,31,45));canvas=Image.alpha_composite(canvas,shade)
-  if self.theme!='village':
+  if self.theme!='village' and not getattr(self,'campus',False):
    lights=Image.new('RGBA',canvas.size);ld=ImageDraw.Draw(lights)
    locations=[(p['x'],p['y']) for p in self.tasks]
    if self.theme=='cyberpunk':locations += [(x*T+w*T//2,(y+h)*T) for x,y,w,h in self.buildings]
@@ -287,9 +287,10 @@ class Map:
     for r in range(130,8,-10):ld.ellipse((x-r,y-r,x+r,y+r),fill=(*rgb,round((140-r)/6)))
    canvas=Image.alpha_composite(canvas,lights)
   canvas.convert('RGB').save(self.out/'full-map.png')
-  overview=canvas.resize((1600,900),Image.Resampling.NEAREST).convert('RGB');d=ImageDraw.Draw(overview)
+  preview_size=(round(W*T*min(1600/(W*T),1400/(H*T))),round(H*T*min(1600/(W*T),1400/(H*T)))) if getattr(self,'campus',False) else (1600,900)
+  overview=canvas.resize(preview_size,Image.Resampling.NEAREST).convert('RGB');d=ImageDraw.Draw(overview)
   for p in self.tasks:
-   x,y=round(p['x']/4.8),round(p['y']/4.8);text=p['name'];box=d.textbbox((0,0),text,font=FONT);tw=box[2]
+   x,y=round(p['x']*overview.width/(W*T)),round(p['y']*overview.height/(H*T));text=p['name'];box=d.textbbox((0,0),text,font=FONT);tw=box[2]
    d.rectangle((x-tw/2-7,y+13,x+tw/2+7,y+40),fill='#18232b');d.text((x-tw/2,y+15),text,font=FONT,fill='#f5e9c9')
   overview.save(self.out/'overview.png')
   canvas.crop((self.square[0]-640,self.square[1]-360,self.square[0]+640,self.square[1]+360)).convert('RGB').save(self.out/'square-detail.png')
@@ -298,5 +299,8 @@ class Map:
   print(self.theme,json.dumps(self.report))
 
 if __name__=='__main__':
- for theme in THEMES:
+ for theme in ('village','horror'):
   m=Map(theme);m.layout();m.export()
+ import sys
+ from campus import generate_campus
+ generate_campus(sys.modules[__name__])

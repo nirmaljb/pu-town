@@ -1,16 +1,21 @@
-const configs={village:{title:'Sunwater Village',description:'Orchards, riverside homes and furnished village gathering rooms.'},horror:{title:'Blackthorn Hollow',description:'An abandoned abbey, infirmary and refuge among restless woodland.'},cyberpunk:{title:'Neon Ward',description:'Neon workshops, hydroponics and control rooms along the canal.'}};
+const configs={village:{title:'Sunwater Village',description:'Orchards, riverside homes and furnished village gathering rooms.'},horror:{title:'Blackthorn Hollow',description:'An abandoned abbey, infirmary and refuge among restless woodland.'},cyberpunk:{title:'Silver Jubilee Campus',description:'Pondicherry University academic blocks, circular roads and warm lights among dark woodland.'}};
 const stage=document.querySelector('#stage'),world=document.querySelector('#world'),canvas=document.querySelector('#motion'),ctx=canvas.getContext('2d');
-let scale=.25,x=0,y=0,drag=null,motion=[],images=new Map(),selection=0;
+let scale=.25,x=0,y=0,drag=null,motion=[],images=new Map(),selection=0,mapWidth=7680,mapHeight=4320;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 function paint(){document.querySelectorAll('.landmark').forEach(label=>{label.hidden=scale<.25&&label.dataset.priority==='detail';label.style.fontSize=Math.max(20,11/scale)+'px'});world.style.transform=`translate(${x}px,${y}px) scale(${scale})`}
-function fit(){scale=Math.min(stage.clientWidth/7680,stage.clientHeight/4320);x=(stage.clientWidth-7680*scale)/2;y=(stage.clientHeight-4320*scale)/2;paint()}
+function fit(){scale=Math.min(stage.clientWidth/mapWidth,stage.clientHeight/mapHeight);x=(stage.clientWidth-mapWidth*scale)/2;y=(stage.clientHeight-mapHeight*scale)/2;paint()}
 function zoom(factor,cx=stage.clientWidth/2,cy=stage.clientHeight/2){const next=Math.max(.06,Math.min(2,scale*factor));x=cx-(cx-x)*next/scale;y=cy-(cy-y)*next/scale;scale=next;paint()}
 function focus(px,py,width=900,height=650){const available=stage.clientWidth-(stage.clientWidth>650?285:210);scale=Math.max(.35,Math.min(1.6,available/width,(stage.clientHeight-140)/height));x=available/2-px*scale;y=stage.clientHeight/2-py*scale;paint()}
 async function select(theme){
  const revision=++selection,c=configs[theme];
  const [metadata,animations,rooms]=await Promise.all(['collision.json','motion.json','interiors.json'].map(file=>fetch(theme+'/'+file+'?v=interiors').then(r=>r.json())));
  const loaded=new Map();await Promise.all([...new Set(animations.map(o=>o.sheet.image))].map(async file=>{const im=new Image();im.src=theme+'/'+file+'?v=interiors';await im.decode();loaded.set(file,im)}));
- if(revision!==selection)return;motion=animations;images=loaded;
+ if(revision!==selection)return;
+ mapWidth=metadata.width;mapHeight=metadata.height;
+ world.style.width=mapWidth+'px';world.style.height=mapHeight+'px';
+ document.querySelector('#map').style.width=mapWidth+'px';document.querySelector('#map').style.height=mapHeight+'px';
+ document.querySelector('#hint').textContent=`Drag to pan. Scroll to zoom. ${mapWidth} × ${mapHeight} pixels`;
+ motion=animations;images=loaded;
  document.querySelector('#map').src=theme+'/base-map.png?v=interiors';document.querySelector('#map').alt=c.title+' map';document.querySelector('#title').textContent=c.title;document.querySelector('#description').textContent=c.description;
  document.querySelector('#download').href=theme+'/map.json';document.querySelectorAll('[data-theme]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.theme===theme)));
  const labels=document.querySelector('#labels'),places=document.querySelector('#places'),indoors=document.querySelector('#rooms');labels.replaceChildren();places.replaceChildren();indoors.replaceChildren();

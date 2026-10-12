@@ -237,6 +237,13 @@ class MafiaGameTest {
         send(host, selection);
         assertEquals(mapId, latestOfType(host, "room_state").path("mapId").asText());
         assertEquals(mapId, latestOfType(guest, "room_state").path("mapId").asText());
+        if (mapId.equals("cyberpunk")) {
+            var members = latestOfType(host, "room_state").path("players");
+            assertEquals(2208, members.get(0).path("x").asDouble());
+            assertEquals(2643, members.get(0).path("y").asDouble());
+            assertEquals(2402, members.get(1).path("x").asDouble());
+            assertEquals(2682, members.get(1).path("y").asDouble());
+        }
         var third = connect("map-third"); join(third, room);
         var fourth = connect("map-fourth"); join(fourth, room);
         for (var member : List.of(host, guest, third, fourth))
@@ -246,8 +253,16 @@ class MafiaGameTest {
         send(host, selection);
         assertEquals("invalid_phase", latest(host).path("code").asText());
         advance(REVEAL);
+        if (mapId.equals("cyberpunk")) {
+            var self = latestOfType(host, "field_state").path("self");
+            assertEquals(2208, self.path("x").asDouble());
+            assertEquals(2643, self.path("y").asDouble());
+            send(host, "{\"version\":1,\"type\":\"move\",\"x\":5000,\"y\":2643,\"facing\":\"right\"}");
+            handler.tickFields();
+            assertEquals(2208, latestOfType(host, "field_state").path("self").path("x").asDouble());
+        }
         String task = latestOfType(guest, "task_state").path("tasks").get(0).path("name").asText();
-        assertEquals(switch (mapId) { case "horror" -> "Abandoned abbey"; case "cyberpunk" -> "Data exchange"; default -> "Sign the town ledger"; }, task);
+        assertEquals(switch (mapId) { case "horror" -> "Abandoned abbey"; case "cyberpunk" -> "Block A Seminar Room"; default -> "Sign the town ledger"; }, task);
         walkIntoSelectedInterior(guest, mapId);
         handler.tickFields();
         var guestField = latestOfType(guest, "field_state");
@@ -1892,7 +1907,7 @@ class MafiaGameTest {
                 && point.x() < room.path("x").asInt() + room.path("width").asInt()
                 && point.y() >= room.path("y").asInt() && point.y() < room.path("y").asInt() + room.path("height").asInt();
         java.util.function.Predicate<MapPoint> open = point -> point.x() >= 14 && point.y() >= 14
-                && point.x() <= 7666 && point.y() <= 4306 && collision.path("obstacles").valueStream().noneMatch(rect ->
+                && point.x() <= collision.path("width").asInt() - 14 && point.y() <= collision.path("height").asInt() - 14 && collision.path("obstacles").valueStream().noneMatch(rect ->
                 point.x() > rect.path("x").asInt() - 14 && point.x() < rect.path("x").asInt() + rect.path("width").asInt() + 14
                         && point.y() > rect.path("y").asInt() - 14 && point.y() < rect.path("y").asInt() + rect.path("height").asInt() + 14);
         JsonNode self = latestOfType(session, "field_state").path("self");

@@ -347,8 +347,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 player.setFacing(RoomRules.seatFacing(seat));
                 player.setReady(false);
                 player.setSeat(seat);
-                player.setX(RoomRules.seatX(seat));
-                player.setY(RoomRules.seatY(seat));
+                player.setX(room.getTownMap().seatX(seat));
+                player.setY(room.getTownMap().seatY(seat));
                 RoleSetup previousSetup = room.getRoleSetup();
                 room.addPlayer(player.getId());
                 if (room.developer() != null) {
@@ -499,6 +499,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             deliver(error(player, "invalid_phase", "The town is chosen in the Lobby."));
         } else {
             room.setTownMap(dev.lpa.pu_go.room.TownMap.find(message.mapId()));
+            for (String memberId : room.playerIdsSnapshot()) {
+                PlayerState member = playersById.get(memberId);
+                member.setX(room.getTownMap().seatX(member.getSeat()));
+                member.setY(room.getTownMap().seatY(member.getSeat()));
+            }
             publishDeveloper(room);
             List<Delivery> deliveries = new ArrayList<>();
             addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));

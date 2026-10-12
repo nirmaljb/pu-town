@@ -48,7 +48,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town");
       await host.keyboard.press("m");
       await expect(host.locator(".map-dialog")).toBeVisible();
-      await expect(host.locator("#map-title")).toHaveText("Neon Ward");
+      await expect(host.locator("#map-title")).toHaveText("Silver Jubilee Campus");
       await expect(host.locator(".map-surface img")).toHaveJSProperty("complete", true);
       await expect(host.locator(".map-marker-self")).toHaveCount(1);
       await expect(host.locator(".map-marker-task")).toHaveCount(3);
@@ -72,7 +72,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
       await host.reload();
       await expect(host.locator(".game-phase")).toHaveText("Day · Explore the town", { timeout: 20_000 });
       await host.locator(".map-toggle").click();
-      await expect(host.locator("#map-title")).toHaveText("Neon Ward");
+      await expect(host.locator("#map-title")).toHaveText("Silver Jubilee Campus");
       await host.keyboard.press("m");
       await expect(host.locator(".map-dialog")).not.toBeVisible();
       await host.locator(".room-menu-toggle").click();
@@ -86,7 +86,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
 for (const [mapId, name, firstTask] of [
   ["village", "Sunwater Village", "Sign the town ledger"],
   ["horror", "Blackthorn Hollow", "Abandoned abbey"],
-  ["cyberpunk", "Neon Ward", "Data exchange"]
+  ["cyberpunk", "Silver Jubilee Campus", "Block A Seminar Room"]
 ] as const) {
   test(`Solo Practice uses ${name} terrain and Tasks`, async ({ page }) => {
     test.setTimeout(45_000);

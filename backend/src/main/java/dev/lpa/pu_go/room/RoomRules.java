@@ -2554,8 +2554,8 @@ public final class RoomRules {
     public static boolean walkable(double x, double y) { return TownMap.village().walkable(x, y); }
 
     // Seat zero is north; indices run clockwise around the button in the Town Square.
-    public static double seatX(int seat) { return BUTTON_X + Math.round(330 * Math.sin(seat * 2 * Math.PI / CAPACITY)); }
-    public static double seatY(int seat) { return BUTTON_Y + Math.round(-205 * Math.cos(seat * 2 * Math.PI / CAPACITY)); }
+    public static double seatX(int seat) { return TownMap.village().seatX(seat); }
+    public static double seatY(int seat) { return TownMap.village().seatY(seat); }
 
     /** Seated Avatars face the centre of the circle in both the Lobby and the Meetings. */
     public static String seatFacing(int seat) {

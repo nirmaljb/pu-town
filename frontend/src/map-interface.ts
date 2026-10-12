@@ -63,6 +63,8 @@ export class MapInterface {
       this.#mapId = world.mapId;
       this.#title.textContent = townName(world.mapId);
       this.#terrain.src = `${mapRoot(world.mapId)}overview.png`;
+      this.#terrain.style.aspectRatio = `${WORLD_WIDTH} / ${WORLD_HEIGHT}`;
+      this.#terrain.parentElement?.style.setProperty("--map-aspect", String(WORLD_WIDTH / WORLD_HEIGHT));
     }
     const position = self ?? world.field?.self ?? world.players.get(world.selfPlayerId ?? "");
     const tasks = (world.tasks?.tasks ?? []).filter(task => task.step < task.steps);

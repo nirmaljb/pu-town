@@ -14,7 +14,7 @@ shutil.copyfile(ROOT/'assets/tiny-town/License.txt',served/'License.txt')
 shutil.copytree(ROOT/'village/supplied',served/'supplied',dirs_exist_ok=True)
 shutil.copyfile(ROOT/'assets/sources.json',served/'sources.json')
 p=REPO/'frontend/src/room-rules.ts';s=p.read_text()
-for name,value in [('WORLD_WIDTH',c['width']),('WORLD_HEIGHT',c['height']),('BUTTON_X',c['emergencyButton']['x']),('BUTTON_Y',c['emergencyButton']['y'])]:s=re.sub(r'(export const '+name+r' = )[\d_]+;',r'\g<1>'+str(value)+';',s)
+for name,value in [('WORLD_WIDTH',c['width']),('WORLD_HEIGHT',c['height']),('BUTTON_X',c['emergencyButton']['x']),('BUTTON_Y',c['emergencyButton']['y'])]:s=re.sub(r'(export (?:const|let) '+name+r' = )[\d_]+;',r'\g<1>'+str(value)+';',s)
 s=re.sub(r'export const INTERIORS = \[.*?\] as const;', 'export const INTERIORS = '+json.dumps([{k:o[k] for k in ['name','x','y','width','height']} for o in rooms],indent=2)+' as const;',s,flags=re.S)
 obstacles='export const OBSTACLES: readonly Obstacle[] = [\n'+',\n'.join('  '+', '.join('{ '+', '.join(f'{k}: {v}' for k,v in o.items())+' }' for o in c['obstacles'][i:i+4]) for i in range(0,len(c['obstacles']),4))+'\n];'
 s=re.sub(r'export const OBSTACLES: readonly Obstacle\[\] = \[.*?\n\];',lambda _:obstacles,s,flags=re.S);p.write_text(s)

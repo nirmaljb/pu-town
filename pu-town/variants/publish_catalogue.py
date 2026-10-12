@@ -13,6 +13,8 @@ def publish_catalogue():
         source = ROOT / map_id
         target = REPO / 'frontend/public/maps' / map_id
         target.mkdir(parents=True, exist_ok=True)
+        if map_id == 'cyberpunk':
+            shutil.rmtree(target / 'supplied', ignore_errors=True)
         tilemap = json.loads((source / 'map.json').read_text())
         collision = json.loads((source / 'collision.json').read_text())
         interiors = [
@@ -34,7 +36,8 @@ def publish_catalogue():
         shutil.copyfile(ROOT / 'assets/sources.json', target / 'sources.json')
         # Terrain only, without the authoring preview's labels or any Players.
         with Image.open(source / 'full-map.png') as image:
-            image.resize((1600, 900), Image.Resampling.NEAREST).save(target / 'overview.png')
+            scale = min(1600 / image.width, 1400 / image.height)
+            image.resize((round(image.width * scale), round(image.height * scale)), Image.Resampling.NEAREST).save(target / 'overview.png')
         for tileset in tilemap['tilesets']:
             image = Path(tileset['image'])
             (target / image).parent.mkdir(parents=True, exist_ok=True)

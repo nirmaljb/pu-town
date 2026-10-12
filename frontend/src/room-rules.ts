@@ -3,12 +3,12 @@ export const ROOM_WIDTH = 1_280;
 export const ROOM_HEIGHT = 720;
 
 // Client copies of the authoritative RoomRules and FieldRules; the server re-checks all of them.
-export const WORLD_WIDTH = 7680;
-export const WORLD_HEIGHT = 4320;
+export let WORLD_WIDTH = 7680;
+export let WORLD_HEIGHT = 4320;
 export const MIN_PLAYERS = 4;
 /** The centre of the retained Seat circle in the Town Square. */
-export const BUTTON_X = 3840;
-export const BUTTON_Y = 2182;
+export let BUTTON_X = 3840;
+export let BUTTON_Y = 2182;
 export const FOOT_RADIUS = 14;
 
 /** A little below the server's limit, so honest movement is never corrected. */
@@ -720,7 +720,11 @@ export function walkable(x: number, y: number): boolean {
     && y > o.y - FOOT_RADIUS && y < o.y + o.height + FOOT_RADIUS);
 }
 
-export function setTownGeometry(rules: Readonly<{ obstacles: readonly Obstacle[]; interiors: typeof INTERIORS }>): void {
+export function setTownGeometry(rules: Readonly<{ width: number; height: number; emergencyButton: Readonly<{ x: number; y: number }>; obstacles: readonly Obstacle[]; interiors: typeof INTERIORS }>): void {
+  WORLD_WIDTH = rules.width;
+  WORLD_HEIGHT = rules.height;
+  BUTTON_X = rules.emergencyButton.x;
+  BUTTON_Y = rules.emergencyButton.y;
   OBSTACLES = rules.obstacles;
   INTERIORS = rules.interiors;
 }

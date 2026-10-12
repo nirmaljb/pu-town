@@ -213,9 +213,9 @@ public final class Game {
     }
 
     /** Everyone stands up at their own Seat, so a Day always begins in the Town Square. */
-    private static void placeAtSeat(Participant member, long at) {
-        member.x = RoomRules.seatX(member.seat());
-        member.y = RoomRules.seatY(member.seat());
+    private void placeAtSeat(Participant member, long at) {
+        member.x = townMap.seatX(member.seat());
+        member.y = townMap.seatY(member.seat());
         member.facing = RoomRules.seatFacing(member.seat());
         member.lastMoveAt = at;
         member.correction++;

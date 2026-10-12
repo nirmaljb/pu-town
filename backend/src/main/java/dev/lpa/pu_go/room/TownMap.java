@@ -14,17 +14,20 @@ public final class TownMap {
     private static final Map<String, TownMap> MAPS = Map.of(
             "village", load("village"), "horror", load("horror"), "cyberpunk", load("cyberpunk"));
     private final String id;
+    private final double width, height, centreX, centreY;
     private final List<RoomRules.Interior> interiors;
     private final List<TaskBoard.Location> tasks;
     private final Map<Long, List<RoomRules.Obstacle>> cells;
 
     private TownMap(String id, JsonNode data) {
         this.id = id;
-        // All published towns share bounds and the retained Seat circle.
-        if (data.path("width").asDouble() != RoomRules.WIDTH || data.path("height").asDouble() != RoomRules.HEIGHT
-                || data.path("emergencyButton").path("x").asDouble() != RoomRules.BUTTON_X
-                || data.path("emergencyButton").path("y").asDouble() != RoomRules.BUTTON_Y)
-            throw new IllegalStateException("Town bounds or Seat centre differ: " + id);
+        width = data.path("width").asDouble();
+        height = data.path("height").asDouble();
+        centreX = data.path("emergencyButton").path("x").asDouble();
+        centreY = data.path("emergencyButton").path("y").asDouble();
+        if (!Double.isFinite(width) || !Double.isFinite(height) || width <= 0 || height <= 0
+                || !Double.isFinite(centreX) || !Double.isFinite(centreY))
+            throw new IllegalStateException("Invalid town bounds or Seat centre: " + id);
         var rooms = new ArrayList<RoomRules.Interior>();
         for (JsonNode room : data.path("interiors")) rooms.add(new RoomRules.Interior(room.path("name").asText(),
                 room.path("x").asDouble(), room.path("y").asDouble(), room.path("width").asDouble(), room.path("height").asDouble()));
@@ -49,7 +52,7 @@ public final class TownMap {
         if (tasks.isEmpty() || tasks.stream().anyMatch(task -> !walkable(task.x(), task.y())))
             throw new IllegalStateException("Town has unreachable Tasks: " + id);
         for (int seat = 0; seat < RoomRules.CAPACITY; seat++)
-            if (!walkable(RoomRules.seatX(seat), RoomRules.seatY(seat))) throw new IllegalStateException("Blocked Seat: " + id);
+            if (!walkable(seatX(seat), seatY(seat))) throw new IllegalStateException("Blocked Seat: " + id);
     }
 
     private static TownMap load(String id) {
@@ -62,6 +65,8 @@ public final class TownMap {
     public static TownMap find(String id) { return MAPS.get(id); }
     public static TownMap village() { return MAPS.get("village"); }
     public String id() { return id; }
+    public double seatX(int seat) { return centreX + Math.round(330 * Math.sin(seat * 2 * Math.PI / RoomRules.CAPACITY)); }
+    public double seatY(int seat) { return centreY + Math.round(-205 * Math.cos(seat * 2 * Math.PI / RoomRules.CAPACITY)); }
     public List<TaskBoard.Location> tasks() { return tasks; }
     public String areaAt(double x, double y) {
         return interiors.stream().filter(room -> room.contains(x, y)).map(RoomRules.Interior::name).findFirst().orElse("Outdoors");
@@ -69,7 +74,7 @@ public final class TownMap {
     private static long cellKey(int x, int y) { return ((long) x << 32) ^ (y & 0xffffffffL); }
     public boolean walkable(double x, double y) {
         if (!Double.isFinite(x) || !Double.isFinite(y) || x < RoomRules.FOOT_RADIUS || y < RoomRules.FOOT_RADIUS
-                || x > RoomRules.WIDTH - RoomRules.FOOT_RADIUS || y > RoomRules.HEIGHT - RoomRules.FOOT_RADIUS) return false;
+                || x > width - RoomRules.FOOT_RADIUS || y > height - RoomRules.FOOT_RADIUS) return false;
         return cells.getOrDefault(cellKey((int) Math.floor(x / 64), (int) Math.floor(y / 64)), List.of()).stream()
                 .noneMatch(obstacle -> obstacle.blocks(x, y, RoomRules.FOOT_RADIUS));
     }

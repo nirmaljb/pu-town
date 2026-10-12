@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import { FieldController } from "../dist/field-controller.js";
-import { BUTTON_X, BUTTON_Y, OBSTACLES, INTERIORS, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "../dist/room-rules.js";
+import { BUTTON_X, BUTTON_Y, OBSTACLES, INTERIORS, WORLD_HEIGHT, WORLD_WIDTH, walkable, setTownGeometry } from "../dist/room-rules.js";
 
 const own = (patch = {}) => ({ x: BUTTON_X, y: BUTTON_Y + 158, facing: "down", correction: 1, ...patch });
 const world = (self, round = 1, phase = "day") => ({
@@ -71,4 +71,20 @@ test("Night adopts the last accepted position, sleeps in place and never sends h
   assert.equal(sent.length, before);
   controller.update(world(own({ x: 1280, y: 947, correction: 2 }), 2), idle, 16, 300);
   assert.equal(controller.position.y, 947);
+});
+
+
+test("campus prediction uses its own bounds and switching restores the village", () => {
+  const campus = JSON.parse(readFileSync(new URL("../public/maps/cyberpunk/rules.json", import.meta.url)));
+  const village = JSON.parse(readFileSync(new URL("../public/maps/village/rules.json", import.meta.url)));
+  try {
+    setTownGeometry(campus);
+    assert.deepEqual([WORLD_WIDTH, WORLD_HEIGHT, BUTTON_X, BUTTON_Y], [4096, 4480, 2208, 2848]);
+    const controller = new FieldController(() => {});
+    controller.update(world(own({ x: 4070, y: 2848 })), { ...idle, right: true }, 100, 0);
+    assert.equal(controller.position.x, 4070, "cannot predict a step outside the campus");
+    assert.equal(walkable(5000, 2848), false, "village coordinates outside the campus are rejected");
+    assert.equal(walkable(2208, 2848), true, "campus Meeting Area is open");
+  } finally { setTownGeometry(village); }
+  assert.deepEqual([WORLD_WIDTH, WORLD_HEIGHT, BUTTON_X, BUTTON_Y], [7680, 4320, 3840, 2182]);
 });

@@ -280,7 +280,7 @@ summary { padding-block: 6px; }
 .map-dialog::backdrop { background: #080a13db; }
 .map-dialog header { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .map-dialog h2 { margin: 0; font-size: 16px; font-weight: 400; }
-.map-surface { position: relative; width: min(100%, calc((100dvh - 180px) * 16 / 9)); margin-inline: auto; }
+.map-surface { position: relative; width: min(100%, calc((100dvh - 180px) * var(--map-aspect, 1.777778))); margin-inline: auto; }
 .map-surface img { display: block; width: 100%; image-rendering: pixelated; }
 .map-markers { position: absolute; inset: 0; pointer-events: none; }
 .map-marker { position: absolute; transform: translate(-50%, -50%); font: 18px Silkscreen, monospace; line-height: 1; text-shadow: 0 1px 2px #000, 0 -1px 2px #000; pointer-events: auto; }
