@@ -1,0 +1,2275 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "FBX/Bush_Common.fbx",
+      "byteLength": 81580,
+      "crc32": "bd9b4036"
+    },
+    {
+      "path": "FBX/Bush_Common_Flowers.fbx",
+      "byteLength": 112316,
+      "crc32": "2602d7af"
+    },
+    {
+      "path": "FBX/Clover_1.fbx",
+      "byteLength": 32668,
+      "crc32": "40f487bf"
+    },
+    {
+      "path": "FBX/Clover_2.fbx",
+      "byteLength": 40108,
+      "crc32": "2a5c29a4"
+    },
+    {
+      "path": "FBX/CommonTree_1.fbx",
+      "byteLength": 365068,
+      "crc32": "563d0961"
+    },
+    {
+      "path": "FBX/CommonTree_2.fbx",
+      "byteLength": 323340,
+      "crc32": "9656542d"
+    },
+    {
+      "path": "FBX/CommonTree_3.fbx",
+      "byteLength": 232284,
+      "crc32": "fdd07803"
+    },
+    {
+      "path": "FBX/CommonTree_4.fbx",
+      "byteLength": 236428,
+      "crc32": "d6934149"
+    },
+    {
+      "path": "FBX/CommonTree_5.fbx",
+      "byteLength": 206108,
+      "crc32": "d2adf100"
+    },
+    {
+      "path": "FBX/DeadTree_1.fbx",
+      "byteLength": 320524,
+      "crc32": "9e87b694"
+    },
+    {
+      "path": "FBX/DeadTree_2.fbx",
+      "byteLength": 339660,
+      "crc32": "b2ae4717"
+    },
+    {
+      "path": "FBX/DeadTree_3.fbx",
+      "byteLength": 299196,
+      "crc32": "05815edf"
+    },
+    {
+      "path": "FBX/DeadTree_4.fbx",
+      "byteLength": 293996,
+      "crc32": "a2364fe0"
+    },
+    {
+      "path": "FBX/DeadTree_5.fbx",
+      "byteLength": 291356,
+      "crc32": "8e08ad01"
+    },
+    {
+      "path": "FBX/Fern_1.fbx",
+      "byteLength": 31884,
+      "crc32": "b0355157"
+    },
+    {
+      "path": "FBX/Flower_3_Group.fbx",
+      "byteLength": 48716,
+      "crc32": "3750fd00"
+    },
+    {
+      "path": "FBX/Flower_3_Single.fbx",
+      "byteLength": 32924,
+      "crc32": "06fc7be5"
+    },
+    {
+      "path": "FBX/Flower_4_Group.fbx",
+      "byteLength": 78252,
+      "crc32": "dd63acf7"
+    },
+    {
+      "path": "FBX/Flower_4_Single.fbx",
+      "byteLength": 44876,
+      "crc32": "0e9a72b0"
+    },
+    {
+      "path": "FBX/Grass_Common_Short.fbx",
+      "byteLength": 25996,
+      "crc32": "f1e93ec7"
+    },
+    {
+      "path": "FBX/Grass_Common_Tall.fbx",
+      "byteLength": 32604,
+      "crc32": "42e016ec"
+    },
+    {
+      "path": "FBX/Grass_Wispy_Short.fbx",
+      "byteLength": 40620,
+      "crc32": "3f37fdf4"
+    },
+    {
+      "path": "FBX/Grass_Wispy_Tall.fbx",
+      "byteLength": 43948,
+      "crc32": "c9c5c0aa"
+    },
+    {
+      "path": "FBX/Mushroom_Common.fbx",
+      "byteLength": 42636,
+      "crc32": "4ba240e9"
+    },
+    {
+      "path": "FBX/Mushroom_Laetiporus.fbx",
+      "byteLength": 106748,
+      "crc32": "c1a0a361"
+    },
+    {
+      "path": "FBX/Pebble_Round_1.fbx",
+      "byteLength": 22716,
+      "crc32": "c826bd49"
+    },
+    {
+      "path": "FBX/Pebble_Round_2.fbx",
+      "byteLength": 22028,
+      "crc32": "1b07ce41"
+    },
+    {
+      "path": "FBX/Pebble_Round_3.fbx",
+      "byteLength": 22396,
+      "crc32": "96f5ecf0"
+    },
+    {
+      "path": "FBX/Pebble_Round_4.fbx",
+      "byteLength": 22316,
+      "crc32": "74385f84"
+    },
+    {
+      "path": "FBX/Pebble_Round_5.fbx",
+      "byteLength": 22204,
+      "crc32": "ab3fb1fa"
+    },
+    {
+      "path": "FBX/Pebble_Square_1.fbx",
+      "byteLength": 21708,
+      "crc32": "ceaa2bc6"
+    },
+    {
+      "path": "FBX/Pebble_Square_2.fbx",
+      "byteLength": 20908,
+      "crc32": "1c01ce50"
+    },
+    {
+      "path": "FBX/Pebble_Square_3.fbx",
+      "byteLength": 20108,
+      "crc32": "c33217e1"
+    },
+    {
+      "path": "FBX/Pebble_Square_4.fbx",
+      "byteLength": 20140,
+      "crc32": "01a8f1cf"
+    },
+    {
+      "path": "FBX/Pebble_Square_5.fbx",
+      "byteLength": 20796,
+      "crc32": "107a517c"
+    },
+    {
+      "path": "FBX/Pebble_Square_6.fbx",
+      "byteLength": 20540,
+      "crc32": "b247c28f"
+    },
+    {
+      "path": "FBX/Petal_1.fbx",
+      "byteLength": 19676,
+      "crc32": "aa926aa6"
+    },
+    {
+      "path": "FBX/Petal_2.fbx",
+      "byteLength": 19820,
+      "crc32": "8b57c0d9"
+    },
+    {
+      "path": "FBX/Petal_3.fbx",
+      "byteLength": 19820,
+      "crc32": "d8c7d37d"
+    },
+    {
+      "path": "FBX/Petal_4.fbx",
+      "byteLength": 20236,
+      "crc32": "d48c5875"
+    },
+    {
+      "path": "FBX/Petal_5.fbx",
+      "byteLength": 19820,
+      "crc32": "ac8dbf05"
+    },
+    {
+      "path": "FBX/Pine_1.fbx",
+      "byteLength": 222204,
+      "crc32": "cbf198c4"
+    },
+    {
+      "path": "FBX/Pine_2.fbx",
+      "byteLength": 205036,
+      "crc32": "18a4dc48"
+    },
+    {
+      "path": "FBX/Pine_3.fbx",
+      "byteLength": 263724,
+      "crc32": "d15cef13"
+    },
+    {
+      "path": "FBX/Pine_4.fbx",
+      "byteLength": 198108,
+      "crc32": "ffcd0763"
+    },
+    {
+      "path": "FBX/Pine_5.fbx",
+      "byteLength": 112124,
+      "crc32": "6f5f9b14"
+    },
+    {
+      "path": "FBX/Plant_1.fbx",
+      "byteLength": 24412,
+      "crc32": "4d27b91a"
+    },
+    {
+      "path": "FBX/Plant_1_Big.fbx",
+      "byteLength": 34188,
+      "crc32": "792ff2c1"
+    },
+    {
+      "path": "FBX/Plant_7.fbx",
+      "byteLength": 21308,
+      "crc32": "cc33d02a"
+    },
+    {
+      "path": "FBX/Plant_7_Big.fbx",
+      "byteLength": 24268,
+      "crc32": "9b2bcf22"
+    },
+    {
+      "path": "FBX/RockPath_Round_Small_1.fbx",
+      "byteLength": 46220,
+      "crc32": "924e67f3"
+    },
+    {
+      "path": "FBX/RockPath_Round_Small_2.fbx",
+      "byteLength": 48956,
+      "crc32": "114a53d7"
+    },
+    {
+      "path": "FBX/RockPath_Round_Small_3.fbx",
+      "byteLength": 46460,
+      "crc32": "a045aa3b"
+    },
+    {
+      "path": "FBX/RockPath_Round_Thin.fbx",
+      "byteLength": 76796,
+      "crc32": "5f00df98"
+    },
+    {
+      "path": "FBX/RockPath_Round_Wide.fbx",
+      "byteLength": 106940,
+      "crc32": "abdf74ae"
+    },
+    {
+      "path": "FBX/RockPath_Square_Small_1.fbx",
+      "byteLength": 40060,
+      "crc32": "c27b2e66"
+    },
+    {
+      "path": "FBX/RockPath_Square_Small_2.fbx",
+      "byteLength": 33628,
+      "crc32": "bb7d36c7"
+    },
+    {
+      "path": "FBX/RockPath_Square_Small_3.fbx",
+      "byteLength": 34188,
+      "crc32": "1243d655"
+    },
+    {
+      "path": "FBX/RockPath_Square_Thin.fbx",
+      "byteLength": 64620,
+      "crc32": "5fab96cf"
+    },
+    {
+      "path": "FBX/RockPath_Square_Wide.fbx",
+      "byteLength": 75260,
+      "crc32": "7dc9a1b8"
+    },
+    {
+      "path": "FBX/Rock_Medium_1.fbx",
+      "byteLength": 30572,
+      "crc32": "b01db9d1"
+    },
+    {
+      "path": "FBX/Rock_Medium_2.fbx",
+      "byteLength": 27164,
+      "crc32": "b4f99206"
+    },
+    {
+      "path": "FBX/Rock_Medium_3.fbx",
+      "byteLength": 37052,
+      "crc32": "6914adce"
+    },
+    {
+      "path": "FBX/TwistedTree_1.fbx",
+      "byteLength": 526716,
+      "crc32": "bb924d9f"
+    },
+    {
+      "path": "FBX/TwistedTree_2.fbx",
+      "byteLength": 506828,
+      "crc32": "f4d07ee9"
+    },
+    {
+      "path": "FBX/TwistedTree_3.fbx",
+      "byteLength": 560220,
+      "crc32": "0f511265"
+    },
+    {
+      "path": "FBX/TwistedTree_4.fbx",
+      "byteLength": 537884,
+      "crc32": "9b686a18"
+    },
+    {
+      "path": "FBX/TwistedTree_5.fbx",
+      "byteLength": 568684,
+      "crc32": "6002fa18"
+    },
+    {
+      "path": "FBX (Unity)/Bush_Common.fbx",
+      "byteLength": 84060,
+      "crc32": "1a34a5f6"
+    },
+    {
+      "path": "FBX (Unity)/Bush_Common_Flowers.fbx",
+      "byteLength": 115532,
+      "crc32": "ba287743"
+    },
+    {
+      "path": "FBX (Unity)/Clover_1.fbx",
+      "byteLength": 32860,
+      "crc32": "2ee2e6fe"
+    },
+    {
+      "path": "FBX (Unity)/Clover_2.fbx",
+      "byteLength": 40604,
+      "crc32": "6e20e409"
+    },
+    {
+      "path": "FBX (Unity)/CommonTree_1.fbx",
+      "byteLength": 374492,
+      "crc32": "ab025e9d"
+    },
+    {
+      "path": "FBX (Unity)/CommonTree_2.fbx",
+      "byteLength": 330636,
+      "crc32": "854be7db"
+    },
+    {
+      "path": "FBX (Unity)/CommonTree_3.fbx",
+      "byteLength": 238860,
+      "crc32": "451e7efa"
+    },
+    {
+      "path": "FBX (Unity)/CommonTree_4.fbx",
+      "byteLength": 240748,
+      "crc32": "5dfd5dbf"
+    },
+    {
+      "path": "FBX (Unity)/CommonTree_5.fbx",
+      "byteLength": 211404,
+      "crc32": "c1edc1f5"
+    },
+    {
+      "path": "FBX (Unity)/DeadTree_1.fbx",
+      "byteLength": 324540,
+      "crc32": "fe2478af"
+    },
+    {
+      "path": "FBX (Unity)/DeadTree_2.fbx",
+      "byteLength": 343756,
+      "crc32": "ff013ad0"
+    },
+    {
+      "path": "FBX (Unity)/DeadTree_3.fbx",
+      "byteLength": 302604,
+      "crc32": "1a7aef75"
+    },
+    {
+      "path": "FBX (Unity)/DeadTree_4.fbx",
+      "byteLength": 297452,
+      "crc32": "7d727f2d"
+    },
+    {
+      "path": "FBX (Unity)/DeadTree_5.fbx",
+      "byteLength": 295068,
+      "crc32": "1fc19b5e"
+    },
+    {
+      "path": "FBX (Unity)/Fern_1.fbx",
+      "byteLength": 32060,
+      "crc32": "757cd4ab"
+    },
+    {
+      "path": "FBX (Unity)/Flower_3_Group.fbx",
+      "byteLength": 49308,
+      "crc32": "0d586ff3"
+    },
+    {
+      "path": "FBX (Unity)/Flower_3_Single.fbx",
+      "byteLength": 33084,
+      "crc32": "653babd8"
+    },
+    {
+      "path": "FBX (Unity)/Flower_4_Group.fbx",
+      "byteLength": 80108,
+      "crc32": "02503153"
+    },
+    {
+      "path": "FBX (Unity)/Flower_4_Single.fbx",
+      "byteLength": 45452,
+      "crc32": "d7ccee22"
+    },
+    {
+      "path": "FBX (Unity)/Grass_Common_Short.fbx",
+      "byteLength": 26060,
+      "crc32": "ae9d702c"
+    },
+    {
+      "path": "FBX (Unity)/Grass_Common_Tall.fbx",
+      "byteLength": 32892,
+      "crc32": "cc102e7a"
+    },
+    {
+      "path": "FBX (Unity)/Grass_Wispy_Short.fbx",
+      "byteLength": 41084,
+      "crc32": "7e132762"
+    },
+    {
+      "path": "FBX (Unity)/Grass_Wispy_Tall.fbx",
+      "byteLength": 44524,
+      "crc32": "c7d27e14"
+    },
+    {
+      "path": "FBX (Unity)/Mushroom_Common.fbx",
+      "byteLength": 43180,
+      "crc32": "bb812f5c"
+    },
+    {
+      "path": "FBX (Unity)/Mushroom_Laetiporus.fbx",
+      "byteLength": 108956,
+      "crc32": "bdb99c1f"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Round_1.fbx",
+      "byteLength": 23372,
+      "crc32": "6cc61fa3"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Round_2.fbx",
+      "byteLength": 22540,
+      "crc32": "518b853d"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Round_3.fbx",
+      "byteLength": 22988,
+      "crc32": "61048208"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Round_4.fbx",
+      "byteLength": 23084,
+      "crc32": "7cc70121"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Round_5.fbx",
+      "byteLength": 22828,
+      "crc32": "21756ff9"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_1.fbx",
+      "byteLength": 21628,
+      "crc32": "725fe53d"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_2.fbx",
+      "byteLength": 20812,
+      "crc32": "428876e2"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_3.fbx",
+      "byteLength": 19996,
+      "crc32": "aed7ac9c"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_4.fbx",
+      "byteLength": 19996,
+      "crc32": "eec1d432"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_5.fbx",
+      "byteLength": 20700,
+      "crc32": "c58d430c"
+    },
+    {
+      "path": "FBX (Unity)/Pebble_Square_6.fbx",
+      "byteLength": 20412,
+      "crc32": "19a46c1d"
+    },
+    {
+      "path": "FBX (Unity)/Petal_1.fbx",
+      "byteLength": 19532,
+      "crc32": "d39a3c2a"
+    },
+    {
+      "path": "FBX (Unity)/Petal_2.fbx",
+      "byteLength": 19644,
+      "crc32": "06c3ff93"
+    },
+    {
+      "path": "FBX (Unity)/Petal_3.fbx",
+      "byteLength": 19676,
+      "crc32": "3bc66ed6"
+    },
+    {
+      "path": "FBX (Unity)/Petal_4.fbx",
+      "byteLength": 20092,
+      "crc32": "03fc7ee1"
+    },
+    {
+      "path": "FBX (Unity)/Petal_5.fbx",
+      "byteLength": 19676,
+      "crc32": "7212d461"
+    },
+    {
+      "path": "FBX (Unity)/Pine_1.fbx",
+      "byteLength": 225404,
+      "crc32": "e7ea3c95"
+    },
+    {
+      "path": "FBX (Unity)/Pine_2.fbx",
+      "byteLength": 208028,
+      "crc32": "2812d4fd"
+    },
+    {
+      "path": "FBX (Unity)/Pine_3.fbx",
+      "byteLength": 267548,
+      "crc32": "79ba9191"
+    },
+    {
+      "path": "FBX (Unity)/Pine_4.fbx",
+      "byteLength": 200924,
+      "crc32": "6bb52269"
+    },
+    {
+      "path": "FBX (Unity)/Pine_5.fbx",
+      "byteLength": 113868,
+      "crc32": "ae52589c"
+    },
+    {
+      "path": "FBX (Unity)/Plant_1.fbx",
+      "byteLength": 24396,
+      "crc32": "a382513d"
+    },
+    {
+      "path": "FBX (Unity)/Plant_1_Big.fbx",
+      "byteLength": 34508,
+      "crc32": "7aaa792e"
+    },
+    {
+      "path": "FBX (Unity)/Plant_7.fbx",
+      "byteLength": 21212,
+      "crc32": "5e233315"
+    },
+    {
+      "path": "FBX (Unity)/Plant_7_Big.fbx",
+      "byteLength": 24284,
+      "crc32": "ed5beae4"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Round_Small_1.fbx",
+      "byteLength": 46988,
+      "crc32": "2ab0ec66"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Round_Small_2.fbx",
+      "byteLength": 49788,
+      "crc32": "d57cd918"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Round_Small_3.fbx",
+      "byteLength": 47180,
+      "crc32": "d532c3f5"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Round_Thin.fbx",
+      "byteLength": 78268,
+      "crc32": "833bcb09"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Round_Wide.fbx",
+      "byteLength": 109308,
+      "crc32": "f8376cd5"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Square_Small_1.fbx",
+      "byteLength": 40476,
+      "crc32": "16630ddc"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Square_Small_2.fbx",
+      "byteLength": 33900,
+      "crc32": "39fc2186"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Square_Small_3.fbx",
+      "byteLength": 34460,
+      "crc32": "c1b45551"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Square_Thin.fbx",
+      "byteLength": 65852,
+      "crc32": "64df9bd9"
+    },
+    {
+      "path": "FBX (Unity)/RockPath_Square_Wide.fbx",
+      "byteLength": 76604,
+      "crc32": "c4dbdaf8"
+    },
+    {
+      "path": "FBX (Unity)/Rock_Medium_1.fbx",
+      "byteLength": 30700,
+      "crc32": "86639426"
+    },
+    {
+      "path": "FBX (Unity)/Rock_Medium_2.fbx",
+      "byteLength": 27276,
+      "crc32": "f1bc2f3f"
+    },
+    {
+      "path": "FBX (Unity)/Rock_Medium_3.fbx",
+      "byteLength": 37324,
+      "crc32": "99186c44"
+    },
+    {
+      "path": "FBX (Unity)/TwistedTree_1.fbx",
+      "byteLength": 539292,
+      "crc32": "43c1b996"
+    },
+    {
+      "path": "FBX (Unity)/TwistedTree_2.fbx",
+      "byteLength": 517228,
+      "crc32": "b5ae7cd4"
+    },
+    {
+      "path": "FBX (Unity)/TwistedTree_3.fbx",
+      "byteLength": 573196,
+      "crc32": "883d3598"
+    },
+    {
+      "path": "FBX (Unity)/TwistedTree_4.fbx",
+      "byteLength": 551052,
+      "crc32": "b4d3946a"
+    },
+    {
+      "path": "FBX (Unity)/TwistedTree_5.fbx",
+      "byteLength": 582284,
+      "crc32": "32ced39d"
+    },
+    {
+      "path": "glTF/Bark_DeadTree.png",
+      "byteLength": 4228870,
+      "crc32": "b6f120db"
+    },
+    {
+      "path": "glTF/Bark_DeadTree_Normal.png",
+      "byteLength": 5728199,
+      "crc32": "dec3f072"
+    },
+    {
+      "path": "glTF/Bark_NormalTree.png",
+      "byteLength": 3894788,
+      "crc32": "589c800f"
+    },
+    {
+      "path": "glTF/Bark_NormalTree_Normal.png",
+      "byteLength": 4384496,
+      "crc32": "525ea39b"
+    },
+    {
+      "path": "glTF/Bark_TwistedTree.png",
+      "byteLength": 4630805,
+      "crc32": "f1bc527d"
+    },
+    {
+      "path": "glTF/Bark_TwistedTree_Normal.png",
+      "byteLength": 5728199,
+      "crc32": "dec3f072"
+    },
+    {
+      "path": "glTF/Bush_Common.bin",
+      "byteLength": 91800,
+      "crc32": "950a6499"
+    },
+    {
+      "path": "glTF/Bush_Common.gltf",
+      "byteLength": 2101,
+      "crc32": "c3e4cbdc"
+    },
+    {
+      "path": "glTF/Bush_Common_Flowers.bin",
+      "byteLength": 128928,
+      "crc32": "8b55fcba"
+    },
+    {
+      "path": "glTF/Bush_Common_Flowers.gltf",
+      "byteLength": 3654,
+      "crc32": "4c5a40c5"
+    },
+    {
+      "path": "glTF/Clover_1.bin",
+      "byteLength": 12956,
+      "crc32": "0962fe56"
+    },
+    {
+      "path": "glTF/Clover_1.gltf",
+      "byteLength": 2074,
+      "crc32": "fa5b76c9"
+    },
+    {
+      "path": "glTF/Clover_2.bin",
+      "byteLength": 21012,
+      "crc32": "fe2b8250"
+    },
+    {
+      "path": "glTF/Clover_2.gltf",
+      "byteLength": 2077,
+      "crc32": "ffe8ce3f"
+    },
+    {
+      "path": "glTF/CommonTree_1.bin",
+      "byteLength": 491576,
+      "crc32": "517142b6"
+    },
+    {
+      "path": "glTF/CommonTree_1.gltf",
+      "byteLength": 3869,
+      "crc32": "16e71a42"
+    },
+    {
+      "path": "glTF/CommonTree_2.bin",
+      "byteLength": 423024,
+      "crc32": "43753f8a"
+    },
+    {
+      "path": "glTF/CommonTree_2.gltf",
+      "byteLength": 3866,
+      "crc32": "8f86b4b6"
+    },
+    {
+      "path": "glTF/CommonTree_3.bin",
+      "byteLength": 296984,
+      "crc32": "6c0a0f90"
+    },
+    {
+      "path": "glTF/CommonTree_3.gltf",
+      "byteLength": 3864,
+      "crc32": "675fda38"
+    },
+    {
+      "path": "glTF/CommonTree_4.bin",
+      "byteLength": 307596,
+      "crc32": "26d943d7"
+    },
+    {
+      "path": "glTF/CommonTree_4.gltf",
+      "byteLength": 3865,
+      "crc32": "a8f2e6f3"
+    },
+    {
+      "path": "glTF/CommonTree_5.bin",
+      "byteLength": 252996,
+      "crc32": "7af1d619"
+    },
+    {
+      "path": "glTF/CommonTree_5.gltf",
+      "byteLength": 3860,
+      "crc32": "20c30bfe"
+    },
+    {
+      "path": "glTF/DeadTree_1.bin",
+      "byteLength": 422744,
+      "crc32": "d6688daa"
+    },
+    {
+      "path": "glTF/DeadTree_1.gltf",
+      "byteLength": 2206,
+      "crc32": "2f681b4a"
+    },
+    {
+      "path": "glTF/DeadTree_2.bin",
+      "byteLength": 453824,
+      "crc32": "1c7a99c2"
+    },
+    {
+      "path": "glTF/DeadTree_2.gltf",
+      "byteLength": 2213,
+      "crc32": "717adc58"
+    },
+    {
+      "path": "glTF/DeadTree_3.bin",
+      "byteLength": 415740,
+      "crc32": "5dcbad5d"
+    },
+    {
+      "path": "glTF/DeadTree_3.gltf",
+      "byteLength": 2211,
+      "crc32": "aec54e83"
+    },
+    {
+      "path": "glTF/DeadTree_4.bin",
+      "byteLength": 401556,
+      "crc32": "cb367588"
+    },
+    {
+      "path": "glTF/DeadTree_4.gltf",
+      "byteLength": 2211,
+      "crc32": "3a1cb4ad"
+    },
+    {
+      "path": "glTF/DeadTree_5.bin",
+      "byteLength": 393840,
+      "crc32": "5e0b3ebc"
+    },
+    {
+      "path": "glTF/DeadTree_5.gltf",
+      "byteLength": 2211,
+      "crc32": "2487db1f"
+    },
+    {
+      "path": "glTF/desktop.ini",
+      "byteLength": 4145,
+      "crc32": "16a6c346"
+    },
+    {
+      "path": "glTF/Fern_1.bin",
+      "byteLength": 11448,
+      "crc32": "6cb14cbc"
+    },
+    {
+      "path": "glTF/Fern_1.gltf",
+      "byteLength": 2058,
+      "crc32": "ae365a17"
+    },
+    {
+      "path": "glTF/Flowers.png",
+      "byteLength": 444609,
+      "crc32": "10c99cf6"
+    },
+    {
+      "path": "glTF/Flower_3_Group.bin",
+      "byteLength": 27772,
+      "crc32": "e411c510"
+    },
+    {
+      "path": "glTF/Flower_3_Group.gltf",
+      "byteLength": 3629,
+      "crc32": "8291f0fd"
+    },
+    {
+      "path": "glTF/Flower_3_Single.bin",
+      "byteLength": 10792,
+      "crc32": "2b2ed56f"
+    },
+    {
+      "path": "glTF/Flower_3_Single.gltf",
+      "byteLength": 3632,
+      "crc32": "aef7b710"
+    },
+    {
+      "path": "glTF/Flower_4_Group.bin",
+      "byteLength": 62220,
+      "crc32": "b2d650ed"
+    },
+    {
+      "path": "glTF/Flower_4_Group.gltf",
+      "byteLength": 3645,
+      "crc32": "4ef73d16"
+    },
+    {
+      "path": "glTF/Flower_4_Single.bin",
+      "byteLength": 23812,
+      "crc32": "d50f5f09"
+    },
+    {
+      "path": "glTF/Flower_4_Single.gltf",
+      "byteLength": 3631,
+      "crc32": "f67f500b"
+    },
+    {
+      "path": "glTF/Grass.png",
+      "byteLength": 33605,
+      "crc32": "4ac081c0"
+    },
+    {
+      "path": "glTF/Grass_Common_Short.bin",
+      "byteLength": 7052,
+      "crc32": "a58bccc9"
+    },
+    {
+      "path": "glTF/Grass_Common_Short.gltf",
+      "byteLength": 2023,
+      "crc32": "ec8658e9"
+    },
+    {
+      "path": "glTF/Grass_Common_Tall.bin",
+      "byteLength": 14076,
+      "crc32": "3f12f7ee"
+    },
+    {
+      "path": "glTF/Grass_Common_Tall.gltf",
+      "byteLength": 2025,
+      "crc32": "751fb5ea"
+    },
+    {
+      "path": "glTF/Grass_Wispy_Short.bin",
+      "byteLength": 25324,
+      "crc32": "6b5bac62"
+    },
+    {
+      "path": "glTF/Grass_Wispy_Short.gltf",
+      "byteLength": 2025,
+      "crc32": "6520c199"
+    },
+    {
+      "path": "glTF/Grass_Wispy_Tall.bin",
+      "byteLength": 29492,
+      "crc32": "0c913bde"
+    },
+    {
+      "path": "glTF/Grass_Wispy_Tall.gltf",
+      "byteLength": 2023,
+      "crc32": "27b0f2bc"
+    },
+    {
+      "path": "glTF/Leaf_Pine.png",
+      "byteLength": 71747,
+      "crc32": "e6b0e9b6"
+    },
+    {
+      "path": "glTF/Leaf_Pine_C.png",
+      "byteLength": 70055,
+      "crc32": "143d7333"
+    },
+    {
+      "path": "glTF/Leaves.png",
+      "byteLength": 2586432,
+      "crc32": "9034fc8c"
+    },
+    {
+      "path": "glTF/Leaves_GiantPine_C.png",
+      "byteLength": 59613,
+      "crc32": "dce352a5"
+    },
+    {
+      "path": "glTF/Leaves_NormalTree.png",
+      "byteLength": 158772,
+      "crc32": "37ba41b9"
+    },
+    {
+      "path": "glTF/Leaves_NormalTree_C.png",
+      "byteLength": 158796,
+      "crc32": "fff91ff3"
+    },
+    {
+      "path": "glTF/Leaves_TwistedTree.png",
+      "byteLength": 69611,
+      "crc32": "7fc97121"
+    },
+    {
+      "path": "glTF/Leaves_TwistedTree_C.png",
+      "byteLength": 70353,
+      "crc32": "d73ee3b6"
+    },
+    {
+      "path": "glTF/Mushrooms.png",
+      "byteLength": 1208660,
+      "crc32": "7b6ec491"
+    },
+    {
+      "path": "glTF/Mushroom_Common.bin",
+      "byteLength": 23040,
+      "crc32": "bc0dedfc"
+    },
+    {
+      "path": "glTF/Mushroom_Common.gltf",
+      "byteLength": 1822,
+      "crc32": "c957f336"
+    },
+    {
+      "path": "glTF/Mushroom_Laetiporus.bin",
+      "byteLength": 77088,
+      "crc32": "24fdf76e"
+    },
+    {
+      "path": "glTF/Mushroom_Laetiporus.gltf",
+      "byteLength": 1833,
+      "crc32": "9f086ac0"
+    },
+    {
+      "path": "glTF/PathRocks_Diffuse.png",
+      "byteLength": 811732,
+      "crc32": "d0e1ed85"
+    },
+    {
+      "path": "glTF/Pebble_Round_1.bin",
+      "byteLength": 10160,
+      "crc32": "e7740e4b"
+    },
+    {
+      "path": "glTF/Pebble_Round_1.gltf",
+      "byteLength": 1850,
+      "crc32": "f15dc27e"
+    },
+    {
+      "path": "glTF/Pebble_Round_2.bin",
+      "byteLength": 7468,
+      "crc32": "6621e229"
+    },
+    {
+      "path": "glTF/Pebble_Round_2.gltf",
+      "byteLength": 1848,
+      "crc32": "2c7b05fe"
+    },
+    {
+      "path": "glTF/Pebble_Round_3.bin",
+      "byteLength": 8576,
+      "crc32": "d3a7b176"
+    },
+    {
+      "path": "glTF/Pebble_Round_3.gltf",
+      "byteLength": 1848,
+      "crc32": "ceaa78fb"
+    },
+    {
+      "path": "glTF/Pebble_Round_4.bin",
+      "byteLength": 9268,
+      "crc32": "5bcd5c40"
+    },
+    {
+      "path": "glTF/Pebble_Round_4.gltf",
+      "byteLength": 1841,
+      "crc32": "6ef76155"
+    },
+    {
+      "path": "glTF/Pebble_Round_5.bin",
+      "byteLength": 8872,
+      "crc32": "e57e1e0d"
+    },
+    {
+      "path": "glTF/Pebble_Round_5.gltf",
+      "byteLength": 1846,
+      "crc32": "5fd15929"
+    },
+    {
+      "path": "glTF/Pebble_Square_1.bin",
+      "byteLength": 7536,
+      "crc32": "406fcd7f"
+    },
+    {
+      "path": "glTF/Pebble_Square_1.gltf",
+      "byteLength": 1850,
+      "crc32": "8d823684"
+    },
+    {
+      "path": "glTF/Pebble_Square_2.bin",
+      "byteLength": 5652,
+      "crc32": "3f2ee3b1"
+    },
+    {
+      "path": "glTF/Pebble_Square_2.gltf",
+      "byteLength": 1847,
+      "crc32": "7928aa46"
+    },
+    {
+      "path": "glTF/Pebble_Square_3.bin",
+      "byteLength": 3768,
+      "crc32": "bd55c819"
+    },
+    {
+      "path": "glTF/Pebble_Square_3.gltf",
+      "byteLength": 1847,
+      "crc32": "c46fb5c4"
+    },
+    {
+      "path": "glTF/Pebble_Square_4.bin",
+      "byteLength": 3360,
+      "crc32": "e27d1b96"
+    },
+    {
+      "path": "glTF/Pebble_Square_4.gltf",
+      "byteLength": 1846,
+      "crc32": "eae5b4d1"
+    },
+    {
+      "path": "glTF/Pebble_Square_5.bin",
+      "byteLength": 5424,
+      "crc32": "d204f7f2"
+    },
+    {
+      "path": "glTF/Pebble_Square_5.gltf",
+      "byteLength": 1849,
+      "crc32": "fc8f3bb6"
+    },
+    {
+      "path": "glTF/Pebble_Square_6.bin",
+      "byteLength": 4840,
+      "crc32": "7729a4f6"
+    },
+    {
+      "path": "glTF/Pebble_Square_6.gltf",
+      "byteLength": 1850,
+      "crc32": "893aade2"
+    },
+    {
+      "path": "glTF/Petal_1.bin",
+      "byteLength": 528,
+      "crc32": "2da8474a"
+    },
+    {
+      "path": "glTF/Petal_1.gltf",
+      "byteLength": 1845,
+      "crc32": "50aadb19"
+    },
+    {
+      "path": "glTF/Petal_2.bin",
+      "byteLength": 604,
+      "crc32": "56694e64"
+    },
+    {
+      "path": "glTF/Petal_2.gltf",
+      "byteLength": 1825,
+      "crc32": "6c27b179"
+    },
+    {
+      "path": "glTF/Petal_3.bin",
+      "byteLength": 604,
+      "crc32": "74a8600d"
+    },
+    {
+      "path": "glTF/Petal_3.gltf",
+      "byteLength": 1849,
+      "crc32": "de50a321"
+    },
+    {
+      "path": "glTF/Petal_4.bin",
+      "byteLength": 980,
+      "crc32": "bf3baa1e"
+    },
+    {
+      "path": "glTF/Petal_4.gltf",
+      "byteLength": 1848,
+      "crc32": "cc411313"
+    },
+    {
+      "path": "glTF/Petal_5.bin",
+      "byteLength": 604,
+      "crc32": "ba01d413"
+    },
+    {
+      "path": "glTF/Petal_5.gltf",
+      "byteLength": 1844,
+      "crc32": "2b39a20e"
+    },
+    {
+      "path": "glTF/Pine_1.bin",
+      "byteLength": 275492,
+      "crc32": "7546ccea"
+    },
+    {
+      "path": "glTF/Pine_1.gltf",
+      "byteLength": 3832,
+      "crc32": "48c01b25"
+    },
+    {
+      "path": "glTF/Pine_2.bin",
+      "byteLength": 258336,
+      "crc32": "b677bde5"
+    },
+    {
+      "path": "glTF/Pine_2.gltf",
+      "byteLength": 3833,
+      "crc32": "3fddb885"
+    },
+    {
+      "path": "glTF/Pine_3.bin",
+      "byteLength": 345288,
+      "crc32": "cfaaa090"
+    },
+    {
+      "path": "glTF/Pine_3.gltf",
+      "byteLength": 3827,
+      "crc32": "276274d8"
+    },
+    {
+      "path": "glTF/Pine_4.bin",
+      "byteLength": 254844,
+      "crc32": "f33341a3"
+    },
+    {
+      "path": "glTF/Pine_4.gltf",
+      "byteLength": 3831,
+      "crc32": "b10b5b75"
+    },
+    {
+      "path": "glTF/Pine_5.bin",
+      "byteLength": 120996,
+      "crc32": "1e9e4167"
+    },
+    {
+      "path": "glTF/Pine_5.gltf",
+      "byteLength": 3815,
+      "crc32": "42a8a759"
+    },
+    {
+      "path": "glTF/Plant_1.bin",
+      "byteLength": 5520,
+      "crc32": "2791ec21"
+    },
+    {
+      "path": "glTF/Plant_1.gltf",
+      "byteLength": 2057,
+      "crc32": "8c09c61a"
+    },
+    {
+      "path": "glTF/Plant_1_Big.bin",
+      "byteLength": 16560,
+      "crc32": "65cf6583"
+    },
+    {
+      "path": "glTF/Plant_1_Big.gltf",
+      "byteLength": 2075,
+      "crc32": "d482404f"
+    },
+    {
+      "path": "glTF/Plant_7.bin",
+      "byteLength": 2016,
+      "crc32": "22315ee1"
+    },
+    {
+      "path": "glTF/Plant_7.gltf",
+      "byteLength": 1844,
+      "crc32": "bd5fc50d"
+    },
+    {
+      "path": "glTF/Plant_7_Big.bin",
+      "byteLength": 4704,
+      "crc32": "aca07237"
+    },
+    {
+      "path": "glTF/Plant_7_Big.gltf",
+      "byteLength": 1857,
+      "crc32": "5018ea88"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_1.bin",
+      "byteLength": 71140,
+      "crc32": "2a56d19d"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_1.gltf",
+      "byteLength": 1871,
+      "crc32": "d1e5357b"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_2.bin",
+      "byteLength": 79204,
+      "crc32": "76b7ad77"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_2.gltf",
+      "byteLength": 1873,
+      "crc32": "b3c5e198"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_3.bin",
+      "byteLength": 70844,
+      "crc32": "22cae9f5"
+    },
+    {
+      "path": "glTF/RockPath_Round_Small_3.gltf",
+      "byteLength": 1872,
+      "crc32": "83a6e417"
+    },
+    {
+      "path": "glTF/RockPath_Round_Thin.bin",
+      "byteLength": 159316,
+      "crc32": "97c8702a"
+    },
+    {
+      "path": "glTF/RockPath_Round_Thin.gltf",
+      "byteLength": 1868,
+      "crc32": "9bd598ab"
+    },
+    {
+      "path": "glTF/RockPath_Round_Wide.bin",
+      "byteLength": 247688,
+      "crc32": "3b597f39"
+    },
+    {
+      "path": "glTF/RockPath_Round_Wide.gltf",
+      "byteLength": 1868,
+      "crc32": "b369939b"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_1.bin",
+      "byteLength": 56956,
+      "crc32": "4b7378d1"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_1.gltf",
+      "byteLength": 1874,
+      "crc32": "c3456b69"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_2.bin",
+      "byteLength": 40636,
+      "crc32": "cd31ee0a"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_2.gltf",
+      "byteLength": 1873,
+      "crc32": "a13e0881"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_3.bin",
+      "byteLength": 41040,
+      "crc32": "9b742a9a"
+    },
+    {
+      "path": "glTF/RockPath_Square_Small_3.gltf",
+      "byteLength": 1873,
+      "crc32": "258c1b19"
+    },
+    {
+      "path": "glTF/RockPath_Square_Thin.bin",
+      "byteLength": 130024,
+      "crc32": "f5715d18"
+    },
+    {
+      "path": "glTF/RockPath_Square_Thin.gltf",
+      "byteLength": 1871,
+      "crc32": "34a35c0c"
+    },
+    {
+      "path": "glTF/RockPath_Square_Wide.bin",
+      "byteLength": 164320,
+      "crc32": "8434823b"
+    },
+    {
+      "path": "glTF/RockPath_Square_Wide.gltf",
+      "byteLength": 1872,
+      "crc32": "ee34e45c"
+    },
+    {
+      "path": "glTF/Rocks_Desert_Diffuse.png",
+      "byteLength": 2095731,
+      "crc32": "b6c3ee70"
+    },
+    {
+      "path": "glTF/Rocks_Diffuse.png",
+      "byteLength": 2517398,
+      "crc32": "3ae6feb3"
+    },
+    {
+      "path": "glTF/Rock_Medium_1.bin",
+      "byteLength": 13284,
+      "crc32": "c4babb01"
+    },
+    {
+      "path": "glTF/Rock_Medium_1.gltf",
+      "byteLength": 1831,
+      "crc32": "897c9fe8"
+    },
+    {
+      "path": "glTF/Rock_Medium_2.bin",
+      "byteLength": 9432,
+      "crc32": "a2391ab4"
+    },
+    {
+      "path": "glTF/Rock_Medium_2.gltf",
+      "byteLength": 1825,
+      "crc32": "a18a77c3"
+    },
+    {
+      "path": "glTF/Rock_Medium_3.bin",
+      "byteLength": 20124,
+      "crc32": "4737daf5"
+    },
+    {
+      "path": "glTF/Rock_Medium_3.gltf",
+      "byteLength": 1832,
+      "crc32": "eef708c6"
+    },
+    {
+      "path": "glTF/TwistedTree_1.bin",
+      "byteLength": 732456,
+      "crc32": "f10ed100"
+    },
+    {
+      "path": "glTF/TwistedTree_1.gltf",
+      "byteLength": 3819,
+      "crc32": "ea814902"
+    },
+    {
+      "path": "glTF/TwistedTree_2.bin",
+      "byteLength": 698340,
+      "crc32": "299dbee0"
+    },
+    {
+      "path": "glTF/TwistedTree_2.gltf",
+      "byteLength": 3815,
+      "crc32": "d47129ce"
+    },
+    {
+      "path": "glTF/TwistedTree_3.bin",
+      "byteLength": 771176,
+      "crc32": "6c9e3355"
+    },
+    {
+      "path": "glTF/TwistedTree_3.gltf",
+      "byteLength": 3817,
+      "crc32": "d5f30935"
+    },
+    {
+      "path": "glTF/TwistedTree_4.bin",
+      "byteLength": 757248,
+      "crc32": "45f2bf29"
+    },
+    {
+      "path": "glTF/TwistedTree_4.gltf",
+      "byteLength": 3817,
+      "crc32": "d09b4e73"
+    },
+    {
+      "path": "glTF/TwistedTree_5.bin",
+      "byteLength": 811680,
+      "crc32": "0a27ba8b"
+    },
+    {
+      "path": "glTF/TwistedTree_5.gltf",
+      "byteLength": 3822,
+      "crc32": "75edc74f"
+    },
+    {
+      "path": "License_Standard.txt",
+      "byteLength": 852,
+      "crc32": "78c23f09"
+    },
+    {
+      "path": "OBJ/Bush_Common.mtl",
+      "byteLength": 462,
+      "crc32": "e801b596"
+    },
+    {
+      "path": "OBJ/Bush_Common.obj",
+      "byteLength": 119639,
+      "crc32": "54737c65"
+    },
+    {
+      "path": "OBJ/Bush_Common_Flowers.mtl",
+      "byteLength": 468,
+      "crc32": "af090349"
+    },
+    {
+      "path": "OBJ/Bush_Common_Flowers.obj",
+      "byteLength": 172264,
+      "crc32": "18ed891b"
+    },
+    {
+      "path": "OBJ/Clover_1.mtl",
+      "byteLength": 239,
+      "crc32": "804424a8"
+    },
+    {
+      "path": "OBJ/Clover_1.obj",
+      "byteLength": 26254,
+      "crc32": "86fec6f2"
+    },
+    {
+      "path": "OBJ/Clover_2.mtl",
+      "byteLength": 239,
+      "crc32": "ffd86eca"
+    },
+    {
+      "path": "OBJ/Clover_2.obj",
+      "byteLength": 40801,
+      "crc32": "51aacae6"
+    },
+    {
+      "path": "OBJ/CommonTree_1.mtl",
+      "byteLength": 519,
+      "crc32": "09396f9a"
+    },
+    {
+      "path": "OBJ/CommonTree_1.obj",
+      "byteLength": 645385,
+      "crc32": "915e763c"
+    },
+    {
+      "path": "OBJ/CommonTree_2.mtl",
+      "byteLength": 519,
+      "crc32": "a774119a"
+    },
+    {
+      "path": "OBJ/CommonTree_2.obj",
+      "byteLength": 556765,
+      "crc32": "62abd8bd"
+    },
+    {
+      "path": "OBJ/CommonTree_3.mtl",
+      "byteLength": 519,
+      "crc32": "746039a5"
+    },
+    {
+      "path": "OBJ/CommonTree_3.obj",
+      "byteLength": 405829,
+      "crc32": "71c50e81"
+    },
+    {
+      "path": "OBJ/CommonTree_4.mtl",
+      "byteLength": 519,
+      "crc32": "209febdb"
+    },
+    {
+      "path": "OBJ/CommonTree_4.obj",
+      "byteLength": 397026,
+      "crc32": "c44d45df"
+    },
+    {
+      "path": "OBJ/CommonTree_5.mtl",
+      "byteLength": 519,
+      "crc32": "f38bc3e4"
+    },
+    {
+      "path": "OBJ/CommonTree_5.obj",
+      "byteLength": 342703,
+      "crc32": "1ac48e81"
+    },
+    {
+      "path": "OBJ/DeadTree_1.mtl",
+      "byteLength": 296,
+      "crc32": "1912bcc5"
+    },
+    {
+      "path": "OBJ/DeadTree_1.obj",
+      "byteLength": 543919,
+      "crc32": "73a5731c"
+    },
+    {
+      "path": "OBJ/DeadTree_2.mtl",
+      "byteLength": 296,
+      "crc32": "9c4b9eec"
+    },
+    {
+      "path": "OBJ/DeadTree_2.obj",
+      "byteLength": 581293,
+      "crc32": "76153626"
+    },
+    {
+      "path": "OBJ/DeadTree_3.mtl",
+      "byteLength": 296,
+      "crc32": "e0837f0b"
+    },
+    {
+      "path": "OBJ/DeadTree_3.obj",
+      "byteLength": 540604,
+      "crc32": "b1899b26"
+    },
+    {
+      "path": "OBJ/DeadTree_4.mtl",
+      "byteLength": 296,
+      "crc32": "4d88dcff"
+    },
+    {
+      "path": "OBJ/DeadTree_4.obj",
+      "byteLength": 525027,
+      "crc32": "00604d33"
+    },
+    {
+      "path": "OBJ/DeadTree_5.mtl",
+      "byteLength": 296,
+      "crc32": "31403d18"
+    },
+    {
+      "path": "OBJ/DeadTree_5.obj",
+      "byteLength": 519066,
+      "crc32": "937bffdf"
+    },
+    {
+      "path": "OBJ/Fern_1.mtl",
+      "byteLength": 237,
+      "crc32": "675315ad"
+    },
+    {
+      "path": "OBJ/Fern_1.obj",
+      "byteLength": 20148,
+      "crc32": "2c05f008"
+    },
+    {
+      "path": "OBJ/Flower_3_Group.mtl",
+      "byteLength": 426,
+      "crc32": "b3f391c3"
+    },
+    {
+      "path": "OBJ/Flower_3_Group.obj",
+      "byteLength": 50075,
+      "crc32": "0cc01ceb"
+    },
+    {
+      "path": "OBJ/Flower_3_Single.mtl",
+      "byteLength": 427,
+      "crc32": "95ec3d0d"
+    },
+    {
+      "path": "OBJ/Flower_3_Single.obj",
+      "byteLength": 20140,
+      "crc32": "ff56fcc2"
+    },
+    {
+      "path": "OBJ/Flower_4_Group.mtl",
+      "byteLength": 426,
+      "crc32": "b5d1d25e"
+    },
+    {
+      "path": "OBJ/Flower_4_Group.obj",
+      "byteLength": 111082,
+      "crc32": "5b16d2eb"
+    },
+    {
+      "path": "OBJ/Flower_4_Single.mtl",
+      "byteLength": 427,
+      "crc32": "1b54f0b7"
+    },
+    {
+      "path": "OBJ/Flower_4_Single.obj",
+      "byteLength": 42836,
+      "crc32": "69548dee"
+    },
+    {
+      "path": "OBJ/Grass_Common_Short.mtl",
+      "byteLength": 238,
+      "crc32": "5655bef9"
+    },
+    {
+      "path": "OBJ/Grass_Common_Short.obj",
+      "byteLength": 14318,
+      "crc32": "6296fcae"
+    },
+    {
+      "path": "OBJ/Grass_Common_Tall.mtl",
+      "byteLength": 237,
+      "crc32": "74509d05"
+    },
+    {
+      "path": "OBJ/Grass_Common_Tall.obj",
+      "byteLength": 23683,
+      "crc32": "e817601d"
+    },
+    {
+      "path": "OBJ/Grass_Wispy_Short.mtl",
+      "byteLength": 237,
+      "crc32": "58470494"
+    },
+    {
+      "path": "OBJ/Grass_Wispy_Short.obj",
+      "byteLength": 43001,
+      "crc32": "f30f5d4e"
+    },
+    {
+      "path": "OBJ/Grass_Wispy_Tall.mtl",
+      "byteLength": 236,
+      "crc32": "bd62c20d"
+    },
+    {
+      "path": "OBJ/Grass_Wispy_Tall.obj",
+      "byteLength": 43571,
+      "crc32": "689ac67d"
+    },
+    {
+      "path": "OBJ/Mushroom_Common.mtl",
+      "byteLength": 243,
+      "crc32": "8689782f"
+    },
+    {
+      "path": "OBJ/Mushroom_Common.obj",
+      "byteLength": 49259,
+      "crc32": "24c23a19"
+    },
+    {
+      "path": "OBJ/Mushroom_Laetiporus.mtl",
+      "byteLength": 247,
+      "crc32": "96f5007f"
+    },
+    {
+      "path": "OBJ/Mushroom_Laetiporus.obj",
+      "byteLength": 185268,
+      "crc32": "27dec872"
+    },
+    {
+      "path": "OBJ/Pebble_Round_1.mtl",
+      "byteLength": 250,
+      "crc32": "86e29aaf"
+    },
+    {
+      "path": "OBJ/Pebble_Round_1.obj",
+      "byteLength": 8832,
+      "crc32": "43f0a15d"
+    },
+    {
+      "path": "OBJ/Pebble_Round_2.mtl",
+      "byteLength": 250,
+      "crc32": "cd172276"
+    },
+    {
+      "path": "OBJ/Pebble_Round_2.obj",
+      "byteLength": 6992,
+      "crc32": "7cd12201"
+    },
+    {
+      "path": "OBJ/Pebble_Round_3.mtl",
+      "byteLength": 250,
+      "crc32": "4294b7fe"
+    },
+    {
+      "path": "OBJ/Pebble_Round_3.obj",
+      "byteLength": 7903,
+      "crc32": "07451083"
+    },
+    {
+      "path": "OBJ/Pebble_Round_4.mtl",
+      "byteLength": 250,
+      "crc32": "5afc53c4"
+    },
+    {
+      "path": "OBJ/Pebble_Round_4.obj",
+      "byteLength": 8035,
+      "crc32": "10e2c4a6"
+    },
+    {
+      "path": "OBJ/Pebble_Round_5.mtl",
+      "byteLength": 250,
+      "crc32": "d57fc64c"
+    },
+    {
+      "path": "OBJ/Pebble_Round_5.obj",
+      "byteLength": 7771,
+      "crc32": "6398f6c0"
+    },
+    {
+      "path": "OBJ/Pebble_Square_1.mtl",
+      "byteLength": 251,
+      "crc32": "a18f560e"
+    },
+    {
+      "path": "OBJ/Pebble_Square_1.obj",
+      "byteLength": 6650,
+      "crc32": "7e3186d1"
+    },
+    {
+      "path": "OBJ/Pebble_Square_2.mtl",
+      "byteLength": 251,
+      "crc32": "ea7aeed7"
+    },
+    {
+      "path": "OBJ/Pebble_Square_2.obj",
+      "byteLength": 5010,
+      "crc32": "c88c38d0"
+    },
+    {
+      "path": "OBJ/Pebble_Square_3.mtl",
+      "byteLength": 251,
+      "crc32": "65f97b5f"
+    },
+    {
+      "path": "OBJ/Pebble_Square_3.obj",
+      "byteLength": 3393,
+      "crc32": "7c565883"
+    },
+    {
+      "path": "OBJ/Pebble_Square_4.mtl",
+      "byteLength": 251,
+      "crc32": "7d919f65"
+    },
+    {
+      "path": "OBJ/Pebble_Square_4.obj",
+      "byteLength": 3314,
+      "crc32": "c04c3cdb"
+    },
+    {
+      "path": "OBJ/Pebble_Square_5.mtl",
+      "byteLength": 251,
+      "crc32": "f2120aed"
+    },
+    {
+      "path": "OBJ/Pebble_Square_5.obj",
+      "byteLength": 4798,
+      "crc32": "1cede1c2"
+    },
+    {
+      "path": "OBJ/Pebble_Square_6.mtl",
+      "byteLength": 251,
+      "crc32": "b9e7b234"
+    },
+    {
+      "path": "OBJ/Pebble_Square_6.obj",
+      "byteLength": 4231,
+      "crc32": "f447edcb"
+    },
+    {
+      "path": "OBJ/Petal_1.mtl",
+      "byteLength": 241,
+      "crc32": "8971b1ab"
+    },
+    {
+      "path": "OBJ/Petal_1.obj",
+      "byteLength": 1446,
+      "crc32": "6e45f4c6"
+    },
+    {
+      "path": "OBJ/Petal_2.mtl",
+      "byteLength": 241,
+      "crc32": "310dd67a"
+    },
+    {
+      "path": "OBJ/Petal_2.obj",
+      "byteLength": 1638,
+      "crc32": "9a36689a"
+    },
+    {
+      "path": "OBJ/Petal_3.mtl",
+      "byteLength": 241,
+      "crc32": "59260b35"
+    },
+    {
+      "path": "OBJ/Petal_3.obj",
+      "byteLength": 1652,
+      "crc32": "22880dd2"
+    },
+    {
+      "path": "OBJ/Petal_4.mtl",
+      "byteLength": 241,
+      "crc32": "9a841f99"
+    },
+    {
+      "path": "OBJ/Petal_4.obj",
+      "byteLength": 2379,
+      "crc32": "820d20c1"
+    },
+    {
+      "path": "OBJ/Petal_5.mtl",
+      "byteLength": 241,
+      "crc32": "f2afc2d6"
+    },
+    {
+      "path": "OBJ/Petal_5.obj",
+      "byteLength": 1640,
+      "crc32": "9c5cae36"
+    },
+    {
+      "path": "OBJ/Pine_1.mtl",
+      "byteLength": 491,
+      "crc32": "d38913c9"
+    },
+    {
+      "path": "OBJ/Pine_1.obj",
+      "byteLength": 353176,
+      "crc32": "050c623c"
+    },
+    {
+      "path": "OBJ/Pine_2.mtl",
+      "byteLength": 491,
+      "crc32": "436e6d78"
+    },
+    {
+      "path": "OBJ/Pine_2.obj",
+      "byteLength": 328166,
+      "crc32": "6c019ae3"
+    },
+    {
+      "path": "OBJ/Pine_3.mtl",
+      "byteLength": 491,
+      "crc32": "33334717"
+    },
+    {
+      "path": "OBJ/Pine_3.obj",
+      "byteLength": 442248,
+      "crc32": "5f1fe8e0"
+    },
+    {
+      "path": "OBJ/Pine_4.mtl",
+      "byteLength": 491,
+      "crc32": "b9d1965b"
+    },
+    {
+      "path": "OBJ/Pine_4.obj",
+      "byteLength": 317996,
+      "crc32": "2222118a"
+    },
+    {
+      "path": "OBJ/Pine_5.mtl",
+      "byteLength": 491,
+      "crc32": "c98cbc34"
+    },
+    {
+      "path": "OBJ/Pine_5.obj",
+      "byteLength": 151121,
+      "crc32": "0a0bb220"
+    },
+    {
+      "path": "OBJ/Plant_1.mtl",
+      "byteLength": 238,
+      "crc32": "fd5db697"
+    },
+    {
+      "path": "OBJ/Plant_1.obj",
+      "byteLength": 8619,
+      "crc32": "a63f316a"
+    },
+    {
+      "path": "OBJ/Plant_1_Big.mtl",
+      "byteLength": 242,
+      "crc32": "5f3d6841"
+    },
+    {
+      "path": "OBJ/Plant_1_Big.obj",
+      "byteLength": 25796,
+      "crc32": "94b589d7"
+    },
+    {
+      "path": "OBJ/Plant_7.mtl",
+      "byteLength": 238,
+      "crc32": "02652253"
+    },
+    {
+      "path": "OBJ/Plant_7.obj",
+      "byteLength": 4434,
+      "crc32": "f89118ca"
+    },
+    {
+      "path": "OBJ/Plant_7_Big.mtl",
+      "byteLength": 242,
+      "crc32": "6695524a"
+    },
+    {
+      "path": "OBJ/Plant_7_Big.obj",
+      "byteLength": 10243,
+      "crc32": "82e231a2"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_1.mtl",
+      "byteLength": 258,
+      "crc32": "3fc4887a"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_1.obj",
+      "byteLength": 60635,
+      "crc32": "65a2ffac"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_2.mtl",
+      "byteLength": 258,
+      "crc32": "743130a3"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_2.obj",
+      "byteLength": 67661,
+      "crc32": "bfe166a6"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_3.mtl",
+      "byteLength": 258,
+      "crc32": "fbb2a52b"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Small_3.obj",
+      "byteLength": 63064,
+      "crc32": "a8f888e5"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Thin.mtl",
+      "byteLength": 255,
+      "crc32": "f160f018"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Thin.obj",
+      "byteLength": 133037,
+      "crc32": "b3516f8a"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Wide.mtl",
+      "byteLength": 255,
+      "crc32": "a51fdcfe"
+    },
+    {
+      "path": "OBJ/RockPath_Round_Wide.obj",
+      "byteLength": 206529,
+      "crc32": "d890c79a"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_1.mtl",
+      "byteLength": 259,
+      "crc32": "ae043402"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_1.obj",
+      "byteLength": 48273,
+      "crc32": "94b32286"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_2.mtl",
+      "byteLength": 259,
+      "crc32": "e5f18cdb"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_2.obj",
+      "byteLength": 32058,
+      "crc32": "9602a3f8"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_3.mtl",
+      "byteLength": 259,
+      "crc32": "6a721953"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Small_3.obj",
+      "byteLength": 34031,
+      "crc32": "ec313f5b"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Thin.mtl",
+      "byteLength": 256,
+      "crc32": "01329059"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Thin.obj",
+      "byteLength": 103745,
+      "crc32": "fa31d61f"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Wide.mtl",
+      "byteLength": 256,
+      "crc32": "554dbcbf"
+    },
+    {
+      "path": "OBJ/RockPath_Square_Wide.obj",
+      "byteLength": 127150,
+      "crc32": "6889cec0"
+    },
+    {
+      "path": "OBJ/Rock_Medium_1.mtl",
+      "byteLength": 241,
+      "crc32": "082e2b79"
+    },
+    {
+      "path": "OBJ/Rock_Medium_1.obj",
+      "byteLength": 25630,
+      "crc32": "c3e2985f"
+    },
+    {
+      "path": "OBJ/Rock_Medium_2.mtl",
+      "byteLength": 241,
+      "crc32": "232288e1"
+    },
+    {
+      "path": "OBJ/Rock_Medium_2.obj",
+      "byteLength": 18058,
+      "crc32": "762f636f"
+    },
+    {
+      "path": "OBJ/Rock_Medium_3.mtl",
+      "byteLength": 241,
+      "crc32": "8cf61456"
+    },
+    {
+      "path": "OBJ/Rock_Medium_3.obj",
+      "byteLength": 39309,
+      "crc32": "e411646c"
+    },
+    {
+      "path": "OBJ/TwistedTree_1.mtl",
+      "byteLength": 526,
+      "crc32": "60ccc808"
+    },
+    {
+      "path": "OBJ/TwistedTree_1.obj",
+      "byteLength": 959489,
+      "crc32": "e06b71a2"
+    },
+    {
+      "path": "OBJ/TwistedTree_2.mtl",
+      "byteLength": 526,
+      "crc32": "9cb6662c"
+    },
+    {
+      "path": "OBJ/TwistedTree_2.obj",
+      "byteLength": 928477,
+      "crc32": "e58937bd"
+    },
+    {
+      "path": "OBJ/TwistedTree_3.mtl",
+      "byteLength": 526,
+      "crc32": "c89ffc30"
+    },
+    {
+      "path": "OBJ/TwistedTree_3.obj",
+      "byteLength": 1030379,
+      "crc32": "2a5c1171"
+    },
+    {
+      "path": "OBJ/TwistedTree_4.mtl",
+      "byteLength": 526,
+      "crc32": "bf323c25"
+    },
+    {
+      "path": "OBJ/TwistedTree_4.obj",
+      "byteLength": 994717,
+      "crc32": "8c4170fd"
+    },
+    {
+      "path": "OBJ/TwistedTree_5.mtl",
+      "byteLength": 526,
+      "crc32": "eb1ba639"
+    },
+    {
+      "path": "OBJ/TwistedTree_5.obj",
+      "byteLength": 1046733,
+      "crc32": "2032fd5e"
+    },
+    {
+      "path": "Preview_1.jpg",
+      "byteLength": 598487,
+      "crc32": "8f1379dd"
+    },
+    {
+      "path": "Preview_2.jpg",
+      "byteLength": 679539,
+      "crc32": "2d7c16b9"
+    },
+    {
+      "path": "Preview_3.jpg",
+      "byteLength": 440967,
+      "crc32": "9ed148bc"
+    },
+    {
+      "path": "Preview_4.jpg",
+      "byteLength": 796873,
+      "crc32": "aa4bbfa1"
+    },
+    {
+      "path": "Textures/Bark_DeadTree.png",
+      "byteLength": 4228870,
+      "crc32": "b6f120db"
+    },
+    {
+      "path": "Textures/Bark_DeadTree_Normal.png",
+      "byteLength": 5728199,
+      "crc32": "dec3f072"
+    },
+    {
+      "path": "Textures/Bark_NormalTree.png",
+      "byteLength": 3894788,
+      "crc32": "589c800f"
+    },
+    {
+      "path": "Textures/Bark_NormalTree_Normal.png",
+      "byteLength": 4384496,
+      "crc32": "525ea39b"
+    },
+    {
+      "path": "Textures/Bark_TwistedTree.png",
+      "byteLength": 4630805,
+      "crc32": "f1bc527d"
+    },
+    {
+      "path": "Textures/Bark_TwistedTree_Normal.png",
+      "byteLength": 5728199,
+      "crc32": "dec3f072"
+    },
+    {
+      "path": "Textures/Flowers.png",
+      "byteLength": 444609,
+      "crc32": "10c99cf6"
+    },
+    {
+      "path": "Textures/Grass.png",
+      "byteLength": 33605,
+      "crc32": "4ac081c0"
+    },
+    {
+      "path": "Textures/Leaf_Pine.png",
+      "byteLength": 71747,
+      "crc32": "e6b0e9b6"
+    },
+    {
+      "path": "Textures/Leaf_Pine_C.png",
+      "byteLength": 70055,
+      "crc32": "143d7333"
+    },
+    {
+      "path": "Textures/Leaves.png",
+      "byteLength": 2586432,
+      "crc32": "9034fc8c"
+    },
+    {
+      "path": "Textures/Leaves_GiantPine_C.png",
+      "byteLength": 59613,
+      "crc32": "dce352a5"
+    },
+    {
+      "path": "Textures/Leaves_NormalTree.png",
+      "byteLength": 158772,
+      "crc32": "37ba41b9"
+    },
+    {
+      "path": "Textures/Leaves_NormalTree_C.png",
+      "byteLength": 158796,
+      "crc32": "fff91ff3"
+    },
+    {
+      "path": "Textures/Leaves_TwistedTree.png",
+      "byteLength": 69611,
+      "crc32": "7fc97121"
+    },
+    {
+      "path": "Textures/Leaves_TwistedTree_C.png",
+      "byteLength": 70353,
+      "crc32": "d73ee3b6"
+    },
+    {
+      "path": "Textures/Mushrooms.png",
+      "byteLength": 1208660,
+      "crc32": "7b6ec491"
+    },
+    {
+      "path": "Textures/PathRocks_Diffuse.png",
+      "byteLength": 811732,
+      "crc32": "d0e1ed85"
+    },
+    {
+      "path": "Textures/Rocks_Desert_Diffuse.png",
+      "byteLength": 2095731,
+      "crc32": "b6c3ee70"
+    },
+    {
+      "path": "Textures/Rocks_Diffuse.png",
+      "byteLength": 2517398,
+      "crc32": "3ae6feb3"
+    }
+  ]
+}

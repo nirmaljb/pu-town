@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "id": "campus-lea",
+  "revision": 1,
+  "sourceFile": "source.blend",
+  "sourceSha256": "3a603c9f2a797b528e87e4a706d71df69ded5f00171473c1fb6233407a3e6438",
+  "provenance": {
+    "author": "Quaternius (CC0 Standard components); PU Town (controlled clothed assembly)",
+    "source": "Retained Universal Base Characters Standard 2025-12-16, Modular Character Outfits Fantasy Standard 2026-01-29, Universal Animation Library Standard 2026-06-16. Imported meshes/UVs/skin weights; derived head crop, selected plain clothes/hair and three in-place actions.",
+    "license": "CC0-1.0, as explicitly declared in all three retained Standard archives; see campus/assets/sources/quaternius-character/provenance.json for exact archive/license hashes and current general QAL conflict.",
+    "licenseRecordedAt": "2026-10-13",
+    "exportEntitlement": "These exact CC0 Standard sources permit editing and redistribution in source and Windows/macOS game exports. No paid Source or Pro assets were obtained."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "preset": "campus-rowan",
+  "platform": "macos-universal",
+  "unityVersion": "6000.6.0f1",
+  "assetName": "assets/art/avatars/campus-rowan/avatar.prefab",
+  "rootNode": "avatar",
+  "expectedRootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "Hips",
+  "bundleSha256": "26cf6b4ccb379fe167454889efdf333efaef9b8cd8d293b7c9a0ec0b22ca5c82",
+  "bundleBytes": 288877,
+  "matchesPublication": true,
+  "mismatches": [],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 2.0,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.0,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 2.0,
+      "loop": true
+    }
+  ]
+}

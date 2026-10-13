@@ -1,0 +1,11 @@
+{
+  "id": "LibraryLantern",
+  "revision": 1,
+  "author": "Original PU Town artwork via Blender MCP",
+  "license": "Project source handoff; original artwork, no provider imagery embedded",
+  "sourceSha256": "e3d88a3042d913ea0754835857dc5e917d868a4ae5e4fc503d012d135c975ec2",
+  "exportSha256": "e50ba977ffdf16e985d6c65ad86526688756c5a52789a7fdbf1e0f2430114037",
+  "triangles": 244,
+  "materials": 3,
+  "textures": 0
+}

@@ -1,0 +1,8 @@
+{
+  "name": "PUtown.Voice.Tests",
+  "references": ["PUtown.Voice", "PUtown.Runtime", "LiveKit"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

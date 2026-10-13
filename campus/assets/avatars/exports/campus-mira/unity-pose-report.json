@@ -1,0 +1,82 @@
+{
+  "preset": "campus-mira",
+  "actualNativeCameraRender": true,
+  "unityVersion": "6000.6.0f1",
+  "poses": [
+    {
+      "view": "front",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.0002773424,
+        0.767202258,
+        -0.0003964318
+      ],
+      "leftFoot": [
+        0.114677,
+        0.133604109,
+        -0.000396202318
+      ]
+    },
+    {
+      "view": "back",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.0002773424,
+        0.767202258,
+        -0.0003964318
+      ],
+      "leftFoot": [
+        0.114677,
+        0.133604109,
+        -0.000396202318
+      ]
+    },
+    {
+      "view": "side",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.0002773424,
+        0.767202258,
+        -0.0003964318
+      ],
+      "leftFoot": [
+        0.114677,
+        0.133604109,
+        -0.000396202318
+      ]
+    },
+    {
+      "view": "walking",
+      "state": "Walking",
+      "normalizedTime": 0.25,
+      "hips": [
+        0.000269278418,
+        0.78690064,
+        -0.000397113676
+      ],
+      "leftFoot": [
+        0.114668988,
+        0.22382769,
+        0.290112048
+      ]
+    },
+    {
+      "view": "seated",
+      "state": "Seated",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.000277344545,
+        0.512002945,
+        -0.08546855
+      ],
+      "leftFoot": [
+        0.114677,
+        0.2128037,
+        0.2489305
+      ]
+    }
+  ]
+}

@@ -20,7 +20,8 @@ public final class DeveloperCapabilities {
     @CrossOrigin(origins = {"http://localhost:5173", "https://localhost:5173"})
     public Map<String, Boolean> capabilities(HttpServletRequest request) {
         HttpHeaders headers = new HttpHeaders();
-        java.util.Collections.list(request.getHeaderNames()).forEach(name -> headers.add(name, request.getHeader(name)));
+        java.util.Collections.list(request.getHeaderNames()).forEach(name ->
+                java.util.Collections.list(request.getHeaders(name)).forEach(value -> headers.add(name, value)));
         if (!enabled || !LocalDeveloperAccess.permits(new InetSocketAddress(request.getRemoteAddr(), request.getRemotePort()),
                 URI.create(request.getRequestURL().toString()), headers)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return Map.of("enabled", true);

@@ -1,0 +1,2291 @@
+{
+  "unityVersion": "6000.6.0f1",
+  "placements": [
+    {
+      "master": "LibraryLantern",
+      "name": "Library clerestory",
+      "x": 29.92,
+      "y": 2.78,
+      "z": 24.48,
+      "size": [
+        2.6,
+        0.9,
+        2.6
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 27.413332,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 28.16,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 28.9066677,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 30.9333324,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 31.68,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 32.4266663,
+      "y": 1.56000006,
+      "z": 22.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 27.4,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 28.12,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 28.84,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 29.56,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 30.28,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 31.0,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 31.72,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "library shade fin",
+      "x": 32.44,
+      "y": 1.56000006,
+      "z": 26.76,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 34.77333,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 35.52,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 36.2666664,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 38.29333,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 39.04,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 39.7866669,
+      "y": 1.56000006,
+      "z": 23.0,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 34.76,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 35.48,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 36.2,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 36.92,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 37.64,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 38.36,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 39.08,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "administration shade fin",
+      "x": 39.8,
+      "y": 1.56000006,
+      "z": 27.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 17.6533337,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 18.4,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 19.1466656,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 21.1733322,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 21.92,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 22.6666679,
+      "y": 1.56000006,
+      "z": 23.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 17.64,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 18.36,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 19.08,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 19.8,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 20.52,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 21.24,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 21.96,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "science shade fin",
+      "x": 22.68,
+      "y": 1.56000006,
+      "z": 28.04,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "SolarModule",
+      "name": "Green Energy solar canopy 0",
+      "x": 36.3599968,
+      "y": 2.83,
+      "z": 31.52,
+      "size": [
+        1.15,
+        0.24,
+        1.0
+      ]
+    },
+    {
+      "master": "SolarModule",
+      "name": "Green Energy solar canopy 1",
+      "x": 37.76,
+      "y": 2.83,
+      "z": 31.52,
+      "size": [
+        1.15,
+        0.24,
+        1.0
+      ]
+    },
+    {
+      "master": "SolarModule",
+      "name": "Green Energy solar canopy 2",
+      "x": 39.16,
+      "y": 2.83,
+      "z": 31.52,
+      "size": [
+        1.15,
+        0.24,
+        1.0
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 35.253334,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 36.0,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 36.746666,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 38.77333,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 39.52,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 40.2666664,
+      "y": 1.56000006,
+      "z": 29.4,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 35.24,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 35.96,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 36.68,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 37.4,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 38.12,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 38.84,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 39.56,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "green-energy shade fin",
+      "x": 40.28,
+      "y": 1.56000006,
+      "z": 33.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 39.08,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 39.8,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 40.52,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 41.24,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 41.96,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 42.68,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 43.4,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 44.12,
+      "y": 1.56000006,
+      "z": 3.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 39.0933342,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 39.84,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 40.5866661,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 42.6133347,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 43.36,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-a shade fin",
+      "x": 44.1066666,
+      "y": 1.56000006,
+      "z": 8.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 38.78,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 39.54,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 40.3,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 41.06,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 41.82,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 42.58,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 43.34,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 44.1,
+      "y": 1.56000006,
+      "z": 11.32,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 38.8,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 39.6,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 40.4,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 42.48,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 43.28,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "jubilee-b shade fin",
+      "x": 44.08,
+      "y": 1.56000006,
+      "z": 15.24,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 25.36,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 26.16,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 26.96,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 27.76,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 28.56,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 29.36,
+      "y": 1.56000006,
+      "z": 3.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 25.4,
+      "y": 1.56000006,
+      "z": 6.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 26.28,
+      "y": 1.56000006,
+      "z": 6.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 28.44,
+      "y": 1.56000006,
+      "z": 6.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "sports-pavilion shade fin",
+      "x": 29.32,
+      "y": 1.56000006,
+      "z": 6.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 31.44,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 32.24,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 33.04,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 33.84,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 34.64,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 35.44,
+      "y": 1.56000006,
+      "z": 5.56,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 31.48,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 32.36,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 34.52,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mens-hostel shade fin",
+      "x": 35.4,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 12.88,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 13.68,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 14.48,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 15.28,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 16.08,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 16.88,
+      "y": 1.56000006,
+      "z": 4.6,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 12.92,
+      "y": 1.56000006,
+      "z": 8.84,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 13.8,
+      "y": 1.56000006,
+      "z": 8.84,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 15.96,
+      "y": 1.56000006,
+      "z": 8.84,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "womens-hostel shade fin",
+      "x": 16.84,
+      "y": 1.56000006,
+      "z": 8.84,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 16.096,
+      "y": 1.56000006,
+      "z": 10.68,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 16.9280014,
+      "y": 1.56000006,
+      "z": 10.68,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 17.76,
+      "y": 1.56000006,
+      "z": 10.68,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 18.592,
+      "y": 1.56000006,
+      "z": 10.68,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 19.424,
+      "y": 1.56000006,
+      "z": 10.68,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 16.04,
+      "y": 1.56000006,
+      "z": 13.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 16.76,
+      "y": 1.56000006,
+      "z": 13.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 18.76,
+      "y": 1.56000006,
+      "z": 13.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "mess shade fin",
+      "x": 19.48,
+      "y": 1.56000006,
+      "z": 13.96,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 6.133333,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 6.88,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 7.626667,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 8.373333,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 9.12,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 9.866667,
+      "y": 1.56000006,
+      "z": 6.2,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 6.16,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 6.96,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 9.04,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "quarters shade fin",
+      "x": 9.84,
+      "y": 1.56000006,
+      "z": 9.8,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 42.624,
+      "y": 1.56000006,
+      "z": 27.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 43.3920021,
+      "y": 1.56000006,
+      "z": 27.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 44.16,
+      "y": 1.56000006,
+      "z": 27.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 44.9279976,
+      "y": 1.56000006,
+      "z": 27.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 45.696,
+      "y": 1.56000006,
+      "z": 27.64,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 42.624,
+      "y": 1.56000006,
+      "z": 30.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 43.3920021,
+      "y": 1.56000006,
+      "z": 30.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 44.16,
+      "y": 1.56000006,
+      "z": 30.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 44.9279976,
+      "y": 1.56000006,
+      "z": 30.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "ShadeFin",
+      "name": "gate-lodge shade fin",
+      "x": 45.696,
+      "y": 1.56000006,
+      "z": 30.92,
+      "size": [
+        0.14,
+        1.872,
+        0.24
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Running track lane 0",
+      "x": 25.28,
+      "y": 0.025,
+      "z": 9.12,
+      "size": [
+        7.04,
+        0.005,
+        2.56
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Running track lane 1",
+      "x": 25.28,
+      "y": 0.026,
+      "z": 9.12,
+      "size": [
+        6.8,
+        0.005,
+        2.32
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Running track lane 2",
+      "x": 25.28,
+      "y": 0.027,
+      "z": 9.12,
+      "size": [
+        6.56,
+        0.005,
+        2.08
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Silver Jubilee circular court 0",
+      "x": 41.12,
+      "y": 0.018,
+      "z": 9.6,
+      "size": [
+        8.64,
+        0.004,
+        2.56
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Silver Jubilee circular court 1",
+      "x": 41.12,
+      "y": 0.019,
+      "z": 9.6,
+      "size": [
+        8.320001,
+        0.004,
+        2.24
+      ]
+    },
+    {
+      "master": "GroundRing",
+      "name": "Silver Jubilee circular court 2",
+      "x": 41.12,
+      "y": 0.02,
+      "z": 9.6,
+      "size": [
+        8.0,
+        0.004,
+        1.92
+      ]
+    },
+    {
+      "master": "GateCrown",
+      "name": "gate-main overhead identity",
+      "x": 26.4,
+      "y": 3.1,
+      "z": 33.12,
+      "size": [
+        2.24,
+        0.45,
+        0.35
+      ]
+    },
+    {
+      "master": "GateCrown",
+      "name": "gate-east overhead identity",
+      "x": 44.96,
+      "y": 3.1,
+      "z": 33.12,
+      "size": [
+        2.24,
+        0.45,
+        0.35
+      ]
+    },
+    {
+      "master": "Boulder",
+      "name": "Water shore boulder 0",
+      "x": 3.94,
+      "y": 0.28,
+      "z": 24.14,
+      "size": [
+        0.65,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "master": "Boulder",
+      "name": "Water shore boulder 1",
+      "x": 5.04,
+      "y": 0.28,
+      "z": 24.14,
+      "size": [
+        0.65,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "master": "Boulder",
+      "name": "Water shore boulder 2",
+      "x": 6.14,
+      "y": 0.28,
+      "z": 24.14,
+      "size": [
+        0.65,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "master": "Boulder",
+      "name": "Water shore boulder 3",
+      "x": 7.24,
+      "y": 0.28,
+      "z": 24.14,
+      "size": [
+        0.65,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "master": "Boulder",
+      "name": "Water shore boulder 4",
+      "x": 8.34,
+      "y": 0.28,
+      "z": 24.14,
+      "size": [
+        0.65,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 3.5,
+      "y": 1.4,
+      "z": 2.22,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 4.48,
+      "y": 1.4,
+      "z": 2.22,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 5.46,
+      "y": 1.4,
+      "z": 2.22,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 3.5,
+      "y": 1.4,
+      "z": 3.2,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 4.48,
+      "y": 1.4,
+      "z": 3.2,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 5.46,
+      "y": 1.4,
+      "z": 3.2,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 3.5,
+      "y": 1.4,
+      "z": 4.18,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 4.48,
+      "y": 1.4,
+      "z": 4.18,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 5.46,
+      "y": 1.4,
+      "z": 4.18,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 7.34,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 8.253333,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 9.166667,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.08,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.9933338,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 11.9066658,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 12.82,
+      "y": 1.4,
+      "z": 31.02,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 7.34,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 8.253333,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 9.166667,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.08,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.9933338,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 11.9066658,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 12.82,
+      "y": 1.4,
+      "z": 32.0,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 7.34,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 8.253333,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 9.166667,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.08,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 10.9933338,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 11.9066658,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    },
+    {
+      "master": "Palm",
+      "name": "Palm master variation",
+      "x": 12.82,
+      "y": 1.4,
+      "z": 32.98,
+      "size": [
+        1.7,
+        2.8,
+        1.7
+      ]
+    }
+  ],
+  "triangles": 50396,
+  "renderers": 826,
+  "materials": 19,
+  "textureCount": 0,
+  "groundCollision": "Unchanged canonical rules; art has no Colliders",
+  "interpretation": "Compressed playable main-campus districts; facade/interior details are authored interpretations"
+}

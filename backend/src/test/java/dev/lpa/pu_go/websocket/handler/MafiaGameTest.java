@@ -279,6 +279,92 @@ class MafiaGameTest {
     }
 
     @Test
+    void nativeCampusPracticePinsSeatsAndRejectsUnreachableDayMovement() throws Exception {
+        var host = connect("native-campus-practice");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        String room = latestOfType(host, "room_snapshot").path("roomId").asText();
+        String token = latestOfType(host, "room_snapshot").path("recoveryToken").asText();
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"campus\"}");
+        assertEquals("campus", latestOfType(host, "room_state").path("mapId").asText());
+        assertEquals(2400, latestOfType(host, "room_state").path("players").get(0).path("x").asDouble());
+        assertEquals(1595, latestOfType(host, "room_state").path("players").get(0).path("y").asDouble());
+        send(host, "{\"version\":1,\"type\":\"start_practice\"}");
+        JsonNode position = latestOfType(host, "field_state").path("self");
+        long correction = position.path("correction").asLong();
+        milliseconds.addAndGet(1000);
+        send(host, "{\"version\":1,\"type\":\"move\",\"x\":4900,\"y\":1595,\"facing\":\"right\"}");
+        handler.tickFields();
+        position = latestOfType(host, "field_state").path("self");
+        assertEquals(2400, position.path("x").asDouble());
+        assertEquals(1595, position.path("y").asDouble());
+        assertEquals(correction + 1, position.path("correction").asLong());
+        milliseconds.addAndGet(100);
+        send(host, "{\"version\":1,\"type\":\"move\",\"x\":2400,\"y\":1575,\"facing\":\"up\"}");
+        handler.tickFields();
+        assertEquals(1575, latestOfType(host, "field_state").path("self").path("y").asDouble());
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"village\"}");
+        assertEquals("invalid_phase", latest(host).path("code").asText());
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        var recovered = connect("native-campus-practice-recovered"); recover(recovered, room, token);
+        assertEquals("campus", latestOfType(recovered, "room_snapshot").path("mapId").asText());
+        assertEquals(1575, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"day\"}");
+        assertEquals(1575, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"night\"}");
+        assertEquals("discussion", latestOfType(recovered, "game_state").path("phase").asText());
+        for (String phase : List.of("discussion", "voting", "voting_result"))
+            send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"" + phase + "\"}");
+        assertEquals(2, latestOfType(recovered, "game_state").path("round").asInt());
+        assertEquals(1595, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+    }
+
+    @Test
+    void nativeCampusDoorsFilterActualRecipientFieldsAndKeepVisionUnlimitedInEachArea() throws Exception {
+        var host = connect("native-campus-privacy-0");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latestOfType(host, "room_snapshot").path("roomId").asText();
+        table.add(host);
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"campus\"}");
+        for (int seat = 1; seat < 4; seat++) {
+            var member = connect("native-campus-privacy-" + seat); join(member, code); table.add(member);
+        }
+        for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+        advance(REVEAL);
+        assertEquals(4, field(0).path("players").size());
+        walk(0, 2992, 1792); walk(0, 2992, 2160); walk(0, 2992, 2272);
+        assertEquals(Set.of(playerId(0)), fieldIds(0));
+        assertFalse(fieldIds(1).contains(playerId(0)), "The outdoor connection must receive no interior position");
+        long correction = field(0).path("self").path("correction").asLong();
+        advance(1000); move(0, 2752, 2208); handler.tickFields();
+        assertEquals(2992, field(0).path("self").path("x").asDouble());
+        assertEquals(2272, field(0).path("self").path("y").asDouble());
+        assertEquals(correction + 1, field(0).path("self").path("correction").asLong());
+        int chatCount = countOfType(table.get(1), "chat_message");
+        chat(0, "public", "Inside the library");
+        assertEquals(chatCount, countOfType(table.get(1), "chat_message"));
+        walk(1, 4640, 1800);
+        assertTrue(fieldIds(2).contains(playerId(1)), "Outdoor Vision has no distance limit");
+        walk(1, 2992, 2160); walk(1, 2992, 2592);
+        assertEquals(Set.of(playerId(0), playerId(1)), fieldIds(0), "Distant library Participants remain visible");
+        assertEquals(Set.of(playerId(0), playerId(1)), fieldIds(1));
+        assertEquals(Set.of(playerId(2), playerId(3)), fieldIds(2));
+        walk(1, 2992, 2160);
+        assertEquals(Set.of(playerId(0)), fieldIds(0));
+        assertEquals(Set.of(playerId(1), playerId(2), playerId(3)), fieldIds(1));
+        advance(REVEAL + DAY + NIGHT + DISCUSSION - milliseconds.get());
+        for (int seat = 0; seat < 3; seat++) ballot(seat, 1, 3);
+        advance(VOTING + VOTING_RESULT);
+        assertEquals("eliminated", game(3).path("self").path("status").asText());
+        walk(3, 2992, 1792); walk(3, 2992, 2272);
+        assertFalse(fieldIds(0).contains(playerId(3)), "Living connections never receive a Ghost position");
+        assertEquals(4, fieldIds(3).size(), "A Ghost retains its unrestricted field across interior areas");
+        walk(0, 2992, 1792); walk(0, 2992, 2272);
+        assertEquals(Set.of(playerId(0)), fieldIds(0), "The same interior does not reveal a Ghost");
+        assertNoHiddenRolesLeaked(table.get(1));
+    }
+
+    @Test
     void eliminatedParticipantsRecoverReceiveOnlyTownhallVoiceAndRetireLivingGrants() throws Exception {
         var voice = new dev.lpa.pu_go.voice.VoiceService("http://127.0.0.1:1", "test-key", "test-secret-with-at-least-32-characters");
         handler = new GameWebSocketHandler(new RoomManager(milliseconds::get, () -> COLLECTION), Runnable::run,

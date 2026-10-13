@@ -47,6 +47,22 @@ class FakeSocket {
   close() { this.disconnect(); }
 }
 
+test("a browser refuses a native campus Room at a frame and releases its reservation", () => {
+  const { client, sockets, inbox } = setup();
+  client.join("ABC234", "Alex"); sockets[0].open();
+  sockets[0].message({ ...snapshot, mapId: "campus" });
+  assert.equal(client.state.status, "connecting");
+  client.update();
+  assert.equal(client.state.status, "join");
+  assert.match(client.state.error, /native PU Town/);
+  assert.equal(inbox.drain().length, 0);
+  assert.equal(sockets.length, 2);
+  sockets[1].open();
+  assert.deepEqual(sockets[1].sent.map(payload => JSON.parse(payload).type), ["recover_room", "leave_room"]);
+  sockets[1].message({ version: 1, type: "room_left" });
+  assert.equal(client.state.status, "join");
+});
+
 test("initial timeout permits retry and ignores late messages from the abandoned socket", () => {
   const { client, sockets, advance, inbox } = setup();
   client.join("ABC234", "Alex");

@@ -1,0 +1,82 @@
+{
+  "id": "campus-mira",
+  "name": "Mira",
+  "native": {
+    "version": 1,
+    "masterId": "campus-mira",
+    "masterRevision": 2,
+    "model": {
+      "sourceFile": "exports/campus-mira/avatar.fbx",
+      "rootNode": "avatar",
+      "heightMetres": 1.7,
+      "pivot": "feet",
+      "forwardAxis": "+z"
+    },
+    "rig": {
+      "type": "humanoid",
+      "avatarName": "avatarAvatar",
+      "hipsBone": "Hips"
+    },
+    "animations": {
+      "standing": {
+        "clipName": "Standing",
+        "durationSeconds": 2.0,
+        "loop": true
+      },
+      "walking": {
+        "clipName": "Walking",
+        "durationSeconds": 1.0,
+        "loop": true
+      },
+      "seated": {
+        "clipName": "Seated",
+        "durationSeconds": 2.0,
+        "loop": true
+      }
+    },
+    "platformAssets": [
+      {
+        "platform": "windows-x86_64",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/campus-mira/avatar.prefab",
+        "file": "exports/campus-mira/windows-x86_64.bundle"
+      },
+      {
+        "platform": "macos-universal",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/campus-mira/avatar.prefab",
+        "file": "exports/campus-mira/macos-universal.bundle"
+      }
+    ]
+  },
+  "review": {
+    "sourceSha256": "628a28fa3e70f4e1c6f56c3708ca9537472974f3269784fcef09bc757c2508b5",
+    "platformSha256": {
+      "windows-x86_64": "13a8c4c3c8fa0cfc6fbee2ad2a231768225dd19dc79d2ca66c814483cb2fc738",
+      "macos-universal": "9f43804ebd38dc276ee55788c64d0d26a779deebb11764441cab339ff3c39603"
+    },
+    "checks": [
+      "silhouette",
+      "scale-pivot",
+      "uv-normals",
+      "deformation",
+      "native-materials",
+      "standing",
+      "walking",
+      "seated"
+    ],
+    "evidenceFiles": [
+      "exports/campus-mira/native-review.md",
+      "exports/campus-mira/repair-record.md",
+      "exports/campus-mira/unity-report.json",
+      "exports/campus-mira/unity-pose-report.json",
+      "exports/campus-mira/unity-front.png",
+      "exports/campus-mira/unity-back.png",
+      "exports/campus-mira/unity-side.png",
+      "exports/campus-mira/unity-walking.png",
+      "exports/campus-mira/unity-seated.png"
+    ]
+  }
+}

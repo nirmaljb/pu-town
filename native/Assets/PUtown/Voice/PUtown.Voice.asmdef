@@ -1,0 +1,6 @@
+{
+  "name": "PUtown.Voice",
+  "rootNamespace": "PUtown.Voice",
+  "references": ["PUtown.Runtime", "LiveKit"],
+  "autoReferenced": true
+}

@@ -1,5 +1,6 @@
 package dev.lpa.pu_go.websocket.handler;
 
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -23,6 +24,7 @@ final class ConnectionOutbox {
     private final int capacity;
     private final List<TextMessage> messages = new ArrayList<>();
     private final AtomicBoolean draining = new AtomicBoolean();
+    private boolean failed;
 
     ConnectionOutbox(WebSocketSession session, Executor executor) {
         this(session, executor, DEFAULT_CAPACITY);
@@ -37,7 +39,7 @@ final class ConnectionOutbox {
 
     boolean enqueue(TextMessage message) {
         synchronized (messages) {
-            if (messages.size() == capacity) return false;
+            if (failed || messages.size() == capacity) return false;
             messages.add(message);
         }
         scheduleDrain();
@@ -45,7 +47,9 @@ final class ConnectionOutbox {
     }
 
     private void scheduleDrain() {
-        if (draining.compareAndSet(false, true)) executor.execute(this::drain);
+        synchronized (messages) {
+            if (!failed && draining.compareAndSet(false, true)) executor.execute(this::drain);
+        }
     }
 
     private void drain() {
@@ -58,12 +62,16 @@ final class ConnectionOutbox {
                 }
                 session.sendMessage(next);
             }
-        } catch (IOException ignored) {
-            // The WebSocket lifecycle callback removes the disconnected player.
+        } catch (IOException | IllegalStateException ignored) {
+            // A failed write cannot establish which events arrived. End this transport;
+            // recovery supplies a complete authorized snapshot instead of replaying it.
+            synchronized (messages) { failed = true; }
+            try { session.close(CloseStatus.SESSION_NOT_RELIABLE); }
+            catch (IOException | IllegalStateException closeFailure) { /* Failure remains latched even if close fails. */ }
         } finally {
             draining.set(false);
             synchronized (messages) {
-                if (!messages.isEmpty() && session.isOpen()) scheduleDrain();
+                if (!failed && !messages.isEmpty() && session.isOpen()) scheduleDrain();
             }
         }
     }

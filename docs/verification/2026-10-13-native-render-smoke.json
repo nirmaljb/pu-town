@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "kind": "native-render-loop-observation",
+  "captureStartedUtc": "2026-10-13T17:33:56.8944980Z",
+  "captureCompletedUtc": "2026-10-13T17:35:57.0008670Z",
+  "warmupSeconds": 5.0,
+  "requestedCaptureSeconds": 120.0,
+  "elapsedCaptureSeconds": 120.01476987500003,
+  "frameSampleCount": 1689,
+  "sumOfReportedFrameIntervalsSeconds": 120.0156980959,
+  "focusedFrameSampleCount": 826,
+  "unfocusedFrameSampleCount": 863,
+  "observedFrameSamplesPerElapsedSecond": 14.073267829944248,
+  "frameDurationMilliseconds": {
+    "mean": 71.057251684961514,
+    "p50": 16.666468232870102,
+    "p95": 17.520922049880028,
+    "p99": 33.216186016798019
+  },
+  "instantaneousFramesPerSecond": {
+    "mean": 59.9655800982081,
+    "p50": 60.000714370172943,
+    "p95": 62.583949935125666,
+    "p99": 63.834764240109827
+  },
+  "sustainedFramesPerSecondFromMeanInterval": 14.073158985005312,
+  "unityAllocatorMemoryBytes": {
+    "allocated": {
+      "sampleCount": 1689,
+      "minimum": 253066479,
+      "maximum": 254417782,
+      "mean": 253463509.45648313,
+      "last": 253197551
+    },
+    "reserved": {
+      "sampleCount": 1689,
+      "minimum": 568066048,
+      "maximum": 570163200,
+      "mean": 570065109.40911651,
+      "last": 570163200
+    }
+  },
+  "machine": {
+    "platform": "OSXPlayer",
+    "unityVersion": "6000.6.0f1",
+    "applicationVersion": "1.0",
+    "developmentBuild": false,
+    "operatingSystem": "Mac OS X 26.2.0",
+    "deviceModel": "MacBookAir10,1",
+    "cpu": "Apple M1",
+    "logicalProcessorCount": 8,
+    "reportedProcessorFrequencyMHz": 2400,
+    "gpu": "Apple M1",
+    "graphicsApi": "Metal",
+    "graphicsDriverVersion": "Metal",
+    "reportedSystemMemoryMB": 8192,
+    "reportedGraphicsMemoryMB": 5461
+  },
+  "observedConfigurations": [
+    {
+      "observedAtSeconds": 0.017348916999999631,
+      "screenWidthPixels": 1920,
+      "screenHeightPixels": 1080,
+      "fullscreen": false,
+      "fullscreenMode": "Windowed",
+      "applicationIsFocused": true,
+      "graphicsPreset": "Balanced",
+      "graphicsPresetIndex": 1,
+      "unityQualityLevelIndex": 5,
+      "unityQualityLevelName": "Ultra",
+      "shadows": "HardOnly",
+      "shadowResolution": "Low",
+      "shadowDistanceUnityUnits": 20.0,
+      "shadowCascades": 1,
+      "pixelLightCount": 1,
+      "realtimeReflectionProbes": false,
+      "lodBias": 1.0,
+      "maximumLodLevel": 0,
+      "antiAliasingSamples": 2,
+      "vSyncCount": 1,
+      "applicationTargetFrameRate": 60
+    },
+    {
+      "observedAtSeconds": 11.451057167,
+      "screenWidthPixels": 1920,
+      "screenHeightPixels": 1080,
+      "fullscreen": false,
+      "fullscreenMode": "Windowed",
+      "applicationIsFocused": false,
+      "graphicsPreset": "Balanced",
+      "graphicsPresetIndex": 1,
+      "unityQualityLevelIndex": 5,
+      "unityQualityLevelName": "Ultra",
+      "shadows": "HardOnly",
+      "shadowResolution": "Low",
+      "shadowDistanceUnityUnits": 20.0,
+      "shadowCascades": 1,
+      "pixelLightCount": 1,
+      "realtimeReflectionProbes": false,
+      "lodBias": 1.0,
+      "maximumLodLevel": 0,
+      "antiAliasingSamples": 2,
+      "vSyncCount": 1,
+      "applicationTargetFrameRate": 60
+    },
+    {
+      "observedAtSeconds": 116.83355625000002,
+      "screenWidthPixels": 1920,
+      "screenHeightPixels": 1080,
+      "fullscreen": false,
+      "fullscreenMode": "Windowed",
+      "applicationIsFocused": true,
+      "graphicsPreset": "Balanced",
+      "graphicsPresetIndex": 1,
+      "unityQualityLevelIndex": 5,
+      "unityQualityLevelName": "Ultra",
+      "shadows": "HardOnly",
+      "shadowResolution": "Low",
+      "shadowDistanceUnityUnits": 20.0,
+      "shadowCascades": 1,
+      "pixelLightCount": 1,
+      "realtimeReflectionProbes": false,
+      "lodBias": 1.0,
+      "maximumLodLevel": 0,
+      "antiAliasingSamples": 2,
+      "vSyncCount": 1,
+      "applicationTargetFrameRate": 60
+    }
+  ],
+  "publicPhaseIntervals": [
+    {
+      "roomPhase": "playing",
+      "gamePhase": "day",
+      "firstObservedAtSeconds": 0.017348916999999631,
+      "lastObservedAtSeconds": 120.01476987500003,
+      "sampleCount": 1689,
+      "roomMembershipCountMinimum": 10,
+      "roomMembershipCountMaximum": 10,
+      "gameRosterCountMinimum": 10,
+      "gameRosterCountMaximum": 10
+    }
+  ],
+  "measurementNotes": [
+    "Frame intervals are Unity unscaledDeltaTime samples from the rendered application loop and include frame pacing; they are not GPU execution timings.",
+    "Instantaneous FPS percentiles summarize reciprocal frame intervals; sustained FPS is the reciprocal of the mean frame interval.",
+    "Observed frame samples per elapsed second divides the valid frame sample count by the measured capture wall duration; focus counts and configuration observations distinguish foreground and background samples.",
+    "Memory observations use Profiler.GetTotalAllocatedMemoryLong and Profiler.GetTotalReservedMemoryLong; they describe Unity allocator memory, not operating-system process RSS or total media/driver memory.",
+    "This opt-in observer adds sampling overhead. Public phase/count observations come from frame-applied Room and Game state; no identity, credential, Role, choice, chat, position or private payload is captured.",
+    "A report establishes only the recorded machine, scene phases, settings and Player counts; it does not establish ten-Player voice-load or cross-platform acceptance."
+  ]
+}

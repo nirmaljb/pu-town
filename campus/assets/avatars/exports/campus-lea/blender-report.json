@@ -1,0 +1,249 @@
+{
+  "id": "campus-lea",
+  "name": "Lea",
+  "masterRevision": 2,
+  "provider": "Quaternius",
+  "license": "CC0-1.0 (retained Standard archive licenses)",
+  "base": "Superhero_Female",
+  "outfit": "Female_Peasant",
+  "hairstyle": "Hair_Buns",
+  "headCrop": "Keep vertices weighted at least0.5 to Head/neck_01; original full body retained hidden in master",
+  "rigBones": [
+    "root",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "neck_01",
+    "Head",
+    "clavicle_l",
+    "upperarm_l",
+    "lowerarm_l",
+    "hand_l",
+    "index_01_l",
+    "index_02_l",
+    "index_03_l",
+    "index_04_leaf_l",
+    "middle_01_l",
+    "middle_02_l",
+    "middle_03_l",
+    "middle_04_leaf_l",
+    "pinky_01_l",
+    "pinky_02_l",
+    "pinky_03_l",
+    "pinky_04_leaf_l",
+    "ring_01_l",
+    "ring_02_l",
+    "ring_03_l",
+    "ring_04_leaf_l",
+    "thumb_01_l",
+    "thumb_02_l",
+    "thumb_03_l",
+    "thumb_04_leaf_l",
+    "clavicle_r",
+    "upperarm_r",
+    "lowerarm_r",
+    "hand_r",
+    "index_01_r",
+    "index_02_r",
+    "index_03_r",
+    "index_04_leaf_r",
+    "middle_01_r",
+    "middle_02_r",
+    "middle_03_r",
+    "middle_04_leaf_r",
+    "pinky_01_r",
+    "pinky_02_r",
+    "pinky_03_r",
+    "pinky_04_leaf_r",
+    "ring_01_r",
+    "ring_02_r",
+    "ring_03_r",
+    "ring_04_leaf_r",
+    "thumb_01_r",
+    "thumb_02_r",
+    "thumb_03_r",
+    "thumb_04_leaf_r",
+    "thigh_l",
+    "calf_l",
+    "foot_l",
+    "ball_l",
+    "ball_leaf_l",
+    "thigh_r",
+    "calf_r",
+    "foot_r",
+    "ball_r",
+    "ball_leaf_r"
+  ],
+  "meshes": [
+    {
+      "name": "Campus_Head",
+      "vertices": 1644,
+      "triangles": 3020,
+      "materials": [
+        "MI_Superhero_Female"
+      ]
+    },
+    {
+      "name": "Eyebrows",
+      "vertices": 912,
+      "triangles": 1480,
+      "materials": [
+        "MI_Hair_2"
+      ]
+    },
+    {
+      "name": "Eyes",
+      "vertices": 556,
+      "triangles": 768,
+      "materials": [
+        "MI_Eyes"
+      ]
+    },
+    {
+      "name": "Female_Peasant_Arms",
+      "vertices": 5436,
+      "triangles": 6848,
+      "materials": [
+        "MI_Peasant"
+      ]
+    },
+    {
+      "name": "Female_Peasant_Body",
+      "vertices": 1730,
+      "triangles": 2188,
+      "materials": [
+        "MI_Peasant.001"
+      ]
+    },
+    {
+      "name": "Female_Peasant_Feet",
+      "vertices": 1892,
+      "triangles": 2588,
+      "materials": [
+        "MI_Peasant.001"
+      ]
+    },
+    {
+      "name": "Female_Peasant_Legs",
+      "vertices": 1126,
+      "triangles": 1944,
+      "materials": [
+        "MI_Peasant"
+      ]
+    },
+    {
+      "name": "Hair_Buns",
+      "vertices": 3501,
+      "triangles": 3284,
+      "materials": [
+        "MI_Hair_2.001"
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "T_Eye_Brown",
+      "file": "T_Eye_Brown.png",
+      "width": 256,
+      "height": 256,
+      "sha256": "d08e3356a83211bc6ca21fe3a8e39f4b5c1a3b8f85457fc2c0fb57be09935025"
+    },
+    {
+      "name": "T_Eye_Normal.png",
+      "file": "T_Eye_Normal.png",
+      "width": 256,
+      "height": 256,
+      "sha256": "9ed61f7726a54fe346a78b9e5a18905d8e2b88f86235d97f53cd207a26f3f8c7"
+    },
+    {
+      "name": "T_Hair_2_BaseColor",
+      "file": "T_Hair_2_BaseColor.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "f9f4f2fb3eeeefb0b6f0fdef38b0770fd6607640c1c680b8139dd76697e9f9b3"
+    },
+    {
+      "name": "T_Hair_2_BaseColor.001",
+      "file": "T_Hair_2_BaseColor.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "f9f4f2fb3eeeefb0b6f0fdef38b0770fd6607640c1c680b8139dd76697e9f9b3"
+    },
+    {
+      "name": "T_Hair_2_Normal",
+      "file": "T_Hair_2_Normal.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "172f230aae0d4366c3cfc0402b2e6d1811b11f8487344bff28605eeacac1558d"
+    },
+    {
+      "name": "T_Hair_2_Normal.001",
+      "file": "T_Hair_2_Normal.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "172f230aae0d4366c3cfc0402b2e6d1811b11f8487344bff28605eeacac1558d"
+    },
+    {
+      "name": "T_Peasant_2_BaseColor.png",
+      "file": "T_Peasant_2_BaseColor.png",
+      "width": 4096,
+      "height": 4096,
+      "sha256": "0019ae4ae3f1a9005d3a6993cfca9218d7e74ec7e10ce1c54e67d63e8054f134"
+    },
+    {
+      "name": "T_Peasant_Normal",
+      "file": "T_Peasant_Normal.png",
+      "width": 4096,
+      "height": 4096,
+      "sha256": "7598fa7b63e46fd4dac29708bf5a81e05eb9a67280f7b13c61e28a9110eeb679"
+    },
+    {
+      "name": "T_Peasant_ORM",
+      "file": "T_Peasant_ORM.png",
+      "width": 4096,
+      "height": 4096,
+      "sha256": "e1932f5f91104afca89c501416a5fec09069b8552734237fc09045fabc4ca9b4"
+    },
+    {
+      "name": "T_Superhero_Female_Dark_BaseColor",
+      "file": "T_Superhero_Female_Dark_BaseColor.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "d366843ee7d9e9f37ec87a0e1c98c7f2e45573c08eeb80a51a6d9344e68cf288"
+    },
+    {
+      "name": "T_Superhero_Female_Normal",
+      "file": "T_Superhero_Female_Normal.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "cf922460b43ccd31e983e34db05514c9d451dd2f9cdd01a843978e797719f859"
+    },
+    {
+      "name": "T_Superhero_Female_Roughness",
+      "file": "T_Superhero_Female_Roughness.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "d2beabf2bd0313e32c68dcdbb80dca371a6e994fabf96efa97128bf9f14fa57b"
+    }
+  ],
+  "actions": {
+    "Standing": {
+      "source": "campus-lea_Standing",
+      "frameStart": 0.0,
+      "frameEnd": 75.0
+    },
+    "Walking": {
+      "source": "campus-lea_Walking",
+      "frameStart": 0.0,
+      "frameEnd": 40.0
+    },
+    "Seated": {
+      "source": "campus-lea_Seated",
+      "frameStart": 0.0,
+      "frameEnd": 50.0
+    }
+  },
+  "sourceSha256": "33ec2e7ae1da24e133edb61be765cdae088fdad17f3db8654c3a63c9400227d7",
+  "fbxSha256": "c2b89ab40bfe0da1ee57311d2feb335663a0569980eed45499d822f8cfb223f0"
+}

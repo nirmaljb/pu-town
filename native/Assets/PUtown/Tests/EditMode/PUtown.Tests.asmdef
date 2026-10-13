@@ -1,0 +1,9 @@
+{
+  "name": "PUtown.Tests",
+  "rootNamespace": "PUtown.Tests",
+  "references": ["PUtown.Runtime"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

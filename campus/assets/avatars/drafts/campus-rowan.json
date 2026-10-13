@@ -1,0 +1,82 @@
+{
+  "id": "campus-rowan",
+  "name": "Rowan",
+  "native": {
+    "version": 1,
+    "masterId": "campus-rowan",
+    "masterRevision": 2,
+    "model": {
+      "sourceFile": "exports/campus-rowan/avatar.fbx",
+      "rootNode": "avatar",
+      "heightMetres": 1.7,
+      "pivot": "feet",
+      "forwardAxis": "+z"
+    },
+    "rig": {
+      "type": "humanoid",
+      "avatarName": "avatarAvatar",
+      "hipsBone": "Hips"
+    },
+    "animations": {
+      "standing": {
+        "clipName": "Standing",
+        "durationSeconds": 2.0,
+        "loop": true
+      },
+      "walking": {
+        "clipName": "Walking",
+        "durationSeconds": 1.0,
+        "loop": true
+      },
+      "seated": {
+        "clipName": "Seated",
+        "durationSeconds": 2.0,
+        "loop": true
+      }
+    },
+    "platformAssets": [
+      {
+        "platform": "windows-x86_64",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/campus-rowan/avatar.prefab",
+        "file": "exports/campus-rowan/windows-x86_64.bundle"
+      },
+      {
+        "platform": "macos-universal",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/campus-rowan/avatar.prefab",
+        "file": "exports/campus-rowan/macos-universal.bundle"
+      }
+    ]
+  },
+  "review": {
+    "sourceSha256": "a84aae5a21f4cbea8603aac91a155779e1ec0d89d5fe4b3da92d88b99154f44b",
+    "platformSha256": {
+      "windows-x86_64": "d0ab58927026e7dd76e2b6b4cc7d96209e36964b99a3edbcb34e766be2334ed2",
+      "macos-universal": "26cf6b4ccb379fe167454889efdf333efaef9b8cd8d293b7c9a0ec0b22ca5c82"
+    },
+    "checks": [
+      "silhouette",
+      "scale-pivot",
+      "uv-normals",
+      "deformation",
+      "native-materials",
+      "standing",
+      "walking",
+      "seated"
+    ],
+    "evidenceFiles": [
+      "exports/campus-rowan/native-review.md",
+      "exports/campus-rowan/repair-record.md",
+      "exports/campus-rowan/unity-report.json",
+      "exports/campus-rowan/unity-pose-report.json",
+      "exports/campus-rowan/unity-front.png",
+      "exports/campus-rowan/unity-back.png",
+      "exports/campus-rowan/unity-side.png",
+      "exports/campus-rowan/unity-walking.png",
+      "exports/campus-rowan/unity-seated.png"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "GroundRing",
+  "revision": 1,
+  "author": "Original PU Town artwork via Blender MCP",
+  "license": "Project source handoff; original artwork, no provider imagery embedded",
+  "sourceSha256": "2d9c6aa6d7af7327bfe6c09d361146f0d98056d54c9b76ce8b233ece4842ed44",
+  "exportSha256": "f441222023e1f703898fe464453424a6babb2302d1bd7e073355830274d142f0",
+  "triangles": 128,
+  "materials": 1,
+  "textures": 0
+}

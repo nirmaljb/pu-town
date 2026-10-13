@@ -1,0 +1,6 @@
+{
+  "name": "PUtown.Runtime",
+  "rootNamespace": "PUtown.Runtime",
+  "references": [],
+  "autoReferenced": true
+}

@@ -14,7 +14,7 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `start_game` | none |
 | `start_practice` | none |
 | `advance_practice` | `round: integer`, `phase: "day" \| "night" \| "discussion" \| "voting" \| "voting_result" |
-| `select_map` | `mapId: "village" \| "horror" \| "cyberpunk"` |
+| `select_map` | `mapId: "village" \| "horror" \| "cyberpunk" \| "campus"` |
 | `select_avatar` | `avatarPreset: string` |
 | `set_ready` | `ready: boolean` |
 | `set_role_setup` | `mafia: integer`, `doctors: integer`, `sheriffs: integer` |
@@ -28,8 +28,8 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | Type | Additional fields |
 | --- | --- |
 | `pong` | none |
-| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk"`, `players: PlayerView[]` |
-| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk"`, `players: PlayerView[]` |
+| `room_snapshot` | `selfPlayerId: string`, `roomId: string`, `recoveryToken: string`, `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk" \| "campus"`, `players: PlayerView[]` |
+| `room_state` | `phase: "lobby" \| "playing"`, `hostPlayerId: string`, `roleSetup: RoleSetup`, `mapId: "village" \| "horror" \| "cyberpunk" \| "campus"`, `players: PlayerView[]` |
 | `player_joined` | `player: PlayerView` |
 | `game_state` | `mode: "competitive" \| "practice"`, `phase: GamePhase`, `round: integer`, `remainingMs: integer \| null`, `players: RosterView[]`, `outcome: Outcome \| null`, `ballots: Ballot[] \| null`, `winner: Faction \| null`, `roles: RoleView[] \| null`, `self: SelfView` |
 | `field_state` | `round: integer`, `players: FieldPlayer[]`, `self: OwnField` |
@@ -50,13 +50,13 @@ The server randomly assigns an Avatar Preset when a new Room Membership begins, 
 ## Town Map selection
 
 `select_map` is `{ "version": 1, "type": "select_map", "mapId": "horror" }`.
-`mapId` is exactly `village` (Sunwater Village), `horror` (Blackthorn Hollow), or `cyberpunk` (Silver Jubilee Campus). Unknown identifiers, missing fields and extra fields are `malformed_message`. Only the current Host in a Lobby can select: a non-Host receives `not_host`, a started Room `invalid_phase`, and a connection without Membership `not_in_room`.
+`mapId` is exactly `village` (Sunwater Village), `horror` (Blackthorn Hollow), `cyberpunk` (Silver Jubilee Campus), or `campus` (Kalapet Main Campus). Unknown identifiers, missing fields and extra fields are `malformed_message`. Only the current Host in a Lobby can select: a non-Host receives `not_host`, a started Room `invalid_phase`, and a connection without Membership `not_in_room`.
 
 Both `room_snapshot` and `room_state` require `mapId` alongside `roleSetup`. New Rooms default to `village`. An accepted selection broadcasts structural `room_state`, preserves readiness and Seats, locks with Start (including Solo Practice), and survives Disconnect, Host transfer and recovery. Each Game enforces the selected town's obstacles, interiors and Task locations; Hearing and recipient privacy use those same interiors. Each town owns its bounds and Seat centre; Seat offsets and Facing are shared.
 
 ## Seats, Day and sleeping Night
 
-Each selected Town Map has its own bounds, obstacles, interiors, Task locations and Meeting Area in its generated rules (`frontend/public/maps/{mapId}/rules.json`), identically packaged on the server. Village and horror remain 7680 × 4320 with the Seat circle centred on (3840, 2182); `cyberpunk` now identifies Silver Jubilee Campus, 4096 × 4480 with the Seat circle centred on (2208, 2848). The legacy `emergencyButton` geometry key supplies this centre; there is no Emergency action. Seat offsets and Facing stay shared. A Lobby map selection relocates every Membership to the same retained Seat in the selected map, including disconnected reservations; it does not change Ready. Room State's Player Views describe retained Seats; accepted town positions travel only in `move` and recipient-specific `field_state`. Players walk only during Day and sleep at their last accepted position during Night.
+Each selected Town Map has its own bounds, obstacles, interiors, Task locations and Meeting Area in its generated rules (`frontend/public/maps/{mapId}/rules.json`), identically packaged on the server. Native `campus` rules are exported from `campus/layout.json` to `backend/src/main/resources/maps/campus.json` and `native/Assets/PUtown/Resources/Campus/campus.json`. Village and horror remain 7680 × 4320 with the Seat circle centred on (3840, 2182); `cyberpunk` now identifies Silver Jubilee Campus, 4096 × 4480 with the Seat circle centred on (2208, 2848). The native `campus` is 4800 × 3600 with its Seat circle centred on (2400, 1800). Its checked `coordinates` metadata maps 100 server units to one Unity unit, X=x/100 and Z=y/100, with visual height independent of traversal. The legacy `emergencyButton` geometry key supplies this centre; there is no Emergency action. Seat offsets and Facing stay shared. A Lobby map selection relocates every Membership to the same retained Seat in the selected map, including disconnected reservations; it does not change Ready. Room State's Player Views describe retained Seats; accepted town positions travel only in `move` and recipient-specific `field_state`. Players walk only during Day and sleep at their last accepted position during Night.
 
 The Room's shared state is its Player Views plus each recipient's `game_state`, with `field_state` during Day and Night. A transition into Day or Night and recovery in either phase include an immediate authorized field snapshot, followed by ten snapshots a second. Townhall uses retained Seats and sends no field snapshots.
 
@@ -240,6 +240,23 @@ Clients fetch this on join, keyed to the Room they are entering, and create ever
 
 The developer editor validates distinct complete compatible saved recipes before atomically replacing the publication file, which the backend reads. Source layers, drafts and authoring endpoints are absent from the Player build. Publishing takes effect for Rooms created from then on, with no rebuild and no restart; a running Room keeps the collection it was created with, and superseded collections stay in memory only while some Room still references one.
 
+### Native Avatar representation during migration
+
+`GET /rooms/{roomCode}/avatars?version=2` requests the same pinned collection's native representation. Its response has exactly `version: 2`, the content-derived `collectionId`, and ordered `presets`. Each preset has exactly `id`, `name` and `native`. The default query and explicit `version=1` retain the sprite response above. An unsupported representation version is `400`; a valid version unavailable for any preset in that Room is `409`, with no body. There is no inferred legacy fallback or client-maintained catalogue.
+
+Each `native` object has exactly `version: 1`, `masterId`, positive `masterRevision`, `model`, `rig`, `animations` and `platformAssets`:
+
+| Object | Exact fields |
+| --- | --- |
+| `model` | `sourceSha256: lowercase SHA-256`, `rootNode: nonblank string`, `heightMetres: positive finite number`, `pivot: "feet"`, `forwardAxis: "+z"` |
+| `rig` | `type: "humanoid"`, `avatarName: nonblank string`, `hipsBone: nonblank string` |
+| `animations` | `standing`, `walking`, `seated`, each `{clipName: nonblank string, durationSeconds: positive finite number, loop: true}` |
+| Each platform asset | `platform: "windows-x86_64" \| "macos-universal"`, `format: "unity-assetbundle"`, `unityVersion: exact editor version`, `assetName: nonblank prefab asset path`, `sha256: lowercase SHA-256`, `byteLength: 8–67108864 integer`, `data: base64 bundle bytes` |
+
+Exactly one bundle for each platform is required, with a shared Unity version. The single publication reader verifies all fields, encoded lengths, hashes and the `UnityFS` container signature before adopting a publication. Unity also verifies the actual prefab, Humanoid rig and looping clips before making the Room interactive. Container integrity alone is not proof of valid native artwork. The private authoring tool ties review records to immutable source and bundle hashes before atomic publication.
+
+Publication file version 2 has exactly `version` and `presets`; presets require `native` and may additionally carry a complete `sprite`/`seatedSprite` pair. Partial sprite pairs are refused. Version 1 publications retain their supported behavior. Invalid replacement files leave the running server's last good collection intact, and a cold start without any valid publication fails explicitly. Native-only publication does not change an existing Room's collection. The legacy browser understands the `campus` identifier but releases that unsupported Membership with an explicit native-application message at a frame boundary; its selector continues to offer only its supported towns.
+
 ## Persistent Tasks (#32)
 
 Each Village Participant receives three real assignments at the existing fourteen map Task points once, including Doctors and Sheriffs. `task_state` is built for one recipient: `{version:1,type:"task_state",tasks,completed,total,activeTaskId,remainingMs}`. `tasks` contains only their assignments; each is `{taskId,name,kind,x,y,step,steps,fake,sequence}`. Repair has `kind:"repair"`, three steps and an empty sequence. The current target is `(x,y)`; `completed` counts fully completed real Tasks and `total` retains the original real workload. Others receive only their own assignments plus this aggregate, never the actor's stage or location. Task snapshots accompany Start, phase transitions and recovery.
@@ -359,7 +376,7 @@ not a deadline or victory restriction; completion still wins immediately.
 
 ## Local Developer Rooms (ADR 0021)
 
-These messages remain protocol v1 and use exact field sets. They require an explicitly enabled backend (`putown.developer.enabled=true`) and a direct local WebSocket handshake: loopback peer, local request authority and HTTP(S) browser Origin, and no `Forwarded`, `X-Forwarded-*` or `Tailscale-*` headers. Public/proxied access is refused even if the proxy connects from loopback. Local `GET /developer/capabilities` returns `{"enabled":true}` only inside this boundary; unavailable access returns 404. Developer Rooms also require this boundary for ordinary Join and recovery. Ordinary Rooms never accept developer operations.
+These messages remain protocol v1 and use exact field sets. They require an explicitly enabled backend (`putown.developer.enabled=true`) and a direct local WebSocket handshake: loopback peer and local request authority, plus either a single local HTTP(S) browser Origin or exactly one `X-PUtown-Native-Version: 1` header with no Origin. Mixed native/browser assertions, unsupported or duplicate native versions are refused. Neither path accepts `Forwarded`, `X-Forwarded-*`, `Tailscale-*` or `X-Real-IP` headers. Public/proxied access is refused even if the proxy connects from loopback. Local `GET /developer/capabilities` returns `{"enabled":true}` only inside this boundary; unavailable access returns 404. Developer Rooms also require this boundary for ordinary Join and recovery. Ordinary Rooms never accept developer operations.
 
 | Client type | Additional fields |
 | --- | --- |

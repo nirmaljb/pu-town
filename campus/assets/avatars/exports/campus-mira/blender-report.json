@@ -1,0 +1,15 @@
+{
+  "preset": "campus-mira",
+  "master": "campus/assets/avatars/sources/campus-mira/v1/avatar.blend",
+  "sourceFbx": "native/Assets/Art/Avatars/campus-mira/avatar.fbx",
+  "meshObjects": 39,
+  "vertices": 6946,
+  "triangles": 13736,
+  "bones": 17,
+  "actions": [
+    "Standing",
+    "Walking",
+    "Seated"
+  ],
+  "authoredWith": "Blender MCP / Blender 5.2.2 LTS"
+}

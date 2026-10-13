@@ -63,6 +63,12 @@ The backend defaults to port `8080`:
 - `GET /health` returns `{"status":"healthy"}`.
 - `/ws/game` is the game WebSocket endpoint.
 
+### Native campus client
+
+`native/README.md` records the Unity 6000.6.0f1 tool pins, isolated-copy verification, native Avatar publication and macOS/Windows build commands. Run Unity EditMode tests and build affected target artifacts for native changes. Use the opt-in real Java/LiveKit/Unity DSP PlayMode test for media boundary changes; synthetic PCM does not establish microphone permission or audible output. Record packaged runtime and measured hardware evidence separately from tests and compilation.
+
+`campus/layout.json` is the canonical campus geometry source. `python3 tools/campus/publish.py --check` verifies the generated backend/native geometry and route reachability. Native runtime code is in `native/Assets/PUtown/Runtime/`, with media in `Voice/` and private authoring/build code in `native/Assets/Editor/`. Development Pipeline control must remain excluded from release builds. The native client preserves the same recipient privacy, queued frame application, transport heartbeat, recovery and ordered delivery constraints as the browser.
+
 ### Frontend
 
 ```sh
@@ -206,3 +212,7 @@ Developer Rooms require `putown.developer.enabled=true` and a direct local brows
 `developer_state` is sent only to the authorized local controller; `developer_status` is nonsecret Room metadata. Private simulated choices update only their affected Player and the controller inspector, never ordinary browsers. Pausing freezes phase and Task deadlines while membership expiry and heartbeat use real time. Role changes retain earned real/Fake Task banks but clear pending choices and unfinished interaction. Reset restores captured Game state for current memberships without creating new connections or resurrecting departed Players.
 
 The frontend developer panel and phase cards apply events through the existing inbox and frame boundary. Phase presentation never changes a server deadline. Verify local access rejection, inspector privacy, handoff/Release, late membership changes, pause and recovery, Role banks, reset and abandoned Room cleanup at the WebSocket boundary. Run `PU_TOWN_E2E_DEVELOPER=1 npm run test:browser -- e2e/developer-rooms.spec.ts` for two real browser clients with simulated Players.
+
+## Upload size policy
+
+Keep downloaded archives, Blender masters, duplicate authoring exports, generated bundles/publication and textures over 5 MiB local, as specified by `.gitignore`. Commit code, geometry, licenses, provenance, Unity metadata and selected smaller runtime imports. Never force-add excluded artifacts. Run `python3 tools/check-upload-size.py --staged` before committing and `python3 tools/check-upload-size.py --base origin/HEAD` before pushing; the history check also rejects large Git LFS payloads and files deleted in later commits. When the owner requests cleanup before a first push, remove the artifacts from all unpushed commits while preserving their local bytes. Follow `tools/native-assets/README.md` to restore required large textures before a fresh-clone Unity build.

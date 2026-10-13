@@ -1,0 +1,3460 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "License_Standard.txt",
+      "byteLength": 847,
+      "crc32": "ec1ad820"
+    },
+    {
+      "path": "Preview_1.jpg",
+      "byteLength": 510040,
+      "crc32": "7c0b934f"
+    },
+    {
+      "path": "Preview_2.jpg",
+      "byteLength": 586856,
+      "crc32": "e5395ab6"
+    },
+    {
+      "path": "Preview_3.jpg",
+      "byteLength": 505075,
+      "crc32": "5dd89923"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_90Angle_L.fbx",
+      "byteLength": 23740,
+      "crc32": "3ecdb444"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_90Angle_R.fbx",
+      "byteLength": 23772,
+      "crc32": "12a2d2f7"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_BottomTrim.fbx",
+      "byteLength": 28748,
+      "crc32": "08b0e9e7"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Column_RedBricks.fbx",
+      "byteLength": 29164,
+      "crc32": "e961ed4f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Column_Small.fbx",
+      "byteLength": 21196,
+      "crc32": "abb36e57"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Column_TrimBricks.fbx",
+      "byteLength": 30572,
+      "crc32": "120b624d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_Bottom.fbx",
+      "byteLength": 26652,
+      "crc32": "8555ba0c"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_Cap.fbx",
+      "byteLength": 27036,
+      "crc32": "c457beb0"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_CapShort.fbx",
+      "byteLength": 21948,
+      "crc32": "6930d3e8"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_Center.fbx",
+      "byteLength": 21900,
+      "crc32": "950861ab"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_Center_Half.fbx",
+      "byteLength": 22460,
+      "crc32": "33de2874"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_CornerColumn_Top.fbx",
+      "byteLength": 26636,
+      "crc32": "9c530b41"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Corner_Plain.fbx",
+      "byteLength": 23788,
+      "crc32": "8219dc0e"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_HalfColumn_Bottom.fbx",
+      "byteLength": 26236,
+      "crc32": "e4aa620d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_HalfColumn_Center.fbx",
+      "byteLength": 21548,
+      "crc32": "2706c2af"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_HalfColumn_Top.fbx",
+      "byteLength": 26540,
+      "crc32": "e11c6a0c"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_HalfTrim.fbx",
+      "byteLength": 27340,
+      "crc32": "7d047664"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Inset.fbx",
+      "byteLength": 28700,
+      "crc32": "c1213d6b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Inset_Window.fbx",
+      "byteLength": 42220,
+      "crc32": "3d6ec5da"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Inset_Window_Curved.fbx",
+      "byteLength": 47356,
+      "crc32": "8c6a585c"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Inset_Window_Curved_Small.fbx",
+      "byteLength": 43724,
+      "crc32": "0dce5bba"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_InteriorWall_1.fbx",
+      "byteLength": 20652,
+      "crc32": "9d7f3063"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_InteriorWall_3.fbx",
+      "byteLength": 20780,
+      "crc32": "9871a935"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_InteriorWall_4.fbx",
+      "byteLength": 20780,
+      "crc32": "e04d4aa4"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Ornament_Horizontal.fbx",
+      "byteLength": 27452,
+      "crc32": "8a074846"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Plain_1.fbx",
+      "byteLength": 23276,
+      "crc32": "70e99c5d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Plain_3.fbx",
+      "byteLength": 23276,
+      "crc32": "9b3a18fb"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Plain_3_noWear.fbx",
+      "byteLength": 23276,
+      "crc32": "497f3b98"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Plain_4.fbx",
+      "byteLength": 23356,
+      "crc32": "9b0125ee"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_RedWhite_DoubleWindow.fbx",
+      "byteLength": 54380,
+      "crc32": "90f9d442"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_TopTrim.fbx",
+      "byteLength": 27420,
+      "crc32": "69ad52a9"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_TopTrim_90Angle_L.fbx",
+      "byteLength": 27868,
+      "crc32": "7a39e053"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_TopTrim_90Angle_R.fbx",
+      "byteLength": 27836,
+      "crc32": "a760e2b3"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_TopTrim_Corner.fbx",
+      "byteLength": 27500,
+      "crc32": "08682406"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Window_CurvedDouble.fbx",
+      "byteLength": 62428,
+      "crc32": "a86f7162"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Window_Square_Single.fbx",
+      "byteLength": 35324,
+      "crc32": "f1817529"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Window_Trim.fbx",
+      "byteLength": 47324,
+      "crc32": "555986e9"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Brick_Window_Trim_Single.fbx",
+      "byteLength": 41516,
+      "crc32": "3fcb9442"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Building_Large_2.fbx",
+      "byteLength": 841452,
+      "crc32": "7e9efedf"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Building_Medium_2_001.fbx",
+      "byteLength": 627532,
+      "crc32": "888e98e3"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Building_Small_1.fbx",
+      "byteLength": 440924,
+      "crc32": "56638e87"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Brick_90Angle_L.fbx",
+      "byteLength": 21420,
+      "crc32": "e830e056"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Brick_90Angle_R.fbx",
+      "byteLength": 21388,
+      "crc32": "98cde15f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Brick_Center.fbx",
+      "byteLength": 20940,
+      "crc32": "2c27660a"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Brick_L.fbx",
+      "byteLength": 20876,
+      "crc32": "c725b20b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Brick_R.fbx",
+      "byteLength": 20876,
+      "crc32": "d1be6a27"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Metal_90Angle_L.fbx",
+      "byteLength": 23516,
+      "crc32": "511db753"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Metal_90Angle_R.fbx",
+      "byteLength": 23548,
+      "crc32": "c78d7141"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Metal_Center.fbx",
+      "byteLength": 21772,
+      "crc32": "ee01f63d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Metal_L.fbx",
+      "byteLength": 23580,
+      "crc32": "1ffc2ac0"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Metal_R.fbx",
+      "byteLength": 23580,
+      "crc32": "33ec6ca1"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Trim_90Angle_L.fbx",
+      "byteLength": 27212,
+      "crc32": "69c6ab59"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Trim_90Angle_R.fbx",
+      "byteLength": 27148,
+      "crc32": "a532d48f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Trim_Center.fbx",
+      "byteLength": 23916,
+      "crc32": "215e75fd"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Trim_L.fbx",
+      "byteLength": 24748,
+      "crc32": "361af1e9"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Cornice_Trim_R.fbx",
+      "byteLength": 24684,
+      "crc32": "9d3a633e"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_ArrowForwardLeft.fbx",
+      "byteLength": 19532,
+      "crc32": "87412294"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_ArrowForwardRight.fbx",
+      "byteLength": 19532,
+      "crc32": "2895335d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_ArrowStraight.fbx",
+      "byteLength": 19148,
+      "crc32": "bc927317"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_ArrowTurnLeft.fbx",
+      "byteLength": 19244,
+      "crc32": "036f6eb2"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_ArrowTurnRight.fbx",
+      "byteLength": 19692,
+      "crc32": "fe40ae85"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Bikelane.fbx",
+      "byteLength": 19324,
+      "crc32": "de3eeaaa"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_BrokenLine_Straight.fbx",
+      "byteLength": 19660,
+      "crc32": "690111d8"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Crosswalk.fbx",
+      "byteLength": 19148,
+      "crc32": "564e276a"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Crosswalk_Wide.fbx",
+      "byteLength": 19324,
+      "crc32": "b32f5940"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Curve_2Lane_Stripe.fbx",
+      "byteLength": 20508,
+      "crc32": "762b1c1b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Curve_4LaneShort.fbx",
+      "byteLength": 20908,
+      "crc32": "bddab1b3"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Curve_4LaneShort_DoubleYellow.fbx",
+      "byteLength": 20908,
+      "crc32": "0a52c824"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Curve_4LaneShort_Stripe.fbx",
+      "byteLength": 20940,
+      "crc32": "da4918e7"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_DoubleYellow_Straight.fbx",
+      "byteLength": 19164,
+      "crc32": "139609c1"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Only.fbx",
+      "byteLength": 19132,
+      "crc32": "6fc23578"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Slow.fbx",
+      "byteLength": 19132,
+      "crc32": "263c8feb"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Decal_Stop.fbx",
+      "byteLength": 19132,
+      "crc32": "7e355a4b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/DoorFrame_Metal_Single.fbx",
+      "byteLength": 27292,
+      "crc32": "66563423"
+    },
+    {
+      "path": "Exports/FBX (Unity)/DoorFrame_Trim.fbx",
+      "byteLength": 55564,
+      "crc32": "fa2d78d6"
+    },
+    {
+      "path": "Exports/FBX (Unity)/DoorFrame_Wooden.fbx",
+      "byteLength": 33644,
+      "crc32": "be8c0d56"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Door_1.fbx",
+      "byteLength": 38572,
+      "crc32": "20d2f9bf"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Door_2.fbx",
+      "byteLength": 27596,
+      "crc32": "ce4500a2"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Door_3.fbx",
+      "byteLength": 29804,
+      "crc32": "21cdfcff"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Entrance_Concrete_2x1.fbx",
+      "byteLength": 20828,
+      "crc32": "e34ef687"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Entrance_Concrete_2x2.fbx",
+      "byteLength": 20796,
+      "crc32": "1d02a48d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Floor_2x2.fbx",
+      "byteLength": 23452,
+      "crc32": "09015a36"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Floor_4x4.fbx",
+      "byteLength": 24348,
+      "crc32": "53575d4d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Floor_Inset.fbx",
+      "byteLength": 24028,
+      "crc32": "d99faefd"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Bottom.fbx",
+      "byteLength": 23500,
+      "crc32": "978644f7"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Center.fbx",
+      "byteLength": 21100,
+      "crc32": "81a4ea58"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Small_Bottom.fbx",
+      "byteLength": 23676,
+      "crc32": "ec57768c"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Small_Center.fbx",
+      "byteLength": 21100,
+      "crc32": "5cb57463"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Small_Top.fbx",
+      "byteLength": 24332,
+      "crc32": "0a806311"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Column_Top.fbx",
+      "byteLength": 24316,
+      "crc32": "96ff8707"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_FirstFloor_Wall.fbx",
+      "byteLength": 29244,
+      "crc32": "214b88e5"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_FirstFloor_Wall_1.fbx",
+      "byteLength": 24652,
+      "crc32": "466c0f89"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_FirstFloor_Window.fbx",
+      "byteLength": 35708,
+      "crc32": "463a642b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_FullWindow.fbx",
+      "byteLength": 28732,
+      "crc32": "5d7cf126"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Plain_1.fbx",
+      "byteLength": 24540,
+      "crc32": "101366d2"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Plain_3.fbx",
+      "byteLength": 25020,
+      "crc32": "2186957c"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Window.fbx",
+      "byteLength": 42620,
+      "crc32": "cebb675d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Metal_Window_Half.fbx",
+      "byteLength": 33692,
+      "crc32": "60ad05db"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Prop_ACUnit.fbx",
+      "byteLength": 25036,
+      "crc32": "2b6fae39"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Prop_Bollard.fbx",
+      "byteLength": 26988,
+      "crc32": "4ced0a16"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Prop_Drain.fbx",
+      "byteLength": 20060,
+      "crc32": "9d674841"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Prop_ManholeCover.fbx",
+      "byteLength": 22380,
+      "crc32": "cb9abb09"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Prop_Planter_Single.fbx",
+      "byteLength": 27276,
+      "crc32": "1b61a027"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_2x2.fbx",
+      "byteLength": 19740,
+      "crc32": "f0a5920a"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_2x2_90Angle_Center.fbx",
+      "byteLength": 19756,
+      "crc32": "2174dc01"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_2x2_90Angle_L.fbx",
+      "byteLength": 19916,
+      "crc32": "73c1e5c1"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_2x2_90Angle_R.fbx",
+      "byteLength": 19916,
+      "crc32": "919add6f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_4x4.fbx",
+      "byteLength": 19852,
+      "crc32": "420da24e"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_SlateCornice_Center.fbx",
+      "byteLength": 28300,
+      "crc32": "f89fc367"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_SlateCornice_Corner.fbx",
+      "byteLength": 27532,
+      "crc32": "12555bc7"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_SlateCornice_InnerCorner.fbx",
+      "byteLength": 29020,
+      "crc32": "70de7e69"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_SlateCornice_Window_1.fbx",
+      "byteLength": 41852,
+      "crc32": "14df9b84"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_Slate_Center.fbx",
+      "byteLength": 24060,
+      "crc32": "2f5f4330"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_Slate_Corner.fbx",
+      "byteLength": 22668,
+      "crc32": "35ad0100"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_Slate_InnerCorner.fbx",
+      "byteLength": 24316,
+      "crc32": "75dea39d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Roof_Slate_Window_1.fbx",
+      "byteLength": 41196,
+      "crc32": "2db0f447"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Corner_Flat_3m.fbx",
+      "byteLength": 24012,
+      "crc32": "d6cb0143"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Corner_Flat_3m_Stripe.fbx",
+      "byteLength": 20316,
+      "crc32": "1c2ffbcc"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Corner_Round_3m.fbx",
+      "byteLength": 26188,
+      "crc32": "9fc4082f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Corner_Round_3m_Stripe.fbx",
+      "byteLength": 19724,
+      "crc32": "4982df1e"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_NoCurb_3m.fbx",
+      "byteLength": 21452,
+      "crc32": "19a8b22d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Planter.fbx",
+      "byteLength": 36716,
+      "crc32": "802b954d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Straight_3m.fbx",
+      "byteLength": 22588,
+      "crc32": "69222d0e"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Sidewalk_Straight_3m_Stripe.fbx",
+      "byteLength": 19164,
+      "crc32": "7ae27972"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Stairs_Entrance_Concrete.fbx",
+      "byteLength": 27532,
+      "crc32": "fc02a8c3"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Stairs_Rails_Metal.fbx",
+      "byteLength": 32924,
+      "crc32": "5fbc5f7a"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Stairs_Rails_Metal_Straight_1.fbx",
+      "byteLength": 23964,
+      "crc32": "ce253ac9"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Stairs_Rails_Metal_Straight_2.fbx",
+      "byteLength": 26364,
+      "crc32": "f252a942"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_2Lane.fbx",
+      "byteLength": 33644,
+      "crc32": "1ea43b4f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_2Lane_noSidewalk.fbx",
+      "byteLength": 24524,
+      "crc32": "aec61d6a"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_4Lane.fbx",
+      "byteLength": 33516,
+      "crc32": "e9d45b5f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_4Lane_noSidewalk.fbx",
+      "byteLength": 24412,
+      "crc32": "0e1b402f"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_4WayIntersection.fbx",
+      "byteLength": 47708,
+      "crc32": "52e23d9b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Asphalt_6x6.fbx",
+      "byteLength": 19756,
+      "crc32": "59f7c491"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Asphalt_9x9.fbx",
+      "byteLength": 19756,
+      "crc32": "873fc068"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Asphalt_Curve_2Lane.fbx",
+      "byteLength": 22412,
+      "crc32": "000122a4"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Asphalt_Curve_4Lane_Short.fbx",
+      "byteLength": 22284,
+      "crc32": "4f98775d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Curve_2Lane.fbx",
+      "byteLength": 43500,
+      "crc32": "0fbbb8a3"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Curve_2Lane_Curb.fbx",
+      "byteLength": 27996,
+      "crc32": "d1927927"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Curve_4LaneShort.fbx",
+      "byteLength": 48284,
+      "crc32": "fc05b7f8"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_Curve_4Lane_Short_Curb.fbx",
+      "byteLength": 30988,
+      "crc32": "1529db14"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Street_TIntersection.fbx",
+      "byteLength": 48012,
+      "crc32": "41573ee4"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_90Angle_TopCover.fbx",
+      "byteLength": 24668,
+      "crc32": "8911b001"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Column_Bottom.fbx",
+      "byteLength": 26828,
+      "crc32": "7d0ba472"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Column_Center.fbx",
+      "byteLength": 21916,
+      "crc32": "c911f5cb"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Column_Top.fbx",
+      "byteLength": 27516,
+      "crc32": "95e48bef"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Corner.fbx",
+      "byteLength": 26796,
+      "crc32": "efc965bc"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_FirstFloor_Wall.fbx",
+      "byteLength": 25788,
+      "crc32": "79e651cf"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_FirstFloor_Window_001.fbx",
+      "byteLength": 31756,
+      "crc32": "48db5665"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_FirstFloor_Window_Columns.fbx",
+      "byteLength": 21516,
+      "crc32": "c60eb84d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Plain_3.fbx",
+      "byteLength": 25292,
+      "crc32": "8f0cfa2b"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Wall_Guard.fbx",
+      "byteLength": 21356,
+      "crc32": "99263b7d"
+    },
+    {
+      "path": "Exports/FBX (Unity)/Trim_Window.fbx",
+      "byteLength": 43020,
+      "crc32": "dba2e17e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_90Angle_L.fbx",
+      "byteLength": 24316,
+      "crc32": "21fd7f21"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_90Angle_R.fbx",
+      "byteLength": 24332,
+      "crc32": "f403bd60"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_BottomTrim.fbx",
+      "byteLength": 29308,
+      "crc32": "fd8bd9cd"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Column_RedBricks.fbx",
+      "byteLength": 29532,
+      "crc32": "828b8dde"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Column_Small.fbx",
+      "byteLength": 21756,
+      "crc32": "830651a8"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Column_TrimBricks.fbx",
+      "byteLength": 30988,
+      "crc32": "33f15de3"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_Bottom.fbx",
+      "byteLength": 27180,
+      "crc32": "99d9ae07"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_Cap.fbx",
+      "byteLength": 27596,
+      "crc32": "03c3e8fc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_CapShort.fbx",
+      "byteLength": 22572,
+      "crc32": "3db5563a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_Center.fbx",
+      "byteLength": 22476,
+      "crc32": "85e618a7"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_Center_Half.fbx",
+      "byteLength": 22972,
+      "crc32": "0e8e6733"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_CornerColumn_Top.fbx",
+      "byteLength": 27164,
+      "crc32": "b2381302"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Corner_Plain.fbx",
+      "byteLength": 24316,
+      "crc32": "f4da64cc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_HalfColumn_Bottom.fbx",
+      "byteLength": 26732,
+      "crc32": "f545de33"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_HalfColumn_Center.fbx",
+      "byteLength": 22108,
+      "crc32": "4d5d3918"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_HalfColumn_Top.fbx",
+      "byteLength": 27020,
+      "crc32": "d990b8de"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_HalfTrim.fbx",
+      "byteLength": 27900,
+      "crc32": "0a0f0d4e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Inset.fbx",
+      "byteLength": 29212,
+      "crc32": "85ccdae0"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Inset_Window.fbx",
+      "byteLength": 42652,
+      "crc32": "d6f4b0ff"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Inset_Window_Curved.fbx",
+      "byteLength": 47932,
+      "crc32": "63a5df02"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Inset_Window_Curved_Small.fbx",
+      "byteLength": 44236,
+      "crc32": "e776ca79"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_InteriorWall_1.fbx",
+      "byteLength": 21164,
+      "crc32": "a54f3b3e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_InteriorWall_3.fbx",
+      "byteLength": 21308,
+      "crc32": "2315ec47"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_InteriorWall_4.fbx",
+      "byteLength": 21292,
+      "crc32": "35b87de1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Ornament_Horizontal.fbx",
+      "byteLength": 27868,
+      "crc32": "7c56da1a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Plain_1.fbx",
+      "byteLength": 23788,
+      "crc32": "e1739105"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Plain_3.fbx",
+      "byteLength": 23804,
+      "crc32": "f9970f75"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Plain_3_noWear.fbx",
+      "byteLength": 23788,
+      "crc32": "57df4c87"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Plain_4.fbx",
+      "byteLength": 23868,
+      "crc32": "0734b00a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_RedWhite_DoubleWindow.fbx",
+      "byteLength": 54780,
+      "crc32": "066f2fe1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_TopTrim.fbx",
+      "byteLength": 27964,
+      "crc32": "a26bbede"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_TopTrim_90Angle_L.fbx",
+      "byteLength": 28476,
+      "crc32": "b822e477"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_TopTrim_90Angle_R.fbx",
+      "byteLength": 28428,
+      "crc32": "7b71675c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_TopTrim_Corner.fbx",
+      "byteLength": 28044,
+      "crc32": "08151003"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Window_CurvedDouble.fbx",
+      "byteLength": 62892,
+      "crc32": "b9a3846b"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Window_Square_Single.fbx",
+      "byteLength": 35852,
+      "crc32": "51135202"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Window_Trim.fbx",
+      "byteLength": 47820,
+      "crc32": "9d7af27d"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Brick_Window_Trim_Single.fbx",
+      "byteLength": 41948,
+      "crc32": "de829874"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Building_Large_2.fbx",
+      "byteLength": 849788,
+      "crc32": "1f258ccd"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Building_Medium_2_001.fbx",
+      "byteLength": 629852,
+      "crc32": "0db46091"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Building_Small_1.fbx",
+      "byteLength": 444332,
+      "crc32": "9ca4e0fa"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Brick_90Angle_L.fbx",
+      "byteLength": 21980,
+      "crc32": "adec0124"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Brick_90Angle_R.fbx",
+      "byteLength": 21948,
+      "crc32": "375f36f8"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Brick_Center.fbx",
+      "byteLength": 21452,
+      "crc32": "7f3d339a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Brick_L.fbx",
+      "byteLength": 21388,
+      "crc32": "f1fd3658"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Brick_R.fbx",
+      "byteLength": 21388,
+      "crc32": "c058f9ef"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Metal_90Angle_L.fbx",
+      "byteLength": 24012,
+      "crc32": "320a5671"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Metal_90Angle_R.fbx",
+      "byteLength": 24060,
+      "crc32": "e2f0a5c0"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Metal_Center.fbx",
+      "byteLength": 22348,
+      "crc32": "c8191702"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Metal_L.fbx",
+      "byteLength": 24092,
+      "crc32": "4cf2094a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Metal_R.fbx",
+      "byteLength": 24060,
+      "crc32": "2c71c9cc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Trim_90Angle_L.fbx",
+      "byteLength": 27628,
+      "crc32": "1f1f0181"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Trim_90Angle_R.fbx",
+      "byteLength": 27596,
+      "crc32": "fe2c7122"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Trim_Center.fbx",
+      "byteLength": 24396,
+      "crc32": "5c194cdb"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Trim_L.fbx",
+      "byteLength": 25196,
+      "crc32": "0d9ad23c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Cornice_Trim_R.fbx",
+      "byteLength": 25148,
+      "crc32": "a38077ec"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_ArrowForwardLeft.fbx",
+      "byteLength": 20044,
+      "crc32": "5b4c3697"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_ArrowForwardRight.fbx",
+      "byteLength": 20044,
+      "crc32": "d2af003f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_ArrowStraight.fbx",
+      "byteLength": 19660,
+      "crc32": "c58dc499"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_ArrowTurnLeft.fbx",
+      "byteLength": 19756,
+      "crc32": "0264a288"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_ArrowTurnRight.fbx",
+      "byteLength": 20204,
+      "crc32": "04da0a04"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Bikelane.fbx",
+      "byteLength": 19852,
+      "crc32": "92bef2c3"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_BrokenLine_Straight.fbx",
+      "byteLength": 20188,
+      "crc32": "9f22915a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Crosswalk.fbx",
+      "byteLength": 19660,
+      "crc32": "92cabaf9"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Crosswalk_Wide.fbx",
+      "byteLength": 19772,
+      "crc32": "33f54b05"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Curve_2Lane_Stripe.fbx",
+      "byteLength": 21084,
+      "crc32": "b35af8ac"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Curve_4LaneShort.fbx",
+      "byteLength": 21516,
+      "crc32": "1800115f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Curve_4LaneShort_DoubleYellow.fbx",
+      "byteLength": 21532,
+      "crc32": "7444d98a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Curve_4LaneShort_Stripe.fbx",
+      "byteLength": 21548,
+      "crc32": "2d4aa576"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_DoubleYellow_Straight.fbx",
+      "byteLength": 19676,
+      "crc32": "bb246698"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Only.fbx",
+      "byteLength": 19660,
+      "crc32": "04c18275"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Slow.fbx",
+      "byteLength": 19660,
+      "crc32": "35cfef68"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Decal_Stop.fbx",
+      "byteLength": 19660,
+      "crc32": "508145dc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/DoorFrame_Metal_Single.fbx",
+      "byteLength": 27836,
+      "crc32": "965dfc7b"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/DoorFrame_Trim.fbx",
+      "byteLength": 56156,
+      "crc32": "4afa4b1d"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/DoorFrame_Wooden.fbx",
+      "byteLength": 34140,
+      "crc32": "c1656bb3"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Door_1.fbx",
+      "byteLength": 39148,
+      "crc32": "33f31160"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Door_2.fbx",
+      "byteLength": 28076,
+      "crc32": "b399a526"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Door_3.fbx",
+      "byteLength": 30268,
+      "crc32": "108896cd"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Entrance_Concrete_2x1.fbx",
+      "byteLength": 21372,
+      "crc32": "32275af5"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Entrance_Concrete_2x2.fbx",
+      "byteLength": 21340,
+      "crc32": "712b7989"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Floor_2x2.fbx",
+      "byteLength": 23964,
+      "crc32": "3c5a8111"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Floor_4x4.fbx",
+      "byteLength": 24892,
+      "crc32": "9e021a7f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Floor_Inset.fbx",
+      "byteLength": 24540,
+      "crc32": "f416396d"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Bottom.fbx",
+      "byteLength": 24012,
+      "crc32": "772f7650"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Center.fbx",
+      "byteLength": 21644,
+      "crc32": "e8f28f9f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Small_Bottom.fbx",
+      "byteLength": 24188,
+      "crc32": "8c6d0910"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Small_Center.fbx",
+      "byteLength": 21644,
+      "crc32": "b4f1ff27"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Small_Top.fbx",
+      "byteLength": 24844,
+      "crc32": "f88366a8"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Column_Top.fbx",
+      "byteLength": 24796,
+      "crc32": "134692e7"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_FirstFloor_Wall.fbx",
+      "byteLength": 29820,
+      "crc32": "338c95c3"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_FirstFloor_Wall_1.fbx",
+      "byteLength": 25180,
+      "crc32": "25858917"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_FirstFloor_Window.fbx",
+      "byteLength": 36204,
+      "crc32": "992d5410"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_FullWindow.fbx",
+      "byteLength": 29212,
+      "crc32": "6969e6f1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Plain_1.fbx",
+      "byteLength": 25036,
+      "crc32": "2d6cc61c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Plain_3.fbx",
+      "byteLength": 25564,
+      "crc32": "62db3668"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Window.fbx",
+      "byteLength": 43116,
+      "crc32": "a83527a1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Metal_Window_Half.fbx",
+      "byteLength": 34172,
+      "crc32": "aef5e878"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Prop_ACUnit.fbx",
+      "byteLength": 25484,
+      "crc32": "5beb80be"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Prop_Bollard.fbx",
+      "byteLength": 27532,
+      "crc32": "24cefd16"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Prop_Drain.fbx",
+      "byteLength": 20588,
+      "crc32": "088c76a8"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Prop_ManholeCover.fbx",
+      "byteLength": 22876,
+      "crc32": "9ed9a76f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Prop_Planter_Single.fbx",
+      "byteLength": 27788,
+      "crc32": "b95e6ebc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_2x2.fbx",
+      "byteLength": 20252,
+      "crc32": "373f366a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_2x2_90Angle_Center.fbx",
+      "byteLength": 20268,
+      "crc32": "dcea93da"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_2x2_90Angle_L.fbx",
+      "byteLength": 20428,
+      "crc32": "ec9f7030"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_2x2_90Angle_R.fbx",
+      "byteLength": 20428,
+      "crc32": "e4163d74"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_4x4.fbx",
+      "byteLength": 20380,
+      "crc32": "c050bace"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_SlateCornice_Center.fbx",
+      "byteLength": 28860,
+      "crc32": "5065311f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_SlateCornice_Corner.fbx",
+      "byteLength": 28012,
+      "crc32": "d084e76e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_SlateCornice_InnerCorner.fbx",
+      "byteLength": 29596,
+      "crc32": "b7562f9c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_SlateCornice_Window_1.fbx",
+      "byteLength": 42364,
+      "crc32": "9aa771d5"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_Slate_Center.fbx",
+      "byteLength": 24572,
+      "crc32": "253cc17c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_Slate_Corner.fbx",
+      "byteLength": 23228,
+      "crc32": "1725d734"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_Slate_InnerCorner.fbx",
+      "byteLength": 24844,
+      "crc32": "84f92b54"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Roof_Slate_Window_1.fbx",
+      "byteLength": 41708,
+      "crc32": "e0eceedc"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Corner_Flat_3m.fbx",
+      "byteLength": 24492,
+      "crc32": "8c084481"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Corner_Flat_3m_Stripe.fbx",
+      "byteLength": 20828,
+      "crc32": "54b37565"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Corner_Round_3m.fbx",
+      "byteLength": 26476,
+      "crc32": "0a45134c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Corner_Round_3m_Stripe.fbx",
+      "byteLength": 20252,
+      "crc32": "da3bb150"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_NoCurb_3m.fbx",
+      "byteLength": 21932,
+      "crc32": "4a3e3147"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Planter.fbx",
+      "byteLength": 37308,
+      "crc32": "1eef4cb6"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Straight_3m.fbx",
+      "byteLength": 23116,
+      "crc32": "ff0307e2"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Sidewalk_Straight_3m_Stripe.fbx",
+      "byteLength": 19676,
+      "crc32": "1c9d629a"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Stairs_Entrance_Concrete.fbx",
+      "byteLength": 28092,
+      "crc32": "099388b1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Stairs_Rails_Metal.fbx",
+      "byteLength": 33612,
+      "crc32": "b1448b99"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Stairs_Rails_Metal_Straight_1.fbx",
+      "byteLength": 24492,
+      "crc32": "a8393bbf"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Stairs_Rails_Metal_Straight_2.fbx",
+      "byteLength": 26956,
+      "crc32": "d337b3e7"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_2Lane.fbx",
+      "byteLength": 34108,
+      "crc32": "2ac81391"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_2Lane_noSidewalk.fbx",
+      "byteLength": 25052,
+      "crc32": "a25a972d"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_4Lane.fbx",
+      "byteLength": 34092,
+      "crc32": "a2435e82"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_4Lane_noSidewalk.fbx",
+      "byteLength": 24940,
+      "crc32": "107b5162"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_4WayIntersection.fbx",
+      "byteLength": 47772,
+      "crc32": "96a3f5ed"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Asphalt_6x6.fbx",
+      "byteLength": 20268,
+      "crc32": "c1e7e381"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Asphalt_9x9.fbx",
+      "byteLength": 20268,
+      "crc32": "cffa4a7f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Asphalt_Curve_2Lane.fbx",
+      "byteLength": 23052,
+      "crc32": "f4afb155"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Asphalt_Curve_4Lane_Short.fbx",
+      "byteLength": 22828,
+      "crc32": "2b068c55"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Curve_2Lane.fbx",
+      "byteLength": 44236,
+      "crc32": "03e77e5e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Curve_2Lane_Curb.fbx",
+      "byteLength": 28636,
+      "crc32": "74d3211f"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Curve_4LaneShort.fbx",
+      "byteLength": 49100,
+      "crc32": "a3b41d77"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_Curve_4Lane_Short_Curb.fbx",
+      "byteLength": 31660,
+      "crc32": "999cbded"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Street_TIntersection.fbx",
+      "byteLength": 48348,
+      "crc32": "8544f4a5"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_90Angle_TopCover.fbx",
+      "byteLength": 25196,
+      "crc32": "6c00bab1"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Column_Bottom.fbx",
+      "byteLength": 27340,
+      "crc32": "becfeb02"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Column_Center.fbx",
+      "byteLength": 22540,
+      "crc32": "c9d40256"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Column_Top.fbx",
+      "byteLength": 28028,
+      "crc32": "efc5b67c"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Corner.fbx",
+      "byteLength": 27276,
+      "crc32": "e0dd7b94"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_FirstFloor_Wall.fbx",
+      "byteLength": 26300,
+      "crc32": "ec3f2dc4"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_FirstFloor_Window_001.fbx",
+      "byteLength": 32236,
+      "crc32": "d7655476"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_FirstFloor_Window_Columns.fbx",
+      "byteLength": 22076,
+      "crc32": "d0e1f210"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Plain_3.fbx",
+      "byteLength": 25852,
+      "crc32": "53ad46cf"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Wall_Guard.fbx",
+      "byteLength": 21932,
+      "crc32": "d0d31b1e"
+    },
+    {
+      "path": "Exports/FBX (Unreal Engine)/Trim_Window.fbx",
+      "byteLength": 43500,
+      "crc32": "41b818d4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_90Angle_L.bin",
+      "byteLength": 1876,
+      "crc32": "9a722e59"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_90Angle_L.gltf",
+      "byteLength": 4650,
+      "crc32": "9034a2e2"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_90Angle_R.bin",
+      "byteLength": 1876,
+      "crc32": "5c2a91c7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_90Angle_R.gltf",
+      "byteLength": 4695,
+      "crc32": "110059f9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_BottomTrim.bin",
+      "byteLength": 5512,
+      "crc32": "89485b9c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_BottomTrim.gltf",
+      "byteLength": 6828,
+      "crc32": "e876e17e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_RedBricks.bin",
+      "byteLength": 32680,
+      "crc32": "1031012b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_RedBricks.gltf",
+      "byteLength": 2399,
+      "crc32": "031c1c04"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_Small.bin",
+      "byteLength": 2752,
+      "crc32": "85dd3faa"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_Small.gltf",
+      "byteLength": 2333,
+      "crc32": "4823ff25"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_TrimBricks.bin",
+      "byteLength": 25628,
+      "crc32": "93573654"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Column_TrimBricks.gltf",
+      "byteLength": 4197,
+      "crc32": "248e852f"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Bottom.bin",
+      "byteLength": 6512,
+      "crc32": "c0e6f880"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Bottom.gltf",
+      "byteLength": 5016,
+      "crc32": "cdd2b207"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Cap.bin",
+      "byteLength": 8032,
+      "crc32": "b007f5b9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Cap.gltf",
+      "byteLength": 5016,
+      "crc32": "3c963c06"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_CapShort.bin",
+      "byteLength": 4208,
+      "crc32": "bb4fe376"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_CapShort.gltf",
+      "byteLength": 2781,
+      "crc32": "fdafd120"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Center.bin",
+      "byteLength": 3520,
+      "crc32": "db614b02"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Center.gltf",
+      "byteLength": 2776,
+      "crc32": "be804492"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Center_Half.bin",
+      "byteLength": 3776,
+      "crc32": "b193afb4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Center_Half.gltf",
+      "byteLength": 2888,
+      "crc32": "82748b35"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Top.bin",
+      "byteLength": 6512,
+      "crc32": "a5fdc29c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_CornerColumn_Top.gltf",
+      "byteLength": 5008,
+      "crc32": "0512dae9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Corner_Plain.bin",
+      "byteLength": 1320,
+      "crc32": "6c05f740"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Corner_Plain.gltf",
+      "byteLength": 4623,
+      "crc32": "44cae049"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Bottom.bin",
+      "byteLength": 6184,
+      "crc32": "f1e64fac"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Bottom.gltf",
+      "byteLength": 4181,
+      "crc32": "5f3e63d8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Center.bin",
+      "byteLength": 2928,
+      "crc32": "2816f8d9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Center.gltf",
+      "byteLength": 2387,
+      "crc32": "4f3dd2fe"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Top.bin",
+      "byteLength": 6184,
+      "crc32": "8709ed3b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfColumn_Top.gltf",
+      "byteLength": 4189,
+      "crc32": "e78c68dd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfTrim.bin",
+      "byteLength": 2536,
+      "crc32": "6b13ab2b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_HalfTrim.gltf",
+      "byteLength": 6841,
+      "crc32": "c3b32870"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset.bin",
+      "byteLength": 6152,
+      "crc32": "3d82f953"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset.gltf",
+      "byteLength": 6854,
+      "crc32": "596e8e3f"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window.bin",
+      "byteLength": 39936,
+      "crc32": "82ab7138"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window.gltf",
+      "byteLength": 9646,
+      "crc32": "7678bf2f"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window_Curved.bin",
+      "byteLength": 48768,
+      "crc32": "52f42027"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window_Curved.gltf",
+      "byteLength": 9650,
+      "crc32": "a92c2264"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window_Curved_Small.bin",
+      "byteLength": 43916,
+      "crc32": "2ba11d5e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Inset_Window_Curved_Small.gltf",
+      "byteLength": 10724,
+      "crc32": "dfebdc28"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_1.bin",
+      "byteLength": 220,
+      "crc32": "38f529ec"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_1.gltf",
+      "byteLength": 2727,
+      "crc32": "c3d6a575"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_3.bin",
+      "byteLength": 440,
+      "crc32": "fc47c8ae"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_3.gltf",
+      "byteLength": 2728,
+      "crc32": "9e7a177c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_4.bin",
+      "byteLength": 440,
+      "crc32": "97e89291"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_InteriorWall_4.gltf",
+      "byteLength": 2728,
+      "crc32": "c536f9ed"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Ornament_Horizontal.bin",
+      "byteLength": 24912,
+      "crc32": "2b7ed6c5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Ornament_Horizontal.gltf",
+      "byteLength": 2370,
+      "crc32": "9a51e297"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_1.bin",
+      "byteLength": 440,
+      "crc32": "67d1eaca"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_1.gltf",
+      "byteLength": 4576,
+      "crc32": "103a15db"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_3.bin",
+      "byteLength": 612,
+      "crc32": "8b1eb82c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_3.gltf",
+      "byteLength": 4157,
+      "crc32": "a6fbb59d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_3_noWear.bin",
+      "byteLength": 612,
+      "crc32": "af80bfbc"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_3_noWear.gltf",
+      "byteLength": 4171,
+      "crc32": "02a9420d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_4.bin",
+      "byteLength": 880,
+      "crc32": "8b09eb33"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Plain_4.gltf",
+      "byteLength": 4599,
+      "crc32": "e77ba88a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_RedWhite_DoubleWindow.bin",
+      "byteLength": 78292,
+      "crc32": "1e374c2d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_RedWhite_DoubleWindow.gltf",
+      "byteLength": 13012,
+      "crc32": "f1dbd60f"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim.bin",
+      "byteLength": 1448,
+      "crc32": "840099fb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim.gltf",
+      "byteLength": 6806,
+      "crc32": "a3fbd47a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_90Angle_L.bin",
+      "byteLength": 3036,
+      "crc32": "b7b48808"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_90Angle_L.gltf",
+      "byteLength": 6883,
+      "crc32": "0ab1162a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_90Angle_R.bin",
+      "byteLength": 3036,
+      "crc32": "4ace320a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_90Angle_R.gltf",
+      "byteLength": 6877,
+      "crc32": "561d20fb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_Corner.bin",
+      "byteLength": 2224,
+      "crc32": "9a560dab"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_TopTrim_Corner.gltf",
+      "byteLength": 6848,
+      "crc32": "a7d79990"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_CurvedDouble.bin",
+      "byteLength": 84536,
+      "crc32": "6c961107"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_CurvedDouble.gltf",
+      "byteLength": 9758,
+      "crc32": "05bf582c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Square_Single.bin",
+      "byteLength": 17260,
+      "crc32": "d07607eb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Square_Single.gltf",
+      "byteLength": 10672,
+      "crc32": "2c3adb3e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Trim.bin",
+      "byteLength": 65232,
+      "crc32": "089ca8ca"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Trim.gltf",
+      "byteLength": 11678,
+      "crc32": "0ce70271"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Trim_Single.bin",
+      "byteLength": 34952,
+      "crc32": "eb0d9baf"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Brick_Window_Trim_Single.gltf",
+      "byteLength": 10746,
+      "crc32": "1da86b34"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Large_2.bin",
+      "byteLength": 3345228,
+      "crc32": "cb0a2a78"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Large_2.gltf",
+      "byteLength": 22880,
+      "crc32": "9a514e9b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Medium_2_001.bin",
+      "byteLength": 2443288,
+      "crc32": "1bf76750"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Medium_2_001.gltf",
+      "byteLength": 25244,
+      "crc32": "a93820ad"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Small_1.bin",
+      "byteLength": 1556100,
+      "crc32": "7decc951"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Building_Small_1.gltf",
+      "byteLength": 27435,
+      "crc32": "51848e05"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_90Angle_L.bin",
+      "byteLength": 2932,
+      "crc32": "b87464f5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_90Angle_L.gltf",
+      "byteLength": 2735,
+      "crc32": "e8a13f0e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_90Angle_R.bin",
+      "byteLength": 2932,
+      "crc32": "e50ebca2"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_90Angle_R.gltf",
+      "byteLength": 2735,
+      "crc32": "fc6718cd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_Center.bin",
+      "byteLength": 660,
+      "crc32": "31bbe3ca"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_Center.gltf",
+      "byteLength": 2719,
+      "crc32": "c66c23d1"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_L.bin",
+      "byteLength": 660,
+      "crc32": "9cf0e770"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_L.gltf",
+      "byteLength": 2709,
+      "crc32": "a623d1a3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_R.bin",
+      "byteLength": 660,
+      "crc32": "67f40dbb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Brick_R.gltf",
+      "byteLength": 2709,
+      "crc32": "84b5981c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_90Angle_L.bin",
+      "byteLength": 8412,
+      "crc32": "9a105a95"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_90Angle_L.gltf",
+      "byteLength": 2612,
+      "crc32": "2af7ab8c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_90Angle_R.bin",
+      "byteLength": 8412,
+      "crc32": "df97ecce"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_90Angle_R.gltf",
+      "byteLength": 2612,
+      "crc32": "b57e18c6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_Center.bin",
+      "byteLength": 3060,
+      "crc32": "223e9461"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_Center.gltf",
+      "byteLength": 2595,
+      "crc32": "ff5b4b5d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_L.bin",
+      "byteLength": 6192,
+      "crc32": "19e16bbf"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_L.gltf",
+      "byteLength": 2611,
+      "crc32": "ef2cb65e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_R.bin",
+      "byteLength": 6192,
+      "crc32": "19858d60"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Metal_R.gltf",
+      "byteLength": 2611,
+      "crc32": "1b508808"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_90Angle_L.bin",
+      "byteLength": 11680,
+      "crc32": "0f1d7f09"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_90Angle_L.gltf",
+      "byteLength": 2327,
+      "crc32": "407c28f5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_90Angle_R.bin",
+      "byteLength": 11680,
+      "crc32": "8f92a4d1"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_90Angle_R.gltf",
+      "byteLength": 2343,
+      "crc32": "5db898fd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_Center.bin",
+      "byteLength": 7312,
+      "crc32": "5402feae"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_Center.gltf",
+      "byteLength": 2303,
+      "crc32": "a912de2d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_L.bin",
+      "byteLength": 8616,
+      "crc32": "7081f612"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_L.gltf",
+      "byteLength": 2310,
+      "crc32": "66c006c8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_R.bin",
+      "byteLength": 8616,
+      "crc32": "2e367481"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Cornice_Trim_R.gltf",
+      "byteLength": 2310,
+      "crc32": "686a4e46"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowForwardLeft.bin",
+      "byteLength": 444,
+      "crc32": "1e0df9c8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowForwardLeft.gltf",
+      "byteLength": 1881,
+      "crc32": "df664a14"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowForwardRight.bin",
+      "byteLength": 444,
+      "crc32": "67f9c6e7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowForwardRight.gltf",
+      "byteLength": 1883,
+      "crc32": "fb37de28"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowStraight.bin",
+      "byteLength": 140,
+      "crc32": "4acaf36a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowStraight.gltf",
+      "byteLength": 1871,
+      "crc32": "e1759fa3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowTurnLeft.bin",
+      "byteLength": 216,
+      "crc32": "c3501dff"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowTurnLeft.gltf",
+      "byteLength": 1872,
+      "crc32": "c938fa26"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowTurnRight.bin",
+      "byteLength": 264,
+      "crc32": "ebedcb8c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_ArrowTurnRight.gltf",
+      "byteLength": 2082,
+      "crc32": "e0cdaf3e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Bikelane.bin",
+      "byteLength": 368,
+      "crc32": "bd60cf33"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Bikelane.gltf",
+      "byteLength": 1868,
+      "crc32": "a76a0b37"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_BrokenLine_Straight.bin",
+      "byteLength": 172,
+      "crc32": "47e7c662"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_BrokenLine_Straight.gltf",
+      "byteLength": 2039,
+      "crc32": "ee43bb93"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Crosswalk.bin",
+      "byteLength": 140,
+      "crc32": "cd9336fc"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Crosswalk.gltf",
+      "byteLength": 1863,
+      "crc32": "8cbef57d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Crosswalk_Wide.bin",
+      "byteLength": 280,
+      "crc32": "0b6b20c2"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Crosswalk_Wide.gltf",
+      "byteLength": 1929,
+      "crc32": "4a774e91"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_2Lane_Stripe.bin",
+      "byteLength": 1552,
+      "crc32": "cd8946ce"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_2Lane_Stripe.gltf",
+      "byteLength": 2085,
+      "crc32": "7a7fc198"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort.bin",
+      "byteLength": 2288,
+      "crc32": "50455082"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort.gltf",
+      "byteLength": 2063,
+      "crc32": "a333d617"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort_DoubleYellow.bin",
+      "byteLength": 2288,
+      "crc32": "d7571297"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort_DoubleYellow.gltf",
+      "byteLength": 2094,
+      "crc32": "8fb2e4f4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort_Stripe.bin",
+      "byteLength": 2288,
+      "crc32": "136a0b16"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Curve_4LaneShort_Stripe.gltf",
+      "byteLength": 2099,
+      "crc32": "bf394dce"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_DoubleYellow_Straight.bin",
+      "byteLength": 140,
+      "crc32": "c1ba0368"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_DoubleYellow_Straight.gltf",
+      "byteLength": 1856,
+      "crc32": "3a499c3a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Only.bin",
+      "byteLength": 140,
+      "crc32": "54db53e3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Only.gltf",
+      "byteLength": 1852,
+      "crc32": "1266b287"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Slow.bin",
+      "byteLength": 140,
+      "crc32": "95a10d6c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Slow.gltf",
+      "byteLength": 1852,
+      "crc32": "75319804"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Stop.bin",
+      "byteLength": 140,
+      "crc32": "0c042207"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Decal_Stop.gltf",
+      "byteLength": 1850,
+      "crc32": "f1109fed"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Metal_Single.bin",
+      "byteLength": 20832,
+      "crc32": "029731cc"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Metal_Single.gltf",
+      "byteLength": 4713,
+      "crc32": "16197e77"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Trim.bin",
+      "byteLength": 54600,
+      "crc32": "7f8353e2"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Trim.gltf",
+      "byteLength": 7990,
+      "crc32": "e04db543"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Wooden.bin",
+      "byteLength": 33748,
+      "crc32": "350772f3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/DoorFrame_Wooden.gltf",
+      "byteLength": 3810,
+      "crc32": "3d6572ad"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_1.bin",
+      "byteLength": 43256,
+      "crc32": "c85f0558"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_1.gltf",
+      "byteLength": 2372,
+      "crc32": "de888677"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_2.bin",
+      "byteLength": 15260,
+      "crc32": "31b1a9f4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_2.gltf",
+      "byteLength": 4722,
+      "crc32": "79cbdac5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_3.bin",
+      "byteLength": 22884,
+      "crc32": "30db0ee5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Door_3.gltf",
+      "byteLength": 4722,
+      "crc32": "4f2881a3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Entrance_Concrete_2x1.bin",
+      "byteLength": 1032,
+      "crc32": "fcbe0aed"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Entrance_Concrete_2x1.gltf",
+      "byteLength": 2395,
+      "crc32": "8bd05b00"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Entrance_Concrete_2x2.bin",
+      "byteLength": 1032,
+      "crc32": "b57c4a55"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Entrance_Concrete_2x2.gltf",
+      "byteLength": 2391,
+      "crc32": "acd8f234"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_2x2.bin",
+      "byteLength": 280,
+      "crc32": "00246be9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_2x2.gltf",
+      "byteLength": 3641,
+      "crc32": "bc579047"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_4x4.bin",
+      "byteLength": 1376,
+      "crc32": "6d10b87c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_4x4.gltf",
+      "byteLength": 4043,
+      "crc32": "1019f0db"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_Inset.bin",
+      "byteLength": 528,
+      "crc32": "d83195cd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Floor_Inset.gltf",
+      "byteLength": 4098,
+      "crc32": "76f07243"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Bottom.bin",
+      "byteLength": 8672,
+      "crc32": "5e468140"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Bottom.gltf",
+      "byteLength": 2403,
+      "crc32": "a6e86e23"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Center.bin",
+      "byteLength": 1376,
+      "crc32": "8f1ec73c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Center.gltf",
+      "byteLength": 2394,
+      "crc32": "805ad35b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Bottom.bin",
+      "byteLength": 8032,
+      "crc32": "e9887aae"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Bottom.gltf",
+      "byteLength": 2417,
+      "crc32": "07b600fd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Center.bin",
+      "byteLength": 1376,
+      "crc32": "80e811ec"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Center.gltf",
+      "byteLength": 2407,
+      "crc32": "b997c2b8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Top.bin",
+      "byteLength": 10040,
+      "crc32": "f5192ddf"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Small_Top.gltf",
+      "byteLength": 2412,
+      "crc32": "04f092bb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Top.bin",
+      "byteLength": 10040,
+      "crc32": "c2268814"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Column_Top.gltf",
+      "byteLength": 2400,
+      "crc32": "0a277ef0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Wall.bin",
+      "byteLength": 3192,
+      "crc32": "605a1d6c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Wall.gltf",
+      "byteLength": 6566,
+      "crc32": "b1259e5a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Wall_1.bin",
+      "byteLength": 816,
+      "crc32": "aeef1b00"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Wall_1.gltf",
+      "byteLength": 4482,
+      "crc32": "2d1a132e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Window.bin",
+      "byteLength": 12840,
+      "crc32": "fd729288"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Window.gltf",
+      "byteLength": 9945,
+      "crc32": "fad2e742"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FullWindow.bin",
+      "byteLength": 16028,
+      "crc32": "958cabee"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_FullWindow.gltf",
+      "byteLength": 6571,
+      "crc32": "20d8cf45"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Plain_1.bin",
+      "byteLength": 660,
+      "crc32": "c995eab0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Plain_1.gltf",
+      "byteLength": 4978,
+      "crc32": "2e9d890a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Plain_3.bin",
+      "byteLength": 1876,
+      "crc32": "ce3b3d1b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Plain_3.gltf",
+      "byteLength": 5040,
+      "crc32": "e23612f0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Window.bin",
+      "byteLength": 42884,
+      "crc32": "6c2adfb1"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Window.gltf",
+      "byteLength": 10718,
+      "crc32": "cf4bcb2d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Window_Half.bin",
+      "byteLength": 28640,
+      "crc32": "95c0b81e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Metal_Window_Half.gltf",
+      "byteLength": 6633,
+      "crc32": "d0569871"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_ACUnit.bin",
+      "byteLength": 6256,
+      "crc32": "c86608e8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_ACUnit.gltf",
+      "byteLength": 2376,
+      "crc32": "400a3ed6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Bollard.bin",
+      "byteLength": 10140,
+      "crc32": "d8a5ae37"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Bollard.gltf",
+      "byteLength": 2394,
+      "crc32": "748f513e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Drain.bin",
+      "byteLength": 700,
+      "crc32": "cd629a39"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Drain.gltf",
+      "byteLength": 2149,
+      "crc32": "e9057e7c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_ManholeCover.bin",
+      "byteLength": 4548,
+      "crc32": "2396f5cd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_ManholeCover.gltf",
+      "byteLength": 2198,
+      "crc32": "fbeca662"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Planter_Single.bin",
+      "byteLength": 9428,
+      "crc32": "35792040"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Prop_Planter_Single.gltf",
+      "byteLength": 4132,
+      "crc32": "af576f29"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2.bin",
+      "byteLength": 140,
+      "crc32": "6e1de837"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2.gltf",
+      "byteLength": 2096,
+      "crc32": "b4561d41"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_Center.bin",
+      "byteLength": 140,
+      "crc32": "921597c3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_Center.gltf",
+      "byteLength": 2143,
+      "crc32": "72e33569"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_L.bin",
+      "byteLength": 292,
+      "crc32": "00876173"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_L.gltf",
+      "byteLength": 2118,
+      "crc32": "89a50eb9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_R.bin",
+      "byteLength": 292,
+      "crc32": "9b9fc490"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_2x2_90Angle_R.gltf",
+      "byteLength": 2118,
+      "crc32": "c9b88214"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_4x4.bin",
+      "byteLength": 560,
+      "crc32": "2cd57266"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_4x4.gltf",
+      "byteLength": 2105,
+      "crc32": "9b40cb8a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Center.bin",
+      "byteLength": 2076,
+      "crc32": "fc344705"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Center.gltf",
+      "byteLength": 5827,
+      "crc32": "81c6502c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Corner.bin",
+      "byteLength": 5456,
+      "crc32": "bfd1894e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Corner.gltf",
+      "byteLength": 4132,
+      "crc32": "7c557d5e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_InnerCorner.bin",
+      "byteLength": 3212,
+      "crc32": "385f6936"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_InnerCorner.gltf",
+      "byteLength": 5984,
+      "crc32": "6750e2f0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Window_1.bin",
+      "byteLength": 25180,
+      "crc32": "e0fc6446"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_SlateCornice_Window_1.gltf",
+      "byteLength": 8826,
+      "crc32": "28de3989"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Center.bin",
+      "byteLength": 516,
+      "crc32": "399ec9c4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Center.gltf",
+      "byteLength": 4037,
+      "crc32": "c10a13e7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Corner.bin",
+      "byteLength": 3104,
+      "crc32": "cf5948ff"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Corner.gltf",
+      "byteLength": 2345,
+      "crc32": "ef572e61"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_InnerCorner.bin",
+      "byteLength": 860,
+      "crc32": "df09eb63"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_InnerCorner.gltf",
+      "byteLength": 4146,
+      "crc32": "827e2d3b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Window_1.bin",
+      "byteLength": 23620,
+      "crc32": "9143a1c0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Roof_Slate_Window_1.gltf",
+      "byteLength": 8847,
+      "crc32": "a137e421"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Flat_3m.bin",
+      "byteLength": 6296,
+      "crc32": "11885136"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Flat_3m.gltf",
+      "byteLength": 2630,
+      "crc32": "bae15e72"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Flat_3m_Stripe.bin",
+      "byteLength": 724,
+      "crc32": "b6452bdc"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Flat_3m_Stripe.gltf",
+      "byteLength": 2063,
+      "crc32": "2232ed59"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Round_3m.bin",
+      "byteLength": 8984,
+      "crc32": "afea2c78"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Round_3m.gltf",
+      "byteLength": 2636,
+      "crc32": "60980458"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Round_3m_Stripe.bin",
+      "byteLength": 976,
+      "crc32": "cd2ad90f"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Corner_Round_3m_Stripe.gltf",
+      "byteLength": 1905,
+      "crc32": "af63a5a6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_NoCurb_3m.bin",
+      "byteLength": 2572,
+      "crc32": "cbb43820"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_NoCurb_3m.gltf",
+      "byteLength": 2356,
+      "crc32": "90fe39b5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Planter.bin",
+      "byteLength": 50708,
+      "crc32": "15dccc2a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Planter.gltf",
+      "byteLength": 4215,
+      "crc32": "64aa5477"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Straight_3m.bin",
+      "byteLength": 4296,
+      "crc32": "4268a2dd"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Straight_3m.gltf",
+      "byteLength": 2586,
+      "crc32": "83482f0a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Straight_3m_Stripe.bin",
+      "byteLength": 140,
+      "crc32": "0e2f7576"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Sidewalk_Straight_3m_Stripe.gltf",
+      "byteLength": 1856,
+      "crc32": "0ae42d7a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Entrance_Concrete.bin",
+      "byteLength": 7088,
+      "crc32": "774aa043"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Entrance_Concrete.gltf",
+      "byteLength": 4227,
+      "crc32": "a31e5d80"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal.bin",
+      "byteLength": 38904,
+      "crc32": "317d9e89"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal.gltf",
+      "byteLength": 2412,
+      "crc32": "055a5566"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal_Straight_1.bin",
+      "byteLength": 14448,
+      "crc32": "98512d70"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal_Straight_1.gltf",
+      "byteLength": 2410,
+      "crc32": "7825746a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal_Straight_2.bin",
+      "byteLength": 26880,
+      "crc32": "2d2903c9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Stairs_Rails_Metal_Straight_2.gltf",
+      "byteLength": 2412,
+      "crc32": "8e785f70"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_2Lane.bin",
+      "byteLength": 15912,
+      "crc32": "45193e4a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_2Lane.gltf",
+      "byteLength": 6364,
+      "crc32": "8c847907"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_2Lane_noSidewalk.bin",
+      "byteLength": 1440,
+      "crc32": "f473e3fa"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_2Lane_noSidewalk.gltf",
+      "byteLength": 4301,
+      "crc32": "bcd412a7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4Lane.bin",
+      "byteLength": 18024,
+      "crc32": "49ae11b4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4Lane.gltf",
+      "byteLength": 6307,
+      "crc32": "93aa7230"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4Lane_noSidewalk.bin",
+      "byteLength": 1224,
+      "crc32": "3ca28c33"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4Lane_noSidewalk.gltf",
+      "byteLength": 4275,
+      "crc32": "4eb80456"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4WayIntersection.bin",
+      "byteLength": 54360,
+      "crc32": "636b811d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_4WayIntersection.gltf",
+      "byteLength": 6432,
+      "crc32": "3f329539"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_6x6.bin",
+      "byteLength": 140,
+      "crc32": "30a8f8d9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_6x6.gltf",
+      "byteLength": 2132,
+      "crc32": "a0ab4cea"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_9x9.bin",
+      "byteLength": 140,
+      "crc32": "2e47858d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_9x9.gltf",
+      "byteLength": 2136,
+      "crc32": "db6ac47e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_Curve_2Lane.bin",
+      "byteLength": 2064,
+      "crc32": "763cb728"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_Curve_2Lane.gltf",
+      "byteLength": 2570,
+      "crc32": "708bb4c3"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_Curve_4Lane_Short.bin",
+      "byteLength": 2120,
+      "crc32": "830dbfa2"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Asphalt_Curve_4Lane_Short.gltf",
+      "byteLength": 2581,
+      "crc32": "1357fe5e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_2Lane.bin",
+      "byteLength": 26216,
+      "crc32": "167a213b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_2Lane.gltf",
+      "byteLength": 6437,
+      "crc32": "7129cb58"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_2Lane_Curb.bin",
+      "byteLength": 11952,
+      "crc32": "4bf59d33"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_2Lane_Curb.gltf",
+      "byteLength": 2654,
+      "crc32": "a48c69ec"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_4LaneShort.bin",
+      "byteLength": 39376,
+      "crc32": "4a24aa49"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_4LaneShort.gltf",
+      "byteLength": 6433,
+      "crc32": "e5b1ff44"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_4Lane_Short_Curb.bin",
+      "byteLength": 17568,
+      "crc32": "cd282e77"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_Curve_4Lane_Short_Curb.gltf",
+      "byteLength": 2653,
+      "crc32": "6c8c79f9"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_TIntersection.bin",
+      "byteLength": 58668,
+      "crc32": "27c656f8"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Street_TIntersection.gltf",
+      "byteLength": 6406,
+      "crc32": "71dce6cf"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_90Angle_TopCover.bin",
+      "byteLength": 1100,
+      "crc32": "cb8325b0"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_90Angle_TopCover.gltf",
+      "byteLength": 4918,
+      "crc32": "daf1bf05"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Bottom.bin",
+      "byteLength": 14456,
+      "crc32": "ef3edb52"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Bottom.gltf",
+      "byteLength": 2346,
+      "crc32": "73a19f07"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Center.bin",
+      "byteLength": 4944,
+      "crc32": "12969002"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Center.gltf",
+      "byteLength": 2315,
+      "crc32": "074cbea6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Top.bin",
+      "byteLength": 14456,
+      "crc32": "8d93dad1"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Column_Top.gltf",
+      "byteLength": 2354,
+      "crc32": "14a9f440"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Corner.bin",
+      "byteLength": 6024,
+      "crc32": "237119a6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Corner.gltf",
+      "byteLength": 4905,
+      "crc32": "91bb5392"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Wall.bin",
+      "byteLength": 4356,
+      "crc32": "461f92ed"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Wall.gltf",
+      "byteLength": 4920,
+      "crc32": "fdad2426"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Window_001.bin",
+      "byteLength": 11712,
+      "crc32": "9945effb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Window_001.gltf",
+      "byteLength": 7915,
+      "crc32": "ca2566d7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Window_Columns.bin",
+      "byteLength": 2496,
+      "crc32": "760ca22c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_FirstFloor_Window_Columns.gltf",
+      "byteLength": 2586,
+      "crc32": "ce452436"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Plain_3.bin",
+      "byteLength": 2908,
+      "crc32": "a12935e6"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Plain_3.gltf",
+      "byteLength": 4904,
+      "crc32": "52a3e48b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Wall_Guard.bin",
+      "byteLength": 2784,
+      "crc32": "febd6212"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Wall_Guard.gltf",
+      "byteLength": 2504,
+      "crc32": "4ff298b1"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Window.bin",
+      "byteLength": 48372,
+      "crc32": "b2be5b70"
+    },
+    {
+      "path": "Exports/glTF (Godot)/Trim_Window.gltf",
+      "byteLength": 10727,
+      "crc32": "ebca6846"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Concrete_Asphalt_BaseColor.png",
+      "byteLength": 988093,
+      "crc32": "b25150e5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Concrete_BaseColor.png",
+      "byteLength": 1341594,
+      "crc32": "2cad4754"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Concrete_Normal.png",
+      "byteLength": 4416770,
+      "crc32": "8d4a2f77"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Concrete_ORM.png",
+      "byteLength": 896797,
+      "crc32": "dcb4908a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_dark_interior.png",
+      "byteLength": 325090,
+      "crc32": "5a5c93da"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Dirt_BaseColor.png",
+      "byteLength": 2003269,
+      "crc32": "a031026b"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Dirt_Normal.png",
+      "byteLength": 9650819,
+      "crc32": "0f025bfe"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Dirt_ORM.png",
+      "byteLength": 1373373,
+      "crc32": "24dcabb5"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_lit_interior_1.png",
+      "byteLength": 395226,
+      "crc32": "5d0fa76c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_lit_interior_2.png",
+      "byteLength": 316427,
+      "crc32": "d62e6828"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MarbleFloor_BaseColor.png",
+      "byteLength": 1095714,
+      "crc32": "8d8590c4"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MarbleFloor_Normal.png",
+      "byteLength": 1382828,
+      "crc32": "085639c7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MarbleFloor_ORM.png",
+      "byteLength": 567860,
+      "crc32": "6c2bb091"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MetalConcrete_BaseColor.png",
+      "byteLength": 1488628,
+      "crc32": "8437b91a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MetalConcrete_Normal.png",
+      "byteLength": 4815924,
+      "crc32": "e5b3798c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_MetalConcrete_ORM.png",
+      "byteLength": 1857257,
+      "crc32": "a2e35691"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Ornaments_BaseColor.png",
+      "byteLength": 4776648,
+      "crc32": "ca432ae7"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Ornaments_Normal.png",
+      "byteLength": 7172215,
+      "crc32": "d6357224"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Ornaments_ORM.png",
+      "byteLength": 4548795,
+      "crc32": "877cc801"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RedBrick_BaseColor.png",
+      "byteLength": 1732063,
+      "crc32": "c029401e"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RedBrick_Normal.png",
+      "byteLength": 7273659,
+      "crc32": "a72ce52d"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RedBrick_ORM.png",
+      "byteLength": 2346959,
+      "crc32": "ee72cbeb"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RoofSlate_BaseColor.png",
+      "byteLength": 1483692,
+      "crc32": "820ade3a"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RoofSlate_Normal.png",
+      "byteLength": 3679324,
+      "crc32": "901eb5ef"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_RoofSlate_ORM.png",
+      "byteLength": 3160276,
+      "crc32": "a825907c"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Street_Decals.png",
+      "byteLength": 2233893,
+      "crc32": "451bcb35"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Trim_BaseColor.png",
+      "byteLength": 4421593,
+      "crc32": "78a66c73"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Trim_Normal.png",
+      "byteLength": 4104873,
+      "crc32": "e9ecc134"
+    },
+    {
+      "path": "Exports/glTF (Godot)/T_Trim_ORM.png",
+      "byteLength": 2538116,
+      "crc32": "14c62d5f"
+    },
+    {
+      "path": "Textures/CM_Dark_Interior_1.HDR",
+      "byteLength": 5391650,
+      "crc32": "3e6ad5a4"
+    },
+    {
+      "path": "Textures/CM_Lit_Interior_1.HDR",
+      "byteLength": 6075827,
+      "crc32": "cb80f164"
+    },
+    {
+      "path": "Textures/CM_Lit_Interior_2.HDR",
+      "byteLength": 6034705,
+      "crc32": "bf742a28"
+    },
+    {
+      "path": "Textures/T_Blinds.png",
+      "byteLength": 810052,
+      "crc32": "9baf88df"
+    },
+    {
+      "path": "Textures/T_Concrete_Asphalt_BaseColor.png",
+      "byteLength": 988093,
+      "crc32": "b25150e5"
+    },
+    {
+      "path": "Textures/T_Concrete_BaseColor.png",
+      "byteLength": 1341594,
+      "crc32": "2cad4754"
+    },
+    {
+      "path": "Textures/T_Concrete_Normal.png",
+      "byteLength": 4416770,
+      "crc32": "8d4a2f77"
+    },
+    {
+      "path": "Textures/T_Concrete_ORM.png",
+      "byteLength": 896797,
+      "crc32": "dcb4908a"
+    },
+    {
+      "path": "Textures/T_CornerDamage_Normal.png",
+      "byteLength": 2864648,
+      "crc32": "95d8f29d"
+    },
+    {
+      "path": "Textures/T_Curtains.png",
+      "byteLength": 903068,
+      "crc32": "c1744a12"
+    },
+    {
+      "path": "Textures/T_dark_interior.png",
+      "byteLength": 325090,
+      "crc32": "5a5c93da"
+    },
+    {
+      "path": "Textures/T_Dirt_BaseColor.png",
+      "byteLength": 2003269,
+      "crc32": "a031026b"
+    },
+    {
+      "path": "Textures/T_Dirt_Normal.png",
+      "byteLength": 9650819,
+      "crc32": "0f025bfe"
+    },
+    {
+      "path": "Textures/T_Dirt_ORM.png",
+      "byteLength": 1373373,
+      "crc32": "24dcabb5"
+    },
+    {
+      "path": "Textures/T_lit_interior_1.png",
+      "byteLength": 395226,
+      "crc32": "5d0fa76c"
+    },
+    {
+      "path": "Textures/T_lit_interior_2.png",
+      "byteLength": 316427,
+      "crc32": "d62e6828"
+    },
+    {
+      "path": "Textures/T_MarbleFloor_BaseColor.png",
+      "byteLength": 1095714,
+      "crc32": "8d8590c4"
+    },
+    {
+      "path": "Textures/T_MarbleFloor_Normal.png",
+      "byteLength": 1382828,
+      "crc32": "085639c7"
+    },
+    {
+      "path": "Textures/T_MarbleFloor_ORM.png",
+      "byteLength": 567860,
+      "crc32": "6c2bb091"
+    },
+    {
+      "path": "Textures/T_MetalConcrete_BaseColor.png",
+      "byteLength": 1488628,
+      "crc32": "8437b91a"
+    },
+    {
+      "path": "Textures/T_MetalConcrete_Normal.png",
+      "byteLength": 4815924,
+      "crc32": "e5b3798c"
+    },
+    {
+      "path": "Textures/T_MetalConcrete_ORM.png",
+      "byteLength": 1857257,
+      "crc32": "a2e35691"
+    },
+    {
+      "path": "Textures/T_Noise_Drips.png",
+      "byteLength": 586491,
+      "crc32": "60cec87f"
+    },
+    {
+      "path": "Textures/T_Ornaments_BaseColor.png",
+      "byteLength": 4776648,
+      "crc32": "ca432ae7"
+    },
+    {
+      "path": "Textures/T_Ornaments_Normal.png",
+      "byteLength": 7172215,
+      "crc32": "d6357224"
+    },
+    {
+      "path": "Textures/T_Ornaments_ORM.png",
+      "byteLength": 4548795,
+      "crc32": "877cc801"
+    },
+    {
+      "path": "Textures/T_RedBrick_BaseColor.png",
+      "byteLength": 1732063,
+      "crc32": "c029401e"
+    },
+    {
+      "path": "Textures/T_RedBrick_Normal.png",
+      "byteLength": 7273659,
+      "crc32": "a72ce52d"
+    },
+    {
+      "path": "Textures/T_RedBrick_ORM.png",
+      "byteLength": 2346959,
+      "crc32": "ee72cbeb"
+    },
+    {
+      "path": "Textures/T_RoofSlate_BaseColor.png",
+      "byteLength": 1483692,
+      "crc32": "820ade3a"
+    },
+    {
+      "path": "Textures/T_RoofSlate_Normal.png",
+      "byteLength": 3679324,
+      "crc32": "901eb5ef"
+    },
+    {
+      "path": "Textures/T_RoofSlate_ORM.png",
+      "byteLength": 3160276,
+      "crc32": "a825907c"
+    },
+    {
+      "path": "Textures/T_Street_Decals.png",
+      "byteLength": 2233893,
+      "crc32": "451bcb35"
+    },
+    {
+      "path": "Textures/T_Trim_BaseColor.png",
+      "byteLength": 4421593,
+      "crc32": "78a66c73"
+    },
+    {
+      "path": "Textures/T_Trim_Normal.png",
+      "byteLength": 4104873,
+      "crc32": "e9ecc134"
+    },
+    {
+      "path": "Textures/T_Trim_ORM.png",
+      "byteLength": 2538116,
+      "crc32": "14c62d5f"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_Concrete_Normal.png",
+      "byteLength": 3907564,
+      "crc32": "785409ac"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_CornerDamage_Normal.png",
+      "byteLength": 2510320,
+      "crc32": "363533e5"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_Dirt_Normal.jpg",
+      "byteLength": 2325358,
+      "crc32": "d2d514a5"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_MarbleFloor_Normal.png",
+      "byteLength": 6245811,
+      "crc32": "91055cbd"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_MetalConcrete_Normal.png",
+      "byteLength": 4225872,
+      "crc32": "41d86b9f"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_Ornaments_Normal.png",
+      "byteLength": 6366344,
+      "crc32": "52b7d910"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_RedBrick_Normal.png",
+      "byteLength": 6332588,
+      "crc32": "4d7ac632"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_RoofSlate_Normal.png",
+      "byteLength": 3224588,
+      "crc32": "8d0c07be"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_Sign_Normal.png",
+      "byteLength": 4754003,
+      "crc32": "fab7a625"
+    },
+    {
+      "path": "Textures/Unreal-Normals/T_Trim_Normal.png",
+      "byteLength": 3643652,
+      "crc32": "d2332f22"
+    }
+  ]
+}

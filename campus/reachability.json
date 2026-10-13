@@ -1,0 +1,1431 @@
+{
+  "schemaVersion": 1,
+  "mapId": "campus",
+  "grid": 16,
+  "footRadius": 14,
+  "acceptedSpeed": 240,
+  "predictedSpeed": 225,
+  "daySeconds": 180,
+  "allSitesReachable": true,
+  "sitesChecked": 58,
+  "interiorsChecked": 12,
+  "maximumMeetingTravelSeconds": 15.63,
+  "maximumMeetingRoundTripSeconds": 31.25,
+  "routes": [
+    {
+      "site": "seat-0",
+      "distance": 205.0,
+      "predictedTravelSeconds": 0.91,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1595
+        }
+      ]
+    },
+    {
+      "site": "seat-1",
+      "distance": 362.83,
+      "predictedTravelSeconds": 1.61,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2592,
+          "y": 1792
+        },
+        {
+          "x": 2592,
+          "y": 1632
+        },
+        {
+          "x": 2594,
+          "y": 1634
+        }
+      ]
+    },
+    {
+      "site": "seat-2",
+      "distance": 385.22,
+      "predictedTravelSeconds": 1.71,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2720,
+          "y": 1792
+        },
+        {
+          "x": 2720,
+          "y": 1744
+        },
+        {
+          "x": 2714,
+          "y": 1737
+        }
+      ]
+    },
+    {
+      "site": "seat-3",
+      "distance": 401.22,
+      "predictedTravelSeconds": 1.78,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2720,
+          "y": 1792
+        },
+        {
+          "x": 2720,
+          "y": 1856
+        },
+        {
+          "x": 2714,
+          "y": 1863
+        }
+      ]
+    },
+    {
+      "site": "seat-4",
+      "distance": 378.83,
+      "predictedTravelSeconds": 1.68,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2592,
+          "y": 1792
+        },
+        {
+          "x": 2592,
+          "y": 1968
+        },
+        {
+          "x": 2594,
+          "y": 1966
+        }
+      ]
+    },
+    {
+      "site": "seat-5",
+      "distance": 221.0,
+      "predictedTravelSeconds": 0.98,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 2005
+        }
+      ]
+    },
+    {
+      "site": "seat-6",
+      "distance": 378.83,
+      "predictedTravelSeconds": 1.68,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2208,
+          "y": 1792
+        },
+        {
+          "x": 2208,
+          "y": 1968
+        },
+        {
+          "x": 2206,
+          "y": 1966
+        }
+      ]
+    },
+    {
+      "site": "seat-7",
+      "distance": 401.22,
+      "predictedTravelSeconds": 1.78,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2080,
+          "y": 1792
+        },
+        {
+          "x": 2080,
+          "y": 1856
+        },
+        {
+          "x": 2086,
+          "y": 1863
+        }
+      ]
+    },
+    {
+      "site": "seat-8",
+      "distance": 385.22,
+      "predictedTravelSeconds": 1.71,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2080,
+          "y": 1792
+        },
+        {
+          "x": 2080,
+          "y": 1744
+        },
+        {
+          "x": 2086,
+          "y": 1737
+        }
+      ]
+    },
+    {
+      "site": "seat-9",
+      "distance": 362.83,
+      "predictedTravelSeconds": 1.61,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2208,
+          "y": 1792
+        },
+        {
+          "x": 2208,
+          "y": 1632
+        },
+        {
+          "x": 2206,
+          "y": 1634
+        }
+      ]
+    },
+    {
+      "site": "task-plaza-register",
+      "distance": 200.0,
+      "predictedTravelSeconds": 0.89,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1600
+        }
+      ]
+    },
+    {
+      "site": "task-library-work",
+      "distance": 1128.0,
+      "predictedTravelSeconds": 5.01,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2992,
+          "y": 1792
+        },
+        {
+          "x": 2992.0,
+          "y": 2320
+        }
+      ]
+    },
+    {
+      "site": "task-administration-work",
+      "distance": 1944.0,
+      "predictedTravelSeconds": 8.64,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3728,
+          "y": 1792
+        },
+        {
+          "x": 3728.0,
+          "y": 2400
+        }
+      ]
+    },
+    {
+      "site": "task-science-work",
+      "distance": 1080.0,
+      "predictedTravelSeconds": 4.8,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2016,
+          "y": 1792
+        },
+        {
+          "x": 2016.0,
+          "y": 2480
+        }
+      ]
+    },
+    {
+      "site": "task-green-energy-work",
+      "distance": 2632.0,
+      "predictedTravelSeconds": 11.7,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 2752
+        },
+        {
+          "x": 3776,
+          "y": 2752
+        },
+        {
+          "x": 3776.0,
+          "y": 3040
+        }
+      ]
+    },
+    {
+      "site": "task-jubilee-a-work",
+      "distance": 2824.0,
+      "predictedTravelSeconds": 12.55,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1104
+        },
+        {
+          "x": 4160,
+          "y": 1104
+        },
+        {
+          "x": 4160.0,
+          "y": 736
+        }
+      ]
+    },
+    {
+      "site": "task-jubilee-b-work",
+      "distance": 2104.0,
+      "predictedTravelSeconds": 9.35,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4144,
+          "y": 1792
+        },
+        {
+          "x": 4144.0,
+          "y": 1440
+        }
+      ]
+    },
+    {
+      "site": "task-sports-pavilion-work",
+      "distance": 1528.0,
+      "predictedTravelSeconds": 6.79,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2736,
+          "y": 1792
+        },
+        {
+          "x": 2736.0,
+          "y": 608
+        }
+      ]
+    },
+    {
+      "site": "task-mens-hostel-work",
+      "distance": 1848.0,
+      "predictedTravelSeconds": 8.21,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3344,
+          "y": 1792
+        },
+        {
+          "x": 3344.0,
+          "y": 896
+        }
+      ]
+    },
+    {
+      "site": "task-womens-hostel-work",
+      "distance": 1912.0,
+      "predictedTravelSeconds": 8.5,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1488,
+          "y": 1792
+        },
+        {
+          "x": 1488.0,
+          "y": 800
+        }
+      ]
+    },
+    {
+      "site": "task-mess-work",
+      "distance": 1112.0,
+      "predictedTravelSeconds": 4.94,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1776,
+          "y": 1792
+        },
+        {
+          "x": 1776.0,
+          "y": 1312
+        }
+      ]
+    },
+    {
+      "site": "task-quarters-work",
+      "distance": 2504.0,
+      "predictedTravelSeconds": 11.13,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 800,
+          "y": 1792
+        },
+        {
+          "x": 800.0,
+          "y": 896
+        }
+      ]
+    },
+    {
+      "site": "task-gate-lodge-work",
+      "distance": 3080.0,
+      "predictedTravelSeconds": 13.69,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 2880
+        },
+        {
+          "x": 4336,
+          "y": 2880
+        },
+        {
+          "x": 4336,
+          "y": 2928.0
+        }
+      ]
+    },
+    {
+      "site": "task-stadium-work",
+      "distance": 872.0,
+      "predictedTravelSeconds": 3.88,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2368,
+          "y": 1792
+        },
+        {
+          "x": 2368,
+          "y": 960
+        }
+      ]
+    },
+    {
+      "site": "task-water-work",
+      "distance": 2120.0,
+      "predictedTravelSeconds": 9.42,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1120,
+          "y": 1792
+        },
+        {
+          "x": 1120,
+          "y": 2624
+        }
+      ]
+    },
+    {
+      "site": "task-gate-work",
+      "distance": 3516.0,
+      "predictedTravelSeconds": 15.63,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 3120
+        },
+        {
+          "x": 4400,
+          "y": 3120
+        },
+        {
+          "x": 4400,
+          "y": 3300
+        }
+      ]
+    },
+    {
+      "site": "library-door-0-inside",
+      "distance": 1080.0,
+      "predictedTravelSeconds": 4.8,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2992,
+          "y": 1792
+        },
+        {
+          "x": 2992.0,
+          "y": 2272
+        }
+      ]
+    },
+    {
+      "site": "library-door-0-outside",
+      "distance": 968.0,
+      "predictedTravelSeconds": 4.3,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2992,
+          "y": 1792
+        },
+        {
+          "x": 2992.0,
+          "y": 2160
+        }
+      ]
+    },
+    {
+      "site": "administration-door-0-inside",
+      "distance": 1896.0,
+      "predictedTravelSeconds": 8.43,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3728,
+          "y": 1792
+        },
+        {
+          "x": 3728.0,
+          "y": 2352
+        }
+      ]
+    },
+    {
+      "site": "administration-door-0-outside",
+      "distance": 1784.0,
+      "predictedTravelSeconds": 7.93,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3728,
+          "y": 1792
+        },
+        {
+          "x": 3728.0,
+          "y": 2240
+        }
+      ]
+    },
+    {
+      "site": "science-door-0-inside",
+      "distance": 1032.0,
+      "predictedTravelSeconds": 4.59,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2016,
+          "y": 1792
+        },
+        {
+          "x": 2016.0,
+          "y": 2432
+        }
+      ]
+    },
+    {
+      "site": "science-door-0-outside",
+      "distance": 920.0,
+      "predictedTravelSeconds": 4.09,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2016,
+          "y": 1792
+        },
+        {
+          "x": 2016.0,
+          "y": 2320
+        }
+      ]
+    },
+    {
+      "site": "green-energy-door-0-inside",
+      "distance": 2584.0,
+      "predictedTravelSeconds": 11.48,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 2752
+        },
+        {
+          "x": 3776,
+          "y": 2752
+        },
+        {
+          "x": 3776.0,
+          "y": 2992
+        }
+      ]
+    },
+    {
+      "site": "green-energy-door-0-outside",
+      "distance": 2472.0,
+      "predictedTravelSeconds": 10.99,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 1792
+        },
+        {
+          "x": 3424,
+          "y": 2752
+        },
+        {
+          "x": 3776,
+          "y": 2752
+        },
+        {
+          "x": 3776.0,
+          "y": 2880
+        }
+      ]
+    },
+    {
+      "site": "jubilee-a-door-0-inside",
+      "distance": 2792.0,
+      "predictedTravelSeconds": 12.41,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1104
+        },
+        {
+          "x": 4160,
+          "y": 1104
+        },
+        {
+          "x": 4160.0,
+          "y": 768
+        }
+      ]
+    },
+    {
+      "site": "jubilee-a-door-0-outside",
+      "distance": 2680.0,
+      "predictedTravelSeconds": 11.91,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1104
+        },
+        {
+          "x": 4160,
+          "y": 1104
+        },
+        {
+          "x": 4160.0,
+          "y": 880
+        }
+      ]
+    },
+    {
+      "site": "jubilee-b-door-0-inside",
+      "distance": 2072.0,
+      "predictedTravelSeconds": 9.21,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4144,
+          "y": 1792
+        },
+        {
+          "x": 4144.0,
+          "y": 1472
+        }
+      ]
+    },
+    {
+      "site": "jubilee-b-door-0-outside",
+      "distance": 1960.0,
+      "predictedTravelSeconds": 8.71,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4144,
+          "y": 1792
+        },
+        {
+          "x": 4144.0,
+          "y": 1584
+        }
+      ]
+    },
+    {
+      "site": "sports-pavilion-door-0-inside",
+      "distance": 1496.0,
+      "predictedTravelSeconds": 6.65,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2736,
+          "y": 1792
+        },
+        {
+          "x": 2736.0,
+          "y": 640
+        }
+      ]
+    },
+    {
+      "site": "sports-pavilion-door-0-outside",
+      "distance": 1384.0,
+      "predictedTravelSeconds": 6.15,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2736,
+          "y": 1792
+        },
+        {
+          "x": 2736.0,
+          "y": 752
+        }
+      ]
+    },
+    {
+      "site": "mens-hostel-door-0-inside",
+      "distance": 1816.0,
+      "predictedTravelSeconds": 8.07,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3344,
+          "y": 1792
+        },
+        {
+          "x": 3344.0,
+          "y": 928
+        }
+      ]
+    },
+    {
+      "site": "mens-hostel-door-0-outside",
+      "distance": 1704.0,
+      "predictedTravelSeconds": 7.57,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3344,
+          "y": 1792
+        },
+        {
+          "x": 3344.0,
+          "y": 1040
+        }
+      ]
+    },
+    {
+      "site": "womens-hostel-door-0-inside",
+      "distance": 1880.0,
+      "predictedTravelSeconds": 8.36,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1488,
+          "y": 1792
+        },
+        {
+          "x": 1488.0,
+          "y": 832
+        }
+      ]
+    },
+    {
+      "site": "womens-hostel-door-0-outside",
+      "distance": 1768.0,
+      "predictedTravelSeconds": 7.86,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1488,
+          "y": 1792
+        },
+        {
+          "x": 1488.0,
+          "y": 944
+        }
+      ]
+    },
+    {
+      "site": "mess-door-0-inside",
+      "distance": 1080.0,
+      "predictedTravelSeconds": 4.8,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1776,
+          "y": 1792
+        },
+        {
+          "x": 1776.0,
+          "y": 1344
+        }
+      ]
+    },
+    {
+      "site": "mess-door-0-outside",
+      "distance": 968.0,
+      "predictedTravelSeconds": 4.3,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1776,
+          "y": 1792
+        },
+        {
+          "x": 1776.0,
+          "y": 1456
+        }
+      ]
+    },
+    {
+      "site": "quarters-door-0-inside",
+      "distance": 2472.0,
+      "predictedTravelSeconds": 10.99,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 800,
+          "y": 1792
+        },
+        {
+          "x": 800.0,
+          "y": 928
+        }
+      ]
+    },
+    {
+      "site": "quarters-door-0-outside",
+      "distance": 2360.0,
+      "predictedTravelSeconds": 10.49,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 800,
+          "y": 1792
+        },
+        {
+          "x": 800.0,
+          "y": 1040
+        }
+      ]
+    },
+    {
+      "site": "gate-lodge-door-0-inside",
+      "distance": 3032.0,
+      "predictedTravelSeconds": 13.48,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 1792
+        },
+        {
+          "x": 4208,
+          "y": 2880
+        },
+        {
+          "x": 4288,
+          "y": 2880
+        },
+        {
+          "x": 4288,
+          "y": 2928.0
+        }
+      ]
+    },
+    {
+      "site": "gate-lodge-door-0-outside",
+      "distance": 2920.0,
+      "predictedTravelSeconds": 12.98,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4176,
+          "y": 1792
+        },
+        {
+          "x": 4176,
+          "y": 2928.0
+        }
+      ]
+    },
+    {
+      "site": "district-quarters",
+      "distance": 2360.0,
+      "predictedTravelSeconds": 10.49,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 800,
+          "y": 1792
+        },
+        {
+          "x": 800,
+          "y": 1040
+        }
+      ]
+    },
+    {
+      "site": "district-hostels-west",
+      "distance": 1688.0,
+      "predictedTravelSeconds": 7.5,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 1488,
+          "y": 1792
+        },
+        {
+          "x": 1488,
+          "y": 1024
+        }
+      ]
+    },
+    {
+      "site": "district-sports",
+      "distance": 808.0,
+      "predictedTravelSeconds": 3.59,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 2368,
+          "y": 1792
+        },
+        {
+          "x": 2368,
+          "y": 1024
+        }
+      ]
+    },
+    {
+      "site": "district-hostels-east",
+      "distance": 1720.0,
+      "predictedTravelSeconds": 7.64,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3344,
+          "y": 1792
+        },
+        {
+          "x": 3344,
+          "y": 1024
+        }
+      ]
+    },
+    {
+      "site": "district-silver-jubilee",
+      "distance": 2600.0,
+      "predictedTravelSeconds": 11.56,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1792
+        },
+        {
+          "x": 3824,
+          "y": 1104
+        },
+        {
+          "x": 4160,
+          "y": 1104
+        },
+        {
+          "x": 4160,
+          "y": 960
+        }
+      ]
+    },
+    {
+      "site": "district-academic",
+      "distance": 1096.0,
+      "predictedTravelSeconds": 4.87,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 2880
+        }
+      ]
+    },
+    {
+      "site": "district-library",
+      "distance": 1016.0,
+      "predictedTravelSeconds": 4.52,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 3200,
+          "y": 1792
+        },
+        {
+          "x": 3200,
+          "y": 2000
+        }
+      ]
+    },
+    {
+      "site": "district-green-energy",
+      "distance": 3292.0,
+      "predictedTravelSeconds": 14.63,
+      "points": [
+        {
+          "x": 2400,
+          "y": 1800
+        },
+        {
+          "x": 2400,
+          "y": 1792
+        },
+        {
+          "x": 4176,
+          "y": 1792
+        },
+        {
+          "x": 4176,
+          "y": 3300
+        }
+      ]
+    }
+  ],
+  "interpretation": "Grid shortest routes from the Meeting Area; walking time excludes Tasks, pauses and conversations. A 180-second Day and all existing Task durations are unchanged."
+}

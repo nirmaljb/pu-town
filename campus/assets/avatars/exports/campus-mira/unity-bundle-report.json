@@ -1,0 +1,31 @@
+{
+  "preset": "campus-mira",
+  "platform": "macos-universal",
+  "unityVersion": "6000.6.0f1",
+  "assetName": "assets/art/avatars/campus-mira/avatar.prefab",
+  "rootNode": "avatar",
+  "expectedRootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "Hips",
+  "bundleSha256": "9f43804ebd38dc276ee55788c64d0d26a779deebb11764441cab339ff3c39603",
+  "bundleBytes": 303913,
+  "matchesPublication": true,
+  "mismatches": [],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 2.0,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.0,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 2.0,
+      "loop": true
+    }
+  ]
+}

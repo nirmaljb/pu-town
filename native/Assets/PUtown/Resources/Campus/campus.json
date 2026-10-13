@@ -1,0 +1,2328 @@
+{
+  "schemaVersion": 1,
+  "mapId": "campus",
+  "name": "Kalapet Main Campus",
+  "width": 4800,
+  "height": 3600,
+  "coordinates": {
+    "serverUnitsPerUnityUnit": 100,
+    "unityZSign": 1,
+    "north": "negativeY",
+    "groundHeight": 0
+  },
+  "meeting": {
+    "x": 2400,
+    "y": 1800,
+    "radiusX": 330,
+    "radiusY": 205,
+    "seats": [
+      {
+        "seat": 0,
+        "x": 2400,
+        "y": 1595,
+        "facing": "down"
+      },
+      {
+        "seat": 1,
+        "x": 2594,
+        "y": 1634,
+        "facing": "left"
+      },
+      {
+        "seat": 2,
+        "x": 2714,
+        "y": 1737,
+        "facing": "left"
+      },
+      {
+        "seat": 3,
+        "x": 2714,
+        "y": 1863,
+        "facing": "left"
+      },
+      {
+        "seat": 4,
+        "x": 2594,
+        "y": 1966,
+        "facing": "left"
+      },
+      {
+        "seat": 5,
+        "x": 2400,
+        "y": 2005,
+        "facing": "up"
+      },
+      {
+        "seat": 6,
+        "x": 2206,
+        "y": 1966,
+        "facing": "right"
+      },
+      {
+        "seat": 7,
+        "x": 2086,
+        "y": 1863,
+        "facing": "right"
+      },
+      {
+        "seat": 8,
+        "x": 2086,
+        "y": 1737,
+        "facing": "right"
+      },
+      {
+        "seat": 9,
+        "x": 2206,
+        "y": 1634,
+        "facing": "right"
+      }
+    ]
+  },
+  "districts": [
+    {
+      "id": "quarters",
+      "name": "Staff quarters",
+      "x": 320,
+      "y": 320,
+      "width": 832,
+      "height": 1056,
+      "entry": {
+        "x": 800,
+        "y": 1040
+      }
+    },
+    {
+      "id": "hostels-west",
+      "name": "Women's hostels and mess",
+      "x": 1152,
+      "y": 320,
+      "width": 928,
+      "height": 1152,
+      "entry": {
+        "x": 1488,
+        "y": 1024
+      }
+    },
+    {
+      "id": "sports",
+      "name": "Sports grounds",
+      "x": 2112,
+      "y": 256,
+      "width": 864,
+      "height": 1120,
+      "entry": {
+        "x": 2368,
+        "y": 1024
+      }
+    },
+    {
+      "id": "hostels-east",
+      "name": "Men's hostels",
+      "x": 3008,
+      "y": 320,
+      "width": 704,
+      "height": 1152,
+      "entry": {
+        "x": 3344,
+        "y": 1024
+      }
+    },
+    {
+      "id": "silver-jubilee",
+      "name": "Silver Jubilee",
+      "x": 3776,
+      "y": 256,
+      "width": 832,
+      "height": 1408,
+      "entry": {
+        "x": 4160,
+        "y": 960
+      }
+    },
+    {
+      "id": "academic",
+      "name": "Academic core",
+      "x": 1536,
+      "y": 2240,
+      "width": 1056,
+      "height": 1120,
+      "entry": {
+        "x": 2400,
+        "y": 2880
+      }
+    },
+    {
+      "id": "library",
+      "name": "Library and administration",
+      "x": 2624,
+      "y": 2080,
+      "width": 1472,
+      "height": 736,
+      "entry": {
+        "x": 3200,
+        "y": 2000
+      }
+    },
+    {
+      "id": "green-energy",
+      "name": "Green energy and gate approaches",
+      "x": 3296,
+      "y": 2816,
+      "width": 1312,
+      "height": 640,
+      "entry": {
+        "x": 4176,
+        "y": 3300
+      }
+    }
+  ],
+  "buildings": [
+    {
+      "id": "library",
+      "name": "Ananda Rangapillai Library",
+      "districtId": "library",
+      "x": 2704,
+      "y": 2208,
+      "width": 576,
+      "height": 480,
+      "interiorId": "library",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "north",
+          "offset": 288.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "administration",
+      "name": "Administration",
+      "districtId": "library",
+      "x": 3440,
+      "y": 2288,
+      "width": 576,
+      "height": 448,
+      "interiorId": "administration",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "north",
+          "offset": 288.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Academic laboratory",
+      "districtId": "academic",
+      "x": 1728,
+      "y": 2368,
+      "width": 576,
+      "height": 448,
+      "interiorId": "science",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "north",
+          "offset": 288.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "green-energy",
+      "name": "Madanjeet Green Energy",
+      "districtId": "green-energy",
+      "x": 3488,
+      "y": 2928,
+      "width": 576,
+      "height": 448,
+      "interiorId": "green-energy",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "north",
+          "offset": 288.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "jubilee-a",
+      "name": "Silver Jubilee Block A",
+      "districtId": "silver-jubilee",
+      "x": 3872,
+      "y": 384,
+      "width": 576,
+      "height": 448,
+      "interiorId": "jubilee-a",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 288.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "jubilee-b",
+      "name": "Silver Jubilee Block B",
+      "districtId": "silver-jubilee",
+      "x": 3840,
+      "y": 1120,
+      "width": 608,
+      "height": 416,
+      "interiorId": "jubilee-b",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 304.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "sports-pavilion",
+      "name": "Sports pavilion",
+      "districtId": "sports",
+      "x": 2496,
+      "y": 352,
+      "width": 480,
+      "height": 352,
+      "interiorId": "sports-pavilion",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 240.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "mens-hostel",
+      "name": "Men's hostel common room",
+      "districtId": "hostels-east",
+      "x": 3104,
+      "y": 544,
+      "width": 480,
+      "height": 448,
+      "interiorId": "mens-hostel",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 240.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "womens-hostel",
+      "name": "Women's hostel common room",
+      "districtId": "hostels-west",
+      "x": 1248,
+      "y": 448,
+      "width": 480,
+      "height": 448,
+      "interiorId": "womens-hostel",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 240.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "mess",
+      "name": "Dining hall",
+      "districtId": "hostels-west",
+      "x": 1568,
+      "y": 1056,
+      "width": 416,
+      "height": 352,
+      "interiorId": "mess",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 208.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "quarters",
+      "name": "Staff quarters common room",
+      "districtId": "quarters",
+      "x": 576,
+      "y": 608,
+      "width": 448,
+      "height": 384,
+      "interiorId": "quarters",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "south",
+          "offset": 224.0,
+          "width": 128
+        }
+      ]
+    },
+    {
+      "id": "gate-lodge",
+      "name": "East gate lodge",
+      "districtId": "green-energy",
+      "x": 4224,
+      "y": 2752,
+      "width": 384,
+      "height": 352,
+      "interiorId": "gate-lodge",
+      "heightUnits": 260,
+      "wallWidth": 24,
+      "doors": [
+        {
+          "side": "west",
+          "offset": 176.0,
+          "width": 128
+        }
+      ]
+    }
+  ],
+  "furnishings": [
+    {
+      "id": "library-table",
+      "interiorId": "library",
+      "kind": "table",
+      "x": 2768,
+      "y": 2368,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "library-bench",
+      "interiorId": "library",
+      "kind": "bench",
+      "x": 3112,
+      "y": 2336,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "library-shelf",
+      "interiorId": "library",
+      "kind": "shelf",
+      "x": 3200,
+      "y": 2432,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "administration-table",
+      "interiorId": "administration",
+      "kind": "table",
+      "x": 3504,
+      "y": 2448,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "administration-bench",
+      "interiorId": "administration",
+      "kind": "bench",
+      "x": 3848,
+      "y": 2416,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "administration-shelf",
+      "interiorId": "administration",
+      "kind": "shelf",
+      "x": 3936,
+      "y": 2512,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "science-table",
+      "interiorId": "science",
+      "kind": "table",
+      "x": 1792,
+      "y": 2528,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "science-bench",
+      "interiorId": "science",
+      "kind": "bench",
+      "x": 2136,
+      "y": 2496,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "science-shelf",
+      "interiorId": "science",
+      "kind": "shelf",
+      "x": 2224,
+      "y": 2592,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "green-energy-table",
+      "interiorId": "green-energy",
+      "kind": "table",
+      "x": 3552,
+      "y": 3088,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "green-energy-bench",
+      "interiorId": "green-energy",
+      "kind": "bench",
+      "x": 3896,
+      "y": 3056,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "green-energy-shelf",
+      "interiorId": "green-energy",
+      "kind": "shelf",
+      "x": 3984,
+      "y": 3152,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "jubilee-a-table",
+      "interiorId": "jubilee-a",
+      "kind": "table",
+      "x": 3936,
+      "y": 544,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "jubilee-a-bench",
+      "interiorId": "jubilee-a",
+      "kind": "bench",
+      "x": 4280,
+      "y": 512,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "jubilee-a-shelf",
+      "interiorId": "jubilee-a",
+      "kind": "shelf",
+      "x": 4368,
+      "y": 608,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "jubilee-b-table",
+      "interiorId": "jubilee-b",
+      "kind": "table",
+      "x": 3904,
+      "y": 1280,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "jubilee-b-bench",
+      "interiorId": "jubilee-b",
+      "kind": "bench",
+      "x": 4280,
+      "y": 1248,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "jubilee-b-shelf",
+      "interiorId": "jubilee-b",
+      "kind": "shelf",
+      "x": 4368,
+      "y": 1344,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "sports-pavilion-table",
+      "interiorId": "sports-pavilion",
+      "kind": "table",
+      "x": 2560,
+      "y": 512,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "sports-pavilion-bench",
+      "interiorId": "sports-pavilion",
+      "kind": "bench",
+      "x": 2808,
+      "y": 480,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "sports-pavilion-shelf",
+      "interiorId": "sports-pavilion",
+      "kind": "shelf",
+      "x": 2896,
+      "y": 576,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "mens-hostel-table",
+      "interiorId": "mens-hostel",
+      "kind": "table",
+      "x": 3168,
+      "y": 704,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "mens-hostel-bench",
+      "interiorId": "mens-hostel",
+      "kind": "bench",
+      "x": 3416,
+      "y": 672,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "mens-hostel-shelf",
+      "interiorId": "mens-hostel",
+      "kind": "shelf",
+      "x": 3504,
+      "y": 768,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "womens-hostel-table",
+      "interiorId": "womens-hostel",
+      "kind": "table",
+      "x": 1312,
+      "y": 608,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "womens-hostel-bench",
+      "interiorId": "womens-hostel",
+      "kind": "bench",
+      "x": 1560,
+      "y": 576,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "womens-hostel-shelf",
+      "interiorId": "womens-hostel",
+      "kind": "shelf",
+      "x": 1648,
+      "y": 672,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "mess-table",
+      "interiorId": "mess",
+      "kind": "table",
+      "x": 1632,
+      "y": 1216,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "mess-bench",
+      "interiorId": "mess",
+      "kind": "bench",
+      "x": 1816,
+      "y": 1184,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "mess-shelf",
+      "interiorId": "mess",
+      "kind": "shelf",
+      "x": 1904,
+      "y": 1280,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "quarters-table",
+      "interiorId": "quarters",
+      "kind": "table",
+      "x": 640,
+      "y": 768,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "quarters-bench",
+      "interiorId": "quarters",
+      "kind": "bench",
+      "x": 856,
+      "y": 736,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "quarters-shelf",
+      "interiorId": "quarters",
+      "kind": "shelf",
+      "x": 944,
+      "y": 832,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    },
+    {
+      "id": "gate-lodge-table",
+      "interiorId": "gate-lodge",
+      "kind": "table",
+      "x": 4384,
+      "y": 2800,
+      "width": 112,
+      "height": 64,
+      "heightUnits": 78
+    },
+    {
+      "id": "gate-lodge-bench",
+      "interiorId": "gate-lodge",
+      "kind": "bench",
+      "x": 4440,
+      "y": 2880,
+      "width": 96,
+      "height": 48,
+      "heightUnits": 46
+    },
+    {
+      "id": "gate-lodge-shelf",
+      "interiorId": "gate-lodge",
+      "kind": "shelf",
+      "x": 4528,
+      "y": 2976,
+      "width": 48,
+      "height": 96,
+      "heightUnits": 150
+    }
+  ],
+  "routes": [
+    {
+      "id": "campus-spine",
+      "name": "Campus spine",
+      "width": 160,
+      "points": [
+        {
+          "x": 320,
+          "y": 1800
+        },
+        {
+          "x": 4608,
+          "y": 1800
+        }
+      ]
+    },
+    {
+      "id": "central-walk",
+      "name": "Central walk",
+      "width": 128,
+      "points": [
+        {
+          "x": 2400,
+          "y": 192
+        },
+        {
+          "x": 2400,
+          "y": 3300
+        }
+      ]
+    },
+    {
+      "id": "northern-walk",
+      "name": "Hostel and sports walk",
+      "width": 96,
+      "points": [
+        {
+          "x": 320,
+          "y": 1024
+        },
+        {
+          "x": 3680,
+          "y": 1024
+        }
+      ]
+    },
+    {
+      "id": "jubilee-link",
+      "name": "Silver Jubilee link",
+      "width": 128,
+      "points": [
+        {
+          "x": 3680,
+          "y": 1800
+        },
+        {
+          "x": 3680,
+          "y": 960
+        },
+        {
+          "x": 4160,
+          "y": 960
+        }
+      ]
+    },
+    {
+      "id": "ecr-approach",
+      "name": "Gate approach",
+      "width": 160,
+      "points": [
+        {
+          "x": 2400,
+          "y": 3300
+        },
+        {
+          "x": 2400,
+          "y": 3472
+        },
+        {
+          "x": 4688,
+          "y": 3472
+        },
+        {
+          "x": 4688,
+          "y": 1800
+        }
+      ]
+    }
+  ],
+  "landscapeObstacles": [
+    {
+      "id": "western-water",
+      "kind": "water",
+      "x": 352,
+      "y": 2368,
+      "width": 704,
+      "height": 512
+    },
+    {
+      "id": "north-grove",
+      "kind": "planting",
+      "x": 320,
+      "y": 192,
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "south-grove",
+      "kind": "planting",
+      "x": 704,
+      "y": 3072,
+      "width": 608,
+      "height": 256
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "sports-oval",
+      "name": "Rajiv Gandhi stadium",
+      "kind": "sports",
+      "x": 2176,
+      "y": 784,
+      "width": 704,
+      "height": 256
+    },
+    {
+      "id": "jubilee-circle",
+      "name": "Silver Jubilee circular court",
+      "kind": "plaza",
+      "x": 3680,
+      "y": 832,
+      "width": 864,
+      "height": 256
+    },
+    {
+      "id": "gate-main",
+      "name": "Main gate approach",
+      "kind": "gate",
+      "x": 2528,
+      "y": 3264,
+      "width": 224,
+      "height": 96
+    },
+    {
+      "id": "gate-east",
+      "name": "East gate approach",
+      "kind": "gate",
+      "x": 4384,
+      "y": 3264,
+      "width": 224,
+      "height": 96
+    }
+  ],
+  "tasks": [
+    {
+      "id": "plaza-register",
+      "name": "Update the campus register",
+      "x": 2400,
+      "y": 1600
+    },
+    {
+      "id": "library-work",
+      "name": "Ananda Rangapillai Library maintenance",
+      "x": 2992.0,
+      "y": 2320
+    },
+    {
+      "id": "administration-work",
+      "name": "Administration maintenance",
+      "x": 3728.0,
+      "y": 2400
+    },
+    {
+      "id": "science-work",
+      "name": "Academic laboratory maintenance",
+      "x": 2016.0,
+      "y": 2480
+    },
+    {
+      "id": "green-energy-work",
+      "name": "Madanjeet Green Energy maintenance",
+      "x": 3776.0,
+      "y": 3040
+    },
+    {
+      "id": "jubilee-a-work",
+      "name": "Silver Jubilee Block A maintenance",
+      "x": 4160.0,
+      "y": 736
+    },
+    {
+      "id": "jubilee-b-work",
+      "name": "Silver Jubilee Block B maintenance",
+      "x": 4144.0,
+      "y": 1440
+    },
+    {
+      "id": "sports-pavilion-work",
+      "name": "Sports pavilion maintenance",
+      "x": 2736.0,
+      "y": 608
+    },
+    {
+      "id": "mens-hostel-work",
+      "name": "Men's hostel common room maintenance",
+      "x": 3344.0,
+      "y": 896
+    },
+    {
+      "id": "womens-hostel-work",
+      "name": "Women's hostel common room maintenance",
+      "x": 1488.0,
+      "y": 800
+    },
+    {
+      "id": "mess-work",
+      "name": "Dining hall maintenance",
+      "x": 1776.0,
+      "y": 1312
+    },
+    {
+      "id": "quarters-work",
+      "name": "Staff quarters common room maintenance",
+      "x": 800.0,
+      "y": 896
+    },
+    {
+      "id": "gate-lodge-work",
+      "name": "East gate lodge maintenance",
+      "x": 4336,
+      "y": 2928.0
+    },
+    {
+      "id": "stadium-work",
+      "name": "Check the stadium equipment",
+      "x": 2368,
+      "y": 960
+    },
+    {
+      "id": "water-work",
+      "name": "Check the water supply",
+      "x": 1120,
+      "y": 2624
+    },
+    {
+      "id": "gate-work",
+      "name": "Check the gate lighting",
+      "x": 4400,
+      "y": 3300
+    }
+  ],
+  "provenance": {
+    "reference": "https://www.pondiuni.edu.in/wp-content/uploads/2025/11/UNESCO-PondicherryUniversityRoadmaptoNetZeroCarbonby2035.pdf",
+    "figures": [
+      "Figure 1 master plan, printed page 8",
+      "Figure 2 Silver Jubilee, printed page 9",
+      "Figure 3 stadium and hostels, printed page 9",
+      "Figure 4 staff quarters and hostels, printed page 10"
+    ],
+    "checkedOn": "2026-10-13",
+    "interpretation": "North-up district relationships inferred from the master plan north arrow. Distances, ground-plane routes, building footprints, interiors, furnishings and Tasks are authored playable compression. No survey or indoor-plan accuracy is claimed. Provider imagery is reference only and is not distributed."
+  },
+  "emergencyButton": {
+    "x": 2400,
+    "y": 1800
+  },
+  "movement": {
+    "footRadius": 14,
+    "acceptedSpeed": 240,
+    "predictedSpeed": 225,
+    "hearingRange": 160,
+    "daySeconds": 180
+  },
+  "interiors": [
+    {
+      "id": "library",
+      "name": "Ananda Rangapillai Library",
+      "x": 2704,
+      "y": 2208,
+      "width": 576,
+      "height": 480,
+      "doors": [
+        {
+          "id": "library-door-0",
+          "kind": "door",
+          "x": 2928.0,
+          "y": 2208,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 2992.0,
+            "y": 2160
+          },
+          "inside": {
+            "x": 2992.0,
+            "y": 2272
+          },
+          "side": "north"
+        }
+      ]
+    },
+    {
+      "id": "administration",
+      "name": "Administration",
+      "x": 3440,
+      "y": 2288,
+      "width": 576,
+      "height": 448,
+      "doors": [
+        {
+          "id": "administration-door-0",
+          "kind": "door",
+          "x": 3664.0,
+          "y": 2288,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 3728.0,
+            "y": 2240
+          },
+          "inside": {
+            "x": 3728.0,
+            "y": 2352
+          },
+          "side": "north"
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Academic laboratory",
+      "x": 1728,
+      "y": 2368,
+      "width": 576,
+      "height": 448,
+      "doors": [
+        {
+          "id": "science-door-0",
+          "kind": "door",
+          "x": 1952.0,
+          "y": 2368,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 2016.0,
+            "y": 2320
+          },
+          "inside": {
+            "x": 2016.0,
+            "y": 2432
+          },
+          "side": "north"
+        }
+      ]
+    },
+    {
+      "id": "green-energy",
+      "name": "Madanjeet Green Energy",
+      "x": 3488,
+      "y": 2928,
+      "width": 576,
+      "height": 448,
+      "doors": [
+        {
+          "id": "green-energy-door-0",
+          "kind": "door",
+          "x": 3712.0,
+          "y": 2928,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 3776.0,
+            "y": 2880
+          },
+          "inside": {
+            "x": 3776.0,
+            "y": 2992
+          },
+          "side": "north"
+        }
+      ]
+    },
+    {
+      "id": "jubilee-a",
+      "name": "Silver Jubilee Block A",
+      "x": 3872,
+      "y": 384,
+      "width": 576,
+      "height": 448,
+      "doors": [
+        {
+          "id": "jubilee-a-door-0",
+          "kind": "door",
+          "x": 4096.0,
+          "y": 808,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 4160.0,
+            "y": 880
+          },
+          "inside": {
+            "x": 4160.0,
+            "y": 768
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "jubilee-b",
+      "name": "Silver Jubilee Block B",
+      "x": 3840,
+      "y": 1120,
+      "width": 608,
+      "height": 416,
+      "doors": [
+        {
+          "id": "jubilee-b-door-0",
+          "kind": "door",
+          "x": 4080.0,
+          "y": 1512,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 4144.0,
+            "y": 1584
+          },
+          "inside": {
+            "x": 4144.0,
+            "y": 1472
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "sports-pavilion",
+      "name": "Sports pavilion",
+      "x": 2496,
+      "y": 352,
+      "width": 480,
+      "height": 352,
+      "doors": [
+        {
+          "id": "sports-pavilion-door-0",
+          "kind": "door",
+          "x": 2672.0,
+          "y": 680,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 2736.0,
+            "y": 752
+          },
+          "inside": {
+            "x": 2736.0,
+            "y": 640
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "mens-hostel",
+      "name": "Men's hostel common room",
+      "x": 3104,
+      "y": 544,
+      "width": 480,
+      "height": 448,
+      "doors": [
+        {
+          "id": "mens-hostel-door-0",
+          "kind": "door",
+          "x": 3280.0,
+          "y": 968,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 3344.0,
+            "y": 1040
+          },
+          "inside": {
+            "x": 3344.0,
+            "y": 928
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "womens-hostel",
+      "name": "Women's hostel common room",
+      "x": 1248,
+      "y": 448,
+      "width": 480,
+      "height": 448,
+      "doors": [
+        {
+          "id": "womens-hostel-door-0",
+          "kind": "door",
+          "x": 1424.0,
+          "y": 872,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 1488.0,
+            "y": 944
+          },
+          "inside": {
+            "x": 1488.0,
+            "y": 832
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "mess",
+      "name": "Dining hall",
+      "x": 1568,
+      "y": 1056,
+      "width": 416,
+      "height": 352,
+      "doors": [
+        {
+          "id": "mess-door-0",
+          "kind": "door",
+          "x": 1712.0,
+          "y": 1384,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 1776.0,
+            "y": 1456
+          },
+          "inside": {
+            "x": 1776.0,
+            "y": 1344
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "quarters",
+      "name": "Staff quarters common room",
+      "x": 576,
+      "y": 608,
+      "width": 448,
+      "height": 384,
+      "doors": [
+        {
+          "id": "quarters-door-0",
+          "kind": "door",
+          "x": 736.0,
+          "y": 968,
+          "width": 128,
+          "height": 24,
+          "outside": {
+            "x": 800.0,
+            "y": 1040
+          },
+          "inside": {
+            "x": 800.0,
+            "y": 928
+          },
+          "side": "south"
+        }
+      ]
+    },
+    {
+      "id": "gate-lodge",
+      "name": "East gate lodge",
+      "x": 4224,
+      "y": 2752,
+      "width": 384,
+      "height": 352,
+      "doors": [
+        {
+          "id": "gate-lodge-door-0",
+          "kind": "door",
+          "x": 4224,
+          "y": 2864.0,
+          "width": 24,
+          "height": 128,
+          "outside": {
+            "x": 4176,
+            "y": 2928.0
+          },
+          "inside": {
+            "x": 4288,
+            "y": 2928.0
+          },
+          "side": "west"
+        }
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "boundary-north",
+      "kind": "boundary",
+      "x": 0,
+      "y": 0,
+      "width": 4800,
+      "height": 24
+    },
+    {
+      "id": "boundary-south",
+      "kind": "boundary",
+      "x": 0,
+      "y": 3576,
+      "width": 4800,
+      "height": 24
+    },
+    {
+      "id": "boundary-west",
+      "kind": "boundary",
+      "x": 0,
+      "y": 24,
+      "width": 24,
+      "height": 3552
+    },
+    {
+      "id": "boundary-east",
+      "kind": "boundary",
+      "x": 4776,
+      "y": 24,
+      "width": 24,
+      "height": 3552
+    },
+    {
+      "id": "library-north-0",
+      "kind": "wall",
+      "x": 2704,
+      "y": 2208,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "library"
+    },
+    {
+      "id": "library-north-1",
+      "kind": "wall",
+      "x": 3056.0,
+      "y": 2208,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "library"
+    },
+    {
+      "id": "library-south-0",
+      "kind": "wall",
+      "x": 2704,
+      "y": 2664,
+      "width": 576,
+      "height": 24,
+      "interiorId": "library"
+    },
+    {
+      "id": "library-west-0",
+      "kind": "wall",
+      "x": 2704,
+      "y": 2208,
+      "width": 24,
+      "height": 480,
+      "interiorId": "library"
+    },
+    {
+      "id": "library-east-0",
+      "kind": "wall",
+      "x": 3256,
+      "y": 2208,
+      "width": 24,
+      "height": 480,
+      "interiorId": "library"
+    },
+    {
+      "id": "administration-north-0",
+      "kind": "wall",
+      "x": 3440,
+      "y": 2288,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "administration"
+    },
+    {
+      "id": "administration-north-1",
+      "kind": "wall",
+      "x": 3792.0,
+      "y": 2288,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "administration"
+    },
+    {
+      "id": "administration-south-0",
+      "kind": "wall",
+      "x": 3440,
+      "y": 2712,
+      "width": 576,
+      "height": 24,
+      "interiorId": "administration"
+    },
+    {
+      "id": "administration-west-0",
+      "kind": "wall",
+      "x": 3440,
+      "y": 2288,
+      "width": 24,
+      "height": 448,
+      "interiorId": "administration"
+    },
+    {
+      "id": "administration-east-0",
+      "kind": "wall",
+      "x": 3992,
+      "y": 2288,
+      "width": 24,
+      "height": 448,
+      "interiorId": "administration"
+    },
+    {
+      "id": "science-north-0",
+      "kind": "wall",
+      "x": 1728,
+      "y": 2368,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "science"
+    },
+    {
+      "id": "science-north-1",
+      "kind": "wall",
+      "x": 2080.0,
+      "y": 2368,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "science"
+    },
+    {
+      "id": "science-south-0",
+      "kind": "wall",
+      "x": 1728,
+      "y": 2792,
+      "width": 576,
+      "height": 24,
+      "interiorId": "science"
+    },
+    {
+      "id": "science-west-0",
+      "kind": "wall",
+      "x": 1728,
+      "y": 2368,
+      "width": 24,
+      "height": 448,
+      "interiorId": "science"
+    },
+    {
+      "id": "science-east-0",
+      "kind": "wall",
+      "x": 2280,
+      "y": 2368,
+      "width": 24,
+      "height": 448,
+      "interiorId": "science"
+    },
+    {
+      "id": "green-energy-north-0",
+      "kind": "wall",
+      "x": 3488,
+      "y": 2928,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "green-energy"
+    },
+    {
+      "id": "green-energy-north-1",
+      "kind": "wall",
+      "x": 3840.0,
+      "y": 2928,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "green-energy"
+    },
+    {
+      "id": "green-energy-south-0",
+      "kind": "wall",
+      "x": 3488,
+      "y": 3352,
+      "width": 576,
+      "height": 24,
+      "interiorId": "green-energy"
+    },
+    {
+      "id": "green-energy-west-0",
+      "kind": "wall",
+      "x": 3488,
+      "y": 2928,
+      "width": 24,
+      "height": 448,
+      "interiorId": "green-energy"
+    },
+    {
+      "id": "green-energy-east-0",
+      "kind": "wall",
+      "x": 4040,
+      "y": 2928,
+      "width": 24,
+      "height": 448,
+      "interiorId": "green-energy"
+    },
+    {
+      "id": "jubilee-a-north-0",
+      "kind": "wall",
+      "x": 3872,
+      "y": 384,
+      "width": 576,
+      "height": 24,
+      "interiorId": "jubilee-a"
+    },
+    {
+      "id": "jubilee-a-south-0",
+      "kind": "wall",
+      "x": 3872,
+      "y": 808,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "jubilee-a"
+    },
+    {
+      "id": "jubilee-a-south-1",
+      "kind": "wall",
+      "x": 4224.0,
+      "y": 808,
+      "width": 224.0,
+      "height": 24,
+      "interiorId": "jubilee-a"
+    },
+    {
+      "id": "jubilee-a-west-0",
+      "kind": "wall",
+      "x": 3872,
+      "y": 384,
+      "width": 24,
+      "height": 448,
+      "interiorId": "jubilee-a"
+    },
+    {
+      "id": "jubilee-a-east-0",
+      "kind": "wall",
+      "x": 4424,
+      "y": 384,
+      "width": 24,
+      "height": 448,
+      "interiorId": "jubilee-a"
+    },
+    {
+      "id": "jubilee-b-north-0",
+      "kind": "wall",
+      "x": 3840,
+      "y": 1120,
+      "width": 608,
+      "height": 24,
+      "interiorId": "jubilee-b"
+    },
+    {
+      "id": "jubilee-b-south-0",
+      "kind": "wall",
+      "x": 3840,
+      "y": 1512,
+      "width": 240.0,
+      "height": 24,
+      "interiorId": "jubilee-b"
+    },
+    {
+      "id": "jubilee-b-south-1",
+      "kind": "wall",
+      "x": 4208.0,
+      "y": 1512,
+      "width": 240.0,
+      "height": 24,
+      "interiorId": "jubilee-b"
+    },
+    {
+      "id": "jubilee-b-west-0",
+      "kind": "wall",
+      "x": 3840,
+      "y": 1120,
+      "width": 24,
+      "height": 416,
+      "interiorId": "jubilee-b"
+    },
+    {
+      "id": "jubilee-b-east-0",
+      "kind": "wall",
+      "x": 4424,
+      "y": 1120,
+      "width": 24,
+      "height": 416,
+      "interiorId": "jubilee-b"
+    },
+    {
+      "id": "sports-pavilion-north-0",
+      "kind": "wall",
+      "x": 2496,
+      "y": 352,
+      "width": 480,
+      "height": 24,
+      "interiorId": "sports-pavilion"
+    },
+    {
+      "id": "sports-pavilion-south-0",
+      "kind": "wall",
+      "x": 2496,
+      "y": 680,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "sports-pavilion"
+    },
+    {
+      "id": "sports-pavilion-south-1",
+      "kind": "wall",
+      "x": 2800.0,
+      "y": 680,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "sports-pavilion"
+    },
+    {
+      "id": "sports-pavilion-west-0",
+      "kind": "wall",
+      "x": 2496,
+      "y": 352,
+      "width": 24,
+      "height": 352,
+      "interiorId": "sports-pavilion"
+    },
+    {
+      "id": "sports-pavilion-east-0",
+      "kind": "wall",
+      "x": 2952,
+      "y": 352,
+      "width": 24,
+      "height": 352,
+      "interiorId": "sports-pavilion"
+    },
+    {
+      "id": "mens-hostel-north-0",
+      "kind": "wall",
+      "x": 3104,
+      "y": 544,
+      "width": 480,
+      "height": 24,
+      "interiorId": "mens-hostel"
+    },
+    {
+      "id": "mens-hostel-south-0",
+      "kind": "wall",
+      "x": 3104,
+      "y": 968,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "mens-hostel"
+    },
+    {
+      "id": "mens-hostel-south-1",
+      "kind": "wall",
+      "x": 3408.0,
+      "y": 968,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "mens-hostel"
+    },
+    {
+      "id": "mens-hostel-west-0",
+      "kind": "wall",
+      "x": 3104,
+      "y": 544,
+      "width": 24,
+      "height": 448,
+      "interiorId": "mens-hostel"
+    },
+    {
+      "id": "mens-hostel-east-0",
+      "kind": "wall",
+      "x": 3560,
+      "y": 544,
+      "width": 24,
+      "height": 448,
+      "interiorId": "mens-hostel"
+    },
+    {
+      "id": "womens-hostel-north-0",
+      "kind": "wall",
+      "x": 1248,
+      "y": 448,
+      "width": 480,
+      "height": 24,
+      "interiorId": "womens-hostel"
+    },
+    {
+      "id": "womens-hostel-south-0",
+      "kind": "wall",
+      "x": 1248,
+      "y": 872,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "womens-hostel"
+    },
+    {
+      "id": "womens-hostel-south-1",
+      "kind": "wall",
+      "x": 1552.0,
+      "y": 872,
+      "width": 176.0,
+      "height": 24,
+      "interiorId": "womens-hostel"
+    },
+    {
+      "id": "womens-hostel-west-0",
+      "kind": "wall",
+      "x": 1248,
+      "y": 448,
+      "width": 24,
+      "height": 448,
+      "interiorId": "womens-hostel"
+    },
+    {
+      "id": "womens-hostel-east-0",
+      "kind": "wall",
+      "x": 1704,
+      "y": 448,
+      "width": 24,
+      "height": 448,
+      "interiorId": "womens-hostel"
+    },
+    {
+      "id": "mess-north-0",
+      "kind": "wall",
+      "x": 1568,
+      "y": 1056,
+      "width": 416,
+      "height": 24,
+      "interiorId": "mess"
+    },
+    {
+      "id": "mess-south-0",
+      "kind": "wall",
+      "x": 1568,
+      "y": 1384,
+      "width": 144.0,
+      "height": 24,
+      "interiorId": "mess"
+    },
+    {
+      "id": "mess-south-1",
+      "kind": "wall",
+      "x": 1840.0,
+      "y": 1384,
+      "width": 144.0,
+      "height": 24,
+      "interiorId": "mess"
+    },
+    {
+      "id": "mess-west-0",
+      "kind": "wall",
+      "x": 1568,
+      "y": 1056,
+      "width": 24,
+      "height": 352,
+      "interiorId": "mess"
+    },
+    {
+      "id": "mess-east-0",
+      "kind": "wall",
+      "x": 1960,
+      "y": 1056,
+      "width": 24,
+      "height": 352,
+      "interiorId": "mess"
+    },
+    {
+      "id": "quarters-north-0",
+      "kind": "wall",
+      "x": 576,
+      "y": 608,
+      "width": 448,
+      "height": 24,
+      "interiorId": "quarters"
+    },
+    {
+      "id": "quarters-south-0",
+      "kind": "wall",
+      "x": 576,
+      "y": 968,
+      "width": 160.0,
+      "height": 24,
+      "interiorId": "quarters"
+    },
+    {
+      "id": "quarters-south-1",
+      "kind": "wall",
+      "x": 864.0,
+      "y": 968,
+      "width": 160.0,
+      "height": 24,
+      "interiorId": "quarters"
+    },
+    {
+      "id": "quarters-west-0",
+      "kind": "wall",
+      "x": 576,
+      "y": 608,
+      "width": 24,
+      "height": 384,
+      "interiorId": "quarters"
+    },
+    {
+      "id": "quarters-east-0",
+      "kind": "wall",
+      "x": 1000,
+      "y": 608,
+      "width": 24,
+      "height": 384,
+      "interiorId": "quarters"
+    },
+    {
+      "id": "gate-lodge-north-0",
+      "kind": "wall",
+      "x": 4224,
+      "y": 2752,
+      "width": 384,
+      "height": 24,
+      "interiorId": "gate-lodge"
+    },
+    {
+      "id": "gate-lodge-south-0",
+      "kind": "wall",
+      "x": 4224,
+      "y": 3080,
+      "width": 384,
+      "height": 24,
+      "interiorId": "gate-lodge"
+    },
+    {
+      "id": "gate-lodge-west-0",
+      "kind": "wall",
+      "x": 4224,
+      "y": 2752,
+      "width": 24,
+      "height": 112.0,
+      "interiorId": "gate-lodge"
+    },
+    {
+      "id": "gate-lodge-west-1",
+      "kind": "wall",
+      "x": 4224,
+      "y": 2992.0,
+      "width": 24,
+      "height": 112.0,
+      "interiorId": "gate-lodge"
+    },
+    {
+      "id": "gate-lodge-east-0",
+      "kind": "wall",
+      "x": 4584,
+      "y": 2752,
+      "width": 24,
+      "height": 352,
+      "interiorId": "gate-lodge"
+    },
+    {
+      "id": "library-table",
+      "interiorId": "library",
+      "kind": "furniture",
+      "x": 2768,
+      "y": 2368,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "library-bench",
+      "interiorId": "library",
+      "kind": "furniture",
+      "x": 3112,
+      "y": 2336,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "library-shelf",
+      "interiorId": "library",
+      "kind": "furniture",
+      "x": 3200,
+      "y": 2432,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "administration-table",
+      "interiorId": "administration",
+      "kind": "furniture",
+      "x": 3504,
+      "y": 2448,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "administration-bench",
+      "interiorId": "administration",
+      "kind": "furniture",
+      "x": 3848,
+      "y": 2416,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "administration-shelf",
+      "interiorId": "administration",
+      "kind": "furniture",
+      "x": 3936,
+      "y": 2512,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "science-table",
+      "interiorId": "science",
+      "kind": "furniture",
+      "x": 1792,
+      "y": 2528,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "science-bench",
+      "interiorId": "science",
+      "kind": "furniture",
+      "x": 2136,
+      "y": 2496,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "science-shelf",
+      "interiorId": "science",
+      "kind": "furniture",
+      "x": 2224,
+      "y": 2592,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "green-energy-table",
+      "interiorId": "green-energy",
+      "kind": "furniture",
+      "x": 3552,
+      "y": 3088,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "green-energy-bench",
+      "interiorId": "green-energy",
+      "kind": "furniture",
+      "x": 3896,
+      "y": 3056,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "green-energy-shelf",
+      "interiorId": "green-energy",
+      "kind": "furniture",
+      "x": 3984,
+      "y": 3152,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "jubilee-a-table",
+      "interiorId": "jubilee-a",
+      "kind": "furniture",
+      "x": 3936,
+      "y": 544,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "jubilee-a-bench",
+      "interiorId": "jubilee-a",
+      "kind": "furniture",
+      "x": 4280,
+      "y": 512,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "jubilee-a-shelf",
+      "interiorId": "jubilee-a",
+      "kind": "furniture",
+      "x": 4368,
+      "y": 608,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "jubilee-b-table",
+      "interiorId": "jubilee-b",
+      "kind": "furniture",
+      "x": 3904,
+      "y": 1280,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "jubilee-b-bench",
+      "interiorId": "jubilee-b",
+      "kind": "furniture",
+      "x": 4280,
+      "y": 1248,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "jubilee-b-shelf",
+      "interiorId": "jubilee-b",
+      "kind": "furniture",
+      "x": 4368,
+      "y": 1344,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "sports-pavilion-table",
+      "interiorId": "sports-pavilion",
+      "kind": "furniture",
+      "x": 2560,
+      "y": 512,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "sports-pavilion-bench",
+      "interiorId": "sports-pavilion",
+      "kind": "furniture",
+      "x": 2808,
+      "y": 480,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "sports-pavilion-shelf",
+      "interiorId": "sports-pavilion",
+      "kind": "furniture",
+      "x": 2896,
+      "y": 576,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "mens-hostel-table",
+      "interiorId": "mens-hostel",
+      "kind": "furniture",
+      "x": 3168,
+      "y": 704,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "mens-hostel-bench",
+      "interiorId": "mens-hostel",
+      "kind": "furniture",
+      "x": 3416,
+      "y": 672,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "mens-hostel-shelf",
+      "interiorId": "mens-hostel",
+      "kind": "furniture",
+      "x": 3504,
+      "y": 768,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "womens-hostel-table",
+      "interiorId": "womens-hostel",
+      "kind": "furniture",
+      "x": 1312,
+      "y": 608,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "womens-hostel-bench",
+      "interiorId": "womens-hostel",
+      "kind": "furniture",
+      "x": 1560,
+      "y": 576,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "womens-hostel-shelf",
+      "interiorId": "womens-hostel",
+      "kind": "furniture",
+      "x": 1648,
+      "y": 672,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "mess-table",
+      "interiorId": "mess",
+      "kind": "furniture",
+      "x": 1632,
+      "y": 1216,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "mess-bench",
+      "interiorId": "mess",
+      "kind": "furniture",
+      "x": 1816,
+      "y": 1184,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "mess-shelf",
+      "interiorId": "mess",
+      "kind": "furniture",
+      "x": 1904,
+      "y": 1280,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "quarters-table",
+      "interiorId": "quarters",
+      "kind": "furniture",
+      "x": 640,
+      "y": 768,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "quarters-bench",
+      "interiorId": "quarters",
+      "kind": "furniture",
+      "x": 856,
+      "y": 736,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "quarters-shelf",
+      "interiorId": "quarters",
+      "kind": "furniture",
+      "x": 944,
+      "y": 832,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "gate-lodge-table",
+      "interiorId": "gate-lodge",
+      "kind": "furniture",
+      "x": 4384,
+      "y": 2800,
+      "width": 112,
+      "height": 64,
+      "furnishingKind": "table"
+    },
+    {
+      "id": "gate-lodge-bench",
+      "interiorId": "gate-lodge",
+      "kind": "furniture",
+      "x": 4440,
+      "y": 2880,
+      "width": 96,
+      "height": 48,
+      "furnishingKind": "bench"
+    },
+    {
+      "id": "gate-lodge-shelf",
+      "interiorId": "gate-lodge",
+      "kind": "furniture",
+      "x": 4528,
+      "y": 2976,
+      "width": 48,
+      "height": 96,
+      "furnishingKind": "shelf"
+    },
+    {
+      "id": "western-water",
+      "kind": "water",
+      "x": 352,
+      "y": 2368,
+      "width": 704,
+      "height": 512
+    },
+    {
+      "id": "north-grove",
+      "kind": "planting",
+      "x": 320,
+      "y": 192,
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "south-grove",
+      "kind": "planting",
+      "x": 704,
+      "y": 3072,
+      "width": 608,
+      "height": 256
+    }
+  ]
+}

@@ -1,0 +1,2590 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "Exports/FBX/Anvil.fbx",
+      "byteLength": 40652,
+      "crc32": "c4e9382a"
+    },
+    {
+      "path": "Exports/FBX/Anvil_Log.fbx",
+      "byteLength": 137564,
+      "crc32": "4628f9e0"
+    },
+    {
+      "path": "Exports/FBX/Axe_Bronze.fbx",
+      "byteLength": 44028,
+      "crc32": "f729c126"
+    },
+    {
+      "path": "Exports/FBX/Bag.fbx",
+      "byteLength": 50956,
+      "crc32": "def4cf03"
+    },
+    {
+      "path": "Exports/FBX/Banner_1.fbx",
+      "byteLength": 42492,
+      "crc32": "ac48f185"
+    },
+    {
+      "path": "Exports/FBX/Banner_1_Cloth.fbx",
+      "byteLength": 29084,
+      "crc32": "fc7ac1a0"
+    },
+    {
+      "path": "Exports/FBX/Banner_2.fbx",
+      "byteLength": 42028,
+      "crc32": "c1c7f858"
+    },
+    {
+      "path": "Exports/FBX/Banner_2_Cloth.fbx",
+      "byteLength": 28588,
+      "crc32": "19e6b170"
+    },
+    {
+      "path": "Exports/FBX/Barrel.fbx",
+      "byteLength": 43820,
+      "crc32": "c445b60b"
+    },
+    {
+      "path": "Exports/FBX/Barrel_Apples.fbx",
+      "byteLength": 92412,
+      "crc32": "aba7e88e"
+    },
+    {
+      "path": "Exports/FBX/Barrel_Holder.fbx",
+      "byteLength": 85356,
+      "crc32": "801be32a"
+    },
+    {
+      "path": "Exports/FBX/Bed_Twin1.fbx",
+      "byteLength": 71436,
+      "crc32": "3f6583a5"
+    },
+    {
+      "path": "Exports/FBX/Bed_Twin2.fbx",
+      "byteLength": 70620,
+      "crc32": "6e84515b"
+    },
+    {
+      "path": "Exports/FBX/Bench.fbx",
+      "byteLength": 34604,
+      "crc32": "cccbfb55"
+    },
+    {
+      "path": "Exports/FBX/Bookcase_2.fbx",
+      "byteLength": 78940,
+      "crc32": "2bb0e2e9"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Medium_1.fbx",
+      "byteLength": 33100,
+      "crc32": "cd430e0a"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Medium_2.fbx",
+      "byteLength": 34460,
+      "crc32": "4b4f24bb"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Medium_3.fbx",
+      "byteLength": 34684,
+      "crc32": "5e68c2f3"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Small_1.fbx",
+      "byteLength": 24204,
+      "crc32": "a838eb1a"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Small_2.fbx",
+      "byteLength": 24140,
+      "crc32": "a4aa1f08"
+    },
+    {
+      "path": "Exports/FBX/BookGroup_Small_3.fbx",
+      "byteLength": 24988,
+      "crc32": "cf3f7a5f"
+    },
+    {
+      "path": "Exports/FBX/BookStand.fbx",
+      "byteLength": 63068,
+      "crc32": "06623cc4"
+    },
+    {
+      "path": "Exports/FBX/Book_5.fbx",
+      "byteLength": 23116,
+      "crc32": "04778e7d"
+    },
+    {
+      "path": "Exports/FBX/Book_7.fbx",
+      "byteLength": 42300,
+      "crc32": "ac1944a6"
+    },
+    {
+      "path": "Exports/FBX/Book_Simplified_Single.fbx",
+      "byteLength": 22348,
+      "crc32": "e5226902"
+    },
+    {
+      "path": "Exports/FBX/Book_Stack_1.fbx",
+      "byteLength": 27228,
+      "crc32": "4b654a95"
+    },
+    {
+      "path": "Exports/FBX/Book_Stack_2.fbx",
+      "byteLength": 38444,
+      "crc32": "5e03b309"
+    },
+    {
+      "path": "Exports/FBX/Bottle_1.fbx",
+      "byteLength": 28556,
+      "crc32": "8827d267"
+    },
+    {
+      "path": "Exports/FBX/Bucket_Metal.fbx",
+      "byteLength": 34092,
+      "crc32": "67fb672a"
+    },
+    {
+      "path": "Exports/FBX/Bucket_Wooden_1.fbx",
+      "byteLength": 52828,
+      "crc32": "e35b0e1a"
+    },
+    {
+      "path": "Exports/FBX/Cabinet.fbx",
+      "byteLength": 81724,
+      "crc32": "5a5bde67"
+    },
+    {
+      "path": "Exports/FBX/Cage_Small.fbx",
+      "byteLength": 127004,
+      "crc32": "0e82567e"
+    },
+    {
+      "path": "Exports/FBX/CandleStick.fbx",
+      "byteLength": 39900,
+      "crc32": "358a5c83"
+    },
+    {
+      "path": "Exports/FBX/CandleStick_Stand.fbx",
+      "byteLength": 180812,
+      "crc32": "8b58c73d"
+    },
+    {
+      "path": "Exports/FBX/CandleStick_Triple.fbx",
+      "byteLength": 88636,
+      "crc32": "80d45b37"
+    },
+    {
+      "path": "Exports/FBX/Candle_1.fbx",
+      "byteLength": 26876,
+      "crc32": "c51f5f2e"
+    },
+    {
+      "path": "Exports/FBX/Candle_2.fbx",
+      "byteLength": 26892,
+      "crc32": "652ca2c0"
+    },
+    {
+      "path": "Exports/FBX/Carrot.fbx",
+      "byteLength": 42364,
+      "crc32": "ab7dbc89"
+    },
+    {
+      "path": "Exports/FBX/Cauldron.fbx",
+      "byteLength": 72188,
+      "crc32": "41d74485"
+    },
+    {
+      "path": "Exports/FBX/Chain_Coil.fbx",
+      "byteLength": 134524,
+      "crc32": "111d14b6"
+    },
+    {
+      "path": "Exports/FBX/Chair_1.fbx",
+      "byteLength": 37084,
+      "crc32": "e2446c01"
+    },
+    {
+      "path": "Exports/FBX/Chalice.fbx",
+      "byteLength": 31116,
+      "crc32": "e2073ebd"
+    },
+    {
+      "path": "Exports/FBX/Chandelier.fbx",
+      "byteLength": 183676,
+      "crc32": "7c62f1a6"
+    },
+    {
+      "path": "Exports/FBX/Chest_Wood.fbx",
+      "byteLength": 10892188,
+      "crc32": "864c3ab4"
+    },
+    {
+      "path": "Exports/FBX/Coin.fbx",
+      "byteLength": 26764,
+      "crc32": "7a00f4e8"
+    },
+    {
+      "path": "Exports/FBX/Coin_Pile.fbx",
+      "byteLength": 41148,
+      "crc32": "3976c173"
+    },
+    {
+      "path": "Exports/FBX/Coin_Pile_2.fbx",
+      "byteLength": 43644,
+      "crc32": "5ccf6b45"
+    },
+    {
+      "path": "Exports/FBX/Crate_Metal.fbx",
+      "byteLength": 90284,
+      "crc32": "0c7ca9fc"
+    },
+    {
+      "path": "Exports/FBX/Crate_Wooden.fbx",
+      "byteLength": 59580,
+      "crc32": "3ab7008e"
+    },
+    {
+      "path": "Exports/FBX/Dummy.fbx",
+      "byteLength": 111212,
+      "crc32": "1ab2754c"
+    },
+    {
+      "path": "Exports/FBX/FarmCrate_Apple.fbx",
+      "byteLength": 129596,
+      "crc32": "f0363adf"
+    },
+    {
+      "path": "Exports/FBX/FarmCrate_Carrot.fbx",
+      "byteLength": 211500,
+      "crc32": "fcd7e0e9"
+    },
+    {
+      "path": "Exports/FBX/FarmCrate_Empty.fbx",
+      "byteLength": 66668,
+      "crc32": "bd41266b"
+    },
+    {
+      "path": "Exports/FBX/Key_Gold.fbx",
+      "byteLength": 52060,
+      "crc32": "d87d3443"
+    },
+    {
+      "path": "Exports/FBX/Key_Metal.fbx",
+      "byteLength": 34860,
+      "crc32": "1293648a"
+    },
+    {
+      "path": "Exports/FBX/Lantern_Wall.fbx",
+      "byteLength": 95484,
+      "crc32": "d4a2cfb3"
+    },
+    {
+      "path": "Exports/FBX/Mug.fbx",
+      "byteLength": 32396,
+      "crc32": "5fdf3b6f"
+    },
+    {
+      "path": "Exports/FBX/Nightstand_Shelf.fbx",
+      "byteLength": 26556,
+      "crc32": "6ff3963e"
+    },
+    {
+      "path": "Exports/FBX/Peg_Rack.fbx",
+      "byteLength": 41788,
+      "crc32": "ce8f8d6d"
+    },
+    {
+      "path": "Exports/FBX/Pickaxe_Bronze.fbx",
+      "byteLength": 43100,
+      "crc32": "fe3ce50a"
+    },
+    {
+      "path": "Exports/FBX/Potion_1.fbx",
+      "byteLength": 31084,
+      "crc32": "6e9b0d2c"
+    },
+    {
+      "path": "Exports/FBX/Potion_2.fbx",
+      "byteLength": 31724,
+      "crc32": "381b1f57"
+    },
+    {
+      "path": "Exports/FBX/Potion_4.fbx",
+      "byteLength": 33580,
+      "crc32": "3afc713b"
+    },
+    {
+      "path": "Exports/FBX/Pot_1.fbx",
+      "byteLength": 47228,
+      "crc32": "2778f6b4"
+    },
+    {
+      "path": "Exports/FBX/Pot_1_Lid.fbx",
+      "byteLength": 53052,
+      "crc32": "af231798"
+    },
+    {
+      "path": "Exports/FBX/Pouch_Large.fbx",
+      "byteLength": 44924,
+      "crc32": "d817b8c4"
+    },
+    {
+      "path": "Exports/FBX/Rope_1.fbx",
+      "byteLength": 61532,
+      "crc32": "7bd0d824"
+    },
+    {
+      "path": "Exports/FBX/Rope_2.fbx",
+      "byteLength": 57420,
+      "crc32": "396a7ff5"
+    },
+    {
+      "path": "Exports/FBX/Rope_3.fbx",
+      "byteLength": 60524,
+      "crc32": "88a3c57a"
+    },
+    {
+      "path": "Exports/FBX/Scroll_1.fbx",
+      "byteLength": 36380,
+      "crc32": "6faefd4b"
+    },
+    {
+      "path": "Exports/FBX/Scroll_2.fbx",
+      "byteLength": 40668,
+      "crc32": "2d592d95"
+    },
+    {
+      "path": "Exports/FBX/Shelf_Arch.fbx",
+      "byteLength": 55052,
+      "crc32": "fd94bea4"
+    },
+    {
+      "path": "Exports/FBX/Shelf_Simple.fbx",
+      "byteLength": 33276,
+      "crc32": "5bd2b7db"
+    },
+    {
+      "path": "Exports/FBX/Shelf_Small_Bottles.fbx",
+      "byteLength": 162092,
+      "crc32": "5e03e13b"
+    },
+    {
+      "path": "Exports/FBX/Shield_Wooden.fbx",
+      "byteLength": 65164,
+      "crc32": "14450470"
+    },
+    {
+      "path": "Exports/FBX/SmallBottle.fbx",
+      "byteLength": 24492,
+      "crc32": "ab643250"
+    },
+    {
+      "path": "Exports/FBX/SmallBottles_1.fbx",
+      "byteLength": 32956,
+      "crc32": "23b95370"
+    },
+    {
+      "path": "Exports/FBX/Stall_Cart_Empty.fbx",
+      "byteLength": 143324,
+      "crc32": "f92269e7"
+    },
+    {
+      "path": "Exports/FBX/Stall_Empty.fbx",
+      "byteLength": 73708,
+      "crc32": "2b75689d"
+    },
+    {
+      "path": "Exports/FBX/Stool.fbx",
+      "byteLength": 24540,
+      "crc32": "5902a3e5"
+    },
+    {
+      "path": "Exports/FBX/Sword_Bronze.fbx",
+      "byteLength": 69516,
+      "crc32": "45214604"
+    },
+    {
+      "path": "Exports/FBX/Table_Fork.fbx",
+      "byteLength": 22684,
+      "crc32": "a35c59ad"
+    },
+    {
+      "path": "Exports/FBX/Table_Knife.fbx",
+      "byteLength": 21516,
+      "crc32": "87220536"
+    },
+    {
+      "path": "Exports/FBX/Table_Large.fbx",
+      "byteLength": 47516,
+      "crc32": "6b5ab34a"
+    },
+    {
+      "path": "Exports/FBX/Table_Plate.fbx",
+      "byteLength": 24748,
+      "crc32": "4932ed05"
+    },
+    {
+      "path": "Exports/FBX/Table_Spoon.fbx",
+      "byteLength": 24556,
+      "crc32": "55fa1909"
+    },
+    {
+      "path": "Exports/FBX/Torch_Metal.fbx",
+      "byteLength": 48700,
+      "crc32": "02b826b1"
+    },
+    {
+      "path": "Exports/FBX/Vase_2.fbx",
+      "byteLength": 34908,
+      "crc32": "c3800dba"
+    },
+    {
+      "path": "Exports/FBX/Vase_4.fbx",
+      "byteLength": 34764,
+      "crc32": "e94ac86e"
+    },
+    {
+      "path": "Exports/FBX/Vase_Rubble_Medium.fbx",
+      "byteLength": 74924,
+      "crc32": "b541fb07"
+    },
+    {
+      "path": "Exports/FBX/WeaponStand.fbx",
+      "byteLength": 74796,
+      "crc32": "5307cc97"
+    },
+    {
+      "path": "Exports/FBX/Whetstone.fbx",
+      "byteLength": 54124,
+      "crc32": "f18c2315"
+    },
+    {
+      "path": "Exports/FBX/Workbench.fbx",
+      "byteLength": 58668,
+      "crc32": "fda06ca0"
+    },
+    {
+      "path": "Exports/FBX/Workbench_Drawers.fbx",
+      "byteLength": 32956,
+      "crc32": "35e9db4a"
+    },
+    {
+      "path": "Exports/glTF/Anvil.bin",
+      "byteLength": 24020,
+      "crc32": "f65ac777"
+    },
+    {
+      "path": "Exports/glTF/Anvil.gltf",
+      "byteLength": 3189,
+      "crc32": "e492e511"
+    },
+    {
+      "path": "Exports/glTF/Anvil_Log.bin",
+      "byteLength": 130880,
+      "crc32": "61d9d65b"
+    },
+    {
+      "path": "Exports/glTF/Anvil_Log.gltf",
+      "byteLength": 5580,
+      "crc32": "96570541"
+    },
+    {
+      "path": "Exports/glTF/Axe_Bronze.bin",
+      "byteLength": 31156,
+      "crc32": "bd7cf07f"
+    },
+    {
+      "path": "Exports/glTF/Axe_Bronze.gltf",
+      "byteLength": 2591,
+      "crc32": "b74cb48a"
+    },
+    {
+      "path": "Exports/glTF/Bag.bin",
+      "byteLength": 27188,
+      "crc32": "f2584207"
+    },
+    {
+      "path": "Exports/glTF/Bag.gltf",
+      "byteLength": 4318,
+      "crc32": "d169e708"
+    },
+    {
+      "path": "Exports/glTF/Banner_1.bin",
+      "byteLength": 20976,
+      "crc32": "a4919390"
+    },
+    {
+      "path": "Exports/glTF/Banner_1.gltf",
+      "byteLength": 6789,
+      "crc32": "9dbda633"
+    },
+    {
+      "path": "Exports/glTF/Banner_1_Cloth.bin",
+      "byteLength": 6636,
+      "crc32": "1b779405"
+    },
+    {
+      "path": "Exports/glTF/Banner_1_Cloth.gltf",
+      "byteLength": 4670,
+      "crc32": "232a4442"
+    },
+    {
+      "path": "Exports/glTF/Banner_2.bin",
+      "byteLength": 19280,
+      "crc32": "d706995c"
+    },
+    {
+      "path": "Exports/glTF/Banner_2.gltf",
+      "byteLength": 6788,
+      "crc32": "0215e6e2"
+    },
+    {
+      "path": "Exports/glTF/Banner_2_Cloth.bin",
+      "byteLength": 4940,
+      "crc32": "bbb8b0c1"
+    },
+    {
+      "path": "Exports/glTF/Banner_2_Cloth.gltf",
+      "byteLength": 4671,
+      "crc32": "7a0c5e68"
+    },
+    {
+      "path": "Exports/glTF/Barrel.bin",
+      "byteLength": 57144,
+      "crc32": "b2fd8297"
+    },
+    {
+      "path": "Exports/glTF/Barrel.gltf",
+      "byteLength": 4311,
+      "crc32": "3e37b33d"
+    },
+    {
+      "path": "Exports/glTF/Barrel_Apples.bin",
+      "byteLength": 104600,
+      "crc32": "62713b78"
+    },
+    {
+      "path": "Exports/glTF/Barrel_Apples.gltf",
+      "byteLength": 6241,
+      "crc32": "3ccc1b88"
+    },
+    {
+      "path": "Exports/glTF/Barrel_Holder.bin",
+      "byteLength": 161816,
+      "crc32": "c08261ba"
+    },
+    {
+      "path": "Exports/glTF/Barrel_Holder.gltf",
+      "byteLength": 4347,
+      "crc32": "2b92abc9"
+    },
+    {
+      "path": "Exports/glTF/Bed_Twin1.bin",
+      "byteLength": 77360,
+      "crc32": "fa7cbddc"
+    },
+    {
+      "path": "Exports/glTF/Bed_Twin1.gltf",
+      "byteLength": 6217,
+      "crc32": "2e6b3fe4"
+    },
+    {
+      "path": "Exports/glTF/Bed_Twin2.bin",
+      "byteLength": 76624,
+      "crc32": "9d6c2434"
+    },
+    {
+      "path": "Exports/glTF/Bed_Twin2.gltf",
+      "byteLength": 6217,
+      "crc32": "bd7b8250"
+    },
+    {
+      "path": "Exports/glTF/Bench.bin",
+      "byteLength": 19304,
+      "crc32": "d5c307b0"
+    },
+    {
+      "path": "Exports/glTF/Bench.gltf",
+      "byteLength": 4298,
+      "crc32": "2bfdf08e"
+    },
+    {
+      "path": "Exports/glTF/Bookcase_2.bin",
+      "byteLength": 92968,
+      "crc32": "d3df0a65"
+    },
+    {
+      "path": "Exports/glTF/Bookcase_2.gltf",
+      "byteLength": 4329,
+      "crc32": "c2e70824"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_1.bin",
+      "byteLength": 25536,
+      "crc32": "92f59394"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_1.gltf",
+      "byteLength": 2429,
+      "crc32": "74b4cecb"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_2.bin",
+      "byteLength": 28728,
+      "crc32": "eee4ba66"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_2.gltf",
+      "byteLength": 2431,
+      "crc32": "66cc409c"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_3.bin",
+      "byteLength": 28728,
+      "crc32": "aa9d1c01"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Medium_3.gltf",
+      "byteLength": 2432,
+      "crc32": "6c31fe0e"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_1.bin",
+      "byteLength": 6384,
+      "crc32": "9f98389d"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_1.gltf",
+      "byteLength": 2423,
+      "crc32": "1307c7a8"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_2.bin",
+      "byteLength": 6384,
+      "crc32": "17c795cd"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_2.gltf",
+      "byteLength": 2426,
+      "crc32": "ce730806"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_3.bin",
+      "byteLength": 7980,
+      "crc32": "d7b3ebb0"
+    },
+    {
+      "path": "Exports/glTF/BookGroup_Small_3.gltf",
+      "byteLength": 2424,
+      "crc32": "6e08cbb8"
+    },
+    {
+      "path": "Exports/glTF/BookStand.bin",
+      "byteLength": 62020,
+      "crc32": "b1859250"
+    },
+    {
+      "path": "Exports/glTF/BookStand.gltf",
+      "byteLength": 2223,
+      "crc32": "b0bcb3d1"
+    },
+    {
+      "path": "Exports/glTF/Book_5.bin",
+      "byteLength": 5856,
+      "crc32": "08d95578"
+    },
+    {
+      "path": "Exports/glTF/Book_5.gltf",
+      "byteLength": 2403,
+      "crc32": "282675a7"
+    },
+    {
+      "path": "Exports/glTF/Book_7.bin",
+      "byteLength": 32664,
+      "crc32": "831a787a"
+    },
+    {
+      "path": "Exports/glTF/Book_7.gltf",
+      "byteLength": 4290,
+      "crc32": "5bdcfd38"
+    },
+    {
+      "path": "Exports/glTF/Book_Simplified_Single.bin",
+      "byteLength": 3192,
+      "crc32": "4b7b25c3"
+    },
+    {
+      "path": "Exports/glTF/Book_Simplified_Single.gltf",
+      "byteLength": 2428,
+      "crc32": "f2fab247"
+    },
+    {
+      "path": "Exports/glTF/Book_Stack_1.bin",
+      "byteLength": 12768,
+      "crc32": "90d84044"
+    },
+    {
+      "path": "Exports/glTF/Book_Stack_1.gltf",
+      "byteLength": 2418,
+      "crc32": "85984ed6"
+    },
+    {
+      "path": "Exports/glTF/Book_Stack_2.bin",
+      "byteLength": 23956,
+      "crc32": "d71a1451"
+    },
+    {
+      "path": "Exports/glTF/Book_Stack_2.gltf",
+      "byteLength": 4309,
+      "crc32": "a7b214da"
+    },
+    {
+      "path": "Exports/glTF/Bottle_1.bin",
+      "byteLength": 13952,
+      "crc32": "7fee5191"
+    },
+    {
+      "path": "Exports/glTF/Bottle_1.gltf",
+      "byteLength": 2413,
+      "crc32": "cf8fde02"
+    },
+    {
+      "path": "Exports/glTF/Bucket_Metal.bin",
+      "byteLength": 18824,
+      "crc32": "82d8a4d8"
+    },
+    {
+      "path": "Exports/glTF/Bucket_Metal.gltf",
+      "byteLength": 2206,
+      "crc32": "ef695274"
+    },
+    {
+      "path": "Exports/glTF/Bucket_Wooden_1.bin",
+      "byteLength": 32544,
+      "crc32": "1acaebe9"
+    },
+    {
+      "path": "Exports/glTF/Bucket_Wooden_1.gltf",
+      "byteLength": 3911,
+      "crc32": "f6ab6ea3"
+    },
+    {
+      "path": "Exports/glTF/Cabinet.bin",
+      "byteLength": 114768,
+      "crc32": "3c27520d"
+    },
+    {
+      "path": "Exports/glTF/Cabinet.gltf",
+      "byteLength": 4324,
+      "crc32": "45ec557a"
+    },
+    {
+      "path": "Exports/glTF/Cage_Small.bin",
+      "byteLength": 171848,
+      "crc32": "620e3652"
+    },
+    {
+      "path": "Exports/glTF/Cage_Small.gltf",
+      "byteLength": 2207,
+      "crc32": "9487f827"
+    },
+    {
+      "path": "Exports/glTF/CandleStick.bin",
+      "byteLength": 21436,
+      "crc32": "7539c2d9"
+    },
+    {
+      "path": "Exports/glTF/CandleStick.gltf",
+      "byteLength": 2199,
+      "crc32": "cae9c421"
+    },
+    {
+      "path": "Exports/glTF/CandleStick_Stand.bin",
+      "byteLength": 226228,
+      "crc32": "feb09d5e"
+    },
+    {
+      "path": "Exports/glTF/CandleStick_Stand.gltf",
+      "byteLength": 4347,
+      "crc32": "66927c25"
+    },
+    {
+      "path": "Exports/glTF/CandleStick_Triple.bin",
+      "byteLength": 74368,
+      "crc32": "81f95387"
+    },
+    {
+      "path": "Exports/glTF/CandleStick_Triple.gltf",
+      "byteLength": 3900,
+      "crc32": "c3637276"
+    },
+    {
+      "path": "Exports/glTF/Candle_1.bin",
+      "byteLength": 6200,
+      "crc32": "e68f99a5"
+    },
+    {
+      "path": "Exports/glTF/Candle_1.gltf",
+      "byteLength": 2191,
+      "crc32": "2111bd38"
+    },
+    {
+      "path": "Exports/glTF/Candle_2.bin",
+      "byteLength": 6124,
+      "crc32": "84ecd4b6"
+    },
+    {
+      "path": "Exports/glTF/Candle_2.gltf",
+      "byteLength": 2191,
+      "crc32": "b3a59bf8"
+    },
+    {
+      "path": "Exports/glTF/Carrot.bin",
+      "byteLength": 22244,
+      "crc32": "fb8d6872"
+    },
+    {
+      "path": "Exports/glTF/Carrot.gltf",
+      "byteLength": 2411,
+      "crc32": "f5c494dd"
+    },
+    {
+      "path": "Exports/glTF/Cauldron.bin",
+      "byteLength": 62712,
+      "crc32": "2a089a0e"
+    },
+    {
+      "path": "Exports/glTF/Cauldron.gltf",
+      "byteLength": 2195,
+      "crc32": "bb413572"
+    },
+    {
+      "path": "Exports/glTF/Chain_Coil.bin",
+      "byteLength": 193664,
+      "crc32": "8d7e12b5"
+    },
+    {
+      "path": "Exports/glTF/Chain_Coil.gltf",
+      "byteLength": 2424,
+      "crc32": "e8f5a926"
+    },
+    {
+      "path": "Exports/glTF/Chair_1.bin",
+      "byteLength": 28096,
+      "crc32": "6e0ef8e4"
+    },
+    {
+      "path": "Exports/glTF/Chair_1.gltf",
+      "byteLength": 4312,
+      "crc32": "03f4475f"
+    },
+    {
+      "path": "Exports/glTF/Chalice.bin",
+      "byteLength": 15644,
+      "crc32": "2ff5cb0b"
+    },
+    {
+      "path": "Exports/glTF/Chalice.gltf",
+      "byteLength": 2197,
+      "crc32": "52a2dfe8"
+    },
+    {
+      "path": "Exports/glTF/Chandelier.bin",
+      "byteLength": 266680,
+      "crc32": "0febf829"
+    },
+    {
+      "path": "Exports/glTF/Chandelier.gltf",
+      "byteLength": 6259,
+      "crc32": "4f05f098"
+    },
+    {
+      "path": "Exports/glTF/Chest_Wood.bin",
+      "byteLength": 184356,
+      "crc32": "5c5719ed"
+    },
+    {
+      "path": "Exports/glTF/Chest_Wood.gltf",
+      "byteLength": 21402,
+      "crc32": "589fea44"
+    },
+    {
+      "path": "Exports/glTF/Coin.bin",
+      "byteLength": 14464,
+      "crc32": "949ed1fa"
+    },
+    {
+      "path": "Exports/glTF/Coin.gltf",
+      "byteLength": 2408,
+      "crc32": "8cc1e374"
+    },
+    {
+      "path": "Exports/glTF/Coin_Pile.bin",
+      "byteLength": 47520,
+      "crc32": "4d11d71b"
+    },
+    {
+      "path": "Exports/glTF/Coin_Pile.gltf",
+      "byteLength": 2424,
+      "crc32": "d48cc009"
+    },
+    {
+      "path": "Exports/glTF/Coin_Pile_2.bin",
+      "byteLength": 52612,
+      "crc32": "3fc5cb05"
+    },
+    {
+      "path": "Exports/glTF/Coin_Pile_2.gltf",
+      "byteLength": 2429,
+      "crc32": "407f163e"
+    },
+    {
+      "path": "Exports/glTF/Crate_Metal.bin",
+      "byteLength": 126828,
+      "crc32": "8c88b39e"
+    },
+    {
+      "path": "Exports/glTF/Crate_Metal.gltf",
+      "byteLength": 4335,
+      "crc32": "843d9fe9"
+    },
+    {
+      "path": "Exports/glTF/Crate_Wooden.bin",
+      "byteLength": 66496,
+      "crc32": "f81b07bb"
+    },
+    {
+      "path": "Exports/glTF/Crate_Wooden.gltf",
+      "byteLength": 4412,
+      "crc32": "ed65e386"
+    },
+    {
+      "path": "Exports/glTF/Dummy.bin",
+      "byteLength": 80988,
+      "crc32": "d0db9798"
+    },
+    {
+      "path": "Exports/glTF/Dummy.gltf",
+      "byteLength": 5570,
+      "crc32": "cc718f04"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Apple.bin",
+      "byteLength": 134488,
+      "crc32": "c86fbdda"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Apple.gltf",
+      "byteLength": 6263,
+      "crc32": "c19e6f65"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Carrot.bin",
+      "byteLength": 204292,
+      "crc32": "10ff4eab"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Carrot.gltf",
+      "byteLength": 6273,
+      "crc32": "ae63e094"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Empty.bin",
+      "byteLength": 54704,
+      "crc32": "acdf910c"
+    },
+    {
+      "path": "Exports/glTF/FarmCrate_Empty.gltf",
+      "byteLength": 3915,
+      "crc32": "3b75364b"
+    },
+    {
+      "path": "Exports/glTF/Key_Gold.bin",
+      "byteLength": 58636,
+      "crc32": "0ba8fea3"
+    },
+    {
+      "path": "Exports/glTF/Key_Gold.gltf",
+      "byteLength": 2424,
+      "crc32": "c2d814fd"
+    },
+    {
+      "path": "Exports/glTF/Key_Metal.bin",
+      "byteLength": 19340,
+      "crc32": "97e3f851"
+    },
+    {
+      "path": "Exports/glTF/Key_Metal.gltf",
+      "byteLength": 2197,
+      "crc32": "6542415f"
+    },
+    {
+      "path": "Exports/glTF/Lantern_Wall.bin",
+      "byteLength": 120036,
+      "crc32": "9e99d005"
+    },
+    {
+      "path": "Exports/glTF/Lantern_Wall.gltf",
+      "byteLength": 2203,
+      "crc32": "818831ed"
+    },
+    {
+      "path": "Exports/glTF/Mug.bin",
+      "byteLength": 12488,
+      "crc32": "db79f08a"
+    },
+    {
+      "path": "Exports/glTF/Mug.gltf",
+      "byteLength": 3881,
+      "crc32": "c9fc4f8d"
+    },
+    {
+      "path": "Exports/glTF/Nightstand_Shelf.bin",
+      "byteLength": 21412,
+      "crc32": "4cd708ff"
+    },
+    {
+      "path": "Exports/glTF/Nightstand_Shelf.gltf",
+      "byteLength": 2447,
+      "crc32": "2b88e969"
+    },
+    {
+      "path": "Exports/glTF/Peg_Rack.bin",
+      "byteLength": 26672,
+      "crc32": "f337d9cc"
+    },
+    {
+      "path": "Exports/glTF/Peg_Rack.gltf",
+      "byteLength": 3879,
+      "crc32": "c874c15a"
+    },
+    {
+      "path": "Exports/glTF/Pickaxe_Bronze.bin",
+      "byteLength": 30736,
+      "crc32": "39dfef9b"
+    },
+    {
+      "path": "Exports/glTF/Pickaxe_Bronze.gltf",
+      "byteLength": 2425,
+      "crc32": "fcf876f7"
+    },
+    {
+      "path": "Exports/glTF/Potion_1.bin",
+      "byteLength": 18200,
+      "crc32": "f8899af1"
+    },
+    {
+      "path": "Exports/glTF/Potion_1.gltf",
+      "byteLength": 2418,
+      "crc32": "fc1e7020"
+    },
+    {
+      "path": "Exports/glTF/Potion_2.bin",
+      "byteLength": 19672,
+      "crc32": "9aed2355"
+    },
+    {
+      "path": "Exports/glTF/Potion_2.gltf",
+      "byteLength": 2418,
+      "crc32": "3e2d16ef"
+    },
+    {
+      "path": "Exports/glTF/Potion_4.bin",
+      "byteLength": 22536,
+      "crc32": "1db80639"
+    },
+    {
+      "path": "Exports/glTF/Potion_4.gltf",
+      "byteLength": 2418,
+      "crc32": "baa6fce5"
+    },
+    {
+      "path": "Exports/glTF/Pot_1.bin",
+      "byteLength": 37160,
+      "crc32": "5ff018c8"
+    },
+    {
+      "path": "Exports/glTF/Pot_1.gltf",
+      "byteLength": 2185,
+      "crc32": "b521e8ad"
+    },
+    {
+      "path": "Exports/glTF/Pot_1_Lid.bin",
+      "byteLength": 46120,
+      "crc32": "ac36950e"
+    },
+    {
+      "path": "Exports/glTF/Pot_1_Lid.gltf",
+      "byteLength": 2196,
+      "crc32": "b4403970"
+    },
+    {
+      "path": "Exports/glTF/Pouch_Large.bin",
+      "byteLength": 31580,
+      "crc32": "15918603"
+    },
+    {
+      "path": "Exports/glTF/Pouch_Large.gltf",
+      "byteLength": 4306,
+      "crc32": "07c316cb"
+    },
+    {
+      "path": "Exports/glTF/Rope_1.bin",
+      "byteLength": 41624,
+      "crc32": "4dee8da4"
+    },
+    {
+      "path": "Exports/glTF/Rope_1.gltf",
+      "byteLength": 2223,
+      "crc32": "9b457e5c"
+    },
+    {
+      "path": "Exports/glTF/Rope_2.bin",
+      "byteLength": 34904,
+      "crc32": "901c2360"
+    },
+    {
+      "path": "Exports/glTF/Rope_2.gltf",
+      "byteLength": 2223,
+      "crc32": "5e7bd56e"
+    },
+    {
+      "path": "Exports/glTF/Rope_3.bin",
+      "byteLength": 41624,
+      "crc32": "86fe5aba"
+    },
+    {
+      "path": "Exports/glTF/Rope_3.gltf",
+      "byteLength": 2225,
+      "crc32": "64fc9e29"
+    },
+    {
+      "path": "Exports/glTF/Scroll_1.bin",
+      "byteLength": 20112,
+      "crc32": "7f720347"
+    },
+    {
+      "path": "Exports/glTF/Scroll_1.gltf",
+      "byteLength": 3954,
+      "crc32": "27bd7b47"
+    },
+    {
+      "path": "Exports/glTF/Scroll_2.bin",
+      "byteLength": 28392,
+      "crc32": "797ed133"
+    },
+    {
+      "path": "Exports/glTF/Scroll_2.gltf",
+      "byteLength": 3968,
+      "crc32": "21ab094b"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Arch.bin",
+      "byteLength": 64836,
+      "crc32": "16b5ac96"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Arch.gltf",
+      "byteLength": 4332,
+      "crc32": "c2185860"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Simple.bin",
+      "byteLength": 22016,
+      "crc32": "03f8dda0"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Simple.gltf",
+      "byteLength": 2224,
+      "crc32": "925d8118"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Small_Bottles.bin",
+      "byteLength": 229484,
+      "crc32": "42f55ff8"
+    },
+    {
+      "path": "Exports/glTF/Shelf_Small_Bottles.gltf",
+      "byteLength": 6266,
+      "crc32": "e07bce9d"
+    },
+    {
+      "path": "Exports/glTF/Shield_Wooden.bin",
+      "byteLength": 64184,
+      "crc32": "9934a680"
+    },
+    {
+      "path": "Exports/glTF/Shield_Wooden.gltf",
+      "byteLength": 6243,
+      "crc32": "c481e476"
+    },
+    {
+      "path": "Exports/glTF/SmallBottle.bin",
+      "byteLength": 5700,
+      "crc32": "d7fb7fd5"
+    },
+    {
+      "path": "Exports/glTF/SmallBottle.gltf",
+      "byteLength": 2392,
+      "crc32": "7af7de97"
+    },
+    {
+      "path": "Exports/glTF/SmallBottles_1.bin",
+      "byteLength": 20556,
+      "crc32": "2adefceb"
+    },
+    {
+      "path": "Exports/glTF/SmallBottles_1.gltf",
+      "byteLength": 2423,
+      "crc32": "31c4f3b8"
+    },
+    {
+      "path": "Exports/glTF/Stall_Cart_Empty.bin",
+      "byteLength": 237264,
+      "crc32": "49809cfa"
+    },
+    {
+      "path": "Exports/glTF/Stall_Cart_Empty.gltf",
+      "byteLength": 6857,
+      "crc32": "7e79cd5a"
+    },
+    {
+      "path": "Exports/glTF/Stall_Empty.bin",
+      "byteLength": 88176,
+      "crc32": "279f97d0"
+    },
+    {
+      "path": "Exports/glTF/Stall_Empty.gltf",
+      "byteLength": 6804,
+      "crc32": "052d3075"
+    },
+    {
+      "path": "Exports/glTF/Stool.bin",
+      "byteLength": 11472,
+      "crc32": "163146da"
+    },
+    {
+      "path": "Exports/glTF/Stool.gltf",
+      "byteLength": 2423,
+      "crc32": "2161c01d"
+    },
+    {
+      "path": "Exports/glTF/Sword_Bronze.bin",
+      "byteLength": 69920,
+      "crc32": "8eacfaeb"
+    },
+    {
+      "path": "Exports/glTF/Sword_Bronze.gltf",
+      "byteLength": 2436,
+      "crc32": "940edb59"
+    },
+    {
+      "path": "Exports/glTF/Table_Fork.bin",
+      "byteLength": 4936,
+      "crc32": "54df76fd"
+    },
+    {
+      "path": "Exports/glTF/Table_Fork.gltf",
+      "byteLength": 2189,
+      "crc32": "c364fd42"
+    },
+    {
+      "path": "Exports/glTF/Table_Knife.bin",
+      "byteLength": 2180,
+      "crc32": "aa1e2884"
+    },
+    {
+      "path": "Exports/glTF/Table_Knife.gltf",
+      "byteLength": 2186,
+      "crc32": "3dfd857b"
+    },
+    {
+      "path": "Exports/glTF/Table_Large.bin",
+      "byteLength": 56396,
+      "crc32": "b7119373"
+    },
+    {
+      "path": "Exports/glTF/Table_Large.gltf",
+      "byteLength": 4316,
+      "crc32": "cd727bdc"
+    },
+    {
+      "path": "Exports/glTF/Table_Plate.bin",
+      "byteLength": 6792,
+      "crc32": "49e74ed7"
+    },
+    {
+      "path": "Exports/glTF/Table_Plate.gltf",
+      "byteLength": 2199,
+      "crc32": "b2576a39"
+    },
+    {
+      "path": "Exports/glTF/Table_Spoon.bin",
+      "byteLength": 4856,
+      "crc32": "884d8d88"
+    },
+    {
+      "path": "Exports/glTF/Table_Spoon.gltf",
+      "byteLength": 2191,
+      "crc32": "b56222fd"
+    },
+    {
+      "path": "Exports/glTF/Torch_Metal.bin",
+      "byteLength": 39100,
+      "crc32": "49bcbbbd"
+    },
+    {
+      "path": "Exports/glTF/Torch_Metal.gltf",
+      "byteLength": 2203,
+      "crc32": "49b53af5"
+    },
+    {
+      "path": "Exports/glTF/T_Page_Noise.png",
+      "byteLength": 7486734,
+      "crc32": "50c3b8b6"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Cloth_BaseColor.png",
+      "byteLength": 1936754,
+      "crc32": "c01f17c3"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Cloth_Normal.png",
+      "byteLength": 3920858,
+      "crc32": "f47ac723"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Cloth_ORM.png",
+      "byteLength": 623426,
+      "crc32": "90b7ff9b"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Furniture_BaseColor.png",
+      "byteLength": 2232961,
+      "crc32": "70608e8b"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Furniture_Normal.png",
+      "byteLength": 3485710,
+      "crc32": "1f5b71aa"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Furniture_ORM.png",
+      "byteLength": 2064585,
+      "crc32": "b5187f8d"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Metal_BaseColor.png",
+      "byteLength": 1361221,
+      "crc32": "98a182e2"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Metal_Normal.png",
+      "byteLength": 3625541,
+      "crc32": "2a6c5a44"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Metal_ORM.png",
+      "byteLength": 1871475,
+      "crc32": "aa6db7ed"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Props_BaseColor.png",
+      "byteLength": 2263132,
+      "crc32": "0d5b919c"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Props_Normal.png",
+      "byteLength": 4441458,
+      "crc32": "224891d4"
+    },
+    {
+      "path": "Exports/glTF/T_Trim_Props_ORM.png",
+      "byteLength": 3017151,
+      "crc32": "220cb793"
+    },
+    {
+      "path": "Exports/glTF/Vase_2.bin",
+      "byteLength": 21188,
+      "crc32": "d3a7334a"
+    },
+    {
+      "path": "Exports/glTF/Vase_2.gltf",
+      "byteLength": 2407,
+      "crc32": "11164f1c"
+    },
+    {
+      "path": "Exports/glTF/Vase_4.bin",
+      "byteLength": 22028,
+      "crc32": "c7440494"
+    },
+    {
+      "path": "Exports/glTF/Vase_4.gltf",
+      "byteLength": 2412,
+      "crc32": "31a8551b"
+    },
+    {
+      "path": "Exports/glTF/Vase_Rubble_Medium.bin",
+      "byteLength": 85960,
+      "crc32": "fbc73f57"
+    },
+    {
+      "path": "Exports/glTF/Vase_Rubble_Medium.gltf",
+      "byteLength": 2453,
+      "crc32": "23e92d10"
+    },
+    {
+      "path": "Exports/glTF/WeaponStand.bin",
+      "byteLength": 76312,
+      "crc32": "487cd34b"
+    },
+    {
+      "path": "Exports/glTF/WeaponStand.gltf",
+      "byteLength": 3903,
+      "crc32": "dcc58c0d"
+    },
+    {
+      "path": "Exports/glTF/Whetstone.bin",
+      "byteLength": 59280,
+      "crc32": "23627533"
+    },
+    {
+      "path": "Exports/glTF/Whetstone.gltf",
+      "byteLength": 6212,
+      "crc32": "fc2c8cf6"
+    },
+    {
+      "path": "Exports/glTF/Workbench.bin",
+      "byteLength": 63408,
+      "crc32": "2d92a604"
+    },
+    {
+      "path": "Exports/glTF/Workbench.gltf",
+      "byteLength": 4318,
+      "crc32": "72a2f27c"
+    },
+    {
+      "path": "Exports/glTF/Workbench_Drawers.bin",
+      "byteLength": 16824,
+      "crc32": "98b2154e"
+    },
+    {
+      "path": "Exports/glTF/Workbench_Drawers.gltf",
+      "byteLength": 4313,
+      "crc32": "00bca87d"
+    },
+    {
+      "path": "Exports/OBJ/Anvil.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Anvil.obj",
+      "byteLength": 49578,
+      "crc32": "c9246d1d"
+    },
+    {
+      "path": "Exports/OBJ/Anvil_Log.mtl",
+      "byteLength": 831,
+      "crc32": "d79dfdc4"
+    },
+    {
+      "path": "Exports/OBJ/Anvil_Log.obj",
+      "byteLength": 279712,
+      "crc32": "add82b29"
+    },
+    {
+      "path": "Exports/OBJ/Axe_Bronze.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Axe_Bronze.obj",
+      "byteLength": 56263,
+      "crc32": "2ae83926"
+    },
+    {
+      "path": "Exports/OBJ/Bag.mtl",
+      "byteLength": 579,
+      "crc32": "dc85506f"
+    },
+    {
+      "path": "Exports/OBJ/Bag.obj",
+      "byteLength": 59303,
+      "crc32": "8884a17e"
+    },
+    {
+      "path": "Exports/OBJ/Banner_1.mtl",
+      "byteLength": 828,
+      "crc32": "13ce5717"
+    },
+    {
+      "path": "Exports/OBJ/Banner_1.obj",
+      "byteLength": 29349,
+      "crc32": "1dcb0146"
+    },
+    {
+      "path": "Exports/OBJ/Banner_1_Cloth.mtl",
+      "byteLength": 563,
+      "crc32": "b701c3aa"
+    },
+    {
+      "path": "Exports/OBJ/Banner_1_Cloth.obj",
+      "byteLength": 8702,
+      "crc32": "69e963ee"
+    },
+    {
+      "path": "Exports/OBJ/Banner_2.mtl",
+      "byteLength": 828,
+      "crc32": "13ce5717"
+    },
+    {
+      "path": "Exports/OBJ/Banner_2.obj",
+      "byteLength": 28419,
+      "crc32": "8ad6a00a"
+    },
+    {
+      "path": "Exports/OBJ/Banner_2_Cloth.mtl",
+      "byteLength": 563,
+      "crc32": "b701c3aa"
+    },
+    {
+      "path": "Exports/OBJ/Banner_2_Cloth.obj",
+      "byteLength": 7807,
+      "crc32": "15282fbf"
+    },
+    {
+      "path": "Exports/OBJ/Barrel.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Barrel.obj",
+      "byteLength": 62845,
+      "crc32": "f0f74cc5"
+    },
+    {
+      "path": "Exports/OBJ/Barrel_Apples.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/Barrel_Apples.obj",
+      "byteLength": 173900,
+      "crc32": "d66c128f"
+    },
+    {
+      "path": "Exports/OBJ/Barrel_Holder.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Barrel_Holder.obj",
+      "byteLength": 198171,
+      "crc32": "2b3725ed"
+    },
+    {
+      "path": "Exports/OBJ/Bed_Twin1.mtl",
+      "byteLength": 832,
+      "crc32": "5dc3d210"
+    },
+    {
+      "path": "Exports/OBJ/Bed_Twin1.obj",
+      "byteLength": 118107,
+      "crc32": "ac93e5cc"
+    },
+    {
+      "path": "Exports/OBJ/Bed_Twin2.mtl",
+      "byteLength": 832,
+      "crc32": "5dc3d210"
+    },
+    {
+      "path": "Exports/OBJ/Bed_Twin2.obj",
+      "byteLength": 116970,
+      "crc32": "1e8d7ccc"
+    },
+    {
+      "path": "Exports/OBJ/Bench.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Bench.obj",
+      "byteLength": 29311,
+      "crc32": "f98f274b"
+    },
+    {
+      "path": "Exports/OBJ/Bookcase_2.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Bookcase_2.obj",
+      "byteLength": 154161,
+      "crc32": "784b2c0a"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_1.obj",
+      "byteLength": 34431,
+      "crc32": "28fb7fde"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_2.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_2.obj",
+      "byteLength": 38347,
+      "crc32": "aeee99a3"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_3.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Medium_3.obj",
+      "byteLength": 40084,
+      "crc32": "ec367cfb"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_1.obj",
+      "byteLength": 9108,
+      "crc32": "9587d137"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_2.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_2.obj",
+      "byteLength": 8795,
+      "crc32": "73ed3298"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_3.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/BookGroup_Small_3.obj",
+      "byteLength": 11667,
+      "crc32": "584519db"
+    },
+    {
+      "path": "Exports/OBJ/BookStand.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/BookStand.obj",
+      "byteLength": 116756,
+      "crc32": "0fb9864c"
+    },
+    {
+      "path": "Exports/OBJ/Book_5.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Book_5.obj",
+      "byteLength": 7026,
+      "crc32": "567b220d"
+    },
+    {
+      "path": "Exports/OBJ/Book_7.mtl",
+      "byteLength": 573,
+      "crc32": "5d051457"
+    },
+    {
+      "path": "Exports/OBJ/Book_7.obj",
+      "byteLength": 48541,
+      "crc32": "a413b7e5"
+    },
+    {
+      "path": "Exports/OBJ/Book_Simplified_Single.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Book_Simplified_Single.obj",
+      "byteLength": 3848,
+      "crc32": "6e74047a"
+    },
+    {
+      "path": "Exports/OBJ/Book_Stack_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Book_Stack_1.obj",
+      "byteLength": 15103,
+      "crc32": "c5bef37b"
+    },
+    {
+      "path": "Exports/OBJ/Book_Stack_2.mtl",
+      "byteLength": 573,
+      "crc32": "5d051457"
+    },
+    {
+      "path": "Exports/OBJ/Book_Stack_2.obj",
+      "byteLength": 33006,
+      "crc32": "d46c7a82"
+    },
+    {
+      "path": "Exports/OBJ/Bottle_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Bottle_1.obj",
+      "byteLength": 21217,
+      "crc32": "e1dc9475"
+    },
+    {
+      "path": "Exports/OBJ/Bucket_Metal.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Bucket_Metal.obj",
+      "byteLength": 38430,
+      "crc32": "4555f70a"
+    },
+    {
+      "path": "Exports/OBJ/Bucket_Wooden_1.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Bucket_Wooden_1.obj",
+      "byteLength": 70192,
+      "crc32": "62d28a7a"
+    },
+    {
+      "path": "Exports/OBJ/Cabinet.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Cabinet.obj",
+      "byteLength": 169268,
+      "crc32": "6c038fde"
+    },
+    {
+      "path": "Exports/OBJ/Cage_Small.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Cage_Small.obj",
+      "byteLength": 324681,
+      "crc32": "f82138a3"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick.obj",
+      "byteLength": 49000,
+      "crc32": "aa30c8d6"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick_Stand.mtl",
+      "byteLength": 573,
+      "crc32": "5d051457"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick_Stand.obj",
+      "byteLength": 449557,
+      "crc32": "3095fa1d"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick_Triple.mtl",
+      "byteLength": 566,
+      "crc32": "e4640256"
+    },
+    {
+      "path": "Exports/OBJ/CandleStick_Triple.obj",
+      "byteLength": 171725,
+      "crc32": "619c7489"
+    },
+    {
+      "path": "Exports/OBJ/Candle_1.mtl",
+      "byteLength": 313,
+      "crc32": "65386b61"
+    },
+    {
+      "path": "Exports/OBJ/Candle_1.obj",
+      "byteLength": 13661,
+      "crc32": "a7bf6ba2"
+    },
+    {
+      "path": "Exports/OBJ/Candle_2.mtl",
+      "byteLength": 313,
+      "crc32": "65386b61"
+    },
+    {
+      "path": "Exports/OBJ/Candle_2.obj",
+      "byteLength": 13591,
+      "crc32": "524bf7a7"
+    },
+    {
+      "path": "Exports/OBJ/Carrot.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Carrot.obj",
+      "byteLength": 43653,
+      "crc32": "c545a8fe"
+    },
+    {
+      "path": "Exports/OBJ/Cauldron.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Cauldron.obj",
+      "byteLength": 141918,
+      "crc32": "fa678a8e"
+    },
+    {
+      "path": "Exports/OBJ/Chain_Coil.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Chain_Coil.obj",
+      "byteLength": 333533,
+      "crc32": "890e43cf"
+    },
+    {
+      "path": "Exports/OBJ/Chair_1.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Chair_1.obj",
+      "byteLength": 40423,
+      "crc32": "f1c6a8af"
+    },
+    {
+      "path": "Exports/OBJ/Chalice.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Chalice.obj",
+      "byteLength": 29909,
+      "crc32": "a1bd7c9a"
+    },
+    {
+      "path": "Exports/OBJ/Chandelier.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/Chandelier.obj",
+      "byteLength": 440952,
+      "crc32": "ce416bb2"
+    },
+    {
+      "path": "Exports/OBJ/Chest_Legendary.mtl",
+      "byteLength": 311,
+      "crc32": "69cba431"
+    },
+    {
+      "path": "Exports/OBJ/Chest_Wood.obj",
+      "byteLength": 168115,
+      "crc32": "5bdeef02"
+    },
+    {
+      "path": "Exports/OBJ/Coin.mtl",
+      "byteLength": 287,
+      "crc32": "74460450"
+    },
+    {
+      "path": "Exports/OBJ/Coin.obj",
+      "byteLength": 19990,
+      "crc32": "fc2f5639"
+    },
+    {
+      "path": "Exports/OBJ/Coin_Pile.mtl",
+      "byteLength": 287,
+      "crc32": "74460450"
+    },
+    {
+      "path": "Exports/OBJ/Coin_Pile.obj",
+      "byteLength": 65100,
+      "crc32": "149d058d"
+    },
+    {
+      "path": "Exports/OBJ/Coin_Pile_2.mtl",
+      "byteLength": 287,
+      "crc32": "74460450"
+    },
+    {
+      "path": "Exports/OBJ/Coin_Pile_2.obj",
+      "byteLength": 74946,
+      "crc32": "027b2331"
+    },
+    {
+      "path": "Exports/OBJ/Crate_Metal.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Crate_Metal.obj",
+      "byteLength": 206440,
+      "crc32": "b28b7497"
+    },
+    {
+      "path": "Exports/OBJ/Crate_Wooden.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Crate_Wooden.obj",
+      "byteLength": 111592,
+      "crc32": "4ea17ddd"
+    },
+    {
+      "path": "Exports/OBJ/Dummy.mtl",
+      "byteLength": 832,
+      "crc32": "5dc3d210"
+    },
+    {
+      "path": "Exports/OBJ/Dummy.obj",
+      "byteLength": 217183,
+      "crc32": "53182471"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Apple.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Apple.obj",
+      "byteLength": 276910,
+      "crc32": "8e98b6fd"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Carrot.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Carrot.obj",
+      "byteLength": 402688,
+      "crc32": "71afb170"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Empty.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/FarmCrate_Empty.obj",
+      "byteLength": 132184,
+      "crc32": "2b7e6e5a"
+    },
+    {
+      "path": "Exports/OBJ/Key_Gold.mtl",
+      "byteLength": 287,
+      "crc32": "74460450"
+    },
+    {
+      "path": "Exports/OBJ/Key_Gold.obj",
+      "byteLength": 92285,
+      "crc32": "f77600b5"
+    },
+    {
+      "path": "Exports/OBJ/Key_Metal.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Key_Metal.obj",
+      "byteLength": 37117,
+      "crc32": "753e48f0"
+    },
+    {
+      "path": "Exports/OBJ/Lantern_Wall.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Lantern_Wall.obj",
+      "byteLength": 221168,
+      "crc32": "249d2cc8"
+    },
+    {
+      "path": "Exports/OBJ/Mug.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Mug.obj",
+      "byteLength": 22773,
+      "crc32": "f7e82386"
+    },
+    {
+      "path": "Exports/OBJ/Nightstand_Shelf.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Nightstand_Shelf.obj",
+      "byteLength": 22165,
+      "crc32": "f4320266"
+    },
+    {
+      "path": "Exports/OBJ/Peg_Rack.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Peg_Rack.obj",
+      "byteLength": 50307,
+      "crc32": "e0398f0e"
+    },
+    {
+      "path": "Exports/OBJ/Pickaxe_Bronze.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Pickaxe_Bronze.obj",
+      "byteLength": 54507,
+      "crc32": "f6e86851"
+    },
+    {
+      "path": "Exports/OBJ/Potion_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Potion_1.obj",
+      "byteLength": 29767,
+      "crc32": "52a1436d"
+    },
+    {
+      "path": "Exports/OBJ/Potion_2.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Potion_2.obj",
+      "byteLength": 32228,
+      "crc32": "946f81e4"
+    },
+    {
+      "path": "Exports/OBJ/Potion_4.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Potion_4.obj",
+      "byteLength": 37425,
+      "crc32": "ad87ef31"
+    },
+    {
+      "path": "Exports/OBJ/Pot_1.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Pot_1.obj",
+      "byteLength": 72662,
+      "crc32": "2bff027f"
+    },
+    {
+      "path": "Exports/OBJ/Pot_1_Lid.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Pot_1_Lid.obj",
+      "byteLength": 88617,
+      "crc32": "b2572d7f"
+    },
+    {
+      "path": "Exports/OBJ/Pouch_Large.mtl",
+      "byteLength": 573,
+      "crc32": "5d051457"
+    },
+    {
+      "path": "Exports/OBJ/Pouch_Large.obj",
+      "byteLength": 48891,
+      "crc32": "68d0b78a"
+    },
+    {
+      "path": "Exports/OBJ/Rope_1.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Rope_1.obj",
+      "byteLength": 112197,
+      "crc32": "bb5596e6"
+    },
+    {
+      "path": "Exports/OBJ/Rope_2.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Rope_2.obj",
+      "byteLength": 93254,
+      "crc32": "94f59110"
+    },
+    {
+      "path": "Exports/OBJ/Rope_3.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Rope_3.obj",
+      "byteLength": 112445,
+      "crc32": "0c6a34e2"
+    },
+    {
+      "path": "Exports/OBJ/Scroll_1.mtl",
+      "byteLength": 507,
+      "crc32": "68881ac5"
+    },
+    {
+      "path": "Exports/OBJ/Scroll_1.obj",
+      "byteLength": 34471,
+      "crc32": "78fb7a1a"
+    },
+    {
+      "path": "Exports/OBJ/Scroll_2.mtl",
+      "byteLength": 507,
+      "crc32": "68881ac5"
+    },
+    {
+      "path": "Exports/OBJ/Scroll_2.obj",
+      "byteLength": 44431,
+      "crc32": "bb94de3a"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Arch.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Arch.obj",
+      "byteLength": 87518,
+      "crc32": "2da84160"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Simple.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Simple.obj",
+      "byteLength": 33937,
+      "crc32": "c9207957"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Small_Bottles.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/Shelf_Small_Bottles.obj",
+      "byteLength": 361973,
+      "crc32": "28d3ceca"
+    },
+    {
+      "path": "Exports/OBJ/Shield_Wooden.mtl",
+      "byteLength": 805,
+      "crc32": "ac9cd59f"
+    },
+    {
+      "path": "Exports/OBJ/Shield_Wooden.obj",
+      "byteLength": 101508,
+      "crc32": "1c03d499"
+    },
+    {
+      "path": "Exports/OBJ/SmallBottle.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/SmallBottle.obj",
+      "byteLength": 9494,
+      "crc32": "ea539435"
+    },
+    {
+      "path": "Exports/OBJ/SmallBottles_1.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/SmallBottles_1.obj",
+      "byteLength": 35542,
+      "crc32": "397f445d"
+    },
+    {
+      "path": "Exports/OBJ/Stall_Cart_Empty.mtl",
+      "byteLength": 828,
+      "crc32": "13ce5717"
+    },
+    {
+      "path": "Exports/OBJ/Stall_Cart_Empty.obj",
+      "byteLength": 291655,
+      "crc32": "71d618cb"
+    },
+    {
+      "path": "Exports/OBJ/Stall_Empty.mtl",
+      "byteLength": 828,
+      "crc32": "13ce5717"
+    },
+    {
+      "path": "Exports/OBJ/Stall_Empty.obj",
+      "byteLength": 112533,
+      "crc32": "36253a98"
+    },
+    {
+      "path": "Exports/OBJ/Stool.mtl",
+      "byteLength": 325,
+      "crc32": "dc4fa239"
+    },
+    {
+      "path": "Exports/OBJ/Stool.obj",
+      "byteLength": 13676,
+      "crc32": "30119a45"
+    },
+    {
+      "path": "Exports/OBJ/Sword_Bronze.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Sword_Bronze.obj",
+      "byteLength": 131109,
+      "crc32": "0f2e3d2c"
+    },
+    {
+      "path": "Exports/OBJ/Table_Fork.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Table_Fork.obj",
+      "byteLength": 7068,
+      "crc32": "d29e71be"
+    },
+    {
+      "path": "Exports/OBJ/Table_Knife.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Table_Knife.obj",
+      "byteLength": 3839,
+      "crc32": "e66d367a"
+    },
+    {
+      "path": "Exports/OBJ/Table_Large.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Table_Large.obj",
+      "byteLength": 70134,
+      "crc32": "0f747489"
+    },
+    {
+      "path": "Exports/OBJ/Table_Plate.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Table_Plate.obj",
+      "byteLength": 10915,
+      "crc32": "424cccbf"
+    },
+    {
+      "path": "Exports/OBJ/Table_Spoon.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Table_Spoon.obj",
+      "byteLength": 9883,
+      "crc32": "7c50bc29"
+    },
+    {
+      "path": "Exports/OBJ/Torch_Metal.mtl",
+      "byteLength": 313,
+      "crc32": "675d9377"
+    },
+    {
+      "path": "Exports/OBJ/Torch_Metal.obj",
+      "byteLength": 77653,
+      "crc32": "5806c850"
+    },
+    {
+      "path": "Exports/OBJ/T_Page_Noise.png",
+      "byteLength": 7486734,
+      "crc32": "50c3b8b6"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Cloth_BaseColor.png",
+      "byteLength": 1936754,
+      "crc32": "c01f17c3"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Cloth_Normal.png",
+      "byteLength": 3920858,
+      "crc32": "f47ac723"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Cloth_ORM.png",
+      "byteLength": 623426,
+      "crc32": "90b7ff9b"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Furniture_BaseColor.png",
+      "byteLength": 2232961,
+      "crc32": "70608e8b"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Furniture_Normal.png",
+      "byteLength": 3485710,
+      "crc32": "1f5b71aa"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Furniture_ORM.png",
+      "byteLength": 2064585,
+      "crc32": "b5187f8d"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Metal_BaseColor.png",
+      "byteLength": 1361221,
+      "crc32": "98a182e2"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Metal_Normal.png",
+      "byteLength": 3625541,
+      "crc32": "2a6c5a44"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Metal_ORM.png",
+      "byteLength": 1871475,
+      "crc32": "aa6db7ed"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Props_BaseColor.png",
+      "byteLength": 2263132,
+      "crc32": "0d5b919c"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Props_Normal.png",
+      "byteLength": 4441458,
+      "crc32": "224891d4"
+    },
+    {
+      "path": "Exports/OBJ/T_Trim_Props_ORM.png",
+      "byteLength": 3017151,
+      "crc32": "220cb793"
+    },
+    {
+      "path": "Exports/OBJ/Vase_2.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Vase_2.obj",
+      "byteLength": 39921,
+      "crc32": "391e8497"
+    },
+    {
+      "path": "Exports/OBJ/Vase_4.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Vase_4.obj",
+      "byteLength": 39399,
+      "crc32": "e16bf9f4"
+    },
+    {
+      "path": "Exports/OBJ/Vase_Rubble_Medium.mtl",
+      "byteLength": 320,
+      "crc32": "b73c228d"
+    },
+    {
+      "path": "Exports/OBJ/Vase_Rubble_Medium.obj",
+      "byteLength": 107992,
+      "crc32": "fd76f668"
+    },
+    {
+      "path": "Exports/OBJ/WeaponStand.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/WeaponStand.obj",
+      "byteLength": 149155,
+      "crc32": "f9214494"
+    },
+    {
+      "path": "Exports/OBJ/Whetstone.mtl",
+      "byteLength": 838,
+      "crc32": "662cbded"
+    },
+    {
+      "path": "Exports/OBJ/Whetstone.obj",
+      "byteLength": 78596,
+      "crc32": "780ed860"
+    },
+    {
+      "path": "Exports/OBJ/Workbench.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Workbench.obj",
+      "byteLength": 99793,
+      "crc32": "0ac21de5"
+    },
+    {
+      "path": "Exports/OBJ/Workbench_Drawers.mtl",
+      "byteLength": 578,
+      "crc32": "5f352dc5"
+    },
+    {
+      "path": "Exports/OBJ/Workbench_Drawers.obj",
+      "byteLength": 23953,
+      "crc32": "5bb2fb9e"
+    },
+    {
+      "path": "License_Standard.txt",
+      "byteLength": 837,
+      "crc32": "735ba252"
+    },
+    {
+      "path": "Preview_1.jpg",
+      "byteLength": 502435,
+      "crc32": "c60d72b8"
+    },
+    {
+      "path": "Preview_2.jpg",
+      "byteLength": 661996,
+      "crc32": "f7c0f2d1"
+    },
+    {
+      "path": "Preview_3.jpg",
+      "byteLength": 525641,
+      "crc32": "f1eb1b3d"
+    },
+    {
+      "path": "Textures/Normals-UnrealEngine/T_Trim_Cloth_Normal.png",
+      "byteLength": 3917916,
+      "crc32": "66be302d"
+    },
+    {
+      "path": "Textures/Normals-UnrealEngine/T_Trim_Furniture_Normal.png",
+      "byteLength": 3478660,
+      "crc32": "39d5f968"
+    },
+    {
+      "path": "Textures/Normals-UnrealEngine/T_Trim_Metal_Normal.png",
+      "byteLength": 3622271,
+      "crc32": "4e4d170d"
+    },
+    {
+      "path": "Textures/Normals-UnrealEngine/T_Trim_Props_Normal.png",
+      "byteLength": 4449962,
+      "crc32": "71ae80b2"
+    },
+    {
+      "path": "Textures/T_Page_Noise.png",
+      "byteLength": 7486734,
+      "crc32": "50c3b8b6"
+    },
+    {
+      "path": "Textures/T_Trim_Cloth_BaseColor.png",
+      "byteLength": 1936754,
+      "crc32": "c01f17c3"
+    },
+    {
+      "path": "Textures/T_Trim_Cloth_Normal.png",
+      "byteLength": 3920858,
+      "crc32": "f47ac723"
+    },
+    {
+      "path": "Textures/T_Trim_Cloth_ORM.png",
+      "byteLength": 623426,
+      "crc32": "90b7ff9b"
+    },
+    {
+      "path": "Textures/T_Trim_Furniture_BaseColor.png",
+      "byteLength": 2232961,
+      "crc32": "70608e8b"
+    },
+    {
+      "path": "Textures/T_Trim_Furniture_Normal.png",
+      "byteLength": 3485710,
+      "crc32": "1f5b71aa"
+    },
+    {
+      "path": "Textures/T_Trim_Furniture_ORM.png",
+      "byteLength": 2064585,
+      "crc32": "b5187f8d"
+    },
+    {
+      "path": "Textures/T_Trim_Metal_BaseColor.png",
+      "byteLength": 1361221,
+      "crc32": "98a182e2"
+    },
+    {
+      "path": "Textures/T_Trim_Metal_Normal.png",
+      "byteLength": 3625541,
+      "crc32": "2a6c5a44"
+    },
+    {
+      "path": "Textures/T_Trim_Metal_ORM.png",
+      "byteLength": 1871475,
+      "crc32": "aa6db7ed"
+    },
+    {
+      "path": "Textures/T_Trim_Props_BaseColor.png",
+      "byteLength": 2263132,
+      "crc32": "0d5b919c"
+    },
+    {
+      "path": "Textures/T_Trim_Props_Normal.png",
+      "byteLength": 4441458,
+      "crc32": "224891d4"
+    },
+    {
+      "path": "Textures/T_Trim_Props_ORM.png",
+      "byteLength": 3017151,
+      "crc32": "220cb793"
+    }
+  ]
+}

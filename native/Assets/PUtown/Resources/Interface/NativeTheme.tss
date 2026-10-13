@@ -1,0 +1,42 @@
+@import url("unity-theme://default");
+
+.unity-base-field {
+    flex-shrink: 0;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+.unity-base-field__label {
+    color: rgb(31, 51, 46);
+    min-width: 110px;
+}
+.unity-base-field__input {
+    background-color: rgb(253, 254, 250);
+    color: rgb(23, 41, 35);
+    min-height: 34px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-width: 1px;
+    border-color: rgb(113, 139, 120);
+    border-radius: 4px;
+}
+.unity-button {
+    border-width: 1px;
+    border-color: rgb(77, 112, 97);
+    border-radius: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+.unity-button:hover {
+    border-color: rgb(187, 217, 196);
+}
+.unity-button:focus, .unity-base-field:focus > .unity-base-field__input {
+    border-width: 2px;
+    border-color: rgb(190, 145, 70);
+}
+.unity-button:disabled {
+    opacity: 0.45;
+}
+.unity-foldout__toggle {
+    min-height: 30px;
+    margin-top: 10px;
+}

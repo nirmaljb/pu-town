@@ -10,6 +10,8 @@ The project currently targets local development. The Game runs in two processes:
 Optional Day and Townhall voice adds a separate local LiveKit process; see
 [the voice setup guide](tools/voice/README.md).
 
+The Unity campus client is in [`native/`](native/README.md). Its guide covers the pinned Editor, macOS/Windows builds, server connection options, native Avatar publication and authoring tools. The Java server remains authoritative for both clients. Native Rooms require the candidate native Avatar publication and the campus map; the browser gives explicit feedback when it encounters one. See the [migration verification record](docs/verification/2026-10-13-native-migration.md) for current acceptance evidence. The browser remains available while packaged acceptance, platform performance and retirement work are pending.
+
 ## Prerequisites
 
 Install the following before starting:

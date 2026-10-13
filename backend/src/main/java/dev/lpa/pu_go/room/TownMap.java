@@ -12,7 +12,8 @@ import java.util.Map;
 /** Immutable, packaged geometry for one playable town. Each Room pins its own choice. */
 public final class TownMap {
     private static final Map<String, TownMap> MAPS = Map.of(
-            "village", load("village"), "horror", load("horror"), "cyberpunk", load("cyberpunk"));
+            "village", load("village"), "horror", load("horror"), "cyberpunk", load("cyberpunk"),
+            "campus", load("campus"));
     private final String id;
     private final double width, height, centreX, centreY;
     private final List<RoomRules.Interior> interiors;

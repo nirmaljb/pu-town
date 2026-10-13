@@ -1,0 +1,15 @@
+{
+  "preset": "campus-rowan",
+  "master": "campus/assets/avatars/sources/campus-rowan/v1/avatar.blend",
+  "sourceFbx": "native/Assets/Art/Avatars/campus-rowan/avatar.fbx",
+  "meshObjects": 33,
+  "vertices": 6066,
+  "triangles": 12000,
+  "bones": 17,
+  "actions": [
+    "Standing",
+    "Walking",
+    "Seated"
+  ],
+  "authoredWith": "Blender MCP / Blender 5.2.2 LTS"
+}

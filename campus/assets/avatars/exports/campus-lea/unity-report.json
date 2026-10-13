@@ -1,0 +1,56 @@
+{
+  "preset": "campus-lea",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "pelvis",
+  "skinnedRenderers": 8,
+  "vertices": 16831,
+  "triangles": 22120,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    0.773808,
+    1.8771708,
+    0.8577155
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 2.50000024,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.33333337,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 1.66666675,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "MI_Superhero_Female",
+      "baseTexture": "T_Superhero_Female_Dark_BaseColor",
+      "normalTexture": "T_Superhero_Female_Normal"
+    },
+    {
+      "name": "MI_Hair_2",
+      "baseTexture": "T_Hair_2_BaseColor",
+      "normalTexture": "T_Hair_2_Normal"
+    },
+    {
+      "name": "MI_Eyes",
+      "baseTexture": "T_Eye_Brown",
+      "normalTexture": "T_Eye_Normal"
+    },
+    {
+      "name": "MI_Peasant",
+      "baseTexture": "T_Peasant_2_BaseColor",
+      "normalTexture": "T_Peasant_Normal"
+    }
+  ]
+}

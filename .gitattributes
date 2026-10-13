@@ -1,0 +1,16 @@
+# Preserve exact source and license bytes from the retained creator archives.
+campus/assets/avatars/sources/quaternius/** -text -whitespace
+campus/assets/sources/quaternius/** -text -whitespace
+campus/assets/sources/quaternius-character/** -text -whitespace
+
+# Unity serializers emit spaces after empty YAML values.
+native/Assets/**/*.meta -whitespace
+native/Assets/**/*.prefab -whitespace
+native/Assets/**/*.mat -whitespace
+native/Assets/**/*.controller -whitespace
+native/Assets/**/*.unity -whitespace
+native/Assets/**/*.asset -whitespace
+native/ProjectSettings/*.asset -whitespace
+
+# Preserve the supplied font license text exactly.
+native/Assets/PUtown/Fonts/OFL.txt -text -whitespace
