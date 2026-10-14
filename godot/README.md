@@ -29,8 +29,8 @@ GODOT_BIN=/path/to/godot ./godot/run.sh --check
 ```
 
 The launcher requires a `4.7.2.stable` version, imports the project headlessly
-before every launch and stops on import errors. `--check` performs that import
-check without opening the scene. It does not exercise movement or rendering.
+before every launch, validates every GDScript file and stops on reported errors.
+`--check` performs those checks without opening the scene. It does not exercise movement or rendering.
 Godot's generated `.godot/` cache remains local.
 
 To use the editor on macOS or Windows, import [`project.godot`](project.godot),

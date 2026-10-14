@@ -4,7 +4,7 @@ extends Node3D
 const SPEED := 2.25
 const HEIGHT := 1.7
 const FOOTPRINT_RADIUS := 0.3
-const LIMIT := 32.0 - FOOTPRINT_RADIUS
+const LIMIT := preload("res://snow_surface.gd").HALF_EXTENT - FOOTPRINT_RADIUS
 
 var direction := Vector2.ZERO
 var horizontal_speed := 0.0

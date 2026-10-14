@@ -32,8 +32,9 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool) -
 		var viewport_size := get_viewport().get_visible_rect().size
 		var figure_screen := camera.unproject_position(walker.global_position)
 		var whole_map_visible := true
-		for x in [-32.0, 32.0]:
-			for z in [-32.0, 32.0]:
+		var edge: float = surface.HALF_EXTENT
+		for x in [-edge, edge]:
+			for z in [-edge, edge]:
 				var corner := camera.unproject_position(Vector3(x, 1.0, z))
 				whole_map_visible = whole_map_visible and Rect2(Vector2.ZERO, viewport_size).has_point(corner)
 		recording.store_csv_line(PackedStringArray([
@@ -49,7 +50,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool) -
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW WALK  /  64 × 64 m\nWASD walk · wheel zoom · F1 overlay\nF8 record route · F9 capture view\n\nFigure 1.70 m · walk 2.25 m/s\nFeet  X %6.2f   Y %5.3f   Z %6.2f m\nHorizontal %4.2f m/s · %s\nTravel %6.2f m · boundary %s\nSnow interior %.3f–%.3f m\nOuter drift %.3f–%.3f m\nOrtho %5.1f m · angle 55° / 45°\n%s  ·  %d fps\n%s" % [
+	label.text = "SNOW WALK  /  %d × %d m\nWASD walk · wheel zoom · F1 overlay\nF8 record route · F9 capture view\n\nFigure 1.70 m · walk 2.25 m/s\nFeet  X %6.2f   Y %5.3f   Z %6.2f m\nHorizontal %4.2f m/s · %s\nTravel %6.2f m · boundary %s\nSnow interior %.3f–%.3f m\nOuter drift %.3f–%.3f m\nOrtho %5.1f m · angle 55° / 45°\n%s  ·  %d fps\n%s" % [
+		surface.HALF_EXTENT * 2, surface.HALF_EXTENT * 2,
 		walker.position.x, walker.position.y, walker.position.z,
 		walker.horizontal_speed, contact, walker.distance_walked,
 		"held" if walker.boundary_limited else "clear",

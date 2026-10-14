@@ -1,0 +1,24 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Press F7 in the scene to start the graphical route; keep its window focused.
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+64 × 64 metres; 1.7 m figure; 2.25 m/s horizontal; captures/records: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Walking: straight interior for 2.0 s
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792015443-62213.csv
+Walking: diagonal interior for 2.0 s
+Walking: west boundary approach for 14.0 s
+Route paused: restore scene focus to continue west boundary approach
+Walking: northwest corner for 14.0 s
+Route paused: restore scene focus to continue northwest corner
+Walking: north perimeter for 29.0 s
+Walking: east perimeter for 29.0 s
+Walking: south perimeter for 29.0 s
+Walking: west perimeter for 29.0 s
+Walking: interior return for 22.0 s
+Saved user://capture-1792015624-345.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792015624-345.png)
+Saved user://capture-1792015625-35184.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792015625-35184.png)
+Saved user://route-1792015443-62213.csv
+Checking recorded scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792015443-62213.csv
+Coverage: 10934 observations, 1442 straight, 8278 diagonal, 7636 drift, 483 boundary, 60 overview, 10874 camera follow
+SCENE WALK: PASS · 0 failures

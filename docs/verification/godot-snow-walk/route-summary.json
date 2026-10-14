@@ -1,0 +1,50 @@
+{
+  "godot": "4.7.2.stable.official.ed1daf0bf",
+  "renderer": "gl_compatibility",
+  "resolution": [
+    1280,
+    800
+  ],
+  "input": "Graphical scene driven by Godot engine key/wheel events; F7 via native CUA",
+  "observations": 10934,
+  "elapsed_ms": 182207,
+  "x_m": [
+    -31.7000007629395,
+    31.7000007629395
+  ],
+  "z_m": [
+    -31.7000007629395,
+    31.7000007629395
+  ],
+  "walking_speed_mps_unblocked": [
+    2.24995382130146,
+    2.25003473460674
+  ],
+  "interior_feet_y_m": [
+    0.10061264038086,
+    0.2353892326355
+  ],
+  "outermost_metre_feet_y_m": [
+    0.61714005470276,
+    0.89929485321045
+  ],
+  "max_contact_gap_m": 0.0,
+  "grounded_all": true,
+  "pitch_deg": [
+    -54.9999961853027,
+    -54.9999961853027
+  ],
+  "yaw_deg": [
+    45.0,
+    45.0
+  ],
+  "ortho_m": [
+    16.6767807006836,
+    118.0
+  ],
+  "travel_m": 364.657711237669,
+  "overview_observations": 60,
+  "focused_observations": 10436,
+  "result": "PASS (0 failures)",
+  "performance_acceptance": false
+}

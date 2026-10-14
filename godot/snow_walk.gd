@@ -43,7 +43,8 @@ func _physics_process(delta: float) -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	var aspect := viewport_size.x / viewport_size.y
 	# A narrow resized window still fits the rotated square at overview zoom.
-	var overview_scale := maxf(1.0, 100.0 / (OVERVIEW_SIZE * aspect))
+	var map_diagonal := Surface.HALF_EXTENT * 2.0 * sqrt(2.0)
+	var overview_scale := maxf(1.0, (map_diagonal + 10.0) / (OVERVIEW_SIZE * aspect))
 	camera.size = zoom * lerpf(1.0, overview_scale, overview_blend)
 	inspection.observe(walker, camera, surface, focused)
 
