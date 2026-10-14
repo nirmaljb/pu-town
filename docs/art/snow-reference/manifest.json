@@ -1,0 +1,15 @@
+{
+  "provenance": "Owner attachment supplied 2026-10-15; adopted unchanged from codex/godot-snow-ground local prepared kit for GitHub issue #90 (parent #89). Authorship and license were not supplied.",
+  "reproduction_environment": {
+    "python": "3.14.3",
+    "pillow": "12.3.0",
+    "zlib": "1.2.12"
+  },
+  "sha256": {
+    "docs/art/snow-reference/reference.png": "5d2f25875a6a2bceb7a9993eae332aee26cb11d9da3497fdd7c12fd51caf1e94",
+    "docs/art/snow-reference/all-colors.csv.gz": "1f1e611e85c467cf18b02133c3e01b1af029bcc7c25c5c8e69623f24078760bb",
+    "docs/art/snow-reference/palette.json": "2f9f5e57156dc921719423e204d4e847f0dac581ff88144acd4c142c42baf3e6",
+    "docs/art/snow-reference/palette.svg": "88b30faaf0392521cf8c8a79684707b9627c9c395472ffd08fac0f0bc5812241",
+    "tools/reference-colors/extract.py": "0eeb22aad6a65e4d2e316f28b72e0932e5dce02a91c322a916d5b5c6d7fd525c"
+  }
+}

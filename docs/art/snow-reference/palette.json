@@ -1,0 +1,1681 @@
+{
+  "source": "reference.png",
+  "source_sha256": "5d2f25875a6a2bceb7a9993eae332aee26cb11d9da3497fdd7c12fd51caf1e94",
+  "width": 1536,
+  "height": 1024,
+  "pixel_count": 1572864,
+  "unique_rgb_count": 72078,
+  "color_space": "sRGB (source PNG sRGB chunk)",
+  "source_srgb_rendering_intent": 0,
+  "pillow_version": "12.3.0",
+  "histogram": "all-colors.csv.gz",
+  "histogram_sha256": "1f1e611e85c467cf18b02133c3e01b1af029bcc7c25c5c8e69623f24078760bb",
+  "method": "64 median-cut buckets; most frequent original RGB per bucket; RGB-order tie break",
+  "interpretation": "Rendered appearance including lighting, shadows and atmosphere; not measured material albedo. Bucket coverage is not the exact frequency of its representative.",
+  "swatches": [
+    {
+      "hex": "#202123",
+      "rgb8": [
+        32,
+        33,
+        35
+      ],
+      "srgb_normalized": [
+        0.12549019607843137,
+        0.12941176470588237,
+        0.13725490196078433
+      ],
+      "linear_rgb": [
+        0.014443843596092545,
+        0.01520851442291271,
+        0.016807375752887384
+      ],
+      "source_pixel": {
+        "x": 474,
+        "y": 407
+      },
+      "exact_pixel_count": 257,
+      "cluster_pixel_count": 21134,
+      "cluster_fraction": 0.013436635335286459,
+      "quantization_bucket": 63
+    },
+    {
+      "hex": "#36383C",
+      "rgb8": [
+        54,
+        56,
+        60
+      ],
+      "srgb_normalized": [
+        0.21176470588235294,
+        0.2196078431372549,
+        0.23529411764705882
+      ],
+      "linear_rgb": [
+        0.03688945040110004,
+        0.03954623527673284,
+        0.04518620438567554
+      ],
+      "source_pixel": {
+        "x": 828,
+        "y": 176
+      },
+      "exact_pixel_count": 225,
+      "cluster_pixel_count": 19591,
+      "cluster_fraction": 0.012455622355143229,
+      "quantization_bucket": 62
+    },
+    {
+      "hex": "#3C3E42",
+      "rgb8": [
+        60,
+        62,
+        66
+      ],
+      "srgb_normalized": [
+        0.23529411764705882,
+        0.24313725490196078,
+        0.25882352941176473
+      ],
+      "linear_rgb": [
+        0.04518620438567554,
+        0.04817182422688942,
+        0.05448027644244237
+      ],
+      "source_pixel": {
+        "x": 829,
+        "y": 177
+      },
+      "exact_pixel_count": 390,
+      "cluster_pixel_count": 25020,
+      "cluster_fraction": 0.01590728759765625,
+      "quantization_bucket": 61
+    },
+    {
+      "hex": "#404348",
+      "rgb8": [
+        64,
+        67,
+        72
+      ],
+      "srgb_normalized": [
+        0.25098039215686274,
+        0.2627450980392157,
+        0.2823529411764706
+      ],
+      "linear_rgb": [
+        0.05126945837404324,
+        0.05612849004960009,
+        0.06480326669290577
+      ],
+      "source_pixel": {
+        "x": 1235,
+        "y": 44
+      },
+      "exact_pixel_count": 433,
+      "cluster_pixel_count": 28025,
+      "cluster_fraction": 0.01781781514485677,
+      "quantization_bucket": 60
+    },
+    {
+      "hex": "#44474D",
+      "rgb8": [
+        68,
+        71,
+        77
+      ],
+      "srgb_normalized": [
+        0.26666666666666666,
+        0.2784313725490196,
+        0.30196078431372547
+      ],
+      "linear_rgb": [
+        0.05780543019106723,
+        0.06301001765316767,
+        0.07421356838014963
+      ],
+      "source_pixel": {
+        "x": 430,
+        "y": 15
+      },
+      "exact_pixel_count": 409,
+      "cluster_pixel_count": 32119,
+      "cluster_fraction": 0.02042071024576823,
+      "quantization_bucket": 59
+    },
+    {
+      "hex": "#494C51",
+      "rgb8": [
+        73,
+        76,
+        81
+      ],
+      "srgb_normalized": [
+        0.28627450980392155,
+        0.2980392156862745,
+        0.3176470588235294
+      ],
+      "linear_rgb": [
+        0.06662593864377289,
+        0.07227185068231748,
+        0.0822827071298148
+      ],
+      "source_pixel": {
+        "x": 422,
+        "y": 64
+      },
+      "exact_pixel_count": 481,
+      "cluster_pixel_count": 29471,
+      "cluster_fraction": 0.018737157185872395,
+      "quantization_bucket": 58
+    },
+    {
+      "hex": "#4B4E53",
+      "rgb8": [
+        75,
+        78,
+        83
+      ],
+      "srgb_normalized": [
+        0.29411764705882354,
+        0.3058823529411765,
+        0.3254901960784314
+      ],
+      "linear_rgb": [
+        0.07036009569659588,
+        0.07618538148130785,
+        0.08650046203654976
+      ],
+      "source_pixel": {
+        "x": 1244,
+        "y": 53
+      },
+      "exact_pixel_count": 443,
+      "cluster_pixel_count": 26392,
+      "cluster_fraction": 0.016779581705729168,
+      "quantization_bucket": 57
+    },
+    {
+      "hex": "#4E5259",
+      "rgb8": [
+        78,
+        82,
+        89
+      ],
+      "srgb_normalized": [
+        0.3058823529411765,
+        0.3215686274509804,
+        0.34901960784313724
+      ],
+      "linear_rgb": [
+        0.07618538148130785,
+        0.08437621154414882,
+        0.09989872824711389
+      ],
+      "source_pixel": {
+        "x": 431,
+        "y": 17
+      },
+      "exact_pixel_count": 734,
+      "cluster_pixel_count": 36309,
+      "cluster_fraction": 0.023084640502929688,
+      "quantization_bucket": 56
+    },
+    {
+      "hex": "#52555C",
+      "rgb8": [
+        82,
+        85,
+        92
+      ],
+      "srgb_normalized": [
+        0.3215686274509804,
+        0.3333333333333333,
+        0.3607843137254902
+      ],
+      "linear_rgb": [
+        0.08437621154414882,
+        0.09084171118340768,
+        0.10702310297826761
+      ],
+      "source_pixel": {
+        "x": 447,
+        "y": 81
+      },
+      "exact_pixel_count": 796,
+      "cluster_pixel_count": 25152,
+      "cluster_fraction": 0.0159912109375,
+      "quantization_bucket": 55
+    },
+    {
+      "hex": "#54565A",
+      "rgb8": [
+        84,
+        86,
+        90
+      ],
+      "srgb_normalized": [
+        0.32941176470588235,
+        0.33725490196078434,
+        0.35294117647058826
+      ],
+      "linear_rgb": [
+        0.08865558628577294,
+        0.09305896284668745,
+        0.10224173308810132
+      ],
+      "source_pixel": {
+        "x": 649,
+        "y": 113
+      },
+      "exact_pixel_count": 96,
+      "cluster_pixel_count": 17385,
+      "cluster_fraction": 0.011053085327148438,
+      "quantization_bucket": 53
+    },
+    {
+      "hex": "#555961",
+      "rgb8": [
+        85,
+        89,
+        97
+      ],
+      "srgb_normalized": [
+        0.3333333333333333,
+        0.34901960784313724,
+        0.3803921568627451
+      ],
+      "linear_rgb": [
+        0.09084171118340768,
+        0.09989872824711389,
+        0.11953842798834562
+      ],
+      "source_pixel": {
+        "x": 845,
+        "y": 2
+      },
+      "exact_pixel_count": 673,
+      "cluster_pixel_count": 30793,
+      "cluster_fraction": 0.019577662150065105,
+      "quantization_bucket": 54
+    },
+    {
+      "hex": "#5F5A58",
+      "rgb8": [
+        95,
+        90,
+        88
+      ],
+      "srgb_normalized": [
+        0.37254901960784315,
+        0.35294117647058826,
+        0.34509803921568627
+      ],
+      "linear_rgb": [
+        0.11443537382697373,
+        0.10224173308810132,
+        0.09758734714186246
+      ],
+      "source_pixel": {
+        "x": 621,
+        "y": 223
+      },
+      "exact_pixel_count": 49,
+      "cluster_pixel_count": 24011,
+      "cluster_fraction": 0.015265782674153646,
+      "quantization_bucket": 49
+    },
+    {
+      "hex": "#585D66",
+      "rgb8": [
+        88,
+        93,
+        102
+      ],
+      "srgb_normalized": [
+        0.34509803921568627,
+        0.36470588235294116,
+        0.4
+      ],
+      "linear_rgb": [
+        0.09758734714186246,
+        0.10946171077829933,
+        0.13286832155381798
+      ],
+      "source_pixel": {
+        "x": 841,
+        "y": 3
+      },
+      "exact_pixel_count": 1075,
+      "cluster_pixel_count": 25516,
+      "cluster_fraction": 0.016222635904947918,
+      "quantization_bucket": 52
+    },
+    {
+      "hex": "#595E67",
+      "rgb8": [
+        89,
+        94,
+        103
+      ],
+      "srgb_normalized": [
+        0.34901960784313724,
+        0.3686274509803922,
+        0.403921568627451
+      ],
+      "linear_rgb": [
+        0.09989872824711389,
+        0.1119324278369056,
+        0.13563332965520566
+      ],
+      "source_pixel": {
+        "x": 831,
+        "y": 0
+      },
+      "exact_pixel_count": 1138,
+      "cluster_pixel_count": 12039,
+      "cluster_fraction": 0.0076541900634765625,
+      "quantization_bucket": 51
+    },
+    {
+      "hex": "#5A5F68",
+      "rgb8": [
+        90,
+        95,
+        104
+      ],
+      "srgb_normalized": [
+        0.35294117647058826,
+        0.37254901960784315,
+        0.40784313725490196
+      ],
+      "linear_rgb": [
+        0.10224173308810132,
+        0.11443537382697373,
+        0.13843161503245183
+      ],
+      "source_pixel": {
+        "x": 737,
+        "y": 1
+      },
+      "exact_pixel_count": 1093,
+      "cluster_pixel_count": 32628,
+      "cluster_fraction": 0.02074432373046875,
+      "quantization_bucket": 50
+    },
+    {
+      "hex": "#5F636D",
+      "rgb8": [
+        95,
+        99,
+        109
+      ],
+      "srgb_normalized": [
+        0.37254901960784315,
+        0.38823529411764707,
+        0.42745098039215684
+      ],
+      "linear_rgb": [
+        0.11443537382697373,
+        0.12477181756095049,
+        0.15292615199615017
+      ],
+      "source_pixel": {
+        "x": 682,
+        "y": 0
+      },
+      "exact_pixel_count": 533,
+      "cluster_pixel_count": 27677,
+      "cluster_fraction": 0.01759656270345052,
+      "quantization_bucket": 48
+    },
+    {
+      "hex": "#6A6F79",
+      "rgb8": [
+        106,
+        111,
+        121
+      ],
+      "srgb_normalized": [
+        0.41568627450980394,
+        0.43529411764705883,
+        0.4745098039215686
+      ],
+      "linear_rgb": [
+        0.14412847085805777,
+        0.1589608350608804,
+        0.19120168274079138
+      ],
+      "source_pixel": {
+        "x": 912,
+        "y": 12
+      },
+      "exact_pixel_count": 148,
+      "cluster_pixel_count": 9904,
+      "cluster_fraction": 0.006296793619791667,
+      "quantization_bucket": 47
+    },
+    {
+      "hex": "#956F49",
+      "rgb8": [
+        149,
+        111,
+        73
+      ],
+      "srgb_normalized": [
+        0.5843137254901961,
+        0.43529411764705883,
+        0.28627450980392155
+      ],
+      "linear_rgb": [
+        0.3005437944157765,
+        0.1589608350608804,
+        0.06662593864377289
+      ],
+      "source_pixel": {
+        "x": 604,
+        "y": 216
+      },
+      "exact_pixel_count": 12,
+      "cluster_pixel_count": 21150,
+      "cluster_fraction": 0.013446807861328125,
+      "quantization_bucket": 40
+    },
+    {
+      "hex": "#747A84",
+      "rgb8": [
+        116,
+        122,
+        132
+      ],
+      "srgb_normalized": [
+        0.4549019607843137,
+        0.47843137254901963,
+        0.5176470588235295
+      ],
+      "linear_rgb": [
+        0.17464740365558504,
+        0.1946178304415758,
+        0.23074004852434915
+      ],
+      "source_pixel": {
+        "x": 541,
+        "y": 29
+      },
+      "exact_pixel_count": 521,
+      "cluster_pixel_count": 25060,
+      "cluster_fraction": 0.015932718912760418,
+      "quantization_bucket": 46
+    },
+    {
+      "hex": "#7A808A",
+      "rgb8": [
+        122,
+        128,
+        138
+      ],
+      "srgb_normalized": [
+        0.47843137254901963,
+        0.5019607843137255,
+        0.5411764705882353
+      ],
+      "linear_rgb": [
+        0.1946178304415758,
+        0.21586050011389926,
+        0.25415209433082675
+      ],
+      "source_pixel": {
+        "x": 1342,
+        "y": 1
+      },
+      "exact_pixel_count": 1052,
+      "cluster_pixel_count": 29500,
+      "cluster_fraction": 0.018755594889322918,
+      "quantization_bucket": 45
+    },
+    {
+      "hex": "#7F848F",
+      "rgb8": [
+        127,
+        132,
+        143
+      ],
+      "srgb_normalized": [
+        0.4980392156862745,
+        0.5176470588235295,
+        0.5607843137254902
+      ],
+      "linear_rgb": [
+        0.21223075741405523,
+        0.23074004852434915,
+        0.27467731206038465
+      ],
+      "source_pixel": {
+        "x": 1362,
+        "y": 4
+      },
+      "exact_pixel_count": 871,
+      "cluster_pixel_count": 33017,
+      "cluster_fraction": 0.02099164326985677,
+      "quantization_bucket": 44
+    },
+    {
+      "hex": "#828792",
+      "rgb8": [
+        130,
+        135,
+        146
+      ],
+      "srgb_normalized": [
+        0.5098039215686274,
+        0.5294117647058824,
+        0.5725490196078431
+      ],
+      "linear_rgb": [
+        0.2232279573168085,
+        0.24228112246555486,
+        0.2874408377269175
+      ],
+      "source_pixel": {
+        "x": 1491,
+        "y": 0
+      },
+      "exact_pixel_count": 977,
+      "cluster_pixel_count": 19950,
+      "cluster_fraction": 0.012683868408203125,
+      "quantization_bucket": 43
+    },
+    {
+      "hex": "#848994",
+      "rgb8": [
+        132,
+        137,
+        148
+      ],
+      "srgb_normalized": [
+        0.5176470588235295,
+        0.5372549019607843,
+        0.5803921568627451
+      ],
+      "linear_rgb": [
+        0.23074004852434915,
+        0.25015828472995344,
+        0.2961382707983211
+      ],
+      "source_pixel": {
+        "x": 1291,
+        "y": 1
+      },
+      "exact_pixel_count": 1073,
+      "cluster_pixel_count": 17510,
+      "cluster_fraction": 0.011132558186848959,
+      "quantization_bucket": 42
+    },
+    {
+      "hex": "#878C97",
+      "rgb8": [
+        135,
+        140,
+        151
+      ],
+      "srgb_normalized": [
+        0.5294117647058824,
+        0.5490196078431373,
+        0.592156862745098
+      ],
+      "linear_rgb": [
+        0.24228112246555486,
+        0.26225065752969623,
+        0.30946892281750854
+      ],
+      "source_pixel": {
+        "x": 1490,
+        "y": 0
+      },
+      "exact_pixel_count": 1432,
+      "cluster_pixel_count": 28447,
+      "cluster_fraction": 0.01808611551920573,
+      "quantization_bucket": 41
+    },
+    {
+      "hex": "#8B909B",
+      "rgb8": [
+        139,
+        144,
+        155
+      ],
+      "srgb_normalized": [
+        0.5450980392156862,
+        0.5647058823529412,
+        0.6078431372549019
+      ],
+      "linear_rgb": [
+        0.2581828529215958,
+        0.2788942634768104,
+        0.3277780980565422
+      ],
+      "source_pixel": {
+        "x": 1,
+        "y": 1
+      },
+      "exact_pixel_count": 1634,
+      "cluster_pixel_count": 35349,
+      "cluster_fraction": 0.022474288940429688,
+      "quantization_bucket": 39
+    },
+    {
+      "hex": "#8C909A",
+      "rgb8": [
+        140,
+        144,
+        154
+      ],
+      "srgb_normalized": [
+        0.5490196078431373,
+        0.5647058823529412,
+        0.6039215686274509
+      ],
+      "linear_rgb": [
+        0.26225065752969623,
+        0.2788942634768104,
+        0.32314320911295075
+      ],
+      "source_pixel": {
+        "x": 1293,
+        "y": 0
+      },
+      "exact_pixel_count": 772,
+      "cluster_pixel_count": 10656,
+      "cluster_fraction": 0.00677490234375,
+      "quantization_bucket": 38
+    },
+    {
+      "hex": "#8C919C",
+      "rgb8": [
+        140,
+        145,
+        156
+      ],
+      "srgb_normalized": [
+        0.5490196078431373,
+        0.5686274509803921,
+        0.611764705882353
+      ],
+      "linear_rgb": [
+        0.26225065752969623,
+        0.2831487404299921,
+        0.33245153634617935
+      ],
+      "source_pixel": {
+        "x": 633,
+        "y": 0
+      },
+      "exact_pixel_count": 1472,
+      "cluster_pixel_count": 34500,
+      "cluster_fraction": 0.02193450927734375,
+      "quantization_bucket": 37
+    },
+    {
+      "hex": "#9196A1",
+      "rgb8": [
+        145,
+        150,
+        161
+      ],
+      "srgb_normalized": [
+        0.5686274509803921,
+        0.5882352941176471,
+        0.6313725490196078
+      ],
+      "linear_rgb": [
+        0.2831487404299921,
+        0.3049873140698863,
+        0.3564001441459435
+      ],
+      "source_pixel": {
+        "x": 561,
+        "y": 1
+      },
+      "exact_pixel_count": 1740,
+      "cluster_pixel_count": 27500,
+      "cluster_fraction": 0.017484029134114582,
+      "quantization_bucket": 36
+    },
+    {
+      "hex": "#9398A3",
+      "rgb8": [
+        147,
+        152,
+        163
+      ],
+      "srgb_normalized": [
+        0.5764705882352941,
+        0.596078431372549,
+        0.6392156862745098
+      ],
+      "linear_rgb": [
+        0.29177064981753587,
+        0.31398871337571754,
+        0.3662525955988395
+      ],
+      "source_pixel": {
+        "x": 640,
+        "y": 0
+      },
+      "exact_pixel_count": 2067,
+      "cluster_pixel_count": 36286,
+      "cluster_fraction": 0.023070017496744793,
+      "quantization_bucket": 35
+    },
+    {
+      "hex": "#9799A0",
+      "rgb8": [
+        151,
+        153,
+        160
+      ],
+      "srgb_normalized": [
+        0.592156862745098,
+        0.6,
+        0.6274509803921569
+      ],
+      "linear_rgb": [
+        0.30946892281750854,
+        0.31854677812509186,
+        0.35153259950043936
+      ],
+      "source_pixel": {
+        "x": 618,
+        "y": 185
+      },
+      "exact_pixel_count": 110,
+      "cluster_pixel_count": 10884,
+      "cluster_fraction": 0.00691986083984375,
+      "quantization_bucket": 34
+    },
+    {
+      "hex": "#969AA5",
+      "rgb8": [
+        150,
+        154,
+        165
+      ],
+      "srgb_normalized": [
+        0.5882352941176471,
+        0.6039215686274509,
+        0.6470588235294118
+      ],
+      "linear_rgb": [
+        0.3049873140698863,
+        0.32314320911295075,
+        0.3762621229909065
+      ],
+      "source_pixel": {
+        "x": 1232,
+        "y": 1
+      },
+      "exact_pixel_count": 2705,
+      "cluster_pixel_count": 35832,
+      "cluster_fraction": 0.0227813720703125,
+      "quantization_bucket": 33
+    },
+    {
+      "hex": "#979BA6",
+      "rgb8": [
+        151,
+        155,
+        166
+      ],
+      "srgb_normalized": [
+        0.592156862745098,
+        0.6078431372549019,
+        0.6509803921568628
+      ],
+      "linear_rgb": [
+        0.30946892281750854,
+        0.3277780980565422,
+        0.38132601143253014
+      ],
+      "source_pixel": {
+        "x": 664,
+        "y": 0
+      },
+      "exact_pixel_count": 3340,
+      "cluster_pixel_count": 20072,
+      "cluster_fraction": 0.012761433919270834,
+      "quantization_bucket": 32
+    },
+    {
+      "hex": "#989CA5",
+      "rgb8": [
+        152,
+        156,
+        165
+      ],
+      "srgb_normalized": [
+        0.596078431372549,
+        0.611764705882353,
+        0.6470588235294118
+      ],
+      "linear_rgb": [
+        0.31398871337571754,
+        0.33245153634617935,
+        0.3762621229909065
+      ],
+      "source_pixel": {
+        "x": 671,
+        "y": 0
+      },
+      "exact_pixel_count": 863,
+      "cluster_pixel_count": 9211,
+      "cluster_fraction": 0.0058561960856119795,
+      "quantization_bucket": 31
+    },
+    {
+      "hex": "#989CA7",
+      "rgb8": [
+        152,
+        156,
+        167
+      ],
+      "srgb_normalized": [
+        0.596078431372549,
+        0.611764705882353,
+        0.6549019607843137
+      ],
+      "linear_rgb": [
+        0.31398871337571754,
+        0.33245153634617935,
+        0.386429433787049
+      ],
+      "source_pixel": {
+        "x": 41,
+        "y": 1
+      },
+      "exact_pixel_count": 3918,
+      "cluster_pixel_count": 23869,
+      "cluster_fraction": 0.015175501505533854,
+      "quantization_bucket": 30
+    },
+    {
+      "hex": "#999DA8",
+      "rgb8": [
+        153,
+        157,
+        168
+      ],
+      "srgb_normalized": [
+        0.6,
+        0.615686274509804,
+        0.6588235294117647
+      ],
+      "linear_rgb": [
+        0.31854677812509186,
+        0.33716361504833037,
+        0.39157247774972326
+      ],
+      "source_pixel": {
+        "x": 1466,
+        "y": 0
+      },
+      "exact_pixel_count": 4160,
+      "cluster_pixel_count": 25979,
+      "cluster_fraction": 0.016517003377278645,
+      "quantization_bucket": 29
+    },
+    {
+      "hex": "#9A9EA9",
+      "rgb8": [
+        154,
+        158,
+        169
+      ],
+      "srgb_normalized": [
+        0.6039215686274509,
+        0.6196078431372549,
+        0.6627450980392157
+      ],
+      "linear_rgb": [
+        0.32314320911295075,
+        0.3419144249086609,
+        0.39675523072562685
+      ],
+      "source_pixel": {
+        "x": 1204,
+        "y": 1
+      },
+      "exact_pixel_count": 3675,
+      "cluster_pixel_count": 33944,
+      "cluster_fraction": 0.021581013997395832,
+      "quantization_bucket": 28
+    },
+    {
+      "hex": "#9C9FA8",
+      "rgb8": [
+        156,
+        159,
+        168
+      ],
+      "srgb_normalized": [
+        0.611764705882353,
+        0.6235294117647059,
+        0.6588235294117647
+      ],
+      "linear_rgb": [
+        0.33245153634617935,
+        0.3467040563550296,
+        0.39157247774972326
+      ],
+      "source_pixel": {
+        "x": 1255,
+        "y": 0
+      },
+      "exact_pixel_count": 790,
+      "cluster_pixel_count": 10514,
+      "cluster_fraction": 0.006684621175130208,
+      "quantization_bucket": 26
+    },
+    {
+      "hex": "#9CA0AA",
+      "rgb8": [
+        156,
+        160,
+        170
+      ],
+      "srgb_normalized": [
+        0.611764705882353,
+        0.6274509803921569,
+        0.6666666666666666
+      ],
+      "linear_rgb": [
+        0.33245153634617935,
+        0.35153259950043936,
+        0.4019777798321958
+      ],
+      "source_pixel": {
+        "x": 1179,
+        "y": 0
+      },
+      "exact_pixel_count": 3505,
+      "cluster_pixel_count": 20680,
+      "cluster_fraction": 0.013147989908854166,
+      "quantization_bucket": 27
+    },
+    {
+      "hex": "#9DA0A9",
+      "rgb8": [
+        157,
+        160,
+        169
+      ],
+      "srgb_normalized": [
+        0.615686274509804,
+        0.6274509803921569,
+        0.6627450980392157
+      ],
+      "linear_rgb": [
+        0.33716361504833037,
+        0.35153259950043936,
+        0.39675523072562685
+      ],
+      "source_pixel": {
+        "x": 1197,
+        "y": 0
+      },
+      "exact_pixel_count": 890,
+      "cluster_pixel_count": 9024,
+      "cluster_fraction": 0.0057373046875,
+      "quantization_bucket": 24
+    },
+    {
+      "hex": "#9DA1AB",
+      "rgb8": [
+        157,
+        161,
+        171
+      ],
+      "srgb_normalized": [
+        0.615686274509804,
+        0.6313725490196078,
+        0.6705882352941176
+      ],
+      "linear_rgb": [
+        0.33716361504833037,
+        0.3564001441459435,
+        0.4072402119017367
+      ],
+      "source_pixel": {
+        "x": 1174,
+        "y": 0
+      },
+      "exact_pixel_count": 3438,
+      "cluster_pixel_count": 29750,
+      "cluster_fraction": 0.018914540608723957,
+      "quantization_bucket": 25
+    },
+    {
+      "hex": "#9EA2AC",
+      "rgb8": [
+        158,
+        162,
+        172
+      ],
+      "srgb_normalized": [
+        0.6196078431372549,
+        0.6352941176470588,
+        0.6745098039215687
+      ],
+      "linear_rgb": [
+        0.3419144249086609,
+        0.3613067797835095,
+        0.41254261348390375
+      ],
+      "source_pixel": {
+        "x": 554,
+        "y": 0
+      },
+      "exact_pixel_count": 3611,
+      "cluster_pixel_count": 8366,
+      "cluster_fraction": 0.005318959554036458,
+      "quantization_bucket": 23
+    },
+    {
+      "hex": "#A0A3AB",
+      "rgb8": [
+        160,
+        163,
+        171
+      ],
+      "srgb_normalized": [
+        0.6274509803921569,
+        0.6392156862745098,
+        0.6705882352941176
+      ],
+      "linear_rgb": [
+        0.35153259950043936,
+        0.3662525955988395,
+        0.4072402119017367
+      ],
+      "source_pixel": {
+        "x": 551,
+        "y": 0
+      },
+      "exact_pixel_count": 494,
+      "cluster_pixel_count": 9509,
+      "cluster_fraction": 0.0060456593831380205,
+      "quantization_bucket": 21
+    },
+    {
+      "hex": "#9FA3AE",
+      "rgb8": [
+        159,
+        163,
+        174
+      ],
+      "srgb_normalized": [
+        0.6235294117647059,
+        0.6392156862745098,
+        0.6823529411764706
+      ],
+      "linear_rgb": [
+        0.3467040563550296,
+        0.3662525955988395,
+        0.4232676699860717
+      ],
+      "source_pixel": {
+        "x": 1172,
+        "y": 0
+      },
+      "exact_pixel_count": 4695,
+      "cluster_pixel_count": 43912,
+      "cluster_fraction": 0.027918497721354168,
+      "quantization_bucket": 22
+    },
+    {
+      "hex": "#A0A4AE",
+      "rgb8": [
+        160,
+        164,
+        174
+      ],
+      "srgb_normalized": [
+        0.6274509803921569,
+        0.6431372549019608,
+        0.6823529411764706
+      ],
+      "linear_rgb": [
+        0.35153259950043936,
+        0.3712376804741491,
+        0.4232676699860717
+      ],
+      "source_pixel": {
+        "x": 1432,
+        "y": 0
+      },
+      "exact_pixel_count": 4783,
+      "cluster_pixel_count": 21817,
+      "cluster_fraction": 0.013870875040690104,
+      "quantization_bucket": 20
+    },
+    {
+      "hex": "#A0A4AF",
+      "rgb8": [
+        160,
+        164,
+        175
+      ],
+      "srgb_normalized": [
+        0.6274509803921569,
+        0.6431372549019608,
+        0.6862745098039216
+      ],
+      "linear_rgb": [
+        0.35153259950043936,
+        0.3712376804741491,
+        0.4286904966139066
+      ],
+      "source_pixel": {
+        "x": 1171,
+        "y": 0
+      },
+      "exact_pixel_count": 5521,
+      "cluster_pixel_count": 40113,
+      "cluster_fraction": 0.025503158569335938,
+      "quantization_bucket": 19
+    },
+    {
+      "hex": "#A7A5A9",
+      "rgb8": [
+        167,
+        165,
+        169
+      ],
+      "srgb_normalized": [
+        0.6549019607843137,
+        0.6470588235294118,
+        0.6627450980392157
+      ],
+      "linear_rgb": [
+        0.386429433787049,
+        0.3762621229909065,
+        0.39675523072562685
+      ],
+      "source_pixel": {
+        "x": 1340,
+        "y": 202
+      },
+      "exact_pixel_count": 56,
+      "cluster_pixel_count": 15674,
+      "cluster_fraction": 0.009965260823567709,
+      "quantization_bucket": 18
+    },
+    {
+      "hex": "#A2A6B0",
+      "rgb8": [
+        162,
+        166,
+        176
+      ],
+      "srgb_normalized": [
+        0.6352941176470588,
+        0.6509803921568628,
+        0.6901960784313725
+      ],
+      "linear_rgb": [
+        0.3613067797835095,
+        0.38132601143253014,
+        0.43415363617474895
+      ],
+      "source_pixel": {
+        "x": 423,
+        "y": 0
+      },
+      "exact_pixel_count": 4417,
+      "cluster_pixel_count": 16628,
+      "cluster_fraction": 0.010571797688802084,
+      "quantization_bucket": 17
+    },
+    {
+      "hex": "#A2A6B1",
+      "rgb8": [
+        162,
+        166,
+        177
+      ],
+      "srgb_normalized": [
+        0.6352941176470588,
+        0.6509803921568628,
+        0.6941176470588235
+      ],
+      "linear_rgb": [
+        0.3613067797835095,
+        0.38132601143253014,
+        0.4396571738409188
+      ],
+      "source_pixel": {
+        "x": 1431,
+        "y": 1
+      },
+      "exact_pixel_count": 4292,
+      "cluster_pixel_count": 18341,
+      "cluster_fraction": 0.011660893758138021,
+      "quantization_bucket": 16
+    },
+    {
+      "hex": "#A4A7B1",
+      "rgb8": [
+        164,
+        167,
+        177
+      ],
+      "srgb_normalized": [
+        0.6431372549019608,
+        0.6549019607843137,
+        0.6941176470588235
+      ],
+      "linear_rgb": [
+        0.3712376804741491,
+        0.386429433787049,
+        0.4396571738409188
+      ],
+      "source_pixel": {
+        "x": 420,
+        "y": 0
+      },
+      "exact_pixel_count": 3215,
+      "cluster_pixel_count": 20529,
+      "cluster_fraction": 0.013051986694335938,
+      "quantization_bucket": 14
+    },
+    {
+      "hex": "#A4A8B2",
+      "rgb8": [
+        164,
+        168,
+        178
+      ],
+      "srgb_normalized": [
+        0.6431372549019608,
+        0.6588235294117647,
+        0.6980392156862745
+      ],
+      "linear_rgb": [
+        0.3712376804741491,
+        0.39157247774972326,
+        0.44520119451622786
+      ],
+      "source_pixel": {
+        "x": 57,
+        "y": 0
+      },
+      "exact_pixel_count": 3459,
+      "cluster_pixel_count": 16170,
+      "cluster_fraction": 0.010280609130859375,
+      "quantization_bucket": 15
+    },
+    {
+      "hex": "#A6A9B1",
+      "rgb8": [
+        166,
+        169,
+        177
+      ],
+      "srgb_normalized": [
+        0.6509803921568628,
+        0.6627450980392157,
+        0.6941176470588235
+      ],
+      "linear_rgb": [
+        0.38132601143253014,
+        0.39675523072562685,
+        0.4396571738409188
+      ],
+      "source_pixel": {
+        "x": 1201,
+        "y": 3
+      },
+      "exact_pixel_count": 720,
+      "cluster_pixel_count": 17000,
+      "cluster_fraction": 0.010808308919270834,
+      "quantization_bucket": 12
+    },
+    {
+      "hex": "#A6A9B3",
+      "rgb8": [
+        166,
+        169,
+        179
+      ],
+      "srgb_normalized": [
+        0.6509803921568628,
+        0.6627450980392157,
+        0.7019607843137254
+      ],
+      "linear_rgb": [
+        0.38132601143253014,
+        0.39675523072562685,
+        0.45078578283822346
+      ],
+      "source_pixel": {
+        "x": 1119,
+        "y": 0
+      },
+      "exact_pixel_count": 3375,
+      "cluster_pixel_count": 28212,
+      "cluster_fraction": 0.01793670654296875,
+      "quantization_bucket": 13
+    },
+    {
+      "hex": "#AAAAB0",
+      "rgb8": [
+        170,
+        170,
+        176
+      ],
+      "srgb_normalized": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6901960784313725
+      ],
+      "linear_rgb": [
+        0.4019777798321958,
+        0.4019777798321958,
+        0.43415363617474895
+      ],
+      "source_pixel": {
+        "x": 756,
+        "y": 271
+      },
+      "exact_pixel_count": 450,
+      "cluster_pixel_count": 16603,
+      "cluster_fraction": 0.010555903116861979,
+      "quantization_bucket": 10
+    },
+    {
+      "hex": "#A7ABB5",
+      "rgb8": [
+        167,
+        171,
+        181
+      ],
+      "srgb_normalized": [
+        0.6549019607843137,
+        0.6705882352941176,
+        0.7098039215686275
+      ],
+      "linear_rgb": [
+        0.386429433787049,
+        0.4072402119017367,
+        0.4620769996544071
+      ],
+      "source_pixel": {
+        "x": 74,
+        "y": 0
+      },
+      "exact_pixel_count": 3437,
+      "cluster_pixel_count": 40995,
+      "cluster_fraction": 0.026063919067382812,
+      "quantization_bucket": 11
+    },
+    {
+      "hex": "#A8ACB6",
+      "rgb8": [
+        168,
+        172,
+        182
+      ],
+      "srgb_normalized": [
+        0.6588235294117647,
+        0.6745098039215687,
+        0.7137254901960784
+      ],
+      "linear_rgb": [
+        0.39157247774972326,
+        0.41254261348390375,
+        0.467783796112159
+      ],
+      "source_pixel": {
+        "x": 91,
+        "y": 0
+      },
+      "exact_pixel_count": 3369,
+      "cluster_pixel_count": 36804,
+      "cluster_fraction": 0.02339935302734375,
+      "quantization_bucket": 9
+    },
+    {
+      "hex": "#A9ADB7",
+      "rgb8": [
+        169,
+        173,
+        183
+      ],
+      "srgb_normalized": [
+        0.6627450980392157,
+        0.6784313725490196,
+        0.7176470588235294
+      ],
+      "linear_rgb": [
+        0.39675523072562685,
+        0.4178850708481375,
+        0.47353149614800955
+      ],
+      "source_pixel": {
+        "x": 88,
+        "y": 0
+      },
+      "exact_pixel_count": 2934,
+      "cluster_pixel_count": 41914,
+      "cluster_fraction": 0.026648203531901043,
+      "quantization_bucket": 8
+    },
+    {
+      "hex": "#B0AFB4",
+      "rgb8": [
+        176,
+        175,
+        180
+      ],
+      "srgb_normalized": [
+        0.6901960784313725,
+        0.6862745098039216,
+        0.7058823529411765
+      ],
+      "linear_rgb": [
+        0.43415363617474895,
+        0.4286904966139066,
+        0.45641102318040466
+      ],
+      "source_pixel": {
+        "x": 580,
+        "y": 293
+      },
+      "exact_pixel_count": 763,
+      "cluster_pixel_count": 19666,
+      "cluster_fraction": 0.012503306070963541,
+      "quantization_bucket": 7
+    },
+    {
+      "hex": "#AEB0B8",
+      "rgb8": [
+        174,
+        176,
+        184
+      ],
+      "srgb_normalized": [
+        0.6823529411764706,
+        0.6901960784313725,
+        0.7215686274509804
+      ],
+      "linear_rgb": [
+        0.4232676699860717,
+        0.43415363617474895,
+        0.4793201831008268
+      ],
+      "source_pixel": {
+        "x": 991,
+        "y": 5
+      },
+      "exact_pixel_count": 2006,
+      "cluster_pixel_count": 30167,
+      "cluster_fraction": 0.019179662068684895,
+      "quantization_bucket": 6
+    },
+    {
+      "hex": "#B4B2B6",
+      "rgb8": [
+        180,
+        178,
+        182
+      ],
+      "srgb_normalized": [
+        0.7058823529411765,
+        0.6980392156862745,
+        0.7137254901960784
+      ],
+      "linear_rgb": [
+        0.45641102318040466,
+        0.44520119451622786,
+        0.467783796112159
+      ],
+      "source_pixel": {
+        "x": 597,
+        "y": 369
+      },
+      "exact_pixel_count": 297,
+      "cluster_pixel_count": 11605,
+      "cluster_fraction": 0.0073782602945963545,
+      "quantization_bucket": 4
+    },
+    {
+      "hex": "#B2B3BA",
+      "rgb8": [
+        178,
+        179,
+        186
+      ],
+      "srgb_normalized": [
+        0.6980392156862745,
+        0.7019607843137254,
+        0.7294117647058823
+      ],
+      "linear_rgb": [
+        0.44520119451622786,
+        0.45078578283822346,
+        0.4910208498478356
+      ],
+      "source_pixel": {
+        "x": 538,
+        "y": 398
+      },
+      "exact_pixel_count": 1703,
+      "cluster_pixel_count": 33428,
+      "cluster_fraction": 0.021252950032552082,
+      "quantization_bucket": 5
+    },
+    {
+      "hex": "#B5B5BB",
+      "rgb8": [
+        181,
+        181,
+        187
+      ],
+      "srgb_normalized": [
+        0.7098039215686275,
+        0.7098039215686275,
+        0.7333333333333333
+      ],
+      "linear_rgb": [
+        0.4620769996544071,
+        0.4620769996544071,
+        0.4969329950608704
+      ],
+      "source_pixel": {
+        "x": 603,
+        "y": 413
+      },
+      "exact_pixel_count": 1383,
+      "cluster_pixel_count": 40886,
+      "cluster_fraction": 0.025994618733723957,
+      "quantization_bucket": 3
+    },
+    {
+      "hex": "#BAB8BC",
+      "rgb8": [
+        186,
+        184,
+        188
+      ],
+      "srgb_normalized": [
+        0.7294117647058823,
+        0.7215686274509804,
+        0.7372549019607844
+      ],
+      "linear_rgb": [
+        0.4910208498478356,
+        0.4793201831008268,
+        0.5028864580325687
+      ],
+      "source_pixel": {
+        "x": 636,
+        "y": 429
+      },
+      "exact_pixel_count": 484,
+      "cluster_pixel_count": 14025,
+      "cluster_fraction": 0.008916854858398438,
+      "quantization_bucket": 2
+    },
+    {
+      "hex": "#BCBABE",
+      "rgb8": [
+        188,
+        186,
+        190
+      ],
+      "srgb_normalized": [
+        0.7372549019607844,
+        0.7294117647058823,
+        0.7450980392156863
+      ],
+      "linear_rgb": [
+        0.5028864580325687,
+        0.4910208498478356,
+        0.5149176653765214
+      ],
+      "source_pixel": {
+        "x": 641,
+        "y": 433
+      },
+      "exact_pixel_count": 336,
+      "cluster_pixel_count": 30814,
+      "cluster_fraction": 0.019591013590494793,
+      "quantization_bucket": 1
+    },
+    {
+      "hex": "#D1C6C0",
+      "rgb8": [
+        209,
+        198,
+        192
+      ],
+      "srgb_normalized": [
+        0.8196078431372549,
+        0.7764705882352941,
+        0.7529411764705882
+      ],
+      "linear_rgb": [
+        0.6375968739940326,
+        0.5647115057049292,
+        0.5271151257058131
+      ],
+      "source_pixel": {
+        "x": 672,
+        "y": 452
+      },
+      "exact_pixel_count": 43,
+      "cluster_pixel_count": 27836,
+      "cluster_fraction": 0.017697652180989582,
+      "quantization_bucket": 0
+    }
+  ]
+}

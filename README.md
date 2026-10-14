@@ -9,6 +9,11 @@ Optional Day and Townhall voice adds a separate local LiveKit process; see
 
 The Unity town client is in [`native/`](native/README.md). Its guide covers the pinned Editor, macOS/Windows builds, server connection options, native Avatar publication and authoring tools. The Java server remains authoritative for both clients. Native Rooms use Woodland Village or Market Town and require the native KayKit Avatar publication; the browser gives explicit feedback when it encounters one. See the [two-town specification](docs/specs/two-generated-town-maps.md) for the current design and the [migration verification record](docs/verification/2026-10-13-native-migration.md) for historical acceptance evidence. The browser remains available while packaged acceptance, platform performance and retirement work are pending.
 
+The [snow-reference colour kit](docs/art/snow-reference/README.md) preserves the
+owner's image, every source colour and a labelled browsing palette for the planned
+Godot ground work. Its extraction command, integrity checks and provenance ship
+with this checkout; it is an authoring reference, not a runtime ground texture.
+
 ## Prerequisites
 
 Install the following before starting:
