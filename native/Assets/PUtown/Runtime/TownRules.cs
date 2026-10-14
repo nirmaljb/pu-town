@@ -29,6 +29,7 @@ namespace PUtown.Runtime
         public string MapId { get { return (string)Data["mapId"]; } }
         public bool TasksEnabled { get { return (bool)Data["tasksEnabled"]; } }
         public readonly float Units, ZSign, Width, Height, FootRadius, WalkSpeed;
+        private readonly Rect[] collision;
         public JArray Obstacles { get { return (JArray)Data["obstacles"]; } }
         public JArray Interiors { get { return (JArray)Data["interiors"]; } }
         public JArray Seats { get { return (JArray)Data["meeting"]["seats"]; } }
@@ -50,6 +51,8 @@ namespace PUtown.Runtime
                 var r = StrictProtocol.Obj(token); StrictProtocol.Text(r["id"]); StrictProtocol.Number(r["x"]); StrictProtocol.Number(r["y"]);
                 if (StrictProtocol.Number(r["width"]) <= 0 || StrictProtocol.Number(r["height"]) <= 0) throw new FormatException("Invalid town rectangle.");
             }
+            collision = Obstacles.Select(r => new Rect((float)r["x"] - FootRadius, (float)r["y"] - FootRadius,
+                (float)r["width"] + FootRadius * 2, (float)r["height"] + FootRadius * 2)).ToArray();
         }
         public Vector3 ToWorld(float x, float y, float elevation = 0) { return new Vector3(x / Units, elevation, y / Units * ZSign); }
         public Vector2 ToServer(Vector3 position) { return new Vector2(position.x * Units, position.z * Units / ZSign); }
@@ -66,7 +69,9 @@ namespace PUtown.Runtime
         public bool Walkable(float x, float y)
         {
             if (x < FootRadius || y < FootRadius || x > Width - FootRadius || y > Height - FootRadius) return false;
-            return !Obstacles.Any(r => x > (float)r["x"] - FootRadius && y > (float)r["y"] - FootRadius && x < (float)r["x"] + (float)r["width"] + FootRadius && y < (float)r["y"] + (float)r["height"] + FootRadius);
+            // Room-pinned geometry never changes; avoid JSON decoding and closures at every substep.
+            foreach (var r in collision) if (x > r.xMin && y > r.yMin && x < r.xMax && y < r.yMax) return false;
+            return true;
         }
         public bool Step(Vector2 from, Vector2 to) { return Walkable(to.x, to.y) && Walkable((from.x + to.x) / 2, (from.y + to.y) / 2); }
     }
@@ -94,14 +99,21 @@ namespace PUtown.Runtime
             { Position = authoritative; Facing = (string)self["facing"]; round = world.Round; correction = count; Active = true; sent = Position; sentFacing = Facing; }
             if (world.Paused || world.Phase == "night" && !((bool?)world.Developer?["nightMovement"] ?? false) || !controls)
             { Position = authoritative; Facing = (string)self["facing"]; Moving = false; return; }
-            Moving = direction.sqrMagnitude > 0.001f;
-            if (Moving)
+            var before = Position;
+            if (direction.sqrMagnitude > 0.001f)
             {
-                var step = direction.normalized * rules.WalkSpeed * Mathf.Min(deltaSeconds, .1f);
-                var next = new Vector2(Position.x + step.x, Position.y); if (rules.Step(Position, next)) Position = next;
-                next = new Vector2(Position.x, Position.y + step.y); if (rules.Step(Position, next)) Position = next;
+                // Catch up a short stall through collision-checked steps. Suspension stays bounded.
+                var duration = Mathf.Clamp(deltaSeconds, 0, .25f);
+                var steps = Mathf.Max(1, Mathf.CeilToInt(duration / .02f));
+                var step = direction.normalized * rules.WalkSpeed * duration / steps;
+                for (var i = 0; i < steps; i++)
+                {
+                    var next = new Vector2(Position.x + step.x, Position.y); if (rules.Step(Position, next)) Position = next;
+                    next = new Vector2(Position.x, Position.y + step.y); if (rules.Step(Position, next)) Position = next;
+                }
                 Facing = Mathf.Abs(step.x) > Mathf.Abs(step.y) ? (step.x < 0 ? "left" : "right") : (step.y < 0 ? "up" : "down");
             }
+            Moving = (Position - before).sqrMagnitude > .0001f;
             if ((sent != Position || sentFacing != Facing) && now - lastSentAt >= 66)
             { send((float)Math.Round(Position.x, 1), (float)Math.Round(Position.y, 1), Facing); sent = Position; sentFacing = Facing; lastSentAt = now; }
         }

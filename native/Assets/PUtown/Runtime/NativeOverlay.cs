@@ -27,7 +27,10 @@ namespace PUtown.Runtime
         private bool settingsOpen;
         private string signature = "", previousPhase;
         private string contentSignature = "", signatureCollectionId, signaturePreviewTarget;
-        private long signatureRevision = -1;
+        private JObject signatureGame, signatureTasks, signatureSetup, signatureDeveloper, signatureInspector;
+        private JArray signaturePracticeTargets;
+        private JObject[] signaturePlayers = Array.Empty<JObject>();
+        private string signatureRoomPhase;
         private bool signaturePreviewChosen;
         private int previousRound = -1, chatCount = -1;
         private string previewTarget;
@@ -94,7 +97,7 @@ namespace PUtown.Runtime
             settingsPanel = new VisualElement(); settingsPanel.style.position = Position.Absolute; settingsPanel.style.left = 0; settingsPanel.style.right = 0; settingsPanel.style.top = 0; settingsPanel.style.bottom = 0; settingsPanel.style.alignItems = Align.Center; settingsPanel.style.justifyContent = Justify.Center; settingsPanel.style.backgroundColor = new Color(.06f, .12f, .10f, .65f); root.Add(settingsPanel);
             BuildSettings(); ShowSettings(false);
         }
-        public void SetRules(TownRules value) { rules = value; signature = ""; signatureRevision = -1; }
+        public void SetRules(TownRules value) { rules = value; signature = ""; signatureRoomPhase = null; }
         public void EnableDeveloperEntry()
         {
             var paper = root.Q<VisualElement>("entry-paper");
@@ -121,10 +124,17 @@ namespace PUtown.Runtime
             taskTimer.style.display = string.IsNullOrEmpty(taskTimer.text) ? DisplayStyle.None : DisplayStyle.Flex;
             if (world.Phase != previousPhase || world.Round != previousRound) { previousPhase = world.Phase; previousRound = world.Round; previewTarget = null; previewChosen = false; }
             if (previewTarget != null && !Living(world).Any(p => (string)p["playerId"] == previewTarget) && !world.PracticeTargets.Any(p => (string)p["targetId"] == previewTarget)) { previewTarget = null; previewChosen = false; }
-            if (signatureRevision != world.Revision || signatureCollectionId != collection.CollectionId
+            // A position-only field tick cannot change this panel. Serialize only its actual inputs.
+            if (signatureGame != world.Game || signatureTasks != world.Tasks || signatureSetup != world.RoleSetup
+                    || signatureDeveloper != world.Developer || signatureInspector != world.Inspector
+                    || signaturePracticeTargets != world.PracticeTargets || signatureRoomPhase != world.RoomPhase
+                    || !signaturePlayers.SequenceEqual(world.Players.Values) || signatureCollectionId != collection.CollectionId
                     || signaturePreviewChosen != previewChosen || signaturePreviewTarget != previewTarget)
             {
-                signatureRevision = world.Revision; signatureCollectionId = collection.CollectionId;
+                signatureGame = world.Game; signatureTasks = world.Tasks; signatureSetup = world.RoleSetup;
+                signatureDeveloper = world.Developer; signatureInspector = world.Inspector;
+                signaturePracticeTargets = world.PracticeTargets; signatureRoomPhase = world.RoomPhase;
+                signaturePlayers = world.Players.Values.ToArray(); signatureCollectionId = collection.CollectionId;
                 signaturePreviewChosen = previewChosen; signaturePreviewTarget = previewTarget;
                 contentSignature = new JArray(world.RoomPhase, world.MapId, world.Game, world.Tasks, world.RoleSetup, new JArray(world.Players.Values),
                     collection.CollectionId, world.Developer, world.Inspector, world.PracticeTargets, previewChosen, previewTarget).ToString(Formatting.None);

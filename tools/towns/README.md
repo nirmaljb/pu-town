@@ -82,3 +82,21 @@ second target. These measurements exclude conversation and pauses.
 solid exterior alignment, outdoor/Task boundaries, all public/Seat access, road
 clearance, travel budget and publication freshness. The boundary tests also
 reject enabled workload, art/collision drift and a landmark inside a solid house.
+
+Unity's `GeneratedTownBuild.Prepare` makes one continuous, mitered paving strip
+per saved road and one elliptical square surface covering the retained Seats.
+Original stone textures use world-space UVs so stone scale stays consistent at
+bends. Woodland adds a cosmetic strip through the open west approach to the
+square, plus planting at the square's edges. These surfaces and plants add no
+Colliders and do not change `layout.json`, authoritative obstacles or reachability.
+
+The ground shader combines the existing meadow textures with fine procedural
+detail and a derived 512×512 mask for earth shoulders beside paving and building
+foundations. The mask is a presentation input, never a collision map. Original
+asset provenance and licenses remain unchanged.
+
+Generated mesh `.asset` files in `native/Assets/Art/Quaternius/TownDerivedMeshes`
+and town Garden prefabs are local build artifacts. Retain their `.meta` files and
+the small mask PNGs/materials; regeneration upserts meshes while keeping GUIDs.
+Run the native `BuildAndReview` method for actual camera renders of both towns,
+and inspect Woodland's square and west approach before committing a visual change.

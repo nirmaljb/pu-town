@@ -1,0 +1,270 @@
+{
+  "version": 2,
+  "kind": "native-render-loop-observation",
+  "captureStartedUtc": "2026-10-14T07:13:05.9111940Z",
+  "captureCompletedUtc": "2026-10-14T07:14:05.9446530Z",
+  "warmupSeconds": 5.0,
+  "requestedCaptureSeconds": 60.0,
+  "elapsedCaptureSeconds": 60.008518749999993,
+  "frameSampleCount": 3500,
+  "sumOfReportedFrameIntervalsSeconds": 60.990664471872151,
+  "focusedFrameSampleCount": 344,
+  "unfocusedFrameSampleCount": 3156,
+  "observedFrameSamplesPerElapsedSecond": 58.325052390999076,
+  "frameDurationMilliseconds": {
+    "mean": 17.425904134820616,
+    "p50": 16.666362062096596,
+    "p95": 16.666488721966743,
+    "p99": 17.07582056522369
+  },
+  "instantaneousFramesPerSecond": {
+    "mean": 59.935326753109912,
+    "p50": 60.001096596493952,
+    "p95": 60.001297770197887,
+    "p99": 60.7670977847061
+  },
+  "frameTiming": {
+    "wallClock": {
+      "sampleCount": 3500,
+      "elapsedSeconds": 60.00851875000005,
+      "framesPerSecond": 58.325052390999019,
+      "p50Milliseconds": 16.696625000001575,
+      "p95Milliseconds": 17.974460400001391,
+      "p99Milliseconds": 20.828476910001815,
+      "maximumMilliseconds": 491.63016699999673,
+      "framesOver100Milliseconds": 2
+    },
+    "reported": {
+      "sampleCount": 3500,
+      "elapsedSeconds": 60.990664471872151,
+      "framesPerSecond": 57.385831590900935,
+      "p50Milliseconds": 16.666362062096596,
+      "p95Milliseconds": 16.666488721966743,
+      "p99Milliseconds": 17.07582056522369,
+      "maximumMilliseconds": 1574.8919248580933,
+      "framesOver100Milliseconds": 5
+    },
+    "focused": {
+      "sampleCount": 345,
+      "elapsedSeconds": 6.7378157919999992,
+      "framesPerSecond": 51.203536969596044,
+      "p50Milliseconds": 16.673457999999641,
+      "p95Milliseconds": 17.695867000000476,
+      "p99Milliseconds": 35.371131480001736,
+      "maximumMilliseconds": 491.63016699999673,
+      "framesOver100Milliseconds": 2
+    },
+    "unfocused": {
+      "sampleCount": 3155,
+      "elapsedSeconds": 53.270702958000065,
+      "framesPerSecond": 59.225800014080534,
+      "p50Milliseconds": 16.699083999998976,
+      "p95Milliseconds": 17.99231670000054,
+      "p99Milliseconds": 20.671890000001842,
+      "maximumMilliseconds": 77.816541000000683,
+      "framesOver100Milliseconds": 0
+    }
+  },
+  "profilerMetrics": [
+    {
+      "name": "Main Thread",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 489668375,
+        "mean": 17017741.322857175,
+        "last": 16667125
+      }
+    },
+    {
+      "name": "GC Allocated In Frame",
+      "unit": "bytes",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 6328,
+        "maximum": 253853,
+        "mean": 15262.673428571446,
+        "last": 6345
+      }
+    },
+    {
+      "name": "Draw Calls Count",
+      "unit": "count",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 0,
+        "mean": 0.0,
+        "last": 0
+      }
+    },
+    {
+      "name": "PUtown.ApplyFrame",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 134458,
+        "mean": 3064.4534285714321,
+        "last": 1750
+      }
+    },
+    {
+      "name": "PUtown.Movement",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 599334,
+        "mean": 9857.4408571428576,
+        "last": 7709
+      }
+    },
+    {
+      "name": "PUtown.Avatars",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 3100584,
+        "mean": 137833.37371428605,
+        "last": 100334
+      }
+    },
+    {
+      "name": "PUtown.Interface",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 4728500,
+        "mean": 175889.67142857102,
+        "last": 150667
+      }
+    },
+    {
+      "name": "PUtown.Occlusion",
+      "unit": "nanoseconds",
+      "available": true,
+      "values": {
+        "sampleCount": 3500,
+        "minimum": 0,
+        "maximum": 1915084,
+        "mean": 315176.04485714174,
+        "last": 393875
+      }
+    }
+  ],
+  "sustainedFramesPerSecondFromMeanInterval": 57.385831590900928,
+  "unityAllocatorMemoryBytes": {
+    "allocated": {
+      "sampleCount": 3500,
+      "minimum": 146312419,
+      "maximum": 147480201,
+      "mean": 147324180.94714314,
+      "last": 147477286
+    },
+    "reserved": {
+      "sampleCount": 3500,
+      "minimum": 586153984,
+      "maximum": 590348288,
+      "mean": 590176920.72228456,
+      "last": 590348288
+    }
+  },
+  "machine": {
+    "platform": "OSXPlayer",
+    "unityVersion": "6000.6.0f1",
+    "applicationVersion": "1.0",
+    "developmentBuild": true,
+    "operatingSystem": "Mac OS X 26.2.0",
+    "deviceModel": "MacBookAir10,1",
+    "cpu": "Apple M1",
+    "logicalProcessorCount": 8,
+    "reportedProcessorFrequencyMHz": 2400,
+    "gpu": "Apple M1",
+    "graphicsApi": "Metal",
+    "graphicsDriverVersion": "Metal",
+    "reportedSystemMemoryMB": 8192,
+    "reportedGraphicsMemoryMB": 5461
+  },
+  "observedConfigurations": [
+    {
+      "observedAtSeconds": 0.426654874999997,
+      "screenWidthPixels": 1280,
+      "screenHeightPixels": 800,
+      "fullscreen": false,
+      "fullscreenMode": "Windowed",
+      "applicationIsFocused": true,
+      "graphicsPreset": "Balanced",
+      "graphicsPresetIndex": 1,
+      "unityQualityLevelIndex": 5,
+      "unityQualityLevelName": "Ultra",
+      "shadows": "HardOnly",
+      "shadowResolution": "Low",
+      "shadowDistanceUnityUnits": 20.0,
+      "shadowCascades": 1,
+      "pixelLightCount": 1,
+      "realtimeReflectionProbes": false,
+      "lodBias": 1.0,
+      "maximumLodLevel": 0,
+      "antiAliasingSamples": 2,
+      "vSyncCount": 1,
+      "applicationTargetFrameRate": 60
+    },
+    {
+      "observedAtSeconds": 6.7378157919999992,
+      "screenWidthPixels": 1280,
+      "screenHeightPixels": 800,
+      "fullscreen": false,
+      "fullscreenMode": "Windowed",
+      "applicationIsFocused": false,
+      "graphicsPreset": "Balanced",
+      "graphicsPresetIndex": 1,
+      "unityQualityLevelIndex": 5,
+      "unityQualityLevelName": "Ultra",
+      "shadows": "HardOnly",
+      "shadowResolution": "Low",
+      "shadowDistanceUnityUnits": 20.0,
+      "shadowCascades": 1,
+      "pixelLightCount": 1,
+      "realtimeReflectionProbes": false,
+      "lodBias": 1.0,
+      "maximumLodLevel": 0,
+      "antiAliasingSamples": 2,
+      "vSyncCount": 1,
+      "applicationTargetFrameRate": 60
+    }
+  ],
+  "publicPhaseIntervals": [
+    {
+      "roomPhase": "playing",
+      "gamePhase": "day",
+      "firstObservedAtSeconds": 0.426654874999997,
+      "lastObservedAtSeconds": 60.008518749999993,
+      "sampleCount": 3500,
+      "roomMembershipCountMinimum": 10,
+      "roomMembershipCountMaximum": 10,
+      "gameRosterCountMinimum": 10,
+      "gameRosterCountMaximum": 10
+    }
+  ],
+  "measurementNotes": [
+    "Frame intervals are Unity unscaledDeltaTime samples from the rendered application loop and include frame pacing; they are not GPU execution timings.",
+    "Instantaneous FPS percentiles summarize reciprocal frame intervals; sustained FPS is the reciprocal of the mean frame interval.",
+    "Observed frame samples per elapsed second divides the valid frame sample count by the measured capture wall duration; focus counts and configuration observations distinguish foreground and background samples.",
+    "frameTiming uses consecutive monotonic-clock samples, retaining stalls omitted by Unity deltaTime. Focus-changing intervals belong to their starting focus state. Focus summaries alone do not establish a controlled workload comparison.",
+    "profilerMetrics samples the last completed Unity recorder frame; unavailable metrics have no samples. Main Thread includes engine work and waits, and is not GPU execution time. Counters may be absent in release Players.",
+    "Memory observations use Profiler.GetTotalAllocatedMemoryLong and Profiler.GetTotalReservedMemoryLong; they describe Unity allocator memory, not operating-system process RSS or total media/driver memory.",
+    "This opt-in observer adds sampling overhead. Public phase/count observations come from frame-applied Room and Game state; no identity, credential, Role, choice, chat, position or private payload is captured.",
+    "A report establishes only the recorded machine, scene phases, settings and Player counts; it does not establish ten-Player voice-load or cross-platform acceptance."
+  ]
+}

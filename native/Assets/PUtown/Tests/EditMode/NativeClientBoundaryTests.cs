@@ -377,6 +377,34 @@ namespace PUtown.Tests
             finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
         }
         [Test]
+        public void ShortStallPreservesPublishedWalkingSpeed()
+        {
+            var town = NativeTownMaps.Load("woodland"); var world = new NativeWorld(); var prediction = new LocalPrediction();
+            world.Apply(StrictProtocol.Decode(Snapshot().ToString()), 0); world.Apply(StrictProtocol.Decode(Game().ToString()), 0);
+            world.Apply(StrictProtocol.Decode(StrictProtocol.Command("field_state", "round", 1, "players", new JArray(),
+                "self", new JObject { ["x"] = 2999.36, ["y"] = 2870.54, ["facing"] = "down", ["correction"] = 0 }).ToString()), 0);
+            prediction.Update(world, town, Vector2.right, .25f, 250, true, (_, __, ___) => { });
+            Assert.That(prediction.Position.x, Is.EqualTo(3055.61f).Within(.01f));
+            Assert.That(prediction.Position.y, Is.EqualTo(2870.54f).Within(.01f));
+        }
+        [Test]
+        public void StalledWalkStopsAtASolidHouseAndSuspensionRemainsBounded()
+        {
+            var town = NativeTownMaps.Load("woodland"); var world = new NativeWorld(); var prediction = new LocalPrediction();
+            world.Apply(StrictProtocol.Decode(Snapshot().ToString()), 0); world.Apply(StrictProtocol.Decode(Game().ToString()), 0);
+            world.Apply(StrictProtocol.Decode(StrictProtocol.Command("field_state", "round", 1, "players", new JArray(),
+                "self", new JObject { ["x"] = 2500, ["y"] = 3400, ["facing"] = "right", ["correction"] = 0 }).ToString()), 0);
+            prediction.Update(world, town, Vector2.right, .25f, 250, true, (_, __, ___) => { });
+            // Workshop 1 starts at 2522.28, with 14 units of feet clearance.
+            Assert.That(prediction.Position.x, Is.LessThanOrEqualTo(2508.28f));
+            prediction.Update(world, town, Vector2.right, .25f, 500, true, (_, __, ___) => { });
+            Assert.That(prediction.Moving, Is.False, "A held key at a solid wall should not keep walking animation active.");
+            var before = prediction.Position;
+            prediction.Update(world, town, Vector2.left, 5, 5500, true, (_, __, ___) => { });
+            Assert.That(before.x - prediction.Position.x, Is.EqualTo(56.25f).Within(.01f));
+            Assert.That((float)world.Field["self"]["x"], Is.EqualTo(2500), "Prediction cannot alter the accepted field.");
+        }
+        [Test]
         public void NativeTownMappingAndPredictionAdoptServerCorrectionAndFreezeNight()
         {
             var campus = new TownRules(Resources.Load<TextAsset>("Towns/woodland").text); var world = new NativeWorld(); var prediction = new LocalPrediction(); var sent = new List<Vector2>();

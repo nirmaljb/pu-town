@@ -71,8 +71,9 @@ namespace PUtown.Editor
 
         public static void BuildMac() => Build(BuildTarget.StandaloneOSX, "Builds/macOS/PU Town.app");
         public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/Windows/PU Town.exe");
+        public static void BuildMacProfile() => Build(BuildTarget.StandaloneOSX, "Builds/Profile/PU Town.app", BuildOptions.Development);
 
-        private static void Build(BuildTarget target, string path)
+        private static void Build(BuildTarget target, string path, BuildOptions options = BuildOptions.None)
         {
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, target))
                 throw new InvalidOperationException("Missing build support for " + target);
@@ -81,7 +82,7 @@ namespace PUtown.Editor
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { ScenePath }, locationPathName = path,
-                target = target, options = BuildOptions.None
+                target = target, options = options
             });
             if (report.summary.result != BuildResult.Succeeded)
                 throw new InvalidOperationException("Native build failed: " + report.summary.result);

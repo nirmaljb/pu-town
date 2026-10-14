@@ -6,12 +6,18 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using Unity.Profiling;
 
 namespace PUtown.Runtime
 {
     [DefaultExecutionOrder(-1000)]
     public sealed class NativeGameClient : MonoBehaviour
     {
+        private static readonly ProfilerMarker ApplyFrameMarker = new ProfilerMarker("PUtown.ApplyFrame");
+        private static readonly ProfilerMarker MovementMarker = new ProfilerMarker("PUtown.Movement");
+        private static readonly ProfilerMarker AvatarsMarker = new ProfilerMarker("PUtown.Avatars");
+        private static readonly ProfilerMarker InterfaceMarker = new ProfilerMarker("PUtown.Interface");
+        private static readonly ProfilerMarker OcclusionMarker = new ProfilerMarker("PUtown.Occlusion");
         public string ServerEndpoint = "ws://localhost:8080/ws/game";
         public GameSession Session { get; private set; }
         public TownRules Town { get; private set; }
@@ -63,7 +69,8 @@ namespace PUtown.Runtime
         {
             if (Session == null) return;
             // Every queued network/lifecycle event applies before world objects, presentation or this frame's input.
-            Session.ApplyFrame(); var world = Session.World; var now = GameSession.MonotonicMilliseconds();
+            using (ApplyFrameMarker.Auto()) Session.ApplyFrame();
+            var world = Session.World; var now = GameSession.MonotonicMilliseconds();
             if (world.RoomId != null && NativeTownMaps.Supports(world.MapId) && Town.MapId != world.MapId && assetsError == null)
             {
                 Session.AssetsReady = false;
@@ -95,11 +102,12 @@ namespace PUtown.Runtime
                 var forward = Vector3.ProjectOnPlane(followCamera.transform.forward, Vector3.up).normalized; var right = Vector3.ProjectOnPlane(followCamera.transform.right, Vector3.up).normalized;
                 var cameraRelative = forward * y + right * x; input = new Vector2(cameraRelative.x, cameraRelative.z / Town.ZSign);
             }
-            local.Update(world, Town, input, Time.unscaledDeltaTime, now, Session.CanControl && !overlay.Typing, (x, y, facing) => Session.Control("move", "x", x, "y", y, "facing", facing));
+            using (MovementMarker.Auto()) local.Update(world, Town, input, Time.unscaledDeltaTime, now, Session.CanControl && !overlay.Typing, (x, y, facing) => Session.Control("move", "x", x, "y", y, "facing", facing));
             if (local.Active) OwnAvatarPosition = Town.ToWorld(local.Position.x, local.Position.y);
             else if (world.Players.TryGetValue(world.SelfPlayerId ?? "", out var own)) OwnAvatarPosition = Town.ToWorld((float)own["x"], (float)own["y"]);
-            if (Session.AssetsReady) actors.Render(world, collection, local, followCamera, Time.unscaledDeltaTime); else actors.Dispose();
-            overlay.Render(now, assetsError);
+            using (AvatarsMarker.Auto())
+            { if (Session.AssetsReady) actors.Render(world, collection, local, followCamera, Time.unscaledDeltaTime); else actors.Dispose(); }
+            using (InterfaceMarker.Auto()) overlay.Render(now, assetsError);
             audio.Update(world, Session.CanControl, VoiceControls?.Enabled ?? false);
             if (VoiceControls != null)
             {
@@ -112,7 +120,7 @@ namespace PUtown.Runtime
             var distance = meeting ? Mathf.Max(zoom, 10.5f) : zoom;
             var cameraTarget = OwnAvatarPosition + Vector3.up * .85f - followCamera.transform.forward * distance;
             followCamera.transform.position = NativePreferences.ReducedMotion ? cameraTarget : Vector3.SmoothDamp(followCamera.transform.position, cameraTarget, ref cameraVelocity, .15f, float.PositiveInfinity, Time.unscaledDeltaTime);
-            townScene.ApplyOcclusion(followCamera, OwnAvatarPosition + Vector3.up * .8f, Time.unscaledDeltaTime, Session.AssetsReady);
+            using (OcclusionMarker.Auto()) townScene.ApplyOcclusion(followCamera, OwnAvatarPosition + Vector3.up * .8f, Time.unscaledDeltaTime, Session.AssetsReady);
             var night = world.Phase == "night"; sunlight.color = Color.Lerp(sunlight.color, night ? new Color(.38f, .54f, 1) : new Color(1, .96f, .87f), Time.unscaledDeltaTime * 2);
             sunlight.intensity = Mathf.Lerp(sunlight.intensity, night ? .3f : .95f, Time.unscaledDeltaTime * 2);
             RenderSettings.ambientLight = night ? new Color(.17f, .24f, .42f) : new Color(.48f, .55f, .52f); followCamera.backgroundColor = night ? new Color(.05f, .10f, .19f) : new Color(.69f, .79f, .77f);

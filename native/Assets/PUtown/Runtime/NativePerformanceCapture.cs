@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Unity.Profiling;
 
 namespace PUtown.Runtime
 {
@@ -15,6 +16,8 @@ namespace PUtown.Runtime
     public sealed class NativePerformanceCapture : MonoBehaviour
     {
         private const double WarmupSeconds = 5;
+        private readonly FrameTimingReport timings = new FrameTimingReport();
+        private readonly List<RecorderMetric> metrics = new List<RecorderMetric>();
         private readonly List<double> frameMilliseconds = new List<double>(4096);
         private readonly List<PublicPhaseInterval> phases = new List<PublicPhaseInterval>();
         private readonly List<JObject> configurations = new List<JObject>();
@@ -60,10 +63,19 @@ namespace PUtown.Runtime
             {
                 if (time < warmupEnds) return;
                 capturing = true; captureStarts = time; startedUtc = DateTime.UtcNow;
+                timings.Begin(time, Application.isFocused);
+                metrics.Add(new RecorderMetric(ProfilerCategory.Internal, "Main Thread", "nanoseconds"));
+                metrics.Add(new RecorderMetric(ProfilerCategory.Memory, "GC Allocated In Frame", "bytes"));
+                metrics.Add(new RecorderMetric(ProfilerCategory.Render, "Draw Calls Count", "count"));
+                if (Debug.isDebugBuild)
+                    foreach (var marker in new[] { "PUtown.ApplyFrame", "PUtown.Movement", "PUtown.Avatars", "PUtown.Interface", "PUtown.Occlusion" })
+                        metrics.Add(new RecorderMetric(ProfilerCategory.Scripts, marker, "nanoseconds"));
                 // The next frame's unscaledDeltaTime lies entirely after the warmup boundary.
                 return;
             }
             var frameMs = Time.unscaledDeltaTime * 1000d;
+            timings.Record(time, frameMs, Application.isFocused);
+            foreach (var metric in metrics) metric.Observe();
             if (frameMs > 0 && !double.IsInfinity(frameMs) && !double.IsNaN(frameMs))
             {
                 frameMilliseconds.Add(frameMs);
@@ -120,13 +132,14 @@ namespace PUtown.Runtime
             var fps = frameMilliseconds.Select(value => 1000d / value).OrderBy(value => value).ToArray();
             var report = new JObject
             {
-                ["version"] = 1, ["kind"] = "native-render-loop-observation",
+                ["version"] = 2, ["kind"] = "native-render-loop-observation",
                 ["captureStartedUtc"] = startedUtc.ToString("O", CultureInfo.InvariantCulture), ["captureCompletedUtc"] = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture),
                 ["warmupSeconds"] = WarmupSeconds, ["requestedCaptureSeconds"] = duration, ["elapsedCaptureSeconds"] = elapsed,
                 ["frameSampleCount"] = frames.Length, ["sumOfReportedFrameIntervalsSeconds"] = frameMilliseconds.Sum() / 1000d,
                 ["focusedFrameSampleCount"] = focusedFrames, ["unfocusedFrameSampleCount"] = unfocusedFrames,
                 ["observedFrameSamplesPerElapsedSecond"] = elapsed <= 0 ? JValue.CreateNull() : new JValue(frames.Length / elapsed),
                 ["frameDurationMilliseconds"] = Distribution(frames), ["instantaneousFramesPerSecond"] = Distribution(fps),
+                ["frameTiming"] = timings.Report(), ["profilerMetrics"] = new JArray(metrics.Select(metric => metric.Report())),
                 ["sustainedFramesPerSecondFromMeanInterval"] = frames.Length == 0 ? JValue.CreateNull() : new JValue(1000d / frames.Average()),
                 ["unityAllocatorMemoryBytes"] = new JObject { ["allocated"] = allocated.Report(), ["reserved"] = reserved.Report() },
                 ["machine"] = new JObject
@@ -143,6 +156,8 @@ namespace PUtown.Runtime
                     "Frame intervals are Unity unscaledDeltaTime samples from the rendered application loop and include frame pacing; they are not GPU execution timings.",
                     "Instantaneous FPS percentiles summarize reciprocal frame intervals; sustained FPS is the reciprocal of the mean frame interval.",
                     "Observed frame samples per elapsed second divides the valid frame sample count by the measured capture wall duration; focus counts and configuration observations distinguish foreground and background samples.",
+                    "frameTiming uses consecutive monotonic-clock samples, retaining stalls omitted by Unity deltaTime. Focus-changing intervals belong to their starting focus state. Focus summaries alone do not establish a controlled workload comparison.",
+                    "profilerMetrics samples the last completed Unity recorder frame; unavailable metrics have no samples. Main Thread includes engine work and waits, and is not GPU execution time. Counters may be absent in release Players.",
                     "Memory observations use Profiler.GetTotalAllocatedMemoryLong and Profiler.GetTotalReservedMemoryLong; they describe Unity allocator memory, not operating-system process RSS or total media/driver memory.",
                     "This opt-in observer adds sampling overhead. Public phase/count observations come from frame-applied Room and Game state; no identity, credential, Role, choice, chat, position or private payload is captured.",
                     "A report establishes only the recorded machine, scene phases, settings and Player counts; it does not establish ten-Player voice-load or cross-platform acceptance."
@@ -156,6 +171,26 @@ namespace PUtown.Runtime
             }
             catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
             { Debug.LogWarning("Native benchmark capture could not write its output file (" + e.GetType().Name + ")."); }
+            foreach (var metric in metrics) metric.Dispose();
+        }
+
+        private void OnDestroy() { foreach (var metric in metrics) metric.Dispose(); }
+
+        private sealed class RecorderMetric : IDisposable
+        {
+            private ProfilerRecorder recorder;
+            private readonly MemoryRange values = new MemoryRange();
+            private readonly string name, unit;
+            private readonly bool available;
+            private bool disposed;
+            public RecorderMetric(ProfilerCategory category, string name, string unit)
+            {
+                this.name = name; this.unit = unit;
+                recorder = ProfilerRecorder.StartNew(category, name, 1); available = recorder.Valid;
+            }
+            public void Observe() { if (!disposed && recorder.Valid && recorder.Count > 0) values.Observe(recorder.LastValue); }
+            public JObject Report() => new JObject { ["name"] = name, ["unit"] = unit, ["available"] = available, ["values"] = values.Report() };
+            public void Dispose() { if (disposed) return; recorder.Dispose(); disposed = true; }
         }
 
         private static JObject Distribution(double[] sorted)

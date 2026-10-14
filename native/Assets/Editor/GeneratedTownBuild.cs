@@ -32,7 +32,7 @@ namespace PUtown.Editor
             AssetDatabase.Refresh(); Descriptions.Clear(); Materials.Clear();
             Directory.CreateDirectory(Art + "TownMaterials"); Directory.CreateDirectory(Art + "TownDerivedTextures");
             Directory.CreateDirectory(ResourcesPath);
-            foreach (var name in new[] { "PUtown/Town Ground", "PUtown/Quaternius Foliage", "Standard" })
+            foreach (var name in new[] { "PUtown/Town Ground", "PUtown/Town Paving", "PUtown/Quaternius Foliage", "Standard" })
             {
                 var shader = Shader.Find(name);
                 if (shader == null || ShaderUtil.ShaderHasError(shader)) throw new InvalidOperationException("Town shader must compile: " + name);
@@ -189,29 +189,105 @@ namespace PUtown.Editor
             var path = Art + "TownMaterials/" + mapId + "-Meadow.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (material == null) { material = new Material(Shader.Find("PUtown/Town Ground")); AssetDatabase.CreateAsset(material, path); }
-            material.SetColor("_Color", Html(mapId == "woodland" ? "#719654" : "#929176"));
-            material.SetColor("_ShadeColor", Html(mapId == "woodland" ? "#507249" : "#757e62")); material.SetColor("_DryColor", Html("#a59b73"));
+            material.SetColor("_Color", Html(mapId == "woodland" ? "#748652" : "#929176"));
+            material.SetColor("_ShadeColor", Html(mapId == "woodland" ? "#4e6240" : "#757e62")); material.SetColor("_DryColor", Html("#9c8b6d"));
             material.SetTexture("_SoilTex", Texture("Village", "T_UnevenBrick_BaseColor.png")); material.enableInstancing = true;
+            material.SetTexture("_SurfaceMask", SurfaceMask());
+            material.SetVector("_TownSize", new Vector4((float)rules["width"] / units, (float)rules["height"] / units * zSign, 0, 0));
+            EditorUtility.SetDirty(material);
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane); ground.name = "Meadow"; ground.transform.SetParent(root, false);
             ground.transform.position = World((float)rules["width"] / 2, (float)rules["height"] / 2, -.025f);
             ground.transform.localScale = new Vector3((float)rules["width"] / units / 10, 1, (float)rules["height"] / units / 10);
             ground.GetComponent<Renderer>().sharedMaterial = material; Object.DestroyImmediate(ground.GetComponent<Collider>());
         }
+
+        private static Texture2D SurfaceMask()
+        {
+            const int size = 512;
+            var meeting = rules["meeting"];
+            var segments = new List<(Vector2 from, Vector2 vector, float halfWidth)>();
+            foreach (JObject route in PresentationRoutes())
+            {
+                var points = (JArray)route["points"];
+                for (var i = 1; i < points.Count; i++)
+                {
+                    var from = new Vector2((float)points[i - 1]["x"], (float)points[i - 1]["y"]);
+                    var to = new Vector2((float)points[i]["x"], (float)points[i]["y"]);
+                    segments.Add((from, to - from, (float)route["width"] / 2));
+                }
+            }
+            var buildings = ((JArray)rules["buildings"]).Select(b => new Rect((float)b["x"], (float)b["y"], (float)b["width"], (float)b["height"])).ToArray();
+            var width = (float)rules["width"]; var height = (float)rules["height"];
+            var centre = new Vector2((float)meeting["x"], (float)meeting["y"]);
+            var radius = new Vector2((float)meeting["radiusX"] + 65, (float)meeting["radiusY"] + 65);
+            var pixels = new Color32[size * size];
+            for (var y = 0; y < size; y++) for (var x = 0; x < size; x++)
+            {
+                var point = new Vector2((x + .5f) / size * width, (y + .5f) / size * height);
+                var shoulder = 0f;
+                foreach (var segment in segments)
+                {
+                    var nearest = segment.from + segment.vector * Mathf.Clamp01(Vector2.Dot(point - segment.from, segment.vector) / segment.vector.sqrMagnitude);
+                    shoulder = Mathf.Max(shoulder, 1 - Mathf.InverseLerp(segment.halfWidth + 5, segment.halfWidth + 60, Vector2.Distance(point, nearest)));
+                }
+                var ellipse = new Vector2((point.x - centre.x) / radius.x, (point.y - centre.y) / radius.y);
+                shoulder = Mathf.Max(shoulder, 1 - Mathf.InverseLerp(1, 1.2f, ellipse.magnitude));
+                foreach (var building in buildings)
+                {
+                    var dx = Mathf.Max(Mathf.Max(building.xMin - point.x, 0), point.x - building.xMax);
+                    var dy = Mathf.Max(Mathf.Max(building.yMin - point.y, 0), point.y - building.yMax);
+                    shoulder = Mathf.Max(shoulder, 1 - Mathf.InverseLerp(5, 38, Mathf.Sqrt(dx * dx + dy * dy)));
+                }
+                pixels[y * size + x] = new Color32((byte)(shoulder * 255), 0, 0, 255);
+            }
+            var pathName = Art + "TownDerivedTextures/" + mapId + "-SurfaceMask.png";
+            WriteTexture(size, size, pixels, pathName); AssetDatabase.ImportAsset(pathName);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(pathName);
+            importer.sRGBTexture = false; importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear; importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport(); return AssetDatabase.LoadAssetAtPath<Texture2D>(pathName);
+        }
         private static void Routes(Transform root)
         {
             var paths = Group(root, "Town streets").transform;
-            foreach (JObject route in (JArray)rules["routes"])
+            var material = PavingMaterial(false);
+            foreach (JObject route in PresentationRoutes())
             {
-                var group = Group(paths, (string)route["name"]).transform; var points = (JArray)route["points"];
-                for (var i = 1; i < points.Count; i++)
-                {
-                    var a = World((float)points[i - 1]["x"], (float)points[i - 1]["y"]); var b = World((float)points[i]["x"], (float)points[i]["y"]);
-                    var vector = b - a; if (vector.magnitude < .01f) continue;
-                    var count = Mathf.Max(1, Mathf.CeilToInt(vector.magnitude / 1.4f)); var length = vector.magnitude / count;
-                    for (var tile = 0; tile < count; tile++) Place("Village", "Floor_UnevenBrick", group, "Street paving", Vector3.Lerp(a, b, (tile + .5f) / count) + Vector3.up * .012f,
-                        new Vector3((float)route["width"] / units, .035f, length + .015f), Mathf.Atan2(vector.x, vector.z) * Mathf.Rad2Deg);
-                }
+                var group = Group(paths, (string)route["name"]).transform;
+                var points = ((JArray)route["points"]).Select(p => World((float)p["x"], (float)p["y"], .012f)).ToArray();
+                TownPavingBuild.Street(group, "Street paving", mapId + "-" + (string)route["id"], points, (float)route["width"] / units, material);
             }
+        }
+
+        private static Material PavingMaterial(bool square)
+        {
+            var path = Art + "TownMaterials/" + mapId + (square ? "-Square.mat" : "-Streets.mat");
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            var shader = Shader.Find("PUtown/Town Paving");
+            if (material == null) { material = new Material(shader); AssetDatabase.CreateAsset(material, path); }
+            material.shader = shader; material.enableInstancing = true;
+            material.SetTexture("_MainTex", Texture("Village", "T_UnevenBrick_BaseColor.png"));
+            material.SetTexture("_BumpMap", Texture("Village", "T_UnevenBrick_Normal.png"));
+            material.SetColor("_Color", Html(mapId == "woodland" ? "#b4b9aa" : "#cbc2ae"));
+            material.SetFloat("_Tiling", 1);
+            var meeting = rules["meeting"]; var centre = World((float)meeting["x"], (float)meeting["y"]);
+            material.SetVector("_Square", square ? new Vector4(centre.x, centre.z, (float)meeting["radiusX"] / units + .65f, (float)meeting["radiusY"] / units + .65f) : Vector4.zero);
+            EditorUtility.SetDirty(material); return material;
+        }
+
+        private static JArray PresentationRoutes()
+        {
+            var routes = (JArray)rules["routes"].DeepClone();
+            if (mapId != "woodland") return routes;
+            // Connect the preserved west road to the square through its already-open meadow.
+            var point = routes[0]["points"][0]; var meeting = rules["meeting"];
+            var centre = new Vector2((float)meeting["x"], (float)meeting["y"]);
+            var offset = new Vector2((float)point["x"], (float)point["y"]) - centre;
+            var radius = new Vector2((float)meeting["radiusX"] + 65, (float)meeting["radiusY"] + 65);
+            var edge = centre + offset * (.96f / new Vector2(offset.x / radius.x, offset.y / radius.y).magnitude);
+            routes.Add(new JObject { ["id"] = "square-west", ["name"] = "Square west approach", ["width"] = 150,
+                ["points"] = new JArray(point.DeepClone(), new JObject { ["x"] = edge.x, ["y"] = edge.y }) });
+            return routes;
         }
         private static void Buildings(Transform root)
         {
@@ -255,8 +331,7 @@ namespace PUtown.Editor
             var radius = (float)meeting["radiusX"] / units + .65f;
             var shortRadius = (float)meeting["radiusY"] / units + .65f;
             var centre = World((float)meeting["x"], (float)meeting["y"]);
-            for (var x = -radius; x < radius; x += .9f) for (var z = -radius; z < radius; z += .9f)
-                if (Mathf.Pow((x + .45f) / radius, 2) + Mathf.Pow((z + .45f) / shortRadius, 2) < 1) Place("Village", "Floor_UnevenBrick", group, "Meeting paving", centre + new Vector3(x + .45f, .025f, z + .45f), new Vector3(.92f, .04f, .92f));
+            TownPavingBuild.Square(group, centre + Vector3.up * .018f, radius, shortRadius, PavingMaterial(true), mapId);
             foreach (JObject seat in (JArray)rules["meeting"]["seats"])
             {
                 var x = (float)seat["x"]; var y = (float)seat["y"]; var position = World(x, y);
@@ -308,8 +383,22 @@ namespace PUtown.Editor
                 }
                 else if (kind == "square")
                 {
-                    Grounded("Props", "Bench", group, "Square bench", x - 105, y + 105, new Vector3(1.4f, .72f, .65f), 90);
-                    Grounded("Nature", "Bush_Common_Flowers", group, "Square flowers", x + 80, y + 95, new Vector3(1, .6f, 1));
+                    if (mapId != "woodland")
+                    {
+                        Grounded("Props", "Bench", group, "Square bench", x - 105, y + 105, new Vector3(1.4f, .72f, .65f), 90);
+                        Grounded("Nature", "Bush_Common_Flowers", group, "Square flowers", x + 80, y + 95, new Vector3(1, .6f, 1));
+                        continue;
+                    }
+                    var edge = (float)rules["meeting"]["radiusX"] + 105;
+                    Grounded("Props", "Bench", group, "Square bench", x - edge, y + 140, new Vector3(1.4f, .72f, .65f), 90);
+                    var garden = Group(group, "Vegetation:square-garden").transform;
+                    foreach (var side in new[] { -1, 1 })
+                    {
+                        var gardenY = y - (side < 0 ? 340 : 95);
+                        Grounded("Nature", "Bush_Common_Flowers", garden, "Square flowers", x + side * edge, gardenY, new Vector3(.95f, .65f, .95f), side * 35);
+                        Grounded("Nature", "Grass_Common_Short", garden, "Square meadow edge", x + side * (edge + 45), gardenY + 45, new Vector3(.7f, .38f, .7f));
+                        Grounded("Nature", "Flower_4_Group", garden, "Square wildflowers", x + side * (edge - 10), gardenY + 70, new Vector3(.55f, .4f, .55f), 20);
+                    }
                 }
             }
         }

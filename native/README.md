@@ -45,6 +45,12 @@ Outputs are `native/Builds/macOS/PU Town.app` and
 `towns/{mapId}/previews/`. These are actual Unity camera renders; geometry boards
 are separate. Source assets are documented in [the asset guide](../towns/assets/sources/README.md).
 
+Paving is generated as continuous meshes in `Art/Quaternius/TownDerivedMeshes`.
+The meshes and Garden prefabs stay local; their metadata, shaders, materials and
+small terrain masks are retained. `Prepare` recreates them from the canonical
+town layouts. Woodland's west square connection and edge planting are cosmetic;
+they add no collision authority. See [the authoring guide](../tools/towns/README.md).
+
 ## Run against Java
 
 The backend remains the single reader of the Avatar publication. The native
@@ -93,3 +99,23 @@ optional `-benchmark-output /absolute/path/result.json -benchmark-seconds 60`
 records frame intervals after warmup; it does not measure total process memory,
 GPU execution or automatically establish ten-Player voice performance. Historical
 migration evidence remains in `docs/verification/2026-10-13-native-migration.md`.
+
+Report version 2 also retains consecutive monotonic-clock intervals, reports
+focused and unfocused interval distributions separately, and records available
+Unity counters. A focus-changing interval belongs to its starting focus state.
+Unavailable counters contain no samples. `Main Thread` includes engine work and
+waits; neither that counter nor frame duration establishes GPU execution time.
+
+For development-only scope/allocation/render observations:
+
+```sh
+unity build native --target StandaloneOSX --execute-method PUtown.Editor.NativeBuild.BuildMacProfile --editor-version 6000.6.0f1 --allow-dirty-build --log-file /tmp/putown-profile-build.log
+```
+
+This writes `native/Builds/Profile/PU Town.app`. Launch it with the same benchmark
+arguments to record `PUtown.ApplyFrame`, `Movement`, `Avatars`, `Interface` and
+`Occlusion` scopes. Compare release performance separately: profiling adds work,
+and release Players may lack allocation/render counters. Record the machine,
+resolution, preset, phase, Player count, focus and background workload with every
+capture. The [Woodland verification record](../docs/verification/2026-10-14-woodland-performance-polish.md)
+separates packaged observations from automated checks and platform limits.
