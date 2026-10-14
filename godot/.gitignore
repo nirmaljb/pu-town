@@ -1,0 +1,10 @@
+# Godot rebuilds this import/editor cache from the checked-in project.
+/.godot/
+
+# Packaged builds and inspection captures remain local.
+/build/
+/exports/
+*.pck
+*.zip
+/route-*.csv
+/capture-*.png

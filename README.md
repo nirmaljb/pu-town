@@ -14,6 +14,12 @@ owner's image, every source colour and a labelled browsing palette for the plann
 Godot ground work. Its extraction command, integrity checks and provenance ship
 with this checkout; it is an authoring reference, not a runtime ground texture.
 
+The standalone [Godot snow prototype](godot/README.md) starts the replacement
+client direction with continuous terrain, a walking figure and an orthographic
+inspection camera. It uses pinned Godot 4.7.2 and runs without the Java server.
+See [ADR 0025](docs/adr/0025-godot-single-snow-map-prototype.md) for its scope and
+the retained authority requirements for future integration.
+
 ## Prerequisites
 
 Install the following before starting:

@@ -69,6 +69,10 @@ The backend defaults to port `8080`:
 
 `towns/{woodland,market}/layout.json` is the canonical native geometry source, derived from saved seeded TownGeneratorOS layouts. `python3 tools/towns/publish.py --check` verifies byte-identical backend/native geometry, solid building footprints and route reachability. Woodland Village and Market Town replace the retired native campus. Both have non-enterable buildings and Tasks disabled authoritatively; the three legacy browser maps retain Tasks. Native runtime code is in `native/Assets/PUtown/Runtime/`, media in `native/Assets/PUtown/Voice/`, and private authoring/build code in `native/Assets/Editor/`. `GeneratedTownBuild` derives both town environments from retained free Quaternius assets. The five free KayKit Adventurers use the publication in `towns/assets/avatars/`; the backend remains its single reader. Development Pipeline control stays excluded from release builds. Preserve recipient privacy, queued frame application, transport heartbeat, recovery and ordered delivery.
 
+### Standalone Godot snow walk
+
+`godot/README.md` pins Godot 4.7.2 stable and the Compatibility renderer for the offline ground prototype (ADR 0025). Run `GODOT_BIN=/path/to/Godot ./godot/run.sh --check` for import validation and omit `--check` to explore. The behavioral seam is the running scene with keyboard/wheel input and its exported observations; `godot/tests/walk_scene.gd` exercises that seam without addressing private nodes or procedural samples. Keep actual window/input and visual evidence separate from engine-event replay, import checks, packaged exports and hardware performance acceptance. This prototype has no Room integration; existing Java, browser and Unity contracts remain authoritative for their current consumers.
+
 ### Frontend
 
 ```sh
