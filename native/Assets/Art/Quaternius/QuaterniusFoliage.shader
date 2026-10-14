@@ -11,6 +11,7 @@ Shader "PUtown/Quaternius Foliage"
         _WindStrength ("Decorative wind in world metres", Range(0,.1)) = 0
         _GreenTint ("Garden leaf palette", Range(0,1)) = 0
         _LeafGreen ("Garden leaf green", Color) = (.42,.58,.30,1)
+        _Visibility ("Camera visibility", Range(0,1)) = 1
     }
     SubShader
     {
@@ -30,11 +31,13 @@ Shader "PUtown/Quaternius Foliage"
         half _WindStrength;
         half _GreenTint;
         fixed4 _LeafGreen;
+        half _Visibility;
         struct Input
         {
             float2 uv_MainTex;
             float2 uv_BumpMap;
             float facing : VFACE;
+            float4 screenPos;
         };
         void vert(inout appdata_full vertex)
         {
@@ -46,6 +49,11 @@ Shader "PUtown/Quaternius Foliage"
         }
         void surf(Input input, inout SurfaceOutputStandard output)
         {
+            // A screen-space threshold preserves original cutout/normal maps while
+            // the local camera reveals only an already-authorized Avatar.
+            float2 pixel = floor(input.screenPos.xy / input.screenPos.w * _ScreenParams.xy);
+            float threshold = frac(dot(pixel, float2(.754877666, .569840296)));
+            clip(_Visibility - threshold - .00001);
             fixed4 colour = tex2D(_MainTex, input.uv_MainTex) * _Color;
             float luminance = dot(colour.rgb, float3(.299,.587,.114));
             output.Albedo = lerp(colour.rgb, _LeafGreen.rgb * lerp(.65,1.3,luminance), _GreenTint);

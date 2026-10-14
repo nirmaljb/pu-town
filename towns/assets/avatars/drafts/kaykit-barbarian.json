@@ -1,0 +1,81 @@
+{
+  "id": "kaykit-barbarian",
+  "name": "Barbarian",
+  "native": {
+    "version": 1,
+    "masterId": "kaykit-barbarian",
+    "masterRevision": 1,
+    "model": {
+      "sourceFile": "exports/kaykit-barbarian/avatar.fbx",
+      "rootNode": "avatar",
+      "heightMetres": 1.7,
+      "pivot": "feet",
+      "forwardAxis": "+z"
+    },
+    "rig": {
+      "type": "humanoid",
+      "avatarName": "avatarAvatar",
+      "hipsBone": "hips"
+    },
+    "animations": {
+      "standing": {
+        "clipName": "Standing",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "walking": {
+        "clipName": "Walking",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "seated": {
+        "clipName": "Seated",
+        "durationSeconds": 3.60000014,
+        "loop": true
+      }
+    },
+    "platformAssets": [
+      {
+        "platform": "macos-universal",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-barbarian/avatar.prefab",
+        "file": "exports/kaykit-barbarian/macos-universal.bundle"
+      },
+      {
+        "platform": "windows-x86_64",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-barbarian/avatar.prefab",
+        "file": "exports/kaykit-barbarian/windows-x86_64.bundle"
+      }
+    ]
+  },
+  "review": {
+    "sourceSha256": "6d1e98fdeea3cf9e2d84fa88b4ae1f0ab06cdcff7570c60c1227fcba8f5e07bd",
+    "platformSha256": {
+      "macos-universal": "cb53b41b3a8f03c6c066357090555e829efddd84c9ab563da551b40f31fa5171",
+      "windows-x86_64": "19df23f58e3f45128f5445644d8be178ee0616425fd2c814add577d73d3c1621"
+    },
+    "checks": [
+      "silhouette",
+      "scale-pivot",
+      "uv-normals",
+      "deformation",
+      "native-materials",
+      "standing",
+      "walking",
+      "seated"
+    ],
+    "evidenceFiles": [
+      "exports/kaykit-barbarian/blender-report.json",
+      "exports/kaykit-barbarian/unity-report.json",
+      "exports/kaykit-barbarian/unity-front.png",
+      "exports/kaykit-barbarian/unity-back.png",
+      "exports/kaykit-barbarian/unity-side.png",
+      "exports/kaykit-barbarian/unity-walking.png",
+      "exports/kaykit-barbarian/unity-seated.png",
+      "exports/kaykit-barbarian/unity-pose-report.json"
+    ]
+  }
+}

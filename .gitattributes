@@ -14,3 +14,8 @@ native/ProjectSettings/*.asset -whitespace
 
 # Preserve the supplied font license text exactly.
 native/Assets/PUtown/Fonts/OFL.txt -text -whitespace
+
+# Keep pinned generator/OpenFL source and supplied town licenses byte-exact.
+tools/towns/vendor/** -text -whitespace
+towns/assets/sources/kaykit/*License.txt -text -whitespace
+towns/assets/sources/quaternius/*License* -text -whitespace

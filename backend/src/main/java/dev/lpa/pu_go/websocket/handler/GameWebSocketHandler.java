@@ -695,6 +695,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     room.startGame(game); dev.revision++;
                 }
                 case "scenario" -> {
+                    if (args.get("name").asText().equals("tasks") && !room.getTownMap().tasksEnabled())
+                        throw new IllegalArgumentException("Tasks are disabled in this Town Map.");
                     dev.scenario = args.get("name").asText();
                     while (room.playerIdsSnapshot().size() < 4) addSimulated(room, "Simulated " + (room.playerIdsSnapshot().size() + 1), Role.VILLAGER);
                     Role[] roles = {Role.MAFIA, Role.DOCTOR, Role.SHERIFF, Role.VILLAGER}; int index = 0;
@@ -714,7 +716,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     Role role = roleOf(args.get("role").asText()); dev.roles.put(playerId, role);
                     if (game != null) game.developerRole(playerId, role);
                 }
-                case "setting" -> dev.settings.set(args.get("name").asText(), args.get("enabled").asBoolean());
+                case "setting" -> {
+                    String name = args.get("name").asText();
+                    if (name.startsWith("task") && !room.getTownMap().tasksEnabled())
+                        throw new IllegalArgumentException("Tasks are disabled in this Town Map.");
+                    dev.settings.set(name, args.get("enabled").asBoolean());
+                }
                 default -> {
                     if (game == null) throw new IllegalArgumentException("Start a Developer Game first.");
                     switch (action) {
@@ -910,6 +917,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private void handleTask(PlayerState player, java.util.function.Function<Game, Game.Rejection> action) {
         withGame(player, (room, game) -> {
+            if (!room.getTownMap().tasksEnabled()) {
+                deliver(error(player, "invalid_task", "Tasks are disabled in this Town Map."));
+                return;
+            }
             int completed = game.tasksFor(player.getId(), roomManager.currentTimeMillis()).completed();
             Game.Rejection rejection = action.apply(game);
             if (rejection != null) { deliver(error(player, rejection.code(), rejection.message())); return; }

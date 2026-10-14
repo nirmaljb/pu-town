@@ -1,0 +1,121 @@
+{
+  "id": "kaykit-barbarian",
+  "name": "Barbarian",
+  "masterRevision": 1,
+  "provider": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "sourceArchive": "KayKit Adventurers Free 2.0",
+  "animationArchive": "KayKit Character Animations Free 1.1",
+  "sourceCharacterSha256": "d37824a1d6e8e8af57ef9ae4a87e9271c3986210fbc432fb44670749a577ccac",
+  "sourceAtlasSha256": "f11434d3e5e4df929dacd2c69d15734effb82babf8176a80bb040d2007f5f882",
+  "sourceSha256": "f48b059f9fb20a15aa51f045b83c69b7c14cf5459b989936ee9ce8a4885e67ac",
+  "fbxSha256": "6d1e98fdeea3cf9e2d84fa88b4ae1f0ab06cdcff7570c60c1227fcba8f5e07bd",
+  "rigBones": [
+    "root",
+    "hips",
+    "spine",
+    "chest",
+    "upperarm.l",
+    "lowerarm.l",
+    "wrist.l",
+    "hand.l",
+    "handslot.l",
+    "head",
+    "upperarm.r",
+    "lowerarm.r",
+    "wrist.r",
+    "hand.r",
+    "handslot.r",
+    "upperleg.l",
+    "lowerleg.l",
+    "foot.l",
+    "toes.l",
+    "upperleg.r",
+    "lowerleg.r",
+    "foot.r",
+    "toes.r"
+  ],
+  "meshes": [
+    {
+      "name": "Barbarian_ArmLeft",
+      "vertices": 589,
+      "triangles": 702,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_ArmRight",
+      "vertices": 589,
+      "triangles": 702,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_BearHat",
+      "vertices": 974,
+      "triangles": 1030,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_Body",
+      "vertices": 1702,
+      "triangles": 1840,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_Head",
+      "vertices": 752,
+      "triangles": 1021,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_LegLeft",
+      "vertices": 722,
+      "triangles": 914,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Barbarian_LegRight",
+      "vertices": 722,
+      "triangles": 914,
+      "materials": [
+        "barbarian"
+      ],
+      "boundRig": "Rig_Medium"
+    }
+  ],
+  "carriedAccessories": [],
+  "actions": {
+    "Standing": {
+      "source": "Idle_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Walking": {
+      "source": "Walking_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Seated": {
+      "source": "Sit_Chair_Idle",
+      "frameStart": 0.0,
+      "frameEnd": 108.0
+    }
+  }
+}

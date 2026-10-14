@@ -2,7 +2,7 @@ import { decodeDeveloperState, decodeDeveloperStatus, type DeveloperState, type 
 import { DIRECTIONS, type Direction } from "./avatar-facing.js";
 import { requireAvatarPreset, requireSelectableAvatarPreset, type AvatarPreset } from "./avatar-presets.js";
 
-export const MAP_IDS = ["village", "horror", "cyberpunk", "campus"] as const;
+export const MAP_IDS = ["village", "horror", "cyberpunk", "woodland", "market"] as const;
 export type MapId = typeof MAP_IDS[number];
 export function requireMapId(value: unknown): MapId {
   if (typeof value !== "string" || !MAP_IDS.includes(value as MapId)) throw new Error("Unknown mapId");

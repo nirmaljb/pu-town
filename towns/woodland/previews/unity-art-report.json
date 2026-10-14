@@ -1,0 +1,8655 @@
+{
+  "mapId": "woodland",
+  "unityVersion": "6000.6.0f1",
+  "placements": [
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 21.6031914,
+      "y": 0.012,
+      "z": 26.6242085,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 20.9345741,
+      "y": 0.012,
+      "z": 25.6342239,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 20.2659588,
+      "y": 0.012,
+      "z": 24.6442413,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 19.5973415,
+      "y": 0.012,
+      "z": 23.6542568,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 18.9287262,
+      "y": 0.012,
+      "z": 22.6642742,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 18.2601089,
+      "y": 0.012,
+      "z": 21.67429,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.2096194
+      ],
+      "yaw": -145.965637,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 17.3826351,
+      "y": 0.012,
+      "z": 20.7843056,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 16.2963066,
+      "y": 0.012,
+      "z": 19.99432,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 15.2099791,
+      "y": 0.012,
+      "z": 19.2043343,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 14.12365,
+      "y": 0.012,
+      "z": 18.4143486,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 13.0373211,
+      "y": 0.012,
+      "z": 17.6243629,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 11.9509926,
+      "y": 0.012,
+      "z": 16.8343773,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 10.8646641,
+      "y": 0.012,
+      "z": 16.0443935,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35820031
+      ],
+      "yaw": -126.0249,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 9.936378,
+      "y": 0.012,
+      "z": 15.0997772,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 9.166133,
+      "y": 0.012,
+      "z": 14.0005331,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 8.395888,
+      "y": 0.012,
+      "z": 12.901289,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 7.625644,
+      "y": 0.012,
+      "z": 11.8020439,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 6.8554,
+      "y": 0.012,
+      "z": 10.7028,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 6.08515549,
+      "y": 0.012,
+      "z": 9.603556,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 5.314911,
+      "y": 0.012,
+      "z": 8.504311,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 4.544667,
+      "y": 0.012,
+      "z": 7.40506649,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 3.77442217,
+      "y": 0.012,
+      "z": 6.30582237,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.35724247
+      ],
+      "yaw": -144.980942,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 3.48919988,
+      "y": 0.012,
+      "z": 5.161675,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.22071958
+      ],
+      "yaw": 170.461517,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 3.689,
+      "y": 0.012,
+      "z": 3.97262478,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.22071958
+      ],
+      "yaw": 170.461517,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 3.8888,
+      "y": 0.012,
+      "z": 2.783575,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.22071958
+      ],
+      "yaw": 170.461517,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 1",
+      "name": "Street paving",
+      "x": 4.0886,
+      "y": 0.012,
+      "z": 1.594525,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.22071958
+      ],
+      "yaw": 170.461517,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 35.9779243,
+      "y": 0.012,
+      "z": 31.642086,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.26607835
+      ],
+      "yaw": 82.18222,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 37.2173767,
+      "y": 0.012,
+      "z": 31.8122635,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.26607835
+      ],
+      "yaw": 82.18222,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 38.4568253,
+      "y": 0.012,
+      "z": 31.9824371,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.26607835
+      ],
+      "yaw": 82.18222,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 39.6962776,
+      "y": 0.012,
+      "z": 32.1526146,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.26607835
+      ],
+      "yaw": 82.18222,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 40.8771629,
+      "y": 0.012,
+      "z": 32.11304,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.16467845
+      ],
+      "yaw": 102.524719,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 41.99948,
+      "y": 0.012,
+      "z": 31.8637218,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.16467845
+      ],
+      "yaw": 102.524719,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 43.1218,
+      "y": 0.012,
+      "z": 31.6144,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.16467845
+      ],
+      "yaw": 102.524719,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 44.2441177,
+      "y": 0.012,
+      "z": 31.36508,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.16467845
+      ],
+      "yaw": 102.524719,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 45.366436,
+      "y": 0.012,
+      "z": 31.11576,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.16467845
+      ],
+      "yaw": 102.524719,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 46.58633,
+      "y": 0.012,
+      "z": 30.905283,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.34360063
+      ],
+      "yaw": 97.42239,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 47.9038,
+      "y": 0.012,
+      "z": 30.73365,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.34360063
+      ],
+      "yaw": 97.42239,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Town road 2",
+      "name": "Street paving",
+      "x": 49.2212677,
+      "y": 0.012,
+      "z": 30.56202,
+      "dimensions": [
+        1.5,
+        0.035,
+        1.34360063
+      ],
+      "yaw": 97.42239,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Front facade",
+      "x": 25.8478012,
+      "y": 1.325,
+      "z": 35.0719,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Back facade",
+      "x": 25.8478012,
+      "y": 1.325,
+      "z": 32.8719025,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-3",
+      "name": "Closed shutters",
+      "x": 25.8478012,
+      "y": 1.2,
+      "z": 35.1569023,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Front facade",
+      "x": 27.0978012,
+      "y": 1.325,
+      "z": 35.0719,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Back facade",
+      "x": 27.0978012,
+      "y": 1.325,
+      "z": 32.8719025,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-1-3",
+      "name": "Closed non-enterable door",
+      "x": 27.0978012,
+      "y": 0.92,
+      "z": 35.1469,
+      "dimensions": [
+        0.9375,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Side facade",
+      "x": 25.3228016,
+      "y": 1.325,
+      "z": 33.3719025,
+      "dimensions": [
+        1.22,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-3",
+      "name": "Closed side shutters",
+      "x": 25.2078018,
+      "y": 1.2,
+      "z": 33.3719025,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Side facade",
+      "x": 27.6228,
+      "y": 1.325,
+      "z": 33.3719025,
+      "dimensions": [
+        1.22,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-3",
+      "name": "Closed side shutters",
+      "x": 27.7378,
+      "y": 1.2,
+      "z": 33.3719025,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Side facade",
+      "x": 25.3228016,
+      "y": 1.325,
+      "z": 34.5719,
+      "dimensions": [
+        1.22,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-1-3",
+      "name": "Side facade",
+      "x": 27.6228,
+      "y": 1.325,
+      "z": 34.5719,
+      "dimensions": [
+        1.22,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-1-3",
+      "name": "Tiled roof",
+      "x": 26.4728012,
+      "y": 3.13,
+      "z": 33.9719,
+      "dimensions": [
+        2.5,
+        1.0,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-3",
+      "name": "Closed gable",
+      "x": 26.4728012,
+      "y": 3.08000016,
+      "z": 32.8719025,
+      "dimensions": [
+        2.25,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-3",
+      "name": "Closed gable",
+      "x": 26.4728012,
+      "y": 3.08000016,
+      "z": 35.0719,
+      "dimensions": [
+        2.25,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney2",
+      "group": "Building:building-1-3",
+      "name": "Chimney",
+      "x": 27.0228,
+      "y": 3.35000014,
+      "z": 33.5399,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Front facade",
+      "x": 24.5257015,
+      "y": 1.225,
+      "z": 39.2113,
+      "dimensions": [
+        1.56999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Back facade",
+      "x": 24.5257015,
+      "y": 1.225,
+      "z": 36.1113,
+      "dimensions": [
+        1.56999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-4",
+      "name": "Closed shutters",
+      "x": 24.5257015,
+      "y": 1.2,
+      "z": 39.2963,
+      "dimensions": [
+        1.00749993,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Front facade",
+      "x": 26.0757,
+      "y": 1.225,
+      "z": 39.2113,
+      "dimensions": [
+        1.56999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Back facade",
+      "x": 26.0757,
+      "y": 1.225,
+      "z": 36.1113,
+      "dimensions": [
+        1.56999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-1-4",
+      "name": "Closed non-enterable door",
+      "x": 26.0757,
+      "y": 0.92,
+      "z": 39.2863,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Side facade",
+      "x": 23.8507,
+      "y": 1.225,
+      "z": 36.8363,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-4",
+      "name": "Closed side shutters",
+      "x": 23.7357,
+      "y": 1.2,
+      "z": 36.8363,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Side facade",
+      "x": 26.7507019,
+      "y": 1.225,
+      "z": 36.8363,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-4",
+      "name": "Closed side shutters",
+      "x": 26.8657017,
+      "y": 1.2,
+      "z": 36.8363,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Side facade",
+      "x": 23.8507,
+      "y": 1.225,
+      "z": 38.4863,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-4",
+      "name": "Side facade",
+      "x": 26.7507019,
+      "y": 1.225,
+      "z": 38.4863,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-1-4",
+      "name": "Tiled roof",
+      "x": 25.3007011,
+      "y": 2.9725,
+      "z": 37.6613,
+      "dimensions": [
+        3.1,
+        1.08499992,
+        3.3
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-4",
+      "name": "Closed gable",
+      "x": 25.3007011,
+      "y": 2.91655,
+      "z": 36.1113,
+      "dimensions": [
+        2.78999972,
+        0.868,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-4",
+      "name": "Closed gable",
+      "x": 25.3007011,
+      "y": 2.91655,
+      "z": 39.2113,
+      "dimensions": [
+        2.78999972,
+        0.868,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-1-4",
+      "name": "Chimney",
+      "x": 25.9827,
+      "y": 3.2095,
+      "z": 37.0673,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Front facade",
+      "x": 22.4812012,
+      "y": 1.225,
+      "z": 33.5102,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Back facade",
+      "x": 22.4812012,
+      "y": 1.225,
+      "z": 30.8102016,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-7",
+      "name": "Closed shutters",
+      "x": 22.4812012,
+      "y": 1.2,
+      "z": 33.5952034,
+      "dimensions": [
+        0.9425,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Front facade",
+      "x": 23.9312019,
+      "y": 1.225,
+      "z": 33.5102,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Back facade",
+      "x": 23.9312019,
+      "y": 1.225,
+      "z": 30.8102016,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-1-7",
+      "name": "Closed non-enterable door",
+      "x": 23.9312019,
+      "y": 0.92,
+      "z": 33.5852,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Side facade",
+      "x": 21.8562012,
+      "y": 1.225,
+      "z": 31.4352016,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-7",
+      "name": "Closed side shutters",
+      "x": 21.7412014,
+      "y": 1.2,
+      "z": 31.4352016,
+      "dimensions": [
+        0.9425,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Side facade",
+      "x": 24.5562019,
+      "y": 1.225,
+      "z": 31.4352016,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-1-7",
+      "name": "Closed side shutters",
+      "x": 24.6712017,
+      "y": 1.2,
+      "z": 31.4352016,
+      "dimensions": [
+        0.9425,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Side facade",
+      "x": 21.8562012,
+      "y": 1.225,
+      "z": 32.8852,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-1-7",
+      "name": "Side facade",
+      "x": 24.5562019,
+      "y": 1.225,
+      "z": 32.8852,
+      "dimensions": [
+        1.47,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-1-7",
+      "name": "Tiled roof",
+      "x": 23.2062016,
+      "y": 2.9375,
+      "z": 32.160202,
+      "dimensions": [
+        2.9,
+        1.015,
+        2.9
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-7",
+      "name": "Closed gable",
+      "x": 23.2062016,
+      "y": 2.88645,
+      "z": 30.8102016,
+      "dimensions": [
+        2.61000013,
+        0.812,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-1-7",
+      "name": "Closed gable",
+      "x": 23.2062016,
+      "y": 2.88645,
+      "z": 33.5102,
+      "dimensions": [
+        2.61000013,
+        0.812,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-1-7",
+      "name": "Chimney",
+      "x": 23.844202,
+      "y": 3.1605,
+      "z": 31.6382027,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Front facade",
+      "x": 23.1219673,
+      "y": 1.225,
+      "z": 24.2867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Back facade",
+      "x": 23.1219673,
+      "y": 1.225,
+      "z": 19.9867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-2-2",
+      "name": "Closed shutters",
+      "x": 23.1219673,
+      "y": 1.2,
+      "z": 24.3717,
+      "dimensions": [
+        0.9966666,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Front facade",
+      "x": 24.6553,
+      "y": 1.225,
+      "z": 24.2867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Back facade",
+      "x": 24.6553,
+      "y": 1.225,
+      "z": 19.9867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-2-2",
+      "name": "Closed non-enterable door",
+      "x": 24.6553,
+      "y": 0.92,
+      "z": 24.3617,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Front facade",
+      "x": 26.188633,
+      "y": 1.225,
+      "z": 24.2867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Back facade",
+      "x": 26.188633,
+      "y": 1.225,
+      "z": 19.9867,
+      "dimensions": [
+        1.55333328,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-2-2",
+      "name": "Closed shutters",
+      "x": 26.188633,
+      "y": 1.2,
+      "z": 24.3717,
+      "dimensions": [
+        0.9966666,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Side facade",
+      "x": 22.4553,
+      "y": 1.225,
+      "z": 21.0117,
+      "dimensions": [
+        2.27,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-2-2",
+      "name": "Closed side shutters",
+      "x": 22.3403,
+      "y": 1.2,
+      "z": 21.0117,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Side facade",
+      "x": 26.8553,
+      "y": 1.225,
+      "z": 21.0117,
+      "dimensions": [
+        2.27,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-2-2",
+      "name": "Closed side shutters",
+      "x": 26.9703,
+      "y": 1.2,
+      "z": 21.0117,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Side facade",
+      "x": 22.4553,
+      "y": 1.225,
+      "z": 23.2617,
+      "dimensions": [
+        2.27,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-2-2",
+      "name": "Side facade",
+      "x": 26.8553,
+      "y": 1.225,
+      "z": 23.2617,
+      "dimensions": [
+        2.27,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-2-2",
+      "name": "Tiled roof",
+      "x": 24.6553,
+      "y": 3.235,
+      "z": 22.1367,
+      "dimensions": [
+        4.6,
+        1.6099999,
+        4.5
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-2-2",
+      "name": "Closed gable",
+      "x": 24.6553,
+      "y": 3.14230013,
+      "z": 19.9867,
+      "dimensions": [
+        4.14,
+        1.288,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-2-2",
+      "name": "Closed gable",
+      "x": 24.6553,
+      "y": 3.14230013,
+      "z": 24.2867,
+      "dimensions": [
+        4.14,
+        1.288,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-2-2",
+      "name": "Chimney",
+      "x": 25.6673,
+      "y": 3.577,
+      "z": 21.3267,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Front facade",
+      "x": 38.2024,
+      "y": 1.225,
+      "z": 25.3277,
+      "dimensions": [
+        2.17,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Back facade",
+      "x": 38.2024,
+      "y": 1.225,
+      "z": 20.1276989,
+      "dimensions": [
+        2.17,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-0",
+      "name": "Closed shutters",
+      "x": 38.2024,
+      "y": 1.2,
+      "z": 25.4126987,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Front facade",
+      "x": 40.3524,
+      "y": 1.225,
+      "z": 25.3277,
+      "dimensions": [
+        2.17,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Back facade",
+      "x": 40.3524,
+      "y": 1.225,
+      "z": 20.1276989,
+      "dimensions": [
+        2.17,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-3-0",
+      "name": "Closed non-enterable door",
+      "x": 40.3524,
+      "y": 0.92,
+      "z": 25.4026985,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 37.2274,
+      "y": 1.225,
+      "z": 20.9277,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-0",
+      "name": "Closed side shutters",
+      "x": 37.1124,
+      "y": 1.2,
+      "z": 20.9277,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 41.3274,
+      "y": 1.225,
+      "z": 20.9277,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-0",
+      "name": "Closed side shutters",
+      "x": 41.4424,
+      "y": 1.2,
+      "z": 20.9277,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 37.2274,
+      "y": 1.225,
+      "z": 22.7277,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 41.3274,
+      "y": 1.225,
+      "z": 22.7277,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 37.2274,
+      "y": 1.225,
+      "z": 24.5276985,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-0",
+      "name": "Closed side shutters",
+      "x": 37.1124,
+      "y": 1.2,
+      "z": 24.5276985,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-0",
+      "name": "Side facade",
+      "x": 41.3274,
+      "y": 1.225,
+      "z": 24.5276985,
+      "dimensions": [
+        1.82,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-0",
+      "name": "Closed side shutters",
+      "x": 41.4424,
+      "y": 1.2,
+      "z": 24.5276985,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x6",
+      "group": "Building:building-3-0",
+      "name": "Tiled roof",
+      "x": 39.2774,
+      "y": 3.18250012,
+      "z": 22.7277,
+      "dimensions": [
+        4.3,
+        1.505,
+        5.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-0",
+      "name": "Closed gable",
+      "x": 39.2774,
+      "y": 3.09715,
+      "z": 20.1276989,
+      "dimensions": [
+        3.87000012,
+        1.204,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-0",
+      "name": "Closed gable",
+      "x": 39.2774,
+      "y": 3.09715,
+      "z": 25.3277,
+      "dimensions": [
+        3.87000012,
+        1.204,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-3-0",
+      "name": "Chimney",
+      "x": 40.2234,
+      "y": 3.5035,
+      "z": 21.7557,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Front facade",
+      "x": 36.1867,
+      "y": 1.425,
+      "z": 28.5474,
+      "dimensions": [
+        1.92,
+        2.85,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Back facade",
+      "x": 36.1867,
+      "y": 1.425,
+      "z": 26.3473988,
+      "dimensions": [
+        1.92,
+        2.85,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-7",
+      "name": "Closed shutters",
+      "x": 36.1867,
+      "y": 1.2,
+      "z": 28.6323986,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Front facade",
+      "x": 38.0867,
+      "y": 1.425,
+      "z": 28.5474,
+      "dimensions": [
+        1.92,
+        2.85,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Back facade",
+      "x": 38.0867,
+      "y": 1.425,
+      "z": 26.3473988,
+      "dimensions": [
+        1.92,
+        2.85,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-3-7",
+      "name": "Closed non-enterable door",
+      "x": 38.0867,
+      "y": 0.92,
+      "z": 28.6223984,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Side facade",
+      "x": 35.3367,
+      "y": 1.425,
+      "z": 26.8473988,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-7",
+      "name": "Closed side shutters",
+      "x": 35.2217,
+      "y": 1.2,
+      "z": 26.8473988,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Side facade",
+      "x": 38.9367,
+      "y": 1.425,
+      "z": 26.8473988,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-7",
+      "name": "Closed side shutters",
+      "x": 39.0517,
+      "y": 1.2,
+      "z": 26.8473988,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Side facade",
+      "x": 35.3367,
+      "y": 1.425,
+      "z": 28.0474,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-7",
+      "name": "Side facade",
+      "x": 38.9367,
+      "y": 1.425,
+      "z": 28.0474,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-3-7",
+      "name": "Tiled roof",
+      "x": 37.1367,
+      "y": 3.495,
+      "z": 27.4474,
+      "dimensions": [
+        3.8,
+        1.32999992,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-7",
+      "name": "Closed gable",
+      "x": 37.1367,
+      "y": 3.4218998,
+      "z": 26.3473988,
+      "dimensions": [
+        3.41999984,
+        1.064,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-7",
+      "name": "Closed gable",
+      "x": 37.1367,
+      "y": 3.4218998,
+      "z": 28.5474,
+      "dimensions": [
+        3.41999984,
+        1.064,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-3-7",
+      "name": "Chimney",
+      "x": 37.9727,
+      "y": 3.781,
+      "z": 27.0154,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Front facade",
+      "x": 41.7429,
+      "y": 1.225,
+      "z": 28.8717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Back facade",
+      "x": 41.7429,
+      "y": 1.225,
+      "z": 26.6717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-12",
+      "name": "Closed shutters",
+      "x": 41.7429,
+      "y": 1.2,
+      "z": 28.9567,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Front facade",
+      "x": 42.9428978,
+      "y": 1.225,
+      "z": 28.8717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Back facade",
+      "x": 42.9428978,
+      "y": 1.225,
+      "z": 26.6717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-3-12",
+      "name": "Closed non-enterable door",
+      "x": 42.9428978,
+      "y": 0.92,
+      "z": 28.9467,
+      "dimensions": [
+        0.900000036,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Side facade",
+      "x": 41.2429,
+      "y": 1.225,
+      "z": 27.1717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-12",
+      "name": "Closed side shutters",
+      "x": 41.1279,
+      "y": 1.2,
+      "z": 27.1717,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Side facade",
+      "x": 43.4428978,
+      "y": 1.225,
+      "z": 27.1717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-3-12",
+      "name": "Closed side shutters",
+      "x": 43.5579,
+      "y": 1.2,
+      "z": 27.1717,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Side facade",
+      "x": 41.2429,
+      "y": 1.225,
+      "z": 28.3717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-3-12",
+      "name": "Side facade",
+      "x": 43.4428978,
+      "y": 1.225,
+      "z": 28.3717,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-3-12",
+      "name": "Tiled roof",
+      "x": 42.3429,
+      "y": 2.93,
+      "z": 27.7717,
+      "dimensions": [
+        2.4,
+        1.0,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-12",
+      "name": "Closed gable",
+      "x": 42.3429,
+      "y": 2.88,
+      "z": 26.6717,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-3-12",
+      "name": "Closed gable",
+      "x": 42.3429,
+      "y": 2.88,
+      "z": 28.8717,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-3-12",
+      "name": "Chimney",
+      "x": 42.8709,
+      "y": 3.15,
+      "z": 27.3397,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Front facade",
+      "x": 37.3786,
+      "y": 1.325,
+      "z": 36.8849,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Back facade",
+      "x": 37.3786,
+      "y": 1.325,
+      "z": 33.4848976,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-0",
+      "name": "Closed shutters",
+      "x": 37.3786,
+      "y": 1.2,
+      "z": 36.9699,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Front facade",
+      "x": 38.6286,
+      "y": 1.325,
+      "z": 36.8849,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Back facade",
+      "x": 38.6286,
+      "y": 1.325,
+      "z": 33.4848976,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-4-0",
+      "name": "Closed non-enterable door",
+      "x": 38.6286,
+      "y": 0.92,
+      "z": 36.9599,
+      "dimensions": [
+        0.9375,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Side facade",
+      "x": 36.8536,
+      "y": 1.325,
+      "z": 34.2848969,
+      "dimensions": [
+        1.81999993,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-0",
+      "name": "Closed side shutters",
+      "x": 36.7386,
+      "y": 1.2,
+      "z": 34.2848969,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Side facade",
+      "x": 39.1536026,
+      "y": 1.325,
+      "z": 34.2848969,
+      "dimensions": [
+        1.81999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-0",
+      "name": "Closed side shutters",
+      "x": 39.2686,
+      "y": 1.2,
+      "z": 34.2848969,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Side facade",
+      "x": 36.8536,
+      "y": 1.325,
+      "z": 36.0849,
+      "dimensions": [
+        1.81999993,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-4-0",
+      "name": "Side facade",
+      "x": 39.1536026,
+      "y": 1.325,
+      "z": 36.0849,
+      "dimensions": [
+        1.81999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x6",
+      "group": "Building:building-4-0",
+      "name": "Tiled roof",
+      "x": 38.0036,
+      "y": 3.13,
+      "z": 35.1849,
+      "dimensions": [
+        2.5,
+        1.0,
+        3.6
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-0",
+      "name": "Closed gable",
+      "x": 38.0036,
+      "y": 3.08000016,
+      "z": 33.4848976,
+      "dimensions": [
+        2.25,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-0",
+      "name": "Closed gable",
+      "x": 38.0036,
+      "y": 3.08000016,
+      "z": 36.8849,
+      "dimensions": [
+        2.25,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney2",
+      "group": "Building:building-4-0",
+      "name": "Chimney",
+      "x": 38.5536,
+      "y": 3.35000014,
+      "z": 34.5369,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Front facade",
+      "x": 32.6058,
+      "y": 1.225,
+      "z": 39.1447029,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Back facade",
+      "x": 32.6058,
+      "y": 1.225,
+      "z": 36.3447,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-2",
+      "name": "Closed shutters",
+      "x": 32.6058,
+      "y": 1.2,
+      "z": 39.229702,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Front facade",
+      "x": 34.4058037,
+      "y": 1.225,
+      "z": 39.1447029,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Back facade",
+      "x": 34.4058037,
+      "y": 1.225,
+      "z": 36.3447,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-4-2",
+      "name": "Closed non-enterable door",
+      "x": 34.4058037,
+      "y": 0.92,
+      "z": 39.2197,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Side facade",
+      "x": 31.8058014,
+      "y": 1.225,
+      "z": 36.9947,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-2",
+      "name": "Closed side shutters",
+      "x": 31.6908016,
+      "y": 1.2,
+      "z": 36.9947,
+      "dimensions": [
+        0.974999964,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Side facade",
+      "x": 35.2058029,
+      "y": 1.225,
+      "z": 36.9947,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-2",
+      "name": "Closed side shutters",
+      "x": 35.3208,
+      "y": 1.2,
+      "z": 36.9947,
+      "dimensions": [
+        0.974999964,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Side facade",
+      "x": 31.8058014,
+      "y": 1.225,
+      "z": 38.4947,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-2",
+      "name": "Side facade",
+      "x": 35.2058029,
+      "y": 1.225,
+      "z": 38.4947,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-4-2",
+      "name": "Tiled roof",
+      "x": 33.5058022,
+      "y": 3.06,
+      "z": 37.7447,
+      "dimensions": [
+        3.6,
+        1.26,
+        3.0
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-2",
+      "name": "Closed gable",
+      "x": 33.5058022,
+      "y": 2.9918,
+      "z": 36.3447,
+      "dimensions": [
+        3.23999977,
+        1.008,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-2",
+      "name": "Closed gable",
+      "x": 33.5058022,
+      "y": 2.9918,
+      "z": 39.1447029,
+      "dimensions": [
+        3.23999977,
+        1.008,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-4-2",
+      "name": "Chimney",
+      "x": 34.297802,
+      "y": 3.332,
+      "z": 37.2047,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Front facade",
+      "x": 31.9024,
+      "y": 1.225,
+      "z": 43.3137,
+      "dimensions": [
+        2.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Back facade",
+      "x": 31.9024,
+      "y": 1.225,
+      "z": 39.9137,
+      "dimensions": [
+        2.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-4",
+      "name": "Closed shutters",
+      "x": 31.9024,
+      "y": 1.2,
+      "z": 43.3987,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Front facade",
+      "x": 34.1023979,
+      "y": 1.225,
+      "z": 43.3137,
+      "dimensions": [
+        2.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Back facade",
+      "x": 34.1023979,
+      "y": 1.225,
+      "z": 39.9137,
+      "dimensions": [
+        2.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-4-4",
+      "name": "Closed non-enterable door",
+      "x": 34.1023979,
+      "y": 0.92,
+      "z": 43.3887024,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Side facade",
+      "x": 30.9024,
+      "y": 1.225,
+      "z": 40.7137,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-4",
+      "name": "Closed side shutters",
+      "x": 30.7874,
+      "y": 1.2,
+      "z": 40.7137,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Side facade",
+      "x": 35.1023979,
+      "y": 1.225,
+      "z": 40.7137,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-4-4",
+      "name": "Closed side shutters",
+      "x": 35.2174,
+      "y": 1.2,
+      "z": 40.7137,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Side facade",
+      "x": 30.9024,
+      "y": 1.225,
+      "z": 42.5137024,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-4-4",
+      "name": "Side facade",
+      "x": 35.1023979,
+      "y": 1.225,
+      "z": 42.5137024,
+      "dimensions": [
+        1.81999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-4-4",
+      "name": "Tiled roof",
+      "x": 33.0024,
+      "y": 3.2,
+      "z": 41.6137,
+      "dimensions": [
+        4.4,
+        1.54,
+        3.6
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-4",
+      "name": "Closed gable",
+      "x": 33.0024,
+      "y": 3.1122,
+      "z": 39.9137,
+      "dimensions": [
+        3.96,
+        1.232,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-4-4",
+      "name": "Closed gable",
+      "x": 33.0024,
+      "y": 3.1122,
+      "z": 43.3137,
+      "dimensions": [
+        3.96,
+        1.232,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-4-4",
+      "name": "Chimney",
+      "x": 33.9703979,
+      "y": 3.528,
+      "z": 40.9657021,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Front facade",
+      "x": 15.2661991,
+      "y": 1.225,
+      "z": 31.9672985,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Back facade",
+      "x": 15.2661991,
+      "y": 1.225,
+      "z": 29.6673,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-2",
+      "name": "Closed shutters",
+      "x": 15.2661991,
+      "y": 1.2,
+      "z": 32.0523,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Front facade",
+      "x": 16.4662,
+      "y": 1.225,
+      "z": 31.9672985,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Back facade",
+      "x": 16.4662,
+      "y": 1.225,
+      "z": 29.6673,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-5-2",
+      "name": "Closed non-enterable door",
+      "x": 16.4662,
+      "y": 0.92,
+      "z": 32.0422974,
+      "dimensions": [
+        0.900000036,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Side facade",
+      "x": 14.7661991,
+      "y": 1.225,
+      "z": 30.1922989,
+      "dimensions": [
+        1.27,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-2",
+      "name": "Closed side shutters",
+      "x": 14.6511993,
+      "y": 1.2,
+      "z": 30.1922989,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Side facade",
+      "x": 16.9662,
+      "y": 1.225,
+      "z": 30.1922989,
+      "dimensions": [
+        1.27,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-2",
+      "name": "Closed side shutters",
+      "x": 17.0812,
+      "y": 1.2,
+      "z": 30.1922989,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Side facade",
+      "x": 14.7661991,
+      "y": 1.225,
+      "z": 31.4422989,
+      "dimensions": [
+        1.27,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-2",
+      "name": "Side facade",
+      "x": 16.9662,
+      "y": 1.225,
+      "z": 31.4422989,
+      "dimensions": [
+        1.27,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-5-2",
+      "name": "Tiled roof",
+      "x": 15.8661995,
+      "y": 2.93,
+      "z": 30.8172989,
+      "dimensions": [
+        2.4,
+        1.0,
+        2.5
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-5-2",
+      "name": "Closed gable",
+      "x": 15.8661995,
+      "y": 2.88,
+      "z": 29.6673,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-5-2",
+      "name": "Closed gable",
+      "x": 15.8661995,
+      "y": 2.88,
+      "z": 31.9672985,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-5-2",
+      "name": "Chimney",
+      "x": 16.3942,
+      "y": 3.15,
+      "z": 30.3672981,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Front facade",
+      "x": 11.4070988,
+      "y": 1.225,
+      "z": 22.295,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Back facade",
+      "x": 11.4070988,
+      "y": 1.225,
+      "z": 20.095,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-11",
+      "name": "Closed shutters",
+      "x": 11.4070988,
+      "y": 1.2,
+      "z": 22.38,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Front facade",
+      "x": 12.6071,
+      "y": 1.225,
+      "z": 22.295,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Back facade",
+      "x": 12.6071,
+      "y": 1.225,
+      "z": 20.095,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-5-11",
+      "name": "Closed non-enterable door",
+      "x": 12.6071,
+      "y": 0.92,
+      "z": 22.3699989,
+      "dimensions": [
+        0.900000036,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Side facade",
+      "x": 10.9070988,
+      "y": 1.225,
+      "z": 20.595,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-11",
+      "name": "Closed side shutters",
+      "x": 10.792099,
+      "y": 1.2,
+      "z": 20.595,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Side facade",
+      "x": 13.1071,
+      "y": 1.225,
+      "z": 20.595,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-5-11",
+      "name": "Closed side shutters",
+      "x": 13.2220993,
+      "y": 1.2,
+      "z": 20.595,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Side facade",
+      "x": 10.9070988,
+      "y": 1.225,
+      "z": 21.795,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-5-11",
+      "name": "Side facade",
+      "x": 13.1071,
+      "y": 1.225,
+      "z": 21.795,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-5-11",
+      "name": "Tiled roof",
+      "x": 12.0070992,
+      "y": 2.93,
+      "z": 21.195,
+      "dimensions": [
+        2.4,
+        1.0,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-5-11",
+      "name": "Closed gable",
+      "x": 12.0070992,
+      "y": 2.88,
+      "z": 20.095,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-5-11",
+      "name": "Closed gable",
+      "x": 12.0070992,
+      "y": 2.88,
+      "z": 22.295,
+      "dimensions": [
+        2.16,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-5-11",
+      "name": "Chimney",
+      "x": 12.535099,
+      "y": 3.15,
+      "z": 20.763,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Front facade",
+      "x": 17.4781,
+      "y": 1.225,
+      "z": 40.805,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Back facade",
+      "x": 17.4781,
+      "y": 1.225,
+      "z": 38.6050034,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-2",
+      "name": "Closed shutters",
+      "x": 17.4781,
+      "y": 1.2,
+      "z": 40.8900032,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Front facade",
+      "x": 19.1281013,
+      "y": 1.225,
+      "z": 40.805,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Back facade",
+      "x": 19.1281013,
+      "y": 1.225,
+      "z": 38.6050034,
+      "dimensions": [
+        1.67,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-6-2",
+      "name": "Closed non-enterable door",
+      "x": 19.1281013,
+      "y": 0.92,
+      "z": 40.88,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Side facade",
+      "x": 16.7531013,
+      "y": 1.225,
+      "z": 39.1050034,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-2",
+      "name": "Closed side shutters",
+      "x": 16.6381,
+      "y": 1.2,
+      "z": 39.1050034,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Side facade",
+      "x": 19.8531,
+      "y": 1.225,
+      "z": 39.1050034,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-2",
+      "name": "Closed side shutters",
+      "x": 19.9681015,
+      "y": 1.2,
+      "z": 39.1050034,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Side facade",
+      "x": 16.7531013,
+      "y": 1.225,
+      "z": 40.305,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-2",
+      "name": "Side facade",
+      "x": 19.8531,
+      "y": 1.225,
+      "z": 40.305,
+      "dimensions": [
+        1.22,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-6-2",
+      "name": "Tiled roof",
+      "x": 18.3031,
+      "y": 3.0075,
+      "z": 39.705,
+      "dimensions": [
+        3.3,
+        1.155,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-2",
+      "name": "Closed gable",
+      "x": 18.3031,
+      "y": 2.94665,
+      "z": 38.6050034,
+      "dimensions": [
+        2.96999979,
+        0.923999965,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-2",
+      "name": "Closed gable",
+      "x": 18.3031,
+      "y": 2.94665,
+      "z": 40.805,
+      "dimensions": [
+        2.96999979,
+        0.923999965,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-6-2",
+      "name": "Chimney",
+      "x": 19.0291,
+      "y": 3.2585,
+      "z": 39.2730026,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Front facade",
+      "x": 13.1498,
+      "y": 1.425,
+      "z": 39.0874,
+      "dimensions": [
+        1.81999993,
+        2.85,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Back facade",
+      "x": 13.1498,
+      "y": 1.425,
+      "z": 36.8874,
+      "dimensions": [
+        1.81999993,
+        2.85,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-5",
+      "name": "Closed shutters",
+      "x": 13.1498,
+      "y": 1.2,
+      "z": 39.1724,
+      "dimensions": [
+        1.05,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Front facade",
+      "x": 14.9498,
+      "y": 1.425,
+      "z": 39.0874,
+      "dimensions": [
+        1.81999993,
+        2.85,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Back facade",
+      "x": 14.9498,
+      "y": 1.425,
+      "z": 36.8874,
+      "dimensions": [
+        1.81999993,
+        2.85,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-6-5",
+      "name": "Closed non-enterable door",
+      "x": 14.9498,
+      "y": 0.92,
+      "z": 39.1624,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Side facade",
+      "x": 12.3498,
+      "y": 1.425,
+      "z": 37.3874,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-5",
+      "name": "Closed side shutters",
+      "x": 12.2348,
+      "y": 1.2,
+      "z": 37.3874,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Side facade",
+      "x": 15.7498,
+      "y": 1.425,
+      "z": 37.3874,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-5",
+      "name": "Closed side shutters",
+      "x": 15.8647995,
+      "y": 1.2,
+      "z": 37.3874,
+      "dimensions": [
+        0.780000031,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Side facade",
+      "x": 12.3498,
+      "y": 1.425,
+      "z": 38.5874,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-6-5",
+      "name": "Side facade",
+      "x": 15.7498,
+      "y": 1.425,
+      "z": 38.5874,
+      "dimensions": [
+        1.22,
+        2.85,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-6-5",
+      "name": "Tiled roof",
+      "x": 14.0498,
+      "y": 3.4599998,
+      "z": 37.9874,
+      "dimensions": [
+        3.6,
+        1.26,
+        2.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-5",
+      "name": "Closed gable",
+      "x": 14.0498,
+      "y": 3.3918,
+      "z": 36.8874,
+      "dimensions": [
+        3.23999977,
+        1.008,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-5",
+      "name": "Closed gable",
+      "x": 14.0498,
+      "y": 3.3918,
+      "z": 39.0874,
+      "dimensions": [
+        3.23999977,
+        1.008,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-6-5",
+      "name": "Chimney",
+      "x": 14.8418,
+      "y": 3.73199987,
+      "z": 37.5554,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Front facade",
+      "x": 13.3306,
+      "y": 1.325,
+      "z": 42.383503,
+      "dimensions": [
+        1.47,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Back facade",
+      "x": 13.3306,
+      "y": 1.325,
+      "z": 39.9835,
+      "dimensions": [
+        1.47,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-6",
+      "name": "Closed shutters",
+      "x": 13.3306,
+      "y": 1.2,
+      "z": 42.468502,
+      "dimensions": [
+        0.9425,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Front facade",
+      "x": 14.7806005,
+      "y": 1.325,
+      "z": 42.383503,
+      "dimensions": [
+        1.47,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Back facade",
+      "x": 14.7806005,
+      "y": 1.325,
+      "z": 39.9835,
+      "dimensions": [
+        1.47,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-6-6",
+      "name": "Closed non-enterable door",
+      "x": 14.7806005,
+      "y": 0.92,
+      "z": 42.4585037,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Side facade",
+      "x": 12.7056,
+      "y": 1.325,
+      "z": 40.5335,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-6",
+      "name": "Closed side shutters",
+      "x": 12.5906,
+      "y": 1.2,
+      "z": 40.5335,
+      "dimensions": [
+        0.8449999,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Side facade",
+      "x": 15.4056005,
+      "y": 1.325,
+      "z": 40.5335,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-6-6",
+      "name": "Closed side shutters",
+      "x": 15.5206,
+      "y": 1.2,
+      "z": 40.5335,
+      "dimensions": [
+        0.8449999,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Side facade",
+      "x": 12.7056,
+      "y": 1.325,
+      "z": 41.8335037,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-6-6",
+      "name": "Side facade",
+      "x": 15.4056005,
+      "y": 1.325,
+      "z": 41.8335037,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-6-6",
+      "name": "Tiled roof",
+      "x": 14.0556,
+      "y": 3.1375,
+      "z": 41.1835022,
+      "dimensions": [
+        2.9,
+        1.015,
+        2.6
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-6",
+      "name": "Closed gable",
+      "x": 14.0556,
+      "y": 3.08645,
+      "z": 39.9835,
+      "dimensions": [
+        2.61000013,
+        0.812,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-6-6",
+      "name": "Closed gable",
+      "x": 14.0556,
+      "y": 3.08645,
+      "z": 42.383503,
+      "dimensions": [
+        2.61000013,
+        0.812,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney2",
+      "group": "Building:building-6-6",
+      "name": "Chimney",
+      "x": 14.6936,
+      "y": 3.3605,
+      "z": 40.7155037,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Front facade",
+      "x": 37.4208,
+      "y": 1.225,
+      "z": 18.1576,
+      "dimensions": [
+        1.31999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Back facade",
+      "x": 37.4208,
+      "y": 1.225,
+      "z": 15.3576012,
+      "dimensions": [
+        1.31999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-2",
+      "name": "Closed shutters",
+      "x": 37.4208,
+      "y": 1.2,
+      "z": 18.2426014,
+      "dimensions": [
+        0.8449999,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Front facade",
+      "x": 38.7208023,
+      "y": 1.225,
+      "z": 18.1576,
+      "dimensions": [
+        1.31999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Back facade",
+      "x": 38.7208023,
+      "y": 1.225,
+      "z": 15.3576012,
+      "dimensions": [
+        1.31999993,
+        2.45,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-7-2",
+      "name": "Closed non-enterable door",
+      "x": 38.7208023,
+      "y": 0.92,
+      "z": 18.2326012,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Side facade",
+      "x": 36.8708,
+      "y": 1.225,
+      "z": 16.0076,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-2",
+      "name": "Closed side shutters",
+      "x": 36.7558022,
+      "y": 1.2,
+      "z": 16.0076,
+      "dimensions": [
+        0.974999964,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Side facade",
+      "x": 39.2708,
+      "y": 1.225,
+      "z": 16.0076,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-2",
+      "name": "Closed side shutters",
+      "x": 39.3858,
+      "y": 1.2,
+      "z": 16.0076,
+      "dimensions": [
+        0.974999964,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Side facade",
+      "x": 36.8708,
+      "y": 1.225,
+      "z": 17.5076,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_Plaster_Straight",
+      "group": "Building:building-7-2",
+      "name": "Side facade",
+      "x": 39.2708,
+      "y": 1.225,
+      "z": 17.5076,
+      "dimensions": [
+        1.52,
+        2.45,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x6",
+      "group": "Building:building-7-2",
+      "name": "Tiled roof",
+      "x": 38.0708,
+      "y": 2.93,
+      "z": 16.7576,
+      "dimensions": [
+        2.6,
+        1.0,
+        3.0
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-7-2",
+      "name": "Closed gable",
+      "x": 38.0708,
+      "y": 2.88,
+      "z": 15.3576012,
+      "dimensions": [
+        2.34,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-7-2",
+      "name": "Closed gable",
+      "x": 38.0708,
+      "y": 2.88,
+      "z": 18.1576,
+      "dimensions": [
+        2.34,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney",
+      "group": "Building:building-7-2",
+      "name": "Chimney",
+      "x": 38.6428,
+      "y": 3.15,
+      "z": 16.2176,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Front facade",
+      "x": 32.9657974,
+      "y": 1.325,
+      "z": 20.3333,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Back facade",
+      "x": 32.9657974,
+      "y": 1.325,
+      "z": 18.0333,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-3",
+      "name": "Closed shutters",
+      "x": 32.9657974,
+      "y": 1.2,
+      "z": 20.4183,
+      "dimensions": [
+        0.8449999,
+        0.8,
+        0.08
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Front facade",
+      "x": 34.2658,
+      "y": 1.325,
+      "z": 20.3333,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Back facade",
+      "x": 34.2658,
+      "y": 1.325,
+      "z": 18.0333,
+      "dimensions": [
+        1.31999993,
+        2.65,
+        0.2
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Door_4_Flat",
+      "group": "Building:building-7-3",
+      "name": "Closed non-enterable door",
+      "x": 34.2658,
+      "y": 0.92,
+      "z": 20.4083,
+      "dimensions": [
+        0.95,
+        1.84,
+        0.075
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Side facade",
+      "x": 32.4158,
+      "y": 1.325,
+      "z": 18.5583,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-3",
+      "name": "Closed side shutters",
+      "x": 32.3008,
+      "y": 1.2,
+      "z": 18.5583,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Side facade",
+      "x": 34.8158,
+      "y": 1.325,
+      "z": 18.5583,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "WindowShutters_Wide_Flat_Closed",
+      "group": "Building:building-7-3",
+      "name": "Closed side shutters",
+      "x": 34.9307976,
+      "y": 1.2,
+      "z": 18.5583,
+      "dimensions": [
+        0.8125,
+        0.8,
+        0.08
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Side facade",
+      "x": 32.4158,
+      "y": 1.325,
+      "z": 19.8083,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": -90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Wall_UnevenBrick_Straight",
+      "group": "Building:building-7-3",
+      "name": "Side facade",
+      "x": 34.8158,
+      "y": 1.325,
+      "z": 19.8083,
+      "dimensions": [
+        1.27,
+        2.65,
+        0.2
+      ],
+      "yaw": 90.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_RoundTiles_4x4",
+      "group": "Building:building-7-3",
+      "name": "Tiled roof",
+      "x": 33.6158,
+      "y": 3.13,
+      "z": 19.1833,
+      "dimensions": [
+        2.6,
+        1.0,
+        2.5
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-7-3",
+      "name": "Closed gable",
+      "x": 33.6158,
+      "y": 3.08000016,
+      "z": 18.0333,
+      "dimensions": [
+        2.34,
+        0.8,
+        0.17
+      ],
+      "yaw": 180.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Front_Brick4",
+      "group": "Building:building-7-3",
+      "name": "Closed gable",
+      "x": 33.6158,
+      "y": 3.08000016,
+      "z": 20.3333,
+      "dimensions": [
+        2.34,
+        0.8,
+        0.17
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Chimney2",
+      "group": "Building:building-7-3",
+      "name": "Chimney",
+      "x": 34.1877975,
+      "y": 3.35000014,
+      "z": 18.7333,
+      "dimensions": [
+        0.4,
+        1.25,
+        0.4
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 26.4936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 26.4936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 26.4936,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 27.3936,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 27.3936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 27.3936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 27.3936,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 27.3936,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 28.2936,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 28.2936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 28.2936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 28.2936,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 28.2936,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 26.1054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 29.1936016,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 26.1054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.0936012,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 26.1054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 30.9936,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 31.8936,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 31.8936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 31.8936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 31.8936,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 31.8936,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 32.793602,
+      "y": 0.025,
+      "z": 27.0054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 32.793602,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 32.793602,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 32.793602,
+      "y": 0.025,
+      "z": 29.7054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 32.793602,
+      "y": 0.025,
+      "z": 30.6054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 33.6936,
+      "y": 0.025,
+      "z": 27.9054012,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Floor_UnevenBrick",
+      "group": "Meeting Area",
+      "name": "Meeting paving",
+      "x": 33.6936,
+      "y": 0.025,
+      "z": 28.8054,
+      "dimensions": [
+        0.92,
+        0.04,
+        0.92
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:0",
+      "x": 29.9936,
+      "y": 0.47,
+      "z": 26.6554012,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 0.0,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:1",
+      "x": 31.9336014,
+      "y": 0.47,
+      "z": 27.0454,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": -49.4473953,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:2",
+      "x": 33.1336021,
+      "y": 0.47,
+      "z": 28.0754013,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": -78.65501,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:3",
+      "x": 33.1336021,
+      "y": 0.47,
+      "z": 29.3354,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": -101.345,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:4",
+      "x": 31.9336014,
+      "y": 0.47,
+      "z": 30.3654,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": -130.552612,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:5",
+      "x": 29.9936,
+      "y": 0.47,
+      "z": 30.7554,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 180.0,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:6",
+      "x": 28.0536,
+      "y": 0.47,
+      "z": 30.3654,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 130.552612,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:7",
+      "x": 26.8536015,
+      "y": 0.47,
+      "z": 29.3354,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 101.345009,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:8",
+      "x": 26.8536015,
+      "y": 0.47,
+      "z": 28.0754013,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 78.655,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Chair_1",
+      "group": "Meeting Area",
+      "name": "Seat:9",
+      "x": 28.0536,
+      "y": 0.47,
+      "z": 27.0454,
+      "dimensions": [
+        0.82,
+        0.94,
+        0.82
+      ],
+      "yaw": 49.4473953,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-0",
+      "name": "shrub",
+      "x": 44.9306,
+      "y": 0.244125009,
+      "z": 37.4366,
+      "dimensions": [
+        0.553350031,
+        0.488250017,
+        0.553350031
+      ],
+      "yaw": 53.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-1",
+      "name": "broadleaf",
+      "x": 21.7306,
+      "y": 1.57435,
+      "z": 2.8778,
+      "dimensions": [
+        2.25515,
+        3.1487,
+        2.25515
+      ],
+      "yaw": 91.4,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-2",
+      "name": "broadleaf",
+      "x": 45.714798,
+      "y": 1.89625,
+      "z": 27.6419,
+      "dimensions": [
+        2.71625,
+        3.7925,
+        2.71625
+      ],
+      "yaw": 56.69,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-3",
+      "name": "shrub",
+      "x": 25.575201,
+      "y": 0.423749983,
+      "z": 8.2103,
+      "dimensions": [
+        0.9605,
+        0.847499967,
+        0.9605
+      ],
+      "yaw": 355.52,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-4",
+      "name": "grass",
+      "x": 45.462,
+      "y": 0.2024,
+      "z": 6.4161,
+      "dimensions": [
+        0.657799959,
+        0.4048,
+        0.657799959
+      ],
+      "yaw": 133.05,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-5",
+      "name": "broadleaf",
+      "x": 30.9995,
+      "y": 1.46705,
+      "z": 48.2488,
+      "dimensions": [
+        2.10145,
+        2.9341,
+        2.10145
+      ],
+      "yaw": 335.63,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-6",
+      "name": "shrub",
+      "x": 29.5826,
+      "y": 0.259875,
+      "z": 45.9312019,
+      "dimensions": [
+        0.589050055,
+        0.51975,
+        0.589050055
+      ],
+      "yaw": 180.98,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-7",
+      "name": "grass",
+      "x": 23.9302,
+      "y": 0.1534,
+      "z": 0.8926,
+      "dimensions": [
+        0.49855,
+        0.3068,
+        0.49855
+      ],
+      "yaw": 290.42,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-8",
+      "name": "shrub",
+      "x": 26.3246,
+      "y": 0.29549998,
+      "z": 16.1051,
+      "dimensions": [
+        0.6698,
+        0.590999961,
+        0.6698
+      ],
+      "yaw": 204.71,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-9",
+      "name": "flowers",
+      "x": 45.802002,
+      "y": 0.279400021,
+      "z": 35.8574,
+      "dimensions": [
+        0.6604,
+        0.558800042,
+        0.6604
+      ],
+      "yaw": 245.12,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-10",
+      "name": "shrub",
+      "x": 3.1409,
+      "y": 0.326250017,
+      "z": 16.9268,
+      "dimensions": [
+        0.739500046,
+        0.652500033,
+        0.739500046
+      ],
+      "yaw": 6.97,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-11",
+      "name": "shrub",
+      "x": 34.5762978,
+      "y": 0.401624978,
+      "z": 4.0712,
+      "dimensions": [
+        0.91035,
+        0.803249955,
+        0.91035
+      ],
+      "yaw": 74.33,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-12",
+      "name": "pine",
+      "x": 33.7515,
+      "y": 2.34995031,
+      "z": 47.1970978,
+      "dimensions": [
+        2.186,
+        4.69990063,
+        2.186
+      ],
+      "yaw": 340.92,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-13",
+      "name": "shrub",
+      "x": 29.736599,
+      "y": 0.323625,
+      "z": 23.736599,
+      "dimensions": [
+        0.73355,
+        0.64725,
+        0.73355
+      ],
+      "yaw": 224.45,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-14",
+      "name": "shrub",
+      "x": 7.4775,
+      "y": 0.303,
+      "z": 44.3837,
+      "dimensions": [
+        0.686800063,
+        0.606,
+        0.686800063
+      ],
+      "yaw": 77.33,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-15",
+      "name": "shrub",
+      "x": 45.8781,
+      "y": 0.287625,
+      "z": 21.2709,
+      "dimensions": [
+        0.651950061,
+        0.57525,
+        0.651950061
+      ],
+      "yaw": 250.72,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_2",
+      "group": "Vegetation:vegetation-16",
+      "name": "pine",
+      "x": 16.3247,
+      "y": 2.4295,
+      "z": 45.9139977,
+      "dimensions": [
+        2.26,
+        4.859,
+        2.26
+      ],
+      "yaw": 114.78,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_3",
+      "group": "Vegetation:vegetation-17",
+      "name": "pine",
+      "x": 19.3972,
+      "y": 1.52435,
+      "z": 3.8735,
+      "dimensions": [
+        1.418,
+        3.0487,
+        1.418
+      ],
+      "yaw": 52.45,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-18",
+      "name": "grass",
+      "x": 9.4029,
+      "y": 0.22739999,
+      "z": 28.1691,
+      "dimensions": [
+        0.73905,
+        0.45479998,
+        0.73905
+      ],
+      "yaw": 336.55,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-19",
+      "name": "broadleaf",
+      "x": 3.2759,
+      "y": 1.2913,
+      "z": 48.259,
+      "dimensions": [
+        1.84970009,
+        2.5826,
+        1.84970009
+      ],
+      "yaw": 304.78,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-20",
+      "name": "shrub",
+      "x": 28.5544,
+      "y": 0.387375,
+      "z": 43.82,
+      "dimensions": [
+        0.87805,
+        0.77475,
+        0.87805
+      ],
+      "yaw": 237.95,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-21",
+      "name": "shrub",
+      "x": 33.7062,
+      "y": 0.3855,
+      "z": 7.51659966,
+      "dimensions": [
+        0.873800039,
+        0.771,
+        0.873800039
+      ],
+      "yaw": 192.26,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-22",
+      "name": "broadleaf",
+      "x": 46.5925,
+      "y": 1.68720007,
+      "z": 46.4899025,
+      "dimensions": [
+        2.4168,
+        3.37440014,
+        2.4168
+      ],
+      "yaw": 5.86,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-23",
+      "name": "grass",
+      "x": 0.8407,
+      "y": 0.2196,
+      "z": 10.0528,
+      "dimensions": [
+        0.7137,
+        0.4392,
+        0.7137
+      ],
+      "yaw": 294.31,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-24",
+      "name": "broadleaf",
+      "x": 48.0293,
+      "y": 1.31720006,
+      "z": 24.0347,
+      "dimensions": [
+        1.8868,
+        2.63440013,
+        1.8868
+      ],
+      "yaw": 113.19,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-25",
+      "name": "broadleaf",
+      "x": 40.2676,
+      "y": 2.072,
+      "z": 48.4129,
+      "dimensions": [
+        2.96800017,
+        4.144,
+        2.96800017
+      ],
+      "yaw": 20.92,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-26",
+      "name": "shrub",
+      "x": 1.4849,
+      "y": 0.26025,
+      "z": 45.7354,
+      "dimensions": [
+        0.5899,
+        0.5205,
+        0.5899
+      ],
+      "yaw": 272.69,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-27",
+      "name": "broadleaf",
+      "x": 23.8747,
+      "y": 1.79265,
+      "z": 3.5828,
+      "dimensions": [
+        2.56785,
+        3.5853,
+        2.56785
+      ],
+      "yaw": 127.03,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-28",
+      "name": "grass",
+      "x": 17.8653011,
+      "y": 0.1698,
+      "z": 16.7148,
+      "dimensions": [
+        0.551849961,
+        0.3396,
+        0.551849961
+      ],
+      "yaw": 53.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-29",
+      "name": "broadleaf",
+      "x": 11.123,
+      "y": 1.961,
+      "z": 46.3879,
+      "dimensions": [
+        2.809,
+        3.922,
+        2.809
+      ],
+      "yaw": 133.8,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-30",
+      "name": "shrub",
+      "x": 40.9743,
+      "y": 0.253499985,
+      "z": 44.5756,
+      "dimensions": [
+        0.574600041,
+        0.506999969,
+        0.574600041
+      ],
+      "yaw": 177.89,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-31",
+      "name": "broadleaf",
+      "x": 7.55330038,
+      "y": 1.73715007,
+      "z": 23.1661015,
+      "dimensions": [
+        2.48835015,
+        3.47430015,
+        2.48835015
+      ],
+      "yaw": 310.74,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_3",
+      "group": "Vegetation:vegetation-32",
+      "name": "pine",
+      "x": 24.3256,
+      "y": 2.24030018,
+      "z": 46.8454971,
+      "dimensions": [
+        2.084,
+        4.48060036,
+        2.084
+      ],
+      "yaw": 112.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-33",
+      "name": "broadleaf",
+      "x": 3.1952,
+      "y": 1.55215,
+      "z": 26.5996,
+      "dimensions": [
+        2.22335,
+        3.1043,
+        2.22335
+      ],
+      "yaw": 283.73,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_2",
+      "group": "Vegetation:vegetation-34",
+      "name": "pine",
+      "x": 19.409399,
+      "y": 1.60390007,
+      "z": 47.7798,
+      "dimensions": [
+        1.492,
+        3.20780015,
+        1.492
+      ],
+      "yaw": 68.82,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-35",
+      "name": "shrub",
+      "x": 8.9319,
+      "y": 0.431249976,
+      "z": 32.3333,
+      "dimensions": [
+        0.9775,
+        0.862499952,
+        0.9775
+      ],
+      "yaw": 230.78,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-36",
+      "name": "shrub",
+      "x": 2.7769,
+      "y": 0.404249966,
+      "z": 45.729702,
+      "dimensions": [
+        0.9163,
+        0.808499932,
+        0.9163
+      ],
+      "yaw": 8.96,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-37",
+      "name": "broadleaf",
+      "x": 36.5048981,
+      "y": 1.9425,
+      "z": 1.5036999,
+      "dimensions": [
+        2.7825,
+        3.885,
+        2.7825
+      ],
+      "yaw": 227.17,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-38",
+      "name": "flowers",
+      "x": 31.1023,
+      "y": 0.30415,
+      "z": 7.8337,
+      "dimensions": [
+        0.718899965,
+        0.6083,
+        0.718899965
+      ],
+      "yaw": 94.53,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-39",
+      "name": "shrub",
+      "x": 1.54699993,
+      "y": 0.284625,
+      "z": 30.7472,
+      "dimensions": [
+        0.64515,
+        0.56925,
+        0.64515
+      ],
+      "yaw": 207.73,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-40",
+      "name": "broadleaf",
+      "x": 2.0526,
+      "y": 1.61135,
+      "z": 46.6712,
+      "dimensions": [
+        2.30815,
+        3.2227,
+        2.30815
+      ],
+      "yaw": 353.19,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_3",
+      "group": "Vegetation:vegetation-41",
+      "name": "pine",
+      "x": 32.1323,
+      "y": 1.59315,
+      "z": 47.4666977,
+      "dimensions": [
+        1.482,
+        3.1863,
+        1.482
+      ],
+      "yaw": 238.2,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-42",
+      "name": "pine",
+      "x": 24.9484,
+      "y": 1.82965016,
+      "z": 2.3605,
+      "dimensions": [
+        1.702,
+        3.65930033,
+        1.702
+      ],
+      "yaw": 57.3,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-43",
+      "name": "broadleaf",
+      "x": 2.94890022,
+      "y": 1.37825,
+      "z": 21.4101,
+      "dimensions": [
+        1.97425008,
+        2.7565,
+        1.97425008
+      ],
+      "yaw": 197.35,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-44",
+      "name": "shrub",
+      "x": 6.1188,
+      "y": 0.272625,
+      "z": 4.5835,
+      "dimensions": [
+        0.61795,
+        0.54525,
+        0.61795
+      ],
+      "yaw": 66.34,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-45",
+      "name": "broadleaf",
+      "x": 18.2832,
+      "y": 1.21545,
+      "z": 48.7706,
+      "dimensions": [
+        1.74105012,
+        2.4309,
+        1.74105012
+      ],
+      "yaw": 272.97,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-46",
+      "name": "shrub",
+      "x": 35.1649,
+      "y": 0.390750021,
+      "z": 45.0100975,
+      "dimensions": [
+        0.885700047,
+        0.781500041,
+        0.885700047
+      ],
+      "yaw": 32.69,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-47",
+      "name": "broadleaf",
+      "x": 50.0741,
+      "y": 1.35050011,
+      "z": 38.2976,
+      "dimensions": [
+        1.9345001,
+        2.70100021,
+        1.9345001
+      ],
+      "yaw": 104.08,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-48",
+      "name": "pine",
+      "x": 13.1179008,
+      "y": 1.56735,
+      "z": 25.5017986,
+      "dimensions": [
+        1.458,
+        3.1347,
+        1.458
+      ],
+      "yaw": 156.58,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-49",
+      "name": "grass",
+      "x": 35.7571,
+      "y": 0.181200013,
+      "z": 13.3161,
+      "dimensions": [
+        0.58889997,
+        0.362400025,
+        0.58889997
+      ],
+      "yaw": 147.67,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-50",
+      "name": "grass",
+      "x": 1.9464,
+      "y": 0.182000011,
+      "z": 22.2983017,
+      "dimensions": [
+        0.5915,
+        0.364000022,
+        0.5915
+      ],
+      "yaw": 76.42,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-51",
+      "name": "broadleaf",
+      "x": 5.3059,
+      "y": 1.46335,
+      "z": 13.5632992,
+      "dimensions": [
+        2.09615016,
+        2.9267,
+        2.09615016
+      ],
+      "yaw": 208.44,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_2",
+      "group": "Vegetation:vegetation-52",
+      "name": "pine",
+      "x": 13.0809994,
+      "y": 2.2575,
+      "z": 7.9183,
+      "dimensions": [
+        2.1,
+        4.515,
+        2.1
+      ],
+      "yaw": 345.8,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-53",
+      "name": "grass",
+      "x": 5.4618,
+      "y": 0.2096,
+      "z": 45.6457,
+      "dimensions": [
+        0.681199968,
+        0.4192,
+        0.681199968
+      ],
+      "yaw": 158.85,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-54",
+      "name": "shrub",
+      "x": 14.6687,
+      "y": 0.419624984,
+      "z": 11.0658,
+      "dimensions": [
+        0.95115,
+        0.839249969,
+        0.95115
+      ],
+      "yaw": 358.76,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-55",
+      "name": "shrub",
+      "x": 33.7515,
+      "y": 0.27,
+      "z": 13.4206009,
+      "dimensions": [
+        0.612000048,
+        0.54,
+        0.612000048
+      ],
+      "yaw": 236.21,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-56",
+      "name": "shrub",
+      "x": 15.2454,
+      "y": 0.2475,
+      "z": 15.7004,
+      "dimensions": [
+        0.561000049,
+        0.495,
+        0.561000049
+      ],
+      "yaw": 127.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-57",
+      "name": "grass",
+      "x": 49.4877,
+      "y": 0.19600001,
+      "z": 23.3319988,
+      "dimensions": [
+        0.636999965,
+        0.39200002,
+        0.636999965
+      ],
+      "yaw": 254.74,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-58",
+      "name": "grass",
+      "x": 46.3775978,
+      "y": 0.1428,
+      "z": 9.6398,
+      "dimensions": [
+        0.464099973,
+        0.2856,
+        0.464099973
+      ],
+      "yaw": 166.57,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-59",
+      "name": "shrub",
+      "x": 13.2892008,
+      "y": 0.406499982,
+      "z": 6.0838,
+      "dimensions": [
+        0.9214,
+        0.812999964,
+        0.9214
+      ],
+      "yaw": 189.21,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-60",
+      "name": "broadleaf",
+      "x": 50.0019,
+      "y": 1.5429,
+      "z": 22.8321,
+      "dimensions": [
+        2.21010017,
+        3.0858,
+        2.21010017
+      ],
+      "yaw": 140.69,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-61",
+      "name": "shrub",
+      "x": 41.4437027,
+      "y": 0.2625,
+      "z": 36.2081,
+      "dimensions": [
+        0.595,
+        0.525,
+        0.595
+      ],
+      "yaw": 214.82,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-62",
+      "name": "shrub",
+      "x": 27.8305,
+      "y": 0.412875,
+      "z": 44.5738,
+      "dimensions": [
+        0.935849965,
+        0.82575,
+        0.935849965
+      ],
+      "yaw": 208.82,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-63",
+      "name": "grass",
+      "x": 12.2060995,
+      "y": 0.228,
+      "z": 4.1306,
+      "dimensions": [
+        0.740999937,
+        0.456,
+        0.740999937
+      ],
+      "yaw": 113.19,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-64",
+      "name": "flowers",
+      "x": 33.9671,
+      "y": 0.26675,
+      "z": 22.1066,
+      "dimensions": [
+        0.6305,
+        0.5335,
+        0.6305
+      ],
+      "yaw": 68.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-65",
+      "name": "flowers",
+      "x": 47.1146,
+      "y": 0.27225,
+      "z": 3.2476,
+      "dimensions": [
+        0.6435,
+        0.5445,
+        0.6435
+      ],
+      "yaw": 148.17,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-66",
+      "name": "shrub",
+      "x": 26.3669987,
+      "y": 0.267375,
+      "z": 17.6788,
+      "dimensions": [
+        0.60605,
+        0.53475,
+        0.60605
+      ],
+      "yaw": 76.88,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-67",
+      "name": "grass",
+      "x": 46.4903,
+      "y": 0.2196,
+      "z": 13.4026,
+      "dimensions": [
+        0.7137,
+        0.4392,
+        0.7137
+      ],
+      "yaw": 116.91,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-68",
+      "name": "grass",
+      "x": 36.7583,
+      "y": 0.1918,
+      "z": 41.308197,
+      "dimensions": [
+        0.623349965,
+        0.3836,
+        0.623349965
+      ],
+      "yaw": 166.48,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-69",
+      "name": "pine",
+      "x": 28.7331,
+      "y": 1.5867,
+      "z": 48.3685,
+      "dimensions": [
+        1.476,
+        3.1734,
+        1.476
+      ],
+      "yaw": 11.39,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-70",
+      "name": "shrub",
+      "x": 28.3202,
+      "y": 0.427125037,
+      "z": 45.0234,
+      "dimensions": [
+        0.9681501,
+        0.8542501,
+        0.9681501
+      ],
+      "yaw": 243.64,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-71",
+      "name": "broadleaf",
+      "x": 42.8643036,
+      "y": 1.73530006,
+      "z": 46.1958,
+      "dimensions": [
+        2.48570013,
+        3.47060013,
+        2.48570013
+      ],
+      "yaw": 223.72,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-72",
+      "name": "grass",
+      "x": 19.5394,
+      "y": 0.2182,
+      "z": 5.112,
+      "dimensions": [
+        0.709149957,
+        0.4364,
+        0.709149957
+      ],
+      "yaw": 126.96,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-73",
+      "name": "flowers",
+      "x": 35.2051,
+      "y": 0.251075,
+      "z": 16.0406,
+      "dimensions": [
+        0.59344995,
+        0.50215,
+        0.59344995
+      ],
+      "yaw": 175.83,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-74",
+      "name": "shrub",
+      "x": 5.5678997,
+      "y": 0.254625022,
+      "z": 16.9638,
+      "dimensions": [
+        0.577150047,
+        0.509250045,
+        0.577150047
+      ],
+      "yaw": 242.85,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-75",
+      "name": "shrub",
+      "x": 24.1486015,
+      "y": 0.318,
+      "z": 42.5499039,
+      "dimensions": [
+        0.7208,
+        0.636,
+        0.7208
+      ],
+      "yaw": 35.42,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-76",
+      "name": "flowers",
+      "x": 46.1125,
+      "y": 0.2772,
+      "z": 23.1237011,
+      "dimensions": [
+        0.6552,
+        0.5544,
+        0.6552
+      ],
+      "yaw": 136.72,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-77",
+      "name": "broadleaf",
+      "x": 49.6494,
+      "y": 1.2395,
+      "z": 16.3298,
+      "dimensions": [
+        1.7755,
+        2.479,
+        1.7755
+      ],
+      "yaw": 302.27,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-78",
+      "name": "grass",
+      "x": 48.1968,
+      "y": 0.147,
+      "z": 47.6032,
+      "dimensions": [
+        0.47775,
+        0.294,
+        0.47775
+      ],
+      "yaw": 282.38,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-79",
+      "name": "shrub",
+      "x": 26.1052,
+      "y": 0.267375,
+      "z": 5.12460041,
+      "dimensions": [
+        0.60605,
+        0.53475,
+        0.60605
+      ],
+      "yaw": 17.11,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-80",
+      "name": "shrub",
+      "x": 7.1635,
+      "y": 0.312375,
+      "z": 44.156498,
+      "dimensions": [
+        0.70805,
+        0.62475,
+        0.70805
+      ],
+      "yaw": 105.18,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-81",
+      "name": "shrub",
+      "x": 22.9904,
+      "y": 0.304499984,
+      "z": 13.0465,
+      "dimensions": [
+        0.6902,
+        0.608999968,
+        0.6902
+      ],
+      "yaw": 170.57,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-82",
+      "name": "shrub",
+      "x": 25.8922,
+      "y": 0.318750024,
+      "z": 15.2493992,
+      "dimensions": [
+        0.7225,
+        0.637500048,
+        0.7225
+      ],
+      "yaw": 180.65,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-83",
+      "name": "grass",
+      "x": 6.3969,
+      "y": 0.1498,
+      "z": 29.8296,
+      "dimensions": [
+        0.48685,
+        0.2996,
+        0.48685
+      ],
+      "yaw": 186.41,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Vegetation:vegetation-84",
+      "name": "rock",
+      "x": 43.9105,
+      "y": 0.3484,
+      "z": 23.2739,
+      "dimensions": [
+        0.9648,
+        0.6968,
+        0.911200047
+      ],
+      "yaw": 90.5,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-85",
+      "name": "flowers",
+      "x": 49.7262,
+      "y": 0.2486,
+      "z": 8.4707,
+      "dimensions": [
+        0.5876,
+        0.4972,
+        0.5876
+      ],
+      "yaw": 128.16,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-86",
+      "name": "shrub",
+      "x": 47.3854,
+      "y": 0.273,
+      "z": 38.1907,
+      "dimensions": [
+        0.6188,
+        0.546,
+        0.6188
+      ],
+      "yaw": 317.24,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-87",
+      "name": "broadleaf",
+      "x": 28.5091,
+      "y": 1.2247,
+      "z": 42.5370979,
+      "dimensions": [
+        1.75430012,
+        2.4494,
+        1.75430012
+      ],
+      "yaw": 198.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-88",
+      "name": "broadleaf",
+      "x": 49.367,
+      "y": 1.31349993,
+      "z": 10.7724,
+      "dimensions": [
+        1.8815,
+        2.62699986,
+        1.8815
+      ],
+      "yaw": 43.84,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-89",
+      "name": "broadleaf",
+      "x": 22.3562984,
+      "y": 1.776,
+      "z": 41.0502968,
+      "dimensions": [
+        2.54400015,
+        3.552,
+        2.54400015
+      ],
+      "yaw": 268.92,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-90",
+      "name": "pine",
+      "x": 37.1268,
+      "y": 2.16505,
+      "z": 47.1547,
+      "dimensions": [
+        2.014,
+        4.3301,
+        2.014
+      ],
+      "yaw": 135.89,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-91",
+      "name": "shrub",
+      "x": 7.5359,
+      "y": 0.244125009,
+      "z": 23.5027,
+      "dimensions": [
+        0.553350031,
+        0.488250017,
+        0.553350031
+      ],
+      "yaw": 123.95,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-92",
+      "name": "shrub",
+      "x": 38.8886,
+      "y": 0.365625024,
+      "z": 47.8264,
+      "dimensions": [
+        0.82875,
+        0.731250048,
+        0.82875
+      ],
+      "yaw": 78.85,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-93",
+      "name": "shrub",
+      "x": 25.442,
+      "y": 0.353625,
+      "z": 4.8312,
+      "dimensions": [
+        0.801550031,
+        0.70725,
+        0.801550031
+      ],
+      "yaw": 341.52,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-94",
+      "name": "shrub",
+      "x": 2.9462,
+      "y": 0.360375017,
+      "z": 22.4952011,
+      "dimensions": [
+        0.816850066,
+        0.720750034,
+        0.816850066
+      ],
+      "yaw": 30.16,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-95",
+      "name": "broadleaf",
+      "x": 19.7231,
+      "y": 1.443,
+      "z": 30.0585,
+      "dimensions": [
+        2.067,
+        2.886,
+        2.067
+      ],
+      "yaw": 300.29,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-96",
+      "name": "pine",
+      "x": 9.8069,
+      "y": 2.29190016,
+      "z": 38.6319,
+      "dimensions": [
+        2.132,
+        4.58380032,
+        2.132
+      ],
+      "yaw": 243.24,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_2",
+      "group": "Vegetation:vegetation-97",
+      "name": "pine",
+      "x": 14.9569,
+      "y": 1.44910014,
+      "z": 10.6096,
+      "dimensions": [
+        1.348,
+        2.89820027,
+        1.348
+      ],
+      "yaw": 37.17,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_3",
+      "group": "Vegetation:vegetation-98",
+      "name": "rock",
+      "x": 26.9925,
+      "y": 0.346775,
+      "z": 16.6633987,
+      "dimensions": [
+        0.9603,
+        0.69355,
+        0.906950057
+      ],
+      "yaw": 131.91,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-99",
+      "name": "broadleaf",
+      "x": 28.5477,
+      "y": 1.6354,
+      "z": 46.119503,
+      "dimensions": [
+        2.3426,
+        3.2708,
+        2.3426
+      ],
+      "yaw": 274.47,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-100",
+      "name": "broadleaf",
+      "x": 43.9888,
+      "y": 2.11825,
+      "z": 13.1022,
+      "dimensions": [
+        3.03425,
+        4.2365,
+        3.03425
+      ],
+      "yaw": 215.4,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-101",
+      "name": "broadleaf",
+      "x": 35.517,
+      "y": 1.35235,
+      "z": 3.4268,
+      "dimensions": [
+        1.93715012,
+        2.7047,
+        1.93715012
+      ],
+      "yaw": 107.83,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-102",
+      "name": "broadleaf",
+      "x": 48.728302,
+      "y": 1.35050011,
+      "z": 25.2611,
+      "dimensions": [
+        1.9345001,
+        2.70100021,
+        1.9345001
+      ],
+      "yaw": 237.01,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-103",
+      "name": "broadleaf",
+      "x": 45.0644,
+      "y": 1.5059,
+      "z": 10.6362,
+      "dimensions": [
+        2.1571002,
+        3.0118,
+        2.1571002
+      ],
+      "yaw": 15.19,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_3",
+      "group": "Vegetation:vegetation-104",
+      "name": "pine",
+      "x": 13.5135,
+      "y": 2.13925,
+      "z": 9.2248,
+      "dimensions": [
+        1.99,
+        4.2785,
+        1.99
+      ],
+      "yaw": 122.76,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-105",
+      "name": "pine",
+      "x": 3.5927,
+      "y": 2.45315027,
+      "z": 27.3128,
+      "dimensions": [
+        2.282,
+        4.90630054,
+        2.282
+      ],
+      "yaw": 196.85,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-106",
+      "name": "flowers",
+      "x": 25.7843,
+      "y": 0.264275,
+      "z": 41.6199036,
+      "dimensions": [
+        0.62465,
+        0.52855,
+        0.62465
+      ],
+      "yaw": 266.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-107",
+      "name": "broadleaf",
+      "x": 25.8749,
+      "y": 1.23765,
+      "z": 18.1106987,
+      "dimensions": [
+        1.77285016,
+        2.4753,
+        1.77285016
+      ],
+      "yaw": 315.15,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-108",
+      "name": "broadleaf",
+      "x": 1.0998,
+      "y": 1.6243,
+      "z": 16.7945,
+      "dimensions": [
+        2.32670021,
+        3.2486,
+        2.32670021
+      ],
+      "yaw": 181.5,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-109",
+      "name": "grass",
+      "x": 15.7537,
+      "y": 0.1754,
+      "z": 34.3287,
+      "dimensions": [
+        0.570049942,
+        0.3508,
+        0.570049942
+      ],
+      "yaw": 221.05,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-110",
+      "name": "broadleaf",
+      "x": 48.3999023,
+      "y": 1.51885,
+      "z": 37.9895,
+      "dimensions": [
+        2.17565012,
+        3.0377,
+        2.17565012
+      ],
+      "yaw": 207.57,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-111",
+      "name": "broadleaf",
+      "x": 46.2635,
+      "y": 1.665,
+      "z": 22.6706,
+      "dimensions": [
+        2.385,
+        3.33,
+        2.385
+      ],
+      "yaw": 207.64,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-112",
+      "name": "grass",
+      "x": 31.523201,
+      "y": 0.152,
+      "z": 15.2052,
+      "dimensions": [
+        0.494,
+        0.304,
+        0.494
+      ],
+      "yaw": 264.93,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-113",
+      "name": "shrub",
+      "x": 37.3064,
+      "y": 0.26700002,
+      "z": 5.1537,
+      "dimensions": [
+        0.605200052,
+        0.534000039,
+        0.605200052
+      ],
+      "yaw": 243.67,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-114",
+      "name": "shrub",
+      "x": 10.765,
+      "y": 0.3645,
+      "z": 10.3420992,
+      "dimensions": [
+        0.8262,
+        0.729,
+        0.8262
+      ],
+      "yaw": 86.56,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-115",
+      "name": "broadleaf",
+      "x": 20.5679,
+      "y": 1.93695009,
+      "z": 5.61570024,
+      "dimensions": [
+        2.7745502,
+        3.87390018,
+        2.7745502
+      ],
+      "yaw": 21.54,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-116",
+      "name": "shrub",
+      "x": 45.7217,
+      "y": 0.255375,
+      "z": 36.557,
+      "dimensions": [
+        0.578850031,
+        0.51075,
+        0.578850031
+      ],
+      "yaw": 181.51,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-117",
+      "name": "shrub",
+      "x": 17.9547,
+      "y": 0.374625,
+      "z": 7.4087,
+      "dimensions": [
+        0.849150062,
+        0.74925,
+        0.849150062
+      ],
+      "yaw": 126.54,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-118",
+      "name": "shrub",
+      "x": 15.4304008,
+      "y": 0.417,
+      "z": 10.4302006,
+      "dimensions": [
+        0.9452,
+        0.834,
+        0.9452
+      ],
+      "yaw": 181.76,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-119",
+      "name": "shrub",
+      "x": 14.4589,
+      "y": 0.281625,
+      "z": 34.475502,
+      "dimensions": [
+        0.63835,
+        0.56325,
+        0.63835
+      ],
+      "yaw": 197.48,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-120",
+      "name": "grass",
+      "x": 40.6311,
+      "y": 0.2268,
+      "z": 5.6018,
+      "dimensions": [
+        0.737099946,
+        0.4536,
+        0.737099946
+      ],
+      "yaw": 339.47,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-121",
+      "name": "flowers",
+      "x": 6.4837,
+      "y": 0.301675022,
+      "z": 25.5815,
+      "dimensions": [
+        0.713049948,
+        0.603350043,
+        0.713049948
+      ],
+      "yaw": 99.32,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-122",
+      "name": "shrub",
+      "x": 49.6229019,
+      "y": 0.373125017,
+      "z": 3.17450023,
+      "dimensions": [
+        0.845750034,
+        0.746250033,
+        0.845750034
+      ],
+      "yaw": 357.56,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-123",
+      "name": "pine",
+      "x": 18.7603,
+      "y": 2.29835,
+      "z": 36.778,
+      "dimensions": [
+        2.138,
+        4.5967,
+        2.138
+      ],
+      "yaw": 349.78,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-124",
+      "name": "shrub",
+      "x": 44.2729,
+      "y": 0.369000018,
+      "z": 1.76759994,
+      "dimensions": [
+        0.836400032,
+        0.738000035,
+        0.836400032
+      ],
+      "yaw": 130.67,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-125",
+      "name": "broadleaf",
+      "x": 48.8402977,
+      "y": 1.5281,
+      "z": 5.3715,
+      "dimensions": [
+        2.1889,
+        3.0562,
+        2.1889
+      ],
+      "yaw": 146.58,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-126",
+      "name": "shrub",
+      "x": 7.2462,
+      "y": 0.393,
+      "z": 37.135,
+      "dimensions": [
+        0.8908,
+        0.786,
+        0.8908
+      ],
+      "yaw": 305.17,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-127",
+      "name": "shrub",
+      "x": 33.01,
+      "y": 0.379499972,
+      "z": 12.2256994,
+      "dimensions": [
+        0.8602,
+        0.758999944,
+        0.8602
+      ],
+      "yaw": 87.03,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-128",
+      "name": "shrub",
+      "x": 5.16950035,
+      "y": 0.258375,
+      "z": 42.3988,
+      "dimensions": [
+        0.58565,
+        0.51675,
+        0.58565
+      ],
+      "yaw": 228.09,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-129",
+      "name": "broadleaf",
+      "x": 37.2244,
+      "y": 1.57805,
+      "z": 2.1805,
+      "dimensions": [
+        2.26045012,
+        3.1561,
+        2.26045012
+      ],
+      "yaw": 114.13,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-130",
+      "name": "shrub",
+      "x": 25.6303,
+      "y": 0.340875,
+      "z": 44.9545021,
+      "dimensions": [
+        0.77265,
+        0.68175,
+        0.77265
+      ],
+      "yaw": 131.18,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-131",
+      "name": "broadleaf",
+      "x": 47.0531,
+      "y": 1.4171,
+      "z": 35.8317,
+      "dimensions": [
+        2.0299,
+        2.8342,
+        2.0299
+      ],
+      "yaw": 119.83,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-132",
+      "name": "broadleaf",
+      "x": 18.0002,
+      "y": 1.8907,
+      "z": 10.1289005,
+      "dimensions": [
+        2.70829988,
+        3.7814,
+        2.70829988
+      ],
+      "yaw": 237.01,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-133",
+      "name": "shrub",
+      "x": 28.9257011,
+      "y": 0.27225,
+      "z": 13.1025,
+      "dimensions": [
+        0.6171,
+        0.5445,
+        0.6171
+      ],
+      "yaw": 81.96,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common",
+      "group": "Vegetation:vegetation-134",
+      "name": "shrub",
+      "x": 41.044,
+      "y": 0.41925,
+      "z": 48.8979,
+      "dimensions": [
+        0.950300038,
+        0.8385,
+        0.950300038
+      ],
+      "yaw": 354.89,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-135",
+      "name": "grass",
+      "x": 47.1822,
+      "y": 0.164400011,
+      "z": 19.3342,
+      "dimensions": [
+        0.53429997,
+        0.328800023,
+        0.53429997
+      ],
+      "yaw": 113.56,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-136",
+      "name": "grass",
+      "x": 15.3399,
+      "y": 0.161600009,
+      "z": 14.6587,
+      "dimensions": [
+        0.5252,
+        0.323200017,
+        0.5252
+      ],
+      "yaw": 8.08,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_3",
+      "group": "Vegetation:vegetation-137",
+      "name": "pine",
+      "x": 8.7824,
+      "y": 1.95005012,
+      "z": 3.1294,
+      "dimensions": [
+        1.814,
+        3.90010023,
+        1.814
+      ],
+      "yaw": 95.64,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Pine_1",
+      "group": "Vegetation:vegetation-138",
+      "name": "pine",
+      "x": 40.165802,
+      "y": 2.23170018,
+      "z": 46.3238,
+      "dimensions": [
+        2.076,
+        4.46340036,
+        2.076
+      ],
+      "yaw": 183.66,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_4_Group",
+      "group": "Vegetation:vegetation-139",
+      "name": "flowers",
+      "x": 41.6406021,
+      "y": 0.27555,
+      "z": 36.215,
+      "dimensions": [
+        0.651299953,
+        0.5511,
+        0.651299953
+      ],
+      "yaw": 126.35,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-140",
+      "name": "flowers",
+      "x": 43.9806023,
+      "y": 0.183975011,
+      "z": 48.5674,
+      "dimensions": [
+        0.43485,
+        0.367950022,
+        0.43485
+      ],
+      "yaw": 79.55,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-141",
+      "name": "grass",
+      "x": 8.0145,
+      "y": 0.1972,
+      "z": 23.622,
+      "dimensions": [
+        0.640899956,
+        0.3944,
+        0.640899956
+      ],
+      "yaw": 120.94,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_1",
+      "group": "Vegetation:vegetation-142",
+      "name": "broadleaf",
+      "x": 41.5769,
+      "y": 2.03685,
+      "z": 46.1604,
+      "dimensions": [
+        2.91765,
+        4.0737,
+        2.91765
+      ],
+      "yaw": 30.02,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-143",
+      "name": "shrub",
+      "x": 10.2449,
+      "y": 0.355875015,
+      "z": 36.3375,
+      "dimensions": [
+        0.806650043,
+        0.711750031,
+        0.806650043
+      ],
+      "yaw": 211.09,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Flower_3_Group",
+      "group": "Vegetation:vegetation-144",
+      "name": "flowers",
+      "x": 25.0241985,
+      "y": 0.2728,
+      "z": 41.3379021,
+      "dimensions": [
+        0.644799948,
+        0.5456,
+        0.644799948
+      ],
+      "yaw": 201.15,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "CommonTree_4",
+      "group": "Vegetation:vegetation-145",
+      "name": "broadleaf",
+      "x": 4.1261,
+      "y": 1.6946,
+      "z": 15.3384,
+      "dimensions": [
+        2.4274,
+        3.3892,
+        2.4274
+      ],
+      "yaw": 104.88,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_3",
+      "group": "Vegetation:vegetation-146",
+      "name": "rock",
+      "x": 34.4994,
+      "y": 0.3523,
+      "z": 1.56360006,
+      "dimensions": [
+        0.975599945,
+        0.7046,
+        0.9214
+      ],
+      "yaw": 201.04,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-147",
+      "name": "grass",
+      "x": 42.9914,
+      "y": 0.228800014,
+      "z": 23.9401,
+      "dimensions": [
+        0.7436,
+        0.457600027,
+        0.7436
+      ],
+      "yaw": 24.78,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Grass_Common_Short",
+      "group": "Vegetation:vegetation-148",
+      "name": "grass",
+      "x": 13.1488,
+      "y": 0.1648,
+      "z": 8.9512,
+      "dimensions": [
+        0.5356,
+        0.3296,
+        0.5356
+      ],
+      "yaw": 196.1,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Vegetation:vegetation-149",
+      "name": "shrub",
+      "x": 21.7843,
+      "y": 0.389625,
+      "z": 18.0761,
+      "dimensions": [
+        0.883150041,
+        0.77925,
+        0.883150041
+      ],
+      "yaw": 41.18,
+      "uniform": true
+    },
+    {
+      "pack": "Props",
+      "model": "Bench",
+      "group": "Landmark:meeting-square",
+      "name": "Square bench",
+      "x": 28.9436016,
+      "y": 0.36,
+      "z": 29.7554,
+      "dimensions": [
+        1.4,
+        0.72,
+        0.65
+      ],
+      "yaw": 90.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Bush_Common_Flowers",
+      "group": "Landmark:meeting-square",
+      "name": "Square flowers",
+      "x": 30.793602,
+      "y": 0.3,
+      "z": 29.6554012,
+      "dimensions": [
+        1.0,
+        0.6,
+        1.0
+      ],
+      "yaw": 0.0,
+      "uniform": true
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:artery-0-0-approach",
+      "name": "Gate timber",
+      "x": 2.5885,
+      "y": 1.25,
+      "z": 1.0,
+      "dimensions": [
+        0.38,
+        2.5,
+        0.38
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:artery-0-0-approach",
+      "name": "Gate timber",
+      "x": 5.7885,
+      "y": 1.25,
+      "z": 1.0,
+      "dimensions": [
+        0.38,
+        2.5,
+        0.38
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Log",
+      "group": "Landmark:artery-0-0-approach",
+      "name": "Gate beam",
+      "x": 4.1885,
+      "y": 2.4,
+      "z": 1.0,
+      "dimensions": [
+        3.6,
+        0.35,
+        0.45
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:artery-1-0-approach",
+      "name": "Gate timber",
+      "x": 48.28,
+      "y": 1.25,
+      "z": 30.476202,
+      "dimensions": [
+        0.38,
+        2.5,
+        0.38
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:artery-1-0-approach",
+      "name": "Gate timber",
+      "x": 51.48,
+      "y": 1.25,
+      "z": 30.476202,
+      "dimensions": [
+        0.38,
+        2.5,
+        0.38
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Log",
+      "group": "Landmark:artery-1-0-approach",
+      "name": "Gate beam",
+      "x": 49.88,
+      "y": 2.4,
+      "z": 30.476202,
+      "dimensions": [
+        3.6,
+        0.35,
+        0.45
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 35.9436,
+      "y": 0.24,
+      "z": 30.2054,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 0.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 35.79153,
+      "y": 0.24,
+      "z": 30.6232128,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 40.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 35.40647,
+      "y": 0.24,
+      "z": 30.8455257,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 80.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 34.9686,
+      "y": 0.24,
+      "z": 30.7683182,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 120.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 34.6828,
+      "y": 0.24,
+      "z": 30.4277115,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 160.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 34.6828,
+      "y": 0.24,
+      "z": 29.9830875,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 200.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 34.9686,
+      "y": 0.24,
+      "z": 29.6424828,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 240.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 35.40647,
+      "y": 0.24,
+      "z": 29.5652752,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 280.0,
+      "uniform": true
+    },
+    {
+      "pack": "Nature",
+      "model": "Rock_Medium_1",
+      "group": "Landmark:square-well",
+      "name": "Well stone",
+      "x": 35.79153,
+      "y": 0.24,
+      "z": 29.7875881,
+      "dimensions": [
+        0.5,
+        0.48,
+        0.45
+      ],
+      "yaw": 320.0,
+      "uniform": true
+    },
+    {
+      "pack": "Village",
+      "model": "Roof_Tower_RoundTiles",
+      "group": "Landmark:square-well",
+      "name": "Well canopy",
+      "x": 35.293602,
+      "y": 1.8,
+      "z": 30.2054,
+      "dimensions": [
+        1.6,
+        0.65,
+        1.6
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:square-well",
+      "name": "Well timber",
+      "x": 34.6936,
+      "y": 0.75,
+      "z": 30.2054,
+      "dimensions": [
+        0.15,
+        1.5,
+        0.15
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    },
+    {
+      "pack": "Village",
+      "model": "Prop_Support",
+      "group": "Landmark:square-well",
+      "name": "Well timber",
+      "x": 35.8936,
+      "y": 0.75,
+      "z": 30.2054,
+      "dimensions": [
+        0.15,
+        1.5,
+        0.15
+      ],
+      "yaw": 0.0,
+      "uniform": false
+    }
+  ],
+  "meshRenderers": 541,
+  "triangles": 444451,
+  "materials": 24,
+  "source": "Exact free Medieval Village Standard, retained Stylized Nature Standard and three existing free Fantasy Props meshes.",
+  "collision": "No art Colliders. Canonical building rectangles alone own accepted movement.",
+  "buildings": 17,
+  "seats": 10,
+  "interiors": 0,
+  "reviewLimit": "Editor composition and render evidence do not establish packaged runtime or hardware performance."
+}

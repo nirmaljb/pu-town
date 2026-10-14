@@ -1,0 +1,20 @@
+{
+  "reviewer": "Codex",
+  "date": "2026-10-14",
+  "scope": "Actual Unity front/back/walking/seated renders inspected; original atlas/materials and bound mesh silhouettes retained; measured standing surface height and feet pivot passed native EditMode checks. Both target bundles built; macOS runtime loading is checked separately.",
+  "checks": [
+    "silhouette",
+    "scale-pivot",
+    "uv-normals",
+    "deformation",
+    "native-materials",
+    "standing",
+    "walking",
+    "seated"
+  ],
+  "sourceSha256": "6d1e98fdeea3cf9e2d84fa88b4ae1f0ab06cdcff7570c60c1227fcba8f5e07bd",
+  "platformSha256": {
+    "macos-universal": "cb53b41b3a8f03c6c066357090555e829efddd84c9ab563da551b40f31fa5171",
+    "windows-x86_64": "19df23f58e3f45128f5445644d8be178ee0616425fd2c814add577d73d3c1621"
+  }
+}

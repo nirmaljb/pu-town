@@ -22,7 +22,7 @@ namespace PUtown.Tests
         }
         private static JObject Snapshot()
         {
-            return StrictProtocol.Command("room_snapshot", "selfPlayerId", "p1", "roomId", "ABC123", "recoveryToken", Credential, "phase", "lobby", "hostPlayerId", "p1", "roleSetup", new JObject { ["mafia"] = 1, ["doctors"] = 1, ["sheriffs"] = 1 }, "mapId", "campus", "players", new JArray(Player()));
+            return StrictProtocol.Command("room_snapshot", "selfPlayerId", "p1", "roomId", "ABC123", "recoveryToken", Credential, "phase", "lobby", "hostPlayerId", "p1", "roleSetup", new JObject { ["mafia"] = 1, ["doctors"] = 1, ["sheriffs"] = 1 }, "mapId", "woodland", "players", new JArray(Player()));
         }
         private static JObject Game(string phase = "day", int round = 1, int remaining = 10000)
         {
@@ -66,7 +66,7 @@ namespace PUtown.Tests
             var world = new NativeWorld(); var snapshot = Snapshot(); snapshot["phase"] = "playing";
             world.Apply(StrictProtocol.Decode(snapshot.ToString()), 0); world.Apply(StrictProtocol.Decode(Game().ToString()), 0);
             var field = StrictProtocol.Command("field_state", "round", 1, "players", new JArray(new JObject { ["playerId"] = "p1", ["x"] = 2400, ["y"] = 1800, ["facing"] = "down", ["ghost"] = false }), "self", new JObject { ["x"] = 2400, ["y"] = 1800, ["facing"] = "down", ["correction"] = 0 });
-            var rules = new CampusRules(File.ReadAllText(Path.Combine(Application.dataPath, "PUtown/Resources/Campus/campus.json")));
+            var rules = new TownRules(File.ReadAllText(Path.Combine(Application.dataPath, "PUtown/Resources/Towns/woodland.json")));
             var prediction = new LocalPrediction(); world.Apply(StrictProtocol.Decode(field.ToString()), 0);
             prediction.Update(world, rules, Vector2.right, .1f, 0, true, (_, __, ___) => { });
             Assert.That(prediction.Position.x, Is.GreaterThan(2400));
@@ -98,17 +98,17 @@ namespace PUtown.Tests
             }
         }
         [Test]
-        public void FreshNativeCreateSelectsCampusBeforeAllowingLobbyControls()
+        public void FreshNativeCreateSelectsWoodlandBeforeAllowingLobbyControls()
         {
             var socket = new FakeSocket();
             using (var session = new GameSession("ws://localhost:8080/ws/game", () => socket, new MemoryStore(), () => 0, false))
             {
                 session.Create("Alice"); var snapshot = Snapshot(); snapshot["mapId"] = "village"; socket.Deliver(snapshot);
                 Assert.That(socket.Sent.Any(m => (string)m["type"] == "select_map"), Is.False); session.ApplyFrame();
-                Assert.That((string)socket.Sent.Last()["type"], Is.EqualTo("select_map")); Assert.That((string)socket.Sent.Last()["mapId"], Is.EqualTo("campus")); Assert.That(session.SelectingCampus, Is.True);
+                Assert.That((string)socket.Sent.Last()["type"], Is.EqualTo("select_map")); Assert.That((string)socket.Sent.Last()["mapId"], Is.EqualTo("woodland")); Assert.That(session.SelectingTown, Is.True);
                 session.Control("set_ready", "ready", true); Assert.That(socket.Sent.Any(m => (string)m["type"] == "set_ready"), Is.False);
-                var state = StrictProtocol.Command("room_state", "phase", "lobby", "hostPlayerId", "p1", "roleSetup", snapshot["roleSetup"], "mapId", "campus", "players", snapshot["players"]); socket.Deliver(state); session.ApplyFrame();
-                Assert.That(session.World.MapId, Is.EqualTo("campus")); Assert.That(session.SelectingCampus, Is.False); Assert.That(session.CanControl, Is.False);
+                var state = StrictProtocol.Command("room_state", "phase", "lobby", "hostPlayerId", "p1", "roleSetup", snapshot["roleSetup"], "mapId", "woodland", "players", snapshot["players"]); socket.Deliver(state); session.ApplyFrame();
+                Assert.That(session.World.MapId, Is.EqualTo("woodland")); Assert.That(session.SelectingTown, Is.False); Assert.That(session.CanControl, Is.False);
                 session.AssetsReady = true; session.Control("set_ready", "ready", true); Assert.That((string)socket.Sent.Last()["type"], Is.EqualTo("set_ready"));
             }
         }
@@ -149,7 +149,7 @@ namespace PUtown.Tests
                     new JObject { ["targetId"] = "practice-villager", ["displayName"] = "Practice Villager", ["role"] = "villager" },
                     new JObject { ["targetId"] = "practice-mafia", ["displayName"] = "Practice Mafia", ["role"] = "mafia" })));
                 session.ApplyFrame(); session.AssetsReady = true;
-                var overlay = new NativeOverlay(session, new CampusRules(Resources.Load<TextAsset>("Campus/campus").text), collection, null);
+                var overlay = new NativeOverlay(session, new TownRules(Resources.Load<TextAsset>("Towns/woodland").text), collection, null);
                 var interfaceObject = GameObject.Find("Native interface"); var document = interfaceObject.GetComponent<UIDocument>(); var panelSettings = document.panelSettings;
                 try
                 {
@@ -198,7 +198,7 @@ namespace PUtown.Tests
                     participant["status"] = "living"; ((JArray)game["players"]).Add(participant);
                 }
                 socket.Deliver(snapshot); socket.Deliver(game); session.ApplyFrame(); session.AssetsReady = true;
-                var overlay = new NativeOverlay(session, new CampusRules(Resources.Load<TextAsset>("Campus/campus").text), collection, Resources.Load<Font>("Fonts/AtkinsonHyperlegible-Regular"), () => { });
+                var overlay = new NativeOverlay(session, new TownRules(Resources.Load<TextAsset>("Towns/woodland").text), collection, Resources.Load<Font>("Fonts/AtkinsonHyperlegible-Regular"), () => { });
                 var interfaceObject = GameObject.Find("Native interface"); var document = interfaceObject.GetComponent<UIDocument>(); var panelSettings = document.panelSettings;
                 RenderTexture viewport = null;
                 try
@@ -377,9 +377,9 @@ namespace PUtown.Tests
             finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
         }
         [Test]
-        public void NativeCampusMappingAndPredictionAdoptServerCorrectionAndFreezeNight()
+        public void NativeTownMappingAndPredictionAdoptServerCorrectionAndFreezeNight()
         {
-            var campus = new CampusRules(Resources.Load<TextAsset>("Campus/campus").text); var world = new NativeWorld(); var prediction = new LocalPrediction(); var sent = new List<Vector2>();
+            var campus = new TownRules(Resources.Load<TextAsset>("Towns/woodland").text); var world = new NativeWorld(); var prediction = new LocalPrediction(); var sent = new List<Vector2>();
             world.Apply(StrictProtocol.Decode(Snapshot().ToString()), 0); world.Apply(StrictProtocol.Decode(Game().ToString()), 0);
             var field = StrictProtocol.Command("field_state", "round", 1, "players", new JArray(new JObject { ["playerId"] = "p1", ["x"] = 2400, ["y"] = 1800, ["facing"] = "down", ["ghost"] = false }), "self", new JObject { ["x"] = 2400, ["y"] = 1800, ["facing"] = "down", ["correction"] = 0 });
             world.Apply(StrictProtocol.Decode(field.ToString()), 0);

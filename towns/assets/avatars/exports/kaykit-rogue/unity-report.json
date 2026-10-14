@@ -1,0 +1,41 @@
+{
+  "preset": "kaykit-rogue",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "skinnedRenderers": 7,
+  "vertices": 7389,
+  "triangles": 7562,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    1.15747619,
+    2.16680431,
+    1.15417218
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "character",
+      "baseTexture": "rogue_texture",
+      "normalTexture": null
+    }
+  ]
+}

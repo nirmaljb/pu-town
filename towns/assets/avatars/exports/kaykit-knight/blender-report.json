@@ -1,0 +1,139 @@
+{
+  "id": "kaykit-knight",
+  "name": "Knight",
+  "masterRevision": 1,
+  "provider": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "sourceArchive": "KayKit Adventurers Free 2.0",
+  "animationArchive": "KayKit Character Animations Free 1.1",
+  "sourceCharacterSha256": "e484370733824a0740683e7f6040aae0d20e5efd4107dde1175d6a2ad7e2f199",
+  "sourceAtlasSha256": "028db4d1cd8b3471e6ba21686515abd4e36ae582f8b314b71ad2ab1fb5453b12",
+  "sourceSha256": "bf5ca3d1c5e6984f0038df4ff1af254c82c7b5e1000f30c2ab93b5a0b0d7ff2a",
+  "fbxSha256": "55144520f09416f1b66e3adeee88519ff6002c63a40fed06bada209b05f3e3a6",
+  "rigBones": [
+    "root",
+    "hips",
+    "spine",
+    "chest",
+    "upperarm.l",
+    "lowerarm.l",
+    "wrist.l",
+    "hand.l",
+    "handslot.l",
+    "upperarm.r",
+    "lowerarm.r",
+    "wrist.r",
+    "hand.r",
+    "handslot.r",
+    "head",
+    "upperleg.r",
+    "lowerleg.r",
+    "foot.r",
+    "toes.r",
+    "upperleg.l",
+    "lowerleg.l",
+    "foot.l",
+    "toes.l"
+  ],
+  "meshes": [
+    {
+      "name": "Knight_ArmLeft",
+      "vertices": 514,
+      "triangles": 622,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_ArmRight",
+      "vertices": 514,
+      "triangles": 622,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_Body",
+      "vertices": 1340,
+      "triangles": 1288,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_Cape",
+      "vertices": 56,
+      "triangles": 84,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_Head",
+      "vertices": 770,
+      "triangles": 1082,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_Helmet",
+      "vertices": 485,
+      "triangles": 418,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_HelmetVisor",
+      "vertices": 477,
+      "triangles": 428,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_LegLeft",
+      "vertices": 586,
+      "triangles": 628,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Knight_LegRight",
+      "vertices": 586,
+      "triangles": 628,
+      "materials": [
+        "knight"
+      ],
+      "boundRig": "Rig_Medium"
+    }
+  ],
+  "carriedAccessories": [],
+  "actions": {
+    "Standing": {
+      "source": "Idle_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Walking": {
+      "source": "Walking_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Seated": {
+      "source": "Sit_Chair_Idle",
+      "frameStart": 0.0,
+      "frameEnd": 108.0
+    }
+  }
+}

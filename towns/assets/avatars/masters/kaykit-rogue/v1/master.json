@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "id": "kaykit-rogue",
+  "revision": 1,
+  "sourceFile": "source.blend",
+  "sourceSha256": "167093fc7c78d4e9ba470c143c329a144dbb252e86a60c5f9066b7d4e1bdf620",
+  "provenance": {
+    "author": "Kay Lousberg; PU Town editable derivative",
+    "source": "https://kaylousberg.itch.io/kaykit-adventurers and https://kaylousberg.itch.io/kaykit-character-animations",
+    "license": "CC0-1.0",
+    "licenseRecordedAt": "2026-10-14",
+    "exportEntitlement": "Original free Adventurers 2.0 and Character Animations 1.1; export and derivative use permitted by included CC0 license."
+  }
+}

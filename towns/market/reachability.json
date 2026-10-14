@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "mapId": "market",
+  "grid": 32,
+  "footRadius": 14,
+  "predictedSpeed": 225,
+  "allSitesReachable": true,
+  "sitesChecked": 19,
+  "solidBuildingsChecked": 25,
+  "maximumMeetingTravelSeconds": 15.49,
+  "maximumMeetingRoundTripSeconds": 30.98,
+  "routes": [
+    {
+      "site": "seat-0",
+      "public": false,
+      "distance": 205.0,
+      "predictedTravelSeconds": 0.91,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2086.57,
+          "y": 1970.38
+        }
+      ]
+    },
+    {
+      "site": "seat-1",
+      "public": false,
+      "distance": 255.33,
+      "predictedTravelSeconds": 1.13,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2280.57,
+          "y": 2009.38
+        }
+      ]
+    },
+    {
+      "site": "seat-2",
+      "public": false,
+      "distance": 320.26,
+      "predictedTravelSeconds": 1.42,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2400.57,
+          "y": 2112.38
+        }
+      ]
+    },
+    {
+      "site": "seat-3",
+      "public": false,
+      "distance": 320.26,
+      "predictedTravelSeconds": 1.42,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2400.57,
+          "y": 2238.38
+        }
+      ]
+    },
+    {
+      "site": "seat-4",
+      "public": false,
+      "distance": 255.33,
+      "predictedTravelSeconds": 1.13,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2280.57,
+          "y": 2341.38
+        }
+      ]
+    },
+    {
+      "site": "seat-5",
+      "public": false,
+      "distance": 205.0,
+      "predictedTravelSeconds": 0.91,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2086.57,
+          "y": 2380.38
+        }
+      ]
+    },
+    {
+      "site": "seat-6",
+      "public": false,
+      "distance": 255.33,
+      "predictedTravelSeconds": 1.13,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 1892.5700000000002,
+          "y": 2341.38
+        }
+      ]
+    },
+    {
+      "site": "seat-7",
+      "public": false,
+      "distance": 320.26,
+      "predictedTravelSeconds": 1.42,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 1772.5700000000002,
+          "y": 2238.38
+        }
+      ]
+    },
+    {
+      "site": "seat-8",
+      "public": false,
+      "distance": 320.26,
+      "predictedTravelSeconds": 1.42,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 1772.5700000000002,
+          "y": 2112.38
+        }
+      ]
+    },
+    {
+      "site": "seat-9",
+      "public": false,
+      "distance": 255.33,
+      "predictedTravelSeconds": 1.13,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 1892.5700000000002,
+          "y": 2009.38
+        }
+      ]
+    },
+    {
+      "site": "landmark-meeting-square",
+      "public": true,
+      "distance": 0.0,
+      "predictedTravelSeconds": 0.0,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        }
+      ]
+    },
+    {
+      "site": "landmark-artery-0-0-approach",
+      "public": true,
+      "distance": 2867.76,
+      "predictedTravelSeconds": 12.75,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2400,
+          "y": 2848
+        },
+        {
+          "x": 2484.88,
+          "y": 4972.0
+        }
+      ]
+    },
+    {
+      "site": "landmark-artery-1-0-approach",
+      "public": true,
+      "distance": 3485.33,
+      "predictedTravelSeconds": 15.49,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 5196.0,
+          "y": 600.9
+        }
+      ]
+    },
+    {
+      "site": "landmark-square-well",
+      "public": true,
+      "distance": 445.98,
+      "predictedTravelSeconds": 1.98,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2506.57,
+          "y": 2325.38
+        }
+      ]
+    },
+    {
+      "site": "landmark-market-stalls",
+      "public": true,
+      "distance": 660.38,
+      "predictedTravelSeconds": 2.94,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 1736.57,
+          "y": 1615.38
+        }
+      ]
+    },
+    {
+      "site": "artery-0-0-start",
+      "public": true,
+      "distance": 489.43,
+      "predictedTravelSeconds": 2.18,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2421.57,
+          "y": 2532.19
+        }
+      ]
+    },
+    {
+      "site": "artery-0-0-end",
+      "public": true,
+      "distance": 2867.76,
+      "predictedTravelSeconds": 12.75,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2400,
+          "y": 2848
+        },
+        {
+          "x": 2484.88,
+          "y": 4972.0
+        }
+      ]
+    },
+    {
+      "site": "artery-1-0-start",
+      "public": true,
+      "distance": 493.86,
+      "predictedTravelSeconds": 2.19,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 2570.78,
+          "y": 2078.22
+        }
+      ]
+    },
+    {
+      "site": "artery-1-0-end",
+      "public": true,
+      "distance": 3485.33,
+      "predictedTravelSeconds": 15.49,
+      "points": [
+        {
+          "x": 2086.57,
+          "y": 2175.38
+        },
+        {
+          "x": 5196.0,
+          "y": 600.9
+        }
+      ]
+    }
+  ],
+  "interpretation": "Collision-verified paths from the Meeting Area to all Seats, public landmarks and preserved road endpoints. Outdoor travel at 225 server units/s excludes conversation and pauses; target 15–20 seconds outward."
+}

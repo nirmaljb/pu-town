@@ -1,0 +1,8 @@
+{
+  "name": "Woodland Village",
+  "scale": 60,
+  "padding": 8,
+  "foliageSeed": 72014,
+  "vegetationCount": 150,
+  "theme": "woodland"
+}

@@ -1,0 +1,41 @@
+{
+  "preset": "kaykit-mage",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "skinnedRenderers": 8,
+  "vertices": 6230,
+  "triangles": 6668,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    1.86829734,
+    2.64244366,
+    1.97993553
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "character",
+      "baseTexture": "mage_texture",
+      "normalTexture": null
+    }
+  ]
+}

@@ -117,7 +117,7 @@ namespace PUtown.Voice
                     if (world.Phase == "day")
                     {
                         var entry = ((Newtonsoft.Json.Linq.JArray)world.Field?["players"])?.FirstOrDefault(p => (string)p["playerId"] == output.PlayerId);
-                        if (entry != null) output.Source.transform.position = client.Campus.ToWorld((float)entry["x"], (float)entry["y"]);
+                        if (entry != null) output.Source.transform.position = client.Town.ToWorld((float)entry["x"], (float)entry["y"]);
                     }
                     output.Source.spatialBlend = world.Phase == "day" ? 1 : 0;
                 }

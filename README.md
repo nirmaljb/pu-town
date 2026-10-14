@@ -2,15 +2,12 @@
 
 PU Town is a social deduction game for four to ten Players. Players explore the town during Day, sleep in place during Night, and gather at retained Seats for Townhall discussion and voting. A Spring Boot server owns Roles, the clock, accepted positions and every result, and tells each Player only what they are entitled to know.
 
-The project currently targets local development. The Game runs in two processes:
-
-- a Java 17 Spring Boot WebSocket backend on `http://localhost:8080`
-- a TypeScript, Vite, and Phaser frontend on `http://localhost:5173`
+The project currently targets local development. A Java 17 Spring Boot WebSocket backend owns the Game. Play through the Unity desktop client in `native/`, or use the retained TypeScript/Vite/Phaser browser client on `http://localhost:5173` during migration. The backend defaults to `http://localhost:8080`; the native guide records its explicit Avatar-publication startup command.
 
 Optional Day and Townhall voice adds a separate local LiveKit process; see
 [the voice setup guide](tools/voice/README.md).
 
-The Unity campus client is in [`native/`](native/README.md). Its guide covers the pinned Editor, macOS/Windows builds, server connection options, native Avatar publication and authoring tools. The Java server remains authoritative for both clients. Native Rooms require the candidate native Avatar publication and the campus map; the browser gives explicit feedback when it encounters one. See the [migration verification record](docs/verification/2026-10-13-native-migration.md) for current acceptance evidence. The browser remains available while packaged acceptance, platform performance and retirement work are pending.
+The Unity town client is in [`native/`](native/README.md). Its guide covers the pinned Editor, macOS/Windows builds, server connection options, native Avatar publication and authoring tools. The Java server remains authoritative for both clients. Native Rooms use Woodland Village or Market Town and require the native KayKit Avatar publication; the browser gives explicit feedback when it encounters one. See the [two-town specification](docs/specs/two-generated-town-maps.md) for the current design and the [migration verification record](docs/verification/2026-10-13-native-migration.md) for historical acceptance evidence. The browser remains available while packaged acceptance, platform performance and retirement work are pending.
 
 ## Prerequisites
 

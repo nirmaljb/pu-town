@@ -1,0 +1,122 @@
+{
+  "id": "kaykit-rogue",
+  "name": "Rogue",
+  "masterRevision": 1,
+  "provider": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "sourceArchive": "KayKit Adventurers Free 2.0",
+  "animationArchive": "KayKit Character Animations Free 1.1",
+  "sourceCharacterSha256": "cae5d9b2f08d53f7b4ab2617d9f42f021c546eb10920455fdcd82a110867fae4",
+  "sourceAtlasSha256": "2e2fc741e20e7e2c85b176c8143b49b769bca0d2ed1a1cfc1807a758a0e4d3e1",
+  "sourceSha256": "167093fc7c78d4e9ba470c143c329a144dbb252e86a60c5f9066b7d4e1bdf620",
+  "fbxSha256": "2d1616aa9dc6d20ff30ee7547eb08e84ec016b1543799f0ca6c911ca32bf5e1d",
+  "rigBones": [
+    "root",
+    "hips",
+    "upperleg.l",
+    "lowerleg.l",
+    "foot.l",
+    "toes.l",
+    "upperleg.r",
+    "lowerleg.r",
+    "foot.r",
+    "toes.r",
+    "spine",
+    "chest",
+    "upperarm.r",
+    "lowerarm.r",
+    "wrist.r",
+    "hand.r",
+    "handslot.r",
+    "head",
+    "upperarm.l",
+    "lowerarm.l",
+    "wrist.l",
+    "hand.l",
+    "handslot.l"
+  ],
+  "meshes": [
+    {
+      "name": "Rogue_ArmLeft",
+      "vertices": 653,
+      "triangles": 788,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_ArmRight",
+      "vertices": 653,
+      "triangles": 788,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_Body",
+      "vertices": 1369,
+      "triangles": 1436,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_Cape",
+      "vertices": 56,
+      "triangles": 84,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_Head",
+      "vertices": 2131,
+      "triangles": 2606,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_LegLeft",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Rogue_LegRight",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "rogue"
+      ],
+      "boundRig": "Rig_Medium"
+    }
+  ],
+  "carriedAccessories": [],
+  "retainedHiddenAccessories": [],
+  "actions": {
+    "Standing": {
+      "source": "Idle_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Walking": {
+      "source": "Walking_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Seated": {
+      "source": "Sit_Chair_Idle",
+      "frameStart": 0.0,
+      "frameEnd": 108.0
+    }
+  }
+}

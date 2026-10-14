@@ -47,10 +47,10 @@ class FakeSocket {
   close() { this.disconnect(); }
 }
 
-test("a browser refuses a native campus Room at a frame and releases its reservation", () => {
+for (const mapId of ["woodland", "market"]) test(`a browser refuses a native ${mapId} Room at a frame and releases its reservation`, () => {
   const { client, sockets, inbox } = setup();
   client.join("ABC234", "Alex"); sockets[0].open();
-  sockets[0].message({ ...snapshot, mapId: "campus" });
+  sockets[0].message({ ...snapshot, mapId });
   assert.equal(client.state.status, "connecting");
   client.update();
   assert.equal(client.state.status, "join");
@@ -61,6 +61,21 @@ test("a browser refuses a native campus Room at a frame and releases its reserva
   assert.deepEqual(sockets[1].sent.map(payload => JSON.parse(payload).type), ["recover_room", "leave_room"]);
   sockets[1].message({ version: 1, type: "room_left" });
   assert.equal(client.state.status, "join");
+});
+
+for (const mapId of ["woodland", "market"]) test(`a browser releases its active Membership when the Host selects ${mapId}`, () => {
+  const { client, sockets, inbox } = setup();
+  client.create("Alex"); sockets[0].open(); sockets[0].message({ ...snapshot, phase: "lobby" }); client.update();
+  inbox.drain();
+  sockets[0].message({ version: 1, type: "room_state", phase: "lobby", hostPlayerId: "p", roleSetup: snapshot.roleSetup, mapId, players: snapshot.players });
+  assert.equal(client.state.status, "playing");
+  client.update();
+  assert.equal(client.state.status, "join");
+  assert.match(client.state.error, /native PU Town/);
+  assert.equal(inbox.drain().length, 0);
+  sockets[1].open();
+  assert.deepEqual(sockets[1].sent.map(payload => JSON.parse(payload).type), ["recover_room", "leave_room"]);
+  sockets[1].message({ version: 1, type: "room_left" });
 });
 
 test("initial timeout permits retry and ignores late messages from the abandoned socket", () => {

@@ -1,0 +1,81 @@
+{
+  "id": "kaykit-rogue",
+  "name": "Rogue",
+  "native": {
+    "version": 1,
+    "masterId": "kaykit-rogue",
+    "masterRevision": 1,
+    "model": {
+      "sourceFile": "exports/kaykit-rogue/avatar.fbx",
+      "rootNode": "avatar",
+      "heightMetres": 1.7,
+      "pivot": "feet",
+      "forwardAxis": "+z"
+    },
+    "rig": {
+      "type": "humanoid",
+      "avatarName": "avatarAvatar",
+      "hipsBone": "hips"
+    },
+    "animations": {
+      "standing": {
+        "clipName": "Standing",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "walking": {
+        "clipName": "Walking",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "seated": {
+        "clipName": "Seated",
+        "durationSeconds": 3.60000014,
+        "loop": true
+      }
+    },
+    "platformAssets": [
+      {
+        "platform": "macos-universal",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-rogue/avatar.prefab",
+        "file": "exports/kaykit-rogue/macos-universal.bundle"
+      },
+      {
+        "platform": "windows-x86_64",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-rogue/avatar.prefab",
+        "file": "exports/kaykit-rogue/windows-x86_64.bundle"
+      }
+    ]
+  },
+  "review": {
+    "sourceSha256": "2d1616aa9dc6d20ff30ee7547eb08e84ec016b1543799f0ca6c911ca32bf5e1d",
+    "platformSha256": {
+      "macos-universal": "200a13344b04cff965d47203f347ea2363583f005600682788d2af0b7eb4c607",
+      "windows-x86_64": "62cfc785bea793596420d948ebafa2a740dc6ddf1bde6aea9302ef25f6f27f51"
+    },
+    "checks": [
+      "silhouette",
+      "scale-pivot",
+      "uv-normals",
+      "deformation",
+      "native-materials",
+      "standing",
+      "walking",
+      "seated"
+    ],
+    "evidenceFiles": [
+      "exports/kaykit-rogue/blender-report.json",
+      "exports/kaykit-rogue/unity-report.json",
+      "exports/kaykit-rogue/unity-front.png",
+      "exports/kaykit-rogue/unity-back.png",
+      "exports/kaykit-rogue/unity-side.png",
+      "exports/kaykit-rogue/unity-walking.png",
+      "exports/kaykit-rogue/unity-seated.png",
+      "exports/kaykit-rogue/unity-pose-report.json"
+    ]
+  }
+}

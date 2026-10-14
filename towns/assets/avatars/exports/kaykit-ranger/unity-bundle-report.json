@@ -1,0 +1,31 @@
+{
+  "preset": "kaykit-ranger",
+  "platform": "macos-universal",
+  "unityVersion": "6000.6.0f1",
+  "assetName": "assets/art/avatars/kaykit-ranger/avatar.prefab",
+  "rootNode": "avatar",
+  "expectedRootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "bundleSha256": "cfc8c35ffbfef2ff2b0e38fe25cdc653ac791c2532028fd94b072b8d5bb83830",
+  "bundleBytes": 512899,
+  "matchesPublication": true,
+  "mismatches": [],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ]
+}

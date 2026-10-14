@@ -1,6 +1,6 @@
-# Native campus asset sources
+# Historical campus asset sources
 
-The owner authorized selecting suitable free packs on 13 October 2026. Original archives are retained under `sources/`; `sources/inventory.json` records their SHA-256 and supplied models. The packs' own `License.txt` files are preserved inside each archive.
+These records describe the retired campus work from 13 October 2026. Current town assets and KayKit characters are documented in [the active source inventory](../../towns/assets/sources/README.md). The owner authorized selecting suitable free packs on 13 October 2026. Original archives are retained under `sources/`; `sources/inventory.json` records their SHA-256 and supplied models. The packs' own `License.txt` files are preserved inside each archive.
 
 | Pack | Retained version | Provider/source | License |
 | --- | --- | --- | --- |
@@ -16,4 +16,4 @@ Reusable inventory: Furniture Kit supplies chairs, tables, beds, desks, shelves 
 
 `authored/starter-courtyard.blend` is original PU Town bootstrap art created through Blender MCP. Its mesh export is retained in the native project. It is an authoring/health demonstration, not finished campus art. Avatar masters and their publication evidence live in `avatars/`.
 
-The active garden refresh combines Quaternius’s free Standard Nature, Downtown City and neutral Fantasy Props, with Universal Base Characters, Modular Character Outfits and Universal Animation Library. See the exact [environment inventory](sources/quaternius/provenance.json), [character inventory](sources/quaternius-character/provenance.json) and [native garden workflow](../../native/Assets/Art/Quaternius/README.md). Complete original archives are retained locally and excluded from Git; their older CC0 notices, hashes and provenance remain committed. Large textures have a hash-verified [local restore step](../../tools/native-assets/README.md). Their exact licenses are recorded separately from the creator’s newer generic license page. The earlier Kenney adaptations remain retained source evidence.
+The retired campus garden refresh combined Quaternius’s free Standard Nature, Downtown City and neutral Fantasy Props, with Universal Base Characters, Modular Character Outfits and Universal Animation Library. See the exact [environment inventory](sources/quaternius/provenance.json), [character inventory](sources/quaternius-character/provenance.json) and [native garden workflow](../../native/Assets/Art/Quaternius/README.md). Complete original archives are retained locally and excluded from Git; their older CC0 notices, hashes and provenance remain committed. Its oversized-texture records are historical; [local asset storage](../../tools/native-assets/README.md) describes the current empty active restore manifest. Their exact licenses are recorded separately from the creator’s newer generic license page. The earlier Kenney adaptations remain retained source evidence.

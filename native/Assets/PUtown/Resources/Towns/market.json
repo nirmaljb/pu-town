@@ -1,0 +1,3043 @@
+{
+  "schemaVersion": 1,
+  "mapId": "market",
+  "name": "Market Town",
+  "width": 5296,
+  "height": 5072,
+  "tileSize": 32,
+  "coordinates": {
+    "serverUnitsPerUnityUnit": 100,
+    "unityZSign": 1,
+    "north": "negativeY",
+    "groundHeight": 0
+  },
+  "movement": {
+    "footRadius": 14,
+    "acceptedSpeed": 240,
+    "predictedSpeed": 225,
+    "hearingRange": 160,
+    "daySeconds": 180
+  },
+  "meeting": {
+    "x": 2086.57,
+    "y": 2175.38,
+    "radiusX": 330,
+    "radiusY": 205,
+    "emergencyButton": {
+      "x": 2086.57,
+      "y": 2175.38
+    },
+    "seats": [
+      {
+        "seat": 0,
+        "x": 2086.57,
+        "y": 1970.38,
+        "facing": "down"
+      },
+      {
+        "seat": 1,
+        "x": 2280.57,
+        "y": 2009.38,
+        "facing": "left"
+      },
+      {
+        "seat": 2,
+        "x": 2400.57,
+        "y": 2112.38,
+        "facing": "left"
+      },
+      {
+        "seat": 3,
+        "x": 2400.57,
+        "y": 2238.38,
+        "facing": "left"
+      },
+      {
+        "seat": 4,
+        "x": 2280.57,
+        "y": 2341.38,
+        "facing": "left"
+      },
+      {
+        "seat": 5,
+        "x": 2086.57,
+        "y": 2380.38,
+        "facing": "up"
+      },
+      {
+        "seat": 6,
+        "x": 1892.5700000000002,
+        "y": 2341.38,
+        "facing": "right"
+      },
+      {
+        "seat": 7,
+        "x": 1772.5700000000002,
+        "y": 2238.38,
+        "facing": "right"
+      },
+      {
+        "seat": 8,
+        "x": 1772.5700000000002,
+        "y": 2112.38,
+        "facing": "right"
+      },
+      {
+        "seat": 9,
+        "x": 1892.5700000000002,
+        "y": 2009.38,
+        "facing": "right"
+      }
+    ]
+  },
+  "emergencyButton": {
+    "x": 2086.57,
+    "y": 2175.38
+  },
+  "tasksEnabled": false,
+  "tasks": [],
+  "interiors": [],
+  "obstacles": [
+    {
+      "id": "building-1-1",
+      "kind": "building",
+      "x": 2125.1,
+      "y": 2833.66,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-13",
+      "kind": "building",
+      "x": 1826.22,
+      "y": 2541.7,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-17",
+      "kind": "building",
+      "x": 1465.74,
+      "y": 3073.12,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-30",
+      "kind": "building",
+      "x": 1474.07,
+      "y": 2556.88,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-40",
+      "kind": "building",
+      "x": 1829.74,
+      "y": 2873.93,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-1",
+      "kind": "building",
+      "x": 1188.73,
+      "y": 1617.88,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-8",
+      "kind": "building",
+      "x": 1024.33,
+      "y": 2040.27,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-26",
+      "kind": "building",
+      "x": 1136.75,
+      "y": 1284.9,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-3-0",
+      "kind": "building",
+      "x": 2364.93,
+      "y": 1141.6,
+      "width": 320,
+      "height": 440
+    },
+    {
+      "id": "building-4-8",
+      "kind": "building",
+      "x": 2810.53,
+      "y": 2189.62,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-4-19",
+      "kind": "building",
+      "x": 2802.67,
+      "y": 2588.19,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-6-1",
+      "kind": "building",
+      "x": 862.37,
+      "y": 2401.42,
+      "width": 300,
+      "height": 260
+    },
+    {
+      "id": "building-7-2",
+      "kind": "building",
+      "x": 664.44,
+      "y": 1822.76,
+      "width": 260,
+      "height": 240
+    },
+    {
+      "id": "building-8-3",
+      "kind": "building",
+      "x": 1682.37,
+      "y": 767.43,
+      "width": 300,
+      "height": 300
+    },
+    {
+      "id": "building-8-7",
+      "kind": "building",
+      "x": 1328.2,
+      "y": 869.97,
+      "width": 270,
+      "height": 290
+    },
+    {
+      "id": "building-10-6",
+      "kind": "building",
+      "x": 3642.42,
+      "y": 1975.21,
+      "width": 240,
+      "height": 270
+    },
+    {
+      "id": "building-11-0",
+      "kind": "building",
+      "x": 3037.53,
+      "y": 2934.32,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-13",
+      "kind": "building",
+      "x": 2918.56,
+      "y": 3236.13,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-29",
+      "kind": "building",
+      "x": 3484.36,
+      "y": 3134.51,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-39",
+      "kind": "building",
+      "x": 3835.99,
+      "y": 2718.76,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-47",
+      "kind": "building",
+      "x": 3358.5,
+      "y": 2756.86,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-12-10",
+      "kind": "building",
+      "x": 2141.27,
+      "y": 3749.49,
+      "width": 240,
+      "height": 260
+    },
+    {
+      "id": "building-13-5",
+      "kind": "building",
+      "x": 2733.21,
+      "y": 3963.17,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-13-6",
+      "kind": "building",
+      "x": 3056.24,
+      "y": 3834.28,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-19-3",
+      "kind": "building",
+      "x": 4032.26,
+      "y": 1501.44,
+      "width": 310,
+      "height": 240
+    },
+    {
+      "id": "boundary-north",
+      "kind": "boundary",
+      "x": 0,
+      "y": 0,
+      "width": 5296,
+      "height": 24
+    },
+    {
+      "id": "boundary-south",
+      "kind": "boundary",
+      "x": 0,
+      "y": 5048,
+      "width": 5296,
+      "height": 24
+    },
+    {
+      "id": "boundary-west",
+      "kind": "boundary",
+      "x": 0,
+      "y": 24,
+      "width": 24,
+      "height": 5024
+    },
+    {
+      "id": "boundary-east",
+      "kind": "boundary",
+      "x": 5272,
+      "y": 24,
+      "width": 24,
+      "height": 5024
+    },
+    {
+      "id": "square-well",
+      "kind": "well",
+      "x": 2526.57,
+      "y": 2235.38,
+      "width": 180,
+      "height": 180
+    },
+    {
+      "id": "market-table-0",
+      "kind": "market-table",
+      "x": 1476.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80
+    },
+    {
+      "id": "market-table-1",
+      "kind": "market-table",
+      "x": 1666.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80
+    },
+    {
+      "id": "market-table-2",
+      "kind": "market-table",
+      "x": 1856.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-1-1",
+      "name": "Village house 1",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 1,
+      "variant": "cottage",
+      "x": 2125.1,
+      "y": 2833.66,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-13",
+      "name": "Village house 2",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 13,
+      "variant": "cottage",
+      "x": 1826.22,
+      "y": 2541.7,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-17",
+      "name": "Village house 3",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 17,
+      "variant": "cottage",
+      "x": 1465.74,
+      "y": 3073.12,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-30",
+      "name": "Workshop 4",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 30,
+      "variant": "workshop",
+      "x": 1474.07,
+      "y": 2556.88,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-1-40",
+      "name": "Village house 5",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 40,
+      "variant": "cottage",
+      "x": 1829.74,
+      "y": 2873.93,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-1",
+      "name": "Village house 6",
+      "districtId": "ward-2",
+      "sourcePatch": 2,
+      "sourceGeometry": 1,
+      "variant": "cottage",
+      "x": 1188.73,
+      "y": 1617.88,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-8",
+      "name": "Village house 7",
+      "districtId": "ward-2",
+      "sourcePatch": 2,
+      "sourceGeometry": 8,
+      "variant": "cottage",
+      "x": 1024.33,
+      "y": 2040.27,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-2-26",
+      "name": "Village house 8",
+      "districtId": "ward-2",
+      "sourcePatch": 2,
+      "sourceGeometry": 26,
+      "variant": "cottage",
+      "x": 1136.75,
+      "y": 1284.9,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-3-0",
+      "name": "Village house 9",
+      "districtId": "ward-3",
+      "sourcePatch": 3,
+      "sourceGeometry": 0,
+      "variant": "cottage",
+      "x": 2364.93,
+      "y": 1141.6,
+      "width": 320,
+      "height": 440
+    },
+    {
+      "id": "building-4-8",
+      "name": "Village house 10",
+      "districtId": "ward-4",
+      "sourcePatch": 4,
+      "sourceGeometry": 8,
+      "variant": "cottage",
+      "x": 2810.53,
+      "y": 2189.62,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-4-19",
+      "name": "Village house 11",
+      "districtId": "ward-4",
+      "sourcePatch": 4,
+      "sourceGeometry": 19,
+      "variant": "cottage",
+      "x": 2802.67,
+      "y": 2588.19,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-6-1",
+      "name": "Village house 12",
+      "districtId": "ward-6",
+      "sourcePatch": 6,
+      "sourceGeometry": 1,
+      "variant": "cottage",
+      "x": 862.37,
+      "y": 2401.42,
+      "width": 300,
+      "height": 260
+    },
+    {
+      "id": "building-7-2",
+      "name": "Village house 13",
+      "districtId": "ward-7",
+      "sourcePatch": 7,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 664.44,
+      "y": 1822.76,
+      "width": 260,
+      "height": 240
+    },
+    {
+      "id": "building-8-3",
+      "name": "Workshop 14",
+      "districtId": "ward-8",
+      "sourcePatch": 8,
+      "sourceGeometry": 3,
+      "variant": "workshop",
+      "x": 1682.37,
+      "y": 767.43,
+      "width": 300,
+      "height": 300
+    },
+    {
+      "id": "building-8-7",
+      "name": "Village house 15",
+      "districtId": "ward-8",
+      "sourcePatch": 8,
+      "sourceGeometry": 7,
+      "variant": "cottage",
+      "x": 1328.2,
+      "y": 869.97,
+      "width": 270,
+      "height": 290
+    },
+    {
+      "id": "building-10-6",
+      "name": "Village house 16",
+      "districtId": "ward-10",
+      "sourcePatch": 10,
+      "sourceGeometry": 6,
+      "variant": "cottage",
+      "x": 3642.42,
+      "y": 1975.21,
+      "width": 240,
+      "height": 270
+    },
+    {
+      "id": "building-11-0",
+      "name": "Workshop 17",
+      "districtId": "ward-11",
+      "sourcePatch": 11,
+      "sourceGeometry": 0,
+      "variant": "workshop",
+      "x": 3037.53,
+      "y": 2934.32,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-13",
+      "name": "Village house 18",
+      "districtId": "ward-11",
+      "sourcePatch": 11,
+      "sourceGeometry": 13,
+      "variant": "cottage",
+      "x": 2918.56,
+      "y": 3236.13,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-29",
+      "name": "Village house 19",
+      "districtId": "ward-11",
+      "sourcePatch": 11,
+      "sourceGeometry": 29,
+      "variant": "cottage",
+      "x": 3484.36,
+      "y": 3134.51,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-39",
+      "name": "Workshop 20",
+      "districtId": "ward-11",
+      "sourcePatch": 11,
+      "sourceGeometry": 39,
+      "variant": "workshop",
+      "x": 3835.99,
+      "y": 2718.76,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-11-47",
+      "name": "Village house 21",
+      "districtId": "ward-11",
+      "sourcePatch": 11,
+      "sourceGeometry": 47,
+      "variant": "cottage",
+      "x": 3358.5,
+      "y": 2756.86,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-12-10",
+      "name": "Village house 22",
+      "districtId": "ward-12",
+      "sourcePatch": 12,
+      "sourceGeometry": 10,
+      "variant": "cottage",
+      "x": 2141.27,
+      "y": 3749.49,
+      "width": 240,
+      "height": 260
+    },
+    {
+      "id": "building-13-5",
+      "name": "Village house 23",
+      "districtId": "ward-13",
+      "sourcePatch": 13,
+      "sourceGeometry": 5,
+      "variant": "cottage",
+      "x": 2733.21,
+      "y": 3963.17,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-13-6",
+      "name": "Village house 24",
+      "districtId": "ward-13",
+      "sourcePatch": 13,
+      "sourceGeometry": 6,
+      "variant": "cottage",
+      "x": 3056.24,
+      "y": 3834.28,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-19-3",
+      "name": "Village house 25",
+      "districtId": "ward-19",
+      "sourcePatch": 19,
+      "sourceGeometry": 3,
+      "variant": "cottage",
+      "x": 4032.26,
+      "y": 1501.44,
+      "width": 310,
+      "height": 240
+    }
+  ],
+  "routes": [
+    {
+      "id": "artery-0-0",
+      "name": "Town road 1",
+      "width": 150,
+      "sourceArtery": 0,
+      "points": [
+        {
+          "x": 2421.57,
+          "y": 2532.19
+        },
+        {
+          "x": 2599.35,
+          "y": 3064.06
+        },
+        {
+          "x": 2621.54,
+          "y": 3787.7
+        },
+        {
+          "x": 2439.09,
+          "y": 4711.67
+        },
+        {
+          "x": 2484.88,
+          "y": 4972.0
+        }
+      ]
+    },
+    {
+      "id": "artery-1-0",
+      "name": "Town road 2",
+      "width": 150,
+      "sourceArtery": 1,
+      "points": [
+        {
+          "x": 2570.78,
+          "y": 2078.22
+        },
+        {
+          "x": 2987.87,
+          "y": 1852.87
+        },
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        },
+        {
+          "x": 4929.57,
+          "y": 753.27
+        },
+        {
+          "x": 5196.0,
+          "y": 600.9
+        }
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "ward-0",
+      "name": "Market",
+      "kind": "Market",
+      "sourcePatch": 0,
+      "points": [
+        {
+          "x": 1456.12,
+          "y": 2508.63
+        },
+        {
+          "x": 1897.82,
+          "y": 1582.49
+        },
+        {
+          "x": 2570.78,
+          "y": 2078.22
+        },
+        {
+          "x": 2421.57,
+          "y": 2532.19
+        }
+      ],
+      "x": 1456.12,
+      "y": 1582.49,
+      "width": 1114.66,
+      "height": 949.7
+    },
+    {
+      "id": "ward-1",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 1,
+      "points": [
+        {
+          "x": 1245.38,
+          "y": 3558.62
+        },
+        {
+          "x": 1456.12,
+          "y": 2508.63
+        },
+        {
+          "x": 2421.57,
+          "y": 2532.19
+        },
+        {
+          "x": 2599.35,
+          "y": 3064.06
+        }
+      ],
+      "x": 1245.38,
+      "y": 2508.63,
+      "width": 1353.97,
+      "height": 1049.99
+    },
+    {
+      "id": "ward-2",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 2,
+      "points": [
+        {
+          "x": 985.0,
+          "y": 2296.89
+        },
+        {
+          "x": 928.01,
+          "y": 903.89
+        },
+        {
+          "x": 1897.82,
+          "y": 1582.49
+        },
+        {
+          "x": 1456.12,
+          "y": 2508.63
+        }
+      ],
+      "x": 928.01,
+      "y": 903.89,
+      "width": 969.81,
+      "height": 1604.74
+    },
+    {
+      "id": "ward-3",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 3,
+      "points": [
+        {
+          "x": 1897.82,
+          "y": 1582.49
+        },
+        {
+          "x": 2244.18,
+          "y": 967.72
+        },
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        },
+        {
+          "x": 2987.87,
+          "y": 1852.87
+        },
+        {
+          "x": 2570.78,
+          "y": 2078.22
+        }
+      ],
+      "x": 1897.82,
+      "y": 967.72,
+      "width": 1807.35,
+      "height": 1110.5
+    },
+    {
+      "id": "ward-4",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 4,
+      "points": [
+        {
+          "x": 2599.35,
+          "y": 3064.06
+        },
+        {
+          "x": 2421.57,
+          "y": 2532.19
+        },
+        {
+          "x": 2570.78,
+          "y": 2078.22
+        },
+        {
+          "x": 2987.87,
+          "y": 1852.87
+        },
+        {
+          "x": 3522.48,
+          "y": 2610.83
+        }
+      ],
+      "x": 2421.57,
+      "y": 1852.87,
+      "width": 1100.91,
+      "height": 1211.19
+    },
+    {
+      "id": "ward-5",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 5,
+      "points": [
+        {
+          "x": 1985.16,
+          "y": 3559.29
+        },
+        {
+          "x": 1245.38,
+          "y": 3558.62
+        },
+        {
+          "x": 2599.35,
+          "y": 3064.06
+        },
+        {
+          "x": 2621.54,
+          "y": 3787.7
+        }
+      ],
+      "x": 1245.38,
+      "y": 3064.06,
+      "width": 1376.16,
+      "height": 723.64
+    },
+    {
+      "id": "ward-6",
+      "name": "Merchant",
+      "kind": "MerchantWard",
+      "sourcePatch": 6,
+      "points": [
+        {
+          "x": 745.56,
+          "y": 3044.34
+        },
+        {
+          "x": 360.0,
+          "y": 2348.61
+        },
+        {
+          "x": 985.0,
+          "y": 2296.89
+        },
+        {
+          "x": 1456.12,
+          "y": 2508.63
+        },
+        {
+          "x": 1245.38,
+          "y": 3558.62
+        }
+      ],
+      "x": 360.0,
+      "y": 2296.89,
+      "width": 1096.12,
+      "height": 1261.73
+    },
+    {
+      "id": "ward-7",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 7,
+      "points": [
+        {
+          "x": 360.0,
+          "y": 2348.61
+        },
+        {
+          "x": 571.41,
+          "y": 1591.97
+        },
+        {
+          "x": 928.01,
+          "y": 903.89
+        },
+        {
+          "x": 985.0,
+          "y": 2296.89
+        }
+      ],
+      "x": 360.0,
+      "y": 903.89,
+      "width": 625.0,
+      "height": 1444.72
+    },
+    {
+      "id": "ward-8",
+      "name": "Temple",
+      "kind": "Cathedral",
+      "sourcePatch": 8,
+      "points": [
+        {
+          "x": 928.01,
+          "y": 903.89
+        },
+        {
+          "x": 1603.83,
+          "y": 634.25
+        },
+        {
+          "x": 2385.4,
+          "y": 521.96
+        },
+        {
+          "x": 2244.18,
+          "y": 967.72
+        },
+        {
+          "x": 1897.82,
+          "y": 1582.49
+        }
+      ],
+      "x": 928.01,
+      "y": 521.96,
+      "width": 1457.39,
+      "height": 1060.53
+    },
+    {
+      "id": "ward-9",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 9,
+      "points": [
+        {
+          "x": 2244.18,
+          "y": 967.72
+        },
+        {
+          "x": 2385.4,
+          "y": 521.96
+        },
+        {
+          "x": 3028.98,
+          "y": 899.28
+        },
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        }
+      ],
+      "x": 2244.18,
+      "y": 521.96,
+      "width": 1460.99,
+      "height": 903.37
+    },
+    {
+      "id": "ward-10",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 10,
+      "points": [
+        {
+          "x": 3522.48,
+          "y": 2610.83
+        },
+        {
+          "x": 2987.87,
+          "y": 1852.87
+        },
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        },
+        {
+          "x": 3960.28,
+          "y": 2061.34
+        },
+        {
+          "x": 4313.45,
+          "y": 2620.21
+        }
+      ],
+      "x": 2987.87,
+      "y": 1425.33,
+      "width": 1325.58,
+      "height": 1194.88
+    },
+    {
+      "id": "ward-11",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 11,
+      "points": [
+        {
+          "x": 2621.54,
+          "y": 3787.7
+        },
+        {
+          "x": 2599.35,
+          "y": 3064.06
+        },
+        {
+          "x": 3522.48,
+          "y": 2610.83
+        },
+        {
+          "x": 4313.45,
+          "y": 2620.21
+        },
+        {
+          "x": 3966.06,
+          "y": 3328.26
+        },
+        {
+          "x": 3482.64,
+          "y": 3582.94
+        }
+      ],
+      "x": 2599.35,
+      "y": 2610.83,
+      "width": 1714.1,
+      "height": 1176.87
+    },
+    {
+      "id": "ward-12",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 12,
+      "points": [
+        {
+          "x": 2439.09,
+          "y": 4711.67
+        },
+        {
+          "x": 1726.56,
+          "y": 4236.55
+        },
+        {
+          "x": 1985.16,
+          "y": 3559.29
+        },
+        {
+          "x": 2621.54,
+          "y": 3787.7
+        }
+      ],
+      "x": 1726.56,
+      "y": 3559.29,
+      "width": 894.98,
+      "height": 1152.38
+    },
+    {
+      "id": "ward-13",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 13,
+      "points": [
+        {
+          "x": 2621.54,
+          "y": 3787.7
+        },
+        {
+          "x": 3482.64,
+          "y": 3582.94
+        },
+        {
+          "x": 3395.08,
+          "y": 4230.72
+        },
+        {
+          "x": 2439.09,
+          "y": 4711.67
+        }
+      ],
+      "x": 2439.09,
+      "y": 3582.94,
+      "width": 1043.55,
+      "height": 1128.73
+    },
+    {
+      "id": "ward-18",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 18,
+      "points": [
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        },
+        {
+          "x": 3028.98,
+          "y": 899.28
+        },
+        {
+          "x": 4000.56,
+          "y": 360.0
+        },
+        {
+          "x": 4929.57,
+          "y": 753.27
+        }
+      ],
+      "x": 3028.98,
+      "y": 360.0,
+      "width": 1900.59,
+      "height": 1065.33
+    },
+    {
+      "id": "ward-19",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 19,
+      "points": [
+        {
+          "x": 4929.57,
+          "y": 753.27
+        },
+        {
+          "x": 4801.86,
+          "y": 1751.64
+        },
+        {
+          "x": 3960.28,
+          "y": 2061.34
+        },
+        {
+          "x": 3705.17,
+          "y": 1425.33
+        }
+      ],
+      "x": 3705.17,
+      "y": 753.27,
+      "width": 1224.4,
+      "height": 1308.07
+    }
+  ],
+  "furnishings": [
+    {
+      "id": "market-table-0",
+      "kind": "market-table",
+      "x": 1476.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80,
+      "heightUnits": 75,
+      "rotation": 0
+    },
+    {
+      "id": "market-table-1",
+      "kind": "market-table",
+      "x": 1666.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80,
+      "heightUnits": 75,
+      "rotation": 0
+    },
+    {
+      "id": "market-table-2",
+      "kind": "market-table",
+      "x": 1856.57,
+      "y": 1435.38,
+      "width": 130,
+      "height": 80,
+      "heightUnits": 75,
+      "rotation": 0
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "meeting-square",
+      "name": "Market Square",
+      "kind": "square",
+      "x": 1681.57,
+      "y": 1895.38,
+      "width": 810,
+      "height": 560,
+      "entry": {
+        "x": 2086.57,
+        "y": 2175.38
+      }
+    },
+    {
+      "id": "artery-0-0-approach",
+      "name": "Town Gate",
+      "kind": "gate",
+      "x": 2424.88,
+      "y": 4912.0,
+      "width": 120,
+      "height": 120,
+      "entry": {
+        "x": 2484.88,
+        "y": 4972.0
+      },
+      "sourceArtery": 0
+    },
+    {
+      "id": "artery-1-0-approach",
+      "name": "Town Gate",
+      "kind": "gate",
+      "x": 5136.0,
+      "y": 540.9,
+      "width": 120,
+      "height": 120,
+      "entry": {
+        "x": 5196.0,
+        "y": 600.9
+      },
+      "sourceArtery": 1
+    },
+    {
+      "id": "square-well",
+      "name": "Market Well",
+      "kind": "well",
+      "x": 2526.57,
+      "y": 2235.38,
+      "width": 180,
+      "height": 180,
+      "entry": {
+        "x": 2506.57,
+        "y": 2325.38
+      }
+    },
+    {
+      "id": "market-stalls",
+      "name": "Market Stalls",
+      "kind": "market",
+      "entry": {
+        "x": 1736.57,
+        "y": 1615.38
+      },
+      "x": 1476.57,
+      "y": 1415.38,
+      "width": 520,
+      "height": 120
+    }
+  ],
+  "vegetation": [
+    {
+      "id": "vegetation-0",
+      "kind": "shrub",
+      "x": 467.04,
+      "y": 950.43,
+      "scale": 0.859,
+      "rotation": 164.66
+    },
+    {
+      "id": "vegetation-1",
+      "kind": "shrub",
+      "x": 1999.67,
+      "y": 4775.97,
+      "scale": 0.945,
+      "rotation": 293.87
+    },
+    {
+      "id": "vegetation-2",
+      "kind": "flowers",
+      "x": 4916.22,
+      "y": 1251.63,
+      "scale": 0.867,
+      "rotation": 92.43
+    },
+    {
+      "id": "vegetation-3",
+      "kind": "flowers",
+      "x": 2156.7,
+      "y": 645.56,
+      "scale": 0.731,
+      "rotation": 85.81
+    },
+    {
+      "id": "vegetation-4",
+      "kind": "grass",
+      "x": 821.92,
+      "y": 3008.28,
+      "scale": 0.963,
+      "rotation": 157.49
+    },
+    {
+      "id": "vegetation-5",
+      "kind": "shrub",
+      "x": 1602.02,
+      "y": 434.37,
+      "scale": 0.896,
+      "rotation": 44.7
+    },
+    {
+      "id": "vegetation-6",
+      "kind": "flowers",
+      "x": 2405.0,
+      "y": 116.87,
+      "scale": 0.656,
+      "rotation": 181.65
+    },
+    {
+      "id": "vegetation-7",
+      "kind": "grass",
+      "x": 3164.7,
+      "y": 648.22,
+      "scale": 1.09,
+      "rotation": 177.29
+    },
+    {
+      "id": "vegetation-8",
+      "kind": "shrub",
+      "x": 3810.65,
+      "y": 4989.17,
+      "scale": 0.948,
+      "rotation": 186.12
+    },
+    {
+      "id": "vegetation-9",
+      "kind": "grass",
+      "x": 3541.48,
+      "y": 3904.68,
+      "scale": 0.903,
+      "rotation": 153.89
+    },
+    {
+      "id": "vegetation-10",
+      "kind": "shrub",
+      "x": 653.33,
+      "y": 980.73,
+      "scale": 0.951,
+      "rotation": 227.08
+    },
+    {
+      "id": "vegetation-11",
+      "kind": "grass",
+      "x": 3678.08,
+      "y": 4215.81,
+      "scale": 1.083,
+      "rotation": 351.8
+    },
+    {
+      "id": "vegetation-12",
+      "kind": "grass",
+      "x": 4724.29,
+      "y": 3570.36,
+      "scale": 0.716,
+      "rotation": 188.1
+    },
+    {
+      "id": "vegetation-13",
+      "kind": "grass",
+      "x": 4516.72,
+      "y": 458.44,
+      "scale": 0.92,
+      "rotation": 70.32
+    },
+    {
+      "id": "vegetation-14",
+      "kind": "shrub",
+      "x": 4737.97,
+      "y": 3216.4,
+      "scale": 0.726,
+      "rotation": 158.71
+    },
+    {
+      "id": "vegetation-15",
+      "kind": "broadleaf",
+      "x": 3703.47,
+      "y": 287.84,
+      "scale": 0.699,
+      "rotation": 206.63
+    },
+    {
+      "id": "vegetation-16",
+      "kind": "grass",
+      "x": 3198.6,
+      "y": 1180.29,
+      "scale": 0.764,
+      "rotation": 326.87
+    },
+    {
+      "id": "vegetation-17",
+      "kind": "grass",
+      "x": 757.92,
+      "y": 4014.05,
+      "scale": 1.06,
+      "rotation": 223.84
+    },
+    {
+      "id": "vegetation-18",
+      "kind": "flowers",
+      "x": 2764.35,
+      "y": 4950.64,
+      "scale": 0.717,
+      "rotation": 203.85
+    },
+    {
+      "id": "vegetation-19",
+      "kind": "grass",
+      "x": 1647.94,
+      "y": 4710.85,
+      "scale": 0.669,
+      "rotation": 293.74
+    },
+    {
+      "id": "vegetation-20",
+      "kind": "rock",
+      "x": 608.94,
+      "y": 2836.84,
+      "scale": 0.837,
+      "rotation": 263.72
+    },
+    {
+      "id": "vegetation-21",
+      "kind": "shrub",
+      "x": 4519.43,
+      "y": 4898.54,
+      "scale": 0.882,
+      "rotation": 18.93
+    },
+    {
+      "id": "vegetation-22",
+      "kind": "broadleaf",
+      "x": 1927.82,
+      "y": 1565.45,
+      "scale": 1.104,
+      "rotation": 129.33
+    },
+    {
+      "id": "vegetation-23",
+      "kind": "flowers",
+      "x": 4186.91,
+      "y": 804.54,
+      "scale": 1.002,
+      "rotation": 299.41
+    },
+    {
+      "id": "vegetation-24",
+      "kind": "shrub",
+      "x": 539.25,
+      "y": 2879.79,
+      "scale": 0.737,
+      "rotation": 18.11
+    },
+    {
+      "id": "vegetation-25",
+      "kind": "rock",
+      "x": 1269.36,
+      "y": 3993.3,
+      "scale": 0.698,
+      "rotation": 51.31
+    },
+    {
+      "id": "vegetation-26",
+      "kind": "grass",
+      "x": 389.49,
+      "y": 1195.7,
+      "scale": 0.974,
+      "rotation": 25.29
+    },
+    {
+      "id": "vegetation-27",
+      "kind": "grass",
+      "x": 258.1,
+      "y": 4726.52,
+      "scale": 0.814,
+      "rotation": 306.67
+    },
+    {
+      "id": "vegetation-28",
+      "kind": "flowers",
+      "x": 2266.09,
+      "y": 263.1,
+      "scale": 0.734,
+      "rotation": 129.45
+    },
+    {
+      "id": "vegetation-29",
+      "kind": "grass",
+      "x": 4249.9,
+      "y": 286.43,
+      "scale": 1.1,
+      "rotation": 160.8
+    },
+    {
+      "id": "vegetation-30",
+      "kind": "broadleaf",
+      "x": 1824.66,
+      "y": 4687.34,
+      "scale": 0.676,
+      "rotation": 20.92
+    },
+    {
+      "id": "vegetation-31",
+      "kind": "shrub",
+      "x": 955.67,
+      "y": 584.0,
+      "scale": 0.957,
+      "rotation": 123.25
+    },
+    {
+      "id": "vegetation-32",
+      "kind": "rock",
+      "x": 2056.21,
+      "y": 156.15,
+      "scale": 0.855,
+      "rotation": 289.64
+    },
+    {
+      "id": "vegetation-33",
+      "kind": "flowers",
+      "x": 4470.95,
+      "y": 4916.7,
+      "scale": 0.905,
+      "rotation": 310.2
+    },
+    {
+      "id": "vegetation-34",
+      "kind": "shrub",
+      "x": 815.18,
+      "y": 351.56,
+      "scale": 0.664,
+      "rotation": 108.02
+    },
+    {
+      "id": "vegetation-35",
+      "kind": "grass",
+      "x": 460.04,
+      "y": 274.45,
+      "scale": 1.134,
+      "rotation": 120.96
+    },
+    {
+      "id": "vegetation-36",
+      "kind": "shrub",
+      "x": 4320.97,
+      "y": 4472.49,
+      "scale": 0.788,
+      "rotation": 332.47
+    },
+    {
+      "id": "vegetation-37",
+      "kind": "shrub",
+      "x": 3922.3,
+      "y": 3435.31,
+      "scale": 1.082,
+      "rotation": 176.35
+    },
+    {
+      "id": "vegetation-38",
+      "kind": "grass",
+      "x": 3297.91,
+      "y": 2264.19,
+      "scale": 0.841,
+      "rotation": 296.46
+    },
+    {
+      "id": "vegetation-39",
+      "kind": "rock",
+      "x": 1019.36,
+      "y": 734.6,
+      "scale": 0.878,
+      "rotation": 102.41
+    },
+    {
+      "id": "vegetation-40",
+      "kind": "flowers",
+      "x": 2201.6,
+      "y": 142.65,
+      "scale": 0.906,
+      "rotation": 4.08
+    },
+    {
+      "id": "vegetation-41",
+      "kind": "shrub",
+      "x": 3882.71,
+      "y": 272.88,
+      "scale": 0.783,
+      "rotation": 256.1
+    },
+    {
+      "id": "vegetation-42",
+      "kind": "shrub",
+      "x": 4430.16,
+      "y": 3451.98,
+      "scale": 0.808,
+      "rotation": 148.43
+    },
+    {
+      "id": "vegetation-43",
+      "kind": "grass",
+      "x": 5094.97,
+      "y": 3537.5,
+      "scale": 0.694,
+      "rotation": 274.35
+    },
+    {
+      "id": "vegetation-44",
+      "kind": "flowers",
+      "x": 1402.4,
+      "y": 3606.26,
+      "scale": 0.968,
+      "rotation": 282.85
+    },
+    {
+      "id": "vegetation-45",
+      "kind": "flowers",
+      "x": 910.74,
+      "y": 4577.45,
+      "scale": 0.931,
+      "rotation": 350.1
+    },
+    {
+      "id": "vegetation-46",
+      "kind": "grass",
+      "x": 4933.94,
+      "y": 2779.8,
+      "scale": 0.846,
+      "rotation": 312.49
+    },
+    {
+      "id": "vegetation-47",
+      "kind": "grass",
+      "x": 3007.62,
+      "y": 1065.07,
+      "scale": 0.966,
+      "rotation": 174.39
+    },
+    {
+      "id": "vegetation-48",
+      "kind": "shrub",
+      "x": 4273.74,
+      "y": 3678.16,
+      "scale": 1.112,
+      "rotation": 7.66
+    },
+    {
+      "id": "vegetation-49",
+      "kind": "grass",
+      "x": 954.32,
+      "y": 2977.08,
+      "scale": 0.702,
+      "rotation": 150.58
+    },
+    {
+      "id": "vegetation-50",
+      "kind": "shrub",
+      "x": 142.21,
+      "y": 845.04,
+      "scale": 0.951,
+      "rotation": 279.46
+    },
+    {
+      "id": "vegetation-51",
+      "kind": "grass",
+      "x": 547.49,
+      "y": 4164.27,
+      "scale": 0.998,
+      "rotation": 71.79
+    },
+    {
+      "id": "vegetation-52",
+      "kind": "rock",
+      "x": 2122.5,
+      "y": 1360.98,
+      "scale": 1.082,
+      "rotation": 210.4
+    },
+    {
+      "id": "vegetation-53",
+      "kind": "grass",
+      "x": 3719.27,
+      "y": 2462.87,
+      "scale": 0.91,
+      "rotation": 249.29
+    },
+    {
+      "id": "vegetation-54",
+      "kind": "grass",
+      "x": 4853.87,
+      "y": 2751.27,
+      "scale": 0.693,
+      "rotation": 76.99
+    },
+    {
+      "id": "vegetation-55",
+      "kind": "rock",
+      "x": 406.04,
+      "y": 792.71,
+      "scale": 0.923,
+      "rotation": 241.01
+    },
+    {
+      "id": "vegetation-56",
+      "kind": "shrub",
+      "x": 2209.25,
+      "y": 4316.79,
+      "scale": 0.756,
+      "rotation": 308.26
+    },
+    {
+      "id": "vegetation-57",
+      "kind": "shrub",
+      "x": 3333.96,
+      "y": 93.79,
+      "scale": 0.776,
+      "rotation": 58.96
+    },
+    {
+      "id": "vegetation-58",
+      "kind": "shrub",
+      "x": 474.92,
+      "y": 3659.39,
+      "scale": 0.678,
+      "rotation": 346.79
+    },
+    {
+      "id": "vegetation-59",
+      "kind": "rock",
+      "x": 4990.45,
+      "y": 2924.43,
+      "scale": 0.97,
+      "rotation": 38.39
+    },
+    {
+      "id": "vegetation-60",
+      "kind": "grass",
+      "x": 3486.09,
+      "y": 4969.42,
+      "scale": 0.804,
+      "rotation": 20.01
+    },
+    {
+      "id": "vegetation-61",
+      "kind": "flowers",
+      "x": 3225.78,
+      "y": 2041.2,
+      "scale": 0.88,
+      "rotation": 99.98
+    },
+    {
+      "id": "vegetation-62",
+      "kind": "grass",
+      "x": 721.93,
+      "y": 4669.57,
+      "scale": 0.722,
+      "rotation": 169.27
+    },
+    {
+      "id": "vegetation-63",
+      "kind": "grass",
+      "x": 1846.2,
+      "y": 1358.17,
+      "scale": 1.096,
+      "rotation": 149.87
+    },
+    {
+      "id": "vegetation-64",
+      "kind": "grass",
+      "x": 1162.93,
+      "y": 4497.77,
+      "scale": 0.965,
+      "rotation": 309.96
+    }
+  ],
+  "provenance": {
+    "generator": "watabou/TownGeneratorOS",
+    "commit": "7fbc87a9398cc508af24de93f79cf2ad027f352b",
+    "seed": 20261015,
+    "size": 12,
+    "rawSha256": "1dee5bfa6705db9b9ee416caa376db58118079ff028b5bf773c096221014c3d4",
+    "source": "watabou.json",
+    "authoring": {
+      "name": "Market Town",
+      "scale": 45,
+      "padding": 8,
+      "foliageSeed": 72015,
+      "vegetationCount": 65,
+      "theme": "market"
+    },
+    "transform": {
+      "scale": 45,
+      "sourceOrigin": {
+        "x": -44.622836221078344,
+        "y": -49.494092029801664
+      }
+    },
+    "adaptations": [
+      {
+        "sourcePatch": 0,
+        "sourceGeometry": 0,
+        "meaning": "market-prop"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 16,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 18,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 19,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 20,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 21,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 22,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 23,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 24,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 25,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 26,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 27,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 28,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 29,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 31,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 32,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 33,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 34,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 35,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 36,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 37,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 38,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 39,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 41,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 42,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 43,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 44,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 13,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 16,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 17,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 18,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 19,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 20,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 21,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 22,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 23,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 24,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 25,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 27,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 28,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 29,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 13,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 16,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 17,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 18,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 20,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 21,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 22,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 8,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 9,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 13,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 10,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 16,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 17,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 18,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 19,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 20,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 21,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 22,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 23,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 24,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 25,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 26,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 27,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 28,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 30,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 31,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 32,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 33,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 34,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 35,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 36,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 37,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 38,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 40,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 41,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 42,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 43,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 44,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 45,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 46,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 11,
+        "sourceGeometry": 48,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 12,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 13,
+        "sourceGeometry": 13,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 18,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 19,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      }
+    ],
+    "interpretation": "Original seeded streets and district polygons retained. Exterior modules fit source building centres within their wards; small/crowded footprints are omitted. Outer roads are clipped to compact playable bounds. Market props and park groves are not buildings."
+  }
+}

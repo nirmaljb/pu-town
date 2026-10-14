@@ -278,90 +278,152 @@ class MafiaGameTest {
         assertNoHiddenRolesLeaked(guest);
     }
 
-    @Test
-    void nativeCampusPracticePinsSeatsAndRejectsUnreachableDayMovement() throws Exception {
-        var host = connect("native-campus-practice");
+    @ParameterizedTest
+    @ValueSource(strings = {"woodland", "market"})
+    void nativeTownsPracticeHasNoTasksAndRecoversAcceptedMovement(String mapId) throws Exception {
+        var host = connect("native-practice-" + mapId);
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
         String room = latestOfType(host, "room_snapshot").path("roomId").asText();
         String token = latestOfType(host, "room_snapshot").path("recoveryToken").asText();
+        send(host, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"" + mapId + "\"}");
+        var map = dev.lpa.pu_go.room.TownMap.find(mapId);
+        JsonNode seated = latestOfType(host, "room_state").path("players").get(0);
+        assertTrue(seated.path("ready").asBoolean(), "Map selection retains Ready");
+        assertEquals(map.seatX(0), seated.path("x").asDouble());
+        assertEquals(map.seatY(0), seated.path("y").asDouble());
         send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"campus\"}");
-        assertEquals("campus", latestOfType(host, "room_state").path("mapId").asText());
-        assertEquals(2400, latestOfType(host, "room_state").path("players").get(0).path("x").asDouble());
-        assertEquals(1595, latestOfType(host, "room_state").path("players").get(0).path("y").asDouble());
+        assertEquals("malformed_message", latest(host).path("code").asText());
         send(host, "{\"version\":1,\"type\":\"start_practice\"}");
-        JsonNode position = latestOfType(host, "field_state").path("self");
-        long correction = position.path("correction").asLong();
+        assertEmptyTasks(host);
+        long correction = latestOfType(host, "field_state").path("self").path("correction").asLong();
         milliseconds.addAndGet(1000);
-        send(host, "{\"version\":1,\"type\":\"move\",\"x\":4900,\"y\":1595,\"facing\":\"right\"}");
+        send(host, "{\"version\":1,\"type\":\"move\",\"x\":-1,\"y\":" + map.seatY(0) + ",\"facing\":\"left\"}");
         handler.tickFields();
-        position = latestOfType(host, "field_state").path("self");
-        assertEquals(2400, position.path("x").asDouble());
-        assertEquals(1595, position.path("y").asDouble());
-        assertEquals(correction + 1, position.path("correction").asLong());
+        assertEquals(map.seatX(0), latestOfType(host, "field_state").path("self").path("x").asDouble());
+        assertEquals(correction + 1, latestOfType(host, "field_state").path("self").path("correction").asLong());
+        double walkedY = map.seatY(0) + 20;
         milliseconds.addAndGet(100);
-        send(host, "{\"version\":1,\"type\":\"move\",\"x\":2400,\"y\":1575,\"facing\":\"up\"}");
+        send(host, "{\"version\":1,\"type\":\"move\",\"x\":" + map.seatX(0) + ",\"y\":" + walkedY + ",\"facing\":\"down\"}");
         handler.tickFields();
-        assertEquals(1575, latestOfType(host, "field_state").path("self").path("y").asDouble());
-        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"village\"}");
-        assertEquals("invalid_phase", latest(host).path("code").asText());
+        assertEquals(walkedY, latestOfType(host, "field_state").path("self").path("y").asDouble());
+        send(host, "{\"version\":1,\"type\":\"preview_role\",\"role\":\"mafia\"}");
+        assertEmptyTasks(host);
+        send(host, "{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"fake-0-0\"}");
+        assertEquals("invalid_task", latest(host).path("code").asText());
         handler.afterConnectionClosed(host, CloseStatus.NORMAL);
-        var recovered = connect("native-campus-practice-recovered"); recover(recovered, room, token);
-        assertEquals("campus", latestOfType(recovered, "room_snapshot").path("mapId").asText());
-        assertEquals(1575, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
-        send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"day\"}");
-        assertEquals(1575, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
-        send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"night\"}");
-        assertEquals("discussion", latestOfType(recovered, "game_state").path("phase").asText());
-        for (String phase : List.of("discussion", "voting", "voting_result"))
+        var recovered = connect("native-practice-recovered-" + mapId); recover(recovered, room, token);
+        assertEquals(mapId, latestOfType(recovered, "room_snapshot").path("mapId").asText());
+        assertEquals(walkedY, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        assertEmptyTasks(recovered);
+        for (String phase : List.of("day", "night", "discussion", "voting", "voting_result"))
             send(recovered, "{\"version\":1,\"type\":\"advance_practice\",\"round\":1,\"phase\":\"" + phase + "\"}");
         assertEquals(2, latestOfType(recovered, "game_state").path("round").asInt());
-        assertEquals(1595, latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        assertEquals(map.seatY(0), latestOfType(recovered, "field_state").path("self").path("y").asDouble());
+        assertEmptyTasks(recovered);
     }
 
-    @Test
-    void nativeCampusDoorsFilterActualRecipientFieldsAndKeepVisionUnlimitedInEachArea() throws Exception {
-        var host = connect("native-campus-privacy-0");
-        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
-        code = latestOfType(host, "room_snapshot").path("roomId").asText();
-        table.add(host);
-        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"campus\"}");
-        for (int seat = 1; seat < 4; seat++) {
-            var member = connect("native-campus-privacy-" + seat); join(member, code); table.add(member);
-        }
-        for (var member : table) send(member, "{\"version\":1,\"type\":\"set_ready\",\"ready\":true}");
-        send(host, "{\"version\":1,\"type\":\"start_game\"}");
+    @ParameterizedTest
+    @ValueSource(strings = {"woodland", "market"})
+    void nativeTownsRunEveryPhaseWithoutTasksAndStillAwardVillageFactionVictory(String mapId) throws Exception {
+        startTable("native-village-" + mapId, 4, 1, 1, 1, mapId);
         advance(REVEAL);
-        assertEquals(4, field(0).path("players").size());
-        walk(0, 2992, 1792); walk(0, 2992, 2160); walk(0, 2992, 2272);
-        assertEquals(Set.of(playerId(0)), fieldIds(0));
-        assertFalse(fieldIds(1).contains(playerId(0)), "The outdoor connection must receive no interior position");
-        long correction = field(0).path("self").path("correction").asLong();
-        advance(1000); move(0, 2752, 2208); handler.tickFields();
-        assertEquals(2992, field(0).path("self").path("x").asDouble());
-        assertEquals(2272, field(0).path("self").path("y").asDouble());
-        assertEquals(correction + 1, field(0).path("self").path("correction").asLong());
-        int chatCount = countOfType(table.get(1), "chat_message");
-        chat(0, "public", "Inside the library");
-        assertEquals(chatCount, countOfType(table.get(1), "chat_message"));
-        walk(1, 4640, 1800);
-        assertTrue(fieldIds(2).contains(playerId(1)), "Outdoor Vision has no distance limit");
-        walk(1, 2992, 2160); walk(1, 2992, 2592);
-        assertEquals(Set.of(playerId(0), playerId(1)), fieldIds(0), "Distant library Participants remain visible");
-        assertEquals(Set.of(playerId(0), playerId(1)), fieldIds(1));
-        assertEquals(Set.of(playerId(2), playerId(3)), fieldIds(2));
-        walk(1, 2992, 2160);
-        assertEquals(Set.of(playerId(0)), fieldIds(0));
-        assertEquals(Set.of(playerId(1), playerId(2), playerId(3)), fieldIds(1));
-        advance(REVEAL + DAY + NIGHT + DISCUSSION - milliseconds.get());
-        for (int seat = 0; seat < 3; seat++) ballot(seat, 1, 3);
-        advance(VOTING + VOTING_RESULT);
-        assertEquals("eliminated", game(3).path("self").path("status").asText());
-        walk(3, 2992, 1792); walk(3, 2992, 2272);
-        assertFalse(fieldIds(0).contains(playerId(3)), "Living connections never receive a Ghost position");
-        assertEquals(4, fieldIds(3).size(), "A Ghost retains its unrestricted field across interior areas");
-        walk(0, 2992, 1792); walk(0, 2992, 2272);
-        assertEquals(Set.of(playerId(0)), fieldIds(0), "The same interior does not reveal a Ghost");
+        for (var member : table) assertEmptyTasks(member);
+        assertTrue(game(0).path("winner").isNull(), "An empty Task bank must not win the Game");
+        assertEquals(Set.of(playerId(0), playerId(1), playerId(2), playerId(3)), fieldIds(1));
+        for (String command : List.of("{\"version\":1,\"type\":\"open_task\",\"round\":1,\"taskId\":\"task-3-0\"}",
+                "{\"version\":1,\"type\":\"task_step\",\"round\":1,\"taskId\":\"task-3-0\",\"step\":0,\"value\":0}",
+                "{\"version\":1,\"type\":\"close_task\"}")) {
+            send(table.get(3), command); assertEquals("invalid_task", latest(table.get(3)).path("code").asText());
+        }
+        handler.afterConnectionClosed(table.get(3), CloseStatus.NORMAL);
+        var recovered = connect("native-village-recovered-" + mapId); recover(recovered, code, tokens.get(3)); table.set(3, recovered);
+        assertEquals(mapId, latestOfType(recovered, "room_snapshot").path("mapId").asText());
+        assertEmptyTasks(recovered);
+        for (var stage : List.of(new Object[] {DAY, "night"}, new Object[] {NIGHT, "discussion"}, new Object[] {DISCUSSION, "voting"})) {
+            advance((long) stage[0]); assertEquals(stage[1], game(0).path("phase").asText());
+            for (var member : table) assertEmptyTasks(member);
+            assertTrue(game(0).path("winner").isNull());
+        }
         assertNoHiddenRolesLeaked(table.get(1));
+        for (int seat = 0; seat < 3; seat++) ballot(seat, 1, 0);
+        advance(VOTING + VOTING_RESULT);
+        assertEquals("finished", game(3).path("phase").asText());
+        assertEquals("village", game(3).path("winner").asText());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"woodland", "market"})
+    void nativeTownsRetainMafiaParityVictoryWithoutTaskProgress(String mapId) throws Exception {
+        startTable("native-mafia-" + mapId, 4, 1, 1, 1, mapId);
+        advance(REVEAL + DAY); nightChoice(0, 1, 3); advance(NIGHT);
+        assertEquals("eliminated", game(3).path("self").path("status").asText());
+        assertEmptyTasks(table.get(3));
+        advance(DISCUSSION + VOTING + VOTING_RESULT);
+        assertFalse(fieldIds(0).contains(playerId(3)), "Living connections never receive Ghost positions");
+        assertEquals(4, fieldIds(3).size(), "Ghosts retain their authorized field");
+        advance(DAY);
+        nightChoice(0, 2, 1); advance(NIGHT);
+        assertEquals("mafia", game(0).path("winner").asText());
+        for (var member : table) assertEmptyTasks(member);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"woodland", "market"})
+    void nativeDeveloperTownsCannotCreateTaskBanksThroughScenariosRolesLatePlayersOrReset(String mapId) throws Exception {
+        handler.setDeveloperEnabled(true);
+        var host = connect("native-dev-" + mapId); host.getAttributes().put("developerLocal", true);
+        send(host, "{\"version\":1,\"type\":\"create_developer_room\",\"displayName\":\"Host\"}");
+        String room = latestOfType(host, "room_snapshot").path("roomId").asText();
+        String token = latestOfType(host, "room_snapshot").path("recoveryToken").asText();
+        send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"" + mapId + "\"}");
+        dev(host, "\"action\":\"scenario\",\"name\":\"tasks\"");
+        assertEquals("invalid_action", latest(host).path("code").asText());
+        assertEquals("lobby", latestOfType(host, "room_state").path("phase").asText());
+        assertEquals(1, latestOfType(host, "developer_state").path("players").size());
+        dev(host, "\"action\":\"scenario\",\"name\":\"four_roles\"");
+        dev(host, "\"action\":\"advance\"");
+        dev(host, "\"action\":\"add_player\",\"displayName\":\"Late Player\",\"role\":\"villager\"");
+        JsonNode inspector = latestOfType(host, "developer_state");
+        String simulated = inspector.path("players").get(4).path("playerId").asText();
+        assertEquals(0, inspector.path("locations").size());
+        assertTrue(inspector.path("players").valueStream().allMatch(p -> p.path("tasks").isEmpty()));
+        try (var geometry = getClass().getResourceAsStream("/maps/" + mapId + ".json")) {
+            JsonNode building = objectMapper.readTree(geometry).path("buildings").get(0);
+            double blockedX = building.path("x").asDouble() + building.path("width").asDouble() / 2;
+            double blockedY = building.path("y").asDouble() + building.path("height").asDouble() / 2;
+            dev(host, "\"action\":\"teleport\",\"playerId\":\"" + simulated + "\",\"x\":" + blockedX + ",\"y\":" + blockedY);
+            assertEquals("invalid_position", latest(host).path("code").asText(), "Published buildings must remain solid at the WebSocket boundary");
+        }
+        dev(host, "\"action\":\"role\",\"playerId\":\"" + simulated + "\",\"role\":\"mafia\"");
+        dev(host, "\"action\":\"role\",\"playerId\":\"" + simulated + "\",\"role\":\"villager\"");
+        dev(host, "\"action\":\"task\",\"playerId\":\"" + simulated + "\",\"taskId\":\"invented\",\"location\":0,\"kind\":\"repair\",\"steps\":1,\"durationMs\":0,\"step\":0");
+        assertEquals("invalid_task", latest(host).path("code").asText());
+        dev(host, "\"action\":\"open_task\",\"playerId\":\"" + simulated + "\",\"round\":1,\"taskId\":\"invented\"");
+        assertEquals("invalid_task", latest(host).path("code").asText());
+        for (String setting : List.of("taskVictory", "taskRange", "taskDuration")) {
+            dev(host, "\"action\":\"setting\",\"name\":\"" + setting + "\",\"enabled\":false");
+            assertEquals("invalid_action", latest(host).path("code").asText());
+            assertTrue(latestOfType(host, "developer_state").path("settings").path(setting).asBoolean(), "Rejected Task settings must not mutate the inspector");
+        }
+        for (int step = 0; step < 5; step++) dev(host, "\"action\":\"advance\"");
+        assertEquals("day", latestOfType(host, "game_state").path("phase").asText());
+        assertTrue(latestOfType(host, "game_state").path("winner").isNull());
+        dev(host, "\"action\":\"reset\"");
+        assertEquals("role_reveal", latestOfType(host, "game_state").path("phase").asText());
+        assertEquals(5, latestOfType(host, "developer_state").path("players").size());
+        assertTrue(latestOfType(host, "developer_state").path("players").valueStream().allMatch(p -> p.path("tasks").isEmpty()));
+        handler.afterConnectionClosed(host, CloseStatus.NORMAL);
+        var recovered = connect("native-dev-recovered-" + mapId); recovered.getAttributes().put("developerLocal", true); recover(recovered, room, token);
+        assertEmptyTasks(recovered);
+        assertEquals(mapId, latestOfType(recovered, "room_snapshot").path("mapId").asText());
+        assertTrue(latestOfType(recovered, "developer_state").path("players").valueStream().allMatch(p -> p.path("tasks").isEmpty()));
+    }
+
+    private void assertEmptyTasks(RecordingWebSocketSession session) {
+        JsonNode tasks = latestOfType(session, "task_state");
+        assertEquals(0, tasks.path("tasks").size()); assertEquals(0, tasks.path("completed").asInt()); assertEquals(0, tasks.path("total").asInt());
+        assertTrue(tasks.path("activeTaskId").isNull()); assertTrue(tasks.path("remainingMs").isNull());
     }
 
     @Test
@@ -2058,12 +2120,17 @@ class MafiaGameTest {
     }
 
     private void startTable(String label, int players, int mafia, int doctors, int sheriffs) throws Exception {
+        startTable(label, players, mafia, doctors, sheriffs, "village");
+    }
+
+    private void startTable(String label, int players, int mafia, int doctors, int sheriffs, String mapId) throws Exception {
         tokens.clear();
         var host = connect(label + "-0");
         send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Player 0\"}");
         code = latest(host).path("roomId").asText();
         tokens.add(latest(host).path("recoveryToken").asText());
         table.add(host);
+        if (!mapId.equals("village")) send(host, "{\"version\":1,\"type\":\"select_map\",\"mapId\":\"" + mapId + "\"}");
         for (int seat = 1; seat < players; seat++) {
             var guest = connect(label + "-" + seat);
             send(guest, "{\"version\":1,\"type\":\"join_room\",\"roomId\":\"" + code + "\",\"displayName\":\"Player " + seat + "\"}");

@@ -13,8 +13,9 @@ import java.util.Map;
 public final class TownMap {
     private static final Map<String, TownMap> MAPS = Map.of(
             "village", load("village"), "horror", load("horror"), "cyberpunk", load("cyberpunk"),
-            "campus", load("campus"));
+            "woodland", load("woodland"), "market", load("market"));
     private final String id;
+    private final boolean tasksEnabled;
     private final double width, height, centreX, centreY;
     private final List<RoomRules.Interior> interiors;
     private final List<TaskBoard.Location> tasks;
@@ -22,6 +23,9 @@ public final class TownMap {
 
     private TownMap(String id, JsonNode data) {
         this.id = id;
+        if (data.has("tasksEnabled") && !data.path("tasksEnabled").isBoolean())
+            throw new IllegalStateException("Invalid Task capability: " + id);
+        tasksEnabled = !data.has("tasksEnabled") || data.path("tasksEnabled").asBoolean();
         width = data.path("width").asDouble();
         height = data.path("height").asDouble();
         centreX = data.path("emergencyButton").path("x").asDouble();
@@ -50,8 +54,9 @@ public final class TownMap {
         }
         indexed.replaceAll((key, value) -> List.copyOf(value));
         cells = Map.copyOf(indexed);
-        if (tasks.isEmpty() || tasks.stream().anyMatch(task -> !walkable(task.x(), task.y())))
+        if (tasksEnabled && (tasks.size() < 3 || tasks.stream().anyMatch(task -> !walkable(task.x(), task.y()))))
             throw new IllegalStateException("Town has unreachable Tasks: " + id);
+        if (!tasksEnabled && !tasks.isEmpty()) throw new IllegalStateException("Disabled town has Task locations: " + id);
         for (int seat = 0; seat < RoomRules.CAPACITY; seat++)
             if (!walkable(seatX(seat), seatY(seat))) throw new IllegalStateException("Blocked Seat: " + id);
     }
@@ -66,6 +71,7 @@ public final class TownMap {
     public static TownMap find(String id) { return MAPS.get(id); }
     public static TownMap village() { return MAPS.get("village"); }
     public String id() { return id; }
+    public boolean tasksEnabled() { return tasksEnabled; }
     public double seatX(int seat) { return centreX + Math.round(330 * Math.sin(seat * 2 * Math.PI / RoomRules.CAPACITY)); }
     public double seatY(int seat) { return centreY + Math.round(-205 * Math.cos(seat * 2 * Math.PI / RoomRules.CAPACITY)); }
     public List<TaskBoard.Location> tasks() { return tasks; }

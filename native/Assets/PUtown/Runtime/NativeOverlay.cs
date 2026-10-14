@@ -13,7 +13,7 @@ namespace PUtown.Runtime
         private readonly GameObject owner;
         private readonly PanelSettings settings;
         private readonly GameSession session;
-        private readonly CampusRules rules;
+        private TownRules rules;
         private readonly VisualElement root, entry, reconnect, sidebar, content;
         private readonly Label phase, countdown, status, error, assetStatus, taskTimer;
         private readonly TextField name, code, chatInput;
@@ -54,7 +54,7 @@ namespace PUtown.Runtime
                 var picked = root.panel.Pick(position); return picked != null && picked != root;
             }
         }
-        public NativeOverlay(GameSession session, CampusRules rules, NativeAvatarCollection collection, Font font, Action retryAssets = null, Func<INativeVoiceControls> voice = null)
+        public NativeOverlay(GameSession session, TownRules rules, NativeAvatarCollection collection, Font font, Action retryAssets = null, Func<INativeVoiceControls> voice = null)
         {
             this.session = session; this.rules = rules; this.collection = collection; this.voice = voice;
             owner = new GameObject("Native interface"); var document = owner.AddComponent<UIDocument>(); settings = ScriptableObject.CreateInstance<PanelSettings>();
@@ -79,7 +79,7 @@ namespace PUtown.Runtime
             sidebar.Add(Button("Leave Room", session.Leave));
             entry = new VisualElement(); entry.style.position = Position.Absolute; entry.style.left = 0; entry.style.right = 0; entry.style.top = 0; entry.style.bottom = 0; entry.style.alignItems = Align.Center; entry.style.justifyContent = Justify.Center; root.Add(entry);
             var entryPaper = new VisualElement { name = "entry-paper" }; entryPaper.style.width = 470; entryPaper.style.backgroundColor = Paper; Pad(entryPaper, 30); entry.Add(entryPaper);
-            entryPaper.Add(Label("PU Town", 52)); entryPaper.Add(Label("Gather at Pondicherry University's main campus.", 21));
+            entryPaper.Add(Label("PU Town", 52)); entryPaper.Add(Label("Gather in Woodland Village or Market Town.", 21));
             name = new TextField("Display Name"); name.style.marginTop = 24; name.style.fontSize = 21; name.value = PlayerPrefs.GetString("DisplayName", session.DisplayName); entryPaper.Add(name);
             code = new TextField("Room Code"); code.style.marginTop = 12; code.style.fontSize = 21; entryPaper.Add(code);
             var entryButtons = Row(); entryButtons.style.marginTop = 18;
@@ -94,6 +94,7 @@ namespace PUtown.Runtime
             settingsPanel = new VisualElement(); settingsPanel.style.position = Position.Absolute; settingsPanel.style.left = 0; settingsPanel.style.right = 0; settingsPanel.style.top = 0; settingsPanel.style.bottom = 0; settingsPanel.style.alignItems = Align.Center; settingsPanel.style.justifyContent = Justify.Center; settingsPanel.style.backgroundColor = new Color(.06f, .12f, .10f, .65f); root.Add(settingsPanel);
             BuildSettings(); ShowSettings(false);
         }
+        public void SetRules(TownRules value) { rules = value; signature = ""; signatureRevision = -1; }
         public void EnableDeveloperEntry()
         {
             var paper = root.Q<VisualElement>("entry-paper");
@@ -125,7 +126,7 @@ namespace PUtown.Runtime
             {
                 signatureRevision = world.Revision; signatureCollectionId = collection.CollectionId;
                 signaturePreviewChosen = previewChosen; signaturePreviewTarget = previewTarget;
-                contentSignature = new JArray(world.RoomPhase, world.Game, world.Tasks, world.RoleSetup, new JArray(world.Players.Values),
+                contentSignature = new JArray(world.RoomPhase, world.MapId, world.Game, world.Tasks, world.RoleSetup, new JArray(world.Players.Values),
                     collection.CollectionId, world.Developer, world.Inspector, world.PracticeTargets, previewChosen, previewTarget).ToString(Formatting.None);
             }
             var focused = root.panel?.focusController?.focusedElement as VisualElement;
@@ -150,6 +151,14 @@ namespace PUtown.Runtime
         private void Lobby(NativeWorld world)
         {
             content.Add(Label("Waiting at the Townhall", 26));
+            content.Add(Label(NativeTownMaps.Name(world.MapId), 21));
+            if (world.HostPlayerId == world.SelfPlayerId)
+            {
+                content.Add(Label("Town Map", 18));
+                var maps = new DropdownField(NativeTownMaps.Ids.Select(NativeTownMaps.Name).ToList(), NativeTownMaps.Ids.ToList().IndexOf(world.MapId));
+                maps.RegisterValueChangedCallback(evt => session.Control("select_map", "mapId", NativeTownMaps.Ids[maps.index]));
+                content.Add(maps); perFrame.Add(() => maps.SetEnabled(session.CanControl));
+            }
             content.Add(Button("Copy Room Code", () => GUIUtility.systemCopyBuffer = world.RoomId));
             foreach (var player in world.Players.Values.OrderBy(p => (int)p["seat"]))
             {
@@ -179,7 +188,11 @@ namespace PUtown.Runtime
             content.Add(Label(RoleHelp(role), 18));
             if (self["mafiaTeam"] is JArray team) content.Add(Label("Mafia team: " + string.Join(", ", team.Select(t => world.Name((string)t))), 17));
             if (self["investigations"] is JArray results) foreach (var result in results) content.Add(Label("Round " + result["round"] + ": " + world.Name((string)result["targetPlayerId"]) + " is " + ((bool)result["mafia"] ? "Mafia" : "Village"), 17));
-            if (world.Phase == "day") Tasks(world);
+            if (world.Phase == "day")
+            {
+                if (rules.TasksEnabled) Tasks(world);
+                else content.Add(Label("Explore the town and talk with nearby Players. Tasks are disabled for now.", 18));
+            }
             else if (world.Phase == "night")
             {
                 content.Add(Label("Sleep where you stood. Conversation is closed.", 18));
@@ -259,7 +272,7 @@ namespace PUtown.Runtime
                 {
                     var self = world.Field?["self"]; var distance = self == null ? float.PositiveInfinity : Vector2.Distance(new Vector2((float)self["x"], (float)self["y"]), new Vector2((float)task["x"], (float)task["y"]));
                     var nearby = self != null && (world.Developer?["taskRange"]?.Type == JTokenType.Boolean && !(bool)world.Developer["taskRange"] || distance <= 64 && rules.Area((float)self["x"], (float)self["y"]) == rules.Area((float)task["x"], (float)task["y"]));
-                    location.text = (int)task["step"] == (int)task["steps"] ? "Complete" : nearby ? "Within reach" : rules.Area((float)task["x"], (float)task["y"]) + " · " + (float.IsInfinity(distance) ? "Explore campus" : Mathf.CeilToInt(distance / rules.Units) + " m away");
+                    location.text = (int)task["step"] == (int)task["steps"] ? "Complete" : nearby ? "Within reach" : rules.Area((float)task["x"], (float)task["y"]) + " · " + (float.IsInfinity(distance) ? "Explore the town" : Mathf.CeilToInt(distance / rules.Units) + " m away");
                     foreach (var button in buttons) button.SetEnabled(session.CanControl && nearby && (!active || !world.Paused && world.TaskRemaining(now) <= 0));
                 });
             }
@@ -297,12 +310,14 @@ namespace PUtown.Runtime
                 button.SetEnabled(action == "start" ? world.RoomPhase == "lobby" : action == "lobby" || action == "inspect" || world.Game != null); panel.Add(button);
             }
             panel.Add(Button(world.Paused ? "Resume Game" : "Pause Game", () => session.Control("developer_command", "action", "pause", "enabled", !world.Paused)));
-            var scenario = new DropdownField("Test Scenario", new List<string> { "four_roles", "protection", "voting", "tasks", "recovery" }, (string)world.Developer["scenario"]); panel.Add(scenario);
+            var scenarios = new List<string> { "four_roles", "protection", "voting", "recovery" }; if (rules.TasksEnabled) scenarios.Add("tasks");
+            var scenario = new DropdownField("Test Scenario", scenarios, (string)world.Developer["scenario"]); panel.Add(scenario);
             panel.Add(Button("Load scenario", () => session.Control("developer_command", "action", "scenario", "name", scenario.value)));
             if (world.Inspector != null)
             {
                 foreach (var setting in StrictProtocol.Settings)
                 {
+                    if (!rules.TasksEnabled && setting.StartsWith("task", StringComparison.Ordinal)) continue;
                     var key = setting; var toggle = new Toggle(setting) { value = (bool)world.Inspector["settings"][setting] }; toggle.RegisterValueChangedCallback(e => session.Control("developer_command", "action", "setting", "name", key, "enabled", e.newValue)); panel.Add(toggle);
                 }
                 foreach (var p in (JArray)world.Inspector["players"])
@@ -341,10 +356,10 @@ namespace PUtown.Runtime
                         var finish = Button("Finish simulated step", () => session.Control("developer_command", "action", "task_step", "playerId", id, "round", world.Round, "taskId", taskId, "step", (int)task["step"], "value", (string)task["kind"] == "sequence" ? sequenceValue.value : 0)); finish.SetEnabled((bool)p["simulated"] && world.Phase == "day" && !world.Paused); taskPanel.Add(finish);
                         bank.Add(taskPanel);
                     }
-                    player.Add(bank); panel.Add(player);
+                    if (rules.TasksEnabled) player.Add(bank); panel.Add(player);
                 }
             }
-            var simulatedName = new TextField("Simulated Display Name") { value = "Campus guest" }; panel.Add(simulatedName);
+            var simulatedName = new TextField("Simulated Display Name") { value = "Town guest" }; panel.Add(simulatedName);
             foreach (var role in StrictProtocol.Roles) { var chosen = role; panel.Add(Button("Add " + role, () => session.Control("developer_command", "action", "add_player", "displayName", simulatedName.value, "role", chosen))); }
             content.Add(panel);
         }
@@ -408,7 +423,7 @@ namespace PUtown.Runtime
         private static void Pad(VisualElement element, int value) { element.style.paddingLeft = element.style.paddingRight = element.style.paddingTop = element.style.paddingBottom = value; }
         private static string TimeText(double ms) { var seconds = (int)Math.Ceiling(ms / 1000); return (seconds / 60) + ":" + (seconds % 60).ToString("00"); }
         private static string PhaseName(string phase) { return phase == "role_reveal" ? "Your Role" : phase == "day" ? "Day" : phase == "night" ? "Night" : phase == "discussion" ? "Townhall discussion" : phase == "voting" ? "Townhall voting" : phase == "voting_result" ? "Meeting result" : "Game finished"; }
-        private static string RoleHelp(string role) { return role == "mafia" ? "Agree on a Village victim at Night. Fake Tasks do not count toward Village victory." : role == "doctor" ? "Protect one living Participant each Night. Complete your Tasks for the Village." : role == "sheriff" ? "Investigate one other living Participant each Night. Results belong to you." : "Complete your Tasks and help the Townhall find the Mafia."; }
+        private static string RoleHelp(string role) { return role == "mafia" ? "Agree on a Village victim at Night. Win when the living Mafia match or outnumber the Village." : role == "doctor" ? "Protect one living Participant each Night. Help the Townhall find the Mafia." : role == "sheriff" ? "Investigate one other living Participant each Night. Results belong to you." : "Explore, converse with nearby Players and help the Townhall find the Mafia."; }
         public void Dispose() { UnityEngine.Object.Destroy(owner); UnityEngine.Object.Destroy(settings); }
     }
 }

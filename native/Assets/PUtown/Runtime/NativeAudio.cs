@@ -12,17 +12,18 @@ namespace PUtown.Runtime
         private readonly GameObject root;
         private readonly AudioSource ambience, music, effects;
         private readonly List<AudioClip> clips = new List<AudioClip>();
-        private readonly CampusRules campus;
+        private TownRules town;
         private long snapshot = -1, lastSound;
         private string phase;
         private readonly Dictionary<string, AudioClip> steps = new Dictionary<string, AudioClip>();
-        public NativeAudio(CampusRules campus)
+        public NativeAudio(TownRules town)
         {
-            this.campus = campus; root = new GameObject("Campus audio"); ambience = Source("Wind and birds"); music = Source("Campus score"); effects = Source("Authorized effects");
+            this.town = town; root = new GameObject("Town audio"); ambience = Source("Wind and birds"); music = Source("Town score"); effects = Source("Authorized effects");
             ambience.clip = Ambience(); ambience.loop = true; ambience.Play(); music.clip = Score(); music.loop = true; music.Play();
             steps["outdoors"] = Footstep("Stone footstep", .065f, .5f); steps["indoors"] = Footstep("Indoor footstep", .055f, .32f);
             steps["enter"] = Tone("Door enter", 280, .12f); steps["exit"] = Tone("Door exit", 220, .12f); steps["phase"] = Tone("Phase transition", 330, .24f);
         }
+        public void SetRules(TownRules rules) { town = rules; }
         private AudioSource Source(string name) { var obj = new GameObject(name); obj.transform.SetParent(root.transform); var source = obj.AddComponent<AudioSource>(); source.playOnAwake = false; source.spatialBlend = 0; return source; }
         private AudioClip Clip(string name, float[] samples) { var clip = AudioClip.Create(name, samples.Length, 1, 22050, false); clip.SetData(samples, 0); clips.Add(clip); return clip; }
         private AudioClip Ambience()
@@ -39,7 +40,7 @@ namespace PUtown.Runtime
                 }
                 var fade = Math.Min(1, Math.Min(time, seconds - time)); samples[i] = (float)(value * fade);
             }
-            return Clip("Original campus wind and birds", samples);
+            return Clip("Original town wind and birds", samples);
         }
         private AudioClip Score()
         {
@@ -49,7 +50,7 @@ namespace PUtown.Runtime
                 var time = i / (double)rate; var local = time % 4; var note = notes[(int)(time / 4) % notes.Length]; var envelope = Math.Sin(local / 4 * Math.PI) * Math.Exp(-local * .6);
                 samples[i] = (float)((Math.Sin(2 * Math.PI * note * local) + .25 * Math.Sin(2 * Math.PI * note * 2 * local)) * envelope * .025);
             }
-            return Clip("Original restrained campus score", samples);
+            return Clip("Original restrained town score", samples);
         }
         private AudioClip Footstep(string name, float duration, float sharpness)
         {
@@ -76,7 +77,7 @@ namespace PUtown.Runtime
                 if (world.Phase != "day" || world.Field == null || (int)sound["round"] != world.Round) continue;
                 var id = (string)sound["playerId"]; var authorized = ((Newtonsoft.Json.Linq.JArray)world.Field["players"]).FirstOrDefault(p => (string)p["playerId"] == id);
                 if (authorized == null || (bool)authorized["ghost"] && id != world.SelfPlayerId) continue;
-                var kind = (string)sound["kind"]; var key = kind == "footstep" ? campus.Area((float)authorized["x"], (float)authorized["y"]) == "outdoors" ? "outdoors" : "indoors" : kind;
+                var kind = (string)sound["kind"]; var key = kind == "footstep" ? town.Area((float)authorized["x"], (float)authorized["y"]) == "outdoors" ? "outdoors" : "indoors" : kind;
                 if (steps.TryGetValue(key, out var clip)) effects.PlayOneShot(clip, (float)sound["gain"]);
             }
         }

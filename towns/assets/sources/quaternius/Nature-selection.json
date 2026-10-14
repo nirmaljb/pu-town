@@ -1,0 +1,1063 @@
+{
+  "pack": "Nature",
+  "edition": "Standard",
+  "models": [
+    {
+      "sourcePath": "FBX (Unity)/CommonTree_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/CommonTree_1.fbx",
+      "byteLength": 374492,
+      "sha256": "270b8be7dbde95980a308212319d99580a433821ca8daa7d115f3d289ede9608",
+      "name": "CommonTree_1",
+      "materialMappingSource": "glTF/CommonTree_1.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_NormalTree",
+          "baseColorTexture": "Leaves_NormalTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/CommonTree_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/CommonTree_2.fbx",
+      "byteLength": 330636,
+      "sha256": "8a2274f2a86ded8f3f6e3d2fcebb7d2e0449c9d3d3733f86c11e09dd8e4e6804",
+      "name": "CommonTree_2",
+      "materialMappingSource": "glTF/CommonTree_2.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_NormalTree",
+          "baseColorTexture": "Leaves_NormalTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/CommonTree_4.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/CommonTree_4.fbx",
+      "byteLength": 240748,
+      "sha256": "2e7526829fd7adbb3383f927f0e692f16cf4c5cd6063e48c7497ccd231a3488f",
+      "name": "CommonTree_4",
+      "materialMappingSource": "glTF/CommonTree_4.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_NormalTree",
+          "baseColorTexture": "Leaves_NormalTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/CommonTree_5.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/CommonTree_5.fbx",
+      "byteLength": 211404,
+      "sha256": "4f77ad8be1ff819365448ae7b0515c84be64936d9f62c173489f59ac9c0b71e1",
+      "name": "CommonTree_5",
+      "materialMappingSource": "glTF/CommonTree_5.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_NormalTree",
+          "baseColorTexture": "Leaves_NormalTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Bush_Common.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Bush_Common.fbx",
+      "byteLength": 84060,
+      "sha256": "f4c057dc7118ab76b946cfa9d01908aa151cc2585bc8799e5a97833bccfec022",
+      "name": "Bush_Common",
+      "materialMappingSource": "glTF/Bush_Common.gltf",
+      "materials": [
+        {
+          "name": "Leaves_TwistedTree",
+          "baseColorTexture": "Leaves_TwistedTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Bush_Common_Flowers.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Bush_Common_Flowers.fbx",
+      "byteLength": 115532,
+      "sha256": "3187c4e37f3be09da9d212e1c3ae04ae24814b7fc7074c19c56f633e95d10943",
+      "name": "Bush_Common_Flowers",
+      "materialMappingSource": "glTF/Bush_Common_Flowers.gltf",
+      "materials": [
+        {
+          "name": "Leaves_NormalTree",
+          "baseColorTexture": "Leaves_NormalTree_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Flowers",
+          "baseColorTexture": "Flowers.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Clover_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Clover_1.fbx",
+      "byteLength": 32860,
+      "sha256": "71b8d08da722418e73b4036d240a073c3499f558a28593c6cda67896ada3c3d1",
+      "name": "Clover_1",
+      "materialMappingSource": "glTF/Clover_1.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Clover_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Clover_2.fbx",
+      "byteLength": 40604,
+      "sha256": "6a541be2ff15c4372541f825ae725a200d19a79bd672463bf74550cea25c70d5",
+      "name": "Clover_2",
+      "materialMappingSource": "glTF/Clover_2.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Fern_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Fern_1.fbx",
+      "byteLength": 32060,
+      "sha256": "520f1bce3d292885b6d85d5f7b541a1f0c236697ca99eb69e57817eed47eab31",
+      "name": "Fern_1",
+      "materialMappingSource": "glTF/Fern_1.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Flower_3_Group.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Flower_3_Group.fbx",
+      "byteLength": 49308,
+      "sha256": "c2a4d9369513e1c3cb1b992d5ae036dd86bd39c402a782ce3fe97f9b1a34d8e1",
+      "name": "Flower_3_Group",
+      "materialMappingSource": "glTF/Flower_3_Group.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Flowers",
+          "baseColorTexture": "Flowers.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Flower_4_Group.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Flower_4_Group.fbx",
+      "byteLength": 80108,
+      "sha256": "1edd78307fcd9618c226c48bd09594462fd21339d7d2b08f732bac649874f623",
+      "name": "Flower_4_Group",
+      "materialMappingSource": "glTF/Flower_4_Group.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Flowers",
+          "baseColorTexture": "Flowers.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Grass_Common_Short.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Grass_Common_Short.fbx",
+      "byteLength": 26060,
+      "sha256": "9bdb821b226ec62e485e648f35ea227c21d0245f3aefe1633d560e457476cd09",
+      "name": "Grass_Common_Short",
+      "materialMappingSource": "glTF/Grass_Common_Short.gltf",
+      "materials": [
+        {
+          "name": "Grass",
+          "baseColorTexture": "Grass.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Grass_Common_Tall.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Grass_Common_Tall.fbx",
+      "byteLength": 32892,
+      "sha256": "71e676f1a0b4ad585646c9c8ea68b23320fc5b1db8946bd19a46147b9060bf14",
+      "name": "Grass_Common_Tall",
+      "materialMappingSource": "glTF/Grass_Common_Tall.gltf",
+      "materials": [
+        {
+          "name": "Grass",
+          "baseColorTexture": "Grass.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Grass_Wispy_Short.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Grass_Wispy_Short.fbx",
+      "byteLength": 41084,
+      "sha256": "123e9d77c073e8a22a8a5d49349d0110731f419778185b458f31f5796249f213",
+      "name": "Grass_Wispy_Short",
+      "materialMappingSource": "glTF/Grass_Wispy_Short.gltf",
+      "materials": [
+        {
+          "name": "Grass",
+          "baseColorTexture": "Grass.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Plant_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Plant_1.fbx",
+      "byteLength": 24396,
+      "sha256": "0d1c10451cd028689ae358c0e2415bc42815dec10eee0f0b724ab0951b7a0679",
+      "name": "Plant_1",
+      "materialMappingSource": "glTF/Plant_1.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Plant_7.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Plant_7.fbx",
+      "byteLength": 21212,
+      "sha256": "77894a2ee355f5cb49203442670aa1f43b432c1437ebe3d1a92948c9c32b5b67",
+      "name": "Plant_7",
+      "materialMappingSource": "glTF/Plant_7.gltf",
+      "materials": [
+        {
+          "name": "Leaves",
+          "baseColorTexture": "Leaves.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Rock_Medium_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Rock_Medium_1.fbx",
+      "byteLength": 30700,
+      "sha256": "e75986c05c1071ca99b8810005aa6d69d575a529e38c7e77c519c592e16f264e",
+      "name": "Rock_Medium_1",
+      "materialMappingSource": "glTF/Rock_Medium_1.gltf",
+      "materials": [
+        {
+          "name": "Rocks",
+          "baseColorTexture": "Rocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Rock_Medium_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Rock_Medium_2.fbx",
+      "byteLength": 27276,
+      "sha256": "6ffd1e9d4b2898e881e612a01faf7cd8120061aec9f1b7c8abe71d63b205341c",
+      "name": "Rock_Medium_2",
+      "materialMappingSource": "glTF/Rock_Medium_2.gltf",
+      "materials": [
+        {
+          "name": "Rocks",
+          "baseColorTexture": "Rocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Rock_Medium_3.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Rock_Medium_3.fbx",
+      "byteLength": 37324,
+      "sha256": "4d1ae93a255821b04f8a2f48c2f65d374617b36b2ad933e8b941a22194a3c3c7",
+      "name": "Rock_Medium_3",
+      "materialMappingSource": "glTF/Rock_Medium_3.gltf",
+      "materials": [
+        {
+          "name": "Rocks",
+          "baseColorTexture": "Rocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pebble_Round_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pebble_Round_1.fbx",
+      "byteLength": 23372,
+      "sha256": "113ac73ebda2ef729f84fc7d7d1a9713912c4a65dc18ffa829a4674af40da28f",
+      "name": "Pebble_Round_1",
+      "materialMappingSource": "glTF/Pebble_Round_1.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pebble_Round_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pebble_Round_2.fbx",
+      "byteLength": 22540,
+      "sha256": "6e49f088d01572be66ae2deeaed1d2306ea0c704e0ee44990dcc45b2e21464ab",
+      "name": "Pebble_Round_2",
+      "materialMappingSource": "glTF/Pebble_Round_2.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pebble_Round_3.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pebble_Round_3.fbx",
+      "byteLength": 22988,
+      "sha256": "0736df35025896b0a08c7a391a9f572c2a7837ba80868668ac7a920d9e986ebd",
+      "name": "Pebble_Round_3",
+      "materialMappingSource": "glTF/Pebble_Round_3.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/RockPath_Round_Wide.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/RockPath_Round_Wide.fbx",
+      "byteLength": 109308,
+      "sha256": "a2026190e1688dc5200d8c8d10ed753be9908d89c0533cb333f43da63416a759",
+      "name": "RockPath_Round_Wide",
+      "materialMappingSource": "glTF/RockPath_Round_Wide.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/RockPath_Round_Thin.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/RockPath_Round_Thin.fbx",
+      "byteLength": 78268,
+      "sha256": "c536753a8883c021f30bf7b6bc97cd10c188062f159f916dd4bcf393ec5c6715",
+      "name": "RockPath_Round_Thin",
+      "materialMappingSource": "glTF/RockPath_Round_Thin.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/RockPath_Round_Small_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/RockPath_Round_Small_1.fbx",
+      "byteLength": 46988,
+      "sha256": "231f9133a2f7c642668a71376bbe4a02fe5ddda987529a8330416804f06f763c",
+      "name": "RockPath_Round_Small_1",
+      "materialMappingSource": "glTF/RockPath_Round_Small_1.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/RockPath_Round_Small_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/RockPath_Round_Small_2.fbx",
+      "byteLength": 49788,
+      "sha256": "c919c6577aab27e0f9eacc6bd2034d873573df3307a5ba93148af4ac71c12d8a",
+      "name": "RockPath_Round_Small_2",
+      "materialMappingSource": "glTF/RockPath_Round_Small_2.gltf",
+      "materials": [
+        {
+          "name": "PathRocks",
+          "baseColorTexture": "PathRocks_Diffuse.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pine_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pine_1.fbx",
+      "byteLength": 225404,
+      "sha256": "f1e352910cb4f7be686212a5f1d6441861202d237575f7df4852b24cf1cae7eb",
+      "name": "Pine_1",
+      "materialMappingSource": "glTF/Pine_1.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_Pine",
+          "baseColorTexture": "Leaf_Pine_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pine_2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pine_2.fbx",
+      "byteLength": 208028,
+      "sha256": "8471d5f4b8b9e60d3d18a6dd70065b09c6507872319d895573467940ef3cb423",
+      "name": "Pine_2",
+      "materialMappingSource": "glTF/Pine_2.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_Pine",
+          "baseColorTexture": "Leaf_Pine_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "FBX (Unity)/Pine_3.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Models/Pine_3.fbx",
+      "byteLength": 267548,
+      "sha256": "82a243d96972221dc4f2b4f5cc6efff80827e1bd93d305c32ccb1e3bbf75b34f",
+      "name": "Pine_3",
+      "materialMappingSource": "glTF/Pine_3.gltf",
+      "materials": [
+        {
+          "name": "Bark_NormalTree",
+          "baseColorTexture": "Bark_NormalTree.png",
+          "normalTexture": "Bark_NormalTree_Normal.png",
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        },
+        {
+          "name": "Leaves_Pine",
+          "baseColorTexture": "Leaf_Pine_C.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.20000000298023224,
+          "doubleSided": true
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sourcePath": "glTF/Bark_NormalTree.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Bark_NormalTree.png",
+      "byteLength": 3894788,
+      "sha256": "f36e94fdd73255347325b998e02a0b2575fdf714b0315bfe5e8ff34bc8e13603"
+    },
+    {
+      "sourcePath": "glTF/Bark_NormalTree_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Bark_NormalTree_Normal.png",
+      "byteLength": 4384496,
+      "sha256": "852f6155404b8c39e100e41e26970e02a6a5c81b482d3726618dab28e3ad03a2"
+    },
+    {
+      "sourcePath": "glTF/Leaves_NormalTree_C.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Leaves_NormalTree_C.png",
+      "byteLength": 158796,
+      "sha256": "998612bdf0b76a22f5f54d65cd7a457815d2842d89653fa4348a4ebb42933ad3"
+    },
+    {
+      "sourcePath": "glTF/Leaves_TwistedTree_C.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Leaves_TwistedTree_C.png",
+      "byteLength": 70353,
+      "sha256": "0e459b56b14c0e81b1b7cf3d1e8c6f0bb71790eb6c46bb02a76a922d8df646ea"
+    },
+    {
+      "sourcePath": "glTF/Flowers.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Flowers.png",
+      "byteLength": 444609,
+      "sha256": "5c531f2329c241c625aafd6cb769de29f33b480ef2a16491c2489f3c68e62a6a"
+    },
+    {
+      "sourcePath": "glTF/Leaves.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Leaves.png",
+      "byteLength": 2586432,
+      "sha256": "23248cebe28a24e78add32db3c2ee2f4d7b9219e9d2467279722f0197a7b6bd5"
+    },
+    {
+      "sourcePath": "glTF/Grass.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Grass.png",
+      "byteLength": 33605,
+      "sha256": "5d69048193b246a73c996b892607fb36c75d0c60afcb2dab8aa12de3c0b2d9bd"
+    },
+    {
+      "sourcePath": "glTF/Rocks_Diffuse.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Rocks_Diffuse.png",
+      "byteLength": 2517398,
+      "sha256": "b813696df6081f469a127092eb0ce45cc39d56f3ccc0699152bfcd3804810b48"
+    },
+    {
+      "sourcePath": "glTF/PathRocks_Diffuse.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/PathRocks_Diffuse.png",
+      "byteLength": 811732,
+      "sha256": "85a04abb2c136fee53b376daf3b7d7f96fdf3966de0258dff6fe2b24da792b23"
+    },
+    {
+      "sourcePath": "glTF/Leaf_Pine_C.png",
+      "importPath": "native/Assets/Art/Quaternius/Nature/Textures/Leaf_Pine_C.png",
+      "byteLength": 70055,
+      "sha256": "86f7ff7a214f5424de48d269568f36a15485e61c80677e426c7be9f45181eef9"
+    }
+  ],
+  "archive": "campus/assets/sources/quaternius/Stylized Nature MegaKit[Standard].zip",
+  "archiveSha256": "298f6732b872e4cf7b30e6e7abf9641c7f6dc6b326df37ac089533ed7e3d58c9",
+  "reuse": "The exact older Standard source remains unchanged; existing campus selection/provenance is historical evidence."
+}

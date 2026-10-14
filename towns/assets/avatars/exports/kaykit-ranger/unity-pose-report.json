@@ -1,0 +1,82 @@
+{
+  "preset": "kaykit-ranger",
+  "actualNativeCameraRender": true,
+  "unityVersion": "6000.6.0f1",
+  "poses": [
+    {
+      "view": "front",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.000498830632,
+        0.296299875,
+        -0.00230072322
+      ],
+      "leftFoot": [
+        -0.162847847,
+        0.11075417,
+        -0.02584259
+      ]
+    },
+    {
+      "view": "back",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.000498830632,
+        0.296299875,
+        -0.00230072322
+      ],
+      "leftFoot": [
+        -0.162847847,
+        0.11075417,
+        -0.02584259
+      ]
+    },
+    {
+      "view": "side",
+      "state": "Standing",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.000498830632,
+        0.296299875,
+        -0.00230072322
+      ],
+      "leftFoot": [
+        -0.162847847,
+        0.11075417,
+        -0.02584259
+      ]
+    },
+    {
+      "view": "walking",
+      "state": "Walking",
+      "normalizedTime": 0.25,
+      "hips": [
+        0.0090022115,
+        0.284978718,
+        -0.004944047
+      ],
+      "leftFoot": [
+        -0.110676385,
+        0.11591024,
+        -0.112459682
+      ]
+    },
+    {
+      "view": "seated",
+      "state": "Seated",
+      "normalizedTime": 0.0,
+      "hips": [
+        0.0015442844,
+        0.36337015,
+        -0.0203408562
+      ],
+      "leftFoot": [
+        -0.162114412,
+        0.3263211,
+        0.152698308
+      ]
+    }
+  ]
+}

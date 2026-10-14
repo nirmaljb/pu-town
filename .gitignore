@@ -62,3 +62,12 @@ campus/assets/avatars/exports/*/avatar.fbm/
 /native/Assets/Art/Quaternius/Nature/Textures/Bark_DeadTree_Normal.png
 /native/Assets/Art/Quaternius/Nature/Textures/Bark_TwistedTree_Normal.png
 /native/Assets/Art/Quaternius/Props/Textures/T_Page_Noise.png
+
+# Generated town art and private Avatar exports are reproduced by the authoring tools.
+/native/Assets/PUtown/Resources/Towns/*Garden.prefab
+/towns/assets/avatars/publication.json
+/towns/assets/avatars/exports/*/avatar.fbx
+/towns/assets/avatars/exports/*/avatar.fbm/
+/towns/assets/avatars/exports/*/textures/
+/towns/assets/avatars/sources/
+/towns/assets/sources/*/extracted/

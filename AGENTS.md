@@ -63,11 +63,11 @@ The backend defaults to port `8080`:
 - `GET /health` returns `{"status":"healthy"}`.
 - `/ws/game` is the game WebSocket endpoint.
 
-### Native campus client
+### Native town client
 
 `native/README.md` records the Unity 6000.6.0f1 tool pins, isolated-copy verification, native Avatar publication and macOS/Windows build commands. Run Unity EditMode tests and build affected target artifacts for native changes. Use the opt-in real Java/LiveKit/Unity DSP PlayMode test for media boundary changes; synthetic PCM does not establish microphone permission or audible output. Record packaged runtime and measured hardware evidence separately from tests and compilation.
 
-`campus/layout.json` is the canonical campus geometry source. `python3 tools/campus/publish.py --check` verifies the generated backend/native geometry and route reachability. Native runtime code is in `native/Assets/PUtown/Runtime/`, with media in `Voice/` and private authoring/build code in `native/Assets/Editor/`. Development Pipeline control must remain excluded from release builds. The native client preserves the same recipient privacy, queued frame application, transport heartbeat, recovery and ordered delivery constraints as the browser.
+`towns/{woodland,market}/layout.json` is the canonical native geometry source, derived from saved seeded TownGeneratorOS layouts. `python3 tools/towns/publish.py --check` verifies byte-identical backend/native geometry, solid building footprints and route reachability. Woodland Village and Market Town replace the retired native campus. Both have non-enterable buildings and Tasks disabled authoritatively; the three legacy browser maps retain Tasks. Native runtime code is in `native/Assets/PUtown/Runtime/`, media in `native/Assets/PUtown/Voice/`, and private authoring/build code in `native/Assets/Editor/`. `GeneratedTownBuild` derives both town environments from retained free Quaternius assets. The five free KayKit Adventurers use the publication in `towns/assets/avatars/`; the backend remains its single reader. Development Pipeline control stays excluded from release builds. Preserve recipient privacy, queued frame application, transport heartbeat, recovery and ordered delivery.
 
 ### Frontend
 

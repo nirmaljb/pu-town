@@ -1,0 +1,188 @@
+{
+  "pack": "Props",
+  "edition": "Standard",
+  "archive": "campus/assets/sources/quaternius/Fantasy Props MegaKit[Standard].zip",
+  "archiveSha256": "8b6f7e806d222e585478f0e1bdc6b271bbc7bc6f84dd6af8ca703a7c64f0cb1e",
+  "models": [
+    {
+      "name": "Bench",
+      "sourcePath": "Exports/FBX/Bench.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Props/Models/Bench.fbx",
+      "sha256": "cd55d1c21ee5055a2002739268014138f3cfe06c7a5cb9fcee3f22c55196d6f3",
+      "materialMappingSource": "Exports/glTF/Bench.gltf",
+      "materials": [
+        {
+          "name": "MI_Trim_Furniture",
+          "baseColorTexture": "T_Trim_Furniture_BaseColor.png",
+          "normalTexture": "T_Trim_Furniture_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Furniture_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Trim_Metal",
+          "baseColorTexture": "T_Trim_Metal_BaseColor.png",
+          "normalTexture": "T_Trim_Metal_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Metal_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "name": "Chair_1",
+      "sourcePath": "Exports/FBX/Chair_1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Props/Models/Chair_1.fbx",
+      "sha256": "f779954e1f6264a90ca28d690135960eb8412da92b8bc0753138bab8845e9540",
+      "materialMappingSource": "Exports/glTF/Chair_1.gltf",
+      "materials": [
+        {
+          "name": "MI_Trim_Furniture",
+          "baseColorTexture": "T_Trim_Furniture_BaseColor.png",
+          "normalTexture": "T_Trim_Furniture_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Furniture_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Trim_Metal",
+          "baseColorTexture": "T_Trim_Metal_BaseColor.png",
+          "normalTexture": "T_Trim_Metal_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Metal_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "name": "Table_Large",
+      "sourcePath": "Exports/FBX/Table_Large.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Props/Models/Table_Large.fbx",
+      "sha256": "64560001286e169879dea986bd2e7295ccaf2269b0fbc1e7b2bc8b802f693689",
+      "materialMappingSource": "Exports/glTF/Table_Large.gltf",
+      "materials": [
+        {
+          "name": "MI_Trim_Furniture",
+          "baseColorTexture": "T_Trim_Furniture_BaseColor.png",
+          "normalTexture": "T_Trim_Furniture_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Furniture_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Trim_Metal",
+          "baseColorTexture": "T_Trim_Metal_BaseColor.png",
+          "normalTexture": "T_Trim_Metal_Normal.png",
+          "metallicRoughnessTexture": "T_Trim_Metal_ORM.png",
+          "occlusionTexture": null,
+          "emissiveTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sourcePath": "Textures/T_Trim_Furniture_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Furniture_BaseColor.png",
+      "sha256": "075fbc9ec2fabc15732bd4025b6f63a0b25762df38440d06bf30437565d39bab",
+      "byteLength": 2232961
+    },
+    {
+      "sourcePath": "Textures/T_Trim_Furniture_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Furniture_Normal.png",
+      "sha256": "3340c4cc47ff06d5e94a2dbe2a2a12d914d0ef055fcf66f63d876666bd160e42",
+      "byteLength": 3485710
+    },
+    {
+      "sourcePath": "Textures/T_Trim_Furniture_ORM.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Furniture_ORM.png",
+      "sha256": "7bf417e82baf313793c5791bf48cdc8e573f1f7136197785bf0eb235cb0f8153",
+      "byteLength": 2064585
+    },
+    {
+      "sourcePath": "Textures/T_Trim_Metal_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Metal_BaseColor.png",
+      "sha256": "50422bbda9661effc259caf8b386224cac4b5ca811d2c5b3b8b25ae8efc714db",
+      "byteLength": 1361221
+    },
+    {
+      "sourcePath": "Textures/T_Trim_Metal_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Metal_Normal.png",
+      "sha256": "ab7315c864c9a9e6d716c940a599928506e1569d3b0c9085f8f1a64ec520d790",
+      "byteLength": 3625541
+    },
+    {
+      "sourcePath": "Textures/T_Trim_Metal_ORM.png",
+      "importPath": "native/Assets/Art/Quaternius/Props/Textures/T_Trim_Metal_ORM.png",
+      "sha256": "7407bccfc39ca74ecd68a61217395959bf56ac2063e6c93b384b11f07f5687c5",
+      "byteLength": 1871475
+    }
+  ],
+  "reuse": "Three already imported free Fantasy Props Standard meshes serve Meeting Seats and street furnishing; no campus map content is reused."
+}

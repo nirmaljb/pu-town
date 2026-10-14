@@ -482,7 +482,7 @@ public final class Game {
         if (practice || winner != null) return;
         long livingMafia = livingMafia().count();
         long livingVillage = livingCount() - livingMafia;
-        if ((developer == null || developer.taskVictory) && tasks.total() > 0 && tasks.completed() == tasks.total()) winner = Faction.VILLAGE;
+        if (townMap.tasksEnabled() && (developer == null || developer.taskVictory) && tasks.total() > 0 && tasks.completed() == tasks.total()) winner = Faction.VILLAGE;
         else if (developer == null || developer.factionVictory) {
             if (livingMafia == 0) winner = Faction.VILLAGE;
             else if (livingMafia >= livingVillage) winner = Faction.MAFIA;

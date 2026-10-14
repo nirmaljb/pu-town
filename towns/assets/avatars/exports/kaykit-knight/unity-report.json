@@ -1,0 +1,41 @@
+{
+  "preset": "kaykit-knight",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "skinnedRenderers": 9,
+  "vertices": 6023,
+  "triangles": 5800,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    1.21768618,
+    2.52936125,
+    1.307535
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "character",
+      "baseTexture": "knight_texture",
+      "normalTexture": null
+    }
+  ]
+}

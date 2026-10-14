@@ -1,0 +1,81 @@
+{
+  "id": "kaykit-mage",
+  "name": "Mage",
+  "native": {
+    "version": 1,
+    "masterId": "kaykit-mage",
+    "masterRevision": 1,
+    "model": {
+      "sourceFile": "exports/kaykit-mage/avatar.fbx",
+      "rootNode": "avatar",
+      "heightMetres": 1.7,
+      "pivot": "feet",
+      "forwardAxis": "+z"
+    },
+    "rig": {
+      "type": "humanoid",
+      "avatarName": "avatarAvatar",
+      "hipsBone": "hips"
+    },
+    "animations": {
+      "standing": {
+        "clipName": "Standing",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "walking": {
+        "clipName": "Walking",
+        "durationSeconds": 1.06666672,
+        "loop": true
+      },
+      "seated": {
+        "clipName": "Seated",
+        "durationSeconds": 3.60000014,
+        "loop": true
+      }
+    },
+    "platformAssets": [
+      {
+        "platform": "macos-universal",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-mage/avatar.prefab",
+        "file": "exports/kaykit-mage/macos-universal.bundle"
+      },
+      {
+        "platform": "windows-x86_64",
+        "format": "unity-assetbundle",
+        "unityVersion": "6000.6.0f1",
+        "assetName": "assets/art/avatars/kaykit-mage/avatar.prefab",
+        "file": "exports/kaykit-mage/windows-x86_64.bundle"
+      }
+    ]
+  },
+  "review": {
+    "sourceSha256": "efc460b1e6fe3b56b1a48b845e88f1acde46e3ad99b9f964b9e6607e7fdcdaf2",
+    "platformSha256": {
+      "macos-universal": "b3a7c4c478557e70232b7c84daf1375dcc42b91d2cfdb1c7d8d5644e6e7b221c",
+      "windows-x86_64": "65044287a43f436dc749a3c0f4620d253a5f1d739e7292be5827a88d477e05e5"
+    },
+    "checks": [
+      "silhouette",
+      "scale-pivot",
+      "uv-normals",
+      "deformation",
+      "native-materials",
+      "standing",
+      "walking",
+      "seated"
+    ],
+    "evidenceFiles": [
+      "exports/kaykit-mage/blender-report.json",
+      "exports/kaykit-mage/unity-report.json",
+      "exports/kaykit-mage/unity-front.png",
+      "exports/kaykit-mage/unity-back.png",
+      "exports/kaykit-mage/unity-side.png",
+      "exports/kaykit-mage/unity-walking.png",
+      "exports/kaykit-mage/unity-seated.png",
+      "exports/kaykit-mage/unity-pose-report.json"
+    ]
+  }
+}

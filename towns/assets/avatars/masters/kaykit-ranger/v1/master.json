@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "id": "kaykit-ranger",
+  "revision": 1,
+  "sourceFile": "source.blend",
+  "sourceSha256": "9ae18ab163d71159209ac3937d54b450e20552323a5acda6583755b9df5a18fc",
+  "provenance": {
+    "author": "Kay Lousberg; PU Town editable derivative",
+    "source": "https://kaylousberg.itch.io/kaykit-adventurers and https://kaylousberg.itch.io/kaykit-character-animations",
+    "license": "CC0-1.0",
+    "licenseRecordedAt": "2026-10-14",
+    "exportEntitlement": "Original free Adventurers 2.0 and Character Animations 1.1; export and derivative use permitted by included CC0 license."
+  }
+}

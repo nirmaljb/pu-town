@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "townGenerator": {
+    "repository": "https://github.com/watabou/TownGeneratorOS",
+    "commit": "7fbc87a9398cc508af24de93f79cf2ad027f352b",
+    "files": {
+      "Source/com/watabou/geom/Circle.hx": "c5ed710926532077b57e3d9fdd3efde3c8c4c8241b1adcb3c0bd9968d8bc2963",
+      "Source/com/watabou/geom/GeomUtils.hx": "92e0d97bd27fe8c801a70ac04c39c7bcb25766bde41dc6866ceacb491bb373eb",
+      "Source/com/watabou/geom/Graph.hx": "3d9359b4d5ebbd1c90860e6d453f3d47ac7c30e5420a75a3f206270fd7d2bba7",
+      "Source/com/watabou/geom/Polygon.hx": "f3fc0d61c258ac73a2684b649a23b44a25a1044b3d0c1d50d4a1f9a5b6cf7d6b",
+      "Source/com/watabou/geom/Segment.hx": "7936d56c3ec3b6427e69ccffff40dc2f474feff40205b688e0d8d58cdcf46527",
+      "Source/com/watabou/geom/Voronoi.hx": "81ba4d969692e2116ad405741daf0e25734ea0fd9c2c24919ded664e3f33a293",
+      "Source/com/watabou/towngenerator/building/CurtainWall.hx": "bb42884cd36c331589b2726e59c7aa2e6c696c6bd5ba1d0afc0c34c70f6336f2",
+      "Source/com/watabou/towngenerator/building/Cutter.hx": "a913776115c4fbdb3f79d8f62d202bf3d32048f1075100fbac8b597402d33bb8",
+      "Source/com/watabou/towngenerator/building/Model.hx": "1407fca9a0d6a36a6c280ee8d5663fd4854bddb21d03c25e5c31cd5655dc8785",
+      "Source/com/watabou/towngenerator/building/Patch.hx": "e953d34303440431d696e40b31ea761e49c3af31b7bbf46d4e94f4ccab0530f3",
+      "Source/com/watabou/towngenerator/building/Topology.hx": "1d03a4113e43be18598c61b0b4079a5045826801739ed6e78621f83538232be5",
+      "Source/com/watabou/towngenerator/wards/AdministrationWard.hx": "74dd8a5e08aa8c601527e97b44eecdc3789d06e59d1f4c29f3a94e86652af54a",
+      "Source/com/watabou/towngenerator/wards/Castle.hx": "c549db02f34f050757fdb50ce2e68dc3602f5ce545301dd0385e8e340419b4b0",
+      "Source/com/watabou/towngenerator/wards/Cathedral.hx": "d737c1e96133bf415c8fd8e0a9908910ea06c60423bb897bd7066c8deb0f6876",
+      "Source/com/watabou/towngenerator/wards/CommonWard.hx": "e55a7366f372ea269ebcdd54a5f123ff8cd8a083148444010ade8e6903362a0b",
+      "Source/com/watabou/towngenerator/wards/CraftsmenWard.hx": "34e02aca8344f21cc359dd079972489bd01352b00d9e54b955bbca84c9ebf62f",
+      "Source/com/watabou/towngenerator/wards/Farm.hx": "b2e3dd2a91c7d012d80737d263d3c1f57f996df6769fa038520d90f517b12795",
+      "Source/com/watabou/towngenerator/wards/GateWard.hx": "9ac256c6848669f1d91a2ea22baa226e684000de69ca9ac1aeeaeb0c1f3b1e64",
+      "Source/com/watabou/towngenerator/wards/Market.hx": "035c761f7d86e8f91c759efb8b5fdeb030fb67bc3647a1086ec10e435da29820",
+      "Source/com/watabou/towngenerator/wards/MerchantWard.hx": "022772337a2947dcc0c27eac107d6fa4968b8a89c5d0603e912d9337a0acf83c",
+      "Source/com/watabou/towngenerator/wards/MilitaryWard.hx": "9f9aca82dc8fcc5131d1cba01e747a25f6d4d445b6b2ccf6824a1036916de463",
+      "Source/com/watabou/towngenerator/wards/Park.hx": "1c59099763cd6b89961df9841367f94f32d4537a032eb04a1c8b56c84754211a",
+      "Source/com/watabou/towngenerator/wards/PatriciateWard.hx": "e738b95b3f7477c1c5d10b74211a6f4155cb404f12decb133b8d6c4855850ae7",
+      "Source/com/watabou/towngenerator/wards/Slum.hx": "c2ca6ecc21d550673a72ed5cbf62a6670695799eb100208917dba0b9aff4efe3",
+      "Source/com/watabou/towngenerator/wards/Ward.hx": "855809f78a2da10ad2491d4cb9bff7acb4724d99b77fe8879d8ff625ae9f0dee",
+      "Source/com/watabou/utils/Random.hx": "9c1e726b35db1ceae09c7f7ef9c192c553bce47d4d29a1256fca160855937e30",
+      "Source/com/watabou/utils/PointExtender.hx": "5ad17b2fb0989035c8b5a6ec20179de85253f8a182611b006e374b85b8e054e1",
+      "Source/com/watabou/utils/ArrayExtender.hx": "3e65373699dc808fdf61160d253b7ca88335aafba1c1b424ec7483441af2b3e4",
+      "Source/com/watabou/utils/MathUtils.hx": "eecdb17ad81418ab79259fe94ffbcac2155c52cb98b3a7d7c5e3c5430629d1c6",
+      "LICENSE": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+      "README.md": "823893fa635e7edf4257f37366364df485cf8121ccec2e1ffc05e31786781574",
+      "project.xml": "ee03bdd597b33ea38e535ae78e849fd8af79352450e33ea0130b1a2927aa27cc"
+    }
+  },
+  "openfl": {
+    "repository": "https://github.com/openfl/openfl",
+    "tag": "8.9.0",
+    "files": {
+      "src/openfl/geom/Point.hx": "94c011a4045974dc2fba227c949496dd8aa694a7d2203e50a347e46cd4be2b99",
+      "src/openfl/geom/Rectangle.hx": "38e247a7a84708ced921f14724f890bc065335b3bff2040e2b0289a81bf434f7",
+      "src/openfl/errors/Error.hx": "7cfb0a5131764b34761daa5ed5cf8c7359cd2fd10830feede3f61434e886193d",
+      "src/openfl/_internal/utils/ObjectPool.hx": "72071f2a3e292cf4db861d51b7b7af6801116e6c8648ba678b5688b6afc009ac",
+      "LICENSE.md": "5f75ac680cc73f30090b5d0714b3d208f33d8a99617078b166943a2e92bc5602",
+      "haxelib.json": "27088d2afb9643bc8e3bf7975061648b82f002451101c94600237c627ee2ea54",
+      "src/openfl/geom/Matrix.hx": "29391bd6406969fa17363e12b8a9c6bee7dc431e39f5ad24e68ebd9464c3a694",
+      "src/openfl/geom/Vector3D.hx": "4ea967ea68bbaf9a9c7bfaeb6092a225b60f6e382ff64aafb4bd7c1636e3fcae"
+    }
+  },
+  "adapter": "Only isolated headless-source compatibility changes: remove Random.hx unused import openfl.Lib; qualify Polygon.get_square last() as ArrayExtender.last(this); annotate Ward.filterOutskirts density as Array<Float>. The checked-in originals and their hashes are unchanged; no geometry or seeded RNG algorithm is replaced.",
+  "compiler": {
+    "version": "4.3.7",
+    "testedDistribution": "haxe-4.3.7-osx.tar.gz",
+    "url": "https://github.com/HaxeFoundation/haxe/releases/download/4.3.7/haxe-4.3.7-osx.tar.gz",
+    "sha256": "1d355cb28bc25784b33acce023caeb28d50ccb14e953134a62b889697947efdc",
+    "storage": ".scratch/native/towns/",
+    "license": "Compiler distribution remains local; see official Haxe distribution for its license."
+  }
+}

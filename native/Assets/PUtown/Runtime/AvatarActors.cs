@@ -33,9 +33,9 @@ namespace PUtown.Runtime
         }
         private readonly Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
         private readonly Dictionary<string, LeftSeat> leftSeats = new Dictionary<string, LeftSeat>();
-        private readonly CampusRules rules;
+        private readonly TownRules rules;
         private readonly Font font;
-        public AvatarActors(CampusRules rules, Font font) { this.rules = rules; this.font = font; }
+        public AvatarActors(TownRules rules, Font font) { this.rules = rules; this.font = font; }
         public void Render(NativeWorld world, NativeAvatarCollection collection, LocalPrediction local, Camera camera, float delta)
         {
             var visible = new HashSet<string>();

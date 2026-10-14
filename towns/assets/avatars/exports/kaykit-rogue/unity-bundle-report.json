@@ -1,0 +1,31 @@
+{
+  "preset": "kaykit-rogue",
+  "platform": "macos-universal",
+  "unityVersion": "6000.6.0f1",
+  "assetName": "assets/art/avatars/kaykit-rogue/avatar.prefab",
+  "rootNode": "avatar",
+  "expectedRootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "bundleSha256": "200a13344b04cff965d47203f347ea2363583f005600682788d2af0b7eb4c607",
+  "bundleBytes": 489837,
+  "matchesPublication": true,
+  "mismatches": [],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ]
+}

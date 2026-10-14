@@ -1,0 +1,41 @@
+{
+  "preset": "kaykit-ranger",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "skinnedRenderers": 7,
+  "vertices": 8279,
+  "triangles": 8645,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    1.1577549,
+    2.26139021,
+    1.02286315
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "character",
+      "baseTexture": "ranger_texture",
+      "normalTexture": null
+    }
+  ]
+}

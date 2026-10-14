@@ -26,14 +26,14 @@ namespace PUtown.IntegrationTests
             session = new GameSession(endpoint, () => new GameSocket(), null);
             session.Create("Avatar integration");
             var deadline = Time.realtimeSinceStartup + 15;
-            while (Time.realtimeSinceStartup < deadline && !(session.Status == SessionStatus.Active && session.World.MapId == "campus" && !session.SelectingCampus))
+            while (Time.realtimeSinceStartup < deadline && !(session.Status == SessionStatus.Active && session.World.MapId == "woodland" && !session.SelectingTown))
             {
                 session.ApplyFrame();
                 Assert.That(session.Status, Is.Not.EqualTo(SessionStatus.Failed), session.Error);
                 yield return null;
             }
             Assert.That(session.Status, Is.EqualTo(SessionStatus.Active), session.Error ?? "Native Room creation timed out.");
-            Assert.That(session.World.MapId, Is.EqualTo("campus")); Assert.That(session.SelectingCampus, Is.False);
+            Assert.That(session.World.MapId, Is.EqualTo("woodland")); Assert.That(session.SelectingTown, Is.False);
 
             collection = new NativeAvatarCollection(); var completed = false; string error = null;
             yield return collection.Fetch(endpoint, session.World.RoomId, result => { error = result; completed = true; });

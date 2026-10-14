@@ -60,7 +60,7 @@ A Player's declaration that they are prepared for the game to start. A Player wh
 _Avoid_: Connected, joined
 
 **Town Map**:
-The town layout shared by a Room, chosen by its Host in the Lobby and retained for the Game. Available towns include Kalapet Main Campus, a compressed interpretation of Pondicherry University's main campus, Sunwater Village, Blackthorn Hollow and Silver Jubilee Campus.
+The town layout shared by a Room, chosen by its Host in the Lobby and retained for the Game. Town Maps include Woodland Village, Market Town, Sunwater Village, Blackthorn Hollow and Silver Jubilee Campus.
 _Avoid_: Avatar Preset, personal preview
 
 **Town Square**:

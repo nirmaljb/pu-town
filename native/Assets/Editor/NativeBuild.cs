@@ -9,7 +9,7 @@ namespace PUtown.Editor
 {
     public static class NativeBuild
     {
-        public const string ScenePath = "Assets/Scenes/Campus.unity";
+        public const string ScenePath = "Assets/Scenes/Town.unity";
 
         [MenuItem("PU Town/Prepare authoring proof")]
         public static void PrepareAuthoringProof()
@@ -33,10 +33,10 @@ namespace PUtown.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("PU Town/Prepare starter scene")]
+        [MenuItem("PU Town/Prepare native town scene")]
         public static void Prepare()
         {
-            QuaterniusCampusBuild.Prepare();
+            GeneratedTownBuild.Prepare();
             Directory.CreateDirectory("Assets/Scenes");
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("PU Town");
@@ -51,6 +51,9 @@ namespace PUtown.Editor
             sunlight.color = new Color(1f, .96f, .87f);
             sunlight.intensity = .95f;
             EditorSceneManager.SaveScene(scene, ScenePath);
+            AssetDatabase.DeleteAsset("Assets/Scenes/Campus.unity");
+            AssetDatabase.DeleteAsset("Assets/PUtown/Resources/Campus");
+            AssetDatabase.DeleteAsset("Assets/Art/Campus");
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             PlayerSettings.companyName = "PU Town";
             PlayerSettings.productName = "PU Town";
@@ -63,7 +66,7 @@ namespace PUtown.Editor
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
             PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
             AssetDatabase.SaveAssets();
-            Debug.Log("PU Town editable starter scene prepared");
+            Debug.Log("PU Town editable town scene prepared");
         }
 
         public static void BuildMac() => Build(BuildTarget.StandaloneOSX, "Builds/macOS/PU Town.app");

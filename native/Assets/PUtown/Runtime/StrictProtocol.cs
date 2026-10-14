@@ -92,7 +92,7 @@ namespace PUtown.Runtime
         {
             Member(d["phase"], "lobby", "playing"); Text(d["hostPlayerId"]);
             // Legacy map IDs are decoded only while the migration retains its browser boundary.
-            Member(d["mapId"], "campus", "village", "horror", "cyberpunk");
+            Member(d["mapId"], "woodland", "market", "village", "horror", "cyberpunk");
             var setup = Obj(d["roleSetup"]); Fields(setup, "mafia", "doctors", "sheriffs");
             Round(setup["mafia"]); Round(setup["doctors"]); Round(setup["sheriffs"]);
             var players = Array(d["players"]); if (players.Count > 10) Bad("Room capacity exceeded."); Unique(players, "playerId"); Unique(players, "seat");

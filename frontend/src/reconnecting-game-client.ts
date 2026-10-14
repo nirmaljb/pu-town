@@ -97,7 +97,7 @@ export class ReconnectingGameClient {
     }
     if (this.#state.status === "leaving" && this.now() >= this.#deadline) { this.cancel(); return; }
     for (const message of this.#messages.splice(0)) {
-      if ((message.type === "room_snapshot" || message.type === "room_state") && message.mapId === "campus") {
+      if ((message.type === "room_snapshot" || message.type === "room_state") && (message.mapId === "woodland" || message.mapId === "market")) {
         const release = message.type === "room_snapshot"
           ? recoverRoom(message.roomId, message.recoveryToken) : this.#intent;
         this.abandon("This Room requires the native PU Town application.");

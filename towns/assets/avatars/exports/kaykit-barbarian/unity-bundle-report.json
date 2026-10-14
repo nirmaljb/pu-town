@@ -1,0 +1,31 @@
+{
+  "preset": "kaykit-barbarian",
+  "platform": "macos-universal",
+  "unityVersion": "6000.6.0f1",
+  "assetName": "assets/art/avatars/kaykit-barbarian/avatar.prefab",
+  "rootNode": "avatar",
+  "expectedRootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "bundleSha256": "cb53b41b3a8f03c6c066357090555e829efddd84c9ab563da551b40f31fa5171",
+  "bundleBytes": 467851,
+  "matchesPublication": true,
+  "mismatches": [],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ]
+}

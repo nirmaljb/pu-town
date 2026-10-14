@@ -1,0 +1,1490 @@
+{
+  "pack": "Village",
+  "edition": "Standard",
+  "models": [
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_Plaster_Straight.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_Plaster_Straight.fbx",
+      "byteLength": 28700,
+      "sha256": "5ef84f632e74ab0b6703853f137443c289d3a2792600b9bc90945da95b76c373",
+      "name": "Wall_Plaster_Straight",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_Plaster_Straight.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_Plaster_Window_Wide_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_Plaster_Window_Wide_Flat.fbx",
+      "byteLength": 33964,
+      "sha256": "3c9d5624bc3c7ae488501cd16837e7c53b28e6251e71ce2a11d6814622502245",
+      "name": "Wall_Plaster_Window_Wide_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_Plaster_Window_Wide_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Brick",
+          "baseColorTexture": "T_Brick_BaseColor.png",
+          "normalTexture": "T_Brick_Normal.png",
+          "metallicRoughnessTexture": "T_Brick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_Plaster_Window_Thin_Round.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_Plaster_Window_Thin_Round.fbx",
+      "byteLength": 35516,
+      "sha256": "257fffb8f0aa38e54d35956d7fed1afdeb107c3600a76378325fad06b006f154",
+      "name": "Wall_Plaster_Window_Thin_Round",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_Plaster_Window_Thin_Round.gltf",
+      "materials": [
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Brick",
+          "baseColorTexture": "T_Brick_BaseColor.png",
+          "normalTexture": "T_Brick_Normal.png",
+          "metallicRoughnessTexture": "T_Brick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_Plaster_Door_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_Plaster_Door_Flat.fbx",
+      "byteLength": 32220,
+      "sha256": "00b8c9389ceb8ccd580714f86451539851a95631876e31b89ca91f78d50eaa36",
+      "name": "Wall_Plaster_Door_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_Plaster_Door_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RockTrim",
+          "baseColorTexture": "T_RockTrim_BaseColor.png",
+          "normalTexture": "T_RockTrim_Normal.png",
+          "metallicRoughnessTexture": "T_RockTrim_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_UnevenBrick_Straight.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_UnevenBrick_Straight.fbx",
+      "byteLength": 32396,
+      "sha256": "f4c7d302a46042931e7d69f9e439a2e4a50506f82bbdb8f5b5cdac42bde9cbf6",
+      "name": "Wall_UnevenBrick_Straight",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_UnevenBrick_Straight.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_UnevenBrick",
+          "baseColorTexture": "T_UnevenBrick_BaseColor.png",
+          "normalTexture": "T_UnevenBrick_Normal.png",
+          "metallicRoughnessTexture": "T_UnevenBrick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_UnevenBrick_Window_Wide_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_UnevenBrick_Window_Wide_Flat.fbx",
+      "byteLength": 33804,
+      "sha256": "94c6e37e73780b227d422628a97157a30ef98aed7b0ce0d863d5ec806062c270",
+      "name": "Wall_UnevenBrick_Window_Wide_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_UnevenBrick_Window_Wide_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_UnevenBrick",
+          "baseColorTexture": "T_UnevenBrick_BaseColor.png",
+          "normalTexture": "T_UnevenBrick_Normal.png",
+          "metallicRoughnessTexture": "T_UnevenBrick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_UnevenBrick_Door_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_UnevenBrick_Door_Flat.fbx",
+      "byteLength": 32796,
+      "sha256": "0a8ebca501b195199244230b4edf427367edd9e83d7f543a2fecdc2b7f681fe0",
+      "name": "Wall_UnevenBrick_Door_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_UnevenBrick_Door_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_UnevenBrick",
+          "baseColorTexture": "T_UnevenBrick_BaseColor.png",
+          "normalTexture": "T_UnevenBrick_Normal.png",
+          "metallicRoughnessTexture": "T_UnevenBrick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Wall_Plaster_WoodGrid.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Wall_Plaster_WoodGrid.fbx",
+      "byteLength": 32476,
+      "sha256": "32d4ecf9b2e8279206d3541baaa855e3f7b320c3e526a317e879e73c116d4fa2",
+      "name": "Wall_Plaster_WoodGrid",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Wall_Plaster_WoodGrid.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Door_1_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Door_1_Flat.fbx",
+      "byteLength": 33436,
+      "sha256": "005faeb66d248874d7644053af41a114a4cf670394f32cb547a1bb4acea3604e",
+      "name": "Door_1_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Door_1_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_WindowGlass",
+          "baseColorTexture": null,
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            0.09545451402664185
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 0.5,
+          "alphaMode": "BLEND",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Door_4_Flat.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Door_4_Flat.fbx",
+      "byteLength": 57020,
+      "sha256": "2e2c1420b00596da579c50107f3846d4e9f7961a98681a0feacf8cca736eb3ad",
+      "name": "Door_4_Flat",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Door_4_Flat.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim_Wear",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_MetalOrnaments",
+          "baseColorTexture": "T_MetalOrnaments_BaseColor.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": "T_MetalOrnaments_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/DoorFrame_Flat_WoodDark.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/DoorFrame_Flat_WoodDark.fbx",
+      "byteLength": 23132,
+      "sha256": "770daa08f225c262511f25b76555c2356e1feab568b617d47f180de638b24f35",
+      "name": "DoorFrame_Flat_WoodDark",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/DoorFrame_Flat_WoodDark.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Window_Wide_Flat1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Window_Wide_Flat1.fbx",
+      "byteLength": 26812,
+      "sha256": "bcb849e5cb0d6ba9a76b6f8f9b78d3075e1619299fbc1fed452bd44048377769",
+      "name": "Window_Wide_Flat1",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Window_Wide_Flat1.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_WindowGlass",
+          "baseColorTexture": null,
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            0.09545451402664185
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 0.5,
+          "alphaMode": "BLEND",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Window_Thin_Round1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Window_Thin_Round1.fbx",
+      "byteLength": 37292,
+      "sha256": "d9d3b6955780b47c2ef34039285eba7b04f65fe3a2490a1d3f6c30640298403a",
+      "name": "Window_Thin_Round1",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Window_Thin_Round1.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim_Wear",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_WindowGlass",
+          "baseColorTexture": null,
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929,
+            0.09545451402664185
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 0.5,
+          "alphaMode": "BLEND",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/WindowShutters_Wide_Flat_Closed.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/WindowShutters_Wide_Flat_Closed.fbx",
+      "byteLength": 25804,
+      "sha256": "fc7c094736755d6fb2e7a4150436df02848c237fbeb5660b3f474d07352ae706",
+      "name": "WindowShutters_Wide_Flat_Closed",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/WindowShutters_Wide_Flat_Closed.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim_Wear",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/WindowShutters_Thin_Round_Closed.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/WindowShutters_Thin_Round_Closed.fbx",
+      "byteLength": 26156,
+      "sha256": "b19041d29afdef93ce9a5894093cd6d47626d234e99b544121f83dbab61e3d75",
+      "name": "WindowShutters_Thin_Round_Closed",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/WindowShutters_Thin_Round_Closed.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim_Wear",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_RoundTiles_4x4.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_RoundTiles_4x4.fbx",
+      "byteLength": 84444,
+      "sha256": "ce10f4d6552237474ef65937b270b61e91ad186f3747034d6e5e87020da07f13",
+      "name": "Roof_RoundTiles_4x4",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_RoundTiles_4x4.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RoundTiles",
+          "baseColorTexture": "T_RoundTiles_BaseColor.png",
+          "normalTexture": "T_RoundTiles_Normal.png",
+          "metallicRoughnessTexture": "T_RoundTiles_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_RoundTiles_4x6.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_RoundTiles_4x6.fbx",
+      "byteLength": 98924,
+      "sha256": "75f85ee0fbd65e2fb1bd1c233a0be5a37a02c9721baf6757598c09550e895a70",
+      "name": "Roof_RoundTiles_4x6",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_RoundTiles_4x6.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RoundTiles",
+          "baseColorTexture": "T_RoundTiles_BaseColor.png",
+          "normalTexture": "T_RoundTiles_Normal.png",
+          "metallicRoughnessTexture": "T_RoundTiles_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_RoundTiles_4x8.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_RoundTiles_4x8.fbx",
+      "byteLength": 115340,
+      "sha256": "3377c133dc7a206f8280afbc6d381ea285fb3a96f8d46de394274ef19ea28fdf",
+      "name": "Roof_RoundTiles_4x8",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_RoundTiles_4x8.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RoundTiles",
+          "baseColorTexture": "T_RoundTiles_BaseColor.png",
+          "normalTexture": "T_RoundTiles_Normal.png",
+          "metallicRoughnessTexture": "T_RoundTiles_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_Tower_RoundTiles.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_Tower_RoundTiles.fbx",
+      "byteLength": 150444,
+      "sha256": "6a2e00d5d41f3b59099b801a55a553a876f41e7f7f986043dc2a9a016553bb66",
+      "name": "Roof_Tower_RoundTiles",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_Tower_RoundTiles.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RockTrim",
+          "baseColorTexture": "T_RockTrim_BaseColor.png",
+          "normalTexture": "T_RockTrim_Normal.png",
+          "metallicRoughnessTexture": "T_RockTrim_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_RoundTiles",
+          "baseColorTexture": "T_RoundTiles_BaseColor.png",
+          "normalTexture": "T_RoundTiles_Normal.png",
+          "metallicRoughnessTexture": "T_RoundTiles_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_MetalOrnaments",
+          "baseColorTexture": "T_MetalOrnaments_BaseColor.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": "T_MetalOrnaments_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_Front_Brick4.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_Front_Brick4.fbx",
+      "byteLength": 32348,
+      "sha256": "6649b2a1bb1d7b154ed906e2d70345713398603e496a4bd081979c3b111cbc9a",
+      "name": "Roof_Front_Brick4",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_Front_Brick4.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_Front_Brick6.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_Front_Brick6.fbx",
+      "byteLength": 33900,
+      "sha256": "ea591db14f8a48b2d26656621360c14c7f066ba912207d485723310ee1b61f26",
+      "name": "Roof_Front_Brick6",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_Front_Brick6.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Plaster",
+          "baseColorTexture": "T_Plaster_BaseColor.png",
+          "normalTexture": "T_Plaster_Normal.png",
+          "metallicRoughnessTexture": "T_Plaster_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Roof_Log.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Roof_Log.fbx",
+      "byteLength": 26460,
+      "sha256": "100ee830f9b5d00bcc50daf94df9c8601fe0057cf141af20c99e54cf17df3189",
+      "name": "Roof_Log",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Roof_Log.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Floor_UnevenBrick.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Floor_UnevenBrick.fbx",
+      "byteLength": 21836,
+      "sha256": "faf9c4b55596b8e7f9b0fdde4edd77eb0fd2be2890cf82dcad128f38e4bad370",
+      "name": "Floor_UnevenBrick",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Floor_UnevenBrick.gltf",
+      "materials": [
+        {
+          "name": "MI_UnevenBrick",
+          "baseColorTexture": "T_UnevenBrick_BaseColor.png",
+          "normalTexture": "T_UnevenBrick_Normal.png",
+          "metallicRoughnessTexture": "T_UnevenBrick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Chimney.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Chimney.fbx",
+      "byteLength": 44044,
+      "sha256": "ecfbe3e9ae586ec5139bd64bb48a6f603e71f3fa7cd1dbf05ae6de8c62b3ecdd",
+      "name": "Prop_Chimney",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Chimney.gltf",
+      "materials": [
+        {
+          "name": "MI_RockTrim",
+          "baseColorTexture": "T_RockTrim_BaseColor.png",
+          "normalTexture": "T_RockTrim_Normal.png",
+          "metallicRoughnessTexture": "T_RockTrim_ORM.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 1,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        },
+        {
+          "name": "MI_Brick",
+          "baseColorTexture": "T_Brick_BaseColor.png",
+          "normalTexture": "T_Brick_Normal.png",
+          "metallicRoughnessTexture": "T_Brick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Chimney2.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Chimney2.fbx",
+      "byteLength": 25532,
+      "sha256": "e5127f3766cf76ca10614363117918e3f981818c3304675162a3082bec2386ca",
+      "name": "Prop_Chimney2",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Chimney2.gltf",
+      "materials": [
+        {
+          "name": "MI_UnevenBrick",
+          "baseColorTexture": "T_UnevenBrick_BaseColor.png",
+          "normalTexture": "T_UnevenBrick_Normal.png",
+          "metallicRoughnessTexture": "T_UnevenBrick_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Crate.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Crate.fbx",
+      "byteLength": 26796,
+      "sha256": "3c3dc336b1fda289ecd5558936345eb3fb67fb147cac791c08ded7e7dbfed9e6",
+      "name": "Prop_Crate",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Crate.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Wagon.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Wagon.fbx",
+      "byteLength": 70700,
+      "sha256": "ae03724c8c3063f88df88651e50b36d5b2fb26b9393d90911111ba890a7e4fde",
+      "name": "Prop_Wagon",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Wagon.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim_Wear",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_WoodenFence_Single.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_WoodenFence_Single.fbx",
+      "byteLength": 22876,
+      "sha256": "7b1de4665567ea0ca5e56ce30e2223f9ac99161cf94d444049f4fa63bde25986",
+      "name": "Prop_WoodenFence_Single",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_WoodenFence_Single.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_WoodenFence_Extension1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_WoodenFence_Extension1.fbx",
+      "byteLength": 22684,
+      "sha256": "ec897834c92171b7bbb9e02a3d775c819731b29733123de9f7a4f16fe2d01b84",
+      "name": "Prop_WoodenFence_Extension1",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_WoodenFence_Extension1.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Support.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Support.fbx",
+      "byteLength": 22396,
+      "sha256": "af88b48d480f4c9879cd9709c32ed5e0473e8ab99d235248bfc50e9136eb5d6b",
+      "name": "Prop_Support",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Support.gltf",
+      "materials": [
+        {
+          "name": "MI_WoodTrim",
+          "baseColorTexture": "T_WoodTrim_BaseColor.png",
+          "normalTexture": "T_WoodTrim_Normal.png",
+          "metallicRoughnessTexture": "T_WoodTrim_Roughness.png",
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "alphaMode": "OPAQUE",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/FBX/Prop_Vine1.fbx",
+      "importPath": "native/Assets/Art/Quaternius/Village/Models/Prop_Vine1.fbx",
+      "byteLength": 23676,
+      "sha256": "ededbd53ac89896192137185a50d1d4b9812668a8918f8e7cd9689dec9a83a8e",
+      "name": "Prop_Vine1",
+      "materialMappingSource": "Medieval Village MegaKit[Standard]/glTF/Prop_Vine1.gltf",
+      "materials": [
+        {
+          "name": "MI_Vine",
+          "baseColorTexture": "T_VineLeaf_png.png",
+          "normalTexture": null,
+          "metallicRoughnessTexture": null,
+          "occlusionTexture": null,
+          "baseColorFactor": [
+            0.10236014425754547,
+            0.3486083149909973,
+            0,
+            1
+          ],
+          "metallicFactor": 0,
+          "roughnessFactor": 0.5,
+          "alphaMode": "MASK",
+          "alphaCutoff": 0.5,
+          "doubleSided": true
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_WoodTrim_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_WoodTrim_BaseColor.png",
+      "byteLength": 2082310,
+      "sha256": "a59f410b07a9bc5f0664df3ba7a2c1e37acffc7979795911f3fc8730ab60e33e"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_WoodTrim_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_WoodTrim_Normal.png",
+      "byteLength": 3613847,
+      "sha256": "a2aa15d79245ba1bbdf82c0aa722a6453bb908fa115c4f5bdfb725d45bf6a641"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_WoodTrim_Roughness.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_WoodTrim_Roughness.png",
+      "byteLength": 1697111,
+      "sha256": "e888464fd4199d458d8cf39e00fa07d56f8a0bcb658aa03b4a7c95d466ceefa3"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_Plaster_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Plaster_BaseColor.png",
+      "byteLength": 3316410,
+      "sha256": "98547ca83888307e3ffa96384ce058b7622affe0a42add3b36d0b48618c5eda4"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_Plaster_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Plaster_Normal.png",
+      "byteLength": 4575580,
+      "sha256": "da129ede879d0ebe7cc21d092242667ca82514959709cfd1565569898b358bda"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_Plaster_ORM.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Plaster_ORM.png",
+      "byteLength": 2381579,
+      "sha256": "7be9d64a6154ba12bb7086e1d6774a7d5bbbc95775efb614f6ff40a4787fe0c7"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_Brick_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Brick_BaseColor.png",
+      "byteLength": 2447169,
+      "sha256": "5515f57e61767838f53f4b9e25aa83b1382ad345ff6b446482718b5140c33813"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_Brick_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Brick_Normal.png",
+      "byteLength": 5199854,
+      "sha256": "eb9a0c76b019cd490995fa92d63c375d9c66b05e16cc73aba5cc8c6f1ff3421a"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_Brick_Roughness.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_Brick_Roughness.png",
+      "byteLength": 689204,
+      "sha256": "981e7a4f8e3119749b2fb3d557e3d0ba0551e75a39b467cff0a3a948a9392716"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_RockTrim_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RockTrim_BaseColor.png",
+      "byteLength": 1908835,
+      "sha256": "aa571cd612091a8f4c95393f8f938bd6e5d47a8cdfd9c896b60a4b37903e2c7c"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_RockTrim_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RockTrim_Normal.png",
+      "byteLength": 3921997,
+      "sha256": "381fc15a3555008dbd281ad475969d373d999b17d70da34496c28861cea831fa"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_RockTrim_ORM.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RockTrim_ORM.png",
+      "byteLength": 1625807,
+      "sha256": "5287dd9a4e9fb7423af8d8440a8de8bdb8910f9f37ba148f619a6eddf58d5bc8"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_UnevenBrick_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_UnevenBrick_BaseColor.png",
+      "byteLength": 2945342,
+      "sha256": "ee0f096df6110e943cd9739680b61bc0ffd6fe00db752c5c3797941057a95ebc"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_UnevenBrick_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_UnevenBrick_Normal.png",
+      "byteLength": 3868581,
+      "sha256": "71b1f5a3707be38e729b0e2c5c09c6841ccb8836cab4f62043c455cfdb5a8c56"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_UnevenBrick_Roughness.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_UnevenBrick_Roughness.png",
+      "byteLength": 1246162,
+      "sha256": "da170cb92ac5479b93ca0c0002b783f1186a146e6e3124891ce7bfe6e1a8a942"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_MetalOrnaments_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_MetalOrnaments_BaseColor.png",
+      "byteLength": 725116,
+      "sha256": "28603125908bb443ef7ac405d6bf2978dafdd348081c1dfd21630ac09862b668"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_MetalOrnaments_Roughness.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_MetalOrnaments_Roughness.png",
+      "byteLength": 89547,
+      "sha256": "2de0135d6ffc3021e2550860107f531d0e64fdd0b46b3bf06f2f85e30b818874"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_RoundTiles_BaseColor.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RoundTiles_BaseColor.png",
+      "byteLength": 4352034,
+      "sha256": "acf388ebd1a97346e1e5b59091cfc609ed15b4f70b83a626089f12a82a2d9997"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/Textures/Normals Godot-Unity/T_RoundTiles_Normal.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RoundTiles_Normal.png",
+      "byteLength": 3256812,
+      "sha256": "af24f7dbde89f8cb0da20b1a0fff35cf411710e033c61a372a2c6472d96fc353"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_RoundTiles_Roughness.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_RoundTiles_Roughness.png",
+      "byteLength": 1624660,
+      "sha256": "02c5cdbb6768de6ac674a343265c020c5bd6ef70fd7ba555d9b9dc7445179366"
+    },
+    {
+      "sourcePath": "Medieval Village MegaKit[Standard]/glTF/T_VineLeaf_png.png",
+      "importPath": "native/Assets/Art/Quaternius/Village/Textures/T_VineLeaf_png.png",
+      "byteLength": 162432,
+      "sha256": "8c80a9835d29cf7b1360ca46c2a96cedc0bfffee59f09db892f64db6825e3188"
+    }
+  ],
+  "archive": "towns/assets/sources/quaternius/Medieval Village MegaKit[Standard].zip",
+  "archiveSha256": "e60dea67c10f30dccccfbff92a7933f5ea5cfe99be0e2a0fa5118cceabeec5c4"
+}

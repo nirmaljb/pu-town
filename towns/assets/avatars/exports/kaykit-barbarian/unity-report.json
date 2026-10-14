@@ -1,0 +1,41 @@
+{
+  "preset": "kaykit-barbarian",
+  "unityVersion": "6000.6.0f1",
+  "validHumanoid": true,
+  "rootNode": "avatar",
+  "rigName": "avatarAvatar",
+  "hipsBone": "hips",
+  "skinnedRenderers": 7,
+  "vertices": 7341,
+  "triangles": 7123,
+  "heightMetres": 1.7,
+  "sourceBounds": [
+    1.135122,
+    2.38476753,
+    1.26757181
+  ],
+  "animations": [
+    {
+      "clipName": "Standing",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Walking",
+      "durationSeconds": 1.06666672,
+      "loop": true
+    },
+    {
+      "clipName": "Seated",
+      "durationSeconds": 3.60000014,
+      "loop": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "character",
+      "baseTexture": "barbarian_texture",
+      "normalTexture": null
+    }
+  ]
+}

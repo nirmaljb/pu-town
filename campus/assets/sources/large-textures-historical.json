@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "maximumTrackedBlobBytes": 5242880,
+  "files": [
+    {
+      "path": "native/Assets/Art/Avatars/campus-ash/textures/T_Peasant_Normal.png",
+      "byteLength": 14110336,
+      "sha256": "7598fa7b63e46fd4dac29708bf5a81e05eb9a67280f7b13c61e28a9110eeb679",
+      "archive": "campus/assets/sources/quaternius-character/Modular Character Outfits - Fantasy[Standard].zip",
+      "archiveSha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70",
+      "member": "Modular Character Outfits - Fantasy[Standard]/Textures/Peasant/T_Peasant_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Avatars/campus-ash/textures/T_Peasant_ORM.png",
+      "byteLength": 9903835,
+      "sha256": "e1932f5f91104afca89c501416a5fec09069b8552734237fc09045fabc4ca9b4",
+      "archive": "campus/assets/sources/quaternius-character/Modular Character Outfits - Fantasy[Standard].zip",
+      "archiveSha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70",
+      "member": "Modular Character Outfits - Fantasy[Standard]/Textures/Peasant/T_Peasant_ORM.png"
+    },
+    {
+      "path": "native/Assets/Art/Avatars/campus-lea/textures/T_Peasant_Normal.png",
+      "byteLength": 14110336,
+      "sha256": "7598fa7b63e46fd4dac29708bf5a81e05eb9a67280f7b13c61e28a9110eeb679",
+      "archive": "campus/assets/sources/quaternius-character/Modular Character Outfits - Fantasy[Standard].zip",
+      "archiveSha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70",
+      "member": "Modular Character Outfits - Fantasy[Standard]/Textures/Peasant/T_Peasant_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Avatars/campus-lea/textures/T_Peasant_ORM.png",
+      "byteLength": 9903835,
+      "sha256": "e1932f5f91104afca89c501416a5fec09069b8552734237fc09045fabc4ca9b4",
+      "archive": "campus/assets/sources/quaternius-character/Modular Character Outfits - Fantasy[Standard].zip",
+      "archiveSha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70",
+      "member": "Modular Character Outfits - Fantasy[Standard]/Textures/Peasant/T_Peasant_ORM.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/City/Textures/T_Dirt_Normal.png",
+      "byteLength": 9650819,
+      "sha256": "88958149742c2ebf8447079edd80ac1133f7b72a5fce0c118206b2f742a350ea",
+      "archive": "campus/assets/sources/quaternius/Downtown City MegaKit[Standard].zip",
+      "archiveSha256": "5b1a945576d54cdbb4ccc9c3d52711e6d530da74c74c586407ecc28b165335da",
+      "member": "Textures/T_Dirt_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/City/Textures/T_Ornaments_Normal.png",
+      "byteLength": 7172215,
+      "sha256": "c1aa6b307d47386b63e775ba88d82992dd0aaf34f1e4c2b7824002e3cc0a795a",
+      "archive": "campus/assets/sources/quaternius/Downtown City MegaKit[Standard].zip",
+      "archiveSha256": "5b1a945576d54cdbb4ccc9c3d52711e6d530da74c74c586407ecc28b165335da",
+      "member": "Textures/T_Ornaments_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/City/Textures/T_RedBrick_Normal.png",
+      "byteLength": 7273659,
+      "sha256": "147f14d7f665d2598d0d796bd02a227f6b8b0fbc790c3e0737b1b90128101c93",
+      "archive": "campus/assets/sources/quaternius/Downtown City MegaKit[Standard].zip",
+      "archiveSha256": "5b1a945576d54cdbb4ccc9c3d52711e6d530da74c74c586407ecc28b165335da",
+      "member": "Textures/T_RedBrick_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/Nature/Textures/Bark_DeadTree_Normal.png",
+      "byteLength": 5728199,
+      "sha256": "692da2f58909263f074cb17b36defd09f56bf89ab7efda567a9a3e59261747b3",
+      "archive": "campus/assets/sources/quaternius/Stylized Nature MegaKit[Standard].zip",
+      "archiveSha256": "298f6732b872e4cf7b30e6e7abf9641c7f6dc6b326df37ac089533ed7e3d58c9",
+      "member": "Textures/Bark_DeadTree_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/Nature/Textures/Bark_TwistedTree_Normal.png",
+      "byteLength": 5728199,
+      "sha256": "692da2f58909263f074cb17b36defd09f56bf89ab7efda567a9a3e59261747b3",
+      "archive": "campus/assets/sources/quaternius/Stylized Nature MegaKit[Standard].zip",
+      "archiveSha256": "298f6732b872e4cf7b30e6e7abf9641c7f6dc6b326df37ac089533ed7e3d58c9",
+      "member": "Textures/Bark_TwistedTree_Normal.png"
+    },
+    {
+      "path": "native/Assets/Art/Quaternius/Props/Textures/T_Page_Noise.png",
+      "byteLength": 7486734,
+      "sha256": "4d4069a8d588dab3dcd36f9ea309fc617815b766ce225b78bcd487751585e312",
+      "archive": "campus/assets/sources/quaternius/Fantasy Props MegaKit[Standard].zip",
+      "archiveSha256": "8b6f7e806d222e585478f0e1bdc6b271bbc7bc6f84dd6af8ca703a7c64f0cb1e",
+      "member": "Textures/T_Page_Noise.png"
+    }
+  ]
+}

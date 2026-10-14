@@ -14,6 +14,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -166,22 +167,27 @@ class NativeAvatarPublicationTest {
     }
 
     @Test
-    void theAuthoredNativePublicationLoadsCompleteClothedDesignsThroughTheRoomCollectionBoundary() throws Exception {
+    void theAuthoredKayKitPublicationLoadsAllFiveDesignsThroughTheRoomCollectionBoundary() throws Exception {
         assumeTrue("1".equals(System.getenv("PU_TOWN_NATIVE_AVATAR_E2E")),
                 "Set PU_TOWN_NATIVE_AVATAR_E2E=1 after restoring or generating the local native Avatar publication.");
         RoomManager rooms = new RoomManager(() -> 0L,
-                new PublishedAvatars(Path.of("../campus/assets/avatars/publication.json")));
+                new PublishedAvatars(Path.of("../towns/assets/avatars/publication.json")));
         String code = rooms.createRoom().getRoomId();
         MockMvc http = MockMvcBuilders.standaloneSetup(new AvatarCollectionController(rooms)).build();
-        http.perform(get("/rooms/" + code + "/avatars?version=2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.version").value(2))
-                .andExpect(jsonPath("$.presets.length()").value(2))
-                .andExpect(jsonPath("$.presets[0].id").value("campus-ash"))
-                .andExpect(jsonPath("$.presets[1].id").value("campus-lea"))
-                .andExpect(jsonPath("$.presets[0].native.masterRevision").value(2))
-                .andExpect(jsonPath("$.presets[0].native.rig.avatarName").value("avatarAvatar"))
-                .andExpect(jsonPath("$.presets[0].native.rig.hipsBone").value("pelvis"))
-                .andExpect(jsonPath("$.presets[1].native.animations.seated.clipName").value("Seated"));
+        String body = http.perform(get("/rooms/" + code + "/avatars?version=2"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var collection = new tools.jackson.databind.ObjectMapper().readTree(body);
+        assertEquals(2, collection.path("version").asInt());
+        var ids = java.util.List.of("kaykit-barbarian", "kaykit-knight", "kaykit-mage", "kaykit-ranger", "kaykit-rogue");
+        assertEquals(ids, collection.path("presets").valueStream().map(preset -> preset.path("id").asText()).toList());
+        for (var preset : collection.path("presets")) {
+            var representation = preset.path("native");
+            assertEquals("avatar", representation.path("model").path("rootNode").asText());
+            assertEquals("humanoid", representation.path("rig").path("type").asText());
+            assertEquals("hips", representation.path("rig").path("hipsBone").asText());
+            assertEquals("Standing", representation.path("animations").path("standing").path("clipName").asText());
+            assertEquals("Walking", representation.path("animations").path("walking").path("clipName").asText());
+            assertEquals("Seated", representation.path("animations").path("seated").path("clipName").asText());
+        }
     }
 }

@@ -1,3 +1,5 @@
+# Native Avatar authoring
+
 Native Avatar authoring stays outside the Player application. The Java backend remains the single reader of the configured publication artifact; new Rooms resolve it once and existing Rooms retain their complete immutable collection, including the platform bytes.
 
 The migration supports existing version 1 sprite publications without changing their wire payload. `GET /rooms/{roomCode}/avatars` still returns version 1. `GET /rooms/{roomCode}/avatars?version=2` returns native designs only and responds `409` when a Room's pinned collection lacks a complete native representation. Unknown versions receive `400`; unknown/expired Room Codes receive `404`. A native-only collection similarly returns `409` to the default sprite request. A version 2 publication can include both complete sprite sheets and its required native representation while transitional consumers remain active.
@@ -7,8 +9,8 @@ A version 2 publication is `{ "version": 2, "presets": [...] }`. Each preset has
 ```json
 {
   "version": 1,
-  "masterId": "campus-ash",
-  "masterRevision": 2,
+  "masterId": "kaykit-knight",
+  "masterRevision": 1,
   "model": {
     "sourceSha256": "<64 lowercase hexadecimal characters>",
     "rootNode": "avatar",
@@ -16,18 +18,18 @@ A version 2 publication is `{ "version": 2, "presets": [...] }`. Each preset has
     "pivot": "feet",
     "forwardAxis": "+z"
   },
-  "rig": { "type": "humanoid", "avatarName": "avatarAvatar", "hipsBone": "pelvis" },
+  "rig": { "type": "humanoid", "avatarName": "avatarAvatar", "hipsBone": "hips" },
   "animations": {
-    "standing": { "clipName": "Standing", "durationSeconds": 2.50000024, "loop": true },
-    "walking": { "clipName": "Walking", "durationSeconds": 1.33333337, "loop": true },
-    "seated": { "clipName": "Seated", "durationSeconds": 1.66666675, "loop": true }
+    "standing": { "clipName": "Standing", "durationSeconds": 1.06666672, "loop": true },
+    "walking": { "clipName": "Walking", "durationSeconds": 1.06666672, "loop": true },
+    "seated": { "clipName": "Seated", "durationSeconds": 3.60000014, "loop": true }
   },
   "platformAssets": [
     {
       "platform": "windows-x86_64",
       "format": "unity-assetbundle",
       "unityVersion": "6000.6.0f1",
-      "assetName": "assets/art/avatars/campus-ash/avatar.prefab",
+      "assetName": "assets/art/avatars/kaykit-knight/avatar.prefab",
       "sha256": "<64 lowercase hexadecimal characters>",
       "byteLength": 123,
       "data": "<raw base64 bytes, without a data URL prefix>"
@@ -36,7 +38,7 @@ A version 2 publication is `{ "version": 2, "presets": [...] }`. Each preset has
       "platform": "macos-universal",
       "format": "unity-assetbundle",
       "unityVersion": "6000.6.0f1",
-      "assetName": "assets/art/avatars/campus-ash/avatar.prefab",
+      "assetName": "assets/art/avatars/kaykit-knight/avatar.prefab",
       "sha256": "<64 lowercase hexadecimal characters>",
       "byteLength": 123,
       "data": "<raw base64 bytes, without a data URL prefix>"
@@ -49,25 +51,36 @@ The representation has its own version, independent of WebSocket protocol versio
 
 Bundle bytes travel inline to preserve the existing Room pinning lifetime without an independent asset catalogue or file reader. Download once per collection, verify the hashes, and create every Avatar from its published `assetName` before presenting the Room. `model.sourceSha256` identifies the reviewed exported GLB/FBX; Blender master provenance and private QA records stay in the authoring workspace. Client rendering never supplies catalogue membership or cosmetic authorization.
 
-The active publication is Ash and Lea, using the exact retained free Quaternius Standard releases documented in [the source inventory](../../campus/assets/sources/quaternius-character/README.md). `quaternius_author.py` combines the supplied base/head, hairstyles, plain clothed components and in-place actions inside fresh Blender processes. The packed editable derivatives retain imported topology, UVs, skinning, textures and a hidden unchanged full body for inspection. Revision 1 is preserved with its rejected full-body overlap; revision 2 explicitly selects a nonempty skinned head and excludes the base body from the runtime export. [The extracted-input guide](../../campus/assets/avatars/sources/quaternius/README.md) records bone mapping, texture repairs and regeneration commands. The script refuses existing master revisions; a repair requires an explicit new revision and private registration.
+The active publication contains all five free **KayKit Adventurers 2.0**: Barbarian, Knight, Mage, Ranger and Rogue, with stable IDs `kaykit-barbarian`, `kaykit-knight`, `kaykit-mage`, `kaykit-ranger` and `kaykit-rogue`. The private workspace is `towns/assets/avatars/`; original downloads, exact hashes and included CC0 licenses are recorded in [the town source inventory](../../towns/assets/sources/README.md). No paid edition or external model-generation service was used.
 
-`PUtown.Editor.QuaterniusAvatarBuild.BuildCandidates` imports the current exported FBX and supplied textures, maps the 65-joint source rig to Unity Humanoid, restores native materials, creates `Standing`, `Walking` and `Seated` states, normalizes height/pivot and builds both desktop bundles. It checks the registered master hash and writes drafts with empty review checks. `RenderCandidates` creates actual Unity front/back/side/walking/seated evidence. Inspect the current outputs and record the required review before publishing; rebuilding a draft clears its approval and does not replace publication. The recorded reports supply exact clip durations and Avatar identities. No Windows runtime pass is inferred from a build.
+`kaykit_author.py` derives each immutable master in a fresh Blender process from the supplied Medium-rig GLB, keeping the original mesh topology, UVs, weights and atlas. It selects `Idle_A` from General, `Walking_A` from MovementBasic and `Sit_Chair_Idle` from Simulation in **KayKit Character Animations 1.1**. Imported Blender bone-display helper meshes are excluded. Carried weapons are not imported; the Ranger's source quiver remains hidden in the editable master and is excluded from the runtime export. Existing master revisions are refused: use an explicit new revision and register it before rebuilding a changed source.
 
-Use the saved prefab's actual `name` for `model.rootNode`; the input GameObject name can differ after `SaveAsPrefabAsset`. Ash and Lea have root `avatar`, Humanoid Avatar `avatarAvatar`, and source Hips bone `pelvis`. `AvatarBuild.ReportAndValidateMacBundles` reads the publication and retained macOS bundles, writes each `unity-bundle-report.json`, and refuses differences in root identity, instantiated Humanoid identity, clip duration/loop, bundle bytes, hash or Unity version. It does not rebuild or alter a bundle. Set `PU_TOWN_REPOSITORY` to the repository's absolute path when invoking these editor methods from an isolated project so the publication and evidence resolve to the intended workspace.
+`PUtown.Editor.KayKitAvatarBuild.BuildCandidates` imports the FBX and unchanged atlas, maps the 23-joint source rig to Unity Humanoid, creates `Standing`, `Walking` and `Seated` states, normalizes the standing mesh surface to 1.7 metres with its feet at ground level, and builds both desktop bundles. Root motion is disabled. It checks the registered master hash and writes drafts with empty review checks. `KayKitAvatarBuild.RenderCandidates` creates actual Unity front/back/side/walking/seated evidence through the common `AvatarBuild` renderer. Inspect the outputs and record the required review before publishing; rebuilding clears a draft's approval and does not replace publication. No Windows runtime pass is inferred from a build.
 
-Rowan and Mira remain historical starters authored through `blender_author.py` inside Blender MCP, with preserved v1/v2 sources, immutable registered masters and pose evidence. `AvatarBuild.BuildAndReview` remains their import/build path. Their rig's `Hips` name and original clip durations differ from the current Quaternius collection; never copy those identities into a new design. No paid character asset or external model-generation service was used.
+Use the saved prefab's actual `name` for `model.rootNode`; the input GameObject name can differ after `SaveAsPrefabAsset`. All five current designs have root `avatar`, Humanoid Avatar `avatarAvatar`, source Hips bone `hips`, and +Z forward. Standing and walking loops are `1.06666672` seconds; seated is `3.60000014` seconds in the current Unity exports. The per-design reports remain authoritative for these identities and durations. `AvatarBuild.ReportAndValidateMacBundles` reads the local publication and retained macOS bundles, writes each `unity-bundle-report.json`, and refuses differences in root identity, instantiated Humanoid identity, clip duration/loop, bundle bytes, hash or Unity version. Set `PU_TOWN_REPOSITORY` to the repository's absolute path when invoking editor methods from an isolated project.
 
-The opt-in PlayMode test `PUtown.IntegrationTests.NativeAvatarRoomTests.PublishedRoomAvatarsLoadAndInstantiateWithTheirDeclaredIdentity` creates a real Room, applies its native campus selection through Game frames, fetches that Room's pinned collection through the strict runtime loader, and instantiates every published design to inspect its Humanoid bones and three playable clips. Set `PU_TOWN_NATIVE_AVATAR_E2E=1` and `PU_TOWN_NATIVE_AVATAR_WS=ws://127.0.0.1:8080/ws/game` against a Java backend configured for this native publication. A metadata republish requires a new Room; existing Rooms preserve the collection they pinned.
+The older Rowan/Mira and Quaternius Ash/Lea sources, registered masters and review evidence under `campus/assets/avatars/` are historical. Their rigs and clip durations differ from KayKit. They are outside the active publication and must not be used as template identities for it.
 
-Use the private workspace commands from the repository root:
+The opt-in PlayMode test `PUtown.IntegrationTests.NativeAvatarRoomTests.PublishedRoomAvatarsLoadAndInstantiateWithTheirDeclaredIdentity` creates a real Room, applies its native Woodland Village selection through Game frames, fetches that Room's pinned collection through the strict runtime loader, and instantiates every published design to inspect its Humanoid bones and three playable clips. Set `PU_TOWN_NATIVE_AVATAR_E2E=1` and `PU_TOWN_NATIVE_AVATAR_WS=ws://127.0.0.1:8080/ws/game` against a Java backend configured for this native publication. A metadata republish requires a new Room; existing Rooms preserve the collection they pinned.
+
+Restore the reviewed private workspace for an existing revision, or derive a new one from the pinned local sources. For example, author the next Knight revision in Blender **5.2.2 LTS**, then register it using a provenance file for the actual source/license:
 
 ```sh
-python3 tools/native-avatars/authoring.py --workspace campus/assets/avatars register-master campus-ash 3 campus/assets/avatars/sources/campus-ash/v3/avatar.blend provenance.json
-python3 tools/native-avatars/authoring.py --workspace campus/assets/avatars save design.json
-python3 tools/native-avatars/authoring.py --workspace campus/assets/avatars validate campus-ash campus-lea
-python3 tools/native-avatars/authoring.py --workspace campus/assets/avatars --publication campus/assets/avatars/publication.json publish campus-ash campus-lea
+Blender --background --factory-startup --python tools/native-avatars/kaykit_author.py -- kaykit-knight 2
+python3 tools/native-avatars/authoring.py --workspace towns/assets/avatars register-master kaykit-knight 2 towns/assets/avatars/sources/kaykit-knight/v2/avatar.blend provenance.json
+unity run native --editor-version 6000.6.0f1 -- -executeMethod PUtown.Editor.KayKitAvatarBuild.BuildCandidates
+unity run native --editor-version 6000.6.0f1 -- -executeMethod PUtown.Editor.KayKitAvatarBuild.RenderCandidates
+```
+
+`KayKitAvatarBuild` currently selects the five registered revision 1 masters; changing a master revision requires updating that authoring configuration deliberately before rebuilding. Run one Unity Editor against a project at a time. After reviewing and recording the new drafts, validate and publish the complete collection:
+
+```sh
+python3 tools/native-avatars/authoring.py --workspace towns/assets/avatars validate kaykit-barbarian kaykit-knight kaykit-mage kaykit-ranger kaykit-rogue
+python3 tools/native-avatars/authoring.py --workspace towns/assets/avatars --publication towns/assets/avatars/publication.json publish kaykit-barbarian kaykit-knight kaykit-mage kaykit-ranger kaykit-rogue
 python3 tools/native-avatars/test_authoring.py
 ```
+
+Use `authoring.py --workspace towns/assets/avatars save design.json` to save a reviewed private design. Review checks cannot be inferred from generation or bundle compilation.
 
 A provenance JSON records `author`, `source`, `license`, `licenseRecordedAt` (ISO date), and `exportEntitlement`. Registration retains an immutable source copy and its SHA-256. Repairs require a new revision and renewed dependent design checks.
 

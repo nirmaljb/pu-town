@@ -1,0 +1,124 @@
+{
+  "id": "kaykit-ranger",
+  "name": "Ranger",
+  "masterRevision": 1,
+  "provider": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "sourceArchive": "KayKit Adventurers Free 2.0",
+  "animationArchive": "KayKit Character Animations Free 1.1",
+  "sourceCharacterSha256": "3a0b0166b9d61d58dcaaa739c3cc0538be46e00d2928dd5cb513d9a41770d2e9",
+  "sourceAtlasSha256": "639cd0ba5106fbdf65370b52b9290091d3bd92fe267693abc8dc474471bb800f",
+  "sourceSha256": "9ae18ab163d71159209ac3937d54b450e20552323a5acda6583755b9df5a18fc",
+  "fbxSha256": "2078958a8b7011eb296731eeb7b8554861d0fc8ebc5131e4b43e7dfbe02483c8",
+  "rigBones": [
+    "root",
+    "hips",
+    "upperleg.l",
+    "lowerleg.l",
+    "foot.l",
+    "toes.l",
+    "upperleg.r",
+    "lowerleg.r",
+    "foot.r",
+    "toes.r",
+    "spine",
+    "chest",
+    "head",
+    "upperarm.r",
+    "lowerarm.r",
+    "wrist.r",
+    "hand.r",
+    "handslot.r",
+    "upperarm.l",
+    "lowerarm.l",
+    "wrist.l",
+    "hand.l",
+    "handslot.l"
+  ],
+  "meshes": [
+    {
+      "name": "Ranger_ArmLeft",
+      "vertices": 668,
+      "triangles": 820,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_ArmRight",
+      "vertices": 668,
+      "triangles": 820,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_Body",
+      "vertices": 3224,
+      "triangles": 3461,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_Cape",
+      "vertices": 56,
+      "triangles": 84,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_Head",
+      "vertices": 1172,
+      "triangles": 1600,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_LegLeft",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Ranger_LegRight",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "ranger"
+      ],
+      "boundRig": "Rig_Medium"
+    }
+  ],
+  "carriedAccessories": [],
+  "retainedHiddenAccessories": [
+    "Ranger_Quiver"
+  ],
+  "actions": {
+    "Standing": {
+      "source": "Idle_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Walking": {
+      "source": "Walking_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Seated": {
+      "source": "Sit_Chair_Idle",
+      "frameStart": 0.0,
+      "frameEnd": 108.0
+    }
+  }
+}

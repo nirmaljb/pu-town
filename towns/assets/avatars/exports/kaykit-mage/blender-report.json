@@ -1,0 +1,130 @@
+{
+  "id": "kaykit-mage",
+  "name": "Mage",
+  "masterRevision": 1,
+  "provider": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "sourceArchive": "KayKit Adventurers Free 2.0",
+  "animationArchive": "KayKit Character Animations Free 1.1",
+  "sourceCharacterSha256": "1f7d891bde50b879c70965f155b7b765b166dc3f8518e5abb86c0002f191a26e",
+  "sourceAtlasSha256": "9ef9672e93b231fc4e0e19238edfae3be22513aaf634df1898f45842ce6e4b5f",
+  "sourceSha256": "cff5cc5abdc76181c38623ccf7f29ed872e61d1ccab98602ea948dbaf5f9a8b4",
+  "fbxSha256": "efc460b1e6fe3b56b1a48b845e88f1acde46e3ad99b9f964b9e6607e7fdcdaf2",
+  "rigBones": [
+    "root",
+    "hips",
+    "upperleg.r",
+    "lowerleg.r",
+    "foot.r",
+    "toes.r",
+    "spine",
+    "chest",
+    "upperarm.l",
+    "lowerarm.l",
+    "wrist.l",
+    "hand.l",
+    "handslot.l",
+    "head",
+    "upperarm.r",
+    "lowerarm.r",
+    "wrist.r",
+    "hand.r",
+    "handslot.r",
+    "upperleg.l",
+    "lowerleg.l",
+    "foot.l",
+    "toes.l"
+  ],
+  "meshes": [
+    {
+      "name": "Mage_ArmLeft",
+      "vertices": 330,
+      "triangles": 468,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_ArmRight",
+      "vertices": 330,
+      "triangles": 468,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_Body",
+      "vertices": 1275,
+      "triangles": 1230,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_Cape",
+      "vertices": 56,
+      "triangles": 84,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_Hat",
+      "vertices": 391,
+      "triangles": 396,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_Head",
+      "vertices": 1479,
+      "triangles": 2162,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_LegLeft",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    },
+    {
+      "name": "Mage_LegRight",
+      "vertices": 780,
+      "triangles": 930,
+      "materials": [
+        "mage"
+      ],
+      "boundRig": "Rig_Medium"
+    }
+  ],
+  "carriedAccessories": [],
+  "actions": {
+    "Standing": {
+      "source": "Idle_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Walking": {
+      "source": "Walking_A",
+      "frameStart": 0.0,
+      "frameEnd": 32.0
+    },
+    "Seated": {
+      "source": "Sit_Chair_Idle",
+      "frameStart": 0.0,
+      "frameEnd": 108.0
+    }
+  }
+}

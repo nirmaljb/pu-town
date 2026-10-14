@@ -71,6 +71,7 @@ public final class TaskBoard {
         for (Participant member : roster) addDeveloper(member);
     }
     public void addDeveloper(Participant member) {
+        if (!townMap.tasksEnabled()) return;
         roles.put(member.playerId(), member.role());
         List<Location> locations = townMap.tasks();
         for (boolean fake : List.of(false, true)) {
@@ -112,6 +113,7 @@ public final class TaskBoard {
 
     public TaskBoard(List<Participant> roster, boolean practice, TownMap townMap) {
         this.townMap = townMap;
+        if (!townMap.tasksEnabled()) return;
         List<Location> locations = townMap.tasks();
         for (Participant member : roster) {
             List<Boolean> banks = practice ? List.of(false, true) : List.of(member.role() == Role.MAFIA);

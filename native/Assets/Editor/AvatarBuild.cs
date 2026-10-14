@@ -6,186 +6,19 @@ using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
-using UnityEditor.Animations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace PUtown.Editor
 {
-    /// <summary>Import retained Blender masters, inspect actual Unity rigs, and build immutable per-platform assets.</summary>
+    /// <summary>Render native Avatar evidence and inspect immutable published platform assets.</summary>
     public static class AvatarBuild
     {
         private const string ArtRoot = "Assets/Art/Avatars";
-        private static readonly string[] Presets = { "campus-rowan", "campus-mira" };
+        private static readonly string[] Presets = { "kaykit-barbarian", "kaykit-knight", "kaykit-mage", "kaykit-ranger", "kaykit-rogue" };
         private static readonly string[] States = { "Standing", "Walking", "Seated" };
         private static string RepositoryRoot => Path.GetFullPath(Environment.GetEnvironmentVariable("PU_TOWN_REPOSITORY") ?? "..");
-        private static string ExportDirectory(string id) => Path.Combine(RepositoryRoot, "campus", "assets", "avatars", "exports", id);
-
-        [MenuItem("PU Town/Avatars/Import authored masters")]
-        public static void Import()
-        {
-            AssetDatabase.Refresh();
-            foreach (string id in Presets) Import(id);
-            AssetDatabase.SaveAssets();
-        }
-
-        private static void Import(string id)
-        {
-            string source = ArtRoot + "/" + id + "/avatar.fbx";
-            var importer = (ModelImporter)AssetImporter.GetAtPath(source);
-            if (importer == null) throw new InvalidOperationException("Missing authored Avatar source: " + source);
-            importer.animationType = ModelImporterAnimationType.Human;
-            importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-            importer.importAnimation = true;
-            importer.importBlendShapes = false;
-            importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
-            importer.materialLocation = ModelImporterMaterialLocation.InPrefab;
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(source);
-            if (model == null) throw new InvalidOperationException("Avatar FBX did not import: " + source);
-            var human = new List<HumanBone>();
-            foreach (HumanBodyBones bone in new[] { HumanBodyBones.Hips, HumanBodyBones.Spine, HumanBodyBones.Chest,
-                HumanBodyBones.Neck, HumanBodyBones.Head, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm,
-                HumanBodyBones.LeftHand, HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm,
-                HumanBodyBones.RightHand, HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg,
-                HumanBodyBones.LeftFoot, HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot })
-            {
-                string name = bone.ToString();
-                if (!model.GetComponentsInChildren<Transform>(true).Any(transform => transform.name == name))
-                    throw new InvalidOperationException("Missing shared humanoid bone: " + name);
-                human.Add(new HumanBone { boneName = name, humanName = HumanTrait.BoneName[(int)bone],
-                    limit = new HumanLimit { useDefaultValues = true } });
-            }
-            var description = importer.humanDescription;
-            description.human = human.ToArray();
-            description.skeleton = model.GetComponentsInChildren<Transform>(true).Select(transform => new SkeletonBone
-            {
-                name = transform.name, position = transform.localPosition,
-                rotation = transform.localRotation, scale = transform.localScale
-            }).ToArray();
-            description.armStretch = .05f;
-            description.legStretch = .05f;
-            description.upperArmTwist = .5f;
-            description.lowerArmTwist = .5f;
-            description.upperLegTwist = .5f;
-            description.lowerLegTwist = .5f;
-            importer.humanDescription = description;
-            var clips = importer.defaultClipAnimations;
-            foreach (var clip in clips)
-            {
-                string state = States.FirstOrDefault(candidate => clip.name.Contains(candidate, StringComparison.OrdinalIgnoreCase)
-                    || clip.takeName.Contains(candidate, StringComparison.OrdinalIgnoreCase));
-                if (state == null) continue;
-                clip.name = state;
-                clip.loopTime = true;
-                clip.loopPose = true;
-                clip.lockRootRotation = true;
-                clip.lockRootHeightY = true;
-                clip.lockRootPositionXZ = true;
-                clip.keepOriginalPositionY = true;
-            }
-            importer.clipAnimations = clips;
-            importer.SaveAndReimport();
-            model = AssetDatabase.LoadAssetAtPath<GameObject>(source);
-            Avatar avatar = AssetDatabase.LoadAllAssetsAtPath(source).OfType<Avatar>().FirstOrDefault();
-            if (avatar == null || !avatar.isValid || !avatar.isHuman)
-                throw new InvalidOperationException("The authored Avatar must import as a valid Unity humanoid: " + id);
-            AnimationClip[] importedClips = AssetDatabase.LoadAllAssetsAtPath(source).OfType<AnimationClip>()
-                .Where(clip => !clip.name.StartsWith("__preview__", StringComparison.Ordinal)).ToArray();
-            if (States.Any(state => !importedClips.Any(clip => clip.name == state && clip.length > 0)))
-                throw new InvalidOperationException("The authored Avatar lacks a standing, walking or seated clip: " + id);
-            string controllerPath = ArtRoot + "/" + id + "/avatar.controller";
-            AssetDatabase.DeleteAsset(controllerPath);
-            AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(controllerPath);
-            foreach (string state in States)
-            {
-                AnimatorState animationState = controller.layers[0].stateMachine.AddState(state);
-                animationState.motion = importedClips.Single(clip => clip.name == state);
-                if (state == "Standing") controller.layers[0].stateMachine.defaultState = animationState;
-            }
-            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
-            try
-            {
-                instance.name = "Avatar";
-                Animator animator = instance.GetComponent<Animator>() ?? instance.AddComponent<Animator>();
-                animator.avatar = avatar;
-                animator.runtimeAnimatorController = controller;
-                animator.applyRootMotion = false;
-                var renderers = instance.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-                if (renderers.Length == 0 || renderers.Any(renderer => renderer.sharedMesh == null || renderer.bones.Length == 0))
-                    throw new InvalidOperationException("Avatar meshes must be bound to their authored rig: " + id);
-                foreach (var renderer in renderers)
-                {
-                    renderer.updateWhenOffscreen = true;
-                    Material[] materials = renderer.sharedMaterials;
-                    for (int index = 0; index < materials.Length; index++)
-                    {
-                        Material material = materials[index];
-                        if (material == null) throw new InvalidOperationException("Avatar has a missing native material: " + id);
-                        string safe = string.Concat(material.name.Select(character => char.IsLetterOrDigit(character) ? character : '-'));
-                        string materialPath = ArtRoot + "/" + id + "/" + safe + ".mat";
-                        Material native = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
-                        if (native == null)
-                        {
-                            native = new Material(Shader.Find("Standard")) { name = material.name, color = material.color };
-                            native.SetFloat("_Glossiness", .15f);
-                            native.SetFloat("_Metallic", 0);
-                            AssetDatabase.CreateAsset(native, materialPath);
-                        }
-                        materials[index] = native;
-                    }
-                    renderer.sharedMaterials = materials;
-                }
-                // Normalize height/pivot once in the authored prefab; the client has no cosmetic geometry table.
-                Bounds bounds = renderers[0].bounds;
-                foreach (var renderer in renderers.Skip(1)) bounds.Encapsulate(renderer.bounds);
-                float scale = 1.7f / bounds.size.y;
-                instance.transform.localScale = Vector3.one * scale;
-                instance.transform.localPosition = new Vector3(0, -bounds.min.y * scale, 0);
-                GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(instance, ArtRoot + "/" + id + "/avatar.prefab");
-                if (savedPrefab == null) throw new InvalidOperationException("The authored Avatar prefab could not be saved: " + id);
-                var report = new
-                {
-                    preset = id, unityVersion = Application.unityVersion, validHumanoid = avatar.isValid && avatar.isHuman,
-                    rootNode = savedPrefab.name,
-                    rigName = avatar.name, hipsBone = animator.GetBoneTransform(HumanBodyBones.Hips)?.name,
-                    skinnedRenderers = renderers.Length, vertices = renderers.Sum(renderer => renderer.sharedMesh.vertexCount),
-                    triangles = renderers.Sum(renderer => renderer.sharedMesh.triangles.Length / 3),
-                    heightMetres = 1.7, scale, sourceBounds = new[] { bounds.size.x, bounds.size.y, bounds.size.z },
-                    animations = importedClips.Select(clip => new { clipName = clip.name, durationSeconds = clip.length, loop = clip.isLooping }).ToArray()
-                };
-                string output = ExportDirectory(id);
-                Directory.CreateDirectory(output);
-                File.WriteAllText(Path.Combine(output, "unity-report.json"), JsonConvert.SerializeObject(report, Formatting.Indented) + "\n");
-                Debug.Log("Validated native Avatar " + id + ": " + JsonConvert.SerializeObject(report));
-            }
-            finally { Object.DestroyImmediate(instance); }
-        }
-
-        [MenuItem("PU Town/Avatars/Build platform bundles")]
-        public static void BuildBundles()
-        {
-            Import();
-            foreach (var platform in new[] { ("windows-x86_64", BuildTarget.StandaloneWindows64), ("macos-universal", BuildTarget.StandaloneOSX) })
-            {
-                if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, platform.Item2))
-                    throw new InvalidOperationException("Missing native Avatar build support: " + platform.Item1);
-                string output = "Builds/AvatarBundles/" + platform.Item1;
-                Directory.CreateDirectory(output);
-                AssetBundleBuild[] builds = Presets.Select(id => new AssetBundleBuild
-                {
-                    assetBundleName = id, assetNames = new[] { ArtRoot + "/" + id + "/avatar.prefab" }
-                }).ToArray();
-                AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(output, builds,
-                    BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode, platform.Item2);
-                if (manifest == null) throw new InvalidOperationException("Native Avatar bundle build failed: " + platform.Item1);
-                foreach (string id in Presets)
-                {
-                    string target = Path.Combine(ExportDirectory(id), platform.Item1 + ".bundle");
-                    File.Copy(Path.Combine(output, id), target, true);
-                }
-                Debug.Log("Native Avatar bundles built for " + platform.Item1);
-            }
-        }
+        private static string ExportDirectory(string id) => Path.Combine(RepositoryRoot, "towns", "assets", "avatars", "exports", id);
 
         [MenuItem("PU Town/Avatars/Render native review evidence")]
         public static void RenderEvidence()
@@ -275,7 +108,7 @@ namespace PUtown.Editor
 
         private static void ValidateMacBundles(bool renderEvidence)
         {
-            string publicationPath = Path.Combine(RepositoryRoot, "campus", "assets", "avatars", "publication.json");
+            string publicationPath = Environment.GetEnvironmentVariable("PU_TOWN_AVATAR_PUBLICATION") ?? Path.Combine(RepositoryRoot, "towns", "assets", "avatars", "publication.json");
             var publication = JObject.Parse(File.ReadAllText(publicationPath));
             var violations = new List<string>();
             foreach (JObject preset in (JArray)publication["presets"])
@@ -337,11 +170,5 @@ namespace PUtown.Editor
             if (violations.Count > 0) throw new InvalidOperationException("Native Avatar publication does not match its actual bundles: " + string.Join(" ", violations));
         }
 
-        public static void BuildAndReview()
-        {
-            BuildBundles();
-            ValidateMacBundles();
-            Debug.Log("Both native Avatar platform bundles built; actual macOS bundles loaded and rendered for art review.");
-        }
     }
 }

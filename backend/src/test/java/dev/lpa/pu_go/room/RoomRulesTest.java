@@ -3,12 +3,15 @@ package dev.lpa.pu_go.room;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -75,45 +78,61 @@ class RoomRulesTest {
         assertTrue(RoomRules.walkable(RoomRules.BUTTON_X, RoomRules.BUTTON_Y + 50));
     }
 
-    @Test
-    void nativeCampusPublicationMatchesUnityAndAuthoritativeCollisionAndRetainedSeats() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"woodland", "market"})
+    void nativeTownPublicationMatchesUnitySolidBuildingsAndRetainedSeats(String mapId) throws Exception {
         var mapper = new ObjectMapper();
-        Path source = Path.of("..", "campus", "layout.json");
-        Path nativeRules = Path.of("..", "native", "Assets", "PUtown", "Resources", "Campus", "campus.json");
+        Path source = Path.of("..", "towns", mapId, "layout.json");
+        Path nativeRules = Path.of("..", "native", "Assets", "PUtown", "Resources", "Towns", mapId + ".json");
         JsonNode authored = mapper.readTree(source.toFile());
         JsonNode rendered = mapper.readTree(nativeRules.toFile());
-        try (var stream = getClass().getResourceAsStream("/maps/campus.json")) {
+        assertEquals(mapId, rendered.path("mapId").asText());
+        try (var stream = getClass().getResourceAsStream("/maps/" + mapId + ".json")) {
             assertNotNull(stream);
             assertEquals(rendered, mapper.readTree(stream), "Unity and Java must load the same publication");
         }
-        assertEquals(4800, rendered.path("width").asInt());
-        assertEquals(3600, rendered.path("height").asInt());
         assertEquals(100, rendered.path("coordinates").path("serverUnitsPerUnityUnit").asInt());
         assertEquals(1, rendered.path("coordinates").path("unityZSign").asInt());
         assertEquals(authored.path("buildings"), rendered.path("buildings"));
-        assertEquals(authored.path("tasks"), rendered.path("tasks"));
-        assertEquals(12, rendered.path("interiors").size());
-        TownMap campus = TownMap.find("campus");
-        assertNotNull(campus);
+        assertFalse(rendered.path("tasksEnabled").asBoolean(true));
+        assertEquals(0, rendered.path("tasks").size());
+        assertEquals(0, rendered.path("interiors").size());
+        var map = TownMap.find(mapId);
+        assertNotNull(map); assertFalse(map.tasksEnabled());
+        assertTrue(map.tasks().isEmpty());
+        assertEquals(10, rendered.path("meeting").path("seats").size());
         for (JsonNode seat : rendered.path("meeting").path("seats")) {
             int index = seat.path("seat").asInt();
-            assertEquals(seat.path("x").asDouble(), campus.seatX(index));
-            assertEquals(seat.path("y").asDouble(), campus.seatY(index));
+            assertEquals(seat.path("x").asDouble(), map.seatX(index));
+            assertEquals(seat.path("y").asDouble(), map.seatY(index));
             assertEquals(seat.path("facing").asText(), RoomRules.seatFacing(index));
-            assertTrue(campus.walkable(campus.seatX(index), campus.seatY(index)));
+            assertTrue(map.walkable(map.seatX(index), map.seatY(index)));
+            assertEquals("Outdoors", map.areaAt(map.seatX(index), map.seatY(index)));
         }
-        assertEquals("Ananda Rangapillai Library", campus.areaAt(2992, 2272));
-        assertEquals("Outdoors", campus.areaAt(2992, 2160));
-        assertTrue(campus.walkable(2992, 2208), "The library doorway must be open");
-        assertFalse(campus.walkable(2752, 2208), "The wall beside the doorway must block feet");
+        assertTrue(rendered.path("buildings").size() > 0);
+        for (JsonNode building : rendered.path("buildings")) {
+            double x = building.path("x").asDouble() + building.path("width").asDouble() / 2;
+            double y = building.path("y").asDouble() + building.path("height").asDouble() / 2;
+            assertFalse(map.walkable(x, y), "Non-enterable building must be solid: " + building.path("id").asText());
+        }
+        double width = rendered.path("width").asDouble(), height = rendered.path("height").asDouble();
         var random = new java.util.Random(62);
         for (int sample = 0; sample < 2000; sample++) {
-            double x = random.nextDouble() * 4800, y = random.nextDouble() * 3600;
-            boolean expected = x >= 14 && y >= 14 && x <= 4786 && y <= 3586
+            double x = random.nextDouble() * width, y = random.nextDouble() * height;
+            boolean expected = x >= 14 && y >= 14 && x <= width - 14 && y <= height - 14
                     && rendered.path("obstacles").valueStream().noneMatch(rect ->
                     x > rect.path("x").asDouble() - 14 && x < rect.path("x").asDouble() + rect.path("width").asDouble() + 14
                             && y > rect.path("y").asDouble() - 14 && y < rect.path("y").asDouble() + rect.path("height").asDouble() + 14);
-            assertEquals(expected, campus.walkable(x, y), "Native collision at " + x + "," + y);
+            assertEquals(expected, map.walkable(x, y), "Native collision at " + x + "," + y);
+        }
+    }
+
+    @Test
+    void activeCatalogueRetainsLegacyRulesAndRetiresTheNativeCampus() {
+        assertNull(TownMap.find("campus"));
+        for (String mapId : List.of("village", "horror", "cyberpunk")) {
+            assertTrue(TownMap.find(mapId).tasksEnabled());
+            assertTrue(TownMap.find(mapId).tasks().size() >= 3);
         }
     }
 }

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "id": "kaykit-barbarian",
+  "revision": 1,
+  "sourceFile": "source.blend",
+  "sourceSha256": "f48b059f9fb20a15aa51f045b83c69b7c14cf5459b989936ee9ce8a4885e67ac",
+  "provenance": {
+    "author": "Kay Lousberg; PU Town editable derivative",
+    "source": "https://kaylousberg.itch.io/kaykit-adventurers and https://kaylousberg.itch.io/kaykit-character-animations",
+    "license": "CC0-1.0",
+    "licenseRecordedAt": "2026-10-14",
+    "exportEntitlement": "Original free Adventurers 2.0 and Character Animations 1.1; export and derivative use permitted by included CC0 license."
+  }
+}

@@ -1,0 +1,2299 @@
+{
+  "schemaVersion": 1,
+  "mapId": "woodland",
+  "name": "Woodland Village",
+  "width": 5088,
+  "height": 4976,
+  "tileSize": 32,
+  "coordinates": {
+    "serverUnitsPerUnityUnit": 100,
+    "unityZSign": 1,
+    "north": "negativeY",
+    "groundHeight": 0
+  },
+  "movement": {
+    "footRadius": 14,
+    "acceptedSpeed": 240,
+    "predictedSpeed": 225,
+    "hearingRange": 160,
+    "daySeconds": 180
+  },
+  "meeting": {
+    "x": 2999.36,
+    "y": 2870.54,
+    "radiusX": 330,
+    "radiusY": 205,
+    "emergencyButton": {
+      "x": 2999.36,
+      "y": 2870.54
+    },
+    "seats": [
+      {
+        "seat": 0,
+        "x": 2999.36,
+        "y": 2665.54,
+        "facing": "down"
+      },
+      {
+        "seat": 1,
+        "x": 3193.36,
+        "y": 2704.54,
+        "facing": "left"
+      },
+      {
+        "seat": 2,
+        "x": 3313.36,
+        "y": 2807.54,
+        "facing": "left"
+      },
+      {
+        "seat": 3,
+        "x": 3313.36,
+        "y": 2933.54,
+        "facing": "left"
+      },
+      {
+        "seat": 4,
+        "x": 3193.36,
+        "y": 3036.54,
+        "facing": "left"
+      },
+      {
+        "seat": 5,
+        "x": 2999.36,
+        "y": 3075.54,
+        "facing": "up"
+      },
+      {
+        "seat": 6,
+        "x": 2805.36,
+        "y": 3036.54,
+        "facing": "right"
+      },
+      {
+        "seat": 7,
+        "x": 2685.36,
+        "y": 2933.54,
+        "facing": "right"
+      },
+      {
+        "seat": 8,
+        "x": 2685.36,
+        "y": 2807.54,
+        "facing": "right"
+      },
+      {
+        "seat": 9,
+        "x": 2805.36,
+        "y": 2704.54,
+        "facing": "right"
+      }
+    ]
+  },
+  "emergencyButton": {
+    "x": 2999.36,
+    "y": 2870.54
+  },
+  "tasksEnabled": false,
+  "tasks": [],
+  "interiors": [],
+  "obstacles": [
+    {
+      "id": "building-1-3",
+      "kind": "building",
+      "x": 2522.28,
+      "y": 3277.19,
+      "width": 250,
+      "height": 240
+    },
+    {
+      "id": "building-1-4",
+      "kind": "building",
+      "x": 2375.07,
+      "y": 3601.13,
+      "width": 310,
+      "height": 330
+    },
+    {
+      "id": "building-1-7",
+      "kind": "building",
+      "x": 2175.62,
+      "y": 3071.02,
+      "width": 290,
+      "height": 290
+    },
+    {
+      "id": "building-2-2",
+      "kind": "building",
+      "x": 2235.53,
+      "y": 1988.67,
+      "width": 460,
+      "height": 450
+    },
+    {
+      "id": "building-3-0",
+      "kind": "building",
+      "x": 3712.74,
+      "y": 2002.77,
+      "width": 430,
+      "height": 540
+    },
+    {
+      "id": "building-3-7",
+      "kind": "building",
+      "x": 3523.67,
+      "y": 2624.74,
+      "width": 380,
+      "height": 240
+    },
+    {
+      "id": "building-3-12",
+      "kind": "building",
+      "x": 4114.29,
+      "y": 2657.17,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-4-0",
+      "kind": "building",
+      "x": 3675.36,
+      "y": 3338.49,
+      "width": 250,
+      "height": 360
+    },
+    {
+      "id": "building-4-2",
+      "kind": "building",
+      "x": 3170.58,
+      "y": 3624.47,
+      "width": 360,
+      "height": 300
+    },
+    {
+      "id": "building-4-4",
+      "kind": "building",
+      "x": 3080.24,
+      "y": 3981.37,
+      "width": 440,
+      "height": 360
+    },
+    {
+      "id": "building-5-2",
+      "kind": "building",
+      "x": 1466.62,
+      "y": 2956.73,
+      "width": 240,
+      "height": 250
+    },
+    {
+      "id": "building-5-11",
+      "kind": "building",
+      "x": 1080.71,
+      "y": 1999.5,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-6-2",
+      "kind": "building",
+      "x": 1665.31,
+      "y": 3850.5,
+      "width": 330,
+      "height": 240
+    },
+    {
+      "id": "building-6-5",
+      "kind": "building",
+      "x": 1224.98,
+      "y": 3678.74,
+      "width": 360,
+      "height": 240
+    },
+    {
+      "id": "building-6-6",
+      "kind": "building",
+      "x": 1260.56,
+      "y": 3988.35,
+      "width": 290,
+      "height": 260
+    },
+    {
+      "id": "building-7-2",
+      "kind": "building",
+      "x": 3677.08,
+      "y": 1525.76,
+      "width": 260,
+      "height": 300
+    },
+    {
+      "id": "building-7-3",
+      "kind": "building",
+      "x": 3231.58,
+      "y": 1793.33,
+      "width": 260,
+      "height": 250
+    },
+    {
+      "id": "boundary-north",
+      "kind": "boundary",
+      "x": 0,
+      "y": 0,
+      "width": 5088,
+      "height": 24
+    },
+    {
+      "id": "boundary-south",
+      "kind": "boundary",
+      "x": 0,
+      "y": 4952,
+      "width": 5088,
+      "height": 24
+    },
+    {
+      "id": "boundary-west",
+      "kind": "boundary",
+      "x": 0,
+      "y": 24,
+      "width": 24,
+      "height": 4928
+    },
+    {
+      "id": "boundary-east",
+      "kind": "boundary",
+      "x": 5064,
+      "y": 24,
+      "width": 24,
+      "height": 4928
+    },
+    {
+      "id": "square-well",
+      "kind": "well",
+      "x": 3439.36,
+      "y": 2930.54,
+      "width": 180,
+      "height": 180
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-1-3",
+      "name": "Workshop 1",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 3,
+      "variant": "workshop",
+      "x": 2522.28,
+      "y": 3277.19,
+      "width": 250,
+      "height": 240
+    },
+    {
+      "id": "building-1-4",
+      "name": "Village house 2",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 4,
+      "variant": "cottage",
+      "x": 2375.07,
+      "y": 3601.13,
+      "width": 310,
+      "height": 330
+    },
+    {
+      "id": "building-1-7",
+      "name": "Village house 3",
+      "districtId": "ward-1",
+      "sourcePatch": 1,
+      "sourceGeometry": 7,
+      "variant": "cottage",
+      "x": 2175.62,
+      "y": 3071.02,
+      "width": 290,
+      "height": 290
+    },
+    {
+      "id": "building-2-2",
+      "name": "Village house 4",
+      "districtId": "ward-2",
+      "sourcePatch": 2,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 2235.53,
+      "y": 1988.67,
+      "width": 460,
+      "height": 450
+    },
+    {
+      "id": "building-3-0",
+      "name": "Village house 5",
+      "districtId": "ward-3",
+      "sourcePatch": 3,
+      "sourceGeometry": 0,
+      "variant": "cottage",
+      "x": 3712.74,
+      "y": 2002.77,
+      "width": 430,
+      "height": 540
+    },
+    {
+      "id": "building-3-7",
+      "name": "Village house 6",
+      "districtId": "ward-3",
+      "sourcePatch": 3,
+      "sourceGeometry": 7,
+      "variant": "longhouse",
+      "x": 3523.67,
+      "y": 2624.74,
+      "width": 380,
+      "height": 240
+    },
+    {
+      "id": "building-3-12",
+      "name": "Village house 7",
+      "districtId": "ward-3",
+      "sourcePatch": 3,
+      "sourceGeometry": 12,
+      "variant": "cottage",
+      "x": 4114.29,
+      "y": 2657.17,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-4-0",
+      "name": "Workshop 8",
+      "districtId": "ward-4",
+      "sourcePatch": 4,
+      "sourceGeometry": 0,
+      "variant": "workshop",
+      "x": 3675.36,
+      "y": 3338.49,
+      "width": 250,
+      "height": 360
+    },
+    {
+      "id": "building-4-2",
+      "name": "Village house 9",
+      "districtId": "ward-4",
+      "sourcePatch": 4,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 3170.58,
+      "y": 3624.47,
+      "width": 360,
+      "height": 300
+    },
+    {
+      "id": "building-4-4",
+      "name": "Village house 10",
+      "districtId": "ward-4",
+      "sourcePatch": 4,
+      "sourceGeometry": 4,
+      "variant": "cottage",
+      "x": 3080.24,
+      "y": 3981.37,
+      "width": 440,
+      "height": 360
+    },
+    {
+      "id": "building-5-2",
+      "name": "Village house 11",
+      "districtId": "ward-5",
+      "sourcePatch": 5,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 1466.62,
+      "y": 2956.73,
+      "width": 240,
+      "height": 250
+    },
+    {
+      "id": "building-5-11",
+      "name": "Village house 12",
+      "districtId": "ward-5",
+      "sourcePatch": 5,
+      "sourceGeometry": 11,
+      "variant": "cottage",
+      "x": 1080.71,
+      "y": 1999.5,
+      "width": 240,
+      "height": 240
+    },
+    {
+      "id": "building-6-2",
+      "name": "Village house 13",
+      "districtId": "ward-6",
+      "sourcePatch": 6,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 1665.31,
+      "y": 3850.5,
+      "width": 330,
+      "height": 240
+    },
+    {
+      "id": "building-6-5",
+      "name": "Village house 14",
+      "districtId": "ward-6",
+      "sourcePatch": 6,
+      "sourceGeometry": 5,
+      "variant": "longhouse",
+      "x": 1224.98,
+      "y": 3678.74,
+      "width": 360,
+      "height": 240
+    },
+    {
+      "id": "building-6-6",
+      "name": "Workshop 15",
+      "districtId": "ward-6",
+      "sourcePatch": 6,
+      "sourceGeometry": 6,
+      "variant": "workshop",
+      "x": 1260.56,
+      "y": 3988.35,
+      "width": 290,
+      "height": 260
+    },
+    {
+      "id": "building-7-2",
+      "name": "Village house 16",
+      "districtId": "ward-7",
+      "sourcePatch": 7,
+      "sourceGeometry": 2,
+      "variant": "cottage",
+      "x": 3677.08,
+      "y": 1525.76,
+      "width": 260,
+      "height": 300
+    },
+    {
+      "id": "building-7-3",
+      "name": "Workshop 17",
+      "districtId": "ward-7",
+      "sourcePatch": 7,
+      "sourceGeometry": 3,
+      "variant": "workshop",
+      "x": 3231.58,
+      "y": 1793.33,
+      "width": 260,
+      "height": 250
+    }
+  ],
+  "routes": [
+    {
+      "id": "artery-0-0",
+      "name": "Town road 1",
+      "width": 150,
+      "sourceArtery": 0,
+      "points": [
+        {
+          "x": 2193.75,
+          "y": 2711.92
+        },
+        {
+          "x": 1792.58,
+          "y": 2117.93
+        },
+        {
+          "x": 1032.15,
+          "y": 1564.94
+        },
+        {
+          "x": 338.93,
+          "y": 575.62
+        },
+        {
+          "x": 418.85,
+          "y": 100.0
+        }
+      ]
+    },
+    {
+      "id": "artery-1-0",
+      "name": "Town road 2",
+      "width": 150,
+      "sourceArtery": 1,
+      "points": [
+        {
+          "x": 3535.82,
+          "y": 3155.7
+        },
+        {
+          "x": 4031.6,
+          "y": 3223.77
+        },
+        {
+          "x": 4592.76,
+          "y": 3099.11
+        },
+        {
+          "x": 4988.0,
+          "y": 3047.62
+        }
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "ward-0",
+      "name": "Market",
+      "kind": "Market",
+      "sourcePatch": 0,
+      "points": [
+        {
+          "x": 2193.75,
+          "y": 2711.92
+        },
+        {
+          "x": 3271.6,
+          "y": 2171.98
+        },
+        {
+          "x": 3535.82,
+          "y": 3155.7
+        },
+        {
+          "x": 2996.27,
+          "y": 3442.57
+        }
+      ],
+      "x": 2193.75,
+      "y": 2171.98,
+      "width": 1342.07,
+      "height": 1270.59
+    },
+    {
+      "id": "ward-1",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 1,
+      "points": [
+        {
+          "x": 1716.21,
+          "y": 3292.29
+        },
+        {
+          "x": 2193.75,
+          "y": 2711.92
+        },
+        {
+          "x": 2996.27,
+          "y": 3442.57
+        },
+        {
+          "x": 2741.21,
+          "y": 4325.3
+        }
+      ],
+      "x": 1716.21,
+      "y": 2711.92,
+      "width": 1280.06,
+      "height": 1613.38
+    },
+    {
+      "id": "ward-2",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 2,
+      "points": [
+        {
+          "x": 2193.75,
+          "y": 2711.92
+        },
+        {
+          "x": 1792.58,
+          "y": 2117.93
+        },
+        {
+          "x": 2836.5,
+          "y": 1379.3
+        },
+        {
+          "x": 3271.6,
+          "y": 2171.98
+        }
+      ],
+      "x": 1792.58,
+      "y": 1379.3,
+      "width": 1479.02,
+      "height": 1332.62
+    },
+    {
+      "id": "ward-3",
+      "name": "Gate",
+      "kind": "GateWard",
+      "sourcePatch": 3,
+      "points": [
+        {
+          "x": 3535.82,
+          "y": 3155.7
+        },
+        {
+          "x": 3271.6,
+          "y": 2171.98
+        },
+        {
+          "x": 4404.57,
+          "y": 1633.49
+        },
+        {
+          "x": 4592.76,
+          "y": 3099.11
+        },
+        {
+          "x": 4031.6,
+          "y": 3223.77
+        }
+      ],
+      "x": 3271.6,
+      "y": 1633.49,
+      "width": 1321.16,
+      "height": 1590.28
+    },
+    {
+      "id": "ward-4",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 4,
+      "points": [
+        {
+          "x": 2741.21,
+          "y": 4325.3
+        },
+        {
+          "x": 2996.27,
+          "y": 3442.57
+        },
+        {
+          "x": 3535.82,
+          "y": 3155.7
+        },
+        {
+          "x": 4031.6,
+          "y": 3223.77
+        },
+        {
+          "x": 3992.24,
+          "y": 4490.07
+        }
+      ],
+      "x": 2741.21,
+      "y": 3155.7,
+      "width": 1290.39,
+      "height": 1334.37
+    },
+    {
+      "id": "ward-5",
+      "name": "Craftsmen",
+      "kind": "CraftsmenWard",
+      "sourcePatch": 5,
+      "points": [
+        {
+          "x": 1161.23,
+          "y": 3487.0
+        },
+        {
+          "x": 480.0,
+          "y": 2905.55
+        },
+        {
+          "x": 1032.15,
+          "y": 1564.94
+        },
+        {
+          "x": 1792.58,
+          "y": 2117.93
+        },
+        {
+          "x": 2193.75,
+          "y": 2711.92
+        },
+        {
+          "x": 1716.21,
+          "y": 3292.29
+        }
+      ],
+      "x": 480.0,
+      "y": 1564.94,
+      "width": 1713.75,
+      "height": 1922.06
+    },
+    {
+      "id": "ward-6",
+      "name": "Temple",
+      "kind": "Cathedral",
+      "sourcePatch": 6,
+      "points": [
+        {
+          "x": 1149.7,
+          "y": 4352.28
+        },
+        {
+          "x": 1161.23,
+          "y": 3487.0
+        },
+        {
+          "x": 1716.21,
+          "y": 3292.29
+        },
+        {
+          "x": 2741.21,
+          "y": 4325.3
+        }
+      ],
+      "x": 1149.7,
+      "y": 3292.29,
+      "width": 1591.51,
+      "height": 1059.99
+    },
+    {
+      "id": "ward-7",
+      "name": "Merchant",
+      "kind": "MerchantWard",
+      "sourcePatch": 7,
+      "points": [
+        {
+          "x": 3271.6,
+          "y": 2171.98
+        },
+        {
+          "x": 2836.5,
+          "y": 1379.3
+        },
+        {
+          "x": 2837.63,
+          "y": 891.37
+        },
+        {
+          "x": 3668.22,
+          "y": 480.0
+        },
+        {
+          "x": 4404.57,
+          "y": 1633.49
+        }
+      ],
+      "x": 2836.5,
+      "y": 480.0,
+      "width": 1568.07,
+      "height": 1691.98
+    }
+  ],
+  "furnishings": [],
+  "landmarks": [
+    {
+      "id": "meeting-square",
+      "name": "Village Square",
+      "kind": "square",
+      "x": 2594.36,
+      "y": 2590.54,
+      "width": 810,
+      "height": 560,
+      "entry": {
+        "x": 2999.36,
+        "y": 2870.54
+      }
+    },
+    {
+      "id": "artery-0-0-approach",
+      "name": "Forest Trail",
+      "kind": "gate",
+      "x": 358.85,
+      "y": 40.0,
+      "width": 120,
+      "height": 120,
+      "entry": {
+        "x": 418.85,
+        "y": 100.0
+      },
+      "sourceArtery": 0
+    },
+    {
+      "id": "artery-1-0-approach",
+      "name": "Forest Trail",
+      "kind": "gate",
+      "x": 4928.0,
+      "y": 2987.62,
+      "width": 120,
+      "height": 120,
+      "entry": {
+        "x": 4988.0,
+        "y": 3047.62
+      },
+      "sourceArtery": 1
+    },
+    {
+      "id": "square-well",
+      "name": "Village Well",
+      "kind": "well",
+      "x": 3439.36,
+      "y": 2930.54,
+      "width": 180,
+      "height": 180,
+      "entry": {
+        "x": 3419.36,
+        "y": 3020.54
+      }
+    }
+  ],
+  "vegetation": [
+    {
+      "id": "vegetation-0",
+      "kind": "shrub",
+      "x": 4493.06,
+      "y": 3743.66,
+      "scale": 0.651,
+      "rotation": 53.0
+    },
+    {
+      "id": "vegetation-1",
+      "kind": "broadleaf",
+      "x": 2173.06,
+      "y": 287.78,
+      "scale": 0.851,
+      "rotation": 91.4
+    },
+    {
+      "id": "vegetation-2",
+      "kind": "broadleaf",
+      "x": 4571.48,
+      "y": 2764.19,
+      "scale": 1.025,
+      "rotation": 56.69
+    },
+    {
+      "id": "vegetation-3",
+      "kind": "shrub",
+      "x": 2557.52,
+      "y": 821.03,
+      "scale": 1.13,
+      "rotation": 355.52
+    },
+    {
+      "id": "vegetation-4",
+      "kind": "grass",
+      "x": 4546.2,
+      "y": 641.61,
+      "scale": 1.012,
+      "rotation": 133.05
+    },
+    {
+      "id": "vegetation-5",
+      "kind": "broadleaf",
+      "x": 3099.95,
+      "y": 4824.88,
+      "scale": 0.793,
+      "rotation": 335.63
+    },
+    {
+      "id": "vegetation-6",
+      "kind": "shrub",
+      "x": 2958.26,
+      "y": 4593.12,
+      "scale": 0.693,
+      "rotation": 180.98
+    },
+    {
+      "id": "vegetation-7",
+      "kind": "grass",
+      "x": 2393.02,
+      "y": 89.26,
+      "scale": 0.767,
+      "rotation": 290.42
+    },
+    {
+      "id": "vegetation-8",
+      "kind": "shrub",
+      "x": 2632.46,
+      "y": 1610.51,
+      "scale": 0.788,
+      "rotation": 204.71
+    },
+    {
+      "id": "vegetation-9",
+      "kind": "flowers",
+      "x": 4580.2,
+      "y": 3585.74,
+      "scale": 1.016,
+      "rotation": 245.12
+    },
+    {
+      "id": "vegetation-10",
+      "kind": "shrub",
+      "x": 314.09,
+      "y": 1692.68,
+      "scale": 0.87,
+      "rotation": 6.97
+    },
+    {
+      "id": "vegetation-11",
+      "kind": "shrub",
+      "x": 3457.63,
+      "y": 407.12,
+      "scale": 1.071,
+      "rotation": 74.33
+    },
+    {
+      "id": "vegetation-12",
+      "kind": "pine",
+      "x": 3375.15,
+      "y": 4719.71,
+      "scale": 1.093,
+      "rotation": 340.92
+    },
+    {
+      "id": "vegetation-13",
+      "kind": "shrub",
+      "x": 2973.66,
+      "y": 2373.66,
+      "scale": 0.863,
+      "rotation": 224.45
+    },
+    {
+      "id": "vegetation-14",
+      "kind": "shrub",
+      "x": 747.75,
+      "y": 4438.37,
+      "scale": 0.808,
+      "rotation": 77.33
+    },
+    {
+      "id": "vegetation-15",
+      "kind": "shrub",
+      "x": 4587.81,
+      "y": 2127.09,
+      "scale": 0.767,
+      "rotation": 250.72
+    },
+    {
+      "id": "vegetation-16",
+      "kind": "pine",
+      "x": 1632.47,
+      "y": 4591.4,
+      "scale": 1.13,
+      "rotation": 114.78
+    },
+    {
+      "id": "vegetation-17",
+      "kind": "pine",
+      "x": 1939.72,
+      "y": 387.35,
+      "scale": 0.709,
+      "rotation": 52.45
+    },
+    {
+      "id": "vegetation-18",
+      "kind": "grass",
+      "x": 940.29,
+      "y": 2816.91,
+      "scale": 1.137,
+      "rotation": 336.55
+    },
+    {
+      "id": "vegetation-19",
+      "kind": "broadleaf",
+      "x": 327.59,
+      "y": 4825.9,
+      "scale": 0.698,
+      "rotation": 304.78
+    },
+    {
+      "id": "vegetation-20",
+      "kind": "shrub",
+      "x": 2855.44,
+      "y": 4382.0,
+      "scale": 1.033,
+      "rotation": 237.95
+    },
+    {
+      "id": "vegetation-21",
+      "kind": "shrub",
+      "x": 3370.62,
+      "y": 751.66,
+      "scale": 1.028,
+      "rotation": 192.26
+    },
+    {
+      "id": "vegetation-22",
+      "kind": "broadleaf",
+      "x": 4659.25,
+      "y": 4648.99,
+      "scale": 0.912,
+      "rotation": 5.86
+    },
+    {
+      "id": "vegetation-23",
+      "kind": "grass",
+      "x": 84.07,
+      "y": 1005.28,
+      "scale": 1.098,
+      "rotation": 294.31
+    },
+    {
+      "id": "vegetation-24",
+      "kind": "broadleaf",
+      "x": 4802.93,
+      "y": 2403.47,
+      "scale": 0.712,
+      "rotation": 113.19
+    },
+    {
+      "id": "vegetation-25",
+      "kind": "broadleaf",
+      "x": 4026.76,
+      "y": 4841.29,
+      "scale": 1.12,
+      "rotation": 20.92
+    },
+    {
+      "id": "vegetation-26",
+      "kind": "shrub",
+      "x": 148.49,
+      "y": 4573.54,
+      "scale": 0.694,
+      "rotation": 272.69
+    },
+    {
+      "id": "vegetation-27",
+      "kind": "broadleaf",
+      "x": 2387.47,
+      "y": 358.28,
+      "scale": 0.969,
+      "rotation": 127.03
+    },
+    {
+      "id": "vegetation-28",
+      "kind": "grass",
+      "x": 1786.53,
+      "y": 1671.48,
+      "scale": 0.849,
+      "rotation": 53.02
+    },
+    {
+      "id": "vegetation-29",
+      "kind": "broadleaf",
+      "x": 1112.3,
+      "y": 4638.79,
+      "scale": 1.06,
+      "rotation": 133.8
+    },
+    {
+      "id": "vegetation-30",
+      "kind": "shrub",
+      "x": 4097.43,
+      "y": 4457.56,
+      "scale": 0.676,
+      "rotation": 177.89
+    },
+    {
+      "id": "vegetation-31",
+      "kind": "broadleaf",
+      "x": 755.33,
+      "y": 2316.61,
+      "scale": 0.939,
+      "rotation": 310.74
+    },
+    {
+      "id": "vegetation-32",
+      "kind": "pine",
+      "x": 2432.56,
+      "y": 4684.55,
+      "scale": 1.042,
+      "rotation": 112.02
+    },
+    {
+      "id": "vegetation-33",
+      "kind": "broadleaf",
+      "x": 319.52,
+      "y": 2659.96,
+      "scale": 0.839,
+      "rotation": 283.73
+    },
+    {
+      "id": "vegetation-34",
+      "kind": "pine",
+      "x": 1940.94,
+      "y": 4777.98,
+      "scale": 0.746,
+      "rotation": 68.82
+    },
+    {
+      "id": "vegetation-35",
+      "kind": "shrub",
+      "x": 893.19,
+      "y": 3233.33,
+      "scale": 1.15,
+      "rotation": 230.78
+    },
+    {
+      "id": "vegetation-36",
+      "kind": "shrub",
+      "x": 277.69,
+      "y": 4572.97,
+      "scale": 1.078,
+      "rotation": 8.96
+    },
+    {
+      "id": "vegetation-37",
+      "kind": "broadleaf",
+      "x": 3650.49,
+      "y": 150.37,
+      "scale": 1.05,
+      "rotation": 227.17
+    },
+    {
+      "id": "vegetation-38",
+      "kind": "flowers",
+      "x": 3110.23,
+      "y": 783.37,
+      "scale": 1.106,
+      "rotation": 94.53
+    },
+    {
+      "id": "vegetation-39",
+      "kind": "shrub",
+      "x": 154.7,
+      "y": 3074.72,
+      "scale": 0.759,
+      "rotation": 207.73
+    },
+    {
+      "id": "vegetation-40",
+      "kind": "broadleaf",
+      "x": 205.26,
+      "y": 4667.12,
+      "scale": 0.871,
+      "rotation": 353.19
+    },
+    {
+      "id": "vegetation-41",
+      "kind": "pine",
+      "x": 3213.23,
+      "y": 4746.67,
+      "scale": 0.741,
+      "rotation": 238.2
+    },
+    {
+      "id": "vegetation-42",
+      "kind": "pine",
+      "x": 2494.84,
+      "y": 236.05,
+      "scale": 0.851,
+      "rotation": 57.3
+    },
+    {
+      "id": "vegetation-43",
+      "kind": "broadleaf",
+      "x": 294.89,
+      "y": 2141.01,
+      "scale": 0.745,
+      "rotation": 197.35
+    },
+    {
+      "id": "vegetation-44",
+      "kind": "shrub",
+      "x": 611.88,
+      "y": 458.35,
+      "scale": 0.727,
+      "rotation": 66.34
+    },
+    {
+      "id": "vegetation-45",
+      "kind": "broadleaf",
+      "x": 1828.32,
+      "y": 4877.06,
+      "scale": 0.657,
+      "rotation": 272.97
+    },
+    {
+      "id": "vegetation-46",
+      "kind": "shrub",
+      "x": 3516.49,
+      "y": 4501.01,
+      "scale": 1.042,
+      "rotation": 32.69
+    },
+    {
+      "id": "vegetation-47",
+      "kind": "broadleaf",
+      "x": 5007.41,
+      "y": 3829.76,
+      "scale": 0.73,
+      "rotation": 104.08
+    },
+    {
+      "id": "vegetation-48",
+      "kind": "pine",
+      "x": 1311.79,
+      "y": 2550.18,
+      "scale": 0.729,
+      "rotation": 156.58
+    },
+    {
+      "id": "vegetation-49",
+      "kind": "grass",
+      "x": 3575.71,
+      "y": 1331.61,
+      "scale": 0.906,
+      "rotation": 147.67
+    },
+    {
+      "id": "vegetation-50",
+      "kind": "grass",
+      "x": 194.64,
+      "y": 2229.83,
+      "scale": 0.91,
+      "rotation": 76.42
+    },
+    {
+      "id": "vegetation-51",
+      "kind": "broadleaf",
+      "x": 530.59,
+      "y": 1356.33,
+      "scale": 0.791,
+      "rotation": 208.44
+    },
+    {
+      "id": "vegetation-52",
+      "kind": "pine",
+      "x": 1308.1,
+      "y": 791.83,
+      "scale": 1.05,
+      "rotation": 345.8
+    },
+    {
+      "id": "vegetation-53",
+      "kind": "grass",
+      "x": 546.18,
+      "y": 4564.57,
+      "scale": 1.048,
+      "rotation": 158.85
+    },
+    {
+      "id": "vegetation-54",
+      "kind": "shrub",
+      "x": 1466.87,
+      "y": 1106.58,
+      "scale": 1.119,
+      "rotation": 358.76
+    },
+    {
+      "id": "vegetation-55",
+      "kind": "shrub",
+      "x": 3375.15,
+      "y": 1342.06,
+      "scale": 0.72,
+      "rotation": 236.21
+    },
+    {
+      "id": "vegetation-56",
+      "kind": "shrub",
+      "x": 1524.54,
+      "y": 1570.04,
+      "scale": 0.66,
+      "rotation": 127.02
+    },
+    {
+      "id": "vegetation-57",
+      "kind": "grass",
+      "x": 4948.77,
+      "y": 2333.2,
+      "scale": 0.98,
+      "rotation": 254.74
+    },
+    {
+      "id": "vegetation-58",
+      "kind": "grass",
+      "x": 4637.76,
+      "y": 963.98,
+      "scale": 0.714,
+      "rotation": 166.57
+    },
+    {
+      "id": "vegetation-59",
+      "kind": "shrub",
+      "x": 1328.92,
+      "y": 608.38,
+      "scale": 1.084,
+      "rotation": 189.21
+    },
+    {
+      "id": "vegetation-60",
+      "kind": "broadleaf",
+      "x": 5000.19,
+      "y": 2283.21,
+      "scale": 0.834,
+      "rotation": 140.69
+    },
+    {
+      "id": "vegetation-61",
+      "kind": "shrub",
+      "x": 4144.37,
+      "y": 3620.81,
+      "scale": 0.7,
+      "rotation": 214.82
+    },
+    {
+      "id": "vegetation-62",
+      "kind": "shrub",
+      "x": 2783.05,
+      "y": 4457.38,
+      "scale": 1.101,
+      "rotation": 208.82
+    },
+    {
+      "id": "vegetation-63",
+      "kind": "grass",
+      "x": 1220.61,
+      "y": 413.06,
+      "scale": 1.14,
+      "rotation": 113.19
+    },
+    {
+      "id": "vegetation-64",
+      "kind": "flowers",
+      "x": 3396.71,
+      "y": 2210.66,
+      "scale": 0.97,
+      "rotation": 68.02
+    },
+    {
+      "id": "vegetation-65",
+      "kind": "flowers",
+      "x": 4711.46,
+      "y": 324.76,
+      "scale": 0.99,
+      "rotation": 148.17
+    },
+    {
+      "id": "vegetation-66",
+      "kind": "shrub",
+      "x": 2636.7,
+      "y": 1767.88,
+      "scale": 0.713,
+      "rotation": 76.88
+    },
+    {
+      "id": "vegetation-67",
+      "kind": "grass",
+      "x": 4649.03,
+      "y": 1340.26,
+      "scale": 1.098,
+      "rotation": 116.91
+    },
+    {
+      "id": "vegetation-68",
+      "kind": "grass",
+      "x": 3675.83,
+      "y": 4130.82,
+      "scale": 0.959,
+      "rotation": 166.48
+    },
+    {
+      "id": "vegetation-69",
+      "kind": "pine",
+      "x": 2873.31,
+      "y": 4836.85,
+      "scale": 0.738,
+      "rotation": 11.39
+    },
+    {
+      "id": "vegetation-70",
+      "kind": "shrub",
+      "x": 2832.02,
+      "y": 4502.34,
+      "scale": 1.139,
+      "rotation": 243.64
+    },
+    {
+      "id": "vegetation-71",
+      "kind": "broadleaf",
+      "x": 4286.43,
+      "y": 4619.58,
+      "scale": 0.938,
+      "rotation": 223.72
+    },
+    {
+      "id": "vegetation-72",
+      "kind": "grass",
+      "x": 1953.94,
+      "y": 511.2,
+      "scale": 1.091,
+      "rotation": 126.96
+    },
+    {
+      "id": "vegetation-73",
+      "kind": "flowers",
+      "x": 3520.51,
+      "y": 1604.06,
+      "scale": 0.913,
+      "rotation": 175.83
+    },
+    {
+      "id": "vegetation-74",
+      "kind": "shrub",
+      "x": 556.79,
+      "y": 1696.38,
+      "scale": 0.679,
+      "rotation": 242.85
+    },
+    {
+      "id": "vegetation-75",
+      "kind": "shrub",
+      "x": 2414.86,
+      "y": 4254.99,
+      "scale": 0.848,
+      "rotation": 35.42
+    },
+    {
+      "id": "vegetation-76",
+      "kind": "flowers",
+      "x": 4611.25,
+      "y": 2312.37,
+      "scale": 1.008,
+      "rotation": 136.72
+    },
+    {
+      "id": "vegetation-77",
+      "kind": "broadleaf",
+      "x": 4964.94,
+      "y": 1632.98,
+      "scale": 0.67,
+      "rotation": 302.27
+    },
+    {
+      "id": "vegetation-78",
+      "kind": "grass",
+      "x": 4819.68,
+      "y": 4760.32,
+      "scale": 0.735,
+      "rotation": 282.38
+    },
+    {
+      "id": "vegetation-79",
+      "kind": "shrub",
+      "x": 2610.52,
+      "y": 512.46,
+      "scale": 0.713,
+      "rotation": 17.11
+    },
+    {
+      "id": "vegetation-80",
+      "kind": "shrub",
+      "x": 716.35,
+      "y": 4415.65,
+      "scale": 0.833,
+      "rotation": 105.18
+    },
+    {
+      "id": "vegetation-81",
+      "kind": "shrub",
+      "x": 2299.04,
+      "y": 1304.65,
+      "scale": 0.812,
+      "rotation": 170.57
+    },
+    {
+      "id": "vegetation-82",
+      "kind": "shrub",
+      "x": 2589.22,
+      "y": 1524.94,
+      "scale": 0.85,
+      "rotation": 180.65
+    },
+    {
+      "id": "vegetation-83",
+      "kind": "grass",
+      "x": 639.69,
+      "y": 2982.96,
+      "scale": 0.749,
+      "rotation": 186.41
+    },
+    {
+      "id": "vegetation-84",
+      "kind": "rock",
+      "x": 4391.05,
+      "y": 2327.39,
+      "scale": 1.072,
+      "rotation": 90.5
+    },
+    {
+      "id": "vegetation-85",
+      "kind": "flowers",
+      "x": 4972.62,
+      "y": 847.07,
+      "scale": 0.904,
+      "rotation": 128.16
+    },
+    {
+      "id": "vegetation-86",
+      "kind": "shrub",
+      "x": 4738.54,
+      "y": 3819.07,
+      "scale": 0.728,
+      "rotation": 317.24
+    },
+    {
+      "id": "vegetation-87",
+      "kind": "broadleaf",
+      "x": 2850.91,
+      "y": 4253.71,
+      "scale": 0.662,
+      "rotation": 198.02
+    },
+    {
+      "id": "vegetation-88",
+      "kind": "broadleaf",
+      "x": 4936.7,
+      "y": 1077.24,
+      "scale": 0.71,
+      "rotation": 43.84
+    },
+    {
+      "id": "vegetation-89",
+      "kind": "broadleaf",
+      "x": 2235.63,
+      "y": 4105.03,
+      "scale": 0.96,
+      "rotation": 268.92
+    },
+    {
+      "id": "vegetation-90",
+      "kind": "pine",
+      "x": 3712.68,
+      "y": 4715.47,
+      "scale": 1.007,
+      "rotation": 135.89
+    },
+    {
+      "id": "vegetation-91",
+      "kind": "shrub",
+      "x": 753.59,
+      "y": 2350.27,
+      "scale": 0.651,
+      "rotation": 123.95
+    },
+    {
+      "id": "vegetation-92",
+      "kind": "shrub",
+      "x": 3888.86,
+      "y": 4782.64,
+      "scale": 0.975,
+      "rotation": 78.85
+    },
+    {
+      "id": "vegetation-93",
+      "kind": "shrub",
+      "x": 2544.2,
+      "y": 483.12,
+      "scale": 0.943,
+      "rotation": 341.52
+    },
+    {
+      "id": "vegetation-94",
+      "kind": "shrub",
+      "x": 294.62,
+      "y": 2249.52,
+      "scale": 0.961,
+      "rotation": 30.16
+    },
+    {
+      "id": "vegetation-95",
+      "kind": "broadleaf",
+      "x": 1972.31,
+      "y": 3005.85,
+      "scale": 0.78,
+      "rotation": 300.29
+    },
+    {
+      "id": "vegetation-96",
+      "kind": "pine",
+      "x": 980.69,
+      "y": 3863.19,
+      "scale": 1.066,
+      "rotation": 243.24
+    },
+    {
+      "id": "vegetation-97",
+      "kind": "pine",
+      "x": 1495.69,
+      "y": 1060.96,
+      "scale": 0.674,
+      "rotation": 37.17
+    },
+    {
+      "id": "vegetation-98",
+      "kind": "rock",
+      "x": 2699.25,
+      "y": 1666.34,
+      "scale": 1.067,
+      "rotation": 131.91
+    },
+    {
+      "id": "vegetation-99",
+      "kind": "broadleaf",
+      "x": 2854.77,
+      "y": 4611.95,
+      "scale": 0.884,
+      "rotation": 274.47
+    },
+    {
+      "id": "vegetation-100",
+      "kind": "broadleaf",
+      "x": 4398.88,
+      "y": 1310.22,
+      "scale": 1.145,
+      "rotation": 215.4
+    },
+    {
+      "id": "vegetation-101",
+      "kind": "broadleaf",
+      "x": 3551.7,
+      "y": 342.68,
+      "scale": 0.731,
+      "rotation": 107.83
+    },
+    {
+      "id": "vegetation-102",
+      "kind": "broadleaf",
+      "x": 4872.83,
+      "y": 2526.11,
+      "scale": 0.73,
+      "rotation": 237.01
+    },
+    {
+      "id": "vegetation-103",
+      "kind": "broadleaf",
+      "x": 4506.44,
+      "y": 1063.62,
+      "scale": 0.814,
+      "rotation": 15.19
+    },
+    {
+      "id": "vegetation-104",
+      "kind": "pine",
+      "x": 1351.35,
+      "y": 922.48,
+      "scale": 0.995,
+      "rotation": 122.76
+    },
+    {
+      "id": "vegetation-105",
+      "kind": "pine",
+      "x": 359.27,
+      "y": 2731.28,
+      "scale": 1.141,
+      "rotation": 196.85
+    },
+    {
+      "id": "vegetation-106",
+      "kind": "flowers",
+      "x": 2578.43,
+      "y": 4161.99,
+      "scale": 0.961,
+      "rotation": 266.0
+    },
+    {
+      "id": "vegetation-107",
+      "kind": "broadleaf",
+      "x": 2587.49,
+      "y": 1811.07,
+      "scale": 0.669,
+      "rotation": 315.15
+    },
+    {
+      "id": "vegetation-108",
+      "kind": "broadleaf",
+      "x": 109.98,
+      "y": 1679.45,
+      "scale": 0.878,
+      "rotation": 181.5
+    },
+    {
+      "id": "vegetation-109",
+      "kind": "grass",
+      "x": 1575.37,
+      "y": 3432.87,
+      "scale": 0.877,
+      "rotation": 221.05
+    },
+    {
+      "id": "vegetation-110",
+      "kind": "broadleaf",
+      "x": 4839.99,
+      "y": 3798.95,
+      "scale": 0.821,
+      "rotation": 207.57
+    },
+    {
+      "id": "vegetation-111",
+      "kind": "broadleaf",
+      "x": 4626.35,
+      "y": 2267.06,
+      "scale": 0.9,
+      "rotation": 207.64
+    },
+    {
+      "id": "vegetation-112",
+      "kind": "grass",
+      "x": 3152.32,
+      "y": 1520.52,
+      "scale": 0.76,
+      "rotation": 264.93
+    },
+    {
+      "id": "vegetation-113",
+      "kind": "shrub",
+      "x": 3730.64,
+      "y": 515.37,
+      "scale": 0.712,
+      "rotation": 243.67
+    },
+    {
+      "id": "vegetation-114",
+      "kind": "shrub",
+      "x": 1076.5,
+      "y": 1034.21,
+      "scale": 0.972,
+      "rotation": 86.56
+    },
+    {
+      "id": "vegetation-115",
+      "kind": "broadleaf",
+      "x": 2056.79,
+      "y": 561.57,
+      "scale": 1.047,
+      "rotation": 21.54
+    },
+    {
+      "id": "vegetation-116",
+      "kind": "shrub",
+      "x": 4572.17,
+      "y": 3655.7,
+      "scale": 0.681,
+      "rotation": 181.51
+    },
+    {
+      "id": "vegetation-117",
+      "kind": "shrub",
+      "x": 1795.47,
+      "y": 740.87,
+      "scale": 0.999,
+      "rotation": 126.54
+    },
+    {
+      "id": "vegetation-118",
+      "kind": "shrub",
+      "x": 1543.04,
+      "y": 1043.02,
+      "scale": 1.112,
+      "rotation": 181.76
+    },
+    {
+      "id": "vegetation-119",
+      "kind": "shrub",
+      "x": 1445.89,
+      "y": 3447.55,
+      "scale": 0.751,
+      "rotation": 197.48
+    },
+    {
+      "id": "vegetation-120",
+      "kind": "grass",
+      "x": 4063.11,
+      "y": 560.18,
+      "scale": 1.134,
+      "rotation": 339.47
+    },
+    {
+      "id": "vegetation-121",
+      "kind": "flowers",
+      "x": 648.37,
+      "y": 2558.15,
+      "scale": 1.097,
+      "rotation": 99.32
+    },
+    {
+      "id": "vegetation-122",
+      "kind": "shrub",
+      "x": 4962.29,
+      "y": 317.45,
+      "scale": 0.995,
+      "rotation": 357.56
+    },
+    {
+      "id": "vegetation-123",
+      "kind": "pine",
+      "x": 1876.03,
+      "y": 3677.8,
+      "scale": 1.069,
+      "rotation": 349.78
+    },
+    {
+      "id": "vegetation-124",
+      "kind": "shrub",
+      "x": 4427.29,
+      "y": 176.76,
+      "scale": 0.984,
+      "rotation": 130.67
+    },
+    {
+      "id": "vegetation-125",
+      "kind": "broadleaf",
+      "x": 4884.03,
+      "y": 537.15,
+      "scale": 0.826,
+      "rotation": 146.58
+    },
+    {
+      "id": "vegetation-126",
+      "kind": "shrub",
+      "x": 724.62,
+      "y": 3713.5,
+      "scale": 1.048,
+      "rotation": 305.17
+    },
+    {
+      "id": "vegetation-127",
+      "kind": "shrub",
+      "x": 3301.0,
+      "y": 1222.57,
+      "scale": 1.012,
+      "rotation": 87.03
+    },
+    {
+      "id": "vegetation-128",
+      "kind": "shrub",
+      "x": 516.95,
+      "y": 4239.88,
+      "scale": 0.689,
+      "rotation": 228.09
+    },
+    {
+      "id": "vegetation-129",
+      "kind": "broadleaf",
+      "x": 3722.44,
+      "y": 218.05,
+      "scale": 0.853,
+      "rotation": 114.13
+    },
+    {
+      "id": "vegetation-130",
+      "kind": "shrub",
+      "x": 2563.03,
+      "y": 4495.45,
+      "scale": 0.909,
+      "rotation": 131.18
+    },
+    {
+      "id": "vegetation-131",
+      "kind": "broadleaf",
+      "x": 4705.31,
+      "y": 3583.17,
+      "scale": 0.766,
+      "rotation": 119.83
+    },
+    {
+      "id": "vegetation-132",
+      "kind": "broadleaf",
+      "x": 1800.02,
+      "y": 1012.89,
+      "scale": 1.022,
+      "rotation": 237.01
+    },
+    {
+      "id": "vegetation-133",
+      "kind": "shrub",
+      "x": 2892.57,
+      "y": 1310.25,
+      "scale": 0.726,
+      "rotation": 81.96
+    },
+    {
+      "id": "vegetation-134",
+      "kind": "shrub",
+      "x": 4104.4,
+      "y": 4889.79,
+      "scale": 1.118,
+      "rotation": 354.89
+    },
+    {
+      "id": "vegetation-135",
+      "kind": "grass",
+      "x": 4718.22,
+      "y": 1933.42,
+      "scale": 0.822,
+      "rotation": 113.56
+    },
+    {
+      "id": "vegetation-136",
+      "kind": "grass",
+      "x": 1533.99,
+      "y": 1465.87,
+      "scale": 0.808,
+      "rotation": 8.08
+    },
+    {
+      "id": "vegetation-137",
+      "kind": "pine",
+      "x": 878.24,
+      "y": 312.94,
+      "scale": 0.907,
+      "rotation": 95.64
+    },
+    {
+      "id": "vegetation-138",
+      "kind": "pine",
+      "x": 4016.58,
+      "y": 4632.38,
+      "scale": 1.038,
+      "rotation": 183.66
+    },
+    {
+      "id": "vegetation-139",
+      "kind": "flowers",
+      "x": 4164.06,
+      "y": 3621.5,
+      "scale": 1.002,
+      "rotation": 126.35
+    },
+    {
+      "id": "vegetation-140",
+      "kind": "flowers",
+      "x": 4398.06,
+      "y": 4856.74,
+      "scale": 0.669,
+      "rotation": 79.55
+    },
+    {
+      "id": "vegetation-141",
+      "kind": "grass",
+      "x": 801.45,
+      "y": 2362.2,
+      "scale": 0.986,
+      "rotation": 120.94
+    },
+    {
+      "id": "vegetation-142",
+      "kind": "broadleaf",
+      "x": 4157.69,
+      "y": 4616.04,
+      "scale": 1.101,
+      "rotation": 30.02
+    },
+    {
+      "id": "vegetation-143",
+      "kind": "shrub",
+      "x": 1024.49,
+      "y": 3633.75,
+      "scale": 0.949,
+      "rotation": 211.09
+    },
+    {
+      "id": "vegetation-144",
+      "kind": "flowers",
+      "x": 2502.42,
+      "y": 4133.79,
+      "scale": 0.992,
+      "rotation": 201.15
+    },
+    {
+      "id": "vegetation-145",
+      "kind": "broadleaf",
+      "x": 412.61,
+      "y": 1533.84,
+      "scale": 0.916,
+      "rotation": 104.88
+    },
+    {
+      "id": "vegetation-146",
+      "kind": "rock",
+      "x": 3449.94,
+      "y": 156.36,
+      "scale": 1.084,
+      "rotation": 201.04
+    },
+    {
+      "id": "vegetation-147",
+      "kind": "grass",
+      "x": 4299.14,
+      "y": 2394.01,
+      "scale": 1.144,
+      "rotation": 24.78
+    },
+    {
+      "id": "vegetation-148",
+      "kind": "grass",
+      "x": 1314.88,
+      "y": 895.12,
+      "scale": 0.824,
+      "rotation": 196.1
+    },
+    {
+      "id": "vegetation-149",
+      "kind": "shrub",
+      "x": 2178.43,
+      "y": 1807.61,
+      "scale": 1.039,
+      "rotation": 41.18
+    }
+  ],
+  "provenance": {
+    "generator": "watabou/TownGeneratorOS",
+    "commit": "7fbc87a9398cc508af24de93f79cf2ad027f352b",
+    "seed": 20261014,
+    "size": 8,
+    "rawSha256": "362aebb5705168d66e53a92149d01f6cf487728d67ae81ec97487cdf6bb9f5a1",
+    "source": "watabou.json",
+    "authoring": {
+      "name": "Woodland Village",
+      "scale": 60,
+      "padding": 8,
+      "foliageSeed": 72014,
+      "vegetationCount": 150,
+      "theme": "woodland"
+    },
+    "transform": {
+      "scale": 60,
+      "sourceOrigin": {
+        "x": -48.17008837080865,
+        "y": -47.9160717408719
+      }
+    },
+    "adaptations": [
+      {
+        "sourcePatch": 0,
+        "sourceGeometry": 0,
+        "meaning": "market-prop"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 1,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 2,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 2,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 3,
+        "sourceGeometry": 11,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 4,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 5,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 6,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 7,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 8,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 9,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 10,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 12,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 13,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 14,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 15,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 5,
+        "sourceGeometry": 16,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 3,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 6,
+        "sourceGeometry": 4,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 0,
+        "meaning": "omitted-small-or-crowded-footprint"
+      },
+      {
+        "sourcePatch": 7,
+        "sourceGeometry": 1,
+        "meaning": "omitted-small-or-crowded-footprint"
+      }
+    ],
+    "interpretation": "Original seeded streets and district polygons retained. Exterior modules fit source building centres within their wards; small/crowded footprints are omitted. Outer roads are clipped to compact playable bounds. Market props and park groves are not buildings."
+  }
+}

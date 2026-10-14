@@ -17,7 +17,7 @@ namespace PUtown.Runtime
         public string RoomId { get { return recovery?.RoomId ?? World.RoomId; } }
         public string Endpoint { get; }
         public bool AssetsReady { get; set; }
-        public bool SelectingCampus { get; private set; }
+        public bool SelectingTown { get; private set; }
         public bool CanControl { get { return Status == SessionStatus.Active && AssetsReady && socket != null; } }
         // Voice revocation/admission uses transport callbacks without waiting for rendered frames.
         public event Action<ProtocolEvent> VoiceAuthorization;
@@ -138,7 +138,7 @@ namespace PUtown.Runtime
                 if (message.Type == "error")
                 {
                     Error = (string)d["message"];
-                    SelectingCampus = false;
+                    SelectingTown = false;
                     if (Status == SessionStatus.Recovering)
                     {
                         if ((string)d["code"] == "recovery_in_use") Disconnect();
@@ -153,12 +153,12 @@ namespace PUtown.Runtime
                     recovery = new RecoveryIntent(Endpoint, (string)d["roomId"], (string)d["recoveryToken"], DisplayName);
                     intent = recovery.Request; store?.Save(recovery); retryDelay = 500; Status = SessionStatus.Active; Error = null; AssetsReady = false;
                     lock (healthGate) { health.ConfirmMembership(now()); healthGeneration = generation; }
-                    // Fresh native creation pins its sole supported map before fetching Room assets. Other controls wait.
-                    SelectingCampus = nativeCreate && (string)d["mapId"] != "campus";
-                    if (SelectingCampus) _ = SendRaw(StrictProtocol.Command("select_map", "mapId", "campus"), generation);
+                    // Fresh native creation selects the default before fetching the Room's pinned assets.
+                    SelectingTown = nativeCreate && (string)d["mapId"] != NativeTownMaps.Default;
+                    if (SelectingTown) _ = SendRaw(StrictProtocol.Command("select_map", "mapId", NativeTownMaps.Default), generation);
                 }
                 if (Status != SessionStatus.Leaving) World.Apply(message, item.ArrivedAt);
-                if (message.Type == "room_state" && (string)d["mapId"] == "campus") SelectingCampus = false;
+                if (message.Type == "room_state" && (string)d["mapId"] == NativeTownMaps.Default) SelectingTown = false;
             }
             if ((Status == SessionStatus.Connecting || Status == SessionStatus.Leaving) && now() >= deadline)
             { var connecting = Status == SessionStatus.Connecting; Cancel(); if (connecting) Error = "Connection timed out. Please try again."; }
@@ -192,7 +192,7 @@ namespace PUtown.Runtime
             }
         }
         private void Fail(string message) { CloseConnection(); store?.Clear(); intent = null; recovery = null; AssetsReady = false; Status = SessionStatus.Failed; Error = message; }
-        public void Cancel() { CloseConnection(); store?.Clear(); recovery = null; intent = null; Status = SessionStatus.Entry; Error = null; AssetsReady = SelectingCampus = false; World.Clear(); }
+        public void Cancel() { CloseConnection(); store?.Clear(); recovery = null; intent = null; Status = SessionStatus.Entry; Error = null; AssetsReady = SelectingTown = false; World.Clear(); }
         public void Leave()
         {
             if (Status == SessionStatus.Recovering || Status == SessionStatus.Failed)
