@@ -1,0 +1,27 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+64 × 64 metres; 12.8 m moving detail; WASD walk / Shift run / Tab switch; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Route paused: restore scene focus to continue
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792041713-43113.csv
+Inspection checkpoint 1
+Snow route: initial idle · 0.5 s
+Inspection checkpoint 2
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 3
+Snow route: straight walk · 2.0 s
+Inspection checkpoint 4
+Snow route: straight return · 2.0 s
+Inspection checkpoint 5
+Snow route: diagonal walk · 2.0 s
+Route paused: restore scene focus to continue
+Inspection checkpoint 6
+Snow route: diagonal return · 2.0 s
+Inspection checkpoint 7
+Snow route: run through thin snow · 6.0 s
+Inspection checkpoint 8
+Snow route: lodge approach · 4.0 s
+Route paused: restore scene focus to continue
+ERROR: Scene remained unfocused for 60 seconds
+   at: push_error (core/variant/variant_utility.cpp:1023)

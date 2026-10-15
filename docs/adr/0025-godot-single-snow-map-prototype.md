@@ -25,3 +25,8 @@ observations and captures. Final reference palette and lighting, content and
 Game integration, and packaged macOS/Windows export and performance acceptance
 belong to later slices. A successful editor import or local run does not establish
 those later acceptance results.
+
+[ADR 0026](0026-dynamic-snow-and-persistent-footprints.md) extends this prototype
+with changing snow, a moving detailed patch and persistent world tracks. It
+supersedes the static mesh/collision approach while retaining the requirement
+that rendered snow and foot support describe the same surface.

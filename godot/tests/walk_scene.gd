@@ -1,6 +1,8 @@
 extends SceneTree
-## Launch the real graphical scene and its public keyboard/CSV inspection route.
-## The same route can run from a release package with --walk-scene-check.
+## Launch the real scene and public keyboard/CSV snow route.
+## Graphical: --script res://tests/walk_scene.gd, then F7 in the focused window.
+## Headless replay: add --headless and -- --auto-start --headless-scene-check.
+## A release package runs the same route with -- --snow-scene-check.
 
 const InspectionRoute = preload("res://inspection_route.gd")
 
@@ -12,4 +14,6 @@ func _initialize() -> void:
 func _run() -> void:
 	change_scene_to_file("res://snow_walk.tscn")
 	await process_frame
-	root.add_child(InspectionRoute.new())
+	# The normal scene adds its route when requested by a release launch argument.
+	if not OS.get_cmdline_user_args().has("--walk-scene-check") and not OS.get_cmdline_user_args().has("--snow-scene-check"):
+		root.add_child(InspectionRoute.new())

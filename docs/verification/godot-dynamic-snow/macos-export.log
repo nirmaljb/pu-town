@@ -1,0 +1,40 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mexport[22m | Started Exporting for macOS (3 steps)[39m[0m
+[   0% ] [90m[1mexport[22m | Creating app bundle[39m[0m
+[  25% ] [90m[1mexport[22m | Making PKG[39m[0m
+[   0% ] [90m[1msavepack[22m | Started Packing (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | Storing File: res://tests/walk_scene.gdc[39m[0m
+[  12% ] [90m[1msavepack[22m | Storing File: res://inspection.gdc[39m[0m
+[  23% ] [90m[1msavepack[22m | Storing File: res://inspection_route.gdc[39m[0m
+[  33% ] [90m[1msavepack[22m | Storing File: res://snow.gdshader[39m[0m
+[  44% ] [90m[1msavepack[22m | Storing File: res://snow_surface.gdc[39m[0m
+[  55% ] [90m[1msavepack[22m | Storing File: res://snow_walk.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | Storing File: res://.godot/exported/133200997/export-4f5738069ef532cfeea3cddc3181665a-snow_walk.scn[39m[0m
+[  76% ] [90m[1msavepack[22m | Storing File: res://town_layout.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://walker.gdc[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://tests/walk_scene.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://inspection.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://inspection_route.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://snow_surface.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://snow_walk.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://snow_walk.tscn.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://town_layout.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://walker.gd.remap[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://.godot/global_script_class_cache.cfg[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://.godot/uid_cache.bin[39m[0m
+[  87% ] [90m[1msavepack[22m | Storing File: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+[  50% ] [90m[1mexport[22m | Code signing bundle[39m[0m
+[92m[ DONE ][39m [1mexport[22m
+[0m

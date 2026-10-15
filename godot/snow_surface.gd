@@ -1,117 +1,314 @@
 extends Node3D
 class_name SnowSurface
 
-## A continuous snow surface. Rendering and collision share these exact triangles.
+## Flat substrate, a world-fixed snow field, and a small moving geometry window.
+## The CPU samples the same displaced triangles as snow.gdshader. No stale static
+## collider stands in for snow contact. Footsteps mutate one bounded image only.
 const HALF_EXTENT := 32.0
-const GRID_STEP := 0.25
-const PERIMETER_WIDTH := 7.0
-const GRID_CELLS := int(HALF_EXTENT * 2.0 / GRID_STEP)
-const GRID_POINTS := GRID_CELLS + 1
+const PATCH_SIZE := 12.8
+const COARSE_STEP := 0.8
+const DETAIL_STEP := 0.1
+const EDGE_BLEND := 1.6
+const IMAGE_SIZE := 2048
+const PRINT_LIFETIME := 120.0
+const MAX_OBSTACLES := 16
 const SNOW_SHADER := preload("res://snow.gdshader")
+const TEXELS_PER_METRE := float(IMAGE_SIZE) / (HALF_EXTENT * 2.0)
 
-## Measured from the generated vertices for the scene's surface observations.
-var interior_height_range := Vector2(INF, -INF)
-var perimeter_height_range := Vector2(INF, -INF)
+var patch_center := Vector2.ZERO
+var wind_strength := 1.0
+var wind_elapsed := 0.0
+var footprint_count := 0
+var footprint_image_bytes := IMAGE_SIZE * IMAGE_SIZE * 4
+var interior_height_range := Vector2.ZERO
+var perimeter_height_range := Vector2.ZERO
+var _footprints: Image
+var _texture: ImageTexture
+var _dirty := false
+var _detail: MeshInstance3D
+var _materials: Array[ShaderMaterial] = []
+var _obstacles: Array[Vector4] = []
+var _observation_elapsed := 1.0
 
 
 func _ready() -> void:
-	_build_surface()
+	_footprints = Image.create_empty(IMAGE_SIZE, IMAGE_SIZE, false, Image.FORMAT_RGBA8)
+	_footprints.fill(Color(0, 0, 0, 0))
+	_texture = ImageTexture.create_from_image(_footprints)
+	_make_mesh(HALF_EXTENT * 2.0, COARSE_STEP, false)
+	_detail = _make_mesh(PATCH_SIZE, DETAIL_STEP, true)
+	_update_uniforms()
+	_refresh_height_ranges()
 
 
-func _build_surface() -> void:
+func _process(_delta: float) -> void:
+	# Coalesce both figures' stamps before drawing. Wind ages encoded timestamps
+	# on the CPU/GPU and never rewrites or uploads the whole image by itself.
+	if _dirty:
+		_texture.update(_footprints)
+		_dirty = false
+
+
+func configure_obstacles(obstacles: Array[Dictionary]) -> void:
+	_obstacles.clear()
+	for obstacle in obstacles:
+		if _obstacles.size() == MAX_OBSTACLES:
+			break
+		var centre: Vector2 = obstacle.center
+		var size: Vector2 = obstacle.size
+		_obstacles.append(Vector4(centre.x, centre.y, size.x * 0.5, size.y * 0.5))
+	_update_uniforms()
+
+
+func advance(delta: float, focus_xz: Vector2) -> void:
+	wind_elapsed += delta * maxf(0.0, wind_strength)
+	# A tenth-second timestamp occupies GBA (24 bits). This preview has no saved
+	# weather: restart its wind epoch before encoding could wrap after 19 days.
+	if wind_elapsed >= 1677700.0:
+		wind_elapsed = 0.0
+		_footprints.fill(Color(0, 0, 0, 0))
+		_dirty = true
+	var centre_limit := HALF_EXTENT - PATCH_SIZE * 0.5
+	patch_center = Vector2(
+		clampf(snappedf(focus_xz.x, COARSE_STEP), -centre_limit, centre_limit),
+		clampf(snappedf(focus_xz.y, COARSE_STEP), -centre_limit, centre_limit)
+	)
+	_detail.position = Vector3(patch_center.x, 0, patch_center.y)
+	_update_uniforms(false)
+	_observation_elapsed += delta
+	if _observation_elapsed >= 1.0:
+		_observation_elapsed = 0.0
+		_refresh_height_ranges()
+
+
+func sample_depth(point: Vector2) -> float:
+	var local := (point - patch_center).abs()
+	if maxf(local.x, local.y) < PATCH_SIZE * 0.5:
+		return _triangle_height(point, DETAIL_STEP, true)
+	return _triangle_height(point, COARSE_STEP, false)
+
+
+func sample_uncompressed_depth(point: Vector2) -> float:
+	return _uncompressed_height(point)
+
+
+func sample_compaction(point: Vector2) -> float:
+	if _footprints == null:
+		return 0.0
+	var texel := (point + Vector2.ONE * HALF_EXTENT) * TEXELS_PER_METRE - Vector2.ONE * 0.5
+	var cell := Vector2i(floori(texel.x), floori(texel.y))
+	var blend := texel - Vector2(cell)
+	return lerpf(
+		lerpf(_pixel_compaction(cell), _pixel_compaction(cell + Vector2i.RIGHT), blend.x),
+		lerpf(_pixel_compaction(cell + Vector2i.DOWN), _pixel_compaction(cell + Vector2i.ONE), blend.x),
+		blend.y
+	)
+
+
+func sample_loose_depth(point: Vector2) -> float:
+	# Distinct boot lanes flank the body centre. An isotropic neighbourhood sees
+	# either lane without depending on which way the controlled figure faces.
+	# The broad kernel also prevents a run/walk toggle between individual prints.
+	var packed := sample_compaction(point)
+	# Two fixed rings cover the gap between alternating 0.48–0.68 m strides.
+	# 25 bilinear samples is a fixed budget, independent of trail length/count.
+	for ring in range(1, 3):
+		var samples := ring * 8
+		for index in range(samples):
+			var angle := float(index) * TAU / float(samples)
+			var offset := Vector2(cos(angle), sin(angle)) * (float(ring) * 0.16)
+			packed = maxf(packed, sample_compaction(point + offset))
+	return _uncompressed_height(point) * (1.0 - 0.94 * packed)
+
+
+func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
+	if _footprints == null or absf(point.x) > HALF_EXTENT or absf(point.y) > HALF_EXTENT:
+		return
+	var forward := Vector2(-sin(heading), -cos(heading))
+	var right := Vector2(cos(heading), -sin(heading))
+	var extent := 0.18
+	var minimum := Vector2i(((point - Vector2.ONE * extent + Vector2.ONE * HALF_EXTENT) * TEXELS_PER_METRE).floor())
+	var maximum := Vector2i(((point + Vector2.ONE * extent + Vector2.ONE * HALF_EXTENT) * TEXELS_PER_METRE).ceil())
+	var timestamp := int(floor(wind_elapsed * 10.0))
+	var encoded := Color(0, float((timestamp >> 16) & 255) / 255.0,
+		float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0)
+	for row in range(maxi(0, minimum.y), mini(IMAGE_SIZE - 1, maximum.y) + 1):
+		for column in range(maxi(0, minimum.x), mini(IMAGE_SIZE - 1, maximum.x) + 1):
+			var pixel := Vector2i(column, row)
+			var world := (Vector2(pixel) + Vector2.ONE * 0.5) / TEXELS_PER_METRE - Vector2.ONE * HALF_EXTENT
+			var offset := world - point
+			# Rounded 0.28 x 0.14 m sole, aligned with this particular footfall.
+			var sole := Vector2(offset.dot(right) / 0.07, offset.dot(forward) / 0.14)
+			var edge := sole.length()
+			if edge >= 1.0:
+				continue
+			var weight := 1.0 - smoothstep(0.65, 1.0, edge)
+			var previous := _pixel_compaction(pixel)
+			encoded.r = clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0)
+			_footprints.set_pixel(column, row, encoded)
+	footprint_count += 1
+	_dirty = true
+
+
+func _pixel_compaction(pixel: Vector2i) -> float:
+	if pixel.x < 0 or pixel.y < 0 or pixel.x >= IMAGE_SIZE or pixel.y >= IMAGE_SIZE:
+		return 0.0
+	var value := _footprints.get_pixel(pixel.x, pixel.y)
+	var timestamp := roundi(value.g * 255.0) * 65536 + roundi(value.b * 255.0) * 256 + roundi(value.a * 255.0)
+	var age := maxf(0.0, wind_elapsed - float(timestamp) * 0.1)
+	return value.r * maxf(0.0, 1.0 - age / PRINT_LIFETIME)
+
+
+func _uncompressed_height(point: Vector2) -> float:
+	# This formula and the shader's uncompressed_height are intentionally paired.
+	# Underneath is y=0. Initial broad shallow/deep fields remain bounded while
+	# the wind slowly moves relief and builds/lowers drifts on the +X lee of boxes.
+	var field := sin(point.x * 0.14 - 0.7) * cos(point.y * 0.12 + 0.4)
+	var height := 0.08 + 0.52 * smoothstep(0.0, 0.85, field)
+	height += 0.018 * sin(point.x * 0.63 + point.y * 0.32)
+	var phase := point.x * 0.36 + point.y * 0.17
+	height += 0.035 * (sin(phase - wind_elapsed * 0.025) - sin(phase)) * sin(point.y * 0.13 + 0.4)
+	var drift_amount := 0.13 + 0.06 * sin(wind_elapsed * 0.018)
+	for obstacle in _obstacles:
+		var downwind := point.x - (obstacle.x + obstacle.z)
+		var lee := 1.0 - smoothstep(0.0, 3.2, absf(downwind - 1.0))
+		var across := 1.0 - smoothstep(obstacle.w + 0.25, obstacle.w + 2.2, absf(point.y - obstacle.y))
+		height += drift_amount * lee * across
+	return clampf(height, 0.05, 0.85)
+
+
+func _field_height(point: Vector2) -> float:
+	# Even completely packed snow retains a thin layer over its flat substrate.
+	return maxf(0.025, _uncompressed_height(point) * (1.0 - 0.86 * sample_compaction(point)))
+
+
+func _detail_vertex_height(point: Vector2) -> float:
+	var edge := PATCH_SIZE * 0.5 - maxf(absf(point.x - patch_center.x), absf(point.y - patch_center.y))
+	var weight := smoothstep(0.0, EDGE_BLEND, edge)
+	if weight >= 0.99999:
+		return _field_height(point)
+	return lerpf(_triangle_height(point, COARSE_STEP, false), _field_height(point), weight)
+
+
+func _triangle_height(point: Vector2, step: float, detail: bool) -> float:
+	var origin := patch_center - Vector2.ONE * PATCH_SIZE * 0.5 if detail else -Vector2.ONE * HALF_EXTENT
+	var grid := (point - origin) / step
+	var cell := grid.floor()
+	var blend := grid - cell
+	var corner := origin + cell * step
+	var first := _detail_vertex_height(corner) if detail else _field_height(corner)
+	var right := _detail_vertex_height(corner + Vector2(step, 0)) if detail else _field_height(corner + Vector2(step, 0))
+	var bottom := _detail_vertex_height(corner + Vector2(0, step)) if detail else _field_height(corner + Vector2(0, step))
+	if blend.x + blend.y <= 1.0:
+		return first + blend.x * (right - first) + blend.y * (bottom - first)
+	var diagonal := _detail_vertex_height(corner + Vector2.ONE * step) if detail else _field_height(corner + Vector2.ONE * step)
+	return diagonal + (1.0 - blend.x) * (bottom - diagonal) + (1.0 - blend.y) * (right - diagonal)
+
+
+func _make_mesh(width: float, step: float, detail: bool) -> MeshInstance3D:
+	var cells := roundi(width / step)
+	var points := cells + 1
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
-	vertices.resize(GRID_POINTS * GRID_POINTS)
+	vertices.resize(points * points)
 	normals.resize(vertices.size())
-	indices.resize(GRID_CELLS * GRID_CELLS * 6)
-
-	for row in range(GRID_POINTS):
-		var z := -HALF_EXTENT + row * GRID_STEP
-		for column in range(GRID_POINTS):
-			var x := -HALF_EXTENT + column * GRID_STEP
-			var height := _snow_height(x, z)
-			vertices[row * GRID_POINTS + column] = Vector3(x, height, z)
-			var edge_distance := HALF_EXTENT - maxf(absf(x), absf(z))
-			if edge_distance >= PERIMETER_WIDTH:
-				interior_height_range.x = minf(interior_height_range.x, height)
-				interior_height_range.y = maxf(interior_height_range.y, height)
-			if edge_distance <= 1.0:
-				perimeter_height_range.x = minf(perimeter_height_range.x, height)
-				perimeter_height_range.y = maxf(perimeter_height_range.y, height)
-
-	var next_index := 0
-	for row in range(GRID_CELLS):
-		for column in range(GRID_CELLS):
-			var top_left := row * GRID_POINTS + column
-			var top_right := top_left + 1
-			var bottom_left := top_left + GRID_POINTS
-			var bottom_right := bottom_left + 1
-			# Godot's front faces use clockwise winding when viewed from above.
-			indices[next_index] = top_left
-			indices[next_index + 1] = top_right
-			indices[next_index + 2] = bottom_left
-			indices[next_index + 3] = top_right
-			indices[next_index + 4] = bottom_right
-			indices[next_index + 5] = bottom_left
-			next_index += 6
-
-	# Area-weighted normals are shared by every triangle meeting at a vertex.
-	for triangle in range(0, indices.size(), 3):
-		var first := indices[triangle]
-		var second := indices[triangle + 1]
-		var third := indices[triangle + 2]
-		var normal := (vertices[third] - vertices[first]).cross(
-			vertices[second] - vertices[first]
-		)
-		normals[first] += normal
-		normals[second] += normal
-		normals[third] += normal
-	for index in range(normals.size()):
-		normals[index] = normals[index].normalized()
-
+	indices.resize(cells * cells * 6)
+	for row in range(points):
+		for column in range(points):
+			var index := row * points + column
+			vertices[index] = Vector3(float(column) * step - width * 0.5, 0, float(row) * step - width * 0.5)
+			normals[index] = Vector3.UP
+	var next := 0
+	for row in range(cells):
+		for column in range(cells):
+			var top_left := row * points + column
+			indices[next] = top_left
+			indices[next + 1] = top_left + 1
+			indices[next + 2] = top_left + points
+			indices[next + 3] = top_left + 1
+			indices[next + 4] = top_left + points + 1
+			indices[next + 5] = top_left + points
+			next += 6
+	# Coarse quads own their vertices so the vertex shader can collapse complete
+	# covered cells. A fragment discard across MSAA samples leaves a dotted gap.
+	var cell_centres := PackedVector2Array()
+	if not detail:
+		var quads := PackedVector3Array()
+		quads.resize(cells * cells * 4)
+		cell_centres.resize(quads.size())
+		var quad_indices := PackedInt32Array()
+		quad_indices.resize(indices.size())
+		for row in range(cells):
+			for column in range(cells):
+				var quad := (row * cells + column) * 4
+				var base := Vector2(float(column) * step - width * 0.5, float(row) * step - width * 0.5)
+				var centre := base + Vector2.ONE * step * 0.5
+				quads[quad] = Vector3(base.x, 0, base.y)
+				quads[quad + 1] = Vector3(base.x + step, 0, base.y)
+				quads[quad + 2] = Vector3(base.x, 0, base.y + step)
+				quads[quad + 3] = Vector3(base.x + step, 0, base.y + step)
+				for corner in range(4):
+					cell_centres[quad + corner] = centre
+				var start := (row * cells + column) * 6
+				quad_indices[start] = quad
+				quad_indices[start + 1] = quad + 1
+				quad_indices[start + 2] = quad + 2
+				quad_indices[start + 3] = quad + 1
+				quad_indices[start + 4] = quad + 3
+				quad_indices[start + 5] = quad + 2
+		vertices = quads
+		indices = quad_indices
+		normals.resize(vertices.size())
+		normals.fill(Vector3.UP)
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_INDEX] = indices
-	var surface_mesh := ArrayMesh.new()
-	surface_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-
-	var snow_material := ShaderMaterial.new()
-	snow_material.shader = SNOW_SHADER
+	if not detail:
+		arrays[Mesh.ARRAY_TEX_UV] = cell_centres
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var material := ShaderMaterial.new()
+	material.shader = SNOW_SHADER
+	material.set_shader_parameter("detail_mesh", detail)
+	material.set_shader_parameter("footprint_image", _texture)
+	_materials.append(material)
 	var visible_surface := MeshInstance3D.new()
-	visible_surface.name = "SnowMesh"
-	visible_surface.mesh = surface_mesh
-	visible_surface.material_override = snow_material
+	visible_surface.name = "DetailedSnow" if detail else "CoarseSnow"
+	visible_surface.mesh = mesh
+	visible_surface.material_override = material
+	visible_surface.custom_aabb = AABB(Vector3(-width * 0.5, -0.1, -width * 0.5), Vector3(width, 1.2, width))
 	add_child(visible_surface)
-
-	var ground := StaticBody3D.new()
-	ground.name = "SnowGround"
-	ground.collision_layer = 1
-	ground.collision_mask = 1
-	var collision := CollisionShape3D.new()
-	collision.name = "SnowCollision"
-	collision.shape = surface_mesh.create_trimesh_shape()
-	ground.add_child(collision)
-	add_child(ground)
+	return visible_surface
 
 
-func _snow_height(x: float, z: float) -> float:
-	# The absolute weights total one: interior relief stays within 0.10–0.25 m.
-	# Warped, oblique pillows break up long waves without sharp or tiled detail.
-	# Their 2–8 m wavelengths are readable beside the figure at exploration zoom.
-	var wind_x := x + 0.65 * sin(z * 0.23 + 0.4)
-	var wind_z := z + 0.55 * sin(x * 0.19 - 0.8)
-	var relief := (
-		0.46 * sin(wind_x * 0.73 + wind_z * 0.31 + 0.7)
-		+ 0.34 * cos(wind_z * 1.19 - wind_x * 0.43 - 0.4)
-		+ 0.20 * sin(wind_x * 1.83 + wind_z * 1.47 + 2.1)
-	)
-	var interior_height := 0.175 + 0.075 * relief
-	var x_drift := smoothstep(HALF_EXTENT - PERIMETER_WIDTH, HALF_EXTENT, absf(x))
-	var z_drift := smoothstep(HALF_EXTENT - PERIMETER_WIDTH, HALF_EXTENT, absf(z))
-	# A smooth union avoids a diagonal crease where the edge bands meet.
-	var drift_weight := 1.0 - (1.0 - x_drift) * (1.0 - z_drift)
-	var drift_height := 0.76 + 0.14 * sin(x * 0.11 + z * 0.07 + 0.8)
-	return lerpf(interior_height, drift_height, drift_weight)
+func _update_uniforms(include_obstacles: bool = true) -> void:
+	var boxes := PackedVector4Array()
+	if include_obstacles:
+		boxes.resize(MAX_OBSTACLES)
+		for index in range(_obstacles.size()):
+			boxes[index] = _obstacles[index]
+	for material in _materials:
+		material.set_shader_parameter("patch_center", patch_center)
+		material.set_shader_parameter("wind_elapsed", wind_elapsed)
+		if include_obstacles:
+			material.set_shader_parameter("obstacle_count", _obstacles.size())
+			material.set_shader_parameter("obstacles", boxes)
+
+
+func _refresh_height_ranges() -> void:
+	# Small, explicitly sampled observations rather than retained initial extrema.
+	interior_height_range = Vector2(INF, -INF)
+	perimeter_height_range = Vector2(INF, -INF)
+	for row in range(9):
+		for column in range(9):
+			var point := Vector2(float(column - 4), float(row - 4)) * 7.9
+			var height := sample_depth(point)
+			if row == 0 or row == 8 or column == 0 or column == 8:
+				perimeter_height_range.x = minf(perimeter_height_range.x, height)
+				perimeter_height_range.y = maxf(perimeter_height_range.y, height)
+			else:
+				interior_height_range.x = minf(interior_height_range.x, height)
+				interior_height_range.y = maxf(interior_height_range.y, height)

@@ -1,0 +1,26 @@
+{
+  "mode": "headless fixed-60-tick engine-event replay; no rendered or wall-clock performance evidence",
+  "observations": 6638,
+  "figure_ids": [
+    "1",
+    "2"
+  ],
+  "max_contact_gap_m": 3.47569348e-05,
+  "horizontal_mps_range": [
+    0.0,
+    4.5000171661377
+  ],
+  "depth_m_range": [
+    0.04868893164616,
+    0.59641002614074
+  ],
+  "max_sink_m": 0.29882819513291,
+  "world_image_sizes": [
+    2048
+  ],
+  "world_image_bytes": [
+    16777216
+  ],
+  "footprints_at_finish": 395,
+  "route_sha256": "b233feb99b3de0d32a9198af90e172498b960eefabc9dc44ff58fe781fd7a192"
+}

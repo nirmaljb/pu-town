@@ -14,14 +14,20 @@ owner's image, every source colour and a labelled browsing palette for the plann
 Godot ground work. Its extraction command, integrity checks and provenance ship
 with this checkout; it is an authoring reference, not a runtime ground texture.
 
-The standalone [Godot snow preview](godot/README.md) starts the replacement
-client direction with continuous terrain, a walking figure and an orthographic
-inspection camera. It uses pinned Godot 4.7.2 and runs without the Java server.
-The guide includes macOS/Windows release exports and a 60-second frame recorder;
-the [desktop verification record](docs/verification/2026-10-15-godot-snow-desktop.md)
-separates packaged Mac traversal, visual comparison and measured M1 performance.
-See [ADR 0025](docs/adr/0025-godot-single-snow-map-prototype.md) for its scope and
-the retained authority requirements for future integration.
+The standalone [Godot snow preview](godot/README.md) develops the replacement
+client direction with changing snow depth, wind, shared bootprints, two switchable
+inspection figures and solid town placeholders. It uses pinned Godot 4.7.2 and
+runs without the Java server. The guide includes macOS/Windows release exports
+and a 60-second frame recorder. The
+[desktop verification record](docs/verification/2026-10-15-godot-snow-desktop.md)
+covers the preceding static scene; its results are not dynamic-snow acceptance.
+See [ADR 0025](docs/adr/0025-godot-single-snow-map-prototype.md) for the retained
+authority requirements and
+[ADR 0026](docs/adr/0026-dynamic-snow-and-persistent-footprints.md) for the current
+offline snow scope.
+The [dynamic-snow verification record](docs/verification/2026-10-15-godot-dynamic-snow.md)
+separates the current behavior checks, rendered inspection, exports and remaining
+platform/performance evidence.
 
 ## Prerequisites
 

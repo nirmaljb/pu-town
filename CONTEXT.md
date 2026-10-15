@@ -66,6 +66,20 @@ _Avoid_: Avatar Preset, personal preview
 **Town Square**:
 The open square at the centre of the town, that holds the Meeting Area.
 
+**Snow Depth**:
+The thickness of snow above the underlying ground at a place. It can change as footsteps compress the snow or wind accumulates it.
+_Avoid_: Ground elevation
+
+**Snowdrift**:
+A local accumulation of snow built up by wind.
+
+**Footprint**:
+An impression left by a step in snow. Footprints can overlap and form a trail that other Players can follow until wind erases it.
+_Avoid_: Player identity
+
+**Packed Path**:
+A trail of snow compressed by repeated footsteps that allows faster travel than the surrounding loose snow. Wind can refill it.
+
 **Meeting Area**:
 The place in the Town Square where Players sit in a circle for the Lobby and Meetings.
 _Avoid_: Lobby, Room

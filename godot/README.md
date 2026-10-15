@@ -1,11 +1,15 @@
 # Godot snow prototype
 
-This is the standalone snow-ground preview from issues #91–93 for the Godot direction
-in [#89](https://github.com/nirmaljb/pu-town/issues/89). One continuous snow surface,
-a temporary 1.7 m figure and an orthographic camera make the terrain inspectable.
-It runs without Java, LiveKit, a Room or Game state. Existing clients retain their
-current integration. [ADR 0025](../docs/adr/0025-godot-single-snow-map-prototype.md)
-records the engine and single-map decision.
+This standalone preview extends the ground milestone from issues #91–93 with
+changing snow depth, overlapping bootprints, wind and a town made of solid box
+placeholders. Two temporary 1.7 m figures share one snow field; Tab switches which
+one you control. It runs without Java, LiveKit, a Room or Game state. Sharing
+trails between these local figures does not establish multiplayer synchronization.
+Existing clients retain their current integration.
+[ADR 0025](../docs/adr/0025-godot-single-snow-map-prototype.md) records the engine
+and single-map direction;
+[ADR 0026](../docs/adr/0026-dynamic-snow-and-persistent-footprints.md) records the
+changing surface and persistent world tracks.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -50,75 +54,133 @@ this source-project slice.
 
 ## Inspect
 
-Walk with WASD. Directions follow the camera's horizontal axes; diagonal input
-is normalized to the same 2.25 m/s horizontal speed as a
-single direction. The figure's feet follow physics ray intersections with the
-rendered terrain's matching collision mesh. The figure is a scale and ground
-contact reference, with no imported Avatar artwork or animation system.
+Walk with WASD at 2.25 m/s. Directions follow the camera's horizontal axes;
+diagonal input is normalized. Hold Shift to request running at up to 4.5 m/s.
+Loose snow at or below 10 cm allows full running, while the permitted speed
+smoothly falls to walking at 40 cm. Repeated traffic compresses the snow and can
+make a faster Packed Path. Alternating boots press into the visible snow; the
+figures remain temporary scale and contact references, not final Avatar artwork.
+
+Tab switches between the orange and blue-grey figures, leaving the other idle.
+Both contribute anonymous bootprints to the same world field. Tracks overlap,
+remain when the detailed patch moves away, and fade as wind fills them. A fresh
+launch resets the snow and both figures. The figures start in the open yard at
+(−3, 7) m and (3, 7) m.
+
+The rectangular lodge, three sheds, generators, utility boxes, rocks, trees and
+fences are non-enterable obstacles anchored to the flat substrate. Walk around
+them through the open yard and connecting passages. Their roofs are not walking
+surfaces, and generators have no interaction. The retained reference guides their
+composition, not measured dimensions or a final asset layout.
 
 The orthographic camera starts at 45° yaw, −55° pitch and an 18 m view size.
 Use the mouse wheel to zoom from 10 m to a 118 m whole-map view. At the widest
 view it frames the ground's centre; as the view closes it blends toward following
 the figure.
 
-F1 toggles the observation HUD. F6 records 60 real seconds of rendered-frame
-intervals while you walk; F8 toggles recording of inspection observations
-to `user://route-….csv`; F9 saves a PNG to `user://capture-….png`. Godot stores
-these in the project's local application-data directory, outside this checkout.
-Use the editor's **Project → Open User Data Folder** to find them. Captures and
-CSV observations support manual inspection; they are not packaged-platform or
-hardware performance acceptance evidence.
+| Control | Effect |
+| --- | --- |
+| `−` / `=` | Reduce/increase wind from 0 to 16 in steps of one; keypad minus/plus also work |
+| `0` | Restore the default wind strength of 1 |
+| F1 | Toggle the observation HUD |
+| F4 | Increment the checkpoint recorded in the observation CSV |
+| F5 | Fix a world probe at the controlled figure's latest bootprint, or at its position before its first step |
+| F6 | Record 60 real seconds of rendered-frame intervals |
+| F8 | Start/stop inspection observations in `user://route-….csv` |
+| F9 | Save the rendered viewport to `user://capture-….png` |
 
-The HUD shows feet position, horizontal speed, grounding, travel distance,
-boundary contact, sampled interior and perimeter heights, camera size and input
-focus. The CSV also records input direction, contact gap, camera pitch and yaw,
-elapsed time and reported frame rate. Movement pauses when the window loses
-focus; the scene keeps rendering.
+At wind strength 1 a print's compaction fades over 120 seconds without another
+step there. Strength 0 freezes weather and preserves tracks; strength 16 advances
+that same weather sixteen times faster. Wind also changes broad snow relief and
+accumulation beside selected obstacles. Movement pauses when the window loses
+focus, but the scene and wind keep advancing.
 
-Start by walking across the centre, then walk diagonally toward each corner near
-(±30, ±30) m. Trace the perimeter inside ±31.5 m and cross back through the
-interior. Check that the figure's feet stay on the visible snow, slopes change
-continuously, and the raised edge remains connected through each corner. Repeat
-with straight and diagonal input and inspect both close and whole-map views.
-The primary check is the running scene with ordinary input.
+The HUD and CSV expose figure identity, position, speed, run request, surface and
+loose depth, compaction, sinking, contact gap, obstacle/boundary contact, steps,
+the moving patch, wind, image allocation and the other figure's position. The F5
+probe stays at its world location when you walk away or switch figures; its depth,
+compaction and whether it lies in the detailed patch remain observable. The CSV
+also records input, camera orientation, framing, focus and elapsed time.
 
-The reproducible scene check opens the same graphical scene and sends keyboard
-and wheel events through Godot's input API. It checks the route CSV without
-addressing scene nodes, mesh ordering or procedural samples:
+Godot writes observations, frame traces and captures into the project's local
+application-data directory, outside this checkout. Use the editor's **Project →
+Open User Data Folder** to find them. These records support inspection; a CSV or
+capture alone is not packaged-platform or hardware performance acceptance.
+
+For a manual check, reduce wind to zero, walk a trail across the yard and press
+F5. Leave the detailed patch, then return and check that the trail remains at the
+same place. Switch figures and follow or cross it to inspect overlapping prints
+and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
+lodge diagonally to inspect sliding along its sides, then increase wind and watch
+the fixed probe and visible trail fade. Check close and overview framing, snow
+contact, and the transition between detailed and distant snow while moving.
+
+The scene route sends keyboard and wheel events through Godot's input API and
+checks the public observation CSV without addressing private scene nodes, mesh
+ordering or procedural samples:
 
 ```sh
-/path/to/godot --path godot --script res://tests/walk_scene.gd
+/path/to/godot --path godot -- --snow-scene-check
 ```
 
-Press **F7** in the scene to begin and leave that window focused for about three
-minutes. The route pauses on focus loss and fails after 60 seconds without focus. The route crosses interior relief, approaches all four edges and walks
-the complete perimeter, then captures overview and exploration views. It checks
-straight/diagonal horizontal speed, surface contact, containment, camera follow
-and fixed angle, and whole-map coverage. The process returns nonzero on failure.
-This engine-event replay complements ordinary window input and visual inspection;
-it does not establish OS input behavior or a hardware performance baseline.
+Press **F7** in the scene to begin and keep the window focused. Add `--auto-start`
+after `--snow-scene-check` to skip the F7 gate; focus is still required. The route
+pauses on focus loss and fails after 60 seconds without focus. It exercises
+walking/running, obstacle contact, overlapping trails, leaving and revisiting the
+detailed patch, wind erasure and camera zoom, and captures graphical views. The
+process returns nonzero on failure. `--walk-scene-check` remains an alias; the
+existing `--script res://tests/walk_scene.gd` launcher opens the same route.
+
+An explicit headless replay is also available:
+
+```sh
+/path/to/godot --headless --path godot -- --snow-scene-check --headless-scene-check
+```
+
+Headless replay runs automatically and does not render captures. It can check
+observed scene behavior but supplies no visual, native input, window-focus or
+hardware-rendering evidence. Graphical engine-event replay likewise complements
+ordinary window input and visual inspection; it does not establish OS keyboard
+behavior or a performance baseline.
 
 ## Reproduce the surface
 
-[`snow_surface.gd`](snow_surface.gd) defines the complete deterministic ground.
-The square spans −32 to +32 m on both horizontal axes. A 0.25 m grid produces
-257 × 257 vertices and 131,072 indexed triangles in one mesh with shared normals;
-Godot derives its static triangle collision from that mesh.
+[`snow_surface.gd`](snow_surface.gd) defines a flat substrate at Y=0 beneath a
+64 × 64 m snow field, spanning −32 to +32 m on both horizontal axes. Snow begins
+with broad shallow/deep variation and responds to wind and compaction. The
+uncompressed depth is bounded to 5–85 cm; packing retains at least 2.5 cm over the
+substrate. The yard remains open without being flattened.
 
-The interior uses warped, weighted oblique sinusoidal harmonics, without a random
-seed. Their absolute weights sum to one, keeping interior heights within
-0.10–0.25 m. Independent 7 m edge bands blend smoothly into a 0.62–0.90 m raised
-perimeter; their union stays continuous through the corners. There is no reserved
-central plateau. Metadata samples every interior vertex at least 7 m from an
-edge, and the outermost 1 m band, for the displayed height observations.
-[`snow.gdshader`](snow.gdshader) supplies low-contrast world-space drift and grain
-detail. The source image, complete colour histogram and palette remain authoring
-references outside the Godot project; no reference image enters the runtime.
+A 12.8 × 12.8 m patch uses a 0.1 m grid around the controlled figure; a 0.8 m grid
+keeps the full town visible outside it. The patch moves in coarse-grid increments
+and stays within the map, blending into the coarse surface over a 1.6 m border.
+[`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the current field.
+CPU foot support evaluates the same height formula and triangle interpolation,
+including the patch border, rather than querying a stale static collision mesh.
+Horizontal movement separately sweeps a circle against the rectangles in
+[`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
-See
-the [issue #91 verification record](../docs/verification/2026-10-15-godot-snow-walk.md)
-for the checks actually performed on this checkout; importing the editor project
-alone does not establish those results.
+Footsteps paint one world-anchored **2048 × 2048 RGBA8 image**, or **31.25 mm per
+texel**, covering the whole town. It stores compaction and the last wind-clock
+timestamp at each texel; no growing list of steps is retained. Both figures use
+this same image, and moving the patch does not move or clear its contents.
+The CPU image pixel payload is **16 MiB**. The GPU texture is a separate nominal
+16 MiB allocation; those figures exclude driver, upload-staging and other scene
+memory. Wind ages the encoded values without rewriting the image each frame;
+new footfalls update it. A fresh process recreates the field rather than loading
+saved snow.
+
+The material retains muted snow and overcast lighting. The source image,
+complete colour histogram and palette remain authoring references outside the
+Godot project; no reference image enters the runtime. The
+[initial ground record](../docs/verification/2026-10-15-godot-snow-walk.md) and
+[static desktop record](../docs/verification/2026-10-15-godot-snow-desktop.md)
+describe the preceding static milestone. Their results do not establish dynamic
+snow behavior, current appearance or performance.
+
+The [dynamic-snow verification record](../docs/verification/2026-10-15-godot-dynamic-snow.md)
+records the current scene route, native input and visual checks, exports and
+remaining packaged-runtime and hardware evidence limits.
 
 ## Desktop exports
 
@@ -148,21 +210,24 @@ and Python 3 are installed. Launch the resulting `.exe` normally.
 hashes. Failed exports preserve the previous completed output. Generated packages,
 templates and archives stay local under the upload-size policy.
 
-The packaged application exposes the same full-map inspection route:
+The packaged application exposes the same snow inspection route:
 
 ```sh
-open godot/build/macos/release/PU-Town-Snow-Walk.app --args -- --walk-scene-check
+open godot/build/macos/release/PU-Town-Snow-Walk.app --args -- --snow-scene-check
 ```
 
-Start from a fresh launch, press F7 and keep it focused for the three-minute
-route. It exits with a status after checking the exported observations. This is
-engine-event replay in the package; ordinary keyboard walking is separate evidence.
+Start from a fresh launch, press F7 and keep it focused for the route. It exits
+with a status after checking the exported observations. This is engine-event
+replay in the package; ordinary keyboard walking is separate evidence. Rebuild
+packages after source changes and check their manifests before treating them as
+evidence for the current implementation.
 
 ## Measure a traversal
 
 Launch the **release package**, keep it focused at 1280 × 800, warm it by walking,
-then press F6 and immediately walk for 60 seconds. Cross the interior, climb a
-drift and turn along the perimeter; do not stand against a boundary. The recorder
+then press F6 and immediately walk for 60 seconds. Cross shallow and deep snow,
+leave a trail, and turn around the boxes without standing against an obstacle or
+boundary. Record the wind setting and any figure switching. The recorder
 stops automatically using real elapsed time. Focus loss and stationary intervals
 remain in the trace, and are reported rather than filtered. F8 may run alongside
 it for detailed contact/camera observations. Avoid F9 capture during the measured
@@ -181,7 +246,9 @@ identified. Keep the raw trace with engine/mode, hardware, OS and concurrent
 workload notes; HUD FPS and fixed-rate route CSV are not benchmark substitutes.
 
 The [#92–93 verification record](../docs/verification/2026-10-15-godot-snow-desktop.md)
-separates visual inspection, packaged runtime, performance and export evidence.
-Town content, Game/networking integration and coordinated retirement of the
+separates visual inspection, packaged runtime, performance and export evidence
+for the older static scene. New dynamic-snow source requires its own runtime,
+visual and performance checks; the earlier measurements are not current results.
+Final town assets, Game/networking integration and coordinated retirement of the
 existing maps remain later milestones. Windows hardware performance requires
 running on Windows hardware.
