@@ -2,6 +2,16 @@
 
 This file is the operational guide for agents and contributors working in this repository. It applies to the entire repository.
 
+## Branch workflow
+
+`native-live` is the default branch. For every request, without exception:
+
+1. Pull the latest `native-live` before changing anything: `git pull --rebase origin native-live`. In a new worktree, start from `origin/native-live`.
+2. Do the work on top of it.
+3. Commit, then push to `native-live` only: `git push origin HEAD:native-live`.
+
+Never push to any other branch, and never force-push. If the push is rejected because `native-live` has moved, pull with rebase again, resolve any conflicts, rerun the affected checks and push. Run the upload-size checks under [Upload size policy](#upload-size-policy) before committing and pushing.
+
 ## Project at a glance
 
 PU Town is a real-time Mafia game for four to ten Players, played like Among Us:
