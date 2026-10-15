@@ -38,7 +38,26 @@ const LANDMARKS := {
 	"yard_open": Vector2(24, 3),
 	"shed_windward": Vector2(35, 3),
 	"lodge_lee": Vector2(35, -4.8),
+	# Corners of the walking figure's loop. It keeps clear of the route's trail
+	# probe, Packed Path corridor and wind probes, and crosses the courtyard on its
+	# own lane south of the route's crossing.
+	"loop_outpost_lane": Vector2(28, 7.5),
+	"loop_gap_south": Vector2(-7.5, 7.5),
+	"loop_gap": Vector2(-7.5, 0),
+	"loop_east_gate": Vector2(-11, 0),
+	"loop_courtyard_east": Vector2(-11, -2),
+	"loop_courtyard_west": Vector2(-22, -2),
+	"loop_stair_foot": Vector2(-23.5, 21),
+	"loop_forest": Vector2(-18, 21),
 }
+## The figure you are not controlling walks this loop: from the outpost through the
+## meeting-hall gap and the compound's east gate, across the courtyard, out of the
+## south gate, down the stair and into the southern forest, then back the same way.
+## Consecutive landmarks are joined by straight, open ground for a 0.3 m figure.
+const LOOP: Array[String] = [
+	"outpost_yard_east", "loop_outpost_lane", "loop_gap_south", "loop_gap", "loop_east_gate",
+	"loop_courtyard_east", "loop_courtyard_west", "south_gate", "loop_stair_foot", "loop_forest",
+]
 ## Ground levels. The shelf carries the compound, meeting hall and outpost; the
 ## forest lies west of FOREST_EAST and south of FOREST_NORTH. Both lines run
 ## beneath cliff rock, at least one coarse snow cell inside every rock face.
@@ -83,6 +102,21 @@ var obstacles: Array[Dictionary] = []
 var ground_image: Image
 var ground_range := Vector2(SHELF_GROUND, SHELF_GROUND)
 var _ground := PackedFloat32Array()
+## The closed loop: out along LOOP and back, so its last corner leads to its first.
+var loop_corners := PackedVector2Array()
+## Distance along the closed loop to each corner, and the loop's whole length.
+var loop_starts := PackedFloat32Array()
+var loop_length := 0.0
+
+
+func _init() -> void:
+	for name in LOOP:
+		loop_corners.append(LANDMARKS[name])
+	for index in range(LOOP.size() - 2, 0, -1):
+		loop_corners.append(LANDMARKS[LOOP[index]])
+	for index in range(loop_corners.size()):
+		loop_starts.append(loop_length)
+		loop_length += loop_corners[index].distance_to(loop_corners[(index + 1) % loop_corners.size()])
 
 
 func _ready() -> void:
@@ -265,6 +299,44 @@ func point_clear(point: Vector2, radius: float = 0.3) -> bool:
 		if outside.length_squared() < radius * radius - 0.00000001:
 			return false
 	return true
+
+
+## Whether a figure could walk straight from one point to another without contact.
+func segment_clear(from: Vector2, to: Vector2, radius: float = 0.3) -> bool:
+	return point_clear(from, radius) and point_clear(to, radius) and _first_contact(from, to - from, radius).is_empty()
+
+
+## Where a figure standing at `from` joins the loop: the nearest loop point it can
+## walk to in a straight line, with the corner it then heads for and the fraction
+## of the loop's length at which it joins. If no loop point is in straight reach,
+## the nearest one is used and the figure slides toward it.
+func loop_entry(from: Vector2, radius: float = 0.3) -> Dictionary:
+	var candidates: Array[Dictionary] = []
+	for index in range(loop_corners.size()):
+		var start := loop_corners[index]
+		var finish := loop_corners[(index + 1) % loop_corners.size()]
+		var length := start.distance_to(finish)
+		# The nearest point of the segment, then points every half metre along it.
+		var along := clampf((from - start).dot(finish - start) / maxf(length * length, 0.000001), 0.0, 1.0) * length
+		var offsets := [along]
+		for sample in range(int(length / 0.5) + 1):
+			offsets.append(minf(sample * 0.5, length))
+		for offset in offsets:
+			var point := start.move_toward(finish, offset)
+			candidates.append({"point": point, "distance": from.distance_to(point), "corner": (index + 1) % loop_corners.size(),
+				"progress": (loop_starts[index] + offset) / loop_length})
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a.distance < b.distance or (a.distance == b.distance and a.progress < b.progress))
+	for candidate in candidates:
+		if candidate.distance < 0.0001 or segment_clear(from, candidate.point, radius):
+			return candidate
+	return candidates.front()
+
+
+## The fraction of the loop's length at a point on the segment that ends at `corner`.
+func loop_progress(corner: int, point: Vector2) -> float:
+	var start := (corner - 1 + loop_corners.size()) % loop_corners.size()
+	return (loop_starts[start] + loop_corners[start].distance_to(point)) / loop_length
 
 
 func move_with_collisions(from: Vector2, to: Vector2, radius: float = 0.3) -> Vector2:

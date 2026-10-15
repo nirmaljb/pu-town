@@ -45,10 +45,17 @@ const PREVAILING_FROM_DEG := 315.0
 const REVERSED_FROM_DEG := 135.0
 # Probes in the order the route places them with F5.
 const TRAIL_PROBE := 1
-const SHELTERED_PROBE := 2
-const EXPOSED_PROBE := 3
-const WINDWARD_PROBE := 4
-const LEE_PROBE := 5
+const TRACK_PROBE := 2
+const SHELTERED_PROBE := 3
+const EXPOSED_PROBE := 4
+const WINDWARD_PROBE := 5
+const LEE_PROBE := 6
+# The walking figure's trail counts as laid while the controlled figure was
+# elsewhere when they stood at least this far apart. A figure further than
+# NEAR_PROBE_M from a probe cannot press a boot onto it.
+const ELSEWHERE_M := 15.0
+const NEAR_PROBE_M := 1.5
+const STRIDE_SLOPE_M := 0.1
 # Cursor points around the figure, as screen offsets in viewport heights and the
 # compass bearing each shows on a north-up view.
 const SWEEP := [
@@ -64,6 +71,8 @@ var route_path := ""
 var headless := false
 # Where the controlled figure stands on screen with no lean, as viewport fractions.
 var figure_screen := Vector2(0.5, 0.5)
+# The recorded point of the walking figure's trail that the route tracked.
+var laid_trail := {}
 
 
 func _ready() -> void:
@@ -137,28 +146,29 @@ func _run() -> void:
 	# The courtyard's Shallow Snow allows full running.
 	await _goto(LANDMARKS.courtyard_west, "reach courtyard west")
 	await _leg([KEY_W, KEY_SHIFT], 2.0, "run in courtyard")
-	# With the cursor west of the figure, the newly controlled figure faces west.
-	_point(Vector2(-0.25, 0))
-	await _wait(0.2)
-	_tap(KEY_TAB)
-	await _leg([], 0.5, "second figure idle")
-	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on second figure")
-	# The second figure walks from the outpost yard to the first figure's actual
-	# exported trail start, then stamps the same northbound boot lanes.
-	var first_trail := _rows_for(_read_rows(), "first trail")
-	var trail_start: Dictionary = first_trail.front()
-	await _goto(Vector2(float(trail_start.x_m), float(trail_start.z_m)), "second figure follows trail")
-	await _leg([KEY_W], 3.0, "second figure overlaps trail")
-	# Gait phase differs between figures. Several passes cover both boot lanes
-	# instead of assuming a particular step lands on an exact world texel.
-	for pass_index in range(2):
-		await _leg([KEY_S], 3.0, "second figure overlap return %d" % pass_index)
-		await _leg([KEY_W], 3.0, "second figure overlap repeat %d" % pass_index)
-	await _leg([], 0.5, "shared probe overlapped")
-	_tap(KEY_TAB)
-	# Navigation reads the latest observation, so let the first figure be observed first.
-	await _leg([], 0.5, "first figure idle")
-	# The first figure leaves the courtyard through the east gate and revisits the probe.
+	# Tracking. While this figure worked the outpost and the meeting-hall gap, the
+	# walking figure laid a trail along its courtyard lane. The route finds a point
+	# of that trail in the public record, fixes a probe there, then follows the
+	# trail the way it was laid and walks back and forth over it.
+	await _goto(LANDMARKS.courtyard, "return to courtyard")
+	laid_trail = _laid_trail(_read_rows())
+	if laid_trail.is_empty():
+		failures.append("The record showed no trail laid across the courtyard while the controlled figure was elsewhere")
+		_finish()
+		return
+	await _goto(laid_trail.point, "reach the walking figure's trail")
+	_tap(KEY_F5)
+	await _leg([], 0.5, "trail found")
+	await _leg([KEY_A], 2.0, "follow trail")
+	# Gait phase differs between figures. Passes of slightly different lengths move
+	# where the boots land along both lanes, a fifth of a step at a time, instead of
+	# assuming a particular step lands on an exact world texel.
+	for pass_index in range(4):
+		var seconds := 3.0 + 0.05 * pass_index
+		await _leg([KEY_D], seconds, "overlap trail return %d" % pass_index)
+		await _leg([KEY_A], seconds, "overlap trail repeat %d" % pass_index)
+	await _leg([], 0.5, "trail overlapped")
+	# The figure leaves the courtyard through the east gate and revisits the probe.
 	await _goto(LANDMARKS.courtyard, "leave courtyard")
 	await _goto(LANDMARKS.courtyard_east, "return to east gate")
 	await _goto(LANDMARKS.meeting_hall_gap, "leave through east gate")
@@ -203,6 +213,15 @@ func _run() -> void:
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
+	# Tab, with the cursor west of the figure, hands control to the walking figure
+	# wherever the loop has taken it; it faces west. The released figure walks back
+	# to the loop from where it stands, off the loop in the outpost yard.
+	_point(Vector2(-0.25, 0))
+	await _wait(0.2)
+	_tap(KEY_TAB)
+	await _leg([], 0.5, "second figure idle")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on second figure")
+	await _leg([], 8.0, "first figure rejoins loop")
 	_tap(KEY_F8)
 	await get_tree().process_frame
 	_check_record()
@@ -531,8 +550,6 @@ func _check_record() -> void:
 				_fail_once("An idle figure created a footprint")
 			if previous.horizontal_mps == "0.0" and speed < 0.0001 and row.step_count != previous.step_count:
 				_fail_once("A stationary or blocked figure created a footprint")
-			if row.other_x_m != previous.other_x_m or row.other_z_m != previous.other_z_m or row.other_steps != previous.other_steps:
-				_fail_once("The uncontrolled figure moved or created a footprint")
 		previous = row
 	if straight < 60 or diagonal < 60 or blocked < 30 or overview < 10 or follow < 1000 or figure_ids.size() != 2:
 		failures.append("Missing route coverage: straight=%d diagonal=%d blocked=%d overview=%d follow=%d figures=%d" % [straight, diagonal, blocked, overview, follow, figure_ids.size()])
@@ -557,7 +574,9 @@ func _check_record() -> void:
 	_check_stair(rows)
 	_check_courtyard_entry(rows)
 	_check_probe(rows)
-	_check_second_figure(rows)
+	_check_walking_figure(rows)
+	_check_tracking(rows)
+	_check_rejoin(rows)
 	_check_packed_speed(rows)
 	_check_snow_zones(rows)
 	_check_facing(rows)
@@ -569,15 +588,16 @@ func _check_record() -> void:
 
 
 func _check_start(rows: Array[Dictionary]) -> void:
-	# Both figures begin a fresh launch at their outpost yard landmarks.
+	# Both figures begin a fresh launch at their outpost yard landmarks. The walking
+	# figure has set off already, but no further than it has walked.
 	var idle := _rows_for(rows, "initial idle")
 	if idle.is_empty():
 		failures.append("Initial idle observations were missing")
 		return
 	var row: Dictionary = idle.front()
 	var controlled := Vector2(float(row.x_m), float(row.z_m))
-	var other := Vector2(float(row.other_x_m), float(row.other_z_m))
-	if controlled.distance_to(LANDMARKS.outpost_yard_west) > 0.001 or other.distance_to(LANDMARKS.outpost_yard_east) > 0.001:
+	var other := _other(row)
+	if controlled.distance_to(LANDMARKS.outpost_yard_west) > 0.001 or other.distance_to(LANDMARKS.outpost_yard_east) > float(row.other_travel_m) + 0.001:
 		failures.append("The figures did not start at the outpost yard landmarks")
 
 
@@ -693,19 +713,236 @@ func _check_probe(rows: Array[Dictionary]) -> void:
 		failures.append("The original footprint was not retained on revisiting its world position")
 
 
-func _check_second_figure(rows: Array[Dictionary]) -> void:
-	var first_trail := _rows_for(rows, "fresh probe")
-	var overlap := _rows_for(rows, "second figure overlaps trail")
-	var shared := _rows_for(rows, "shared probe overlapped")
-	if first_trail.is_empty() or overlap.is_empty() or shared.is_empty():
-		failures.append("Second-figure trail stages were missing")
+## The recorded point of the walking figure's courtyard lane nearest the lane's
+## middle, laid while the controlled figure stood at least ELSEWHERE_M away.
+func _laid_trail(rows: Array[Dictionary]) -> Dictionary:
+	var east: Vector2 = LANDMARKS.loop_courtyard_east
+	var west: Vector2 = LANDMARKS.loop_courtyard_west
+	var middle := (east + west) * 0.5
+	var best := {}
+	for row in rows:
+		var other := _other(row)
+		var controlled := Vector2(float(row.x_m), float(row.z_m))
+		# Keep clear of the lane's corners, where the trail turns.
+		if absf(other.y - east.y) > 0.01 or other.x > east.x - 2.0 or other.x < west.x + 2.0:
+			continue
+		if controlled.distance_to(other) < ELSEWHERE_M or row.other_rejoining == "true":
+			continue
+		if best.is_empty() or absf(other.x - middle.x) < absf(best.point.x - middle.x):
+			best = {"point": other, "elapsed_ms": int(row.elapsed_ms), "apart_m": controlled.distance_to(other)}
+	return best
+
+
+func _check_walking_figure(rows: Array[Dictionary]) -> void:
+	# The figure you are not controlling walks the loop from launch: it stays on the
+	# loop, never goes backwards along it, runs where the snow allows, faces the way
+	# it goes, keeps snow contact and passes through the courtyard and down and up
+	# the stair. The final Tab stage checks how a released figure rejoins.
+	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
+	var moving := 0
+	var matched := 0
+	var running := 0
+	var walking := 0
+	var in_courtyard := 0
+	var on_slope := 0
+	var descents := 0
+	var ascents := 0
+	var level := ""
+	var previous := {}
+	var steps := {}
+	for row in rows:
+		var other := _other(row)
+		var speed := float(row.other_mps)
+		var loose := float(row.other_loose_depth_m)
+		var ground := float(row.other_ground_y_m)
+		if absf(other.x) > bounds.x + 0.001 or absf(other.y) > bounds.y + 0.001:
+			_fail_once("The walking figure escaped the map rectangle")
+		if row.other_grounded != "true" or absf(float(row.other_contact_gap_m)) > CONTACT_BOUND_M:
+			_fail_once("The walking figure entered an obstacle or lost its snow contact")
+		# Running on the stair, its boots straddle a slope that falls 0.5 m per metre,
+		# so their mean height may sit a few centimetres below the ground at its centre.
+		var above_ground := float(row.other_feet_y_m) - ground
+		if above_ground > 1.3 or above_ground < -STRIDE_SLOPE_M:
+			_fail_once("The walking figure teleported onto a box roof or below the ground")
+		if row.other_rejoining == "false" and _loop_distance(other) > 0.01:
+			_fail_once("The walking figure left its loop")
+		# Footsteps laid by each figure while it walked the loop.
+		var span: Vector2i = steps.get(row.other_figure_id, Vector2i(int(row.other_steps), int(row.other_steps)))
+		steps[row.other_figure_id] = Vector2i(mini(span.x, int(row.other_steps)), maxi(span.y, int(row.other_steps)))
+		if not previous.is_empty() and previous.other_figure_id == row.other_figure_id:
+			var walked := float(row.other_travel_m) - float(previous.other_travel_m)
+			if walked < -0.000001:
+				_fail_once("The walking figure's travel went backwards")
+			if row.other_rejoining == "false" and previous.other_rejoining == "false":
+				if wrapf(float(row.other_loop_progress) - float(previous.other_loop_progress), -0.5, 0.5) < -0.00001:
+					_fail_once("The walking figure went backwards around its loop")
+				if walked < 0.0001:
+					_fail_once("The walking figure stood still on its loop")
+		else:
+			level = ""
+		if speed > 0.01:
+			moving += 1
+			if row.other_run_requested != "true":
+				_fail_once("The walking figure did not request running")
+			var expected := lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, loose))
+			# A frame that ends on a loop corner stops there, so it may be shorter.
+			if absf(speed - expected) <= 0.003:
+				matched += 1
+			elif speed > expected + 0.003:
+				_fail_once("The walking figure exceeded the speed its snow allows")
+			if loose <= FULL_RUN_DEPTH_M and speed >= RUN_MPS - 0.003:
+				running += 1
+			if loose >= WALK_ONLY_DEPTH_M and absf(speed - WALK_MPS) <= 0.003:
+				walking += 1
+			if _angle_between(float(row.other_facing_deg), float(row.other_travel_deg)) > 0.5:
+				_fail_once("The walking figure did not face its direction of travel")
+		if TownLayout.COURTYARD.has_point(other):
+			in_courtyard += 1
+		# Ground strictly between the two levels lies on the stair's slope.
+		if ground < TownLayout.SHELF_GROUND - 0.1 and ground > TownLayout.FOREST_GROUND + 0.1:
+			on_slope += 1
+			if other.x < TownLayout.STAIR_GROUND_X.x or other.x > TownLayout.STAIR_GROUND_X.y:
+				_fail_once("The walking figure changed level away from the stair")
+		var now := level
+		if ground > TownLayout.SHELF_GROUND - 0.01:
+			now = "shelf"
+		elif ground < TownLayout.FOREST_GROUND + 0.01:
+			now = "forest"
+		if level == "shelf" and now == "forest":
+			descents += 1
+		elif level == "forest" and now == "shelf":
+			ascents += 1
+		level = now
+		previous = row
+	var laid: Vector2i = steps.get(rows.front().other_figure_id, Vector2i.ZERO)
+	print("Walking figure: %d moving observations, %d at the speed its snow allows, %d running in Shallow Snow, %d walking in Deep, %d in the courtyard, %d on the stair, %d descents and %d ascents" % [
+		moving, matched, running, walking, in_courtyard, on_slope, descents, ascents])
+	if moving < 1000 or matched < moving * 0.98:
+		failures.append("The walking figure did not keep walking at the speed its snow allows (%d of %d)" % [matched, moving])
+	if running < 60 or walking < 60:
+		failures.append("The walking figure did not run in Shallow Snow and walk in Deep (running %d, walking %d)" % [running, walking])
+	if in_courtyard < 60:
+		failures.append("The walking figure's loop did not pass through the courtyard")
+	if descents < 1 or ascents < 1 or on_slope < 60:
+		failures.append("The walking figure did not go down and back up the stair (down %d, up %d, slope %d)" % [descents, ascents, on_slope])
+	if laid.y - laid.x < 100:
+		failures.append("The walking figure laid too few footsteps (%d)" % (laid.y - laid.x))
+
+
+func _check_tracking(rows: Array[Dictionary]) -> void:
+	# The probe the route fixed on the walking figure's trail: laid while the
+	# controlled figure was elsewhere, retained until it was found, compacted
+	# further by following and overlapping it, then filled by the wind.
+	var found := _rows_for(rows, "trail found")
+	var followed := _rows_for(rows, "follow trail")
+	var overlapped := _rows_for(rows, "trail overlapped")
+	if laid_trail.is_empty() or found.is_empty() or followed.is_empty() or overlapped.is_empty():
+		failures.append("Tracking route stages were missing")
 		return
-	if overlap.front().figure_id == first_trail.front().figure_id:
-		failures.append("Tab did not transfer control to the other figure")
-	if int(overlap.back().step_count) <= int(overlap.front().step_count):
-		failures.append("The second figure did not add footsteps to the shared image")
-	if _probe(shared.back(), TRAIL_PROBE, "compaction") < _probe(first_trail.back(), TRAIL_PROBE, "compaction") + 0.02:
-		failures.append("The second figure did not compact the original figure's probed footprint")
+	var row: Dictionary = found.back()
+	var probe := Vector2(_probe(row, TRACK_PROBE, "x_m"), _probe(row, TRACK_PROBE, "z_m"))
+	var lane: Vector2 = laid_trail.point
+	var baseline := _probe(row, TRACK_PROBE, "compaction")
+	print("Tracked the walking figure's trail at %s, laid %.1f s into the record %.1f m from the controlled figure; probe %s compaction %.3f" % [
+		lane, float(laid_trail.elapsed_ms) / 1000.0, laid_trail.apart_m, probe, baseline])
+	if int(row.probe_count) != TRACK_PROBE or absf(probe.y - lane.y) > 0.2 or absf(probe.x - lane.x) > 1.0 or baseline < 0.01:
+		failures.append("The route did not fix a probe on the walking figure's trail")
+	if row.figure_id == row.other_figure_id or int(row.elapsed_ms) <= int(laid_trail.elapsed_ms):
+		failures.append("The tracked trail was not laid by the other figure before it was found")
+	if int(followed.back().step_count) <= int(followed.front().step_count):
+		failures.append("The controlled figure did not follow the trail")
+	for leg in followed:
+		if float(leg.input_x) < 0.0 and absf(float(leg.z_m) - lane.y) > 0.1:
+			_fail_once("Following left the walking figure's lane")
+	var overlapped_compaction := _probe(overlapped.back(), TRACK_PROBE, "compaction")
+	print("Tracking probe compaction %.3f -> %.3f after following and overlapping" % [baseline, overlapped_compaction])
+	if overlapped_compaction < baseline + 0.02:
+		failures.append("Following and overlapping the trail did not raise the probe's compaction")
+	# Wind fills the loop's trail like any other: at wind 16 the probe's compaction
+	# falls between rows in which no figure can reach it, and never rises then.
+	var filled := 0.0
+	var wind_rows := _rows_for(rows, "wind fills prints") + _rows_for(rows, "drifts build")
+	for index in range(1, wind_rows.size()):
+		var before: Dictionary = wind_rows[index - 1]
+		var after: Dictionary = wind_rows[index]
+		if _near_probe(before, TRACK_PROBE) or _near_probe(after, TRACK_PROBE):
+			continue
+		var change := _probe(after, TRACK_PROBE, "compaction") - _probe(before, TRACK_PROBE, "compaction")
+		if change > 0.000001:
+			_fail_once("The loop's trail grew with no figure near it")
+		filled -= minf(change, 0.0)
+	print("Wind filled %.3f of the tracked trail's compaction" % filled)
+	if filled < 0.05:
+		failures.append("Wind did not fill the walking figure's trail")
+
+
+func _check_rejoin(rows: Array[Dictionary]) -> void:
+	# After Tab the walking figure takes control where it stands, and the released
+	# figure walks straight from where it stood back onto the loop and around it.
+	var before := _rows_for(rows, "close view")
+	var after := _rows_for(rows, "second figure idle") + _rows_for(rows, "cursor on second figure") + _rows_for(rows, "first figure rejoins loop")
+	if before.is_empty() or after.is_empty():
+		failures.append("Rejoin route stages were missing")
+		return
+	var released: Dictionary = before.back()
+	var stood := Vector2(float(released.x_m), float(released.z_m))
+	var first: Dictionary = after.front()
+	if first.figure_id == released.figure_id or first.other_figure_id != released.figure_id:
+		failures.append("Tab did not swap the controlled and walking figures")
+		return
+	if _loop_distance(stood) < 1.0:
+		failures.append("The released figure already stood on the loop")
+	if first.other_rejoining != "true" or _other(first).distance_to(stood) > 0.25:
+		failures.append("The released figure did not set off for the loop from where it stood")
+	var entry := Vector2.INF
+	for row in after:
+		if row.other_rejoining == "false":
+			entry = _other(row)
+			break
+	if entry == Vector2.INF:
+		failures.append("The released figure did not reach the loop")
+		return
+	var joined := 0
+	var held := Vector2(float(first.x_m), float(first.z_m))
+	for row in after:
+		if Vector2(float(row.x_m), float(row.z_m)).distance_to(held) > 0.000001:
+			_fail_once("The newly controlled figure kept walking the loop")
+		if row.other_rejoining == "true":
+			# Straight from where it stood toward its entry point.
+			var line := entry - stood
+			var offset := _other(row) - stood
+			if absf(line.normalized().cross(offset)) > 0.05:
+				_fail_once("The released figure did not walk straight back to the loop")
+		else:
+			joined += 1
+	var last: Dictionary = after.back()
+	print("Released figure stood %.2f m off the loop at %s, joined it at %s and walked on to %.0f%% of the loop" % [
+		_loop_distance(stood), stood, entry, float(last.other_loop_progress) * 100.0])
+	if joined < 60 or int(last.other_steps) <= int(first.other_steps) + 5 or float(last.other_mps) < 0.01:
+		failures.append("The released figure did not walk on around the loop after rejoining")
+
+
+## The other figure's observed position.
+func _other(row: Dictionary) -> Vector2:
+	return Vector2(float(row.other_x_m), float(row.other_z_m))
+
+
+## Whether either figure stands near enough to a probe to press a boot onto it.
+func _near_probe(row: Dictionary, slot: int) -> bool:
+	if int(row.probe_count) < slot:
+		return false
+	var probe := Vector2(_probe(row, slot, "x_m"), _probe(row, slot, "z_m"))
+	return _other(row).distance_to(probe) < NEAR_PROBE_M or Vector2(float(row.x_m), float(row.z_m)).distance_to(probe) < NEAR_PROBE_M
+
+
+## Distance from a point to the walking figure's loop, laid out in the town layout.
+func _loop_distance(point: Vector2) -> float:
+	var nearest := INF
+	for index in range(TownLayout.LOOP.size() - 1):
+		var start: Vector2 = LANDMARKS[TownLayout.LOOP[index]]
+		var finish: Vector2 = LANDMARKS[TownLayout.LOOP[index + 1]]
+		nearest = minf(nearest, point.distance_to(Geometry2D.get_closest_point_to_segment(point, start, finish)))
+	return nearest
 
 
 func _check_packed_speed(rows: Array[Dictionary]) -> void:
@@ -931,7 +1168,7 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 		failures.append("Wind route stages were missing")
 		return
 	if int(placed.back().probe_count) != LEE_PROBE:
-		failures.append("The route did not fix its five world probes (%s)" % placed.back().probe_count)
+		failures.append("The route did not fix its six world probes (%s)" % placed.back().probe_count)
 		return
 	for row in placed + filling + building:
 		if absf(float(row.wind_from_deg) - PREVAILING_FROM_DEG) > 0.01:
@@ -966,7 +1203,8 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 	var filled_depression := _probe(settled, LEE_PROBE, "depth_m") - _probe(settled, LEE_PROBE, "visible_m")
 	if _probe(settled, EXPOSED_PROBE, "compaction") > 0.001 or _probe(settled, LEE_PROBE, "compaction") > 0.001:
 		failures.append("Wind did not fill the exposed and lee prints")
-	if placed.back().probe5_in_region != "true" or settled.probe5_in_region != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
+	var lee_in_region := "probe%d_in_region" % LEE_PROBE
+	if placed.back()[lee_in_region] != "true" or settled[lee_in_region] != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
 		failures.append("Wind did not fill the lee print's visible depression")
 	if _probe(settled, SHELTERED_PROBE, "compaction") < 0.2 * _probe(first, SHELTERED_PROBE, "compaction"):
 		failures.append("The sheltered print did not outlast the exposed one")
@@ -1006,14 +1244,18 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 	print("Reversed wind: old lee -%.3f m, old windward face +%.3f m" % [worn, drifted])
 	if worn < 0.2 or drifted < 0.1:
 		failures.append("Reversing the wind did not move where the Snowdrift grows")
-	# Wind 0 freezes Snow Depth and every print once the last sweep has landed.
-	var held: Dictionary = frozen.back()
-	for row in frozen.slice(30):
-		if row.wind_elapsed_s != held.wind_elapsed_s:
-			_fail_once("Wind 0 did not stop the weather clock")
-		for probe in range(1, LEE_PROBE + 1):
+	# Wind 0 freezes Snow Depth and every print once the last sweep has landed. Only
+	# a boot can still press a print, so a probe the walking figure passes is skipped.
+	var settled_rows := frozen.slice(30)
+	for probe in range(1, LEE_PROBE + 1):
+		var trodden := false
+		for row in settled_rows:
+			trodden = trodden or _near_probe(row, probe)
+		for row in settled_rows:
+			if row.wind_elapsed_s != settled_rows.front().wind_elapsed_s:
+				_fail_once("Wind 0 did not stop the weather clock")
 			for value in ["depth_m", "compaction"]:
-				if absf(_probe(row, probe, value) - _probe(held, probe, value)) > 0.000001:
+				if absf(_probe(row, probe, value) - _probe(settled_rows.front(), probe, value)) > 0.000001 and not (value == "compaction" and trodden):
 					_fail_once("Wind 0 did not freeze Snow Depth and Footprints at every probe")
 
 

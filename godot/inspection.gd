@@ -38,6 +38,9 @@ const ROUTE_COLUMNS := [
 	"footprint_count", "footprint_image_width", "footprint_image_height", "footprint_image_bytes",
 	"footprint_tile_bytes", "upload_bytes", "upload_total_bytes", "uploaded_steps",
 	"other_figure_id", "other_x_m", "other_z_m", "other_steps",
+	"other_feet_y_m", "other_ground_y_m", "other_mps", "other_run_requested", "other_loose_depth_m", "other_grounded",
+	"other_contact_gap_m", "other_obstacle_limited", "other_boundary_limited", "other_facing_deg", "other_travel_deg",
+	"other_travel_m", "other_loop_progress", "other_rejoining",
 	"facing_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
 ]
 ## Every probe slot has the same columns, prefixed probe1_ … probe6_: its world
@@ -130,6 +133,15 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"other_figure_id": other.figure_id if other else -1,
 		"other_x_m": other.position.x if other else 0.0, "other_z_m": other.position.z if other else 0.0,
 		"other_steps": other.step_count if other else 0,
+		# The other figure walks the loop; these let a route check how it walks.
+		"other_feet_y_m": other.position.y if other else 0.0, "other_ground_y_m": other.ground_height if other else 0.0,
+		"other_mps": other.horizontal_speed if other else 0.0, "other_run_requested": other.run_requested if other else false,
+		"other_loose_depth_m": other.loose_depth if other else 0.0, "other_grounded": other.grounded if other else false,
+		"other_contact_gap_m": other.contact_gap if other else 0.0, "other_obstacle_limited": other.obstacle_limited if other else false,
+		"other_boundary_limited": other.boundary_limited if other else false,
+		"other_facing_deg": _bearing(other.facing_yaw) if other else 0.0, "other_travel_deg": _bearing(other.travel_yaw) if other else 0.0,
+		"other_travel_m": other.distance_walked if other else 0.0, "other_loop_progress": other.loop_progress if other else 0.0,
+		"other_rejoining": other.rejoining if other else false,
 		"facing_deg": _bearing(walker.facing_yaw), "travel_deg": _bearing(walker.travel_yaw), "print_deg": _bearing(walker.print_yaw),
 		"cursor_set": camera.has_cursor_ground, "cursor_x_m": camera.cursor_ground.x, "cursor_z_m": camera.cursor_ground.y,
 		"probe_count": probes.size()
@@ -144,7 +156,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
@@ -156,12 +168,21 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		surface.DETAIL_SIZE.x, surface.DETAIL_SIZE.y, surface.region_center.x, surface.region_center.y, float(surface.upload_bytes) / 1024.0,
 		surface.wind_strength, _compass(surface.wind_from()), surface.wind_elapsed, surface.wind_update_ms, surface.footprint_count,
 		surface.IMAGE_SIZE.x, surface.IMAGE_SIZE.y, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
+		_other_text(other),
 		_probe_text(),
 		"Overview %.0f m" % camera.current_distance() if camera.overview else "Distance %.1f m" % camera.distance,
 		camera.lean.length(), "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
 		"RECORDING  " + record_path if recording else notice,
 		"FRAME TRACE  %.1f / %.0f s" % [float(Time.get_ticks_usec() - frame_started_usec) / 1000000.0, FRAME_TRACE_SECONDS] if frame_recording and frame_started_usec > 0 else frame_notice
 	]
+
+
+func _other_text(other: Node3D) -> String:
+	if other == null:
+		return ""
+	return "Figure %d walks the loop · %s %.0f%% · %.1f, %.1f · %.2f m/s · steps %d" % [other.figure_id,
+		"rejoining at" if other.rejoining else "at", other.loop_progress * 100.0, other.position.x, other.position.z,
+		other.horizontal_speed, other.step_count]
 
 
 func _probe_text() -> String:

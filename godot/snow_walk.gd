@@ -27,6 +27,8 @@ func _ready() -> void:
 	second_walker.configure(surface, town, 2, TownLayout.LANDMARKS.outpost_yard_east)
 	add_child(walker)
 	add_child(second_walker)
+	# The figure you are not controlling walks the town loop, from its first corner.
+	second_walker.rejoin_loop()
 	add_child(camera)
 	add_child(inspection)
 	camera.follow(walker.position, 0.0)
@@ -44,7 +46,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var controlled := _controlled()
-	var idle := second_walker if active_figure == 0 else walker
+	var idle := _uncontrolled()
 	# The cursor is read through the view that was last drawn, where the Player saw it.
 	if focused:
 		camera.update_cursor(controlled.position)
@@ -52,7 +54,7 @@ func _physics_process(delta: float) -> void:
 			controlled.face_toward(camera.cursor_ground)
 	surface.advance(delta)
 	controlled.walk(delta, camera.global_basis, focused)
-	idle.walk(delta, camera.global_basis, false)
+	idle.walk_loop(delta)
 	camera.follow(controlled.position, delta)
 	# The detail region follows what the camera shows. Its 5 cm grid is world-aligned,
 	# so the figure's full-detail support is the same before and after it moves.
@@ -62,6 +64,10 @@ func _physics_process(delta: float) -> void:
 
 func _controlled() -> Node3D:
 	return walker if active_figure == 0 else second_walker
+
+
+func _uncontrolled() -> Node3D:
+	return second_walker if active_figure == 0 else walker
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -78,6 +84,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.physical_keycode:
 			KEY_TAB:
 				active_figure = 1 - active_figure
+				# The figure just released walks back to the loop from where it stands.
+				_uncontrolled().rejoin_loop()
 				# Frame the newly controlled figure at once, so it takes its Facing
 				# from the cursor in the view that shows it.
 				camera.follow(_controlled().position, 0.0)

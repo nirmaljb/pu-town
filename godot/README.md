@@ -3,7 +3,7 @@
 This standalone preview extends the ground milestone from issues #91–93 with
 changing snow depth, overlapping bootprints, wind and a town made of solid box
 placeholders. Two 1.7 m parka Avatars share one snow field; Tab switches which
-one you control. Each walks, runs and stands with clips exported by
+one you control, and the other walks a loop through the town. Each walks, runs and stands with clips exported by
 [`tools/characters/parka`](../tools/characters/parka/README.md); the clips follow the
 figure's step phase, its boots are bent onto the snow under them, and its
 Footprints use the same stride. Their gloves carry stand-in Player Colours. It runs without Java, LiveKit, a Room or Game state. Sharing
@@ -16,15 +16,14 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first six slices: the 100 × 56 m town laid out from that reference
+describes its first seven slices: the 100 × 56 m town laid out from that reference
 as solid placeholder boxes, on a town shelf about 5 m above the southern forest
 and joined to it by the snow-buried stair; a north-up perspective camera that
 follows the controlled figure while the mouse sets its Facing; a saved Snow
 Depth that starts Deep or Shallow by place; a north-west wind that builds
 Snowdrifts, scours windward sides and fills Footprints faster or slower by place;
-and a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
-up close.
-The second figure stays idle; the walking second figure follows later.
+a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
+up close; and a walking figure whose loop lays trails you did not watch being made.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -77,12 +76,51 @@ smoothly falls to walking at 40 cm. Repeated traffic compresses the snow and can
 make a faster Packed Path. Alternating boots press into the visible snow; the
 figures remain temporary scale and contact references, not final Avatar artwork.
 
-Tab switches between the orange and blue-grey figures, leaving the other idle.
-Both contribute anonymous bootprints to the same world field. Tracks overlap,
-remain when the detail region moves away, and fade as wind fills them. A fresh
-launch resets the snow and both figures. Both start in the outpost yard, at its
-`outpost_yard_west` and `outpost_yard_east` landmarks, (22, 4) m and (28, 4) m:
-the first in the yard's Shallow Snow, the second in its eastern Deep drift.
+Tab switches between the orange and blue-grey figures. Both contribute anonymous
+bootprints to the same world field. Tracks overlap, remain when the detail region
+moves away, and fade as wind fills them. A fresh launch resets the snow and both
+figures. Both start in the outpost yard, at its `outpost_yard_west` and
+`outpost_yard_east` landmarks, (22, 4) m and (28, 4) m: the first in the yard's
+Shallow Snow, the second in its eastern Deep drift.
+
+### The walking figure
+
+The figure you are not controlling walks a loop without stopping:
+
+outpost yard → meeting-hall gap → compound's east gate → across the courtyard →
+south gate → down the stair → southern forest → back the same way
+
+It always asks to run, so it runs where the snow is Shallow (the courtyard, the
+stair, the west of the outpost yard) and only walks in Deep Snow, and it speeds up
+on Packed Paths like you do. It faces the way it travels. It moves with the same
+speed, collision and sliding rules as the controlled figure, never through a box
+or cliff, and goes down and up the stair's one slope. Its loop is about 184 m out
+and back, about a minute at its pace.
+
+When you press Tab, the walking figure stops where it is and you take it over. The
+figure you released walks in a straight line from where it stands to the nearest
+point of the loop it can reach without contact, then carries on around the loop.
+
+Its trail is ordinary Footprints in the shared picture: it persists, fills with
+the wind like any other and overlaps yours. The loop's corners are the `loop_…`
+landmarks below and the `outpost_yard_east` and `south_gate` landmarks, listed in
+`LOOP` in [`town_layout.gd`](town_layout.gd). It keeps clear of the scene route's
+trail probe, Packed Path corridor and wind probes, and crosses the courtyard on
+its own lane, 2 m south of the route's crossing.
+
+#### Practise tracking
+
+1. Press `−` to set wind 0, so trails stay as they are while you look for them.
+2. Walk away from the walking figure, for example to the meeting hall or the
+   lodge, and let it pass through the courtyard without watching. The HUD shows
+   where it is and how far round the loop it has gone.
+3. Head into the courtyard or down to the stair and look for a line of bootprints
+   you did not make. Bootprints point the way it was going; prints in Shallow
+   Snow are spaced further apart because it was running.
+4. Follow the trail. Press F5 on it to fix a probe, then walk along and over it
+   and watch the probe's compaction rise as your prints overlap its own.
+5. Restore wind with `0`, or raise it with `=`, and watch the trail fill. It lasts
+   longer in the sheltered courtyard and on the walled stair than in the open.
 
 ### The town
 
@@ -131,6 +169,7 @@ named landmarks are, in metres:
 | `outpost_yard_west` | 22, 4 | Outpost yard; figure 1 starts here |
 | `outpost_yard_east` | 28, 4 | Outpost yard; figure 2 starts here |
 | `lodge_front` | 32, −2 | Yard south of the lodge |
+| `loop_outpost_lane` | 28, 7.5 | Loop corner: the outpost yard's south lane |
 | `meeting_hall_gap_south` | −6, 7.5 | South end of the gap between compound and meeting hall |
 | `meeting_hall_lane` | −4.5, 7.5 | That gap's Deep Snow, beside the meeting hall's west face |
 | `meeting_hall_gap` | −6, 0 | That gap, outside the east gate |
@@ -141,6 +180,13 @@ named landmarks are, in metres:
 | `south_gate` | −23.5, 2 | Courtyard, inside the south gate at the top of the stair |
 | `forest_lane` | −23.5, 22 | Forest floor, south of the foot of the stair |
 | `forest_west` | −28, 24 | Forest floor, south of the cliff beside the stair |
+| `loop_gap_south` | −7.5, 7.5 | Loop corner: the meeting-hall gap's south end, west of the route's trail |
+| `loop_gap` | −7.5, 0 | Loop corner: the meeting-hall gap, before the east gate |
+| `loop_east_gate` | −11, 0 | Loop corner: the courtyard, inside the east gate |
+| `loop_courtyard_east` | −11, −2 | Loop corner: east end of the walking figure's courtyard lane |
+| `loop_courtyard_west` | −22, −2 | Loop corner: west end of that lane, before the south gate |
+| `loop_stair_foot` | −23.5, 21 | Loop corner: forest floor below the stair |
+| `loop_forest` | −18, 21 | Loop corner: the loop's far end, in the forest east of the stair |
 
 ### Deep and Shallow Snow
 
@@ -234,7 +280,7 @@ controlled figure takes its Facing from the cursor; the other keeps its own.
 | Shift | Request running, up to 4.5 m/s where the snow allows it |
 | Mouse | Face the cursor's point on the ground; the camera leans up to 3 m toward it |
 | Mouse wheel | Zoom from 10 to 30 m, or one step further out to the whole-map overview |
-| Tab | Switch the controlled figure |
+| Tab | Switch the controlled figure; the released figure walks back to the loop |
 | `−` / `=` | Reduce/increase wind from 0 to 16 in steps of one; keypad minus/plus also work |
 | `0` | Restore the default wind strength of 1 |
 | `[` / `]` | Turn the wind 45° anticlockwise/clockwise; it starts from the north-west |
@@ -262,7 +308,11 @@ picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
 total (`upload_total_bytes`) and the footsteps those uploads carried
 (`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`), the
 weather clock, the wind's work in the latest physics frame (`wind_update_ms`),
-image allocation and the other figure's position. Each F5 probe stays at its world
+image allocation and the walking figure: its identity, position, step count and
+progress round the loop as a fraction of its length (`other_loop_progress`, the
+point where it will join while `other_rejoining` is true), together with its feet
+and ground heights, speed, run request, loose depth, contact, obstruction, Facing
+and travel bearings and distance walked (`other_…` columns). Each F5 probe stays at its world
 location when you walk away or switch figures. For every probe the CSV reports
 `probe_count` and, in columns `probe1_…` to `probe6_…`, its position (`x_m`,
 `z_m`), loose Snow Depth (`depth_m`), visible snow above the ground after packing
@@ -280,7 +330,8 @@ capture alone is not packaged-platform or hardware performance acceptance.
 For a manual check, reduce wind to zero, walk a trail across the outpost yard and press
 F5. Leave the detail region, then return and check that the trail remains at the
 same place. Switch figures and follow or cross it to inspect overlapping prints
-and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
+and Packed Paths, then find and follow the walking figure's trail as described
+under [Practise tracking](#practise-tracking). Compare Shift movement in shallow and deep snow, approach the
 lodge diagonally to inspect sliding along its sides, then increase wind and watch
 the fixed probe and visible trail fade. Lay probes in the courtyard, in the open
 outpost yard and against the lodge's south face, raise the wind to 16 and compare
@@ -320,10 +371,12 @@ map, that in play the figure stands far enough inside it for every footstep to
 land in full detail, and that Footprint uploads never exceed the 2 × 2 tiles each
 uploaded footstep may touch. It lays a probed trail in the
 gap, walks through the east gate into the courtyard, is stopped by the courtyard
-wall, crosses the courtyard and runs at full speed in its Shallow Snow. Tab, with the
-cursor west of the figure, gives the second figure a westward Facing; it then
-walks from the outpost yard to overlap the trail. The first figure
-returns through the gate to find the trail retained, and walks south until the
+wall, crosses the courtyard and runs at full speed in its Shallow Snow. Meanwhile the
+walking figure has crossed the courtyard on its own lane while the controlled
+figure was at least 15 m away. The route picks a point of that trail from the
+public record, walks to it, fixes a probe there and follows the trail the way it
+was laid, then walks back and forth over it until the probe's compaction rises.
+The figure then returns through the gate to find its own trail retained, and walks south until the
 cliff rock at the shelf's edge stops it. It then crosses
 the courtyard to the south gate and walks down the stair to the forest,
 observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
@@ -343,9 +396,18 @@ faster still; the lodge's drift grows from 60 cm toward 1.2 m without shrinking
 and settles, and the shed's face scours to the 3 cm floor and holds. The figure
 wades through the drift with Shift held at walking speed. Four turns of `]`
 reverse the wind: the lodge's drift wears away and one builds on the shed's face.
-Wind 0 then freezes every probe's depth and compaction. Finally it zooms to
-the 30 m end of the play range, on to the whole-map overview, which must frame the
-town, and back in to 10 m, capturing graphical views along the way. Throughout, the
+During the wind stages the tracked trail fills whenever no figure is near it.
+Wind 0 then freezes every probe's depth, and the compaction of every probe no
+figure walks past. It zooms to the 30 m end of the play range, on to the
+whole-map overview, which must frame the town, and back in to 10 m, capturing
+graphical views along the way. Finally Tab, with the cursor west of the figure,
+hands control to the walking figure wherever the loop has taken it, which then
+faces west and stands still, while the released figure walks straight from where
+it stood in the outpost yard back onto the loop and on around it. Throughout, the
+walking figure stays on its loop and never goes backwards round it, keeps snow
+contact, runs in Shallow Snow and walks in Deep at the speed its loose snow
+allows, faces its travel, passes through the courtyard and goes down and back up
+the stair. Throughout, the
 camera stays a 40° perspective view at −55° pitch with north up, its lean stays
 within 3 m, its play distance within 10–30 m, and without lean it holds the
 figure slightly below the centre of the screen. Every

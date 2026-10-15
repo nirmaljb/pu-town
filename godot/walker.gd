@@ -4,6 +4,7 @@ extends Node3D
 ## The figure is the parka Avatar; its steps, Footprints and clips share one gait.
 ## Facing turns the upper body. Legs, boots and Footprints keep the direction of
 ## travel; standing still, the legs pivot after the upper body without stepping.
+## The figure you are not controlling walks the town loop with these same rules.
 
 const Avatar = preload("res://parka_avatar.gd")
 const TownLayout = preload("res://town_layout.gd")
@@ -16,6 +17,9 @@ const LIMIT := TownLayout.HALF_EXTENTS - Vector2.ONE * FOOTPRINT_RADIUS
 const FACING_DEAD_ZONE := 0.25
 ## Standing still, the legs turn so the upper body twists no further than this.
 const STANDING_TWIST := PI / 3.0
+## A loop walker this close to its next point has reached it. Each frame's motion
+## stops at that point, so it walks the loop's straight lines exactly.
+const LOOP_ARRIVAL := 0.0001
 
 var figure_id := 1
 var direction := Vector2.ZERO
@@ -39,6 +43,9 @@ var has_footprint := false
 var facing_yaw := 0.0
 var travel_yaw := 0.0
 var print_yaw := 0.0
+## Fraction of the loop's length where the loop walker is; while it rejoins, where it will join.
+var loop_progress := 0.0
+var rejoining := false
 var stance := Node3D.new()
 var avatar := Avatar.new()
 var surface: Node3D
@@ -50,6 +57,8 @@ var _landed_side := 1
 var _heading := 0.0
 var _moving := false
 var _run_amount := 0.0
+var _rejoin_point := Vector2.ZERO
+var _loop_corner := 0
 
 
 func configure(snow: Node3D, town: Node3D, identity: int, spawn: Vector2) -> void:
@@ -86,14 +95,62 @@ func walk(delta: float, camera_basis: Basis, controlled: bool) -> void:
 			float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 			float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W))
 		).limit_length()
+	var right := Vector3(camera_basis.x.x, 0, camera_basis.x.z).normalized()
+	var back := Vector3(camera_basis.z.x, 0, camera_basis.z.z).normalized()
+	var travel := right * direction.x + back * direction.y
+	_move(delta, Vector2(travel.x, travel.z))
+
+
+## Set off for the loop from where the figure stands. It walks straight to the
+## nearest loop point in reach, then on around the loop.
+func rejoin_loop() -> void:
+	var entry: Dictionary = layout.loop_entry(Vector2(position.x, position.z), FOOTPRINT_RADIUS)
+	_rejoin_point = entry.point
+	_loop_corner = entry.corner
+	loop_progress = entry.progress
+	rejoining = true
+
+
+## Walk the town loop unattended: always requesting a run, so it runs where the
+## snow allows, facing the way it travels. It moves, collides and slides exactly
+## as the controlled figure does.
+func walk_loop(delta: float) -> void:
+	run_requested = true
+	var here := Vector2(position.x, position.z)
+	var goal := _loop_goal()
+	if here.distance_to(goal) < LOOP_ARRIVAL:
+		_arrive()
+		goal = _loop_goal()
+	var offset := goal - here
+	direction = offset.normalized()
+	_move(delta, direction, offset.length(), true)
+	here = Vector2(position.x, position.z)
+	if here.distance_to(goal) < LOOP_ARRIVAL:
+		_arrive()
+	if not rejoining:
+		loop_progress = layout.loop_progress(_loop_corner, here)
+
+
+func _loop_goal() -> Vector2:
+	return _rejoin_point if rejoining else layout.loop_corners[_loop_corner]
+
+
+func _arrive() -> void:
+	if rejoining:
+		rejoining = false
+	else:
+		_loop_corner = (_loop_corner + 1) % layout.loop_corners.size()
+
+
+## Move along a horizontal world direction of at most unit length, no further than
+## `reach`, at the speed the loose snow allows.
+func _move(delta: float, travel: Vector2, reach: float = INF, face_travel: bool = false) -> void:
 	var here := Vector2(position.x, position.z)
 	loose_depth = surface.sample_loose_depth(here)
 	var allowance := 1.0 - smoothstep(0.10, 0.40, loose_depth)
 	var speed := lerpf(WALK_SPEED, RUN_SPEED, allowance) if run_requested else WALK_SPEED
-	var right := Vector3(camera_basis.x.x, 0, camera_basis.x.z).normalized()
-	var back := Vector3(camera_basis.z.x, 0, camera_basis.z.z).normalized()
-	var motion := (right * direction.x + back * direction.y) * speed * delta
-	var desired := here + Vector2(motion.x, motion.z)
+	var motion := (travel * speed * delta).limit_length(reach)
+	var desired := here + motion
 	var bounded := desired.clamp(-LIMIT, LIMIT)
 	boundary_limited = not bounded.is_equal_approx(desired)
 	var target: Vector2 = layout.move_with_collisions(here, bounded, FOOTPRINT_RADIUS)
@@ -108,6 +165,8 @@ func walk(delta: float, camera_basis: Basis, controlled: bool) -> void:
 	if _moving:
 		_heading = atan2(-movement.x, -movement.y)
 		travel_yaw = _heading
+		if face_travel:
+			facing_yaw = _heading
 		_run_amount = clampf((horizontal_speed - WALK_SPEED) / (RUN_SPEED - WALK_SPEED), 0, 1)
 		_step_length = lerpf(avatar.gait.walk.step_m, avatar.gait.run.step_m, _run_amount)
 		_step_progress += travelled
