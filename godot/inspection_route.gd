@@ -85,7 +85,7 @@ func _run() -> void:
 	_tap(KEY_0)
 	await _leg([KEY_W, KEY_A], 18.0, "west boundary")
 	await _leg([KEY_W, KEY_A], 1.0, "boundary blocked")
-	for step in range(20):
+	for step in range(26):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
 	if not headless:

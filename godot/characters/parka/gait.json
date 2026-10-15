@@ -1,0 +1,22 @@
+{
+  "source": "tools/characters/parka/gait.py",
+  "clips": {
+    "walk": "Walk",
+    "run": "Run",
+    "stand": "Stand"
+  },
+  "phase": "one cycle is two steps; the left boot lands at 0 and the right at 0.5",
+  "boot_lateral_m": 0.105,
+  "walk": {
+    "speed_mps": 2.25,
+    "step_m": 0.5333,
+    "duty": 0.6,
+    "landing_ahead_m": 0.31
+  },
+  "run": {
+    "speed_mps": 4.5,
+    "step_m": 0.95,
+    "duty": 0.3,
+    "landing_ahead_m": 0.26
+  }
+}

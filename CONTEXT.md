@@ -36,7 +36,7 @@ The developer act of releasing a set of saved designs as the Published Avatar Co
 _Avoid_: Save, deploy
 
 **Player Colour**:
-A visual marker assigned to a Player that is distinct from those of other current Players in the same Room. It stays with the Room Membership and does not determine Player identity.
+A visual marker assigned to a Player that is distinct from those of other current Players in the same Room. It stays with the Room Membership and does not determine Player identity. It may be shown on part of the Player's Avatar.
 _Avoid_: Player ID
 
 **Room**:
