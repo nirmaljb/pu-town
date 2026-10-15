@@ -20,7 +20,7 @@ var observed_focus := false
 var observed_input := Vector2.ZERO
 var observed_speed := 0.0
 var observed_position := Vector3.ZERO
-var observed_camera_size := 0.0
+var observed_camera_distance := 0.0
 var checkpoint := 0
 var probe_set := false
 var probe := Vector2.ZERO
@@ -31,12 +31,14 @@ var latest := {}
 
 const ROUTE_COLUMNS := [
 	"elapsed_ms", "x_m", "feet_y_m", "z_m", "ground_y_m", "input_x", "input_y", "horizontal_mps", "grounded",
-	"contact_gap_m", "boundary_limited", "travel_m", "ortho_m", "pitch_deg", "yaw_deg", "focused", "fps",
+	"contact_gap_m", "boundary_limited", "travel_m", "camera_projection", "camera_fov_deg", "camera_distance_m",
+	"overview", "lean_x_m", "lean_z_m", "lean_m", "pitch_deg", "yaw_deg", "focused", "fps",
 	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
 	"patch_x_m", "patch_z_m", "patch_size_m", "wind_strength", "wind_elapsed_s", "footprint_count",
 	"footprint_image_width", "footprint_image_height", "footprint_image_bytes", "probe_set", "probe_x_m", "probe_z_m",
-	"probe_depth_m", "probe_uncompressed_depth_m", "probe_compaction", "probe_in_patch", "other_figure_id", "other_x_m", "other_z_m", "other_steps"
+	"probe_depth_m", "probe_uncompressed_depth_m", "probe_compaction", "probe_in_patch", "other_figure_id", "other_x_m", "other_z_m", "other_steps",
+	"facing_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m"
 ]
 
 
@@ -51,6 +53,8 @@ func _ready() -> void:
 	style.content_margin_bottom = 12
 	style.set_corner_radius_all(8)
 	panel.add_theme_stylebox_override("panel", style)
+	# The cursor sets Facing everywhere in the view, including over the HUD.
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_font_size_override("font_size", 16)
 	label.add_theme_color_override("font_color", Color("e3edf1"))
 	panel.add_child(label)
@@ -65,7 +69,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	observed_input = walker.direction
 	observed_speed = walker.horizontal_speed
 	observed_position = walker.position
-	observed_camera_size = camera.size
+	observed_camera_distance = camera.current_distance()
 	tick += 1
 	if probe_set:
 		# Depths are measured vertically above the ground at the probe.
@@ -79,8 +83,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	var edge: Vector2 = surface.HALF_EXTENTS
 	for x in [-edge.x, edge.x]:
 		for z in [-edge.y, edge.y]:
-			var corner := camera.unproject_position(Vector3(x, 1.0, z))
-			whole_map_visible = whole_map_visible and Rect2(Vector2.ZERO, viewport_size).has_point(corner)
+			var corner := Vector3(x, 1.0, z)
+			whole_map_visible = whole_map_visible and not camera.is_position_behind(corner) and Rect2(Vector2.ZERO, viewport_size).has_point(camera.unproject_position(corner))
 	var probe_offset: Vector2 = (probe - surface.patch_center).abs()
 	latest = {
 		"elapsed_ms": Time.get_ticks_msec() - started_ms,
@@ -89,7 +93,10 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"input_x": walker.direction.x, "input_y": walker.direction.y,
 		"horizontal_mps": walker.horizontal_speed, "grounded": walker.grounded,
 		"contact_gap_m": walker.contact_gap, "boundary_limited": walker.boundary_limited,
-		"travel_m": walker.distance_walked, "ortho_m": camera.size,
+		"travel_m": walker.distance_walked,
+		"camera_projection": "perspective" if camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "orthogonal",
+		"camera_fov_deg": camera.fov, "camera_distance_m": camera.current_distance(), "overview": camera.overview,
+		"lean_x_m": camera.lean.x, "lean_z_m": camera.lean.y, "lean_m": camera.lean.length(),
 		"pitch_deg": camera.rotation_degrees.x, "yaw_deg": camera.rotation_degrees.y,
 		"focused": focused, "fps": Engine.get_frames_per_second(),
 		"figure_screen_x": figure_screen.x / viewport_size.x,
@@ -109,7 +116,9 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"probe_in_patch": probe_set and maxf(probe_offset.x, probe_offset.y) <= surface.PATCH_SIZE * 0.5,
 		"other_figure_id": other.figure_id if other else -1,
 		"other_x_m": other.position.x if other else 0.0, "other_z_m": other.position.z if other else 0.0,
-		"other_steps": other.step_count if other else 0
+		"other_steps": other.step_count if other else 0,
+		"facing_deg": _bearing(walker.facing_yaw), "travel_deg": _bearing(walker.travel_yaw), "print_deg": _bearing(walker.print_yaw),
+		"cursor_set": camera.has_cursor_ground, "cursor_x_m": camera.cursor_ground.x, "cursor_z_m": camera.cursor_ground.y
 	}
 	if recording:
 		_write_observation()
@@ -118,21 +127,29 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\nOrtho %5.1f m · angle 55° / 45° · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
 		"obstacle" if walker.obstacle_limited else ("boundary" if walker.boundary_limited else "clear"),
 		walker.snow_depth, walker.loose_depth, walker.sink_depth,
 		walker.foot_compaction * 100.0, walker.step_count, walker.distance_walked,
+		latest.facing_deg, latest.travel_deg,
+		"%.1f, %.1f" % [camera.cursor_ground.x, camera.cursor_ground.y] if camera.has_cursor_ground else "not yet seen",
 		surface.PATCH_SIZE, surface.PATCH_SIZE, surface.patch_center.x, surface.patch_center.y,
 		surface.wind_strength, surface.wind_elapsed, surface.footprint_count,
 		surface.IMAGE_SIZE.x, surface.IMAGE_SIZE.y, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
 		"Probe %.1f, %.1f: packed %.0f%% · %s" % [probe.x, probe.y, probe_compaction * 100.0, "in patch" if latest.probe_in_patch else "outside patch"] if probe_set else "F5 follows the latest boot print with a fixed world probe",
-		camera.size, "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
+		"Overview %.0f m" % camera.current_distance() if camera.overview else "Distance %.1f m" % camera.distance,
+		camera.lean.length(), "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
 		"RECORDING  " + record_path if recording else notice,
 		"FRAME TRACE  %.1f / %.0f s" % [float(Time.get_ticks_usec() - frame_started_usec) / 1000000.0, FRAME_TRACE_SECONDS] if frame_recording and frame_started_usec > 0 else frame_notice
 	]
+
+
+## A compass bearing in degrees, clockwise from north, for a yaw about +Y.
+func _bearing(yaw: float) -> float:
+	return fposmod(-rad_to_deg(yaw), 360.0)
 
 
 func _write_observation() -> void:
@@ -172,7 +189,7 @@ func start_frame_recording() -> void:
 	frame_notice = "Frame trace starting; walk for 60 real seconds"
 	frame_recording.store_csv_line(PackedStringArray([
 		"frame", "interval_start_usec", "interval_end_usec", "frame_ms", "elapsed_ms", "focused", "moving",
-		"input_x", "input_y", "horizontal_mps", "x_m", "feet_y_m", "z_m", "ortho_m",
+		"input_x", "input_y", "horizontal_mps", "x_m", "feet_y_m", "z_m", "camera_distance_m",
 		"viewport_width", "viewport_height", "window_width", "window_height", "observation_age_ms"
 	]))
 	print("Recording 60-second frame trace: ", ProjectSettings.globalize_path(frame_record_path))
@@ -195,7 +212,7 @@ func _process(_delta: float) -> void:
 		str(frame_count), str(previous_frame_usec), str(now), str(float(now - previous_frame_usec) / 1000.0),
 		str(float(now - frame_started_usec) / 1000.0), str(observed_focus), str(observed_speed > 0.01),
 		str(observed_input.x), str(observed_input.y), str(observed_speed),
-		str(observed_position.x), str(observed_position.y), str(observed_position.z), str(observed_camera_size),
+		str(observed_position.x), str(observed_position.y), str(observed_position.z), str(observed_camera_distance),
 		str(viewport_size.x), str(viewport_size.y), str(window_size.x), str(window_size.y),
 		str(float(now - observed_usec) / 1000.0)
 	]))

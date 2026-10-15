@@ -16,11 +16,12 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first two slices: the 100 × 56 m town laid out from that reference
+describes its first three slices: the 100 × 56 m town laid out from that reference
 as solid placeholder boxes, on a town shelf about 5 m above the southern forest
-and joined to it by the snow-buried stair, with the existing snow, camera and
-idle second figure. Saved Snow Depth with wind drifts, the perspective camera and
-the walking second figure follow later.
+and joined to it by the snow-buried stair; and a north-up perspective camera that
+follows the controlled figure while the mouse sets its Facing. The snow and the
+idle second figure are unchanged. Saved Snow Depth with wind drifts and the
+walking second figure follow later.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -66,8 +67,8 @@ this source-project slice.
 
 ## Inspect
 
-Walk with WASD at 2.25 m/s. Directions follow the camera's horizontal axes;
-diagonal input is normalized. Hold Shift to request running at up to 4.5 m/s.
+Walk with WASD at 2.25 m/s. Directions follow the screen, whose north is always
+up: W walks north, S south, D east and A west. Diagonal input is normalized. Hold Shift to request running at up to 4.5 m/s.
 Loose snow at or below 10 cm allows full running, while the permitted speed
 smoothly falls to walking at 40 cm. Repeated traffic compresses the snow and can
 make a faster Packed Path. Alternating boots press into the visible snow; the
@@ -137,14 +138,34 @@ named landmarks are, in metres:
 | `forest_lane` | −23.5, 22 | Forest floor, south of the foot of the stair |
 | `forest_west` | −28, 24 | Forest floor, south of the cliff beside the stair |
 
-The orthographic camera starts at 45° yaw, −55° pitch and a 12 m view size, wide
-enough to show the Avatar among the buildings and snow around it.
-Use the mouse wheel to zoom from 3.5 m to a 118 m whole-map view. At the widest
-view it frames the ground's centre; as the view closes it blends toward following
-the figure.
+### Camera and Facing
+
+The camera is perspective, with a 40° vertical field of view and a −55° pitch,
+16 m from its focus. North is always up and the camera never turns. Its focus
+sits a little north of the controlled figure, so the figure stands slightly below
+the centre of the screen at every play distance. The focus leans toward the
+cursor's point on the ground, by a quarter of the cursor's distance from the
+figure and never more than 3 m, so you see further where you look. The mouse
+wheel zooms from 10 to 30 m. One step out beyond 30 m opens a whole-map overview
+for inspection, which frames the map rectangle around its centre without lean;
+one step in returns to 30 m.
+
+The figure faces the cursor's point on the ground, including while standing
+still. A cursor within 25 cm of the figure, or outside the window, leaves Facing
+as it was. The upper body, from the lower spine to the head, turns toward Facing;
+the hips, legs and boots keep stepping in the direction of travel, so bootprints
+point where the figure went and speed is unchanged whichever way it faces.
+Standing still, the legs pivot once the upper body has turned 60° from them,
+without stepping, so turning in place leaves no prints. After Tab, the newly
+controlled figure takes its Facing from the cursor; the other keeps its own.
 
 | Control | Effect |
 | --- | --- |
+| WASD | Walk relative to the screen: W north, S south, D east, A west; diagonals are normalized |
+| Shift | Request running, up to 4.5 m/s where the snow allows it |
+| Mouse | Face the cursor's point on the ground; the camera leans up to 3 m toward it |
+| Mouse wheel | Zoom from 10 to 30 m, or one step further out to the whole-map overview |
+| Tab | Switch the controlled figure |
 | `−` / `=` | Reduce/increase wind from 0 to 16 in steps of one; keypad minus/plus also work |
 | `0` | Restore the default wind strength of 1 |
 | F1 | Toggle the observation HUD |
@@ -161,12 +182,16 @@ accumulation beside selected obstacles. Movement pauses when the window loses
 focus, but the scene and wind keep advancing.
 
 The HUD and CSV expose figure identity, position, the ground height beneath the
-figure (`ground_y_m`), speed, run request, Snow Depth above that ground and
+figure (`ground_y_m`), Facing, the latest travel and bootprint directions as
+compass bearings (`facing_deg`, `travel_deg`, `print_deg`), the cursor's ground
+point (`cursor_x_m`, `cursor_z_m`), speed, run request, Snow Depth above that ground and
 loose depth, compaction, sinking, contact gap, obstacle/boundary contact, steps,
 the moving patch, wind, image allocation and the other figure's position. The F5
 probe stays at its world location when you walk away or switch figures; its depth,
 compaction and whether it lies in the detailed patch remain observable. The CSV
-also records input, camera orientation, framing, focus and elapsed time.
+also records input, the camera's projection, field of view, distance, overview
+state, lean (`lean_x_m`, `lean_z_m`, `lean_m`), pitch and yaw, framing, focus and
+elapsed time.
 
 Godot writes observations, frame traces and captures into the project's local
 application-data directory, outside this checkout. Use the editor's **Project →
@@ -181,10 +206,12 @@ lodge diagonally to inspect sliding along its sides, then increase wind and watc
 the fixed probe and visible trail fade. Walk out of the compound's south gate,
 down the stair to the forest and back up, and check that boots stay on the snow,
 the HUD's ground height changes by 5 m and the cliff rock stops you on both
-levels. Check close and overview framing, snow contact, and the transition
-between detailed and distant snow while moving.
+levels. Move the cursor round the standing figure to turn it in place without
+prints, then walk while facing elsewhere and check that the bootprints follow the
+travel. Check close and overview framing, the camera's lean toward the cursor,
+snow contact, and the transition between detailed and distant snow while moving.
 
-The scene route sends keyboard and wheel events through Godot's input API and
+The scene route sends keyboard, wheel and mouse-movement events through Godot's input API and
 checks the public observation CSV without addressing private scene nodes, mesh
 ordering or procedural samples. Its destinations are the named landmarks in
 [`town_layout.gd`](town_layout.gd), and its bounds come from the same map rectangle:
@@ -196,18 +223,27 @@ ordering or procedural samples. Its destinations are the named landmarks in
 Press **F7** in the scene to begin and keep the window focused. Add `--auto-start`
 after `--snow-scene-check` to skip the F7 gate; focus is still required. The route
 pauses on focus loss and fails after 60 seconds without focus. Starting from the
-outpost yard, it walks and runs in shallow and deep snow and is stopped by the
+outpost yard, it moves the cursor round the standing figure and checks that
+Facing points at the cursor's ground point with no new bootprint, leans the
+camera to its 3 m bound toward a corner of the view and back, and walks north and
+south while facing east, with prints and speed following the travel. It walks and
+runs in shallow and deep snow and is stopped by the
 lodge. It lays a probed trail in the meeting-hall gap, walks through the east gate
 into the courtyard, is stopped by the courtyard wall and crosses the courtyard.
-It then shows a Packed Path's running advantage in the courtyard's deep snow. The
-second figure walks from the outpost yard to overlap the trail. The first figure
+It then shows a Packed Path's running advantage in the courtyard's deep snow. Tab, with the
+cursor west of the figure, gives the second figure a westward Facing; it then
+walks from the outpost yard to overlap the trail. The first figure
 returns through the gate to find the trail retained, watches wind erase it, and
 walks south until the cliff rock at the shelf's edge stops it. It then crosses
 the courtyard to the south gate and walks down the stair to the forest,
 observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
 speed on the slope. On the forest floor the map edge and the cliff beside the
 stair each stop it, and it climbs the stair back to the gate. Finally it zooms to
-the whole-map overview and back, capturing graphical views along the way. Every
+the 30 m end of the play range, on to the whole-map overview, which must frame the
+town, and back in to 10 m, capturing graphical views along the way. Throughout, the
+camera stays a 40° perspective view at −55° pitch with north up, its lean stays
+within 3 m, its play distance within 10–30 m, and without lean it holds the
+figure slightly below the centre of the screen. Every
 navigation leg must reach its landmark. The process returns nonzero on failure. `--walk-scene-check` remains an alias; the
 existing `--script res://tests/walk_scene.gd` launcher opens the same route.
 

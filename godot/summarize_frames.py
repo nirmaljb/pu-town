@@ -88,7 +88,9 @@ def summarize(path: Path) -> dict:
             axis: [min(float(row[field]) for row in rows), max(float(row[field]) for row in rows)]
             for axis, field in (("x", "x_m"), ("z", "z_m"))
         },
-        "ortho_range_m": [min(float(row["ortho_m"]) for row in rows), max(float(row["ortho_m"]) for row in rows)],
+        # Traces before the perspective camera recorded an orthographic view size.
+        "camera_range_m": [min(float(row.get("camera_distance_m", row.get("ortho_m"))) for row in rows),
+                           max(float(row.get("camera_distance_m", row.get("ortho_m"))) for row in rows)],
         "resolutions": [
             {"viewport_width": width, "viewport_height": height, "window_width": window_width, "window_height": window_height}
             for width, height, window_width, window_height in sorted(resolutions)

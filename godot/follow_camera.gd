@@ -1,0 +1,119 @@
+extends Camera3D
+## A north-up perspective camera that follows the controlled figure. Its yaw never
+## changes. Its focus leans toward the cursor's point on the ground, and the wheel
+## zooms through the play range or out to a whole-map overview of the town.
+
+const TownLayout = preload("res://town_layout.gd")
+const FIELD_OF_VIEW := 40.0
+const PITCH := -55.0
+const PLAY_DISTANCE := 16.0
+const MIN_DISTANCE := 10.0
+const MAX_DISTANCE := 30.0
+const ZOOM_STEP := 1.15
+const MAX_LEAN := 3.0
+## The focus leans by this share of the cursor's offset from the figure. Below one,
+## the lean converges while the cursor holds still on screen.
+const LEAN_SHARE := 0.25
+const LEAN_RATE := 6.0
+## The focus sits this share of the distance north of the figure, so the figure
+## stands slightly below the centre of the screen at every play distance.
+const FRAMING_SHARE := 0.075
+## The overview frames the map rectangle with this margin, from the forest floor
+## to the top of the cliff rock.
+const OVERVIEW_MARGIN := 3.0
+const OVERVIEW_HEIGHTS := Vector2(TownLayout.FOREST_GROUND, TownLayout.SHELF_GROUND + 2.0)
+
+var distance := PLAY_DISTANCE
+var overview := false
+var lean := Vector2.ZERO
+var focus := Vector3.ZERO
+var cursor_inside := false
+var cursor_screen := Vector2.ZERO
+var has_cursor_ground := false
+var cursor_ground := Vector2.ZERO
+var _cursor_offset := Vector2.ZERO
+
+
+func _ready() -> void:
+	projection = PROJECTION_PERSPECTIVE
+	keep_aspect = KEEP_HEIGHT
+	fov = FIELD_OF_VIEW
+	near = 0.1
+	far = 400.0
+	rotation_degrees = Vector3(PITCH, 0.0, 0.0)
+	current = true
+	get_window().mouse_exited.connect(func() -> void: cursor_inside = false)
+
+
+func zoom_in() -> void:
+	if overview:
+		overview = false
+		distance = MAX_DISTANCE
+	else:
+		distance = maxf(MIN_DISTANCE, distance / ZOOM_STEP)
+
+
+func zoom_out() -> void:
+	if distance >= MAX_DISTANCE - 0.001:
+		overview = true
+	else:
+		distance = minf(MAX_DISTANCE, distance * ZOOM_STEP)
+
+
+func current_distance() -> float:
+	return _overview_distance() if overview else distance
+
+
+func point_at(screen: Vector2) -> void:
+	cursor_screen = screen
+	cursor_inside = true
+
+
+## Find the cursor's point on the horizontal plane through the figure's feet.
+## While the cursor is outside the window the last point holds.
+func update_cursor(figure: Vector3) -> void:
+	if not cursor_inside:
+		return
+	var origin := project_ray_origin(cursor_screen)
+	var ray := project_ray_normal(cursor_screen)
+	if ray.y > -0.0001:
+		return
+	var hit := origin + ray * ((figure.y - origin.y) / ray.y)
+	cursor_ground = Vector2(hit.x, hit.z)
+	# The lean follows the offset the Player saw, before the figure moves this frame.
+	_cursor_offset = cursor_ground - Vector2(figure.x, figure.z)
+	has_cursor_ground = true
+
+
+## Frame `figure`. A zero `delta` moves straight to the new figure, as after Tab.
+func follow(figure: Vector3, delta: float) -> void:
+	var target_lean := lean
+	if overview:
+		target_lean = Vector2.ZERO
+	elif cursor_inside and has_cursor_ground:
+		target_lean = (_cursor_offset * LEAN_SHARE).limit_length(MAX_LEAN)
+	lean = lean.lerp(target_lean, 1.0 - exp(-LEAN_RATE * delta)).limit_length(MAX_LEAN)
+	if overview:
+		focus = Vector3(0.0, (OVERVIEW_HEIGHTS.x + OVERVIEW_HEIGHTS.y) * 0.5, 0.0)
+		position = focus + basis.z * _overview_distance()
+	else:
+		focus = figure + Vector3(lean.x, 0.0, lean.y - distance * FRAMING_SHARE)
+		position = focus + basis.z * distance
+
+
+## The nearest distance from the map centre at which every corner of the map
+## rectangle, at both ground levels, lies inside the view.
+func _overview_distance() -> float:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var tan_vertical := tan(deg_to_rad(fov) * 0.5)
+	var tan_horizontal := tan_vertical * viewport_size.x / viewport_size.y
+	var centre := Vector3(0.0, (OVERVIEW_HEIGHTS.x + OVERVIEW_HEIGHTS.y) * 0.5, 0.0)
+	var edge := TownLayout.HALF_EXTENTS + Vector2.ONE * OVERVIEW_MARGIN
+	var to_view := basis.inverse()
+	var needed := 0.0
+	for x in [-edge.x, edge.x]:
+		for z in [-edge.y, edge.y]:
+			for y in [OVERVIEW_HEIGHTS.x, OVERVIEW_HEIGHTS.y]:
+				var local := to_view * (Vector3(x, y, z) - centre)
+				needed = maxf(needed, local.z + maxf(absf(local.x) / tan_horizontal, absf(local.y) / tan_vertical))
+	return needed

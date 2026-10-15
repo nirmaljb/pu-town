@@ -1,7 +1,9 @@
 extends Node
-## Drive the running scene through ordinary keyboard/wheel events and public CSV.
+## Drive the running scene through ordinary keyboard, wheel and mouse-movement
+## events and public CSV.
 ## Headless event replay is explicitly labelled; it is not OS input or visual QA.
 ## Destinations and bounds come from the town layout definition, not the running scene.
+## The camera is north-up, so W walks north, S south, D east and A west.
 
 const TownLayout = preload("res://town_layout.gd")
 const LANDMARKS := TownLayout.LANDMARKS
@@ -12,6 +14,18 @@ const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
 const LEVEL_DROP_M := 5.0
 const CONTACT_BOUND_M := 0.002
+# The specified camera: perspective, 40° field of view, −55° pitch, north up,
+# a 10–30 m play range and a lean of at most 3 m.
+const CAMERA_FOV_DEG := 40.0
+const CAMERA_PITCH_DEG := -55.0
+const PLAY_RANGE_M := Vector2(10.0, 30.0)
+const MAX_LEAN_M := 3.0
+# Cursor points around the figure, as screen offsets in viewport heights and the
+# compass bearing each shows on a north-up view.
+const SWEEP := [
+	[Vector2(0, -0.2), 0.0], [Vector2(0.2, -0.2), 45.0], [Vector2(0.2, 0), 90.0], [Vector2(0.2, 0.2), 135.0],
+	[Vector2(0, 0.2), 180.0], [Vector2(-0.2, 0.2), 225.0], [Vector2(-0.2, 0), 270.0], [Vector2(-0.2, -0.2), 315.0],
+]
 
 var failures: Array[String] = []
 var stages := {}
@@ -19,6 +33,8 @@ var arrivals: Array[Dictionary] = []
 var checkpoint := 0
 var route_path := ""
 var headless := false
+# Where the controlled figure stands on screen with no lean, as viewport fractions.
+var figure_screen := Vector2(0.5, 0.5)
 
 
 func _ready() -> void:
@@ -48,48 +64,62 @@ func _run() -> void:
 		return
 
 	await _leg([], 0.5, "initial idle")
+	var idle_row: Dictionary = _read_rows().back()
+	figure_screen = Vector2(float(idle_row.figure_screen_x), float(idle_row.figure_screen_y))
+	# Facing follows the cursor round the standing figure without a step.
+	await _sweep_cursor("turn in place")
+	# The camera leans toward a cursor in the corner of the view, but no further than its bound.
+	await _cursor_leg(Vector2(0.48, -0.48), [], 1.5, "lean to corner")
+	# A cursor resting on the figure gives no Facing and no lean, so the camera centres it again.
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure")
 	await _short_steps()
 	# Both figures start in the outpost yard, where shallow and deep snow mix.
-	await _leg([KEY_W], 2.0, "straight walk")
-	await _leg([KEY_S], 2.0, "straight return")
-	await _leg([KEY_W, KEY_D], 2.0, "diagonal walk")
-	await _leg([KEY_S, KEY_A], 2.0, "diagonal return")
-	await _leg([KEY_S, KEY_D, KEY_SHIFT], 2.5, "run through thin snow")
+	await _leg([KEY_W, KEY_A], 2.0, "north-west walk")
+	await _leg([KEY_S, KEY_D], 2.0, "south-east return")
+	# Facing east, the figure still walks north and back, at walking speed, with its prints.
+	await _cursor_leg(Vector2(0.3, 0), [KEY_W], 2.0, "walk north facing east")
+	await _cursor_leg(Vector2(0.3, 0), [KEY_S], 2.0, "walk south facing east")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor back on figure")
+	await _leg([KEY_D, KEY_SHIFT], 2.5, "run through thin snow")
 	await _goto(LANDMARKS.lodge_front, "reach lodge front")
-	await _leg([KEY_W, KEY_D], 2.5, "lodge approach")
-	await _leg([KEY_W, KEY_D], 1.2, "lodge blocked")
+	await _leg([KEY_W], 2.5, "lodge approach")
+	await _leg([KEY_W], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
 	# Lay a trail in the meeting-hall gap and fix a world probe on it.
 	await _goto(LANDMARKS.meeting_hall_gap_south, "reach meeting-hall gap")
-	await _leg([KEY_W, KEY_D], 2.0, "first trail")
+	await _leg([KEY_W], 2.0, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
 	# Leave the detailed patch through the compound's east gate into the courtyard.
 	await _goto(LANDMARKS.meeting_hall_gap, "leave detailed patch")
 	await _goto(LANDMARKS.courtyard_east, "enter courtyard")
-	await _leg([KEY_S, KEY_A], 2.2, "wall approach")
-	await _leg([KEY_S, KEY_A], 1.2, "wall blocked")
+	await _leg([KEY_S], 2.2, "wall approach")
+	await _leg([KEY_S], 1.2, "wall blocked")
 	await _goto(LANDMARKS.courtyard, "cross courtyard")
 	await _leg([], 0.5, "probe outside patch")
 	await _goto(LANDMARKS.courtyard_west, "reach deep courtyard")
-	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run through deep snow")
+	await _leg([KEY_W, KEY_SHIFT], 2.0, "run through deep snow")
 	await _goto(LANDMARKS.courtyard_west, "pack deep trail return")
-	await _leg([KEY_W, KEY_D], 2.0, "pack deep trail again")
+	await _leg([KEY_W], 2.0, "pack deep trail again")
 	await _goto(LANDMARKS.courtyard_west, "packed run start")
-	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run on packed trail")
+	await _leg([KEY_W, KEY_SHIFT], 2.0, "run on packed trail")
+	# With the cursor west of the figure, the newly controlled figure faces west.
+	_point(Vector2(-0.25, 0))
+	await _wait(0.2)
 	_tap(KEY_TAB)
 	await _leg([], 0.5, "second figure idle")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on second figure")
 	# The second figure walks from the outpost yard to the first figure's actual
 	# exported trail start, then stamps the same northbound boot lanes.
 	var first_trail := _rows_for(_read_rows(), "first trail")
 	var trail_start: Dictionary = first_trail.front()
 	await _goto(Vector2(float(trail_start.x_m), float(trail_start.z_m)), "second figure follows trail")
-	await _leg([KEY_W, KEY_D], 3.0, "second figure overlaps trail")
+	await _leg([KEY_W], 3.0, "second figure overlaps trail")
 	# Gait phase differs between figures. Several passes cover both boot lanes
 	# instead of assuming a particular step lands on an exact world texel.
 	for pass_index in range(2):
-		await _leg([KEY_S, KEY_A], 3.0, "second figure overlap return %d" % pass_index)
-		await _leg([KEY_W, KEY_D], 3.0, "second figure overlap repeat %d" % pass_index)
+		await _leg([KEY_S], 3.0, "second figure overlap return %d" % pass_index)
+		await _leg([KEY_W], 3.0, "second figure overlap repeat %d" % pass_index)
 	await _leg([], 0.5, "shared probe overlapped")
 	_tap(KEY_TAB)
 	# Navigation reads the latest observation, so let the first figure be observed first.
@@ -110,29 +140,33 @@ func _run() -> void:
 	await _leg([], 0.5, "erased probe")
 	_tap(KEY_0)
 	# South from the meeting-hall gap, the shelf ends at cliff rock above the forest.
-	await _leg([KEY_S, KEY_A], 3.0, "shelf cliff approach")
-	await _leg([KEY_S, KEY_A], 1.2, "shelf cliff blocked")
+	await _leg([KEY_S], 3.0, "shelf cliff approach")
+	await _leg([KEY_S], 1.2, "shelf cliff blocked")
 	# The stair from the compound's south gate is the way down to the forest.
 	await _goto(LANDMARKS.meeting_hall_gap, "return to meeting-hall gap")
 	await _goto(LANDMARKS.courtyard_east, "re-enter courtyard")
 	await _goto(LANDMARKS.courtyard, "cross to south gate")
 	await _goto(LANDMARKS.south_gate, "reach south gate")
 	await _goto(LANDMARKS.forest_lane, "descend stair")
-	await _leg([KEY_S, KEY_A], 3.0, "south boundary")
-	await _leg([KEY_S, KEY_A], 1.0, "boundary blocked")
+	await _leg([KEY_S], 3.0, "south boundary")
+	await _leg([KEY_S], 1.0, "boundary blocked")
 	# From the forest floor the cliff beside the stair is equally impassable.
 	await _goto(LANDMARKS.forest_west, "reach forest west")
-	await _leg([KEY_W, KEY_D], 2.5, "forest cliff approach")
-	await _leg([KEY_W, KEY_D], 1.2, "forest cliff blocked")
+	await _leg([KEY_W], 2.5, "forest cliff approach")
+	await _leg([KEY_W], 1.2, "forest cliff blocked")
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
-	for step in range(26):
+	# Five steps out reach the 30 m end of the play range; the next opens the overview.
+	for step in range(5):
+		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	await _leg([], 0.5, "widest play view")
+	for step in range(7):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
-	for step in range(14):
+	for step in range(12):
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _leg([], 0.5, "close view")
 	if not headless:
@@ -165,13 +199,41 @@ func _leg(keys: Array, seconds: float, description: String) -> void:
 	await _wait(0.05)
 
 
+func _sweep_cursor(description: String) -> void:
+	checkpoint += 1
+	stages[description] = checkpoint
+	_tap(KEY_F4)
+	print("Snow route: ", description)
+	for point in SWEEP:
+		_point(point[0])
+		await _wait(0.4)
+
+
+func _cursor_leg(offset: Vector2, keys: Array, seconds: float, description: String) -> void:
+	_point(offset)
+	await _leg(keys, seconds, description)
+
+
+## Move the cursor to `offset` viewport heights from where the figure stands on screen.
+func _point(offset: Vector2) -> void:
+	var viewport := get_viewport()
+	var size := viewport.get_visible_rect().size
+	var screen := figure_screen * size + offset * size.y
+	var event := InputEventMouseMotion.new()
+	# Input events arrive in window coordinates and the scene reads viewport ones.
+	event.position = viewport.get_final_transform() * screen
+	event.global_position = event.position
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
+
+
 func _short_steps() -> void:
 	checkpoint += 1
 	stages["short steps"] = checkpoint
 	_tap(KEY_F4)
 	print("Snow route: repeated brief taps must accumulate foot travel")
 	for step in range(10):
-		var keys := [KEY_S, KEY_D] if step % 2 == 0 else [KEY_W, KEY_A]
+		var keys := [KEY_D] if step % 2 == 0 else [KEY_A]
 		for key in keys:
 			_key(key, true)
 		await _wait(0.025, keys)
@@ -206,7 +268,7 @@ func _wait(seconds: float, held_keys: Array = []) -> void:
 
 func _goto(destination: Vector2, description: String) -> void:
 	# Navigation uses the completed scene observation, not an addressed walker.
-	# It walks one straight leg along Z, then one along X, at ordinary walk speed;
+	# It walks one straight leg north or south, then one east or west, at ordinary walk speed;
 	# the layout keeps open ground between each pair of places it joins.
 	var x := destination.x
 	var z := destination.y
@@ -220,11 +282,11 @@ func _goto(destination: Vector2, description: String) -> void:
 	var row: Dictionary = rows.back()
 	var dz := z - float(row.z_m)
 	if absf(dz) > 0.02:
-		await _leg([KEY_S, KEY_A] if dz > 0 else [KEY_W, KEY_D], absf(dz) / 2.25, description + " z")
+		await _leg([KEY_S] if dz > 0 else [KEY_W], absf(dz) / 2.25, description + " z")
 		arrivals.append({"stage": description + " z", "destination": destination})
 	var dx := x - float(row.x_m)
 	if absf(dx) > 0.02:
-		await _leg([KEY_S, KEY_D] if dx > 0 else [KEY_W, KEY_A], absf(dx) / 2.25, description + " x")
+		await _leg([KEY_D] if dx > 0 else [KEY_A], absf(dx) / 2.25, description + " x")
 		arrivals.append({"stage": description + " x", "destination": destination})
 
 
@@ -316,8 +378,18 @@ func _check_record() -> void:
 		var above_ground := float(row.feet_y_m) - float(row.ground_y_m)
 		if above_ground > 1.3 or above_ground < -0.001:
 			_fail_once("Figure teleported onto a box roof or below the ground")
-		if absf(float(row.pitch_deg) + 55.0) > 0.01 or absf(float(row.yaw_deg) - 45.0) > 0.01:
-			_fail_once("Camera angle changed")
+		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
+			_fail_once("Camera is not a 40° perspective view")
+		if absf(float(row.pitch_deg) - CAMERA_PITCH_DEG) > 0.01 or absf(float(row.yaw_deg)) > 0.01:
+			_fail_once("Camera tilted or turned away from north-up")
+		if float(row.lean_m) > MAX_LEAN_M + 0.0001:
+			_fail_once("Camera leaned more than 3 m")
+		var distance := float(row.camera_distance_m)
+		if row.overview == "true":
+			if row.whole_map_visible != "true":
+				_fail_once("The overview did not frame the town")
+		elif distance < PLAY_RANGE_M.x - 0.001 or distance > PLAY_RANGE_M.y + 0.001:
+			_fail_once("Play zoom left the 10–30 m range")
 		if absf(float(row.patch_size_m) - 12.8) > 0.001:
 			_fail_once("Detailed patch is not 12.8 × 12.8 m")
 		if maxf(absf(float(row.patch_x_m) - float(row.x_m)), absf(float(row.patch_z_m) - float(row.z_m))) > 6.401:
@@ -347,10 +419,14 @@ func _check_record() -> void:
 					deep_run += 1
 		if obstruction and speed < 0.01:
 			blocked += 1
-		if float(row.ortho_m) > 117.0 and row.whole_map_visible == "true":
+		if row.overview == "true" and row.whole_map_visible == "true":
 			overview += 1
-		if float(row.ortho_m) < 20.0 and absf(float(row.figure_screen_x) - 0.5) < 0.005 and absf(float(row.figure_screen_y) - 0.5) < 0.005:
-			follow += 1
+		# Without lean the figure stands on the vertical centre line, slightly below the middle.
+		if row.overview == "false" and float(row.lean_m) < 0.05:
+			if absf(float(row.figure_screen_x) - 0.5) < 0.005 and float(row.figure_screen_y) > 0.52 and float(row.figure_screen_y) < 0.65:
+				follow += 1
+			else:
+				_fail_once("The camera did not hold the figure slightly below the centre of the screen")
 		if not previous.is_empty() and previous.figure_id == row.figure_id:
 			if input.length() < 0.01 and previous.input_x == row.input_x and previous.input_y == row.input_y and row.step_count != previous.step_count:
 				_fail_once("An idle figure created a footprint")
@@ -384,6 +460,8 @@ func _check_record() -> void:
 	_check_probe(rows)
 	_check_second_figure(rows)
 	_check_packed_speed(rows)
+	_check_facing(rows)
+	_check_zoom(rows)
 	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, deep run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, deep_run, blocked, overview, follow])
 
 
@@ -561,6 +639,79 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	print("Same deep corridor, Shift held: fresh %.3f m/s -> packed %.3f m/s (%d / %d samples)" % [fresh_speed, packed_speed, fresh_samples, packed_samples])
 	if fresh_samples < 20 or packed_samples < 20 or packed_speed < fresh_speed + 0.10:
 		failures.append("Repeated traffic did not produce a measurable running advantage in the same deep corridor")
+
+
+func _check_facing(rows: Array[Dictionary]) -> void:
+	# Turning in place: Facing points at the cursor's ground point, without a step.
+	var sweep := _rows_for(rows, "turn in place")
+	if sweep.is_empty():
+		failures.append("Cursor sweep observations were missing")
+		return
+	var bearings := {}
+	for row in sweep:
+		if row.cursor_set != "true":
+			_fail_once("The cursor's ground point was not observed")
+			continue
+		if _angle_between(float(row.facing_deg), _cursor_bearing(row)) > 0.5:
+			_fail_once("Facing did not track the cursor's ground point")
+		if int(row.step_count) != int(sweep.front().step_count) or float(row.horizontal_mps) > 0.0:
+			_fail_once("Turning in place moved the figure or added a bootprint")
+		for entry in SWEEP:
+			if _angle_between(float(row.facing_deg), entry[1]) < 15.0:
+				bearings[entry[1]] = true
+	if bearings.size() != SWEEP.size():
+		failures.append("Facing did not follow the cursor all the way round (%d of %d directions)" % [bearings.size(), SWEEP.size()])
+	var corner := _rows_for(rows, "lean to corner")
+	if corner.is_empty() or float(corner.back().lean_m) < MAX_LEAN_M - 0.01:
+		failures.append("The camera did not lean the full 3 m toward a distant cursor")
+	var centred := _rows_for(rows, "cursor on figure")
+	if centred.is_empty() or float(centred.back().lean_m) > 0.05:
+		failures.append("The lean did not return when the cursor rested on the figure")
+	# Facing elsewhere: prints and speed follow travel north and back south.
+	for leg in [["walk north facing east", 0.0], ["walk south facing east", 180.0]]:
+		var walk := _rows_for(rows, leg[0])
+		if walk.size() < 60:
+			failures.append("Stage %s was missing" % leg[0])
+			continue
+		for row in walk.slice(10):
+			if float(row.input_x) == 0.0 and float(row.input_y) == 0.0:
+				continue
+			if _angle_between(float(row.facing_deg), 90.0) > 20.0:
+				_fail_once("Facing left the cursor while walking")
+			if _angle_between(float(row.travel_deg), leg[1]) > 0.5 or absf(float(row.horizontal_mps) - 2.25) > 0.003:
+				_fail_once("Walking while facing elsewhere changed travel direction or speed")
+			if int(row.step_count) > int(walk.front().step_count) and _angle_between(float(row.print_deg), leg[1]) > 0.5:
+				_fail_once("Bootprints did not point the way the figure travelled")
+		if int(walk.back().step_count) - int(walk.front().step_count) < 4:
+			failures.append("Walking while facing elsewhere left too few prints (%s)" % leg[0])
+	# Tab: the newly controlled figure takes its Facing from the cursor, west of it.
+	var swapped := _rows_for(rows, "second figure idle")
+	if swapped.is_empty() or swapped.front().cursor_set != "true":
+		failures.append("Tab Facing observations were missing")
+	elif _angle_between(float(swapped.front().facing_deg), 270.0) > 20.0 or _angle_between(float(swapped.front().facing_deg), _cursor_bearing(swapped.front())) > 0.5:
+		failures.append("After Tab the newly controlled figure did not face the cursor")
+
+
+func _check_zoom(rows: Array[Dictionary]) -> void:
+	var overview := _rows_for(rows, "whole map")
+	var close := _rows_for(rows, "close view")
+	if overview.is_empty() or overview.back().overview != "true" or overview.back().whole_map_visible != "true":
+		failures.append("Zooming out did not reach the whole-map overview")
+	if close.is_empty() or close.back().overview != "false" or absf(float(close.back().camera_distance_m) - PLAY_RANGE_M.x) > 0.001:
+		failures.append("Zooming in did not stop at the 10 m play distance")
+	var widest := _rows_for(rows, "widest play view")
+	if widest.is_empty() or widest.back().overview != "false" or absf(float(widest.back().camera_distance_m) - PLAY_RANGE_M.y) > 0.001:
+		failures.append("Zooming out did not stop at the 30 m play distance before the overview")
+
+
+## The compass bearing from the figure to the cursor's ground point.
+func _cursor_bearing(row: Dictionary) -> float:
+	var offset := Vector2(float(row.cursor_x_m) - float(row.x_m), float(row.cursor_z_m) - float(row.z_m))
+	return fposmod(rad_to_deg(atan2(offset.x, -offset.y)), 360.0)
+
+
+func _angle_between(a: float, b: float) -> float:
+	return absf(wrapf(a - b, -180.0, 180.0))
 
 
 func _fail_once(message: String) -> void:

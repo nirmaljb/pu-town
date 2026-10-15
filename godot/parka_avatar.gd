@@ -7,6 +7,8 @@ extends Node3D
 const MODEL := preload("res://characters/parka/parka.glb")
 const GAIT_PATH := "res://characters/parka/gait.json"
 const STAND_BLEND_RATE := 6.0
+## Facing twists the spine above the hips, shared out from the lower spine to the head.
+const TWIST_SHARES := {"Spine": 0.15, "Chest": 0.2, "UpperChest": 0.3, "Neck": 0.2, "Head": 0.15}
 
 var gait: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(GAIT_PATH))
 var skeleton: Skeleton3D
@@ -16,11 +18,12 @@ var _walk_length := 1.0
 var _run_length := 1.0
 var _moving_blend := 0.0
 var _legs := {}
+var _twist_bones := {}
 
 
 func _ready() -> void:
 	var model: Node3D = MODEL.instantiate()
-	# glTF figures face +Z; the walker's facing node looks down -Z.
+	# glTF figures face +Z; the walker's stance node looks down -Z.
 	model.rotation.y = PI
 	add_child(model)
 	skeleton = model.find_children("*", "Skeleton3D", true, false)[0]
@@ -50,6 +53,8 @@ func _ready() -> void:
 	model.add_child(_tree)
 	_tree.anim_player = _tree.get_path_to(player)
 	_tree.active = true
+	for bone in TWIST_SHARES:
+		_twist_bones[skeleton.find_bone(bone)] = TWIST_SHARES[bone]
 	for side in ["Left", "Right"]:
 		var foot := skeleton.find_bone(side + "Foot")
 		var toes := skeleton.find_bone(side + "Toes")
@@ -85,6 +90,20 @@ func animate(phase: float, run_amount: float, moving: bool, delta: float) -> voi
 	_tree.set("parameters/gait/blend_amount", run_amount)
 	_tree.set("parameters/move/blend_amount", _moving_blend)
 	_tree.advance(0.0)
+
+
+## Turn the upper body by `angle` about the vertical, after the clips are applied,
+## so the head and shoulders face it while the hips and legs keep their heading.
+func twist(angle: float) -> void:
+	if absf(angle) < 0.00001:
+		return
+	var up := (skeleton.global_basis.orthonormalized().inverse() * Vector3.UP).normalized()
+	for bone: int in _twist_bones:
+		# Rotations about one axis commute, so each bone's share can be applied in its
+		# parent's current frame whether or not the parent has already turned.
+		var parent := skeleton.get_bone_global_pose(skeleton.get_bone_parent(bone)).basis.get_rotation_quaternion()
+		var turn := Quaternion(up, angle * float(_twist_bones[bone]))
+		skeleton.set_bone_pose_rotation(bone, parent.inverse() * turn * parent * skeleton.get_bone_pose_rotation(bone))
 
 
 ## Which boots the clips have planted at this phase. While the figure eases into
