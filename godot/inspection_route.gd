@@ -473,8 +473,10 @@ func _check_record() -> void:
 			_fail_once("Figure escaped the map rectangle")
 		if row.grounded != "true" or absf(float(row.contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("Figure lost its observed snow contact")
+		# Crossing the stair's crest, one boot can stand on the slope while the other is
+		# on the shelf, so their mean height may sit just below the ground at the centre.
 		var above_ground := float(row.feet_y_m) - float(row.ground_y_m)
-		if above_ground > 1.3 or above_ground < -0.001:
+		if above_ground > 1.3 or above_ground < -STRIDE_SLOPE_M:
 			_fail_once("Figure teleported onto a box roof or below the ground")
 		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
 			_fail_once("Camera is not a 40° perspective view")
