@@ -1,0 +1,72 @@
+# Run 1, revision c81b7b0, trace frames-1792091279-35316.csv
+## Launch
+pid 12355
+window 80, 33, 1280, 832
+content origin 80 65 (title bar 32)
+## Input driver
+trusted for input: true
+   1.08 s  warm-up walk
+   5.68 s  F6 pressed; walking the loop to the stair and back toward the outpost
+  66.84 s  walk finished
+## Focus watcher (empty means it logged nothing)
+00:39:05 frontmost pid 618 (/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder); refocusing
+## Workload before
+Processes: 643 total, 2 running, 641 sleeping, 4543 threads 
+2026/10/16 00:37:46
+Load Avg: 2.83, 2.40, 2.74 
+CPU usage: 9.36% user, 23.10% sys, 67.52% idle 
+SharedLibs: 240M resident, 59M data, 56M linkedit.
+MemRegions: 900811 total, 1552M resident, 72M private, 565M shared.
+PhysMem: 7516M used (1768M wired, 3211M compressor), 116M unused.
+VM: 330T vsize, 17G framework vsize, 34678315(0) swapins, 36416942(0) swapouts.
+Networks: packets: 10438241/12G in, 4886171/1816M out.
+Disks: 54078516/1270G read, 15597552/648G written.
+
+PID    COMMAND          %CPU MEM  
+99919  com.apple.Safari 0.0  14M  
+99597  coreauthd        0.0  4721K
+99594  com.apple.Safari 0.0  15M  
+99588  rtcreportingd    0.0  3889K
+99581  intelligencecont 0.0  4785K
+99572  suggestd         0.0  11M  
+99564  networkservicepr 0.0  9169K
+99562  iconservicesagen 0.0  19M  
+99559  CoreServicesUIAg 0.0  16M  
+99523  routined         0.0  15M  
+99508  IntelligencePlat 0.0  11M  
+99465  coreduetd        0.0  7025K
+99416  knowledge-agent  0.0  10M  
+99413  ScreenTimeAgent  0.0  9633K
+99412  extensionkitserv 0.0  3809K
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	43%; charging; 2:14 remaining present: true
+## Workload during (35 s after launch)
+Processes: 624 total, 3 running, 621 sleeping, 4485 threads 
+2026/10/16 00:38:29
+Load Avg: 2.77, 2.44, 2.74 
+CPU usage: 11.35% user, 16.48% sys, 72.16% idle 
+SharedLibs: 250M resident, 57M data, 52M linkedit.
+MemRegions: 898902 total, 1403M resident, 55M private, 681M shared.
+PhysMem: 7534M used (1965M wired, 3265M compressor), 100M unused.
+VM: 322T vsize, 5268M framework vsize, 34692249(0) swapins, 36432434(0) swapouts.
+Networks: packets: 10439446/12G in, 4887216/1816M out.
+Disks: 54115191/1270G read, 15604670/649G written.
+
+PID    COMMAND          %CPU MEM  
+99919  com.apple.Safari 0.0  14M  
+99597  coreauthd        0.0  4721K
+99594  com.apple.Safari 0.0  15M  
+99588  rtcreportingd    0.0  3905K
+99581  intelligencecont 0.0  4785K
+99572  suggestd         0.0  11M  
+99564  networkservicepr 0.0  9153K
+99562  iconservicesagen 0.0  19M  
+99559  CoreServicesUIAg 0.0  16M  
+99523  routined         0.0  15M  
+99508  IntelligencePlat 0.0  11M  
+99465  coreduetd        0.0  6865K
+99416  knowledge-agent  0.0  10M  
+99413  ScreenTimeAgent  0.0  9537K
+99412  extensionkitserv 0.0  3809K
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	44%; charging; 2:15 remaining present: true

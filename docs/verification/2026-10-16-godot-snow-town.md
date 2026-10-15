@@ -155,6 +155,10 @@ corrects them; the HUD note still applies:
 
 ## 5. Frame measurement
 
+This trace predates the shading change in `c81b7b0`. The
+[shading record](2026-10-16-godot-snow-shading.md#5-release-frame-trace) repeats
+it in the rebuilt package.
+
 The macOS release package at 1280 × 800, launched normally, warmed by walking,
 then F6 and 60 s of walking with ordinary OS key events
 ([script](godot-snow-town/benchmark-input-script.txt)) from the outpost yard along

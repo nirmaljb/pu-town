@@ -90,10 +90,8 @@ It renders nothing. The values the changes moved, against the earlier record:
 The windward probe stands 1 m east of the yard's Deep drift, so the wider taper
 starts it deeper. Scour still takes it to the 3 cm floor.
 
-No focused graphical route was run for this change. That route needs the window
-to keep focus throughout, and its checks are behavioral. The Snow Depth changes
-are covered headlessly above. The shading changes are covered by the captures
-below.
+The focused graphical route was run later in the rebuilt release package
+(section 6). The shading changes are covered by the captures below.
 
 ## 3. Before and after captures
 
@@ -133,12 +131,84 @@ view, Mac in use. Two runs per revision:
 The changes add about **2 ms per frame** in this setup. Disabling either part
 alone left about 1 ms, so the smooth slope and the print shadow cost about the
 same. These are source-scene, unfocused, uncontrolled-workload timings, not a
-release benchmark. The release trace in the town record predates this change and
-has not been remeasured.
+release benchmark. Section 5 measures the release package.
+
+## 5. Release frame trace
+
+`GODOT_BIN=~/Downloads/Godot.app ./godot/export.sh macos` rebuilt the macOS
+release package from the clean revision `c81b7b0`
+([manifest](godot-snow-shading/macos-build-info.json),
+[log](godot-snow-shading/macos-export.log); `godot_source_dirty: false`). The same
+command in a detached checkout of `a218405` built the earlier package as a control
+([manifest](godot-snow-shading/macos-build-info-a218405.json)).
+
+Each run repeated the 60 s F6 benchmark of section 5 of the
+[town record](2026-10-16-godot-snow-town.md#5-frame-measurement): the package
+launched normally at 1280 × 800, the same
+[input script](godot-snow-town/benchmark-input-script.txt) posted through the same
+[OS-event driver](godot-snow-town/osinput.swift), wind 1 from the north-west,
+camera 16 m, no figure switching.
+[`run_benchmark.sh`](godot-snow-shading/run_benchmark.sh) launched the package,
+waited for its window, ran the script at the window's content origin, ran a focus
+watcher and sampled `top`. Each trace was summarized with
+`python3 godot/summarize_frames.py`. Five runs alternated between the two packages
+within ten minutes. Keyboard and mouse had been idle for at least 20 s before
+each run:
+
+| Run | Package | Average FPS | Mean | p95 | p99 | Max | Over 33.4 ms | Wind per update | Wind per frame |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [1](godot-snow-shading/benchmark-1-c81b7b0-summary.json) | `c81b7b0` | 46.6 | 21.44 ms | 25.81 ms | 27.38 ms | 37.09 ms | 3 | 0.538 ms | 0.692 ms |
+| [2](godot-snow-shading/benchmark-2-c81b7b0-summary.json) | `c81b7b0` | 46.5 | 21.48 ms | 26.13 ms | 27.87 ms | 34.65 ms | 1 | 0.547 ms | 0.705 ms |
+| [3](godot-snow-shading/benchmark-3-a218405-summary.json) | `a218405` | 50.6 | 19.75 ms | 23.89 ms | 25.70 ms | 30.27 ms | 0 | 0.525 ms | 0.624 ms |
+| [4](godot-snow-shading/benchmark-4-c81b7b0-summary.json) | `c81b7b0` | 46.6 | 21.46 ms | 25.97 ms | 27.63 ms | 41.36 ms | 1 | 0.547 ms | 0.705 ms |
+| [5](godot-snow-shading/benchmark-5-a218405-summary.json) | `a218405` | 50.7 | 19.73 ms | 23.99 ms | 25.84 ms | 44.02 ms | 1 | 0.523 ms | 0.619 ms |
+
+Every trace is complete at 60.0 s (2,793–3,042 frames), focused and moving for
+100% of it, at viewport and window 1280 × 800, with no warnings. Raw traces and
+per-run launch, driver, focus-watcher and workload notes sit beside each summary
+(`benchmark-N-<revision>-frames.csv.gz`, `-session.txt`). The focus watcher logged
+only Finder taking the front after each package was closed; no frame was
+unfocused.
+
+**The shading costs about 1.7 ms per frame in the release package:** mean 21.46 ms
+against 19.74 ms, p95 and p99 about 2 ms higher, 46.6 FPS against 50.7. That
+agrees with the source-scene estimate in section 4.
+
+**The Mac was slower than in the town record's run.** The control package, the
+same revision as that run, averaged 50.7 FPS here against 55.2 FPS there, and its
+wind cost 0.52 ms per update against 0.38 ms. `c81b7b0` changed the wind only
+where it reshapes its target, once per change of bearing, so the wind's higher
+cost reflects the machine state, not the code: memory was nearly full (64–274 MB
+unused, 2.4–3.4 GB compressed) and `kernel_task` used 20–40% of a core during
+each walk. Chrome, ChatGPT and the Claude app were open. Run 1's `top` samples
+are first samples and lack per-process CPU.
+The 46.6 FPS absolute figure therefore reflects this workload; the difference
+between packages is the change's cost. The wind remains about 3.3% of frame time.
+
+These are engine frame-loop timings including the recorder, not GPU timestamps or
+display latency, from one machine with a desktop workload.
+
+## 6. Packaged graphical route
+
+```sh
+"godot/build/macos/release/PU-Town-Snow-Walk.app/Contents/MacOS/PU Town · Snow Walk" -- --snow-scene-check --auto-start
+```
+
+In the `c81b7b0` release package: **PASS, 0 failures**, 17,162 observations, none
+unfocused ([log](godot-snow-shading/packaged-route.log),
+[CSV](godot-snow-shading/packaged-route.csv.gz)). As before, the log shows one
+"Route paused" line before recording began. A focus watcher ran throughout and
+logged nothing. Its measured values match the headless replay in section 2: lodge
+lee drift 0.605 → 1.108 m, windward scour 0.513 → 0.033 m, reversed wind +0.511 m
+on the old windward face, and prints remaining after 41.1 wind-seconds 0.70, 0.93
+and 0.03 (exposed, sheltered, lee).
+
+This is engine-event replay in a rendered window, not ordinary OS input.
 
 ## Evidence limits
 
 - Captures come from a driver that sets positions directly, not from OS input or
   the scene route. Window focus was not held.
-- The release packages were not rebuilt. Windows is untested.
+- Only the macOS release package was rebuilt. The Windows package was neither
+  rebuilt nor run.
 - Shading is judged by eye from captures on one display.

@@ -1,0 +1,105 @@
+Importing snow prototype with Godot 4.7.2.stable.official.ed1daf0bf
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (10 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | SnowSurface[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | SnowTownLayout[39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (1 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | Started Preparing scenes for reload (1 steps)[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | Analyzing scene [empty][39m[0m
+[  50% ] [90m[1mpreload_reimporting_scene[22m | Preparation done.[39m[0m
+[92m[ DONE ][39m [1mpreload_reimporting_scene[22m
+[0m
+[   0% ] [90m[1mreimport[22m | parka.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  50% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (1 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Snow prototype import check completed.
+Exporting macOS Preview (release), Godot 4.7.2.stable.official.ed1daf0bf
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mexport[22m | Started Exporting for macOS (3 steps)[39m[0m
+[   0% ] [90m[1mexport[22m | Creating app bundle[39m[0m
+[  25% ] [90m[1mexport[22m | Making PKG[39m[0m
+[   0% ] [90m[1msavepack[22m | Started Packing (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | Storing File: res://characters/parka/gait.json[39m[0m
+[   8% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/parka.glb-8a23c4589c93be29320f6b9b568f06cb.scn[39m[0m
+[   8% ] [90m[1msavepack[22m | Storing File: res://characters/parka/parka.glb.import[39m[0m
+[  15% ] [90m[1msavepack[22m | Storing File: res://tests/walk_scene.gdc[39m[0m
+[  22% ] [90m[1msavepack[22m | Storing File: res://follow_camera.gdc[39m[0m
+[  29% ] [90m[1msavepack[22m | Storing File: res://inspection.gdc[39m[0m
+[  35% ] [90m[1msavepack[22m | Storing File: res://inspection_route.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | Storing File: res://parka_avatar.gdc[39m[0m
+[  50% ] [90m[1msavepack[22m | Storing File: res://snow.gdshader[39m[0m
+[  57% ] [90m[1msavepack[22m | Storing File: res://snow_surface.gdc[39m[0m
+[  64% ] [90m[1msavepack[22m | Storing File: res://snow_walk.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | Storing File: res://.godot/exported/133200997/export-4f5738069ef532cfeea3cddc3181665a-snow_walk.scn[39m[0m
+[  77% ] [90m[1msavepack[22m | Storing File: res://snow_wind.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | Storing File: res://town_layout.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://walker.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://tests/walk_scene.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://follow_camera.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://inspection.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://inspection_route.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://parka_avatar.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://snow_surface.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://snow_walk.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://snow_walk.tscn.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://snow_wind.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://town_layout.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://walker.gd.remap[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://.godot/global_script_class_cache.cfg[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://.godot/uid_cache.bin[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+[  50% ] [90m[1mexport[22m | Code signing bundle[39m[0m
+[92m[ DONE ][39m [1mexport[22m
+[0m
+Package: /Users/kaizenjb/project/pu-town/.claude/worktrees/stoic-rubin-c329e9/godot/build/macos/release/PU-Town-Snow-Walk.app
+Build record: /Users/kaizenjb/project/pu-town/.claude/worktrees/stoic-rubin-c329e9/godot/build/macos/release/build-info.json

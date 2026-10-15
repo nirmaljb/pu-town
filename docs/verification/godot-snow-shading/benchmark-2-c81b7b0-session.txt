@@ -1,0 +1,71 @@
+# Run 2, revision c81b7b0, trace frames-1792091386-06939.csv
+## Launch
+pid 12750
+window 80, 33, 1280, 832
+content origin 80 65 (title bar 32)
+## Input driver
+trusted for input: true
+   1.08 s  warm-up walk
+   5.68 s  F6 pressed; walking the loop to the stair and back toward the outpost
+  66.84 s  walk finished
+## Focus watcher (empty means it logged nothing)
+## Workload before
+Processes: 622 total, 2 running, 620 sleeping, 4539 threads 
+2026/10/16 00:39:32
+Load Avg: 2.12, 2.32, 2.67 
+CPU usage: 14.20% user, 23.37% sys, 62.41% idle 
+SharedLibs: 276M resident, 57M data, 51M linkedit.
+MemRegions: 0 total, 0B resident, 61M private, 624M shared.
+PhysMem: 7489M used (1756M wired, 3214M compressor), 142M unused.
+VM: 322T vsize, 5268M framework vsize, 34703991(1139) swapins, 36434390(0) swapouts.
+Networks: packets: 10441816/12G in, 4889128/1817M out.
+Disks: 54143576/1271G read, 15607199/649G written.
+
+PID    COMMAND          %CPU MEM   
+0      kernel_task      57.1 62M   
+1094   Google Chrome He 49.3 466M+ 
+401    WindowServer     11.4 549M- 
+672    NotificationCent 10.1 82M   
+12746  top              6.5  4657K+
+86574  Google Chrome He 6.0  469M+ 
+86905  Google Chrome He 5.8  771M+ 
+91877  Google Chrome He 5.3  343M+ 
+41509  Google Chrome He 5.2  660M+ 
+90527  Google Chrome He 3.9  237M+ 
+1068   Google Chrome    3.6  481M- 
+4287   ChatGPT          3.3  549M+ 
+380    dasd             2.4  12M   
+86518  Google Chrome He 2.3  407M+ 
+95264  Google Chrome He 2.2  438M+ 
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	45%; charging; 2:13 remaining present: true
+## Workload during (35 s after launch)
+Processes: 629 total, 2 running, 627 sleeping, 4480 threads 
+2026/10/16 00:40:17
+Load Avg: 2.28, 2.32, 2.65 
+CPU usage: 10.52% user, 6.38% sys, 83.9% idle 
+SharedLibs: 217M resident, 60M data, 54M linkedit.
+MemRegions: 30 total, 384K resident, 53M private, 675M shared.
+PhysMem: 7544M used (1973M wired, 3349M compressor), 89M unused.
+VM: 324T vsize, 5268M framework vsize, 34706031(4) swapins, 36446618(0) swapouts.
+Networks: packets: 10442665/12G in, 4889996/1817M out.
+Disks: 54176392/1272G read, 15613405/649G written.
+
+PID    COMMAND          %CPU MEM   
+12750  PU Town · Snow  25.6 404M- 
+401    WindowServer     21.3 547M- 
+0      kernel_task      20.8 62M-  
+12926  top              6.5  4705K+
+412    coreaudiod       5.3  21M   
+404    loginwindow      3.9  50M   
+12112  System Events    3.0  12M   
+371    launchservicesd  2.6  7361K+
+484    syspolicyd       2.5  48M   
+402    tccd             2.5  5825K 
+3921   trustd           2.0  7889K 
+62280  claude           1.5  190M  
+85574  tccd             1.4  5121K 
+95264  Google Chrome He 1.2  438M  
+632    trustd           1.2  8145K 
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	45%; charging; 2:13 remaining present: true

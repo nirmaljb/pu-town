@@ -531,8 +531,8 @@ input, inspected captures with the defects they show, a 60-second release frame
 trace with the wind's cost, and both exports. The
 [shading record](../docs/verification/2026-10-16-godot-snow-shading.md) corrects
 those defects and compares before and after captures; its smooth shading adds
-about 2 ms per frame in an unfocused source-scene timing, and the release trace
-has not been remeasured since.
+about 2 ms per frame in an unfocused source-scene timing and 1.7 ms in the
+remeasured release trace.
 
 ## Desktop exports
 
@@ -604,10 +604,15 @@ focus/movement coverage, resolution and observation age so invalid runs can be
 identified. Keep the raw trace with engine/mode, hardware, OS and concurrent
 workload notes; HUD FPS and fixed-rate route CSV are not benchmark substitutes.
 
-The [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
-holds the current release trace: 55.2 FPS average, 24.0 ms p99 and 0.41 ms of
-wind work per rendered frame on an Apple M1 under macOS 26.2, at wind 1. That is
-one machine with a desktop workload, not a platform baseline. The
+The [shading record](../docs/verification/2026-10-16-godot-snow-shading.md)
+holds the current release trace, at `c81b7b0` on an Apple M1 under macOS 26.2 at
+wind 1: 46.6 FPS average, 21.5 ms mean, 27.6 ms p99 and 0.70 ms of wind work per
+rendered frame, over three runs. The earlier package, run alternately on the same
+machine state, averaged 50.7 FPS and 19.7 ms, so the smooth shading costs about
+1.7 ms per frame. That earlier package reached 55.2 FPS in the
+[town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
+under a lighter load, so compare packages within one session rather than across
+records. These are one machine with a desktop workload, not a platform baseline. The
 [#92–93 record](../docs/verification/2026-10-15-godot-snow-desktop.md) measured
 the older static scene and is not a current result. Rebuild and remeasure after
 source changes. Final town assets, Game/networking integration and coordinated
