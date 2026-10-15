@@ -4,6 +4,8 @@ extends Node3D
 ## The figure is the parka Avatar; its steps, Footprints and clips share one gait.
 ## Facing turns the upper body. Legs, boots and Footprints keep the direction of
 ## travel; standing still, the legs pivot after the upper body without stepping.
+## The cursor sets the bearing the figure wants to look along. Walking, Facing
+## turns at a bounded rate and stops at a limit over the shoulder it last used.
 ## The figure you are not controlling walks the town loop with these same rules.
 
 const Avatar = preload("res://parka_avatar.gd")
@@ -17,6 +19,11 @@ const LIMIT := TownLayout.HALF_EXTENTS - Vector2.ONE * FOOTPRINT_RADIUS
 const FACING_DEAD_ZONE := 0.25
 ## Standing still, the legs turn so the upper body twists no further than this.
 const STANDING_TWIST := PI / 3.0
+## Walking, the upper body twists no further than 110° from travel. Beyond it the
+## figure holds the shoulder it last looked over, never swinging through its back.
+const WALKING_TWIST := PI * 11.0 / 18.0
+## Facing turns no faster than 540° per second while it is walking or catching up.
+const FACING_TURN_RATE := PI * 3.0
 ## A loop walker this close to its next point has reached it. Each frame's motion
 ## stops at that point, so it walks the loop's straight lines exactly.
 const LOOP_ARRIVAL := 0.0001
@@ -43,6 +50,8 @@ var has_footprint := false
 var facing_yaw := 0.0
 var travel_yaw := 0.0
 var print_yaw := 0.0
+## The upper body's turn from the legs, Facing minus their direction.
+var twist := 0.0
 ## Fraction of the loop's length where the loop walker is; while it rejoins, where it will join.
 var loop_progress := 0.0
 var rejoining := false
@@ -59,6 +68,12 @@ var _moving := false
 var _run_amount := 0.0
 var _rejoin_point := Vector2.ZERO
 var _loop_corner := 0
+## The bearing the cursor asks for, as a yaw.
+var _wanted_yaw := 0.0
+## While walking, the side of travel (+1 or −1 in yaw) Facing last looked to; 0 when unset.
+var _held_side := 0.0
+## Standing still, Facing follows the wanted yaw exactly once it has reached it.
+var _tracking := true
 
 
 func configure(snow: Node3D, town: Node3D, identity: int, spawn: Vector2) -> void:
@@ -80,11 +95,12 @@ func _ready() -> void:
 	_update_pose()
 
 
-## Turn Facing toward a world point on the ground.
+## Want to look toward a world point on the ground. Facing turns toward it as the
+## figure walks or stands.
 func face_toward(point: Vector2) -> void:
 	var offset := point - Vector2(position.x, position.z)
 	if offset.length() > FACING_DEAD_ZONE:
-		facing_yaw = atan2(-offset.x, -offset.y)
+		_wanted_yaw = atan2(-offset.x, -offset.y)
 
 
 func walk(delta: float, camera_basis: Basis, controlled: bool) -> void:
@@ -166,7 +182,9 @@ func _move(delta: float, travel: Vector2, reach: float = INF, face_travel: bool 
 		_heading = atan2(-movement.x, -movement.y)
 		travel_yaw = _heading
 		if face_travel:
-			facing_yaw = _heading
+			_look_along(_heading)
+		else:
+			_turn_walking(delta)
 		_run_amount = clampf((horizontal_speed - WALK_SPEED) / (RUN_SPEED - WALK_SPEED), 0, 1)
 		_step_length = lerpf(avatar.gait.walk.step_m, avatar.gait.run.step_m, _run_amount)
 		_step_progress += travelled
@@ -174,10 +192,53 @@ func _move(delta: float, travel: Vector2, reach: float = INF, face_travel: bool 
 			_step_progress -= _step_length
 			_land_step(target)
 	else:
-		var twist := wrapf(facing_yaw - _heading, -PI, PI)
-		_heading = facing_yaw - clampf(twist, -STANDING_TWIST, STANDING_TWIST)
+		if not face_travel:
+			_turn_standing(delta)
+		var standing_twist := wrapf(facing_yaw - _heading, -PI, PI)
+		_heading = facing_yaw - clampf(standing_twist, -STANDING_TWIST, STANDING_TWIST)
 	stance.rotation.y = _heading
 	_update_pose(delta)
+
+
+## Look the way the figure travels, as the loop walker does. When it is next
+## controlled while standing, it takes its Facing from the cursor at once.
+func _look_along(yaw: float) -> void:
+	facing_yaw = yaw
+	_wanted_yaw = yaw
+	_held_side = 0.0
+	_tracking = true
+
+
+## Walking: turn toward the wanted bearing, but no further than WALKING_TWIST from
+## travel. Beyond that, hold the last shoulder; the twist moves only between the
+## limits, so a change of shoulder always turns through the front.
+func _turn_walking(delta: float) -> void:
+	_tracking = false
+	var wanted := wrapf(_wanted_yaw - _heading, -PI, PI)
+	var target := wanted
+	if absf(wanted) <= WALKING_TWIST:
+		if wanted != 0.0:
+			_held_side = signf(wanted)
+	else:
+		if _held_side == 0.0:
+			_held_side = signf(wanted)
+		target = _held_side * WALKING_TWIST
+	var current := wrapf(facing_yaw - _heading, -PI, PI)
+	var limit := FACING_TURN_RATE * delta
+	facing_yaw = wrapf(facing_yaw + clampf(target - current, -limit, limit), -PI, PI)
+
+
+## Standing still: track the wanted bearing exactly, after first catching up with
+## it at the walking turn rate if Facing was left away from it.
+func _turn_standing(delta: float) -> void:
+	_held_side = 0.0
+	var remaining := wrapf(_wanted_yaw - facing_yaw, -PI, PI)
+	var limit := FACING_TURN_RATE * delta
+	if _tracking or absf(remaining) <= limit:
+		facing_yaw = _wanted_yaw
+		_tracking = true
+	else:
+		facing_yaw = wrapf(facing_yaw + signf(remaining) * limit, -PI, PI)
 
 
 func _land_step(centre: Vector2) -> void:
@@ -227,7 +288,8 @@ func _update_pose(delta: float = 1.0 / 60.0) -> void:
 	# One cycle is two steps: the left boot (index 0) lands at phase 0, the right at 0.5.
 	var phase := 0.5 * _landed_side + 0.5 * fraction
 	avatar.animate(phase, _run_amount, _moving, delta)
-	avatar.twist(wrapf(facing_yaw - _heading, -PI, PI))
+	twist = wrapf(facing_yaw - _heading, -PI, PI)
+	avatar.twist(twist)
 	var support := func(point: Vector2) -> float: return surface.sample_height(point)
 	contact_gap = avatar.ground(support, position.y, avatar.planted(phase, _run_amount))
 

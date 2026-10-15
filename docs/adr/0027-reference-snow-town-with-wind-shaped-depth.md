@@ -61,8 +61,10 @@ still evaluates exactly the heights and triangles the shader draws.
 A perspective camera (40° vertical field of view, −55° pitch, 16 m from its
 focus) follows the figure with north up and never rotates. Its focus leans up to
 3 m toward the cursor's point on the ground. The wheel zooms from 10 to 30 m,
-plus a whole-map overview for inspection. WASD moves relative to the screen.
-Facing follows the cursor, including while standing still. Legs, boots and
+plus a whole-map overview for inspection, which M also opens and closes. WASD
+moves relative to the screen. Facing follows the cursor, including while standing
+still, but while walking the upper body turns no more than 110° from travel and
+holds the nearer shoulder rather than swinging through its back. Legs, boots and
 bootprints follow the direction of travel, so trails stay honest, and turning in
 place leaves no prints. Both inspection figures start in the outpost yard. The
 uncontrolled one walks a fixed loop (outpost, meeting-hall gap, compound gate,

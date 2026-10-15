@@ -1,7 +1,8 @@
 extends Camera3D
 ## A north-up perspective camera that follows the controlled figure. Its yaw never
 ## changes. Its focus leans toward the cursor's point on the ground, and the wheel
-## zooms through the play range or out to a whole-map overview of the town.
+## zooms through the play range or out to a whole-map overview of the town, which
+## M also opens and closes.
 
 const TownLayout = preload("res://town_layout.gd")
 const FIELD_OF_VIEW := 40.0
@@ -53,11 +54,20 @@ func zoom_in() -> void:
 		distance = maxf(MIN_DISTANCE, distance / ZOOM_STEP)
 
 
+## Out from the overview there is nothing further, and the play distance it
+## returns to stays as the Player left it.
 func zoom_out() -> void:
+	if overview:
+		return
 	if distance >= MAX_DISTANCE - 0.001:
 		overview = true
 	else:
 		distance = minf(MAX_DISTANCE, distance * ZOOM_STEP)
+
+
+## Open the overview, or return from it to the play distance the Player left.
+func toggle_overview() -> void:
+	overview = not overview
 
 
 func current_distance() -> float:

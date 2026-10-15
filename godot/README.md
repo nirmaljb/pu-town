@@ -268,23 +268,42 @@ cursor's point on the ground, by a quarter of the cursor's distance from the
 figure and never more than 3 m, so you see further where you look. The mouse
 wheel zooms from 10 to 30 m. One step out beyond 30 m opens a whole-map overview
 for inspection, which frames the map rectangle around its centre without lean;
-one step in returns to 30 m.
+one step in returns to 30 m. **M** opens the overview from any play distance, and
+M again returns to the distance you left. A wheel step out does nothing while the
+overview is open, and one step in returns to 30 m however it was opened. Walking,
+the lean and the detail region behave the same whichever way it was opened.
 
-The figure faces the cursor's point on the ground, including while standing
-still. A cursor within 25 cm of the figure, or outside the window, leaves Facing
-as it was. The upper body, from the lower spine to the head, turns toward Facing;
+The cursor's point on the ground sets the bearing the figure wants to look
+along. A cursor within 25 cm of the figure, or outside the window, gives no new
+bearing. The upper body, from the lower spine to the head, turns toward Facing;
 the hips, legs and boots keep stepping in the direction of travel, so bootprints
 point where the figure went and speed is unchanged whichever way it faces.
-Standing still, the legs pivot once the upper body has turned 60° from them,
-without stepping, so turning in place leaves no prints. After Tab, the newly
-controlled figure takes its Facing from the cursor; the other keeps its own.
+
+- **Standing still**, Facing points at the cursor exactly. The legs pivot once the
+  upper body has turned 60° from them, without stepping, so turning in place
+  leaves no prints.
+- **Walking**, the upper body turns toward the cursor but no more than **110°**
+  from the direction of travel, like the bounded upper-body turn of on-foot
+  shooters. With the cursor further round, the figure looks over the shoulder it
+  last used and never swings through its back. It changes shoulder only when the
+  cursor comes back within 110° on the other side, and then turns through the
+  front. Facing turns no faster than **540° per second**, so a change of shoulder
+  or a change of travel never snaps it round.
+- **Stopping** with Facing still away from the cursor, it turns to the cursor at
+  the same rate, with the legs pivoting after it, and then tracks it exactly.
+
+The 110° twist is spread over the spine as before, so the head alone turns about
+16° and about 72° counting the neck and upper chest. After Tab, the newly
+controlled figure takes its Facing from the cursor; the other faces where it
+walks.
 
 | Control | Effect |
 | --- | --- |
 | WASD | Walk relative to the screen: W north, S south, D east, A west; diagonals are normalized |
 | Shift | Request running, up to 4.5 m/s where the snow allows it |
 | Mouse | Face the cursor's point on the ground; the camera leans up to 3 m toward it |
-| Mouse wheel | Zoom from 10 to 30 m, or one step further out to the whole-map overview |
+| Mouse wheel | Zoom from 10 to 30 m, or one step further out to the whole-map overview; one step in from the overview returns to 30 m |
+| M | Open the whole-map overview, or return from it to the play distance you left |
 | Tab | Switch the controlled figure; the released figure walks back to the loop |
 | `−` / `=` | Reduce/increase wind from 0 to 16 in steps of one; keypad minus/plus also work |
 | `0` | Restore the default wind strength of 1 |
@@ -302,7 +321,9 @@ but the scene and wind keep advancing.
 
 The HUD and CSV expose figure identity, position, the ground height beneath the
 figure (`ground_y_m`), Facing, the latest travel and bootprint directions as
-compass bearings (`facing_deg`, `travel_deg`, `print_deg`), the cursor's ground
+compass bearings (`facing_deg`, `travel_deg`, `print_deg`), the upper body's
+turn from the legs (`twist_deg`, Facing minus the legs' direction, clockwise
+positive), the cursor's ground
 point (`cursor_x_m`, `cursor_z_m`), speed, run request, the visible Snow Depth above
 that ground (`snow_depth_m`), the saved loose Snow Depth under the figure before
 packing (`saved_depth_m`), the loose depth that sets running speed after nearby
@@ -346,7 +367,9 @@ down the stair to the forest and back up, and check that boots stay on the snow,
 the HUD's ground height changes by 5 m and the cliff rock stops you on both
 levels. Move the cursor round the standing figure to turn it in place without
 prints, then walk while facing elsewhere and check that the bootprints follow the
-travel. Check close and overview framing, the camera's lean toward the cursor,
+travel. Walk with the cursor behind the figure and check that it looks over one
+shoulder rather than twisting backwards, and that it changes shoulder through the
+front. Press M to open and close the overview. Check close and overview framing, the camera's lean toward the cursor,
 snow contact, and the transition between detailed and distant snow while moving.
 
 The scene route sends keyboard, wheel and mouse-movement events through Godot's input API and
@@ -387,15 +410,25 @@ the courtyard to the south gate and walks down the stair to the forest,
 observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
 speed on the slope. On the forest floor, requested running only walks in the Deep
 Snow, both toward the map edge and to the foot of the cliff beside the stair;
-each stops it, and it climbs the stair back to the gate. Wind stays at 0 until
-then. The figure next fixes four more probes: sheltered in the courtyard
+each stops it, and it climbs the stair back to the gate. In the courtyard it then
+presses M at the 16 m play distance with the camera leaning: the whole map shows
+without lean while it walks north and back, a wheel step out changes nothing, and
+M returns to exactly 16 m while a repeat of the held key does not toggle. Walking
+north, it sweeps the cursor from east through directly behind to west and behind
+again. The twist never exceeds 110°, holds the east shoulder while the cursor is
+beyond 110°, changes once to the west shoulder through the front after the cursor
+comes within 110° on the west, and Facing never turns faster than 540° per
+second; travel, speed and bootprints stay a plain northward walk's. Stopped with
+the cursor behind, Facing reaches it within the time that rate allows, with the
+legs within 60° and no new print, and then tracks it to 0.5°. Wind stays at 0
+until then. The figure next fixes four more probes: sheltered in the courtyard
 (`courtyard_shelter`), exposed in the open outpost yard (`yard_open`), on the east
 shed's windward west face (`shed_windward`) and in the lee of the lodge's south
-face (`lodge_lee`). Between the first two it opens the whole-map overview, whose
-detail region stays at the map centre, and walks from the courtyard through the
+face (`lodge_lee`). Between the first two it opens the whole-map overview with M,
+whose detail region stays at the map centre, and walks from the courtyard through the
 east gate into the region and out past the meeting hall toward the outpost:
 across the blended border the region holds still and the contact gap stays within
-2 mm. It then zooms back in to 10 m. At wind 16 from the north-west the exposed print fills at the
+2 mm. One wheel step in leaves it at 30 m, and it zooms on in to 10 m. At wind 16 from the north-west the exposed print fills at the
 120 wind-second rate, the sheltered one four times more slowly and the lee one
 faster still; the lodge's drift grows from 60 cm toward 1.2 m without shrinking
 and settles, and the shed's face scours to the 3 cm floor and holds. The figure

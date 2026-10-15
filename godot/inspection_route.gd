@@ -33,7 +33,14 @@ const RUN_MPS := 4.5
 const CAMERA_FOV_DEG := 40.0
 const CAMERA_PITCH_DEG := -55.0
 const PLAY_RANGE_M := Vector2(10.0, 30.0)
+const PLAY_DISTANCE_M := 16.0
 const MAX_LEAN_M := 3.0
+# Walking, the upper body turns no more than 110° from travel, and Facing turns no
+# faster than 540° per second: 9° in each 60 Hz physics observation. Standing, the
+# legs pivot once the twist passes 60°.
+const WALKING_TWIST_DEG := 110.0
+const TURN_PER_OBSERVATION_DEG := 540.0 / 60.0
+const STANDING_TWIST_DEG := 60.0
 # Wind: prints fill in about 120 wind-seconds in the open and up to four times
 # slower in shelter; Snowdrifts reach about 1.2 m and scour stops at 3 cm. The
 # prevailing wind blows from the north-west, and four turns of 45° reverse it.
@@ -62,6 +69,12 @@ const SWEEP := [
 	[Vector2(0, -0.2), 0.0], [Vector2(0.2, -0.2), 45.0], [Vector2(0.2, 0), 90.0], [Vector2(0.2, 0.2), 135.0],
 	[Vector2(0, 0.2), 180.0], [Vector2(-0.2, 0.2), 225.0], [Vector2(-0.2, 0), 270.0], [Vector2(-0.2, -0.2), 315.0],
 ]
+# Cursor points for a figure walking north, as screen offsets and how long each is
+# held: east, south-east, directly behind, south-west, west, then behind again.
+const BEHIND_SWEEP := [
+	[Vector2(0.25, 0), 0.4], [Vector2(0.2, 0.2), 0.4], [Vector2(0, 0.25), 0.5],
+	[Vector2(-0.2, 0.2), 0.4], [Vector2(-0.25, 0), 0.8], [Vector2(0, 0.25), 0.4],
+]
 
 var failures: Array[String] = []
 var stages := {}
@@ -71,6 +84,8 @@ var route_path := ""
 var headless := false
 # Where the controlled figure stands on screen with no lean, as viewport fractions.
 var figure_screen := Vector2(0.5, 0.5)
+# The cursor's latest position in window coordinates; wheel events happen there.
+var cursor_window := Vector2.ZERO
 # The recorded point of the walking figure's trail that the route tracked.
 var laid_trail := {}
 
@@ -196,6 +211,28 @@ func _run() -> void:
 	await _leg([KEY_W], 1.2, "forest cliff blocked")
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
+	# In the courtyard, after the tracking stages so their timing is unchanged: M
+	# opens the whole-map overview from the 16 m play distance, without lean, and
+	# the figure walks on while it is open. A wheel step out does nothing there, M
+	# returns to the play distance it left, and a held M's repeat does not toggle.
+	await _cursor_leg(Vector2(0.3, 0), [], 1.0, "lean before overview")
+	_tap(KEY_M)
+	await _leg([KEY_W], 1.0, "overview by M")
+	await _leg([KEY_S], 1.0, "overview walk back")
+	_wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	await _leg([], 0.3, "overview wheel out")
+	_tap(KEY_M)
+	_repeat(KEY_M)
+	await _leg([], 0.5, "overview closed by M")
+	# Walking north while the cursor sweeps from east through directly behind to west,
+	# the upper body stops at its limit over the east shoulder, changes to the west
+	# one through the front, and on stopping with the cursor behind turns to meet it.
+	await _walking_sweep("walk north sweeping behind")
+	await _leg([], 1.0, "stop facing behind")
+	# Facing east again before the cursor rests on the figure, as earlier stages left it.
+	await _cursor_leg(Vector2(0.3, 0), [], 0.5, "face east again")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure after sweep")
+	await _goto(LANDMARKS.south_gate, "return to south gate")
 	await _wind_stages()
 	# Eight steps out from 10 m reach the 30 m end of the play range; the next opens the overview.
 	for step in range(8):
@@ -237,13 +274,15 @@ func _wind_stages() -> void:
 	await _goto(LANDMARKS.courtyard_east, "head for the outpost")
 	# The overview's detail region stays at the map centre, so the figure walks into
 	# it across its blended border through the east gate and out again by the outpost.
-	for step in range(12):
-		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	# M opens it here; one wheel step in still leaves it at the 30 m end of play.
+	_tap(KEY_M)
 	await _leg([], 0.5, "overview before border")
 	await _goto(LANDMARKS.meeting_hall_gap, "leave courtyard for the outpost")
 	await _goto(LANDMARKS.outpost_lane, "walk to the outpost")
-	# Back in from the overview to the 10 m end of the play range.
-	for step in range(12):
+	_wheel(MOUSE_BUTTON_WHEEL_UP)
+	await _leg([], 0.3, "overview wheel in")
+	# On in to the 10 m end of the play range.
+	for step in range(11):
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _goto(LANDMARKS.yard_open, "reach open yard")
 	_tap(KEY_F5)
@@ -305,6 +344,27 @@ func _sweep_cursor(description: String) -> void:
 		await _wait(0.4)
 
 
+## Walk north while the cursor visits each BEHIND_SWEEP point. A graphical run
+## captures the view while the cursor is first directly behind the figure.
+func _walking_sweep(description: String) -> void:
+	checkpoint += 1
+	stages[description] = checkpoint
+	_tap(KEY_F4)
+	await get_tree().physics_frame
+	print("Snow route: ", description)
+	_key(KEY_W, true)
+	for index in range(BEHIND_SWEEP.size()):
+		_point(BEHIND_SWEEP[index][0])
+		if index == 2 and not headless:
+			await _wait(0.3, [KEY_W])
+			_tap(KEY_F9)
+			await _wait(BEHIND_SWEEP[index][1] - 0.3, [KEY_W])
+		else:
+			await _wait(BEHIND_SWEEP[index][1], [KEY_W])
+	_key(KEY_W, false)
+	await _wait(0.05)
+
+
 func _cursor_leg(offset: Vector2, keys: Array, seconds: float, description: String) -> void:
 	_point(offset)
 	await _leg(keys, seconds, description)
@@ -319,6 +379,7 @@ func _point(offset: Vector2) -> void:
 	# Input events arrive in window coordinates and the scene reads viewport ones.
 	event.position = viewport.get_final_transform() * screen
 	event.global_position = event.position
+	cursor_window = event.position
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()
 
@@ -402,14 +463,29 @@ func _tap(code: Key) -> void:
 	_key(code, false)
 
 
+## A held key's repeat, which must not act as a fresh press.
+func _repeat(code: Key) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = code
+	event.keycode = code
+	event.pressed = true
+	event.echo = true
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()
+	_key(code, false)
+
+
 func _wheel(button: MouseButton) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
+	event.position = cursor_window
+	event.global_position = cursor_window
 	event.pressed = true
 	Input.parse_input_event(event)
 	var released := event.duplicate()
 	released.pressed = false
 	Input.parse_input_event(released)
+	Input.flush_buffered_events()
 
 
 func _latest_record() -> String:
@@ -582,6 +658,8 @@ func _check_record() -> void:
 	_check_packed_speed(rows)
 	_check_snow_zones(rows)
 	_check_facing(rows)
+	_check_walking_facing(rows)
+	_check_overview_key(rows)
 	_check_wind(rows)
 	_check_zoom(rows)
 	_check_detail_region(rows)
@@ -1067,6 +1145,109 @@ func _check_facing(rows: Array[Dictionary]) -> void:
 		failures.append("Tab Facing observations were missing")
 	elif _angle_between(float(swapped.front().facing_deg), 270.0) > 20.0 or _angle_between(float(swapped.front().facing_deg), _cursor_bearing(swapped.front())) > 0.5:
 		failures.append("After Tab the newly controlled figure did not face the cursor")
+
+
+func _check_walking_facing(rows: Array[Dictionary]) -> void:
+	# Walking north with the cursor sweeping round behind: the twist stays within
+	# 110°, holds its shoulder while the cursor is beyond that, changes shoulder
+	# through the front once, and Facing never turns faster than 540°/s. Travel,
+	# speed and bootprints are a plain northward walk's.
+	var sweep := _rows_for(rows, "walk north sweeping behind")
+	var stop := _rows_for(rows, "stop facing behind")
+	if sweep.size() < 120 or stop.size() < 30:
+		failures.append("Walking Facing stages were missing")
+		return
+	var held := {1.0: 0, -1.0: 0}
+	var behind := 0
+	var changes: Array[String] = []
+	var last_side := 0.0
+	var last_walking := {}
+	var previous := {}
+	var standing: Array[Dictionary] = []
+	for row in sweep + stop:
+		if not previous.is_empty() and _angle_between(float(row.facing_deg), float(previous.facing_deg)) > TURN_PER_OBSERVATION_DEG + 0.01:
+			_fail_once("Facing turned faster than 540° per second")
+		previous = row
+		if float(row.input_y) > -0.5:
+			if not last_walking.is_empty():
+				standing.append(row)
+			continue
+		last_walking = row
+		var obstructed: bool = row.boundary_limited == "true" or row.obstacle_limited == "true"
+		if obstructed or _angle_between(float(row.travel_deg), 0.0) > 0.5 or absf(float(row.horizontal_mps) - WALK_MPS) > 0.003:
+			_fail_once("Facing changed the northward walk's travel or speed")
+		if int(row.step_count) > int(sweep.front().step_count) and _angle_between(float(row.print_deg), 0.0) > 0.5:
+			_fail_once("Bootprints did not point north while the figure looked behind")
+		var twist := float(row.twist_deg)
+		var wanted := wrapf(_cursor_bearing(row) - float(row.travel_deg), -180.0, 180.0)
+		if absf(twist) > WALKING_TWIST_DEG + 0.5:
+			_fail_once("The upper body twisted beyond 110° while walking")
+		var beyond := absf(wanted) > WALKING_TWIST_DEG + 1.0
+		if beyond and absf(wanted) > 170.0:
+			behind += 1
+		if beyond and absf(twist) > WALKING_TWIST_DEG - 0.5:
+			held[signf(twist)] += 1
+		var side := signf(twist)
+		if side != 0.0 and last_side != 0.0 and side != last_side:
+			changes.append("%+.0f° to %+.0f° with the cursor at %+.0f°" % [last_side * WALKING_TWIST_DEG, twist, wanted])
+			if beyond:
+				_fail_once("The upper body changed shoulder while the cursor was beyond the limit")
+		if side != 0.0:
+			last_side = side
+	print("Walking with the cursor behind: %d observations directly behind, held east %d and west %d, shoulder changes %s" % [behind, held[1.0], held[-1.0], changes])
+	if behind < 20 or held[1.0] < 20 or held[-1.0] < 10:
+		failures.append("The upper body was not held at its limit over each shoulder (behind %d, east %d, west %d)" % [behind, held[1.0], held[-1.0]])
+	if changes.size() != 1 or not changes[0].begins_with("+"):
+		failures.append("The upper body did not change once from the east to the west shoulder (%s)" % [changes])
+	if int(last_walking.step_count) - int(sweep.front().step_count) < 4:
+		failures.append("Walking while looking behind left too few prints")
+	# Stopped with the cursor behind, Facing turns to it at the same rate, the legs
+	# pivot after it without stepping, and it then tracks the cursor exactly.
+	if standing.size() < 30:
+		failures.append("Stop observations were missing")
+		return
+	var gap := _angle_between(float(last_walking.facing_deg), _cursor_bearing(standing.front()))
+	var expected := ceili(gap / TURN_PER_OBSERVATION_DEG) + 1
+	print("Stopped %.0f° from the cursor; expected to reach it within %d observations" % [gap, expected])
+	if gap < 30.0:
+		failures.append("The figure did not stop with Facing away from the cursor (%.1f°)" % gap)
+	for index in range(standing.size()):
+		var row: Dictionary = standing[index]
+		if int(row.step_count) != int(last_walking.step_count) or float(row.horizontal_mps) > 0.0:
+			_fail_once("Turning after stopping moved the figure or added a bootprint")
+		if absf(float(row.twist_deg)) > STANDING_TWIST_DEG + 0.5:
+			_fail_once("Standing, the legs did not pivot under the 60° twist")
+		if index >= expected and _angle_between(float(row.facing_deg), _cursor_bearing(row)) > 0.5:
+			_fail_once("After stopping, Facing did not reach and track the cursor")
+
+
+func _check_overview_key(rows: Array[Dictionary]) -> void:
+	# M opens the overview from 16 m and returns to exactly 16 m. Walking carries on
+	# in it, the lean falls to zero, and a wheel step out changes nothing. From an
+	# overview M opened, one wheel step in reaches the 30 m end of play.
+	var leaned := _rows_for(rows, "lean before overview")
+	var opened := _rows_for(rows, "overview by M")
+	var open := opened + _rows_for(rows, "overview walk back") + _rows_for(rows, "overview wheel out")
+	var closed := _rows_for(rows, "overview closed by M")
+	var wheel_in := _rows_for(rows, "overview wheel in")
+	if leaned.is_empty() or opened.is_empty() or closed.is_empty() or wheel_in.is_empty():
+		failures.append("Overview key stages were missing")
+		return
+	if leaned.back().overview != "false" or absf(float(leaned.back().camera_distance_m) - PLAY_DISTANCE_M) > 0.001 or float(leaned.back().lean_m) < 0.5:
+		failures.append("The route did not open the overview from a leaning 16 m play view")
+	for row in open:
+		if row.overview != "true" or row.whole_map_visible != "true":
+			_fail_once("M did not hold the whole-map overview open")
+	if float(opened.back().lean_m) > 0.01:
+		failures.append("The overview opened by M kept its lean (%.3f m)" % float(opened.back().lean_m))
+	if float(opened.back().travel_m) - float(opened.front().travel_m) < 1.5:
+		failures.append("The figure did not walk while the overview was open")
+	for row in closed:
+		if row.overview != "false" or absf(float(row.camera_distance_m) - PLAY_DISTANCE_M) > 0.001:
+			_fail_once("M did not return to the 16 m play distance, or its repeat toggled the overview")
+	for row in wheel_in:
+		if row.overview != "false" or absf(float(row.camera_distance_m) - PLAY_RANGE_M.y) > 0.001:
+			_fail_once("One wheel step in from the overview did not reach 30 m")
 
 
 func _check_detail_region(rows: Array[Dictionary]) -> void:

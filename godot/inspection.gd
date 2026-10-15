@@ -47,7 +47,7 @@ const ROUTE_COLUMNS := [
 	"other_feet_y_m", "other_ground_y_m", "other_mps", "other_run_requested", "other_loose_depth_m", "other_grounded",
 	"other_contact_gap_m", "other_obstacle_limited", "other_boundary_limited", "other_facing_deg", "other_travel_deg",
 	"other_travel_m", "other_loop_progress", "other_rejoining",
-	"facing_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
+	"facing_deg", "twist_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
 ]
 ## Every probe slot has the same columns, prefixed probe1_ … probe6_: its world
 ## position, loose Snow Depth, visible snow above the ground after packing,
@@ -152,7 +152,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"other_facing_deg": _bearing(other.facing_yaw) if other else 0.0, "other_travel_deg": _bearing(other.travel_yaw) if other else 0.0,
 		"other_travel_m": other.distance_walked if other else 0.0, "other_loop_progress": other.loop_progress if other else 0.0,
 		"other_rejoining": other.rejoining if other else false,
-		"facing_deg": _bearing(walker.facing_yaw), "travel_deg": _bearing(walker.travel_yaw), "print_deg": _bearing(walker.print_yaw),
+		# Facing minus the legs' direction, clockwise positive like the bearings.
+		"facing_deg": _bearing(walker.facing_yaw), "twist_deg": wrapf(-rad_to_deg(walker.twist), -180.0, 180.0), "travel_deg": _bearing(walker.travel_yaw), "print_deg": _bearing(walker.print_yaw),
 		"cursor_set": camera.has_cursor_ground, "cursor_x_m": camera.cursor_ground.x, "cursor_z_m": camera.cursor_ground.y,
 		"probe_count": probes.size()
 	}
@@ -166,14 +167,14 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
 		"obstacle" if walker.obstacle_limited else ("boundary" if walker.boundary_limited else "clear"),
 		walker.snow_depth, walker.saved_depth, walker.loose_depth, walker.sink_depth,
 		walker.foot_compaction * 100.0, walker.step_count, walker.distance_walked,
-		latest.facing_deg, latest.travel_deg,
+		latest.facing_deg, latest.twist_deg, latest.travel_deg,
 		"%.1f, %.1f" % [camera.cursor_ground.x, camera.cursor_ground.y] if camera.has_cursor_ground else "not yet seen",
 		surface.DETAIL_SIZE.x, surface.DETAIL_SIZE.y, surface.region_center.x, surface.region_center.y, float(surface.upload_bytes) / 1024.0,
 		surface.wind_strength, _compass(surface.wind_from()), surface.wind_elapsed, surface.wind_update_ms, surface.footprint_count,
