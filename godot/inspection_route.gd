@@ -4,6 +4,7 @@ extends Node
 ## Destinations and bounds come from the town layout definition, not the running scene.
 
 const TownLayout = preload("res://town_layout.gd")
+const LANDMARKS := TownLayout.LANDMARKS
 # Specified values: a figure keeps its 0.3 m radius inside the map, and the
 # footprint image covers the whole map at 31.25 mm per texel.
 const FIGURE_RADIUS_M := 0.3
@@ -11,6 +12,7 @@ const FOOTPRINT_TEXEL_M := 0.03125
 
 var failures: Array[String] = []
 var stages := {}
+var arrivals: Array[Dictionary] = []
 var checkpoint := 0
 var route_path := ""
 var headless := false
@@ -44,43 +46,57 @@ func _run() -> void:
 
 	await _leg([], 0.5, "initial idle")
 	await _short_steps()
+	# Both figures start in the outpost yard, where shallow and deep snow mix.
 	await _leg([KEY_W], 2.0, "straight walk")
 	await _leg([KEY_S], 2.0, "straight return")
 	await _leg([KEY_W, KEY_D], 2.0, "diagonal walk")
 	await _leg([KEY_S, KEY_A], 2.0, "diagonal return")
-	await _leg([KEY_W, KEY_D, KEY_SHIFT], 6.0, "run through thin snow")
-	await _leg([KEY_W, KEY_D], 4.0, "lodge approach")
+	await _leg([KEY_S, KEY_D, KEY_SHIFT], 2.5, "run through thin snow")
+	await _goto(LANDMARKS.lodge_front, "reach lodge front")
+	await _leg([KEY_W, KEY_D], 2.5, "lodge approach")
 	await _leg([KEY_W, KEY_D], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
-	await _goto(TownLayout.LANDMARKS.yard_west, "return to yard")
-	await _leg([KEY_S, KEY_D], 2.0, "first trail")
+	# Lay a trail in the meeting-hall gap and fix a world probe on it.
+	await _goto(LANDMARKS.meeting_hall_gap_south, "reach meeting-hall gap")
+	await _leg([KEY_W, KEY_D], 2.0, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
-	await _leg([KEY_S, KEY_A], 6.0, "leave detailed patch")
+	# Leave the detailed patch through the compound's east gate into the courtyard.
+	await _goto(LANDMARKS.meeting_hall_gap, "leave detailed patch")
+	await _goto(LANDMARKS.courtyard_east, "enter courtyard")
+	await _leg([KEY_S, KEY_A], 2.2, "wall approach")
+	await _leg([KEY_S, KEY_A], 1.2, "wall blocked")
+	await _goto(LANDMARKS.courtyard, "cross courtyard")
 	await _leg([], 0.5, "probe outside patch")
-	await _goto(TownLayout.LANDMARKS.deep_field, "reach deep field")
+	await _goto(LANDMARKS.courtyard_west, "reach deep courtyard")
 	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run through deep snow")
-	await _goto(TownLayout.LANDMARKS.deep_field, "pack deep trail return")
+	await _goto(LANDMARKS.courtyard_west, "pack deep trail return")
 	await _leg([KEY_W, KEY_D], 2.0, "pack deep trail again")
-	await _goto(TownLayout.LANDMARKS.deep_field, "packed run start")
+	await _goto(LANDMARKS.courtyard_west, "packed run start")
 	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run on packed trail")
-	await _goto(TownLayout.LANDMARKS.deep_field_east, "deep run return")
 	_tap(KEY_TAB)
 	await _leg([], 0.5, "second figure idle")
-	# Return through the first figure's actual exported trail line, accounting
-	# for frame timing, then stamp the same eastbound boot lanes with figure 2.
+	# The second figure walks from the outpost yard to the first figure's actual
+	# exported trail start, then stamps the same northbound boot lanes.
 	var first_trail := _rows_for(_read_rows(), "first trail")
 	var trail_start: Dictionary = first_trail.front()
 	await _goto(Vector2(float(trail_start.x_m), float(trail_start.z_m)), "second figure follows trail")
-	await _leg([KEY_S, KEY_D], 3.0, "second figure overlaps trail")
+	await _leg([KEY_W, KEY_D], 3.0, "second figure overlaps trail")
 	# Gait phase differs between figures. Several passes cover both boot lanes
 	# instead of assuming a particular step lands on an exact world texel.
 	for pass_index in range(2):
-		await _leg([KEY_W, KEY_A], 3.0, "second figure overlap return %d" % pass_index)
-		await _leg([KEY_S, KEY_D], 3.0, "second figure overlap repeat %d" % pass_index)
+		await _leg([KEY_S, KEY_A], 3.0, "second figure overlap return %d" % pass_index)
+		await _leg([KEY_W, KEY_D], 3.0, "second figure overlap repeat %d" % pass_index)
 	await _leg([], 0.5, "shared probe overlapped")
 	_tap(KEY_TAB)
-	await _leg([KEY_W, KEY_D], 6.0, "return to trail")
+	# Navigation reads the latest observation, so let the first figure be observed first.
+	await _leg([], 0.5, "first figure idle")
+	# The first figure leaves the courtyard through the east gate and revisits the probe.
+	await _goto(LANDMARKS.courtyard, "leave courtyard")
+	await _goto(LANDMARKS.courtyard_east, "return to east gate")
+	await _goto(LANDMARKS.meeting_hall_gap, "leave through east gate")
+	var probe_row: Dictionary = _rows_for(_read_rows(), "fresh probe").back()
+	await _goto(Vector2(float(probe_row.probe_x_m), float(probe_row.probe_z_m)), "return to trail")
 	await _leg([], 0.5, "probe revisited")
 	if not headless:
 		_tap(KEY_F9)
@@ -90,8 +106,9 @@ func _run() -> void:
 	await _leg([], 8.2, "wind erases trail")
 	await _leg([], 0.5, "erased probe")
 	_tap(KEY_0)
-	await _leg([KEY_W, KEY_A], 18.0, "west boundary")
-	await _leg([KEY_W, KEY_A], 1.0, "boundary blocked")
+	# South from the meeting-hall gap, past the southern forest, to the map edge.
+	await _leg([KEY_S, KEY_A], 12.0, "south boundary")
+	await _leg([KEY_S, KEY_A], 1.0, "boundary blocked")
 	for step in range(26):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
@@ -172,7 +189,8 @@ func _wait(seconds: float, held_keys: Array = []) -> void:
 
 func _goto(destination: Vector2, description: String) -> void:
 	# Navigation uses the completed scene observation, not an addressed walker.
-	# This helper is only used in the open central yard, at ordinary walk speed.
+	# It walks one straight leg along Z, then one along X, at ordinary walk speed;
+	# the layout keeps open ground between each pair of places it joins.
 	var x := destination.x
 	var z := destination.y
 	checkpoint += 1
@@ -180,15 +198,17 @@ func _goto(destination: Vector2, description: String) -> void:
 	await get_tree().process_frame
 	var rows := _read_rows()
 	if rows.is_empty():
-		failures.append("No observation available to return to the open yard")
+		failures.append("No observation available to navigate to " + description)
 		return
 	var row: Dictionary = rows.back()
 	var dz := z - float(row.z_m)
 	if absf(dz) > 0.02:
 		await _leg([KEY_S, KEY_A] if dz > 0 else [KEY_W, KEY_D], absf(dz) / 2.25, description + " z")
+		arrivals.append({"stage": description + " z", "destination": destination})
 	var dx := x - float(row.x_m)
 	if absf(dx) > 0.02:
 		await _leg([KEY_S, KEY_D] if dx > 0 else [KEY_W, KEY_A], absf(dx) / 2.25, description + " x")
+		arrivals.append({"stage": description + " x", "destination": destination})
 
 
 func _key(code: Key, pressed: bool) -> void:
@@ -335,10 +355,74 @@ func _check_record() -> void:
 	var short_steps := _rows_for(rows, "short steps")
 	if short_steps.is_empty() or int(short_steps.back().step_count) <= int(short_steps.front().step_count):
 		failures.append("Repeated brief taps lost accumulated footsteps")
+	_check_start(rows)
+	_check_arrivals(rows)
+	_check_held_by_obstacle(rows, "lodge blocked", "the lodge")
+	_check_held_by_obstacle(rows, "wall blocked", "the courtyard's south wall")
+	_check_courtyard_entry(rows)
 	_check_probe(rows)
 	_check_second_figure(rows)
 	_check_packed_speed(rows)
 	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, deep run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, deep_run, blocked, overview, follow])
+
+
+func _check_start(rows: Array[Dictionary]) -> void:
+	# Both figures begin a fresh launch at their outpost yard landmarks.
+	var idle := _rows_for(rows, "initial idle")
+	if idle.is_empty():
+		failures.append("Initial idle observations were missing")
+		return
+	var row: Dictionary = idle.front()
+	var controlled := Vector2(float(row.x_m), float(row.z_m))
+	var other := Vector2(float(row.other_x_m), float(row.other_z_m))
+	if controlled.distance_to(LANDMARKS.outpost_yard_west) > 0.001 or other.distance_to(LANDMARKS.outpost_yard_east) > 0.001:
+		failures.append("The figures did not start at the outpost yard landmarks")
+
+
+func _check_arrivals(rows: Array[Dictionary]) -> void:
+	# Every navigation leg must end at its destination; a leg that met an
+	# obstacle would leave the route checking the wrong part of the town.
+	for arrival in arrivals:
+		var leg := _rows_for(rows, arrival.stage)
+		if leg.is_empty():
+			failures.append("Navigation stage %s was missing" % arrival.stage)
+			continue
+		var destination: Vector2 = arrival.destination
+		var reached := Vector2(float(leg.back().x_m), float(leg.back().z_m))
+		var axis := 1 if String(arrival.stage).ends_with(" z") else 0
+		if absf(reached[axis] - destination[axis]) > 0.1:
+			failures.append("Navigation %s ended at %s instead of %s" % [arrival.stage, reached, destination])
+
+
+func _check_held_by_obstacle(rows: Array[Dictionary], stage: String, obstacle: String) -> void:
+	var held := 0
+	for row in _rows_for(rows, stage):
+		if row.obstacle_limited == "true" and row.boundary_limited == "false" and float(row.horizontal_mps) < 0.01:
+			held += 1
+	if held < 30:
+		failures.append("Route did not reach and stop at %s (%d held observations)" % [obstacle, held])
+
+
+func _check_courtyard_entry(rows: Array[Dictionary]) -> void:
+	# The east gate is the only opening on the courtyard's east side. Walking
+	# through it unobstructed and on into the courtyard shows the gate is passable.
+	var entry := _rows_for(rows, "enter courtyard x")
+	if entry.is_empty():
+		failures.append("Courtyard entry stage was missing")
+		return
+	var gate: Vector2 = LANDMARKS.east_gate
+	var in_gate := 0
+	for row in entry:
+		if row.obstacle_limited == "true" or row.boundary_limited == "true":
+			_fail_once("The east gate obstructed the walk into the courtyard")
+		if absf(float(row.x_m) - gate.x) < 0.5 and absf(float(row.z_m) - gate.y) < 0.05:
+			in_gate += 1
+	var inside := Vector2(float(entry.back().x_m), float(entry.back().z_m))
+	if in_gate < 10 or inside.distance_to(LANDMARKS.courtyard_east) > 0.05:
+		failures.append("Route did not walk through the east gate into the courtyard")
+	var crossed := _rows_for(rows, "probe outside patch")
+	if crossed.is_empty() or Vector2(float(crossed.back().x_m), float(crossed.back().z_m)).distance_to(LANDMARKS.courtyard) > 0.05:
+		failures.append("Route did not cross the courtyard")
 
 
 func _check_probe(rows: Array[Dictionary]) -> void:
@@ -388,8 +472,8 @@ func _check_second_figure(rows: Array[Dictionary]) -> void:
 func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	var fresh := _rows_for(rows, "run through deep snow")
 	var packed := _rows_for(rows, "run on packed trail")
-	# The corridor runs north from the deep-field landmark where both runs start.
-	var corridor_z: float = TownLayout.LANDMARKS.deep_field.y - 2.0
+	# The corridor runs north from the deep courtyard landmark where both runs start.
+	var corridor_z: float = LANDMARKS.courtyard_west.y - 2.0
 	var fresh_distance := 0.0
 	var fresh_samples := 0
 	var packed_distance := 0.0

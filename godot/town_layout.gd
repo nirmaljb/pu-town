@@ -1,52 +1,107 @@
 extends Node3D
 class_name SnowTownLayout
-## Reference-inspired blockout; dimensions are authored, not measured from the image.
+## Blockout of the whole-map reference (docs/art/snow-town-reference/town-top-down.png):
+## a walled compound in the west, the meeting hall in the central gap and the
+## outpost in the east, with rock masses around the rim and pines in the
+## southern forest. Composition follows the picture; dimensions are authored.
 ## All obstacles stand on the flat substrate. Their roofs never become walking ground.
 
 ## The map is a rectangle centred on the origin: X runs east–west and Z
 ## north–south (north is −Z). Snow, shader, containment, camera and route all
 ## derive their bounds from these half extents rather than repeating them.
-const HALF_EXTENTS := Vector2(32.0, 32.0)
-## Named places in this layout. Figures start at the yard landmarks, and the
-## scene route travels between landmarks rather than literal coordinates.
+const HALF_EXTENTS := Vector2(50.0, 28.0)
+## Named places in this layout. Figures start at the outpost yard landmarks, and
+## the scene route travels between landmarks rather than literal coordinates.
+## Each consecutive pair the route uses is joined by open, axis-aligned ground.
 const LANDMARKS := {
-	"yard_west": Vector2(-3, 7),
-	"yard_east": Vector2(3, 7),
-	"deep_field": Vector2(-3, 23),
-	"deep_field_east": Vector2(1.5, 20.5),
+	"outpost_yard_west": Vector2(22, 4),
+	"outpost_yard_east": Vector2(28, 4),
+	"lodge_front": Vector2(32, -2),
+	"meeting_hall_gap_south": Vector2(-6, 7.5),
+	"meeting_hall_gap": Vector2(-6, 0),
+	"east_gate": Vector2(-9.25, 0),
+	"courtyard_east": Vector2(-12, 0),
+	"courtyard": Vector2(-22, 0),
+	"courtyard_west": Vector2(-30, 3),
 }
 const CONTACT_MARGIN := 0.0001
 const MAX_DRIFT_OBSTACLES := 16
+const PINE_SIZE := Vector2(1.6, 1.6)
 
 var obstacles: Array[Dictionary] = []
 var drift_obstacles: Array[Dictionary] = []
 
 
 func _ready() -> void:
-	# North is -Z. Leave the yard and its connecting passages open for crossed trails.
-	_add_box(Vector2(0, -16), Vector2(24, 14), 6.0, "lodge", true)
-	_add_box(Vector2(-24, -6), Vector2(10, 10), 3.5, "shed", true)
-	_add_box(Vector2(24, 0), Vector2(10, 10), 3.5, "shed", true)
-	_add_box(Vector2(-22, 19), Vector2(10, 10), 3.5, "shed", true)
-	_add_box(Vector2(-24, 1), Vector2(2.5, 1.5), 1.2, "generator", true)
-	_add_box(Vector2(-27.5, 0.5), Vector2(1.2, 1.2), 1.4, "utility", true)
-	_add_box(Vector2(-18, -20), Vector2(1.4, 1.4), 5.5, "utility", true)
-	_add_box(Vector2(-8, -7.5), Vector2(3, 1.5), 1.1, "utility", true)
-	_add_box(Vector2(27, 8), Vector2(2, 2), 1.4, "utility", true)
-	_add_box(Vector2(-16, 22), Vector2(1, 3), 1.1, "utility", true)
-	_add_box(Vector2(-29, -27), Vector2(3, 2.5), 1.8, "rock", true)
-	_add_box(Vector2(27, -28), Vector2(3, 2.5), 2.0, "rock", true)
-	_add_box(Vector2(3, 29), Vector2(4, 2.5), 1.6, "rock", true)
-	_add_box(Vector2(-29, 29), Vector2(2.5, 2.5), 1.5, "rock", true)
-	_add_box(Vector2(28, 21), Vector2(2.5, 2), 1.3, "rock", true)
-	_add_box(Vector2(-29, 9), Vector2(2, 2), 1.4, "rock", true)
-	for tree in [Vector2(-20, -29), Vector2(16, -28), Vector2(29, 14),
-			Vector2(14, 29), Vector2(-8, 29), Vector2(-29, 14)]:
-		_add_box(tree, Vector2(1.5, 1.5), 4.6, "tree")
-	_add_box(Vector2(-28, 26), Vector2(6, 0.45), 1.1, "fence")
-	_add_box(Vector2(23, 26), Vector2(8, 0.45), 1.1, "fence")
-	_add_box(Vector2(29, -18), Vector2(0.45, 10), 1.1, "fence")
-	_add_box(Vector2(-29, -18), Vector2(0.45, 6), 1.1, "fence")
+	# North is -Z. Boxes are given by centre and east–west × north–south size.
+	_add_compound()
+	_add_box(Vector2(0.5, -1.2), Vector2(8.5, 12), 7.0, "meeting_hall", true)
+	_add_box(Vector2(-1, 10.5), Vector2(3, 2), 1.0, "crate")
+	_add_box(Vector2(2, 10), Vector2(1.2, 1.2), 1.1, "barrel")
+	_add_outpost()
+	_add_rim_and_forest()
+
+
+func _add_compound() -> void:
+	# The courtyard spans x -34..-10, z -9..4.5. Its east gate faces the meeting
+	# hall and its south gate (the gatehouse) faces the forest; both are 3 m wide.
+	_add_box(Vector2(-38, -6), Vector2(8, 25), 6.0, "range", true)
+	_add_box(Vector2(-28.5, -13), Vector2(11, 8), 6.0, "range", true)
+	_add_box(Vector2(-25.25, -17.25), Vector2(4.5, 4.5), 14.0, "bell_tower", true)
+	_add_box(Vector2(-16.25, -13.75), Vector2(13.5, 9.5), 7.0, "long_hall", true)
+	_add_box(Vector2(-8, -13.25), Vector2(3, 8.5), 5.0, "range")
+	_add_box(Vector2(-12, -6.75), Vector2(4, 4.5), 4.5, "range")
+	_add_box(Vector2(-9.25, -5.25), Vector2(1.5, 7.5), 4.0, "wall")
+	_add_box(Vector2(-9.25, 3), Vector2(1.5, 3), 4.0, "wall")
+	_add_box(Vector2(-34.25, 5.5), Vector2(15.5, 2), 4.0, "wall", true)
+	_add_box(Vector2(-14.5, 5.5), Vector2(12, 2), 4.0, "wall", true)
+	_add_box(Vector2(-25.75, 6.5), Vector2(1.5, 5), 7.0, "gatehouse")
+	_add_box(Vector2(-21.25, 6.5), Vector2(1.5, 5), 7.0, "gatehouse")
+	_add_box(Vector2(-25.8, -2.9), Vector2(3.5, 3.5), 3.5, "well_pavilion")
+	for pine in [Vector2(-17, 2.5), Vector2(-14.5, 3)]:
+		_add_box(pine, PINE_SIZE, 6.0, "pine")
+
+
+func _add_outpost() -> void:
+	# The yard spans roughly x 16..36, z -6..12 and stays open between the lodge,
+	# the sheds and the workshop.
+	_add_box(Vector2(31, -12.5), Vector2(18, 13), 8.0, "lodge", true)
+	_add_box(Vector2(11.5, -12.75), Vector2(8, 7.5), 4.5, "shed", true)
+	_add_box(Vector2(11.75, 2.5), Vector2(7.5, 7), 5.0, "workshop", true)
+	_add_box(Vector2(38.75, 3.5), Vector2(6.5, 6), 4.0, "shed", true)
+	_add_box(Vector2(18.5, -15), Vector2(1.6, 1.6), 14.0, "radio_tower")
+	_add_box(Vector2(17.2, -9.5), Vector2(2.4, 1.4), 1.2, "generator")
+	_add_box(Vector2(20.5, -8), Vector2(1.5, 1.5), 1.0, "crate")
+	_add_box(Vector2(12, 9.75), Vector2(2.5, 1.5), 1.0, "crate")
+	_add_box(Vector2(34, 8.5), Vector2(1.4, 1.4), 1.0, "crate")
+	_add_box(Vector2(9, -7.5), Vector2(1.2, 1.2), 1.1, "barrel")
+	_add_box(Vector2(16, 11), Vector2(4.5, 0.45), 1.1, "fence")
+	_add_box(Vector2(26.5, 14.5), Vector2(5.5, 0.45), 1.1, "fence")
+	_add_box(Vector2(38, 9.5), Vector2(0.45, 4), 1.1, "fence")
+
+
+func _add_rim_and_forest() -> void:
+	_add_box(Vector2(-47, -3), Vector2(6, 18), 5.0, "rock", true)
+	_add_box(Vector2(4, -20), Vector2(6, 16), 6.0, "rock", true)
+	_add_box(Vector2(46.5, -17), Vector2(7, 22), 6.0, "rock", true)
+	_add_box(Vector2(-0.5, 18), Vector2(7, 8), 4.0, "rock", true)
+	_add_box(Vector2(9, 21), Vector2(10, 14), 5.0, "rock", true)
+	_add_box(Vector2(-46.5, -23.5), Vector2(7, 9), 5.0, "rock")
+	_add_box(Vector2(-2.5, -24), Vector2(7, 8), 5.0, "rock")
+	_add_box(Vector2(10.5, -23.5), Vector2(7, 9), 5.0, "rock")
+	_add_box(Vector2(30, -24.5), Vector2(16, 7), 5.0, "rock")
+	_add_box(Vector2(47.5, 3), Vector2(5, 18), 5.0, "rock")
+	_add_box(Vector2(45, 20), Vector2(10, 16), 5.0, "rock")
+	_add_box(Vector2(19, 23), Vector2(10, 10), 4.5, "rock")
+	_add_box(Vector2(32, 25), Vector2(16, 6), 4.0, "rock")
+	# The southern forest leaves an open lane south of the gatehouse (x -27..-20).
+	for pine in [Vector2(-46, 12), Vector2(-41.5, 14.5), Vector2(-37, 11.5), Vector2(-44.5, 20),
+			Vector2(-39, 19.5), Vector2(-33.5, 15), Vector2(-30.5, 20), Vector2(-47, 26),
+			Vector2(-41, 25), Vector2(-35, 23.5), Vector2(-30, 26), Vector2(-17, 12),
+			Vector2(-13, 15), Vector2(-16.5, 19), Vector2(-11.5, 21.5), Vector2(-18, 25),
+			Vector2(-13.5, 26), Vector2(-38, -23.5), Vector2(-32, -24.5), Vector2(-20, -23.5),
+			Vector2(-13, -22.5)]:
+		_add_box(pine, PINE_SIZE, 6.5, "pine")
 
 
 func point_clear(point: Vector2, radius: float = 0.3) -> bool:
@@ -162,12 +217,23 @@ func _add_box(centre: Vector2, size: Vector2, height: float, kind: String, catch
 
 
 func _colour_for(kind: String) -> Color:
+	# Muted stone, timber and metal tones keep each kind distinguishable in the blockout.
 	match kind:
+		"range": return Color("6f6a64")
+		"long_hall": return Color("5c554f")
+		"bell_tower": return Color("8c857b")
+		"wall": return Color("9a958c")
+		"gatehouse": return Color("7f766b")
+		"well_pavilion": return Color("7a6a58")
+		"meeting_hall": return Color("6b5a4a")
 		"lodge": return Color("716960")
 		"shed": return Color("7d7468")
+		"workshop": return Color("7a6f5f")
+		"radio_tower": return Color("5a636c")
 		"generator": return Color("697477")
-		"utility": return Color("827d72")
-		"tree": return Color("586861")
-		"rock": return Color("747b82")
+		"crate": return Color("8a7559")
+		"barrel": return Color("625447")
 		"fence": return Color("77736d")
+		"rock": return Color("747b82")
+		"pine": return Color("4f6158")
 	return Color("808080")

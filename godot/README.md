@@ -15,8 +15,11 @@ and single-map direction;
 changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
-[whole-map reference](../docs/art/snow-town-reference/README.md). Until that
-lands, this guide describes the current 64 × 64 m scene.
+[whole-map reference](../docs/art/snow-town-reference/README.md). This guide
+describes its first slice: the 100 × 56 m town laid out from that reference as
+solid placeholder boxes, still on flat ground with the existing snow, camera and
+idle second figure. Ground levels and the stair, saved Snow Depth with wind
+drifts, the perspective camera and the walking second figure follow later.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -72,14 +75,44 @@ figures remain temporary scale and contact references, not final Avatar artwork.
 Tab switches between the orange and blue-grey figures, leaving the other idle.
 Both contribute anonymous bootprints to the same world field. Tracks overlap,
 remain when the detailed patch moves away, and fade as wind fills them. A fresh
-launch resets the snow and both figures. The figures start at the open yard's
-`yard_west` and `yard_east` landmarks, (−3, 7) m and (3, 7) m.
+launch resets the snow and both figures. Both start in the outpost yard, at its
+`outpost_yard_west` and `outpost_yard_east` landmarks, (22, 4) m and (28, 4) m,
+where shallow and deep snow mix.
 
-The rectangular lodge, three sheds, generators, utility boxes, rocks, trees and
-fences are non-enterable obstacles anchored to the flat substrate. Walk around
-them through the open yard and connecting passages. Their roofs are not walking
-surfaces, and generators have no interaction. The retained reference guides their
-composition, not measured dimensions or a final asset layout.
+### The town
+
+The town follows the composition of the whole-map reference, with north up (−Z):
+
+- **Walled compound** (west). Its ranges, including the long hall on the north
+  side, the bell tower, outer walls and gatehouse enclose a courtyard of about
+  24 × 13.5 m with a well pavilion and two pines. Reach the courtyard through
+  either 3 m gate: the east gate faces the meeting hall, and the gatehouse's
+  south gate faces the forest.
+- **Meeting hall** in the central gap, at its reference place and shape. The gaps
+  on its west, north and east sides stay passable.
+- **Outpost** (east). The lodge, two sheds, workshop, radio tower, generator,
+  crates and barrels, and fences surround an open yard.
+- **Rim and forest**. Rock masses close the north, east and south-east rim, and
+  pines fill the southern forest and the ground north of the compound. An open
+  lane runs south from the gatehouse.
+
+Every placeholder is a solid, non-enterable box anchored to the flat substrate,
+with a size and colour that distinguish its kind. Walk around them; their roofs
+are not walking surfaces, and generators have no interaction. The reference guides
+the composition, not measured dimensions or a final asset layout. The route's
+named landmarks are, in metres:
+
+| Landmark | X, Z | Place |
+| --- | --- | --- |
+| `outpost_yard_west` | 22, 4 | Outpost yard; figure 1 starts here |
+| `outpost_yard_east` | 28, 4 | Outpost yard; figure 2 starts here |
+| `lodge_front` | 32, −2 | Yard south of the lodge |
+| `meeting_hall_gap_south` | −6, 7.5 | South end of the gap between compound and meeting hall |
+| `meeting_hall_gap` | −6, 0 | That gap, outside the east gate |
+| `east_gate` | −9.25, 0 | The compound's east gate |
+| `courtyard_east` | −12, 0 | Courtyard, inside the east gate |
+| `courtyard` | −22, 0 | Middle of the courtyard |
+| `courtyard_west` | −30, 3 | Deep snow in the west of the courtyard |
 
 The orthographic camera starts at 45° yaw, −55° pitch and a 6 m view size, close
 enough to read the Avatar with a little of the town around it.
@@ -116,7 +149,7 @@ application-data directory, outside this checkout. Use the editor's **Project �
 Open User Data Folder** to find them. These records support inspection; a CSV or
 capture alone is not packaged-platform or hardware performance acceptance.
 
-For a manual check, reduce wind to zero, walk a trail across the yard and press
+For a manual check, reduce wind to zero, walk a trail across the outpost yard and press
 F5. Leave the detailed patch, then return and check that the trail remains at the
 same place. Switch figures and follow or cross it to inspect overlapping prints
 and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
@@ -135,10 +168,16 @@ ordering or procedural samples. Its destinations are the named landmarks in
 
 Press **F7** in the scene to begin and keep the window focused. Add `--auto-start`
 after `--snow-scene-check` to skip the F7 gate; focus is still required. The route
-pauses on focus loss and fails after 60 seconds without focus. It exercises
-walking/running, obstacle contact, overlapping trails, leaving and revisiting the
-detailed patch, wind erasure and camera zoom, and captures graphical views. The
-process returns nonzero on failure. `--walk-scene-check` remains an alias; the
+pauses on focus loss and fails after 60 seconds without focus. Starting from the
+outpost yard, it walks and runs in shallow and deep snow and is stopped by the
+lodge. It lays a probed trail in the meeting-hall gap, walks through the east gate
+into the courtyard, is stopped by the courtyard wall and crosses the courtyard.
+It then shows a Packed Path's running advantage in the courtyard's deep snow. The
+second figure walks from the outpost yard to overlap the trail. The first figure
+returns through the gate to find the trail retained, watches wind erase it, and
+walks south through the forest until the map edge stops it. Finally it zooms to
+the whole-map overview and back, capturing graphical views along the way. Every
+navigation leg must reach its landmark. The process returns nonzero on failure. `--walk-scene-check` remains an alias; the
 existing `--script res://tests/walk_scene.gd` launcher opens the same route.
 
 An explicit headless replay is also available:
@@ -159,8 +198,8 @@ behavior or a performance baseline.
 separate east–west and north–south half extents, together with its named
 landmarks. The snow surface, the shader's map uniform, obstacle and figure
 containment, the camera overview and the scene route all derive from it; do not
-repeat map dimensions elsewhere. The current half extents are 32 m each way, a
-64 × 64 m field spanning −32 to +32 m on both horizontal axes.
+repeat map dimensions elsewhere. The half extents are 50 m east–west and 28 m
+north–south: a 100 × 56 m field spanning −50 to +50 m in X and −28 to +28 m in Z.
 
 [`snow_surface.gd`](snow_surface.gd) defines a flat substrate at Y=0 beneath that
 snow field. Snow begins
@@ -178,11 +217,11 @@ Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
 Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
-to cover the whole map rectangle: **2048 × 2048** for the current town. It stores compaction and the last wind-clock
+to cover the whole map rectangle: **3200 × 1792** for the 100 × 56 m town. It stores compaction and the last wind-clock
 timestamp at each texel; no growing list of steps is retained. Both figures use
 this same image, and moving the patch does not move or clear its contents.
-The CPU image pixel payload is **16 MiB**. The GPU texture is a separate nominal
-16 MiB allocation; those figures exclude driver, upload-staging and other scene
+The CPU image pixel payload is **22,937,600 bytes** (about 21.9 MiB), whatever the
+number of steps. The GPU texture is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
 memory. Wind ages the encoded values without rewriting the image each frame;
 new footfalls update it. A fresh process recreates the field rather than loading
 saved snow.
