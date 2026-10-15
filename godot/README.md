@@ -13,6 +13,10 @@ Existing clients retain their current integration.
 and single-map direction;
 [ADR 0026](../docs/adr/0026-dynamic-snow-and-persistent-footprints.md) records the
 changing surface and persistent world tracks.
+[ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
+the agreed rebuild as the 100 × 56 m town of the
+[whole-map reference](../docs/art/snow-town-reference/README.md). Until that
+lands, this guide describes the current 64 × 64 m scene.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -68,8 +72,8 @@ figures remain temporary scale and contact references, not final Avatar artwork.
 Tab switches between the orange and blue-grey figures, leaving the other idle.
 Both contribute anonymous bootprints to the same world field. Tracks overlap,
 remain when the detailed patch moves away, and fade as wind fills them. A fresh
-launch resets the snow and both figures. The figures start in the open yard at
-(−3, 7) m and (3, 7) m.
+launch resets the snow and both figures. The figures start at the open yard's
+`yard_west` and `yard_east` landmarks, (−3, 7) m and (3, 7) m.
 
 The rectangular lodge, three sheds, generators, utility boxes, rocks, trees and
 fences are non-enterable obstacles anchored to the flat substrate. Walk around
@@ -122,7 +126,8 @@ contact, and the transition between detailed and distant snow while moving.
 
 The scene route sends keyboard and wheel events through Godot's input API and
 checks the public observation CSV without addressing private scene nodes, mesh
-ordering or procedural samples:
+ordering or procedural samples. Its destinations are the named landmarks in
+[`town_layout.gd`](town_layout.gd), and its bounds come from the same map rectangle:
 
 ```sh
 /path/to/godot --path godot -- --snow-scene-check
@@ -150,8 +155,15 @@ behavior or a performance baseline.
 
 ## Reproduce the surface
 
-[`snow_surface.gd`](snow_surface.gd) defines a flat substrate at Y=0 beneath a
-64 × 64 m snow field, spanning −32 to +32 m on both horizontal axes. Snow begins
+[`town_layout.gd`](town_layout.gd) defines the map once, as a rectangle with
+separate east–west and north–south half extents, together with its named
+landmarks. The snow surface, the shader's map uniform, obstacle and figure
+containment, the camera overview and the scene route all derive from it; do not
+repeat map dimensions elsewhere. The current half extents are 32 m each way, a
+64 × 64 m field spanning −32 to +32 m on both horizontal axes.
+
+[`snow_surface.gd`](snow_surface.gd) defines a flat substrate at Y=0 beneath that
+snow field. Snow begins
 with broad shallow/deep variation and responds to wind and compaction. The
 uncompressed depth is bounded to 5–85 cm; packing retains at least 2.5 cm over the
 substrate. The yard remains open without being flattened.
@@ -165,8 +177,8 @@ including the patch border, rather than querying a stale static collision mesh.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
-Footsteps paint one world-anchored **2048 × 2048 RGBA8 image**, or **31.25 mm per
-texel**, covering the whole town. It stores compaction and the last wind-clock
+Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
+to cover the whole map rectangle: **2048 × 2048** for the current town. It stores compaction and the last wind-clock
 timestamp at each texel; no growing list of steps is retained. Both figures use
 this same image, and moving the patch does not move or clear its contents.
 The CPU image pixel payload is **16 MiB**. The GPU texture is a separate nominal

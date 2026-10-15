@@ -3,21 +3,21 @@ render_mode diffuse_burley, specular_schlick_ggx;
 
 uniform sampler2D footprint_image : filter_nearest, repeat_disable;
 uniform vec2 patch_center = vec2(0.0);
+// East–west and north–south half extents of the map rectangle, set from the town layout.
+uniform vec2 map_half_extents;
 uniform float wind_elapsed = 0.0;
 uniform bool detail_mesh = false;
 uniform int obstacle_count = 0;
 uniform vec4 obstacles[16];
 varying vec3 world_position;
 
-const float HALF_EXTENT = 32.0;
 const float PATCH_HALF = 6.4;
 const float COARSE_STEP = 0.8;
 const float EDGE_BLEND = 1.6;
-const float IMAGE_SIZE = 2048.0;
 const float PRINT_LIFETIME = 120.0;
 
-float pixel_compaction(ivec2 pixel) {
-	if (pixel.x < 0 || pixel.y < 0 || pixel.x >= 2048 || pixel.y >= 2048) {
+float pixel_compaction(ivec2 pixel, ivec2 image_size) {
+	if (pixel.x < 0 || pixel.y < 0 || pixel.x >= image_size.x || pixel.y >= image_size.y) {
 		return 0.0;
 	}
 	vec4 value = texelFetch(footprint_image, pixel, 0);
@@ -27,12 +27,14 @@ float pixel_compaction(ivec2 pixel) {
 }
 
 float compaction(vec2 point) {
-	vec2 texel = (point + vec2(HALF_EXTENT)) * 32.0 - vec2(0.5);
+	// The image covers the whole map rectangle, so its size sets the texel density.
+	ivec2 image_size = textureSize(footprint_image, 0);
+	vec2 texel = (point + map_half_extents) / (2.0 * map_half_extents) * vec2(image_size) - vec2(0.5);
 	ivec2 cell = ivec2(floor(texel));
 	vec2 blend = fract(texel);
 	return mix(
-		mix(pixel_compaction(cell), pixel_compaction(cell + ivec2(1, 0)), blend.x),
-		mix(pixel_compaction(cell + ivec2(0, 1)), pixel_compaction(cell + ivec2(1, 1)), blend.x), blend.y);
+		mix(pixel_compaction(cell, image_size), pixel_compaction(cell + ivec2(1, 0), image_size), blend.x),
+		mix(pixel_compaction(cell + ivec2(0, 1), image_size), pixel_compaction(cell + ivec2(1, 1), image_size), blend.x), blend.y);
 }
 
 // Paired with SnowSurface._uncompressed_height. Both start above flat y=0.
@@ -59,10 +61,10 @@ float field_height(vec2 point) {
 }
 
 float coarse_height(vec2 point) {
-	vec2 grid = (point + vec2(HALF_EXTENT)) / COARSE_STEP;
+	vec2 grid = (point + map_half_extents) / COARSE_STEP;
 	vec2 cell = floor(grid);
 	vec2 blend = grid - cell;
-	vec2 corner = cell * COARSE_STEP - vec2(HALF_EXTENT);
+	vec2 corner = cell * COARSE_STEP - map_half_extents;
 	float first = field_height(corner);
 	float right = field_height(corner + vec2(COARSE_STEP, 0.0));
 	float bottom = field_height(corner + vec2(0.0, COARSE_STEP));

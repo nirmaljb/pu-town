@@ -3,7 +3,18 @@ class_name SnowTownLayout
 ## Reference-inspired blockout; dimensions are authored, not measured from the image.
 ## All obstacles stand on the flat substrate. Their roofs never become walking ground.
 
-const HALF_EXTENT := 32.0
+## The map is a rectangle centred on the origin: X runs east–west and Z
+## north–south (north is −Z). Snow, shader, containment, camera and route all
+## derive their bounds from these half extents rather than repeating them.
+const HALF_EXTENTS := Vector2(32.0, 32.0)
+## Named places in this layout. Figures start at the yard landmarks, and the
+## scene route travels between landmarks rather than literal coordinates.
+const LANDMARKS := {
+	"yard_west": Vector2(-3, 7),
+	"yard_east": Vector2(3, 7),
+	"deep_field": Vector2(-3, 23),
+	"deep_field_east": Vector2(1.5, 20.5),
+}
 const CONTACT_MARGIN := 0.0001
 const MAX_DRIFT_OBSTACLES := 16
 
@@ -39,8 +50,7 @@ func _ready() -> void:
 
 
 func point_clear(point: Vector2, radius: float = 0.3) -> bool:
-	var limit := HALF_EXTENT - radius
-	if absf(point.x) > limit or absf(point.y) > limit:
+	if absf(point.x) > HALF_EXTENTS.x - radius or absf(point.y) > HALF_EXTENTS.y - radius:
 		return false
 	for obstacle in obstacles:
 		var centre: Vector2 = obstacle.center
@@ -73,21 +83,23 @@ func move_with_collisions(from: Vector2, to: Vector2, radius: float = 0.3) -> Ve
 		remaining *= 1.0 - travel
 		var normal: Vector2 = contact.normal
 		remaining -= normal * minf(0.0, remaining.dot(normal))
-	var limit := HALF_EXTENT - radius
-	return point.clamp(Vector2(-limit, -limit), Vector2(limit, limit))
+	var limit := Vector2(HALF_EXTENTS.x - radius, HALF_EXTENTS.y - radius)
+	return point.clamp(-limit, limit)
 
 
 func _first_contact(point: Vector2, motion: Vector2, radius: float) -> Dictionary:
 	var nearest: Dictionary = {}
-	var limit := HALF_EXTENT - radius
+	# Scalar limits keep the map-edge contact time in full float precision.
+	var limit_x := HALF_EXTENTS.x - radius
+	var limit_y := HALF_EXTENTS.y - radius
 	if motion.x > 0.0:
-		_consider(nearest, (limit - point.x) / motion.x, Vector2.LEFT, motion)
+		_consider(nearest, (limit_x - point.x) / motion.x, Vector2.LEFT, motion)
 	elif motion.x < 0.0:
-		_consider(nearest, (-limit - point.x) / motion.x, Vector2.RIGHT, motion)
+		_consider(nearest, (-limit_x - point.x) / motion.x, Vector2.RIGHT, motion)
 	if motion.y > 0.0:
-		_consider(nearest, (limit - point.y) / motion.y, Vector2.UP, motion)
+		_consider(nearest, (limit_y - point.y) / motion.y, Vector2.UP, motion)
 	elif motion.y < 0.0:
-		_consider(nearest, (-limit - point.y) / motion.y, Vector2.DOWN, motion)
+		_consider(nearest, (-limit_y - point.y) / motion.y, Vector2.DOWN, motion)
 	for obstacle in obstacles:
 		var centre: Vector2 = obstacle.center
 		var half_size: Vector2 = obstacle.size * 0.5

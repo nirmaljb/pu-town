@@ -1,6 +1,13 @@
 extends Node
 ## Drive the running scene through ordinary keyboard/wheel events and public CSV.
 ## Headless event replay is explicitly labelled; it is not OS input or visual QA.
+## Destinations and bounds come from the town layout definition, not the running scene.
+
+const TownLayout = preload("res://town_layout.gd")
+# Specified values: a figure keeps its 0.3 m radius inside the map, and the
+# footprint image covers the whole map at 31.25 mm per texel.
+const FIGURE_RADIUS_M := 0.3
+const FOOTPRINT_TEXEL_M := 0.03125
 
 var failures: Array[String] = []
 var stages := {}
@@ -45,26 +52,26 @@ func _run() -> void:
 	await _leg([KEY_W, KEY_D], 4.0, "lodge approach")
 	await _leg([KEY_W, KEY_D], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
-	await _goto(-3.0, 7.0, "return to yard")
+	await _goto(TownLayout.LANDMARKS.yard_west, "return to yard")
 	await _leg([KEY_S, KEY_D], 2.0, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
 	await _leg([KEY_S, KEY_A], 6.0, "leave detailed patch")
 	await _leg([], 0.5, "probe outside patch")
-	await _goto(-3.0, 23.0, "reach deep field")
+	await _goto(TownLayout.LANDMARKS.deep_field, "reach deep field")
 	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run through deep snow")
-	await _goto(-3.0, 23.0, "pack deep trail return")
+	await _goto(TownLayout.LANDMARKS.deep_field, "pack deep trail return")
 	await _leg([KEY_W, KEY_D], 2.0, "pack deep trail again")
-	await _goto(-3.0, 23.0, "packed run start")
+	await _goto(TownLayout.LANDMARKS.deep_field, "packed run start")
 	await _leg([KEY_W, KEY_D, KEY_SHIFT], 2.0, "run on packed trail")
-	await _goto(1.5, 20.5, "deep run return")
+	await _goto(TownLayout.LANDMARKS.deep_field_east, "deep run return")
 	_tap(KEY_TAB)
 	await _leg([], 0.5, "second figure idle")
 	# Return through the first figure's actual exported trail line, accounting
 	# for frame timing, then stamp the same eastbound boot lanes with figure 2.
 	var first_trail := _rows_for(_read_rows(), "first trail")
 	var trail_start: Dictionary = first_trail.front()
-	await _goto(float(trail_start.x_m), float(trail_start.z_m), "second figure follows trail")
+	await _goto(Vector2(float(trail_start.x_m), float(trail_start.z_m)), "second figure follows trail")
 	await _leg([KEY_S, KEY_D], 3.0, "second figure overlaps trail")
 	# Gait phase differs between figures. Several passes cover both boot lanes
 	# instead of assuming a particular step lands on an exact world texel.
@@ -163,9 +170,11 @@ func _wait(seconds: float, held_keys: Array = []) -> void:
 				return
 
 
-func _goto(x: float, z: float, description: String) -> void:
+func _goto(destination: Vector2, description: String) -> void:
 	# Navigation uses the completed scene observation, not an addressed walker.
 	# This helper is only used in the open central yard, at ordinary walk speed.
+	var x := destination.x
+	var z := destination.y
 	checkpoint += 1
 	_tap(KEY_F4)
 	await get_tree().process_frame
@@ -256,13 +265,15 @@ func _check_record() -> void:
 	var overview := 0
 	var previous := {}
 	var figure_ids := {}
+	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
+	var image_texels := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
 	for row in rows:
 		var input := Vector2(float(row.input_x), float(row.input_y))
 		var speed := float(row.horizontal_mps)
 		var obstruction: bool = row.boundary_limited == "true" or row.obstacle_limited == "true"
 		figure_ids[row.figure_id] = true
-		if absf(float(row.x_m)) > 31.701 or absf(float(row.z_m)) > 31.701:
-			_fail_once("Figure escaped the 64 m world bounds")
+		if absf(float(row.x_m)) > bounds.x + 0.001 or absf(float(row.z_m)) > bounds.y + 0.001:
+			_fail_once("Figure escaped the map rectangle")
 		if row.grounded != "true" or absf(float(row.contact_gap_m)) > 0.002:
 			_fail_once("Figure lost its observed snow contact")
 		if float(row.feet_y_m) > 1.3 or float(row.feet_y_m) < -0.001:
@@ -273,7 +284,8 @@ func _check_record() -> void:
 			_fail_once("Detailed patch is not 12.8 × 12.8 m")
 		if maxf(absf(float(row.patch_x_m) - float(row.x_m)), absf(float(row.patch_z_m) - float(row.z_m))) > 6.401:
 			_fail_once("Detailed patch stopped following the controlled figure")
-		if int(row.footprint_image_size) != 2048 or int(row.footprint_image_bytes) != 16777216:
+		var image_size := Vector2i(int(row.footprint_image_width), int(row.footprint_image_height))
+		if image_size != image_texels or int(row.footprint_image_bytes) != image_texels.x * image_texels.y * 4:
 			_fail_once("Footprint image dimensions or allocation changed during traversal")
 		if float(row.foot_compaction) < -0.001 or float(row.foot_compaction) > 1.001 or float(row.probe_compaction) < -0.001 or float(row.probe_compaction) > 1.001:
 			_fail_once("Snow compaction escaped its bounded range")
@@ -376,6 +388,8 @@ func _check_second_figure(rows: Array[Dictionary]) -> void:
 func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	var fresh := _rows_for(rows, "run through deep snow")
 	var packed := _rows_for(rows, "run on packed trail")
+	# The corridor runs north from the deep-field landmark where both runs start.
+	var corridor_z: float = TownLayout.LANDMARKS.deep_field.y - 2.0
 	var fresh_distance := 0.0
 	var fresh_samples := 0
 	var packed_distance := 0.0
@@ -383,11 +397,11 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	# Compare the same world corridor after several passes, not elapsed legs
 	# that may cover different snow. Every included row requests running.
 	for row in fresh:
-		if float(row.z_m) >= 20.0 and float(row.z_m) <= 22.0 and row.run_requested == "true":
+		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
 			fresh_distance += float(row.horizontal_mps)
 			fresh_samples += 1
 	for row in packed:
-		if float(row.z_m) >= 20.0 and float(row.z_m) <= 22.0 and row.run_requested == "true":
+		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
 			packed_distance += float(row.horizontal_mps)
 			packed_samples += 1
 	var fresh_speed := fresh_distance / maxi(1, fresh_samples)

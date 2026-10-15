@@ -70,6 +70,13 @@ The open square at the centre of the town, that holds the Meeting Area.
 The thickness of snow above the underlying ground at a place. It can change as footsteps compress the snow or wind accumulates it.
 _Avoid_: Ground elevation
 
+**Deep Snow**:
+Snow too deep to run through; a Player in it can only walk.
+
+**Shallow Snow**:
+Snow shallow enough to run through, including Deep Snow packed down into a Packed Path.
+_Avoid_: Light snow
+
 **Snowdrift**:
 A local accumulation of snow built up by wind.
 

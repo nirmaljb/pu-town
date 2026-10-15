@@ -3,11 +3,12 @@ extends Node3D
 ## The figure is the parka Avatar; its steps, Footprints and clips share one gait.
 
 const Avatar = preload("res://parka_avatar.gd")
+const TownLayout = preload("res://town_layout.gd")
 const WALK_SPEED := 2.25
 const RUN_SPEED := 4.5
 const HEIGHT := 1.7
 const FOOTPRINT_RADIUS := 0.3
-const LIMIT := 32.0 - FOOTPRINT_RADIUS
+const LIMIT := TownLayout.HALF_EXTENTS - Vector2.ONE * FOOTPRINT_RADIUS
 
 var figure_id := 1
 var direction := Vector2.ZERO
@@ -73,7 +74,7 @@ func walk(delta: float, camera_basis: Basis, controlled: bool) -> void:
 	var back := Vector3(camera_basis.z.x, 0, camera_basis.z.z).normalized()
 	var motion := (right * direction.x + back * direction.y) * speed * delta
 	var desired := here + Vector2(motion.x, motion.z)
-	var bounded := desired.clamp(Vector2(-LIMIT, -LIMIT), Vector2(LIMIT, LIMIT))
+	var bounded := desired.clamp(-LIMIT, LIMIT)
 	boundary_limited = not bounded.is_equal_approx(desired)
 	var target: Vector2 = layout.move_with_collisions(here, bounded, FOOTPRINT_RADIUS)
 	obstacle_limited = target.distance_to(bounded) > 0.0001

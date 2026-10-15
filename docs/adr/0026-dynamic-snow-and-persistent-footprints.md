@@ -51,3 +51,10 @@ This extends the static first milestone deliberately while leaving the existing
 Java, browser and Unity contracts unchanged. Validate through the running scene,
 ordinary movement input, visible trails and exported observations; imports,
 exports and hardware performance remain separate evidence.
+
+[ADR 0027](0027-reference-snow-town-with-wind-shaped-depth.md) rebuilds this
+prototype as the 100 × 56 m reference town. It supersedes this record's flat
+substrate, formula snow, 64 m map, orthographic camera turned 45° and idle second
+figure. It retains the world-anchored Footprint picture, the agreement of visible
+snow and foot contact on the CPU and in the shader, the offline boundary, and
+ADR 0025's requirements for later integration.

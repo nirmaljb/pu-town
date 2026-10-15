@@ -26,8 +26,8 @@ func _ready() -> void:
 	add_child(town)
 	add_child(surface)
 	surface.configure_obstacles(town.drift_obstacles)
-	walker.configure(surface, town, 1, Vector2(-3, 7))
-	second_walker.configure(surface, town, 2, Vector2(3, 7))
+	walker.configure(surface, town, 1, TownLayout.LANDMARKS.yard_west)
+	second_walker.configure(surface, town, 2, TownLayout.LANDMARKS.yard_east)
 	add_child(walker)
 	add_child(second_walker)
 	add_child(camera)
@@ -44,7 +44,8 @@ func _ready() -> void:
 	get_window().focus_exited.connect(func() -> void: focused = headless_replay)
 	focused = headless_replay or get_window().has_focus()
 	print("Snow Walk: Godot ", Engine.get_version_info().string, " · ", RenderingServer.get_current_rendering_method())
-	print("64 × 64 metres; 12.8 m moving detail; WASD walk / Shift run / Tab switch; captures: ", OS.get_user_data_dir())
+	print("%d × %d metres; 12.8 m moving detail; WASD walk / Shift run / Tab switch; captures: " % [
+		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0], OS.get_user_data_dir())
 	if OS.get_cmdline_user_args().has("--walk-scene-check") or OS.get_cmdline_user_args().has("--snow-scene-check"):
 		add_child(InspectionRoute.new())
 
@@ -61,9 +62,10 @@ func _physics_process(delta: float) -> void:
 	camera.position = target + camera.basis.z * 100.0
 	var viewport_size := get_viewport().get_visible_rect().size
 	var aspect := viewport_size.x / viewport_size.y
-	# A narrow resized window still fits the rotated square at overview zoom.
-	var map_diagonal := Surface.HALF_EXTENT * 2.0 * sqrt(2.0)
-	var overview_scale := maxf(1.0, (map_diagonal + 10.0) / (OVERVIEW_SIZE * aspect))
+	# A narrow resized window still fits the turned map rectangle at overview zoom.
+	var yaw := camera.rotation.y
+	var map_across := 2.0 * (TownLayout.HALF_EXTENTS.x * absf(cos(yaw)) + TownLayout.HALF_EXTENTS.y * absf(sin(yaw)))
+	var overview_scale := maxf(1.0, (map_across + 10.0) / (OVERVIEW_SIZE * aspect))
 	camera.size = zoom * lerpf(1.0, overview_scale, overview_blend)
 	inspection.observe(controlled, camera, surface, focused, idle)
 

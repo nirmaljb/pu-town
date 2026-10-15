@@ -34,7 +34,7 @@ const ROUTE_COLUMNS := [
 	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
 	"patch_x_m", "patch_z_m", "patch_size_m", "wind_strength", "wind_elapsed_s", "footprint_count",
-	"footprint_image_size", "footprint_image_bytes", "probe_set", "probe_x_m", "probe_z_m",
+	"footprint_image_width", "footprint_image_height", "footprint_image_bytes", "probe_set", "probe_x_m", "probe_z_m",
 	"probe_depth_m", "probe_uncompressed_depth_m", "probe_compaction", "probe_in_patch", "other_figure_id", "other_x_m", "other_z_m", "other_steps"
 ]
 
@@ -72,9 +72,9 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	var viewport_size := get_viewport().get_visible_rect().size
 	var figure_screen := camera.unproject_position(walker.global_position)
 	var whole_map_visible := true
-	var edge: float = surface.HALF_EXTENT
-	for x in [-edge, edge]:
-		for z in [-edge, edge]:
+	var edge: Vector2 = surface.HALF_EXTENTS
+	for x in [-edge.x, edge.x]:
+		for z in [-edge.y, edge.y]:
 			var corner := camera.unproject_position(Vector3(x, 1.0, z))
 			whole_map_visible = whole_map_visible and Rect2(Vector2.ZERO, viewport_size).has_point(corner)
 	var probe_offset: Vector2 = (probe - surface.patch_center).abs()
@@ -97,7 +97,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"patch_x_m": surface.patch_center.x, "patch_z_m": surface.patch_center.y,
 		"patch_size_m": surface.PATCH_SIZE, "wind_strength": surface.wind_strength,
 		"wind_elapsed_s": surface.wind_elapsed, "footprint_count": surface.footprint_count,
-		"footprint_image_size": surface.IMAGE_SIZE, "footprint_image_bytes": surface.footprint_image_bytes,
+		"footprint_image_width": surface.IMAGE_SIZE.x, "footprint_image_height": surface.IMAGE_SIZE.y,
+		"footprint_image_bytes": surface.footprint_image_bytes,
 		"probe_set": probe_set, "probe_x_m": probe.x, "probe_z_m": probe.y,
 		"probe_depth_m": probe_depth, "probe_uncompressed_depth_m": surface.sample_uncompressed_depth(probe) if probe_set else 0.0, "probe_compaction": probe_compaction,
 		"probe_in_patch": probe_set and maxf(probe_offset.x, probe_offset.y) <= surface.PATCH_SIZE * 0.5,
@@ -112,8 +113,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %5.3f   Z %6.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d² · %.0f MiB · checkpoint %d\n%s\nOrtho %5.1f m · angle 55° / 45° · %s · %d fps\n%s\n%s" % [
-		surface.HALF_EXTENT * 2, surface.HALF_EXTENT * 2, walker.figure_id,
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %5.3f   Z %6.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\nOrtho %5.1f m · angle 55° / 45° · %s · %d fps\n%s\n%s" % [
+		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z,
 		walker.horizontal_speed, contact,
 		"obstacle" if walker.obstacle_limited else ("boundary" if walker.boundary_limited else "clear"),
@@ -121,7 +122,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		walker.foot_compaction * 100.0, walker.step_count, walker.distance_walked,
 		surface.PATCH_SIZE, surface.PATCH_SIZE, surface.patch_center.x, surface.patch_center.y,
 		surface.wind_strength, surface.wind_elapsed, surface.footprint_count,
-		surface.IMAGE_SIZE, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
+		surface.IMAGE_SIZE.x, surface.IMAGE_SIZE.y, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
 		"Probe %.1f, %.1f: packed %.0f%% · %s" % [probe.x, probe.y, probe_compaction * 100.0, "in patch" if latest.probe_in_patch else "outside patch"] if probe_set else "F5 follows the latest boot print with a fixed world probe",
 		camera.size, "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
 		"RECORDING  " + record_path if recording else notice,
