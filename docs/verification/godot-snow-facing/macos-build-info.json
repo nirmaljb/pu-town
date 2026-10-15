@@ -1,0 +1,37 @@
+{
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "renderer": "gl_compatibility",
+  "configured_viewport": [
+    1280,
+    800
+  ],
+  "platform": "macos",
+  "build_mode": "release",
+  "git_revision": "3f21045f38fcad460d348b2d0057ddd6b43e18d6",
+  "godot_source_dirty": false,
+  "sources_sha256": {
+    "export_presets.cfg": "3fc639a1d00e635a74c167b0634b116415f95e60b085bf29c167fcd4c533e3f8",
+    "follow_camera.gd": "2f4cb57af938d1354f007c16c2021132dbc9e2c2960c2b6db74f5b102bce5ace",
+    "inspection.gd": "c3aaea0ab0dd567f05ec492b70752953294ca5455778d9bf58a4d9b5215715c2",
+    "inspection_route.gd": "8fd01ca34a9fe58a4aa702c0a6d3591c612b07bc179d2573f5efbe1ed27e16fd",
+    "parka_avatar.gd": "2e61c7da0cbf7e636752704632603ba0272f6e64c742f79d4fc4fc6b86c7b52f",
+    "project.godot": "8bd36a29eaa9b59353ea7d7d1f7f57646cf472d3503185902716e0ec576f959e",
+    "snow.gdshader": "45bf519836cde33e0ed43dcafbb3faf7ba2ea2dfc97e840fc327c5dadd5d8e89",
+    "snow_surface.gd": "3d4011a3fb6d359e0cfd51956a92b353f2aa424015785f3e994c7bcc2e5b968a",
+    "snow_walk.gd": "d98bc144ffdebda41571b5a89e7191b349863f3551ab16cabf8bd244db197751",
+    "snow_walk.tscn": "712874be226e5d69947d4030ba35feb306f5aca59df469b3bc349b23cc0259fd",
+    "snow_wind.gd": "352f12d99d6b5a6c02354e67fc938e23606a7eac719792286aaac6e4a202c8cb",
+    "tests/walk_scene.gd": "d8c65bacc079c8f5c42235c3b9fd97eaa93da3595bae5d2e8c602f1e82c70d21",
+    "town_layout.gd": "44ee5e6133d68c704fcfb9537f659ac74eb6731c060d2b18b251a7b84313bd36",
+    "walker.gd": "401a6f01456f24736484b55334e6a71710687774bc2e31d78bc44d111fe2a99f"
+  },
+  "package_sha256": {
+    "PU-Town-Snow-Walk.app/Contents/Info.plist": "251008657dec4c899fc3ae7aea50002cb1a8ca0f24910ba5064a1bb8dc64180e",
+    "PU-Town-Snow-Walk.app/Contents/MacOS/PU Town \u00b7 Snow Walk": "7ee7dc3fd93a57606eff9c2750c090cb2d0f3a9c6e4fba9c5a7908df8d5c3b1a",
+    "PU-Town-Snow-Walk.app/Contents/PkgInfo": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb",
+    "PU-Town-Snow-Walk.app/Contents/Resources/PU Town \u00b7 Snow Walk.pck": "f461397f6e2cbe7df08fa14e0bd950c4af04dce66e0dbd46a4de7271f4882692",
+    "PU-Town-Snow-Walk.app/Contents/Resources/PrivacyInfo.xcprivacy": "0535353bb08c25b8ce5ed9ac7e442a5994f402e0f6cbc4bed668cfc63c2ceac3",
+    "PU-Town-Snow-Walk.app/Contents/Resources/icon.icns": "779ff524928785811d6d4c61f47a26491160b1092db9b610e85fcdfd9b2d2b2a",
+    "PU-Town-Snow-Walk.app/Contents/_CodeSignature/CodeResources": "bfde0409fdd56806e6b67851655cc42cc1e30938d23f47b4c5b3b7692dd05b90"
+  }
+}
