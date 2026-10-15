@@ -1,0 +1,54 @@
+{
+  "mode": "graphical engine-event replay in the source scene, focused; rendered but not ordinary OS input or a frame benchmark",
+  "observations": 17151,
+  "figure_ids": [
+    "1",
+    "2"
+  ],
+  "max_grounded_contact_gap_m": 0.00024054690141,
+  "ground_y_m_range": [
+    -5.0,
+    0.0
+  ],
+  "horizontal_mps_range": [
+    0.0,
+    4.50004577636719
+  ],
+  "loose_depth_m_range": [
+    0.01547574661014,
+    1.13406161397637
+  ],
+  "max_sink_m": 0.37367905708681,
+  "camera_distance_m_range": [
+    10.0,
+    111.658092961817
+  ],
+  "max_lean_m": 2.9997718334198,
+  "wind_strengths": [
+    0.0,
+    1.0,
+    16.0
+  ],
+  "wind_from_deg": [
+    135.0,
+    315.0
+  ],
+  "wind_update_ms": {
+    "mean": 0.118898198355781,
+    "p95": 0.757,
+    "p99": 0.914,
+    "max": 12.821,
+    "note": "CPU time of the wind in each observed physics frame; not a rendered-frame measurement"
+  },
+  "footprint_image": [
+    3200,
+    1792,
+    22937600
+  ],
+  "footprints_at_finish": 2237,
+  "upload_total_bytes": 239308800,
+  "uploaded_steps": 2237,
+  "max_probe_count": 6,
+  "elapsed_s": 311.84,
+  "route_sha256": "ad7eb9ecff4f74bc503c885a610c058c9c398075b692de964e4e9718d5f2420e"
+}

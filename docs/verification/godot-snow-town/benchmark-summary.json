@@ -1,0 +1,63 @@
+{
+  "source": "/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town \u00b7 Snow Walk/frames-1792088984-40769.csv",
+  "frame_count": 3316,
+  "interval_start_usec": 11870721,
+  "interval_end_usec": 71890276,
+  "elapsed_seconds": 60.019555,
+  "duration_complete": true,
+  "average_fps": 55.24866020749404,
+  "mean_frame_ms": 18.099986429433052,
+  "p95_frame_ms": 21.986,
+  "p99_frame_ms": 24.038,
+  "max_frame_ms": 68.736,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 0,
+  "unfocused_seconds": 0.0,
+  "stationary_frames": 0,
+  "stationary_seconds": 0.0,
+  "focused_moving_seconds": 60.019555,
+  "focused_moving_fraction": 1.0,
+  "position_range_m": {
+    "x": [
+      -23.6002712249756,
+      21.9249992370605
+    ],
+    "z": [
+      -0.08749632537365,
+      22.0001316070557
+    ]
+  },
+  "camera_range_m": [
+    16.0,
+    16.0
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 800,
+      "window_width": 1280,
+      "window_height": 800
+    }
+  ],
+  "max_observation_age_ms": 15.033,
+  "wind": {
+    "recorded": true,
+    "settings": [
+      {
+        "strength": 1.0,
+        "from_deg": 315.0
+      }
+    ],
+    "physics_updates": 3602,
+    "mean_ms_per_update": 0.37559161576901523,
+    "single_update_frames": 3012,
+    "single_update_p95_ms": 0.64599999999996,
+    "single_update_max_ms": 10.769,
+    "mean_ms_per_frame": 0.4079858262967409,
+    "p95_ms_per_frame": 0.77500000000003,
+    "p99_ms_per_frame": 1.322,
+    "max_ms_per_frame": 10.769,
+    "share_of_frame_time": 0.022540670286542323
+  },
+  "warnings": []
+}

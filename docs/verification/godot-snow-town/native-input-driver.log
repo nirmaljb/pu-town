@@ -1,0 +1,15 @@
+trusted for input: true
+   1.67 s  facing: cursor round the standing figure
+   7.75 s  lean: cursor to the north-east corner and back
+  13.40 s  walk north and south while facing east
+  16.98 s  wind keys: 0, 3, turn clockwise, turn back, restore default
+  24.02 s  lee drift: walk to (32, 0) and blow at 16 for 15 s
+  48.00 s  walk to the meeting-hall gap
+  71.71 s  through the east gate across the courtyard
+  80.58 s  down the stair
+  91.62 s  back up the stair
+ 100.65 s  trail down the stair, leaning south
+ 105.23 s  Tab to the walking figure and back
+ 118.01 s  close view and whole-map overview
+ 126.16 s  probes fill at wind 16
+ 137.41 s  done

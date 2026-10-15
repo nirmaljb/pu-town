@@ -1,0 +1,196 @@
+# Ordinary OS input inspection in the release package. Fresh launch: figure 1 at (22, 4), wind 1 from NW.
+move 640 440
+sleep 1
+tap f8
+sleep 0.5
+log facing: cursor round the standing figure
+move 880 440
+sleep 1.5
+move 640 200
+sleep 1.5
+move 400 440
+sleep 1.5
+move 640 680
+sleep 1.5
+tap f4
+log lean: cursor to the north-east corner and back
+move 1270 10
+sleep 2.5
+tap f9
+sleep 0.5
+move 640 440
+sleep 2.5
+tap f4
+log walk north and south while facing east
+move 880 440
+down w
+sleep 1.5
+up w
+down s
+sleep 1.5
+up s
+sleep 0.5
+tap f4
+log wind keys: 0, 3, turn clockwise, turn back, restore default
+tap minus
+sleep 1
+tap equal
+tap equal
+tap equal
+sleep 1.5
+tap ]
+sleep 1.5
+tap [
+sleep 1.5
+tap 0
+sleep 1
+tap f4
+log lee drift: walk to (32, 0) and blow at 16 for 15 s
+down w
+sleep 1.778
+up w
+down d
+sleep 4.444
+up d
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+move 900 250
+sleep 15
+tap f4
+tap f1
+sleep 0.3
+tap f9
+sleep 0.5
+tap f1
+tap 0
+tap minus
+sleep 0.5
+tap f4
+log walk to the meeting-hall gap
+move 640 440
+down a
+sleep 1.778
+up a
+down s
+sleep 3.333
+up s
+down a
+sleep 15.111
+up a
+down w
+sleep 3.333
+up w
+tap f5
+tap f4
+log through the east gate across the courtyard
+down a
+sleep 7.111
+up a
+tap f5
+tap f4
+down s
+sleep 0.889
+up s
+down a
+sleep 0.667
+up a
+tap f4
+log down the stair
+down s
+sleep 5.333
+up s
+move 640 600
+sleep 1
+tap f1
+sleep 0.3
+tap f9
+sleep 0.5
+tap f1
+tap f4
+down s
+sleep 3.556
+up s
+tap f4
+log back up the stair
+move 640 300
+down w
+sleep 8.889
+up w
+tap f5
+tap f4
+log trail down the stair, leaning south
+move 640 790
+sleep 2.5
+tap f1
+sleep 0.3
+tap f9
+sleep 0.5
+tap f1
+move 640 440
+sleep 1
+tap f4
+log Tab to the walking figure and back
+tap tab
+sleep 3
+move 400 440
+sleep 1.5
+down d
+sleep 1
+up d
+sleep 1
+tap f4
+tap tab
+sleep 6
+tap f4
+log close view and whole-map overview
+wheel 4
+sleep 1.5
+tap f9
+sleep 0.5
+wheel -9
+sleep 2
+tap f1
+sleep 0.3
+tap f9
+sleep 0.5
+tap f1
+wheel 3
+sleep 1
+tap f4
+log probes fill at wind 16
+tap 0
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+tap equal
+sleep 8
+tap f4
+tap 0
+sleep 1
+tap f8
+sleep 1
+log done

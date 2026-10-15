@@ -1,0 +1,16 @@
+Networks: packets: 10092519/11G in, 4733186/1765M out.
+Disks: 51750796/1215G read, 15082777/626G written.
+
+PID    COMMAND          %CPU MEM   
+401    WindowServer     23.9 533M  
+0      kernel_task      19.7 58M-  
+5293   PU Town · Snow  18.3 332M- 
+412    coreaudiod       5.5  21M   
+5625   top              5.3  4737K+
+404    loginwindow      4.7  49M   
+318    System Events    4.3  14M   
+484    syspolicyd       3.3  48M   
+371    launchservicesd  2.9  7121K 
+402    tccd             2.9  5873K 
+3921   trustd           2.1  7921K+
+632    trustd           1.6  8129K 

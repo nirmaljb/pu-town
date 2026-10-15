@@ -1,0 +1,18 @@
+Networks: packets: 10091376/11G in, 4732066/1765M out.
+Disks: 51679161/1213G read, 15065654/625G written.
+
+PID    COMMAND          %CPU MEM   
+0      kernel_task      39.1 59M   
+1094   Google Chrome He 6.8  465M+ 
+86905  Google Chrome He 6.0  763M+ 
+5289   top              5.3  4705K+
+91877  Google Chrome He 4.9  345M+ 
+41509  Google Chrome He 4.6  663M+ 
+4287   ChatGPT          3.5  551M+ 
+44889  Claude Helper (R 2.8  886M+ 
+95264  Google Chrome He 2.6  449M  
+4724   Codex (Renderer) 2.5  1104M+
+86518  Google Chrome He 2.2  398M+ 
+1068   Google Chrome    1.7  469M+ 
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	14%; charging; 2:57 remaining present: true

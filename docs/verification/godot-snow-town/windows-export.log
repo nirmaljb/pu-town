@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] first_scan_filesystem | Started Project initialization (5 steps)
+[   0% ] first_scan_filesystem | Scanning file structure...
+[  16% ] first_scan_filesystem | Loading global class names...
+[  33% ] first_scan_filesystem | Verifying GDExtensions...
+[  50% ] first_scan_filesystem | Creating autoload scripts...
+[  66% ] first_scan_filesystem | Initializing plugins...
+[  83% ] first_scan_filesystem | Starting file scan...
+[ DONE ] first_scan_filesystem
+
+[   0% ] savepack | Started Packing (102 steps)
+[   1% ] savepack | Storing File: res://town_layout.gdc
+[   8% ] savepack | Storing File: res://walker.gdc
+[  15% ] savepack | Storing File: res://snow_wind.gdc
+[  22% ] savepack | Storing File: res://characters/parka/gait.json
+[  29% ] savepack | Storing File: res://.godot/imported/parka.glb-8a23c4589c93be29320f6b9b568f06cb.scn
+[  29% ] savepack | Storing File: res://characters/parka/parka.glb.import
+[  35% ] savepack | Storing File: res://tests/walk_scene.gdc
+[  42% ] savepack | Storing File: res://follow_camera.gdc
+[  50% ] savepack | Storing File: res://inspection.gdc
+[  57% ] savepack | Storing File: res://inspection_route.gdc
+[  64% ] savepack | Storing File: res://parka_avatar.gdc
+[  70% ] savepack | Storing File: res://snow.gdshader
+[  77% ] savepack | Storing File: res://snow_surface.gdc
+[  84% ] savepack | Storing File: res://snow_walk.gdc
+[  91% ] savepack | Storing File: res://.godot/exported/133200997/export-4f5738069ef532cfeea3cddc3181665a-snow_walk.scn
+[  91% ] savepack | Storing File: res://town_layout.gd.remap
+[  91% ] savepack | Storing File: res://walker.gd.remap
+[  91% ] savepack | Storing File: res://snow_wind.gd.remap
+[  91% ] savepack | Storing File: res://tests/walk_scene.gd.remap
+[  91% ] savepack | Storing File: res://follow_camera.gd.remap
+[  91% ] savepack | Storing File: res://inspection.gd.remap
+[  91% ] savepack | Storing File: res://inspection_route.gd.remap
+[  91% ] savepack | Storing File: res://parka_avatar.gd.remap
+[  91% ] savepack | Storing File: res://snow_surface.gd.remap
+[  91% ] savepack | Storing File: res://snow_walk.gd.remap
+[  91% ] savepack | Storing File: res://snow_walk.tscn.remap
+[  91% ] savepack | Storing File: res://.godot/global_script_class_cache.cfg
+[  91% ] savepack | Storing File: res://.godot/uid_cache.bin
+[  91% ] savepack | Storing File: res://project.binary
+[ DONE ] savepack
+

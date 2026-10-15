@@ -1,0 +1,51 @@
+# 60 s F6 trace in the release package at the default wind (1 from NW). Fresh launch at (22, 4).
+move 640 440
+sleep 1
+log warm-up walk
+down d
+sleep 2
+up d
+down a
+sleep 2
+up a
+sleep 0.5
+tap f6
+log F6 pressed; walking the loop to the stair and back toward the outpost
+down s
+sleep 1.556
+up s
+down a
+sleep 12.444
+up a
+down w
+sleep 3.333
+up w
+down a
+sleep 7.111
+up a
+down s
+sleep 0.889
+up s
+down a
+sleep 0.667
+up a
+down s
+sleep 8.889
+up s
+down w
+sleep 8.889
+up w
+down w
+sleep 0.889
+up w
+down d
+sleep 7.111
+up d
+down s
+sleep 3.333
+up s
+down d
+sleep 6
+up d
+log walk finished
+sleep 2

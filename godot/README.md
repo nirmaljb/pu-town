@@ -16,7 +16,7 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first seven slices: the 100 × 56 m town laid out from that reference
+describes the delivered desktop preview of that town: the 100 × 56 m town laid out from that reference
 as solid placeholder boxes, on a town shelf about 5 m above the southern forest
 and joined to it by the snow-buried stair; a north-up perspective camera that
 follows the controlled figure while the mouse sets its Facing; a saved Snow
@@ -24,6 +24,9 @@ Depth that starts Deep or Shallow by place; a north-west wind that builds
 Snowdrifts, scours windward sides and fills Footprints faster or slower by place;
 a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
 up close; and a walking figure whose loop lays trails you did not watch being made.
+The [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
+holds its import checks, engine-event replay, ordinary input, visual inspection,
+frame measurement and exports, each kept separate, with their limits.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -506,8 +509,12 @@ describe the preceding static milestone. Their results do not establish dynamic
 snow behavior, current appearance or performance.
 
 The [dynamic-snow verification record](../docs/verification/2026-10-15-godot-dynamic-snow.md)
-records the current scene route, native input and visual checks, exports and
-remaining packaged-runtime and hardware evidence limits.
+describes the 64 × 64 m scene that preceded this town. The
+[town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
+describes the current town: the headless and focused graphical scene routes in
+the source scene and the Mac release package, ordinary macOS keyboard and mouse
+input, inspected captures with the defects they show, a 60-second release frame
+trace with the wind's cost, and both exports.
 
 ## Desktop exports
 
@@ -564,6 +571,13 @@ minute. Summarize the saved trace with:
 python3 godot/summarize_frames.py "/path/to/user-data/frames-….csv"
 ```
 
+Each rendered frame also records the wind's work in the physics frames since the
+previous one (`wind_ms`, `wind_updates`) and the wind setting (`wind_strength`,
+`wind_from_deg`). The summary's `wind` section reports its cost per physics
+update and per rendered frame, its share of frame time and every setting seen;
+traces recorded before these columns report `"recorded": false`. Wind 0 costs
+almost nothing, so measure at a nonzero strength.
+
 Average FPS is complete rendered-frame intervals divided by their monotonic
 wall-clock span. Frame-time p95/p99 use nearest rank over every interval. These
 are engine frame-loop timings, including recording overhead, rather than GPU
@@ -572,10 +586,13 @@ focus/movement coverage, resolution and observation age so invalid runs can be
 identified. Keep the raw trace with engine/mode, hardware, OS and concurrent
 workload notes; HUD FPS and fixed-rate route CSV are not benchmark substitutes.
 
-The [#92–93 verification record](../docs/verification/2026-10-15-godot-snow-desktop.md)
-separates visual inspection, packaged runtime, performance and export evidence
-for the older static scene. New dynamic-snow source requires its own runtime,
-visual and performance checks; the earlier measurements are not current results.
-Final town assets, Game/networking integration and coordinated retirement of the
-existing maps remain later milestones. Windows hardware performance requires
-running on Windows hardware.
+The [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
+holds the current release trace: 55.2 FPS average, 24.0 ms p99 and 0.41 ms of
+wind work per rendered frame on an Apple M1 under macOS 26.2, at wind 1. That is
+one machine with a desktop workload, not a platform baseline. The
+[#92–93 record](../docs/verification/2026-10-15-godot-snow-desktop.md) measured
+the older static scene and is not a current result. Rebuild and remeasure after
+source changes. Final town assets, Game/networking integration and coordinated
+retirement of the existing maps remain later milestones. The Windows export has
+not been run; Windows runtime and hardware performance require running on
+Windows hardware.

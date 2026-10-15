@@ -15,19 +15,20 @@ Godot ground work. Its extraction command, integrity checks and provenance ship
 with this checkout; it is an authoring reference, not a runtime ground texture.
 
 The standalone [Godot snow preview](godot/README.md) develops the replacement
-client direction with changing snow depth, wind, shared bootprints, two switchable
-inspection figures and solid town placeholders. It uses pinned Godot 4.7.2 and
-runs without the Java server. The guide includes macOS/Windows release exports
-and a 60-second frame recorder. The
-[desktop verification record](docs/verification/2026-10-15-godot-snow-desktop.md)
-covers the preceding static scene; its results are not dynamic-snow acceptance.
+client direction as the 100 × 56 m reference snow town of
+[ADR 0027](docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md): placeholder
+boxes on a town shelf above a southern forest joined by one stair, Deep and
+Shallow Snow, wind-built Snowdrifts and filling Footprints, two switchable parka
+figures (one walking a loop) and a north-up camera led by the mouse. It uses
+pinned Godot 4.7.2 and runs without the Java server. The guide lists its controls
+and includes macOS/Windows release exports and a 60-second frame recorder. The
+[town verification record](docs/verification/2026-10-16-godot-snow-town.md)
+separates import checks, engine-event replay, ordinary input, visual inspection,
+frame measurement and exports. The Windows export has not been run on Windows.
 See [ADR 0025](docs/adr/0025-godot-single-snow-map-prototype.md) for the retained
 authority requirements and
-[ADR 0026](docs/adr/0026-dynamic-snow-and-persistent-footprints.md) for the current
-offline snow scope.
-The [dynamic-snow verification record](docs/verification/2026-10-15-godot-dynamic-snow.md)
-separates the current behavior checks, rendered inspection, exports and remaining
-platform/performance evidence.
+[ADR 0026](docs/adr/0026-dynamic-snow-and-persistent-footprints.md) for the
+offline snow scope. Earlier records describe preceding scenes, not this town.
 
 ## Prerequisites
 
