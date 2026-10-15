@@ -136,3 +136,5 @@ func _add_overcast_light() -> void:
 	light.directional_shadow_max_distance = 160.0
 	light.shadow_blur = 4.0
 	add_child(light)
+	# The light shines along its −Z axis, so its +Z axis points toward the sun.
+	surface.set_sun_direction(light.global_basis.z)

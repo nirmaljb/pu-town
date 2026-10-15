@@ -152,6 +152,26 @@ func _shape(bearing: float) -> Dictionary:
 	for index in range(shaped_target.size()):
 		var initial := start[index]
 		shaped_target[index] = clampf(initial + delta[index], SCOUR_FLOOR, maxf(initial, DRIFT_MAX)) if _solid[index] == 0 else initial
+	# A node inside an obstacle still shapes the snow surface within one node of its
+	# face. It takes the mean of its open neighbours, so a drift rises right to the
+	# wall instead of dipping into a trough where the old depth was kept.
+	var faces := shaped_target.duplicate()
+	for row in range(size.y):
+		for column in range(size.x):
+			var index := row * size.x + column
+			if _solid[index] == 0:
+				continue
+			var total := 0.0
+			var open := 0
+			for neighbour_row in range(maxi(0, row - 1), mini(size.y - 1, row + 1) + 1):
+				for neighbour_column in range(maxi(0, column - 1), mini(size.x - 1, column + 1) + 1):
+					var neighbour := neighbour_row * size.x + neighbour_column
+					if _solid[neighbour] == 0:
+						total += shaped_target[neighbour]
+						open += 1
+			if open > 0:
+				faces[index] = total / open
+	shaped_target = faces
 	return {"bearing": bearing, "target": shaped_target, "shelter": fields.shelter, "usec": Time.get_ticks_usec() - began}
 
 

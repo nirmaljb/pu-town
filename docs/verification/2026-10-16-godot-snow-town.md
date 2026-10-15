@@ -134,7 +134,10 @@ at full size and enlarged where needed:
 | [Stair](godot-snow-town/native-stair.png), HUD hidden | Both figures on the walled slope with paired bootprints; the low walls and cliff masses stay solid |
 | [Lean](godot-snow-town/native-lean.png) | 3 m lean toward the north-east corner; the figure faces the cursor |
 
-Defects and weaknesses seen, reported rather than corrected here:
+Defects and weaknesses seen, reported rather than corrected here. The
+[shading record](2026-10-16-godot-snow-shading.md) traces the drift bands, the
+ambiguous fresh prints, the lee drift and the level change to their causes and
+corrects them; the HUD note still applies:
 
 - **Drift shading shows straight-edged bands.** Beside the lodge, the drifted
   snow shades in rectangular steps, with a horizontal band through the figure

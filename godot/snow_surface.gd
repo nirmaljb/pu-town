@@ -129,6 +129,12 @@ func configure_ground(town: Node3D) -> void:
 				Vector3(bounds.size.x, heights.y - heights.x + 1.2, bounds.size.z))
 
 
+## Shade Footprints' own shadows toward this unit direction to the sun. Shading only.
+func set_sun_direction(toward_sun: Vector3) -> void:
+	for material in _materials:
+		material.set_shader_parameter("sun_direction", toward_sun.normalized())
+
+
 ## The wind blows from this compass bearing, clockwise from north.
 func wind_from() -> float:
 	return wind.from_bearing

@@ -80,11 +80,15 @@ const GROUND_SIZE := Vector2i(HALF_EXTENTS * (2.0 * GROUND_NODES_PER_METRE)) + V
 ## Snow lets a Player run; Deep Snow only lets them walk until traffic packs it.
 ## Every other place on the shelf starts at an in-between depth. Each zone fades
 ## into what lies beneath it over ZONE_BLEND metres; later zones take precedence.
+## The outpost yard and its Deep drifts lie in open ground, away from walls that
+## would hide an edge, so they taper over OPEN_ZONE_TAPER metres, as drifted snow
+## does, instead of rising in a visible terrace.
 const SHALLOW_SNOW := 0.09
 const OPEN_SNOW := 0.25
 const DEEP_SNOW := 0.6
 const MIN_SNOW_DEPTH := 0.03
 const ZONE_BLEND := 1.5
+const OPEN_ZONE_TAPER := 3.5
 ## Deep Snow lies within this distance of cliff rock, on either level.
 const CLIFF_FOOT_REACH := 2.0
 ## Shallow: the courtyard, and the stair from its south gate to the forest floor.
@@ -241,9 +245,9 @@ func starting_snow_depth(point: Vector2) -> float:
 	var forest_offset := Vector2(maxf(0.0, point.x - FOREST_EAST), maxf(0.0, FOREST_NORTH - point.y))
 	depth = lerpf(depth, DEEP_SNOW, _zone_weight(forest_offset.length()))
 	depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(MEETING_HALL_GAP, point)))
-	depth = lerpf(depth, SHALLOW_SNOW, _zone_weight(_outside(OUTPOST_YARD, point)))
+	depth = lerpf(depth, SHALLOW_SNOW, _zone_weight(_outside(OUTPOST_YARD, point), OPEN_ZONE_TAPER))
 	for drift in OUTPOST_DRIFTS:
-		depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(drift, point)))
+		depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(drift, point), OPEN_ZONE_TAPER))
 	for obstacle in obstacles:
 		if obstacle.kind == "cliff":
 			var rock := Rect2(obstacle.center - obstacle.size * 0.5, obstacle.size)
@@ -254,8 +258,8 @@ func starting_snow_depth(point: Vector2) -> float:
 
 
 ## How fully a zone applies at a point this far outside it.
-func _zone_weight(distance: float) -> float:
-	return 1.0 - smoothstep(0.0, ZONE_BLEND, distance)
+func _zone_weight(distance: float, blend: float = ZONE_BLEND) -> float:
+	return 1.0 - smoothstep(0.0, blend, distance)
 
 
 ## Distance from a point to a rectangle; zero inside it.

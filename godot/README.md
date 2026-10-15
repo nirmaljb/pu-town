@@ -208,7 +208,9 @@ traffic packs a Packed Path.
 - **Elsewhere** on the shelf, such as north of the compound and around the rim,
   the snow starts at 25 cm, where running is partly slowed.
 
-Each zone fades into its surroundings over 1.5 m, and no place starts below 3 cm.
+Each zone fades into its surroundings over 1.5 m, except the outpost yard and its
+Deep drifts, which lie in open ground and taper over 3.5 m so they never rise in
+a visible terrace. No place starts below 3 cm.
 Where zones overlap, the courtyard and stair stay Shallow beside the cliffs that
 flank them. A fresh launch restores this starting snow; wind then reshapes it.
 
@@ -470,12 +472,22 @@ and the current field.
 CPU foot support evaluates the same heights and triangle interpolation,
 including the region border, rather than querying a stale static collision mesh.
 
-Sole outlines are shaded from the Footprint picture everywhere, inside and
-outside the region, at the picture's own 31.25 mm texels: its slope tilts the
-shading normal and darkens each sole's rim. On the coarse surface, which has no
-depression, the picture supplies the whole slope; inside the region the 5 cm
-triangles carry the depression and the picture sharpens its rim. This changes
-shading only, never height or foot support, so distant trails still read.
+The shading normal is not taken from the triangles. It is the height field's own
+slope evaluated smoothly: the ground picture's, Snow Depth's through a quadratic
+B-spline over the same 0.4 m nodes, and each depression's from the Footprint
+picture. Bilinear Snow Depth changes slope abruptly at every node line, so
+triangle normals shaded Snowdrifts and zone edges as straight bands; the smooth
+slope keeps them continuous while every height stays bilinear. Sole outlines are
+shaded from the Footprint picture everywhere, inside and outside the region, at
+the picture's own 31.25 mm texels: its slope tilts the shading normal and darkens
+each sole's rim. A pressed print is shaded as a hollow: its floor is dimmed and
+cooled by how deep it is pressed, as overcast sky reaches less of it, and a short
+march toward the sun across the Footprint picture shades the part its sunward rim
+hides. The sun stands behind the play camera, so lit far walls alone made fresh
+prints in loose snow read as raised pads. For legibility from above, snow heaped
+deeper than about 0.5 m is slightly whiter and the forest floor, 5 m below the
+shelf, slightly cooler and dimmer. All of this changes shading only, never height
+or foot support, so distant trails still read.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
@@ -494,7 +506,9 @@ memory. Wind ages the encoded values without rewriting the image each frame;
 new footfalls update it. [`snow_wind.gd`](snow_wind.gd) holds the wind: the
 working Snow Depth and fill-clock pictures (251 × 141 nodes each), the target
 shape for the current direction, marched cell by cell from the obstacles upwind
-and downwind of each node and shaped on a worker thread when the wind turns, and
+and downwind of each node and shaped on a worker thread when the wind turns (nodes
+inside an obstacle take their open neighbours' mean, so a drift meets the wall
+without a trough), and
 the sweep that relaxes ten rows per physics frame. At the end of each sweep the
 surface publishes both pictures to its CPU copies and the shader's textures in
 the same physics frame, so visible snow and foot support keep agreeing. A fresh process recreates the field rather than loading
@@ -514,7 +528,11 @@ describes the 64 × 64 m scene that preceded this town. The
 describes the current town: the headless and focused graphical scene routes in
 the source scene and the Mac release package, ordinary macOS keyboard and mouse
 input, inspected captures with the defects they show, a 60-second release frame
-trace with the wind's cost, and both exports.
+trace with the wind's cost, and both exports. The
+[shading record](../docs/verification/2026-10-16-godot-snow-shading.md) corrects
+those defects and compares before and after captures; its smooth shading adds
+about 2 ms per frame in an unfocused source-scene timing, and the release trace
+has not been remeasured since.
 
 ## Desktop exports
 
