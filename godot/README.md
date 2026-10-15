@@ -137,8 +137,8 @@ named landmarks are, in metres:
 | `forest_lane` | −23.5, 22 | Forest floor, south of the foot of the stair |
 | `forest_west` | −28, 24 | Forest floor, south of the cliff beside the stair |
 
-The orthographic camera starts at 45° yaw, −55° pitch and a 6 m view size, close
-enough to read the Avatar with a little of the town around it.
+The orthographic camera starts at 45° yaw, −55° pitch and a 12 m view size, wide
+enough to show the Avatar among the buildings and snow around it.
 Use the mouse wheel to zoom from 3.5 m to a 118 m whole-map view. At the widest
 view it frames the ground's centre; as the view closes it blends toward following
 the figure.

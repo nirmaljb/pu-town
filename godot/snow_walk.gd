@@ -5,7 +5,7 @@ const Walker = preload("res://walker.gd")
 const TownLayout = preload("res://town_layout.gd")
 const Inspection = preload("res://inspection.gd")
 const InspectionRoute = preload("res://inspection_route.gd")
-const EXPLORE_SIZE := 6.0
+const EXPLORE_SIZE := 12.0
 const MIN_SIZE := 3.5
 const OVERVIEW_SIZE := 118.0
 
