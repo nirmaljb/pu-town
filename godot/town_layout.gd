@@ -21,6 +21,7 @@ const LANDMARKS := {
 	"outpost_yard_east": Vector2(28, 4),
 	"lodge_front": Vector2(32, -2),
 	"meeting_hall_gap_south": Vector2(-6, 7.5),
+	"meeting_hall_lane": Vector2(-4.5, 7.5),
 	"meeting_hall_gap": Vector2(-6, 0),
 	"east_gate": Vector2(-9.25, 0),
 	"courtyard_east": Vector2(-12, 0),
@@ -48,12 +49,29 @@ const STAIR_WALL_HEIGHT := 1.0
 ## the map's west and north edges, and is read bilinearly.
 const GROUND_NODES_PER_METRE := 5.0
 const GROUND_SIZE := Vector2i(HALF_EXTENTS * (2.0 * GROUND_NODES_PER_METRE)) + Vector2i.ONE
+## Starting Snow Depth by place, measured vertically above the ground. Shallow
+## Snow lets a Player run; Deep Snow only lets them walk until traffic packs it.
+## Every other place on the shelf starts at an in-between depth. Each zone fades
+## into what lies beneath it over ZONE_BLEND metres; later zones take precedence.
+const SHALLOW_SNOW := 0.09
+const OPEN_SNOW := 0.25
+const DEEP_SNOW := 0.6
+const MIN_SNOW_DEPTH := 0.03
+const ZONE_BLEND := 1.5
+## Deep Snow lies within this distance of cliff rock, on either level.
+const CLIFF_FOOT_REACH := 2.0
+## Shallow: the courtyard, and the stair from its south gate to the forest floor.
+const COURTYARD := Rect2(-34, -9, 24, 13.5)
+const STAIR_WAY := Rect2(STAIR_GROUND_X.x, 4.5, STAIR_GROUND_X.y - STAIR_GROUND_X.x, STAIR_FOOT - 4.5)
+## Deep: the ground around the meeting hall, between the compound and the outpost.
+const MEETING_HALL_GAP := Rect2(-8.5, -12, 16.5, 21)
+## Mixed: a Shallow outpost yard holding Deep drifts in its east and along the lodge.
+const OUTPOST_YARD := Rect2(16, -6, 20, 18)
+const OUTPOST_DRIFTS: Array[Rect2] = [Rect2(27, 0, 7, 9), Rect2(20, -6, 20, 1.5)]
 const CONTACT_MARGIN := 0.0001
-const MAX_DRIFT_OBSTACLES := 16
 const PINE_SIZE := Vector2(1.6, 1.6)
 
 var obstacles: Array[Dictionary] = []
-var drift_obstacles: Array[Dictionary] = []
 var ground_image: Image
 var ground_range := Vector2(SHELF_GROUND, SHELF_GROUND)
 var _ground := PackedFloat32Array()
@@ -65,7 +83,7 @@ func _ready() -> void:
 	# a box's height is how far it rises above the highest ground beneath it.
 	_add_compound()
 	_add_stair_and_cliffs()
-	_add_box(Vector2(0.5, -1.2), Vector2(8.5, 12), 7.0, "meeting_hall", true)
+	_add_box(Vector2(0.5, -1.2), Vector2(8.5, 12), 7.0, "meeting_hall")
 	_add_box(Vector2(-1, 10.5), Vector2(3, 2), 1.0, "crate")
 	_add_box(Vector2(2, 10), Vector2(1.2, 1.2), 1.1, "barrel")
 	_add_outpost()
@@ -75,16 +93,16 @@ func _ready() -> void:
 func _add_compound() -> void:
 	# The courtyard spans x -34..-10, z -9..4.5. Its east gate faces the meeting
 	# hall and its south gate (the gatehouse) faces the forest; both are 3 m wide.
-	_add_box(Vector2(-38, -6), Vector2(8, 25), 6.0, "range", true)
-	_add_box(Vector2(-28.5, -13), Vector2(11, 8), 6.0, "range", true)
-	_add_box(Vector2(-25.25, -17.25), Vector2(4.5, 4.5), 14.0, "bell_tower", true)
-	_add_box(Vector2(-16.25, -13.75), Vector2(13.5, 9.5), 7.0, "long_hall", true)
+	_add_box(Vector2(-38, -6), Vector2(8, 25), 6.0, "range")
+	_add_box(Vector2(-28.5, -13), Vector2(11, 8), 6.0, "range")
+	_add_box(Vector2(-25.25, -17.25), Vector2(4.5, 4.5), 14.0, "bell_tower")
+	_add_box(Vector2(-16.25, -13.75), Vector2(13.5, 9.5), 7.0, "long_hall")
 	_add_box(Vector2(-8, -13.25), Vector2(3, 8.5), 5.0, "range")
 	_add_box(Vector2(-12, -6.75), Vector2(4, 4.5), 4.5, "range")
 	_add_box(Vector2(-9.25, -5.25), Vector2(1.5, 7.5), 4.0, "wall")
 	_add_box(Vector2(-9.25, 3), Vector2(1.5, 3), 4.0, "wall")
-	_add_box(Vector2(-34.25, 5.5), Vector2(15.5, 2), 4.0, "wall", true)
-	_add_box(Vector2(-14.5, 5.5), Vector2(12, 2), 4.0, "wall", true)
+	_add_box(Vector2(-34.25, 5.5), Vector2(15.5, 2), 4.0, "wall")
+	_add_box(Vector2(-14.5, 5.5), Vector2(12, 2), 4.0, "wall")
 	_add_box(Vector2(-25.75, 6.5), Vector2(1.5, 5), 7.0, "gatehouse")
 	_add_box(Vector2(-21.25, 6.5), Vector2(1.5, 5), 7.0, "gatehouse")
 	_add_box(Vector2(-25.8, -2.9), Vector2(3.5, 3.5), 3.5, "well_pavilion")
@@ -112,10 +130,10 @@ func _add_stair_and_cliffs() -> void:
 func _add_outpost() -> void:
 	# The yard spans roughly x 16..36, z -6..12 and stays open between the lodge,
 	# the sheds and the workshop.
-	_add_box(Vector2(31, -12.5), Vector2(18, 13), 8.0, "lodge", true)
-	_add_box(Vector2(11.5, -12.75), Vector2(8, 7.5), 4.5, "shed", true)
-	_add_box(Vector2(11.75, 2.5), Vector2(7.5, 7), 5.0, "workshop", true)
-	_add_box(Vector2(38.75, 3.5), Vector2(6.5, 6), 4.0, "shed", true)
+	_add_box(Vector2(31, -12.5), Vector2(18, 13), 8.0, "lodge")
+	_add_box(Vector2(11.5, -12.75), Vector2(8, 7.5), 4.5, "shed")
+	_add_box(Vector2(11.75, 2.5), Vector2(7.5, 7), 5.0, "workshop")
+	_add_box(Vector2(38.75, 3.5), Vector2(6.5, 6), 4.0, "shed")
 	_add_box(Vector2(18.5, -15), Vector2(1.6, 1.6), 14.0, "radio_tower")
 	_add_box(Vector2(17.2, -9.5), Vector2(2.4, 1.4), 1.2, "generator")
 	_add_box(Vector2(20.5, -8), Vector2(1.5, 1.5), 1.0, "crate")
@@ -128,11 +146,11 @@ func _add_outpost() -> void:
 
 
 func _add_rim_and_forest() -> void:
-	_add_box(Vector2(-47, -3), Vector2(6, 18), 5.0, "rock", true)
-	_add_box(Vector2(4, -20), Vector2(6, 16), 6.0, "rock", true)
-	_add_box(Vector2(46.5, -17), Vector2(7, 22), 6.0, "rock", true)
-	_add_box(Vector2(-0.5, 18), Vector2(7, 8), 4.0, "rock", true)
-	_add_box(Vector2(9, 21), Vector2(10, 14), 5.0, "rock", true)
+	_add_box(Vector2(-47, -3), Vector2(6, 18), 5.0, "rock")
+	_add_box(Vector2(4, -20), Vector2(6, 16), 6.0, "rock")
+	_add_box(Vector2(46.5, -17), Vector2(7, 22), 6.0, "rock")
+	_add_box(Vector2(-0.5, 18), Vector2(7, 8), 4.0, "rock")
+	_add_box(Vector2(9, 21), Vector2(10, 14), 5.0, "rock")
 	_add_box(Vector2(-46.5, -23.5), Vector2(7, 9), 5.0, "rock")
 	_add_box(Vector2(-2.5, -24), Vector2(7, 8), 5.0, "rock")
 	_add_box(Vector2(10.5, -23.5), Vector2(7, 9), 5.0, "rock")
@@ -172,6 +190,36 @@ func _authored_ground(point: Vector2) -> float:
 	if point.x < FOREST_EAST and point.y > FOREST_NORTH:
 		return FOREST_GROUND
 	return SHELF_GROUND
+
+
+## Snow Depth at a world XZ point when the town starts: the authored zones,
+## never less than MIN_SNOW_DEPTH. SnowSurface saves it into its Snow Depth picture.
+func starting_snow_depth(point: Vector2) -> float:
+	var depth := OPEN_SNOW
+	var forest_offset := Vector2(maxf(0.0, point.x - FOREST_EAST), maxf(0.0, FOREST_NORTH - point.y))
+	depth = lerpf(depth, DEEP_SNOW, _zone_weight(forest_offset.length()))
+	depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(MEETING_HALL_GAP, point)))
+	depth = lerpf(depth, SHALLOW_SNOW, _zone_weight(_outside(OUTPOST_YARD, point)))
+	for drift in OUTPOST_DRIFTS:
+		depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(drift, point)))
+	for obstacle in obstacles:
+		if obstacle.kind == "cliff":
+			var rock := Rect2(obstacle.center - obstacle.size * 0.5, obstacle.size)
+			depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(rock, point) - CLIFF_FOOT_REACH))
+	depth = lerpf(depth, SHALLOW_SNOW, _zone_weight(_outside(COURTYARD, point)))
+	depth = lerpf(depth, SHALLOW_SNOW, _zone_weight(_outside(STAIR_WAY, point)))
+	return maxf(MIN_SNOW_DEPTH, depth)
+
+
+## How fully a zone applies at a point this far outside it.
+func _zone_weight(distance: float) -> float:
+	return 1.0 - smoothstep(0.0, ZONE_BLEND, distance)
+
+
+## Distance from a point to a rectangle; zero inside it.
+func _outside(zone: Rect2, point: Vector2) -> float:
+	var offset := (point - zone.get_center()).abs() - zone.size * 0.5
+	return Vector2(maxf(offset.x, 0.0), maxf(offset.y, 0.0)).length()
 
 
 func _build_ground() -> void:
@@ -290,15 +338,13 @@ func _consider(nearest: Dictionary, time: float, normal: Vector2, motion: Vector
 		nearest.normal = normal
 
 
-func _add_box(centre: Vector2, size: Vector2, height: float, kind: String, catches_drift: bool = false) -> void:
+func _add_box(centre: Vector2, size: Vector2, height: float, kind: String) -> void:
 	# A box stands on the lowest ground beneath it and rises `height` above the highest.
 	var under := _ground_under(centre, size)
 	var base := under.x
 	var top := under.y + height
 	var obstacle := {"center": centre, "size": size, "base": base, "top": top, "kind": kind}
 	obstacles.append(obstacle)
-	if catches_drift and drift_obstacles.size() < MAX_DRIFT_OBSTACLES:
-		drift_obstacles.append(obstacle)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = _colour_for(kind)
 	material.roughness = 0.96

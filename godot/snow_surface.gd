@@ -3,7 +3,7 @@ class_name SnowSurface
 
 ## Static ground levels, a world-fixed snow field, and a small moving geometry window.
 ## The field spans the town layout's map rectangle; its surface is the layout's
-## ground-height picture plus Snow Depth.
+## ground-height picture plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
 ## collider stands in for snow contact. Footsteps mutate one bounded image only.
 const TownLayout = preload("res://town_layout.gd")
@@ -16,7 +16,10 @@ const EDGE_BLEND := 1.6
 const TEXELS_PER_METRE := 32.0
 const IMAGE_SIZE := Vector2i(HALF_EXTENTS * (2.0 * TEXELS_PER_METRE))
 const PRINT_LIFETIME := 120.0
-const MAX_OBSTACLES := 16
+## The saved Snow Depth picture holds loose depth at nodes 0.4 m apart, counted
+## from the map's west and north edges and read bilinearly, like the ground picture.
+const DEPTH_NODES_PER_METRE := 2.5
+const DEPTH_SIZE := Vector2i(HALF_EXTENTS * (2.0 * DEPTH_NODES_PER_METRE)) + Vector2i.ONE
 const SNOW_SHADER := preload("res://snow.gdshader")
 
 var patch_center := Vector2.ZERO
@@ -24,16 +27,13 @@ var wind_strength := 1.0
 var wind_elapsed := 0.0
 var footprint_count := 0
 var footprint_image_bytes := IMAGE_SIZE.x * IMAGE_SIZE.y * 4
-var interior_height_range := Vector2.ZERO
-var perimeter_height_range := Vector2.ZERO
 var _footprints: Image
 var _texture: ImageTexture
 var _layout: Node3D
 var _dirty := false
 var _detail: MeshInstance3D
 var _materials: Array[ShaderMaterial] = []
-var _obstacles: Array[Vector4] = []
-var _observation_elapsed := 1.0
+var _depth := PackedFloat32Array()
 
 
 func _ready() -> void:
@@ -43,7 +43,6 @@ func _ready() -> void:
 	_make_mesh(HALF_EXTENTS.x * 2.0, HALF_EXTENTS.y * 2.0, COARSE_STEP, false)
 	_detail = _make_mesh(PATCH_SIZE, PATCH_SIZE, DETAIL_STEP, true)
 	_update_uniforms()
-	_refresh_height_ranges()
 
 
 func _process(_delta: float) -> void:
@@ -58,27 +57,29 @@ func configure_ground(town: Node3D) -> void:
 	# The layout owns the static ground picture. The shader reads the same nodes.
 	_layout = town
 	var ground_texture := ImageTexture.create_from_image(town.ground_image)
+	_save_starting_depth()
+	var depth_image := Image.create_from_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _depth.to_byte_array())
+	var depth_texture := ImageTexture.create_from_image(depth_image)
 	var heights: Vector2 = town.ground_range
 	for material in _materials:
 		material.set_shader_parameter("ground_image", ground_texture)
 		material.set_shader_parameter("ground_nodes_per_metre", TownLayout.GROUND_NODES_PER_METRE)
+		material.set_shader_parameter("depth_image", depth_texture)
+		material.set_shader_parameter("depth_nodes_per_metre", DEPTH_NODES_PER_METRE)
 	for child in get_children():
 		if child is MeshInstance3D:
 			var bounds: AABB = child.custom_aabb
 			child.custom_aabb = AABB(Vector3(bounds.position.x, heights.x - 0.1, bounds.position.z),
 				Vector3(bounds.size.x, heights.y - heights.x + 1.2, bounds.size.z))
-	_refresh_height_ranges()
 
 
-func configure_obstacles(obstacles: Array[Dictionary]) -> void:
-	_obstacles.clear()
-	for obstacle in obstacles:
-		if _obstacles.size() == MAX_OBSTACLES:
-			break
-		var centre: Vector2 = obstacle.center
-		var size: Vector2 = obstacle.size
-		_obstacles.append(Vector4(centre.x, centre.y, size.x * 0.5, size.y * 0.5))
-	_update_uniforms()
+func _save_starting_depth() -> void:
+	# A fresh launch saves the layout's authored zones; nothing is loaded from disk.
+	_depth.resize(DEPTH_SIZE.x * DEPTH_SIZE.y)
+	for row in range(DEPTH_SIZE.y):
+		for column in range(DEPTH_SIZE.x):
+			var point := Vector2(column, row) / DEPTH_NODES_PER_METRE - HALF_EXTENTS
+			_depth[row * DEPTH_SIZE.x + column] = _layout.starting_snow_depth(point)
 
 
 func advance(delta: float, focus_xz: Vector2) -> void:
@@ -96,11 +97,7 @@ func advance(delta: float, focus_xz: Vector2) -> void:
 		clampf(snappedf(focus_xz.y + HALF_EXTENTS.y, COARSE_STEP) - HALF_EXTENTS.y, -centre_limit.y, centre_limit.y)
 	)
 	_detail.position = Vector3(patch_center.x, 0, patch_center.y)
-	_update_uniforms(false)
-	_observation_elapsed += delta
-	if _observation_elapsed >= 1.0:
-		_observation_elapsed = 0.0
-		_refresh_height_ranges()
+	_update_uniforms()
 
 
 ## Visible snow height: ground plus compacted Snow Depth, on the drawn triangles.
@@ -117,7 +114,23 @@ func sample_ground(point: Vector2) -> float:
 
 ## Snow height before any compaction: ground plus loose Snow Depth.
 func sample_uncompressed_height(point: Vector2) -> float:
-	return sample_ground(point) + _uncompressed_height(point)
+	return sample_ground(point) + sample_saved_depth(point)
+
+
+## Loose Snow Depth from the saved picture, before Footprint compaction.
+## SnowSurface and snow.gdshader interpolate the same nodes in the same way.
+func sample_saved_depth(point: Vector2) -> float:
+	if _depth.is_empty():
+		return 0.0
+	var node := (point + HALF_EXTENTS) * DEPTH_NODES_PER_METRE
+	var cell := Vector2i(clampi(floori(node.x), 0, DEPTH_SIZE.x - 2), clampi(floori(node.y), 0, DEPTH_SIZE.y - 2))
+	var blend := (node - Vector2(cell)).clamp(Vector2.ZERO, Vector2.ONE)
+	var index := cell.y * DEPTH_SIZE.x + cell.x
+	return lerpf(
+		lerpf(_depth[index], _depth[index + 1], blend.x),
+		lerpf(_depth[index + DEPTH_SIZE.x], _depth[index + DEPTH_SIZE.x + 1], blend.x),
+		blend.y
+	)
 
 
 func sample_compaction(point: Vector2) -> float:
@@ -146,7 +159,7 @@ func sample_loose_depth(point: Vector2) -> float:
 			var angle := float(index) * TAU / float(samples)
 			var offset := Vector2(cos(angle), sin(angle)) * (float(ring) * 0.16)
 			packed = maxf(packed, sample_compaction(point + offset))
-	return _uncompressed_height(point) * (1.0 - 0.94 * packed)
+	return sample_saved_depth(point) * (1.0 - 0.94 * packed)
 
 
 func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
@@ -187,27 +200,9 @@ func _pixel_compaction(pixel: Vector2i) -> float:
 	return value.r * maxf(0.0, 1.0 - age / PRINT_LIFETIME)
 
 
-func _uncompressed_height(point: Vector2) -> float:
-	# This formula and the shader's uncompressed_height are intentionally paired.
-	# It is Snow Depth above the ground. Initial broad shallow/deep fields remain bounded while
-	# the wind slowly moves relief and builds/lowers drifts on the +X lee of boxes.
-	var field := sin(point.x * 0.14 - 0.7) * cos(point.y * 0.12 + 0.4)
-	var height := 0.08 + 0.52 * smoothstep(0.0, 0.85, field)
-	height += 0.018 * sin(point.x * 0.63 + point.y * 0.32)
-	var phase := point.x * 0.36 + point.y * 0.17
-	height += 0.035 * (sin(phase - wind_elapsed * 0.025) - sin(phase)) * sin(point.y * 0.13 + 0.4)
-	var drift_amount := 0.13 + 0.06 * sin(wind_elapsed * 0.018)
-	for obstacle in _obstacles:
-		var downwind := point.x - (obstacle.x + obstacle.z)
-		var lee := 1.0 - smoothstep(0.0, 3.2, absf(downwind - 1.0))
-		var across := 1.0 - smoothstep(obstacle.w + 0.25, obstacle.w + 2.2, absf(point.y - obstacle.y))
-		height += drift_amount * lee * across
-	return clampf(height, 0.05, 0.85)
-
-
 func _field_height(point: Vector2) -> float:
 	# Even completely packed snow retains a thin layer over the ground.
-	return sample_ground(point) + maxf(0.025, _uncompressed_height(point) * (1.0 - 0.86 * sample_compaction(point)))
+	return sample_ground(point) + maxf(0.025, sample_saved_depth(point) * (1.0 - 0.86 * sample_compaction(point)))
 
 
 func _detail_vertex_height(point: Vector2) -> float:
@@ -314,32 +309,7 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 	return visible_surface
 
 
-func _update_uniforms(include_obstacles: bool = true) -> void:
-	var boxes := PackedVector4Array()
-	if include_obstacles:
-		boxes.resize(MAX_OBSTACLES)
-		for index in range(_obstacles.size()):
-			boxes[index] = _obstacles[index]
+func _update_uniforms() -> void:
 	for material in _materials:
 		material.set_shader_parameter("patch_center", patch_center)
 		material.set_shader_parameter("wind_elapsed", wind_elapsed)
-		if include_obstacles:
-			material.set_shader_parameter("obstacle_count", _obstacles.size())
-			material.set_shader_parameter("obstacles", boxes)
-
-
-func _refresh_height_ranges() -> void:
-	# Small, explicitly sampled observations rather than retained initial extrema.
-	interior_height_range = Vector2(INF, -INF)
-	perimeter_height_range = Vector2(INF, -INF)
-	var spacing := (HALF_EXTENTS - Vector2.ONE * 0.4) / 4.0
-	for row in range(9):
-		for column in range(9):
-			var point := Vector2(float(column - 4), float(row - 4)) * spacing
-			var height := sample_height(point) - sample_ground(point)
-			if row == 0 or row == 8 or column == 0 or column == 8:
-				perimeter_height_range.x = minf(perimeter_height_range.x, height)
-				perimeter_height_range.y = maxf(perimeter_height_range.y, height)
-			else:
-				interior_height_range.x = minf(interior_height_range.x, height)
-				interior_height_range.y = maxf(interior_height_range.y, height)

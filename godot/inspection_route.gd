@@ -14,6 +14,11 @@ const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
 const LEVEL_DROP_M := 5.0
 const CONTACT_BOUND_M := 0.002
+# Running is full at or below 10 cm of loose snow and falls to walking at 40 cm.
+const FULL_RUN_DEPTH_M := 0.10
+const WALK_ONLY_DEPTH_M := 0.40
+const WALK_MPS := 2.25
+const RUN_MPS := 4.5
 # The specified camera: perspective, 40° field of view, −55° pitch, north up,
 # a 10–30 m play range and a lean of at most 3 m.
 const CAMERA_FOV_DEG := 40.0
@@ -80,11 +85,19 @@ func _run() -> void:
 	await _cursor_leg(Vector2(0.3, 0), [KEY_W], 2.0, "walk north facing east")
 	await _cursor_leg(Vector2(0.3, 0), [KEY_S], 2.0, "walk south facing east")
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor back on figure")
-	await _leg([KEY_D, KEY_SHIFT], 2.5, "run through thin snow")
+	# Running east from the Shallow west of the outpost yard reaches its Deep drift.
+	await _leg([KEY_D, KEY_SHIFT], 2.5, "run across outpost yard")
 	await _goto(LANDMARKS.lodge_front, "reach lodge front")
 	await _leg([KEY_W], 2.5, "lodge approach")
 	await _leg([KEY_W], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
+	# Repeated traffic packs a lane of the meeting-hall gap's Deep Snow until it is runnable.
+	await _goto(LANDMARKS.meeting_hall_lane, "reach meeting-hall lane")
+	await _leg([KEY_W, KEY_SHIFT], 2.0, "run through deep snow")
+	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail return")
+	await _leg([KEY_W], 2.0, "pack deep trail again")
+	await _goto(LANDMARKS.meeting_hall_lane, "packed run start")
+	await _leg([KEY_W, KEY_SHIFT], 2.0, "run on packed trail")
 	# Lay a trail in the meeting-hall gap and fix a world probe on it.
 	await _goto(LANDMARKS.meeting_hall_gap_south, "reach meeting-hall gap")
 	await _leg([KEY_W], 2.0, "first trail")
@@ -97,12 +110,9 @@ func _run() -> void:
 	await _leg([KEY_S], 1.2, "wall blocked")
 	await _goto(LANDMARKS.courtyard, "cross courtyard")
 	await _leg([], 0.5, "probe outside patch")
-	await _goto(LANDMARKS.courtyard_west, "reach deep courtyard")
-	await _leg([KEY_W, KEY_SHIFT], 2.0, "run through deep snow")
-	await _goto(LANDMARKS.courtyard_west, "pack deep trail return")
-	await _leg([KEY_W], 2.0, "pack deep trail again")
-	await _goto(LANDMARKS.courtyard_west, "packed run start")
-	await _leg([KEY_W, KEY_SHIFT], 2.0, "run on packed trail")
+	# The courtyard's Shallow Snow allows full running.
+	await _goto(LANDMARKS.courtyard_west, "reach courtyard west")
+	await _leg([KEY_W, KEY_SHIFT], 2.0, "run in courtyard")
 	# With the cursor west of the figure, the newly controlled figure faces west.
 	_point(Vector2(-0.25, 0))
 	await _wait(0.2)
@@ -148,11 +158,12 @@ func _run() -> void:
 	await _goto(LANDMARKS.courtyard, "cross to south gate")
 	await _goto(LANDMARKS.south_gate, "reach south gate")
 	await _goto(LANDMARKS.forest_lane, "descend stair")
-	await _leg([KEY_S], 3.0, "south boundary")
+	# The forest's Deep Snow allows only walking, as does the Deep Snow at the cliff foot.
+	await _leg([KEY_S, KEY_SHIFT], 3.0, "run in forest")
 	await _leg([KEY_S], 1.0, "boundary blocked")
 	# From the forest floor the cliff beside the stair is equally impassable.
 	await _goto(LANDMARKS.forest_west, "reach forest west")
-	await _leg([KEY_W], 2.5, "forest cliff approach")
+	await _leg([KEY_W, KEY_SHIFT], 2.5, "run to forest cliff foot")
 	await _leg([KEY_W], 1.2, "forest cliff blocked")
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
@@ -460,6 +471,7 @@ func _check_record() -> void:
 	_check_probe(rows)
 	_check_second_figure(rows)
 	_check_packed_speed(rows)
+	_check_snow_zones(rows)
 	_check_facing(rows)
 	_check_zoom(rows)
 	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, deep run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, deep_run, blocked, overview, follow])
@@ -618,10 +630,11 @@ func _check_second_figure(rows: Array[Dictionary]) -> void:
 func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	var fresh := _rows_for(rows, "run through deep snow")
 	var packed := _rows_for(rows, "run on packed trail")
-	# The corridor runs north from the deep courtyard landmark where both runs start.
-	var corridor_z: float = LANDMARKS.courtyard_west.y - 2.0
+	# The corridor runs north from the meeting-hall lane landmark where both runs start.
+	var corridor_z: float = LANDMARKS.meeting_hall_lane.y - 2.0
 	var fresh_distance := 0.0
 	var fresh_samples := 0
+	var fresh_depth := 0.0
 	var packed_distance := 0.0
 	var packed_samples := 0
 	# Compare the same world corridor after several passes, not elapsed legs
@@ -629,6 +642,7 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	for row in fresh:
 		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
 			fresh_distance += float(row.horizontal_mps)
+			fresh_depth += float(row.saved_depth_m)
 			fresh_samples += 1
 	for row in packed:
 		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
@@ -639,6 +653,49 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 	print("Same deep corridor, Shift held: fresh %.3f m/s -> packed %.3f m/s (%d / %d samples)" % [fresh_speed, packed_speed, fresh_samples, packed_samples])
 	if fresh_samples < 20 or packed_samples < 20 or packed_speed < fresh_speed + 0.10:
 		failures.append("Repeated traffic did not produce a measurable running advantage in the same deep corridor")
+	if fresh_depth / maxi(1, fresh_samples) < WALK_ONLY_DEPTH_M:
+		failures.append("The packed corridor did not start as Deep Snow")
+
+
+func _check_snow_zones(rows: Array[Dictionary]) -> void:
+	# Starting Snow Depth follows the town's places: the courtyard is Shallow, the
+	# outpost yard mixes Shallow and Deep, and the forest and cliff feet are Deep.
+	var courtyard := _running_rows(rows, "run in courtyard")
+	if courtyard.size() < 30:
+		failures.append("Too few running observations in the courtyard (%d)" % courtyard.size())
+	for row in courtyard:
+		if float(row.saved_depth_m) > FULL_RUN_DEPTH_M or float(row.horizontal_mps) < RUN_MPS - 0.003:
+			_fail_once("The courtyard's Shallow Snow did not allow full running")
+	var full := 0
+	var walking := 0
+	for row in _running_rows(rows, "run across outpost yard"):
+		if float(row.horizontal_mps) >= RUN_MPS - 0.01:
+			full += 1
+		elif float(row.horizontal_mps) <= WALK_MPS + 0.003:
+			walking += 1
+	if full < 10 or walking < 10:
+		failures.append("The outpost yard did not mix full running and walking (full=%d, walking=%d)" % [full, walking])
+	for stage in ["run in forest", "run to forest cliff foot"]:
+		var running := _running_rows(rows, stage)
+		var walked := 0
+		for row in running:
+			if float(row.saved_depth_m) < WALK_ONLY_DEPTH_M:
+				_fail_once("The forest or a cliff foot did not start with Deep Snow")
+			if float(row.horizontal_mps) <= WALK_MPS + 0.003:
+				walked += 1
+		# Its own arrival prints may pack the first steps of each run.
+		if running.size() < 30 or walked < running.size() * 0.9:
+			failures.append("Requested running was not held to walking in %s (%d of %d)" % [stage, walked, running.size()])
+
+
+## Unobstructed observations of a stage that requested running with movement input.
+func _running_rows(rows: Array[Dictionary], stage: String) -> Array[Dictionary]:
+	var running: Array[Dictionary] = []
+	for row in _rows_for(rows, stage):
+		var moving := absf(float(row.input_x)) + absf(float(row.input_y)) > 0.5
+		if moving and row.run_requested == "true" and row.boundary_limited == "false" and row.obstacle_limited == "false":
+			running.append(row)
+	return running
 
 
 func _check_facing(rows: Array[Dictionary]) -> void:

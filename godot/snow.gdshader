@@ -6,13 +6,15 @@ uniform sampler2D footprint_image : filter_nearest, repeat_disable;
 // map's west and north edges and read bilinearly, as in SnowTownLayout.ground_height.
 uniform sampler2D ground_image : filter_nearest, repeat_disable;
 uniform float ground_nodes_per_metre = 5.0;
+// The saved Snow Depth picture: loose depth above the ground at nodes counted the
+// same way and read bilinearly, as in SnowSurface.sample_saved_depth.
+uniform sampler2D depth_image : filter_nearest, repeat_disable;
+uniform float depth_nodes_per_metre = 2.5;
 uniform vec2 patch_center = vec2(0.0);
 // East–west and north–south half extents of the map rectangle, set from the town layout.
 uniform vec2 map_half_extents;
 uniform float wind_elapsed = 0.0;
 uniform bool detail_mesh = false;
-uniform int obstacle_count = 0;
-uniform vec4 obstacles[16];
 varying vec3 world_position;
 
 const float PATCH_HALF = 6.4;
@@ -41,37 +43,27 @@ float compaction(vec2 point) {
 		mix(pixel_compaction(cell + ivec2(0, 1), image_size), pixel_compaction(cell + ivec2(1, 1), image_size), blend.x), blend.y);
 }
 
-float ground_height(vec2 point) {
-	ivec2 size = textureSize(ground_image, 0);
-	vec2 node = (point + map_half_extents) * ground_nodes_per_metre;
+// Bilinear reading of a picture whose nodes are counted from the map's west and north edges.
+float picture_value(sampler2D picture, float nodes_per_metre, vec2 point) {
+	ivec2 size = textureSize(picture, 0);
+	vec2 node = (point + map_half_extents) * nodes_per_metre;
 	ivec2 cell = clamp(ivec2(floor(node)), ivec2(0), size - ivec2(2));
 	vec2 blend = clamp(node - vec2(cell), vec2(0.0), vec2(1.0));
 	return mix(
-		mix(texelFetch(ground_image, cell, 0).r, texelFetch(ground_image, cell + ivec2(1, 0), 0).r, blend.x),
-		mix(texelFetch(ground_image, cell + ivec2(0, 1), 0).r, texelFetch(ground_image, cell + ivec2(1, 1), 0).r, blend.x), blend.y);
+		mix(texelFetch(picture, cell, 0).r, texelFetch(picture, cell + ivec2(1, 0), 0).r, blend.x),
+		mix(texelFetch(picture, cell + ivec2(0, 1), 0).r, texelFetch(picture, cell + ivec2(1, 1), 0).r, blend.x), blend.y);
 }
 
-// Paired with SnowSurface._uncompressed_height: Snow Depth above the ground.
-float uncompressed_height(vec2 point) {
-	float field = sin(point.x * 0.14 - 0.7) * cos(point.y * 0.12 + 0.4);
-	float height = 0.08 + 0.52 * smoothstep(0.0, 0.85, field);
-	height += 0.018 * sin(point.x * 0.63 + point.y * 0.32);
-	float phase = point.x * 0.36 + point.y * 0.17;
-	height += 0.035 * (sin(phase - wind_elapsed * 0.025) - sin(phase)) * sin(point.y * 0.13 + 0.4);
-	float drift_amount = 0.13 + 0.06 * sin(wind_elapsed * 0.018);
-	for (int index = 0; index < 16; index++) {
-		if (index >= obstacle_count) { break; }
-		vec4 obstacle = obstacles[index];
-		float downwind = point.x - (obstacle.x + obstacle.z);
-		float lee = 1.0 - smoothstep(0.0, 3.2, abs(downwind - 1.0));
-		float across = 1.0 - smoothstep(obstacle.w + 0.25, obstacle.w + 2.2, abs(point.y - obstacle.y));
-		height += drift_amount * lee * across;
-	}
-	return clamp(height, 0.05, 0.85);
+float ground_height(vec2 point) {
+	return picture_value(ground_image, ground_nodes_per_metre, point);
+}
+
+float saved_depth(vec2 point) {
+	return picture_value(depth_image, depth_nodes_per_metre, point);
 }
 
 float field_height(vec2 point) {
-	return ground_height(point) + max(0.025, uncompressed_height(point) * (1.0 - 0.86 * compaction(point)));
+	return ground_height(point) + max(0.025, saved_depth(point) * (1.0 - 0.86 * compaction(point)));
 }
 
 float coarse_height(vec2 point) {

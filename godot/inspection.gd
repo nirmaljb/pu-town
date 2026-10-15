@@ -34,7 +34,7 @@ const ROUTE_COLUMNS := [
 	"contact_gap_m", "boundary_limited", "travel_m", "camera_projection", "camera_fov_deg", "camera_distance_m",
 	"overview", "lean_x_m", "lean_z_m", "lean_m", "pitch_deg", "yaw_deg", "focused", "fps",
 	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
-	"snow_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
+	"snow_depth_m", "saved_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
 	"patch_x_m", "patch_z_m", "patch_size_m", "wind_strength", "wind_elapsed_s", "footprint_count",
 	"footprint_image_width", "footprint_image_height", "footprint_image_bytes", "probe_set", "probe_x_m", "probe_z_m",
 	"probe_depth_m", "probe_uncompressed_depth_m", "probe_compaction", "probe_in_patch", "other_figure_id", "other_x_m", "other_z_m", "other_steps",
@@ -103,7 +103,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"figure_screen_y": figure_screen.y / viewport_size.y,
 		"whole_map_visible": whole_map_visible, "checkpoint": checkpoint,
 		"figure_id": walker.figure_id, "run_requested": walker.run_requested,
-		"snow_depth_m": walker.snow_depth, "loose_depth_m": walker.loose_depth,
+		"snow_depth_m": walker.snow_depth, "saved_depth_m": walker.saved_depth, "loose_depth_m": walker.loose_depth,
 		"foot_compaction": walker.foot_compaction, "sink_depth_m": walker.sink_depth,
 		"obstacle_limited": walker.obstacle_limited, "step_count": walker.step_count,
 		"patch_x_m": surface.patch_center.x, "patch_z_m": surface.patch_center.y,
@@ -127,12 +127,12 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
 		"obstacle" if walker.obstacle_limited else ("boundary" if walker.boundary_limited else "clear"),
-		walker.snow_depth, walker.loose_depth, walker.sink_depth,
+		walker.snow_depth, walker.saved_depth, walker.loose_depth, walker.sink_depth,
 		walker.foot_compaction * 100.0, walker.step_count, walker.distance_walked,
 		latest.facing_deg, latest.travel_deg,
 		"%.1f, %.1f" % [camera.cursor_ground.x, camera.cursor_ground.y] if camera.has_cursor_ground else "not yet seen",
