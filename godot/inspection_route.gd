@@ -14,6 +14,15 @@ const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
 const LEVEL_DROP_M := 5.0
 const CONTACT_BOUND_M := 0.002
+# The detail region: 24 × 16 m, centred on the camera focus, snapped to the 0.8 m
+# coarse grid and blended into it over a 1.6 m border on sides inside the map. A
+# boot lands within 0.65 m of the figure's centre. One footstep touches at most
+# 2 × 2 tiles of the Footprint picture's GPU copy.
+const DETAIL_SIZE_M := Vector2(24.0, 16.0)
+const COARSE_STEP_M := 0.8
+const DETAIL_BORDER_M := 1.6
+const STEP_REACH_M := 0.65
+const MAX_TILES_PER_STEP := 4
 # Running is full at or below 10 cm of loose snow and falls to walking at 40 cm.
 const FULL_RUN_DEPTH_M := 0.10
 const WALK_ONLY_DEPTH_M := 0.40
@@ -118,13 +127,13 @@ func _run() -> void:
 	await _leg([KEY_W], 2.0, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
-	# Leave the detailed patch through the compound's east gate into the courtyard.
-	await _goto(LANDMARKS.meeting_hall_gap, "leave detailed patch")
+	# Leave the detail region through the compound's east gate into the courtyard.
+	await _goto(LANDMARKS.meeting_hall_gap, "leave detail region")
 	await _goto(LANDMARKS.courtyard_east, "enter courtyard")
 	await _leg([KEY_S], 2.2, "wall approach")
 	await _leg([KEY_S], 1.2, "wall blocked")
 	await _goto(LANDMARKS.courtyard, "cross courtyard")
-	await _leg([], 0.5, "probe outside patch")
+	await _leg([], 0.5, "probe outside region")
 	# The courtyard's Shallow Snow allows full running.
 	await _goto(LANDMARKS.courtyard_west, "reach courtyard west")
 	await _leg([KEY_W, KEY_SHIFT], 2.0, "run in courtyard")
@@ -178,8 +187,8 @@ func _run() -> void:
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
 	await _wind_stages()
-	# Five steps out reach the 30 m end of the play range; the next opens the overview.
-	for step in range(5):
+	# Eight steps out from 10 m reach the 30 m end of the play range; the next opens the overview.
+	for step in range(8):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "widest play view")
 	for step in range(7):
@@ -207,8 +216,16 @@ func _wind_stages() -> void:
 	_tap(KEY_F5)
 	await _goto(LANDMARKS.courtyard, "leave courtyard shelter")
 	await _goto(LANDMARKS.courtyard_east, "head for the outpost")
+	# The overview's detail region stays at the map centre, so the figure walks into
+	# it across its blended border through the east gate and out again by the outpost.
+	for step in range(12):
+		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	await _leg([], 0.5, "overview before border")
 	await _goto(LANDMARKS.meeting_hall_gap, "leave courtyard for the outpost")
 	await _goto(LANDMARKS.outpost_lane, "walk to the outpost")
+	# Back in from the overview to the 10 m end of the play range.
+	for step in range(12):
+		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _goto(LANDMARKS.yard_open, "reach open yard")
 	_tap(KEY_F5)
 	await _goto(LANDMARKS.shed_windward, "reach shed windward face")
@@ -425,6 +442,8 @@ func _check_record() -> void:
 	var previous := {}
 	var figure_ids := {}
 	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
+	var region_limit := TownLayout.HALF_EXTENTS - DETAIL_SIZE_M * 0.5
+	var previous_upload := {}
 	var image_texels := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
 	for row in rows:
 		var input := Vector2(float(row.input_x), float(row.input_y))
@@ -450,10 +469,23 @@ func _check_record() -> void:
 				_fail_once("The overview did not frame the town")
 		elif distance < PLAY_RANGE_M.x - 0.001 or distance > PLAY_RANGE_M.y + 0.001:
 			_fail_once("Play zoom left the 10–30 m range")
-		if absf(float(row.patch_size_m) - 12.8) > 0.001:
-			_fail_once("Detailed patch is not 12.8 × 12.8 m")
-		if maxf(absf(float(row.patch_x_m) - float(row.x_m)), absf(float(row.patch_z_m) - float(row.z_m))) > 6.401:
-			_fail_once("Detailed patch stopped following the controlled figure")
+		var region := Vector2(float(row.region_x_m), float(row.region_z_m))
+		if Vector2(float(row.region_width_m), float(row.region_depth_m)).distance_to(DETAIL_SIZE_M) > 0.001:
+			_fail_once("Detail region is not 24 × 16 m")
+		var focus := Vector2(float(row.focus_x_m), float(row.focus_z_m)).clamp(-region_limit, region_limit)
+		var grid := (region + TownLayout.HALF_EXTENTS) / COARSE_STEP_M
+		if maxf(absf(region.x - focus.x), absf(region.y - focus.y)) > COARSE_STEP_M * 0.5 + 0.001 or grid.distance_to(grid.round()) > 0.001:
+			_fail_once("Detail region was not centred on the camera focus, snapped to the coarse grid and kept inside the map")
+		if row.overview == "false" and _region_inset(row, Vector2(float(row.x_m), float(row.z_m))) < DETAIL_BORDER_M + STEP_REACH_M:
+			_fail_once("In play the controlled figure's steps could land outside the full-detail region")
+		if not previous_upload.is_empty():
+			var sent := int(row.upload_total_bytes) - int(previous_upload.upload_total_bytes)
+			var steps := int(row.uploaded_steps) - int(previous_upload.uploaded_steps)
+			if sent < 0 or steps < 0 or sent % int(row.footprint_tile_bytes) != 0 or sent > steps * MAX_TILES_PER_STEP * int(row.footprint_tile_bytes):
+				_fail_once("Footprint uploads exceeded the tiles their footsteps touched")
+		if int(row.uploaded_steps) > int(row.footprint_count) or int(row.upload_bytes) >= int(row.footprint_image_bytes):
+			_fail_once("The Footprint picture was resent beyond its footsteps' tiles")
+		previous_upload = row
 		var image_size := Vector2i(int(row.footprint_image_width), int(row.footprint_image_height))
 		if image_size != image_texels or int(row.footprint_image_bytes) != image_texels.x * image_texels.y * 4:
 			_fail_once("Footprint image dimensions or allocation changed during traversal")
@@ -531,6 +563,8 @@ func _check_record() -> void:
 	_check_facing(rows)
 	_check_wind(rows)
 	_check_zoom(rows)
+	_check_detail_region(rows)
+	_check_uploads(rows)
 	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, deep run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, deep_run, blocked, overview, follow])
 
 
@@ -635,14 +669,14 @@ func _check_courtyard_entry(rows: Array[Dictionary]) -> void:
 	var inside := Vector2(float(entry.back().x_m), float(entry.back().z_m))
 	if in_gate < 10 or inside.distance_to(LANDMARKS.courtyard_east) > 0.05:
 		failures.append("Route did not walk through the east gate into the courtyard")
-	var crossed := _rows_for(rows, "probe outside patch")
+	var crossed := _rows_for(rows, "probe outside region")
 	if crossed.is_empty() or Vector2(float(crossed.back().x_m), float(crossed.back().z_m)).distance_to(LANDMARKS.courtyard) > 0.05:
 		failures.append("Route did not cross the courtyard")
 
 
 func _check_probe(rows: Array[Dictionary]) -> void:
 	var fresh := _rows_for(rows, "fresh probe")
-	var outside := _rows_for(rows, "probe outside patch")
+	var outside := _rows_for(rows, "probe outside region")
 	var revisited := _rows_for(rows, "probe revisited")
 	if fresh.is_empty() or outside.is_empty() or revisited.is_empty():
 		failures.append("Trail probe route stages were missing")
@@ -652,10 +686,10 @@ func _check_probe(rows: Array[Dictionary]) -> void:
 	if int(original.probe_count) != 1 or baseline < 0.01:
 		failures.append("A moving boot did not leave a measurable footprint at the world probe")
 	for row in outside:
-		if row.probe1_in_patch != "false" or absf(_probe(row, TRAIL_PROBE, "compaction") - baseline) > 0.001:
-			_fail_once("Leaving the detailed patch erased or moved a world footprint")
+		if row.probe1_in_region != "false" or absf(_probe(row, TRAIL_PROBE, "compaction") - baseline) > 0.001:
+			_fail_once("Leaving the detail region erased or moved a world footprint")
 	var returned: Dictionary = revisited.back()
-	if returned.probe1_in_patch != "true" or _probe(returned, TRAIL_PROBE, "compaction") + 0.001 < baseline:
+	if returned.probe1_in_region != "true" or _probe(returned, TRAIL_PROBE, "compaction") + 0.001 < baseline:
 		failures.append("The original footprint was not retained on revisiting its world position")
 
 
@@ -796,6 +830,84 @@ func _check_facing(rows: Array[Dictionary]) -> void:
 		failures.append("After Tab the newly controlled figure did not face the cursor")
 
 
+func _check_detail_region(rows: Array[Dictionary]) -> void:
+	# The region follows the camera focus as the cursor moves the lean, while the
+	# figure stands still, and returns with it.
+	var idle := _rows_for(rows, "initial idle")
+	var corner := _rows_for(rows, "lean to corner")
+	var centred := _rows_for(rows, "cursor on figure")
+	if idle.is_empty() or corner.is_empty() or centred.is_empty():
+		failures.append("Detail region lean stages were missing")
+		return
+	var start := _region(idle.back())
+	var leaned := _region(corner.back())
+	var returned := _region(centred.back())
+	print("Detail region at %s; leaned to %s; returned to %s" % [start, leaned, returned])
+	if leaned.distance_to(start) < 2.0 * COARSE_STEP_M:
+		failures.append("The detail region did not follow the camera focus as the cursor moved the lean")
+	if returned.distance_to(start) > COARSE_STEP_M + 0.001:
+		failures.append("The detail region did not return with the lean")
+	# In the overview the region holds still while the figure walks across its
+	# border: from the coarse surface, through the blend, into full detail and out.
+	var outside := 0
+	var border := 0
+	var inside := 0
+	var border_gap := 0.0
+	var held := Vector2.INF
+	for row in rows:
+		if row.overview != "true" or absf(float(row.input_x)) + absf(float(row.input_y)) < 0.5:
+			continue
+		if held == Vector2.INF:
+			held = _region(row)
+		elif _region(row).distance_to(held) > 0.001:
+			_fail_once("The overview's detail region moved while the figure walked")
+		var inset := _region_inset(row, Vector2(float(row.x_m), float(row.z_m)))
+		if inset < 0.0:
+			outside += 1
+		elif inset < DETAIL_BORDER_M:
+			border += 1
+			border_gap = maxf(border_gap, absf(float(row.contact_gap_m)))
+		else:
+			inside += 1
+	print("Overview walk across the region border: outside %d, border %d, inside %d; border contact gap %.4f m" % [outside, border, inside, border_gap])
+	if outside < 30 or border < 30 or inside < 30:
+		failures.append("The figure did not walk across the detail region's border (outside %d, border %d, inside %d)" % [outside, border, inside])
+	if border_gap > CONTACT_BOUND_M:
+		failures.append("Boots left the snow across the detail region's border (gap %.4f m)" % border_gap)
+
+
+func _check_uploads(rows: Array[Dictionary]) -> void:
+	var last: Dictionary = rows.back()
+	var steps := int(last.uploaded_steps)
+	var sent := int(last.upload_total_bytes)
+	var bound := steps * MAX_TILES_PER_STEP * int(last.footprint_tile_bytes)
+	print("Footprint uploads: %d bytes for %d footsteps (%.0f per step; touched-tile bound %d per step)" % [
+		sent, steps, float(sent) / maxi(1, steps), MAX_TILES_PER_STEP * int(last.footprint_tile_bytes)])
+	if steps < 100 or sent <= 0 or sent > bound:
+		failures.append("Footprint uploads were missing or exceeded the touched tiles (%d bytes, %d steps)" % [sent, steps])
+
+
+func _region(row: Dictionary) -> Vector2:
+	return Vector2(float(row.region_x_m), float(row.region_z_m))
+
+
+## How far a point lies inside the detail region from its nearest blended side.
+## A side on the map edge has no coarse surface beyond it and no border.
+func _region_inset(row: Dictionary, point: Vector2) -> float:
+	var low := _region(row) - DETAIL_SIZE_M * 0.5
+	var high := _region(row) + DETAIL_SIZE_M * 0.5
+	var edge := INF
+	if low.x > -TownLayout.HALF_EXTENTS.x + 0.001:
+		edge = minf(edge, point.x - low.x)
+	if high.x < TownLayout.HALF_EXTENTS.x - 0.001:
+		edge = minf(edge, high.x - point.x)
+	if low.y > -TownLayout.HALF_EXTENTS.y + 0.001:
+		edge = minf(edge, point.y - low.y)
+	if high.y < TownLayout.HALF_EXTENTS.y - 0.001:
+		edge = minf(edge, high.y - point.y)
+	return edge
+
+
 func _check_zoom(rows: Array[Dictionary]) -> void:
 	var overview := _rows_for(rows, "whole map")
 	var close := _rows_for(rows, "close view")
@@ -848,13 +960,13 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 		failures.append("A print where a drift builds did not fill faster than in the open")
 	# By the end of the drift stage the exposed and lee prints have filled completely,
 	# while the sheltered print still remains. The figure stands at the lee probe,
-	# inside the detailed patch, where its visible depression fills as well.
+	# inside the detail region, where its visible depression fills as well.
 	var settled: Dictionary = building.back()
 	var fresh_depression := _probe(placed.back(), LEE_PROBE, "depth_m") - _probe(placed.back(), LEE_PROBE, "visible_m")
 	var filled_depression := _probe(settled, LEE_PROBE, "depth_m") - _probe(settled, LEE_PROBE, "visible_m")
 	if _probe(settled, EXPOSED_PROBE, "compaction") > 0.001 or _probe(settled, LEE_PROBE, "compaction") > 0.001:
 		failures.append("Wind did not fill the exposed and lee prints")
-	if placed.back().probe5_in_patch != "true" or settled.probe5_in_patch != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
+	if placed.back().probe5_in_region != "true" or settled.probe5_in_region != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
 		failures.append("Wind did not fill the lee print's visible depression")
 	if _probe(settled, SHELTERED_PROBE, "compaction") < 0.2 * _probe(first, SHELTERED_PROBE, "compaction"):
 		failures.append("The sheltered print did not outlast the exposed one")

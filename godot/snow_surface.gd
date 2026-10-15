@@ -1,23 +1,35 @@
 extends Node3D
 class_name SnowSurface
 
-## Static ground levels, a world-fixed snow field, and a small moving geometry window.
+## Static ground levels, a world-fixed snow field, and a camera-sized detail region.
 ## The field spans the town layout's map rectangle; its surface is the layout's
 ## ground-height picture plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
-## collider stands in for snow contact. Footsteps mutate one bounded image only.
+## collider stands in for snow contact. Footsteps mutate one bounded, tiled picture
+## and resend only the tiles they touched.
 ## Wind reshapes Snow Depth and advances each place's fill clock a few times a
 ## second; both pictures are published to the CPU and the shader together.
 const TownLayout = preload("res://town_layout.gd")
 const SnowWind = preload("res://snow_wind.gd")
 const HALF_EXTENTS := TownLayout.HALF_EXTENTS
-const PATCH_SIZE := 12.8
+## The detail region covers what the play camera shows at a 5 cm grid; the coarse
+## 0.8 m surface keeps the whole town live beyond it. It blends into the coarse
+## surface over a border on every side that does not lie on the map edge.
+const DETAIL_SIZE := Vector2(24.0, 16.0)
+const DETAIL_HALF := DETAIL_SIZE * 0.5
 const COARSE_STEP := 0.8
-const DETAIL_STEP := 0.1
+const DETAIL_STEP := 0.05
 const EDGE_BLEND := 1.6
 # 31.25 mm per texel; the image covers the whole map rectangle at this density.
 const TEXELS_PER_METRE := 32.0
 const IMAGE_SIZE := Vector2i(HALF_EXTENTS * (2.0 * TEXELS_PER_METRE))
+## The Footprint picture is held in 200 × 128 texel tiles (6.25 × 4 m), 16 × 14 of
+## them, each one layer of the GPU copy. A sole spans at most 0.36 m, less than a
+## tile either way, so one footstep touches at most 2 × 2 tiles.
+const TILE_SIZE := Vector2i(200, 128)
+const TILE_GRID := IMAGE_SIZE / TILE_SIZE
+const TILE_BYTES := TILE_SIZE.x * TILE_SIZE.y * 4
+const MAX_TILES_PER_STEP := 4
 ## Fill-clock seconds for a Footprint to fill: 120 wind-seconds in the open.
 const PRINT_LIFETIME := 120.0
 ## The saved Snow Depth and fill-clock pictures hold values at nodes 0.4 m apart,
@@ -29,18 +41,24 @@ const SNOW_SHADER := preload("res://snow.gdshader")
 ## 1 + BUILDING_FILL times the wind clock, so restart both before encoding could wrap.
 const CLOCK_LIMIT := 1677700.0 / (1.0 + SnowWind.BUILDING_FILL)
 
-var patch_center := Vector2.ZERO
+var region_center := Vector2.ZERO
 var wind_strength := 1.0
 var wind_elapsed := 0.0
 var wind := SnowWind.new()
 ## Milliseconds the wind spent in the latest physics frame, including publication.
 var wind_update_ms := 0.0
 var footprint_count := 0
-var footprint_image_bytes := IMAGE_SIZE.x * IMAGE_SIZE.y * 4
-var _footprints: Image
-var _texture: ImageTexture
+var footprint_image_bytes := TILE_GRID.x * TILE_GRID.y * TILE_BYTES
+## Footprint picture bytes sent to the GPU in the latest rendered frame and in total,
+## and how many footsteps those uploads carried; each carries at most MAX_TILES_PER_STEP tiles.
+var upload_bytes := 0
+var upload_total_bytes := 0
+var uploaded_steps := 0
+var _tiles: Array[Image] = []
+var _texture := Texture2DArray.new()
 var _layout: Node3D
-var _dirty := false
+var _dirty_tiles := {}
+var _pending_steps := 0
 var _detail: MeshInstance3D
 var _materials: Array[ShaderMaterial] = []
 var _depth := PackedFloat32Array()
@@ -52,20 +70,29 @@ var _fill_texture: ImageTexture
 
 
 func _ready() -> void:
-	_footprints = Image.create_empty(IMAGE_SIZE.x, IMAGE_SIZE.y, false, Image.FORMAT_RGBA8)
-	_footprints.fill(Color(0, 0, 0, 0))
-	_texture = ImageTexture.create_from_image(_footprints)
+	assert(TILE_GRID * TILE_SIZE == IMAGE_SIZE, "Footprint tiles must cover the picture exactly")
+	for layer in range(TILE_GRID.x * TILE_GRID.y):
+		var tile := Image.create_empty(TILE_SIZE.x, TILE_SIZE.y, false, Image.FORMAT_RGBA8)
+		tile.fill(Color(0, 0, 0, 0))
+		_tiles.append(tile)
+	_texture.create_from_images(_tiles)
 	_make_mesh(HALF_EXTENTS.x * 2.0, HALF_EXTENTS.y * 2.0, COARSE_STEP, false)
-	_detail = _make_mesh(PATCH_SIZE, PATCH_SIZE, DETAIL_STEP, true)
+	_detail = _make_mesh(DETAIL_SIZE.x, DETAIL_SIZE.y, DETAIL_STEP, true)
 	_update_uniforms()
 
 
 func _process(_delta: float) -> void:
-	# Coalesce both figures' stamps before drawing. Wind ages encoded timestamps
-	# through the fill clock and never rewrites or uploads the whole image by itself.
-	if _dirty:
-		_texture.update(_footprints)
-		_dirty = false
+	# Coalesce both figures' stamps before drawing and resend only the tiles they
+	# touched. Wind ages encoded timestamps through the fill clock and never
+	# rewrites or uploads the picture by itself.
+	upload_bytes = 0
+	for layer in _dirty_tiles:
+		_texture.update_layer(_tiles[layer], layer)
+		upload_bytes += TILE_BYTES
+	_dirty_tiles.clear()
+	upload_total_bytes += upload_bytes
+	uploaded_steps += _pending_steps
+	_pending_steps = 0
 
 
 func _exit_tree() -> void:
@@ -108,7 +135,7 @@ func turn_wind(steps: int) -> void:
 	wind.turn(steps)
 
 
-func advance(delta: float, focus_xz: Vector2) -> void:
+func advance(delta: float) -> void:
 	var began := Time.get_ticks_usec()
 	wind_elapsed += delta * maxf(0.0, wind_strength)
 	# This preview has no saved weather: restart its clocks and Footprints before
@@ -116,26 +143,36 @@ func advance(delta: float, focus_xz: Vector2) -> void:
 	if wind_elapsed >= CLOCK_LIMIT:
 		wind_elapsed = 0.0
 		wind.restart_clock()
-		_footprints.fill(Color(0, 0, 0, 0))
-		_dirty = true
+		for layer in range(_tiles.size()):
+			_tiles[layer].fill(Color(0, 0, 0, 0))
+			_dirty_tiles[layer] = true
 		_publish_snow()
 	if wind.step(wind_elapsed):
 		_publish_snow()
 	wind_update_ms = float(Time.get_ticks_usec() - began) / 1000.0
-	# Snap to coarse vertices, which are counted from the map's west and north edges.
-	var centre_limit := HALF_EXTENTS - Vector2.ONE * PATCH_SIZE * 0.5
-	patch_center = Vector2(
-		clampf(snappedf(focus_xz.x + HALF_EXTENTS.x, COARSE_STEP) - HALF_EXTENTS.x, -centre_limit.x, centre_limit.x),
-		clampf(snappedf(focus_xz.y + HALF_EXTENTS.y, COARSE_STEP) - HALF_EXTENTS.y, -centre_limit.y, centre_limit.y)
+
+
+## Centre the detail region on the camera's focus. It snaps to coarse vertices,
+## counted from the map's west and north edges, so its 5 cm grid stays world-aligned,
+## and it stays inside the map. Moving it never moves or clears the Footprint picture.
+func centre_detail(focus: Vector2) -> void:
+	var centre_limit := HALF_EXTENTS - DETAIL_HALF
+	region_center = Vector2(
+		clampf(snappedf(focus.x + HALF_EXTENTS.x, COARSE_STEP) - HALF_EXTENTS.x, -centre_limit.x, centre_limit.x),
+		clampf(snappedf(focus.y + HALF_EXTENTS.y, COARSE_STEP) - HALF_EXTENTS.y, -centre_limit.y, centre_limit.y)
 	)
-	_detail.position = Vector3(patch_center.x, 0, patch_center.y)
+	_detail.position = Vector3(region_center.x, 0, region_center.y)
 	_update_uniforms()
+
+
+func in_detail_region(point: Vector2) -> bool:
+	var local := (point - region_center).abs()
+	return local.x < DETAIL_HALF.x and local.y < DETAIL_HALF.y
 
 
 ## Visible snow height: ground plus compacted Snow Depth, on the drawn triangles.
 func sample_height(point: Vector2) -> float:
-	var local := (point - patch_center).abs()
-	if maxf(local.x, local.y) < PATCH_SIZE * 0.5:
+	if in_detail_region(point):
 		return _triangle_height(point, DETAIL_STEP, true)
 	return _triangle_height(point, COARSE_STEP, false)
 
@@ -185,7 +222,7 @@ func _publish_snow() -> void:
 
 
 func sample_compaction(point: Vector2) -> float:
-	if _footprints == null:
+	if _tiles.is_empty():
 		return 0.0
 	var texel := (point + HALF_EXTENTS) * TEXELS_PER_METRE - Vector2.ONE * 0.5
 	var cell := Vector2i(floori(texel.x), floori(texel.y))
@@ -214,7 +251,7 @@ func sample_loose_depth(point: Vector2) -> float:
 
 
 func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
-	if _footprints == null or absf(point.x) > HALF_EXTENTS.x or absf(point.y) > HALF_EXTENTS.y:
+	if _tiles.is_empty() or absf(point.x) > HALF_EXTENTS.x or absf(point.y) > HALF_EXTENTS.y:
 		return
 	var forward := Vector2(-sin(heading), -cos(heading))
 	var right := Vector2(cos(heading), -sin(heading))
@@ -235,16 +272,23 @@ func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
 			var previous := _pixel_compaction(pixel)
 			# Each texel keeps the fill clock at its centre when it was last pressed.
 			var timestamp := int(floor(sample_fill(world) * 10.0))
-			_footprints.set_pixel(column, row, Color(clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0),
+			var layer := _tile_layer(pixel)
+			_tiles[layer].set_pixel(column % TILE_SIZE.x, row % TILE_SIZE.y, Color(clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0),
 				float((timestamp >> 16) & 255) / 255.0, float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0))
+			_dirty_tiles[layer] = true
 	footprint_count += 1
-	_dirty = true
+	_pending_steps += 1
+
+
+## The tile, and GPU layer, that holds a texel of the Footprint picture.
+func _tile_layer(pixel: Vector2i) -> int:
+	return (pixel.y / TILE_SIZE.y) * TILE_GRID.x + pixel.x / TILE_SIZE.x
 
 
 func _pixel_compaction(pixel: Vector2i) -> float:
 	if pixel.x < 0 or pixel.y < 0 or pixel.x >= IMAGE_SIZE.x or pixel.y >= IMAGE_SIZE.y:
 		return 0.0
-	var value := _footprints.get_pixel(pixel.x, pixel.y)
+	var value := _tiles[_tile_layer(pixel)].get_pixel(pixel.x % TILE_SIZE.x, pixel.y % TILE_SIZE.y)
 	if value.r <= 0.0:
 		return 0.0
 	# Snow has filled the print by as much as the fill clock at the texel's centre
@@ -260,16 +304,32 @@ func _field_height(point: Vector2) -> float:
 	return sample_ground(point) + maxf(0.025, sample_saved_depth(point) * (1.0 - 0.86 * sample_compaction(point)))
 
 
+## Full detail inside the region's border, falling to the coarse surface across it.
+## A side on the map edge has no coarse surface beyond it, so it has no border.
+func _region_weight(point: Vector2) -> float:
+	var low := region_center - DETAIL_HALF
+	var high := region_center + DETAIL_HALF
+	var edge := 1.0e6
+	if low.x > -HALF_EXTENTS.x + 0.001:
+		edge = minf(edge, point.x - low.x)
+	if high.x < HALF_EXTENTS.x - 0.001:
+		edge = minf(edge, high.x - point.x)
+	if low.y > -HALF_EXTENTS.y + 0.001:
+		edge = minf(edge, point.y - low.y)
+	if high.y < HALF_EXTENTS.y - 0.001:
+		edge = minf(edge, high.y - point.y)
+	return smoothstep(0.0, EDGE_BLEND, edge)
+
+
 func _detail_vertex_height(point: Vector2) -> float:
-	var edge := PATCH_SIZE * 0.5 - maxf(absf(point.x - patch_center.x), absf(point.y - patch_center.y))
-	var weight := smoothstep(0.0, EDGE_BLEND, edge)
+	var weight := _region_weight(point)
 	if weight >= 0.99999:
 		return _field_height(point)
 	return lerpf(_triangle_height(point, COARSE_STEP, false), _field_height(point), weight)
 
 
 func _triangle_height(point: Vector2, step: float, detail: bool) -> float:
-	var origin := patch_center - Vector2.ONE * PATCH_SIZE * 0.5 if detail else -HALF_EXTENTS
+	var origin := region_center - DETAIL_HALF if detail else -HALF_EXTENTS
 	var grid := (point - origin) / step
 	var cell := grid.floor()
 	var blend := grid - cell
@@ -353,7 +413,9 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 	material.shader = SNOW_SHADER
 	material.set_shader_parameter("detail_mesh", detail)
 	material.set_shader_parameter("map_half_extents", HALF_EXTENTS)
-	material.set_shader_parameter("footprint_image", _texture)
+	material.set_shader_parameter("footprint_tiles", _texture)
+	material.set_shader_parameter("footprint_tile_grid", TILE_GRID)
+	material.set_shader_parameter("detail_half_extents", DETAIL_HALF)
 	_materials.append(material)
 	var visible_surface := MeshInstance3D.new()
 	visible_surface.name = "DetailedSnow" if detail else "CoarseSnow"
@@ -366,4 +428,4 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 
 func _update_uniforms() -> void:
 	for material in _materials:
-		material.set_shader_parameter("patch_center", patch_center)
+		material.set_shader_parameter("region_center", region_center)

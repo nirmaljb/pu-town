@@ -30,13 +30,14 @@ func _ready() -> void:
 	add_child(camera)
 	add_child(inspection)
 	camera.follow(walker.position, 0.0)
+	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
 	_add_overcast_light()
 	get_window().focus_entered.connect(func() -> void: focused = true)
 	get_window().focus_exited.connect(func() -> void: focused = headless_replay)
 	focused = headless_replay or get_window().has_focus()
 	print("Snow Walk: Godot ", Engine.get_version_info().string, " · ", RenderingServer.get_current_rendering_method())
-	print("%d × %d metres; 12.8 m moving detail; WASD walk / Shift run / mouse Facing / Tab switch / [ ] turn wind; captures: " % [
-		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0], OS.get_user_data_dir())
+	print("%d × %d metres; %d × %d m detail region at the camera focus; WASD walk / Shift run / mouse Facing / Tab switch / [ ] turn wind; captures: " % [
+		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0, Surface.DETAIL_SIZE.x, Surface.DETAIL_SIZE.y], OS.get_user_data_dir())
 	if OS.get_cmdline_user_args().has("--walk-scene-check") or OS.get_cmdline_user_args().has("--snow-scene-check"):
 		add_child(InspectionRoute.new())
 
@@ -49,10 +50,13 @@ func _physics_process(delta: float) -> void:
 		camera.update_cursor(controlled.position)
 		if camera.cursor_inside and camera.has_cursor_ground:
 			controlled.face_toward(camera.cursor_ground)
-	surface.advance(delta, Vector2(controlled.position.x, controlled.position.z))
+	surface.advance(delta)
 	controlled.walk(delta, camera.global_basis, focused)
 	idle.walk(delta, camera.global_basis, false)
 	camera.follow(controlled.position, delta)
+	# The detail region follows what the camera shows. Its 5 cm grid is world-aligned,
+	# so the figure's full-detail support is the same before and after it moves.
+	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
 	inspection.observe(controlled, camera, surface, focused, idle)
 
 
@@ -77,6 +81,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				# Frame the newly controlled figure at once, so it takes its Facing
 				# from the cursor in the view that shows it.
 				camera.follow(_controlled().position, 0.0)
+				surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
 			KEY_MINUS, KEY_KP_SUBTRACT:
 				surface.wind_strength = maxf(0.0, surface.wind_strength - 1.0)
 			KEY_EQUAL, KEY_KP_ADD:

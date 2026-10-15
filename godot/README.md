@@ -16,12 +16,14 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first five slices: the 100 × 56 m town laid out from that reference
+describes its first six slices: the 100 × 56 m town laid out from that reference
 as solid placeholder boxes, on a town shelf about 5 m above the southern forest
 and joined to it by the snow-buried stair; a north-up perspective camera that
 follows the controlled figure while the mouse sets its Facing; a saved Snow
-Depth that starts Deep or Shallow by place; and a north-west wind that builds
-Snowdrifts, scours windward sides and fills Footprints faster or slower by place.
+Depth that starts Deep or Shallow by place; a north-west wind that builds
+Snowdrifts, scours windward sides and fills Footprints faster or slower by place;
+and a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
+up close.
 The second figure stays idle; the walking second figure follows later.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
@@ -77,7 +79,7 @@ figures remain temporary scale and contact references, not final Avatar artwork.
 
 Tab switches between the orange and blue-grey figures, leaving the other idle.
 Both contribute anonymous bootprints to the same world field. Tracks overlap,
-remain when the detailed patch moves away, and fade as wind fills them. A fresh
+remain when the detail region moves away, and fade as wind fills them. A fresh
 launch resets the snow and both figures. Both start in the outpost yard, at its
 `outpost_yard_west` and `outpost_yard_east` landmarks, (22, 4) m and (28, 4) m:
 the first in the yard's Shallow Snow, the second in its eastern Deep drift.
@@ -254,16 +256,20 @@ point (`cursor_x_m`, `cursor_z_m`), speed, run request, the visible Snow Depth a
 that ground (`snow_depth_m`), the saved loose Snow Depth under the figure before
 packing (`saved_depth_m`), the loose depth that sets running speed after nearby
 packing (`loose_depth_m`), compaction, sinking, contact gap, obstacle/boundary contact, steps,
-the moving patch, wind strength, the bearing it blows from (`wind_from_deg`), the
+the camera's focus (`focus_x_m`, `focus_z_m`), the detail region's centre and size
+(`region_x_m`, `region_z_m`, `region_width_m`, `region_depth_m`), the Footprint
+picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
+total (`upload_total_bytes`) and the footsteps those uploads carried
+(`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`), the
 weather clock, the wind's work in the latest physics frame (`wind_update_ms`),
 image allocation and the other figure's position. Each F5 probe stays at its world
 location when you walk away or switch figures. For every probe the CSV reports
 `probe_count` and, in columns `probe1_…` to `probe6_…`, its position (`x_m`,
 `z_m`), loose Snow Depth (`depth_m`), visible snow above the ground after packing
-(`visible_m`), compaction and whether it lies in the detailed patch (`in_patch`);
+(`visible_m`), compaction and whether it lies in the detail region (`in_region`);
 unused slots stay empty. The HUD lists the same readings. The CSV
 also records input, the camera's projection, field of view, distance, overview
-state, lean (`lean_x_m`, `lean_z_m`, `lean_m`), pitch and yaw, framing, focus and
+state, lean (`lean_x_m`, `lean_z_m`, `lean_m`), pitch and yaw, framing and
 elapsed time.
 
 Godot writes observations, frame traces and captures into the project's local
@@ -272,7 +278,7 @@ Open User Data Folder** to find them. These records support inspection; a CSV or
 capture alone is not packaged-platform or hardware performance acceptance.
 
 For a manual check, reduce wind to zero, walk a trail across the outpost yard and press
-F5. Leave the detailed patch, then return and check that the trail remains at the
+F5. Leave the detail region, then return and check that the trail remains at the
 same place. Switch figures and follow or cross it to inspect overlapping prints
 and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
 lodge diagonally to inspect sliding along its sides, then increase wind and watch
@@ -306,7 +312,13 @@ south while facing east, with prints and speed following the travel. Running eas
 across the outpost yard, it runs at full speed in the Shallow Snow and only walks
 in the Deep drift, and it is stopped by the lodge. In the meeting-hall gap it
 runs, walks and runs again along one lane of Deep Snow, showing a measurable
-Packed Path running advantage over the fresh lane. It lays a probed trail in the
+Packed Path running advantage over the fresh lane. While the cursor leans the
+camera toward a corner and back, the detail region follows the focus and returns
+with it. Every observation checks that the region is 24 × 16 m, centred on the
+camera's focus to within half a coarse cell, on the coarse grid and inside the
+map, that in play the figure stands far enough inside it for every footstep to
+land in full detail, and that Footprint uploads never exceed the 2 × 2 tiles each
+uploaded footstep may touch. It lays a probed trail in the
 gap, walks through the east gate into the courtyard, is stopped by the courtyard
 wall, crosses the courtyard and runs at full speed in its Shallow Snow. Tab, with the
 cursor west of the figure, gives the second figure a westward Facing; it then
@@ -321,7 +333,11 @@ each stops it, and it climbs the stair back to the gate. Wind stays at 0 until
 then. The figure next fixes four more probes: sheltered in the courtyard
 (`courtyard_shelter`), exposed in the open outpost yard (`yard_open`), on the east
 shed's windward west face (`shed_windward`) and in the lee of the lodge's south
-face (`lodge_lee`). At wind 16 from the north-west the exposed print fills at the
+face (`lodge_lee`). Between the first two it opens the whole-map overview, whose
+detail region stays at the map centre, and walks from the courtyard through the
+east gate into the region and out past the meeting hall toward the outpost:
+across the blended border the region holds still and the contact gap stays within
+2 mm. It then zooms back in to 10 m. At wind 16 from the north-west the exposed print fills at the
 120 wind-second rate, the sheltered one four times more slowly and the lee one
 faster still; the lodge's drift grows from 60 cm toward 1.2 m without shrinking
 and settles, and the shed's face scours to the 3 cm floor and holds. The figure
@@ -370,22 +386,45 @@ the authored zones in [`town_layout.gd`](town_layout.gd) and never loads saved
 snow. Every rendered vertex and every foot-support query reads it, with the
 Footprint picture, each frame.
 
-A 12.8 × 12.8 m patch uses a 0.1 m grid around the controlled figure; a 0.8 m grid
-keeps the full town visible outside it. The patch moves in coarse-grid increments
-and stays within the map, blending into the coarse surface over a 1.6 m border.
+Bootprints are shaped in height inside a **detail region** of 24 × 16 m at a
+**5 cm grid** (480 × 320 cells); a live 0.8 m grid keeps the whole town's snow
+visible beyond it. The region is sized to what the play camera shows: its centre
+is the camera's focus, including the lean, so at every play distance the
+controlled figure stands well inside it. With the focus at most 3 m of lean plus
+2.25 m of framing from the figure, half a coarse cell of snapping and a boot's
+0.65 m reach, every footstep lands at least 1.6 m inside its blended sides.
+The region snaps to coarse vertices counted from the map's west and north edges,
+so its 5 cm grid is world-aligned and the figure's support does not change when
+it moves, and it stays inside the map. It blends into the coarse surface over a
+1.6 m border on each side inside the map; a side on the map edge has no coarse
+snow beyond it and no border. Coarse cells under the region collapse in the
+vertex shader, so the two surfaces never overlap. In the whole-map overview the
+focus is the map centre, so the region stays there while the figure walks.
 [`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the ground picture
 and the current field.
 CPU foot support evaluates the same heights and triangle interpolation,
-including the patch border, rather than querying a stale static collision mesh.
+including the region border, rather than querying a stale static collision mesh.
+
+Sole outlines are shaded from the Footprint picture everywhere, inside and
+outside the region, at the picture's own 31.25 mm texels: its slope tilts the
+shading normal and darkens each sole's rim. On the coarse surface, which has no
+depression, the picture supplies the whole slope; inside the region the 5 cm
+triangles carry the depression and the picture sharpens its rim. This changes
+shading only, never height or foot support, so distant trails still read.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
 Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
 to cover the whole map rectangle: **3200 × 1792** for the 100 × 56 m town. It stores compaction and the fill clock
 at the texel's centre when it was last pressed; no growing list of steps is retained. Both figures use
-this same image, and moving the patch does not move or clear its contents.
-The CPU image pixel payload is **22,937,600 bytes** (about 21.9 MiB), whatever the
-number of steps. The GPU texture is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
+this same image, and moving the detail region does not move or clear its contents.
+The picture is held in **200 × 128 texel tiles** (6.25 × 4 m), 16 × 14 of them,
+and its GPU copy is a texture array with one layer per tile. A sole spans at most
+0.36 m, so a footstep touches at most 2 × 2 tiles; at the end of each rendered
+frame only the tiles that frame's footsteps touched are resent, at most
+**409,600 bytes per footstep** (four 102,400-byte tiles), never the whole picture.
+The CPU tile payload is **22,937,600 bytes** (about 21.9 MiB), whatever the
+number of steps. The GPU texture array is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
 memory. Wind ages the encoded values without rewriting the image each frame;
 new footfalls update it. [`snow_wind.gd`](snow_wind.gd) holds the wind: the
 working Snow Depth and fill-clock pictures (251 × 141 nodes each), the target
