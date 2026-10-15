@@ -35,7 +35,7 @@ func _ready() -> void:
 	get_window().focus_exited.connect(func() -> void: focused = headless_replay)
 	focused = headless_replay or get_window().has_focus()
 	print("Snow Walk: Godot ", Engine.get_version_info().string, " · ", RenderingServer.get_current_rendering_method())
-	print("%d × %d metres; 12.8 m moving detail; WASD walk / Shift run / mouse Facing / Tab switch; captures: " % [
+	print("%d × %d metres; 12.8 m moving detail; WASD walk / Shift run / mouse Facing / Tab switch / [ ] turn wind; captures: " % [
 		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0], OS.get_user_data_dir())
 	if OS.get_cmdline_user_args().has("--walk-scene-check") or OS.get_cmdline_user_args().has("--snow-scene-check"):
 		add_child(InspectionRoute.new())
@@ -83,12 +83,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				surface.wind_strength = minf(16.0, surface.wind_strength + 1.0)
 			KEY_0:
 				surface.wind_strength = 1.0
+			KEY_BRACKETLEFT:
+				surface.turn_wind(-1)
+			KEY_BRACKETRIGHT:
+				surface.turn_wind(1)
 			KEY_F1:
 				inspection.visible = not inspection.visible
 			KEY_F4:
 				inspection.mark_checkpoint()
 			KEY_F5:
-				inspection.mark_trail(_controlled(), surface)
+				inspection.add_probe(_controlled())
 			KEY_F6:
 				inspection.start_frame_recording()
 			KEY_F8:

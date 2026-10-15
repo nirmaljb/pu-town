@@ -30,6 +30,14 @@ const LANDMARKS := {
 	"south_gate": Vector2(-23.5, 2),
 	"forest_lane": Vector2(-23.5, 22),
 	"forest_west": Vector2(-28, 24),
+	# Places the prevailing north-west wind treats differently, for probes: the
+	# courtyard is sheltered, the open yard exposed, the shed's west face scoured
+	# and the lodge's south face in the lee where a Snowdrift builds.
+	"courtyard_shelter": Vector2(-31, -7),
+	"outpost_lane": Vector2(24, 7.5),
+	"yard_open": Vector2(24, 3),
+	"shed_windward": Vector2(35, 3),
+	"lodge_lee": Vector2(35, -4.8),
 }
 ## Ground levels. The shelf carries the compound, meeting hall and outpost; the
 ## forest lies west of FOREST_EAST and south of FOREST_NORTH. Both lines run

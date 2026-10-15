@@ -9,11 +9,13 @@ uniform float ground_nodes_per_metre = 5.0;
 // The saved Snow Depth picture: loose depth above the ground at nodes counted the
 // same way and read bilinearly, as in SnowSurface.sample_saved_depth.
 uniform sampler2D depth_image : filter_nearest, repeat_disable;
+// The fill clock, on the same nodes: fill-seconds of wind-blown snow that have
+// fallen there, as in SnowSurface.sample_fill.
+uniform sampler2D fill_image : filter_nearest, repeat_disable;
 uniform float depth_nodes_per_metre = 2.5;
 uniform vec2 patch_center = vec2(0.0);
 // East–west and north–south half extents of the map rectangle, set from the town layout.
 uniform vec2 map_half_extents;
-uniform float wind_elapsed = 0.0;
 uniform bool detail_mesh = false;
 varying vec3 world_position;
 
@@ -22,14 +24,32 @@ const float COARSE_STEP = 0.8;
 const float EDGE_BLEND = 1.6;
 const float PRINT_LIFETIME = 120.0;
 
+// Bilinear reading of a picture whose nodes are counted from the map's west and north edges.
+float picture_value(sampler2D picture, float nodes_per_metre, vec2 point) {
+	ivec2 size = textureSize(picture, 0);
+	vec2 node = (point + map_half_extents) * nodes_per_metre;
+	ivec2 cell = clamp(ivec2(floor(node)), ivec2(0), size - ivec2(2));
+	vec2 blend = clamp(node - vec2(cell), vec2(0.0), vec2(1.0));
+	return mix(
+		mix(texelFetch(picture, cell, 0).r, texelFetch(picture, cell + ivec2(1, 0), 0).r, blend.x),
+		mix(texelFetch(picture, cell + ivec2(0, 1), 0).r, texelFetch(picture, cell + ivec2(1, 1), 0).r, blend.x), blend.y);
+}
+
 float pixel_compaction(ivec2 pixel, ivec2 image_size) {
 	if (pixel.x < 0 || pixel.y < 0 || pixel.x >= image_size.x || pixel.y >= image_size.y) {
 		return 0.0;
 	}
 	vec4 value = texelFetch(footprint_image, pixel, 0);
+	if (value.r <= 0.0) {
+		return 0.0;
+	}
+	// Snow has filled the print by as much as the fill clock at the texel's centre
+	// has run since it was pressed, as in SnowSurface._pixel_compaction.
 	vec3 bytes = floor(value.gba * 255.0 + vec3(0.5));
 	float stamped = dot(bytes, vec3(65536.0, 256.0, 1.0)) * 0.1;
-	return value.r * max(0.0, 1.0 - max(0.0, wind_elapsed - stamped) / PRINT_LIFETIME);
+	vec2 centre = (vec2(pixel) + vec2(0.5)) / vec2(image_size) * 2.0 * map_half_extents - map_half_extents;
+	float filled = picture_value(fill_image, depth_nodes_per_metre, centre);
+	return value.r * max(0.0, 1.0 - max(0.0, filled - stamped) / PRINT_LIFETIME);
 }
 
 float compaction(vec2 point) {
@@ -41,17 +61,6 @@ float compaction(vec2 point) {
 	return mix(
 		mix(pixel_compaction(cell, image_size), pixel_compaction(cell + ivec2(1, 0), image_size), blend.x),
 		mix(pixel_compaction(cell + ivec2(0, 1), image_size), pixel_compaction(cell + ivec2(1, 1), image_size), blend.x), blend.y);
-}
-
-// Bilinear reading of a picture whose nodes are counted from the map's west and north edges.
-float picture_value(sampler2D picture, float nodes_per_metre, vec2 point) {
-	ivec2 size = textureSize(picture, 0);
-	vec2 node = (point + map_half_extents) * nodes_per_metre;
-	ivec2 cell = clamp(ivec2(floor(node)), ivec2(0), size - ivec2(2));
-	vec2 blend = clamp(node - vec2(cell), vec2(0.0), vec2(1.0));
-	return mix(
-		mix(texelFetch(picture, cell, 0).r, texelFetch(picture, cell + ivec2(1, 0), 0).r, blend.x),
-		mix(texelFetch(picture, cell + ivec2(0, 1), 0).r, texelFetch(picture, cell + ivec2(1, 1), 0).r, blend.x), blend.y);
 }
 
 float ground_height(vec2 point) {

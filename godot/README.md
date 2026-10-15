@@ -16,12 +16,13 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first four slices: the 100 × 56 m town laid out from that reference
+describes its first five slices: the 100 × 56 m town laid out from that reference
 as solid placeholder boxes, on a town shelf about 5 m above the southern forest
 and joined to it by the snow-buried stair; a north-up perspective camera that
-follows the controlled figure while the mouse sets its Facing; and a saved Snow
-Depth that starts Deep or Shallow by place. Footprints fade as before and the
-second figure stays idle. Wind drifts and the walking second figure follow later.
+follows the controlled figure while the mouse sets its Facing; a saved Snow
+Depth that starts Deep or Shallow by place; and a north-west wind that builds
+Snowdrifts, scours windward sides and fills Footprints faster or slower by place.
+The second figure stays idle; the walking second figure follows later.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -158,7 +159,51 @@ traffic packs a Packed Path.
 
 Each zone fades into its surroundings over 1.5 m, and no place starts below 3 cm.
 Where zones overlap, the courtyard and stair stay Shallow beside the cliffs that
-flank them. A fresh launch restores this starting snow.
+flank them. A fresh launch restores this starting snow; wind then reshapes it.
+
+### Wind, Snowdrifts and Footprints
+
+The prevailing wind blows from the **north-west**. `−` and `=` set its strength
+from 0 to 16 and `0` restores the default of 1; `[` and `]` turn the direction it
+blows from by 45° anticlockwise or clockwise. The HUD shows the strength and the
+compass point it blows from. There is no snowfall: wind only moves the snow that is
+already there.
+
+Wind reshapes Snow Depth by relaxation toward a steady shape, so drifts build and
+settle instead of growing forever or pulsing:
+
+- **Snowdrifts** build in the lee of boxes and cliffs, the side facing away from
+  the wind. A drift rises toward the obstacle's height, at most about 1.2 m, right
+  behind it and tapers away within three obstacle heights (at most 6 m). Only
+  obstacles whose windward side faces open ground build one: an obstacle standing
+  in another's shelter receives no blown snow.
+- **Scour** thins exposed windward sides, the faces the wind strikes, toward a floor
+  of 3 cm: fully within half an obstacle height of the face, fading out by one
+  obstacle height, counted as 2–4 m. Snow never scours to bare ground.
+- Each place closes about 63% of the gap to its steady shape in 60 wind-seconds:
+  a minute at the default wind, or under four seconds at 16. At wind 1 a drift is
+  most of the way built after about three minutes.
+
+With the prevailing wind the lodge's south face and the south-east sides of exposed
+buildings and rim rocks drift deep, while exposed north-west faces such as the east
+shed's west face scour to 3 cm. Turning the wind recomputes which side
+of every obstacle is sheltered: old drifts wear away and new ones build in the new
+lee. Snowdrifts stay walkable at walking speed, and running always follows the
+current loose depth, so a scoured face can become runnable and a drift walk-only.
+
+A Footprint fills as wind drops snow on it. In the open it fills in **about 120
+wind-seconds**: two minutes at the default wind, 7.5 seconds at 16. It fills faster,
+up to four times faster, where a drift is building, so drifting snow buries tracks.
+In shelter, within two obstacle heights downwind of a box or cliff (at most 6 m),
+it lasts **up to four times longer**, fading out of shelter by five obstacle heights
+(at most 12 m). **Tracks last longest in sheltered places**: the compound's
+courtyard, the walled stair and the lee of large buildings once their drifts have
+settled. Wind 0 freezes both drifts and Footprints.
+
+Wind updates the Snow Depth picture four times a second, ten rows of the
+picture per physics frame, and never rewrites the Footprint picture. Each
+place keeps a fill clock that runs at its own rate; a print remembers the fill
+clock when it was pressed and fills by how far that clock has run since.
 
 ### Camera and Facing
 
@@ -190,18 +235,17 @@ controlled figure takes its Facing from the cursor; the other keeps its own.
 | Tab | Switch the controlled figure |
 | `−` / `=` | Reduce/increase wind from 0 to 16 in steps of one; keypad minus/plus also work |
 | `0` | Restore the default wind strength of 1 |
+| `[` / `]` | Turn the wind 45° anticlockwise/clockwise; it starts from the north-west |
 | F1 | Toggle the observation HUD |
 | F4 | Increment the checkpoint recorded in the observation CSV |
-| F5 | Fix a world probe at the controlled figure's latest bootprint, or at its position before its first step |
+| F5 | Add a fixed world probe at the controlled figure's latest bootprint, or at its position before its first step; up to six |
 | F6 | Record 60 real seconds of rendered-frame intervals |
 | F8 | Start/stop inspection observations in `user://route-….csv` |
 | F9 | Save the rendered viewport to `user://capture-….png` |
 
-At wind strength 1 a print's compaction fades over 120 seconds without another
-step there. Strength 0 freezes weather and preserves tracks; strength 16 advances
-that same weather sixteen times faster. Wind does not yet change Snow Depth: it
-keeps its starting picture until the wind slice builds drifts. Movement pauses
-when the window loses focus, but the scene and wind keep advancing.
+Strength 0 freezes weather and preserves tracks and drifts; strength 16 advances
+the same weather sixteen times faster. Movement pauses when the window loses focus,
+but the scene and wind keep advancing.
 
 The HUD and CSV expose figure identity, position, the ground height beneath the
 figure (`ground_y_m`), Facing, the latest travel and bootprint directions as
@@ -210,9 +254,14 @@ point (`cursor_x_m`, `cursor_z_m`), speed, run request, the visible Snow Depth a
 that ground (`snow_depth_m`), the saved loose Snow Depth under the figure before
 packing (`saved_depth_m`), the loose depth that sets running speed after nearby
 packing (`loose_depth_m`), compaction, sinking, contact gap, obstacle/boundary contact, steps,
-the moving patch, wind, image allocation and the other figure's position. The F5
-probe stays at its world location when you walk away or switch figures; its depth,
-compaction and whether it lies in the detailed patch remain observable. The CSV
+the moving patch, wind strength, the bearing it blows from (`wind_from_deg`), the
+weather clock, the wind's work in the latest physics frame (`wind_update_ms`),
+image allocation and the other figure's position. Each F5 probe stays at its world
+location when you walk away or switch figures. For every probe the CSV reports
+`probe_count` and, in columns `probe1_…` to `probe6_…`, its position (`x_m`,
+`z_m`), loose Snow Depth (`depth_m`), visible snow above the ground after packing
+(`visible_m`), compaction and whether it lies in the detailed patch (`in_patch`);
+unused slots stay empty. The HUD lists the same readings. The CSV
 also records input, the camera's projection, field of view, distance, overview
 state, lean (`lean_x_m`, `lean_z_m`, `lean_m`), pitch and yaw, framing, focus and
 elapsed time.
@@ -227,7 +276,10 @@ F5. Leave the detailed patch, then return and check that the trail remains at th
 same place. Switch figures and follow or cross it to inspect overlapping prints
 and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
 lodge diagonally to inspect sliding along its sides, then increase wind and watch
-the fixed probe and visible trail fade. Walk out of the compound's south gate,
+the fixed probe and visible trail fade. Lay probes in the courtyard, in the open
+outpost yard and against the lodge's south face, raise the wind to 16 and compare
+how fast each print fills while the lodge's drift grows; then turn the wind with
+`]` and watch the drift wear away. Walk out of the compound's south gate,
 down the stair to the forest and back up, and check that boots stay on the snow,
 the HUD's ground height changes by 5 m and the cliff rock stops you on both
 levels. Move the cursor round the standing figure to turn it in place without
@@ -259,13 +311,23 @@ gap, walks through the east gate into the courtyard, is stopped by the courtyard
 wall, crosses the courtyard and runs at full speed in its Shallow Snow. Tab, with the
 cursor west of the figure, gives the second figure a westward Facing; it then
 walks from the outpost yard to overlap the trail. The first figure
-returns through the gate to find the trail retained, watches wind erase it, and
-walks south until the cliff rock at the shelf's edge stops it. It then crosses
+returns through the gate to find the trail retained, and walks south until the
+cliff rock at the shelf's edge stops it. It then crosses
 the courtyard to the south gate and walks down the stair to the forest,
 observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
 speed on the slope. On the forest floor, requested running only walks in the Deep
 Snow, both toward the map edge and to the foot of the cliff beside the stair;
-each stops it, and it climbs the stair back to the gate. Finally it zooms to
+each stops it, and it climbs the stair back to the gate. Wind stays at 0 until
+then. The figure next fixes four more probes: sheltered in the courtyard
+(`courtyard_shelter`), exposed in the open outpost yard (`yard_open`), on the east
+shed's windward west face (`shed_windward`) and in the lee of the lodge's south
+face (`lodge_lee`). At wind 16 from the north-west the exposed print fills at the
+120 wind-second rate, the sheltered one four times more slowly and the lee one
+faster still; the lodge's drift grows from 60 cm toward 1.2 m without shrinking
+and settles, and the shed's face scours to the 3 cm floor and holds. The figure
+wades through the drift with Shift held at walking speed. Four turns of `]`
+reverse the wind: the lodge's drift wears away and one builds on the shed's face.
+Wind 0 then freezes every probe's depth and compaction. Finally it zooms to
 the 30 m end of the play range, on to the whole-map overview, which must frame the
 town, and back in to 10 m, capturing graphical views along the way. Throughout, the
 camera stays a 40° perspective view at −55° pitch with north up, its lean stays
@@ -319,13 +381,19 @@ Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
 Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
-to cover the whole map rectangle: **3200 × 1792** for the 100 × 56 m town. It stores compaction and the last wind-clock
-timestamp at each texel; no growing list of steps is retained. Both figures use
+to cover the whole map rectangle: **3200 × 1792** for the 100 × 56 m town. It stores compaction and the fill clock
+at the texel's centre when it was last pressed; no growing list of steps is retained. Both figures use
 this same image, and moving the patch does not move or clear its contents.
 The CPU image pixel payload is **22,937,600 bytes** (about 21.9 MiB), whatever the
 number of steps. The GPU texture is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
 memory. Wind ages the encoded values without rewriting the image each frame;
-new footfalls update it. A fresh process recreates the field rather than loading
+new footfalls update it. [`snow_wind.gd`](snow_wind.gd) holds the wind: the
+working Snow Depth and fill-clock pictures (251 × 141 nodes each), the target
+shape for the current direction, marched cell by cell from the obstacles upwind
+and downwind of each node and shaped on a worker thread when the wind turns, and
+the sweep that relaxes ten rows per physics frame. At the end of each sweep the
+surface publishes both pictures to its CPU copies and the shader's textures in
+the same physics frame, so visible snow and foot support keep agreeing. A fresh process recreates the field rather than loading
 saved snow.
 
 The material retains muted snow and overcast lighting. The source image,

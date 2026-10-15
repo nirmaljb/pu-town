@@ -6,7 +6,10 @@ class_name SnowSurface
 ## ground-height picture plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
 ## collider stands in for snow contact. Footsteps mutate one bounded image only.
+## Wind reshapes Snow Depth and advances each place's fill clock a few times a
+## second; both pictures are published to the CPU and the shader together.
 const TownLayout = preload("res://town_layout.gd")
+const SnowWind = preload("res://snow_wind.gd")
 const HALF_EXTENTS := TownLayout.HALF_EXTENTS
 const PATCH_SIZE := 12.8
 const COARSE_STEP := 0.8
@@ -15,16 +18,23 @@ const EDGE_BLEND := 1.6
 # 31.25 mm per texel; the image covers the whole map rectangle at this density.
 const TEXELS_PER_METRE := 32.0
 const IMAGE_SIZE := Vector2i(HALF_EXTENTS * (2.0 * TEXELS_PER_METRE))
+## Fill-clock seconds for a Footprint to fill: 120 wind-seconds in the open.
 const PRINT_LIFETIME := 120.0
-## The saved Snow Depth picture holds loose depth at nodes 0.4 m apart, counted
-## from the map's west and north edges and read bilinearly, like the ground picture.
+## The saved Snow Depth and fill-clock pictures hold values at nodes 0.4 m apart,
+## counted from the map's west and north edges and read bilinearly, like the ground picture.
 const DEPTH_NODES_PER_METRE := 2.5
 const DEPTH_SIZE := Vector2i(HALF_EXTENTS * (2.0 * DEPTH_NODES_PER_METRE)) + Vector2i.ONE
 const SNOW_SHADER := preload("res://snow.gdshader")
+## A tenth-second fill timestamp occupies GBA (24 bits). Fill clocks run at most
+## 1 + BUILDING_FILL times the wind clock, so restart both before encoding could wrap.
+const CLOCK_LIMIT := 1677700.0 / (1.0 + SnowWind.BUILDING_FILL)
 
 var patch_center := Vector2.ZERO
 var wind_strength := 1.0
 var wind_elapsed := 0.0
+var wind := SnowWind.new()
+## Milliseconds the wind spent in the latest physics frame, including publication.
+var wind_update_ms := 0.0
 var footprint_count := 0
 var footprint_image_bytes := IMAGE_SIZE.x * IMAGE_SIZE.y * 4
 var _footprints: Image
@@ -34,6 +44,11 @@ var _dirty := false
 var _detail: MeshInstance3D
 var _materials: Array[ShaderMaterial] = []
 var _depth := PackedFloat32Array()
+var _fill := PackedFloat32Array()
+var _depth_image: Image
+var _depth_texture: ImageTexture
+var _fill_image: Image
+var _fill_texture: ImageTexture
 
 
 func _ready() -> void:
@@ -47,24 +62,34 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	# Coalesce both figures' stamps before drawing. Wind ages encoded timestamps
-	# on the CPU/GPU and never rewrites or uploads the whole image by itself.
+	# through the fill clock and never rewrites or uploads the whole image by itself.
 	if _dirty:
 		_texture.update(_footprints)
 		_dirty = false
+
+
+func _exit_tree() -> void:
+	wind.finish()
 
 
 func configure_ground(town: Node3D) -> void:
 	# The layout owns the static ground picture. The shader reads the same nodes.
 	_layout = town
 	var ground_texture := ImageTexture.create_from_image(town.ground_image)
-	_save_starting_depth()
-	var depth_image := Image.create_from_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _depth.to_byte_array())
-	var depth_texture := ImageTexture.create_from_image(depth_image)
+	# A fresh launch saves the layout's authored zones; nothing is loaded from disk.
+	wind.configure(town, DEPTH_SIZE, DEPTH_NODES_PER_METRE)
+	_depth = wind.depth.duplicate()
+	_fill = wind.fill.duplicate()
+	_depth_image = Image.create_from_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _depth.to_byte_array())
+	_depth_texture = ImageTexture.create_from_image(_depth_image)
+	_fill_image = Image.create_from_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _fill.to_byte_array())
+	_fill_texture = ImageTexture.create_from_image(_fill_image)
 	var heights: Vector2 = town.ground_range
 	for material in _materials:
 		material.set_shader_parameter("ground_image", ground_texture)
 		material.set_shader_parameter("ground_nodes_per_metre", TownLayout.GROUND_NODES_PER_METRE)
-		material.set_shader_parameter("depth_image", depth_texture)
+		material.set_shader_parameter("depth_image", _depth_texture)
+		material.set_shader_parameter("fill_image", _fill_texture)
 		material.set_shader_parameter("depth_nodes_per_metre", DEPTH_NODES_PER_METRE)
 	for child in get_children():
 		if child is MeshInstance3D:
@@ -73,23 +98,30 @@ func configure_ground(town: Node3D) -> void:
 				Vector3(bounds.size.x, heights.y - heights.x + 1.2, bounds.size.z))
 
 
-func _save_starting_depth() -> void:
-	# A fresh launch saves the layout's authored zones; nothing is loaded from disk.
-	_depth.resize(DEPTH_SIZE.x * DEPTH_SIZE.y)
-	for row in range(DEPTH_SIZE.y):
-		for column in range(DEPTH_SIZE.x):
-			var point := Vector2(column, row) / DEPTH_NODES_PER_METRE - HALF_EXTENTS
-			_depth[row * DEPTH_SIZE.x + column] = _layout.starting_snow_depth(point)
+## The wind blows from this compass bearing, clockwise from north.
+func wind_from() -> float:
+	return wind.from_bearing
+
+
+## Turn the wind by whole 45° steps; positive turns clockwise.
+func turn_wind(steps: int) -> void:
+	wind.turn(steps)
 
 
 func advance(delta: float, focus_xz: Vector2) -> void:
+	var began := Time.get_ticks_usec()
 	wind_elapsed += delta * maxf(0.0, wind_strength)
-	# A tenth-second timestamp occupies GBA (24 bits). This preview has no saved
-	# weather: restart its wind epoch before encoding could wrap after 19 days.
-	if wind_elapsed >= 1677700.0:
+	# This preview has no saved weather: restart its clocks and Footprints before
+	# a timestamp could wrap, after about four days of default wind.
+	if wind_elapsed >= CLOCK_LIMIT:
 		wind_elapsed = 0.0
+		wind.restart_clock()
 		_footprints.fill(Color(0, 0, 0, 0))
 		_dirty = true
+		_publish_snow()
+	if wind.step(wind_elapsed):
+		_publish_snow()
+	wind_update_ms = float(Time.get_ticks_usec() - began) / 1000.0
 	# Snap to coarse vertices, which are counted from the map's west and north edges.
 	var centre_limit := HALF_EXTENTS - Vector2.ONE * PATCH_SIZE * 0.5
 	patch_center = Vector2(
@@ -120,17 +152,36 @@ func sample_uncompressed_height(point: Vector2) -> float:
 ## Loose Snow Depth from the saved picture, before Footprint compaction.
 ## SnowSurface and snow.gdshader interpolate the same nodes in the same way.
 func sample_saved_depth(point: Vector2) -> float:
-	if _depth.is_empty():
+	return _picture_value(_depth, point)
+
+
+## The fill clock: fill-seconds of wind-blown snow that have fallen at a point.
+func sample_fill(point: Vector2) -> float:
+	return _picture_value(_fill, point)
+
+
+func _picture_value(picture: PackedFloat32Array, point: Vector2) -> float:
+	if picture.is_empty():
 		return 0.0
 	var node := (point + HALF_EXTENTS) * DEPTH_NODES_PER_METRE
 	var cell := Vector2i(clampi(floori(node.x), 0, DEPTH_SIZE.x - 2), clampi(floori(node.y), 0, DEPTH_SIZE.y - 2))
 	var blend := (node - Vector2(cell)).clamp(Vector2.ZERO, Vector2.ONE)
 	var index := cell.y * DEPTH_SIZE.x + cell.x
 	return lerpf(
-		lerpf(_depth[index], _depth[index + 1], blend.x),
-		lerpf(_depth[index + DEPTH_SIZE.x], _depth[index + DEPTH_SIZE.x + 1], blend.x),
+		lerpf(picture[index], picture[index + 1], blend.x),
+		lerpf(picture[index + DEPTH_SIZE.x], picture[index + DEPTH_SIZE.x + 1], blend.x),
 		blend.y
 	)
+
+
+func _publish_snow() -> void:
+	# The CPU copies and the shader's pictures change in the same physics frame.
+	_depth = wind.depth.duplicate()
+	_fill = wind.fill.duplicate()
+	_depth_image.set_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _depth.to_byte_array())
+	_depth_texture.update(_depth_image)
+	_fill_image.set_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _fill.to_byte_array())
+	_fill_texture.update(_fill_image)
 
 
 func sample_compaction(point: Vector2) -> float:
@@ -170,9 +221,6 @@ func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
 	var extent := 0.18
 	var minimum := Vector2i(((point - Vector2.ONE * extent + HALF_EXTENTS) * TEXELS_PER_METRE).floor())
 	var maximum := Vector2i(((point + Vector2.ONE * extent + HALF_EXTENTS) * TEXELS_PER_METRE).ceil())
-	var timestamp := int(floor(wind_elapsed * 10.0))
-	var encoded := Color(0, float((timestamp >> 16) & 255) / 255.0,
-		float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0)
 	for row in range(maxi(0, minimum.y), mini(IMAGE_SIZE.y - 1, maximum.y) + 1):
 		for column in range(maxi(0, minimum.x), mini(IMAGE_SIZE.x - 1, maximum.x) + 1):
 			var pixel := Vector2i(column, row)
@@ -185,8 +233,10 @@ func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
 				continue
 			var weight := 1.0 - smoothstep(0.65, 1.0, edge)
 			var previous := _pixel_compaction(pixel)
-			encoded.r = clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0)
-			_footprints.set_pixel(column, row, encoded)
+			# Each texel keeps the fill clock at its centre when it was last pressed.
+			var timestamp := int(floor(sample_fill(world) * 10.0))
+			_footprints.set_pixel(column, row, Color(clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0),
+				float((timestamp >> 16) & 255) / 255.0, float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0))
 	footprint_count += 1
 	_dirty = true
 
@@ -195,8 +245,13 @@ func _pixel_compaction(pixel: Vector2i) -> float:
 	if pixel.x < 0 or pixel.y < 0 or pixel.x >= IMAGE_SIZE.x or pixel.y >= IMAGE_SIZE.y:
 		return 0.0
 	var value := _footprints.get_pixel(pixel.x, pixel.y)
+	if value.r <= 0.0:
+		return 0.0
+	# Snow has filled the print by as much as the fill clock at the texel's centre
+	# has run since it was pressed: quickly where a drift builds, slowly in shelter.
 	var timestamp := roundi(value.g * 255.0) * 65536 + roundi(value.b * 255.0) * 256 + roundi(value.a * 255.0)
-	var age := maxf(0.0, wind_elapsed - float(timestamp) * 0.1)
+	var centre := (Vector2(pixel) + Vector2.ONE * 0.5) / TEXELS_PER_METRE - HALF_EXTENTS
+	var age := maxf(0.0, sample_fill(centre) - float(timestamp) * 0.1)
 	return value.r * maxf(0.0, 1.0 - age / PRINT_LIFETIME)
 
 
@@ -312,4 +367,3 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 func _update_uniforms() -> void:
 	for material in _materials:
 		material.set_shader_parameter("patch_center", patch_center)
-		material.set_shader_parameter("wind_elapsed", wind_elapsed)

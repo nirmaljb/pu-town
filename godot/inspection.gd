@@ -22,11 +22,10 @@ var observed_speed := 0.0
 var observed_position := Vector3.ZERO
 var observed_camera_distance := 0.0
 var checkpoint := 0
-var probe_set := false
-var probe := Vector2.ZERO
-var probe_depth := 0.0
-var probe_uncompressed_depth := 0.0
-var probe_compaction := 0.0
+## Fixed world probes, in the order F5 placed them, and their latest readings.
+const MAX_PROBES := 6
+var probes: Array[Vector2] = []
+var probe_readings: Array[Dictionary] = []
 var latest := {}
 
 const ROUTE_COLUMNS := [
@@ -35,11 +34,22 @@ const ROUTE_COLUMNS := [
 	"overview", "lean_x_m", "lean_z_m", "lean_m", "pitch_deg", "yaw_deg", "focused", "fps",
 	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "saved_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
-	"patch_x_m", "patch_z_m", "patch_size_m", "wind_strength", "wind_elapsed_s", "footprint_count",
-	"footprint_image_width", "footprint_image_height", "footprint_image_bytes", "probe_set", "probe_x_m", "probe_z_m",
-	"probe_depth_m", "probe_uncompressed_depth_m", "probe_compaction", "probe_in_patch", "other_figure_id", "other_x_m", "other_z_m", "other_steps",
-	"facing_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m"
+	"patch_x_m", "patch_z_m", "patch_size_m", "wind_strength", "wind_from_deg", "wind_elapsed_s", "wind_update_ms",
+	"footprint_count", "footprint_image_width", "footprint_image_height", "footprint_image_bytes",
+	"other_figure_id", "other_x_m", "other_z_m", "other_steps",
+	"facing_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
 ]
+## Every probe slot has the same columns, prefixed probe1_ … probe6_: its world
+## position, loose Snow Depth, visible snow above the ground after packing,
+## compaction and whether the detailed patch covers it. Unused slots stay empty.
+const PROBE_COLUMNS := ["x_m", "z_m", "depth_m", "visible_m", "compaction", "in_patch"]
+var columns := PackedStringArray(ROUTE_COLUMNS)
+
+
+func _init() -> void:
+	for slot in range(1, MAX_PROBES + 1):
+		for column in PROBE_COLUMNS:
+			columns.append("probe%d_%s" % [slot, column])
 
 
 func _ready() -> void:
@@ -71,12 +81,16 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	observed_position = walker.position
 	observed_camera_distance = camera.current_distance()
 	tick += 1
-	if probe_set:
+	probe_readings.clear()
+	for probe in probes:
 		# Depths are measured vertically above the ground at the probe.
-		var probe_ground: float = surface.sample_ground(probe)
-		probe_depth = surface.sample_height(probe) - probe_ground
-		probe_uncompressed_depth = surface.sample_uncompressed_height(probe) - probe_ground
-		probe_compaction = surface.sample_compaction(probe)
+		var offset: Vector2 = (probe - surface.patch_center).abs()
+		probe_readings.append({
+			"x_m": probe.x, "z_m": probe.y, "depth_m": surface.sample_saved_depth(probe),
+			"visible_m": surface.sample_height(probe) - surface.sample_ground(probe),
+			"compaction": surface.sample_compaction(probe),
+			"in_patch": maxf(offset.x, offset.y) <= surface.PATCH_SIZE * 0.5,
+		})
 	var viewport_size := get_viewport().get_visible_rect().size
 	var figure_screen := camera.unproject_position(walker.global_position)
 	var whole_map_visible := true
@@ -85,7 +99,6 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		for z in [-edge.y, edge.y]:
 			var corner := Vector3(x, 1.0, z)
 			whole_map_visible = whole_map_visible and not camera.is_position_behind(corner) and Rect2(Vector2.ZERO, viewport_size).has_point(camera.unproject_position(corner))
-	var probe_offset: Vector2 = (probe - surface.patch_center).abs()
 	latest = {
 		"elapsed_ms": Time.get_ticks_msec() - started_ms,
 		"x_m": walker.position.x, "feet_y_m": walker.position.y, "z_m": walker.position.z,
@@ -107,19 +120,20 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"foot_compaction": walker.foot_compaction, "sink_depth_m": walker.sink_depth,
 		"obstacle_limited": walker.obstacle_limited, "step_count": walker.step_count,
 		"patch_x_m": surface.patch_center.x, "patch_z_m": surface.patch_center.y,
-		"patch_size_m": surface.PATCH_SIZE, "wind_strength": surface.wind_strength,
-		"wind_elapsed_s": surface.wind_elapsed, "footprint_count": surface.footprint_count,
+		"patch_size_m": surface.PATCH_SIZE, "wind_strength": surface.wind_strength, "wind_from_deg": surface.wind_from(),
+		"wind_elapsed_s": surface.wind_elapsed, "wind_update_ms": surface.wind_update_ms, "footprint_count": surface.footprint_count,
 		"footprint_image_width": surface.IMAGE_SIZE.x, "footprint_image_height": surface.IMAGE_SIZE.y,
 		"footprint_image_bytes": surface.footprint_image_bytes,
-		"probe_set": probe_set, "probe_x_m": probe.x, "probe_z_m": probe.y,
-		"probe_depth_m": probe_depth, "probe_uncompressed_depth_m": probe_uncompressed_depth, "probe_compaction": probe_compaction,
-		"probe_in_patch": probe_set and maxf(probe_offset.x, probe_offset.y) <= surface.PATCH_SIZE * 0.5,
 		"other_figure_id": other.figure_id if other else -1,
 		"other_x_m": other.position.x if other else 0.0, "other_z_m": other.position.z if other else 0.0,
 		"other_steps": other.step_count if other else 0,
 		"facing_deg": _bearing(walker.facing_yaw), "travel_deg": _bearing(walker.travel_yaw), "print_deg": _bearing(walker.print_yaw),
-		"cursor_set": camera.has_cursor_ground, "cursor_x_m": camera.cursor_ground.x, "cursor_z_m": camera.cursor_ground.y
+		"cursor_set": camera.has_cursor_ground, "cursor_x_m": camera.cursor_ground.x, "cursor_z_m": camera.cursor_ground.y,
+		"probe_count": probes.size()
 	}
+	for slot in range(MAX_PROBES):
+		for column in PROBE_COLUMNS:
+			latest["probe%d_%s" % [slot + 1, column]] = probe_readings[slot][column] if slot < probe_readings.size() else ""
 	if recording:
 		_write_observation()
 		if tick % 60 == 0:
@@ -127,7 +141,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · travel %03.0f° · cursor %s\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
@@ -137,14 +151,29 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		latest.facing_deg, latest.travel_deg,
 		"%.1f, %.1f" % [camera.cursor_ground.x, camera.cursor_ground.y] if camera.has_cursor_ground else "not yet seen",
 		surface.PATCH_SIZE, surface.PATCH_SIZE, surface.patch_center.x, surface.patch_center.y,
-		surface.wind_strength, surface.wind_elapsed, surface.footprint_count,
+		surface.wind_strength, _compass(surface.wind_from()), surface.wind_elapsed, surface.wind_update_ms, surface.footprint_count,
 		surface.IMAGE_SIZE.x, surface.IMAGE_SIZE.y, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
-		"Probe %.1f, %.1f: packed %.0f%% · %s" % [probe.x, probe.y, probe_compaction * 100.0, "in patch" if latest.probe_in_patch else "outside patch"] if probe_set else "F5 follows the latest boot print with a fixed world probe",
+		_probe_text(),
 		"Overview %.0f m" % camera.current_distance() if camera.overview else "Distance %.1f m" % camera.distance,
 		camera.lean.length(), "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
 		"RECORDING  " + record_path if recording else notice,
 		"FRAME TRACE  %.1f / %.0f s" % [float(Time.get_ticks_usec() - frame_started_usec) / 1000000.0, FRAME_TRACE_SECONDS] if frame_recording and frame_started_usec > 0 else frame_notice
 	]
+
+
+func _probe_text() -> String:
+	if probes.is_empty():
+		return "F5 fixes a world probe at the latest bootprint (up to %d)" % MAX_PROBES
+	var lines := PackedStringArray()
+	for slot in range(probe_readings.size()):
+		var reading: Dictionary = probe_readings[slot]
+		lines.append("P%d %.1f, %.1f · depth %.2f m · packed %.0f%% · %s" % [slot + 1, reading.x_m, reading.z_m,
+			reading.depth_m, reading.compaction * 100.0, "in patch" if reading.in_patch else "outside patch"])
+	return "\n".join(lines)
+
+
+func _compass(bearing: float) -> String:
+	return ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][posmod(roundi(bearing / 45.0), 8)]
 
 
 ## A compass bearing in degrees, clockwise from north, for a yaw about +Y.
@@ -154,7 +183,7 @@ func _bearing(yaw: float) -> float:
 
 func _write_observation() -> void:
 	var values := PackedStringArray()
-	for column in ROUTE_COLUMNS:
+	for column in columns:
 		values.append(str(latest[column]))
 	recording.store_csv_line(values)
 
@@ -168,10 +197,15 @@ func mark_checkpoint() -> void:
 	print("Inspection checkpoint ", checkpoint)
 
 
-func mark_trail(walker: Node3D, _surface: Node3D) -> void:
-	probe = walker.last_footprint if walker.has_footprint else Vector2(walker.position.x, walker.position.z)
-	probe_set = true
-	print("World trail probe: ", probe)
+## Fix a world probe at the walker's latest bootprint, up to MAX_PROBES.
+func add_probe(walker: Node3D) -> void:
+	if probes.size() >= MAX_PROBES:
+		notice = "All %d probes are placed" % MAX_PROBES
+		print(notice)
+		return
+	var probe: Vector2 = walker.last_footprint if walker.has_footprint else Vector2(walker.position.x, walker.position.z)
+	probes.append(probe)
+	print("World probe %d: " % probes.size(), probe)
 
 
 func start_frame_recording() -> void:
@@ -252,7 +286,7 @@ func toggle_recording() -> void:
 		return
 	started_ms = Time.get_ticks_msec()
 	checkpoint = 0
-	recording.store_csv_line(PackedStringArray(ROUTE_COLUMNS))
+	recording.store_csv_line(columns)
 	recording.flush()
 	print("Recording route: ", ProjectSettings.globalize_path(record_path))
 
