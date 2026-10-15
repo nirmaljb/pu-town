@@ -20,37 +20,10 @@ if (( $# > 1 )); then
   exit 2
 fi
 
-godot_bin="${GODOT_BIN:-}"
-if [[ -z "$godot_bin" ]]; then
-  if command -v godot >/dev/null 2>&1; then
-    godot_bin="$(command -v godot)"
-  elif command -v godot4 >/dev/null 2>&1; then
-    godot_bin="$(command -v godot4)"
-  elif [[ -d /Applications/Godot.app ]]; then
-    godot_bin=/Applications/Godot.app
-  else
-    printf '%s\n' 'Godot 4.7.2 was not found. Set GODOT_BIN to its executable or macOS .app.' >&2
-    exit 1
-  fi
-fi
+source "$project_dir/resolve-godot.sh"
+resolve_godot
 
-if [[ "$godot_bin" == *.app || "$godot_bin" == *.app/ ]]; then
-  godot_bin="${godot_bin%/}/Contents/MacOS/Godot"
-elif [[ "$godot_bin" != */* ]]; then
-  godot_bin="$(command -v "$godot_bin" || true)"
-fi
-if [[ -z "$godot_bin" || ! -x "$godot_bin" ]]; then
-  printf 'Godot executable is unavailable: %s\n' "${GODOT_BIN:-$godot_bin}" >&2
-  exit 1
-fi
-
-version="$("$godot_bin" --version)"
-case "$version" in
-  4.7.2.stable|4.7.2.stable.*) ;;
-  *) printf 'Godot 4.7.2 stable is required; found %s.\n' "$version" >&2; exit 1 ;;
-esac
-
-printf 'Importing snow prototype with Godot %s\n' "$version"
+printf 'Importing snow prototype with Godot %s\n' "$godot_version"
 import_log="$(mktemp "${TMPDIR:-/tmp}/pu-town-godot-import.XXXXXX")"
 trap 'rm -f "$import_log"' EXIT
 if ! "$godot_bin" --headless --editor --path "$project_dir" --import >"$import_log" 2>&1; then

@@ -1,0 +1,47 @@
+{
+  "source": "invalid-route-unfocused-frames.csv.gz",
+  "frame_count": 7386,
+  "interval_start_usec": 12063481,
+  "interval_end_usec": 72067148,
+  "elapsed_seconds": 60.003667,
+  "duration_complete": true,
+  "average_fps": 123.09247699811414,
+  "mean_frame_ms": 8.123973327917682,
+  "p95_frame_ms": 11.412,
+  "p99_frame_ms": 16.248,
+  "max_frame_ms": 146.974,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 2785,
+  "unfocused_seconds": 20.603814,
+  "stationary_frames": 3443,
+  "stationary_seconds": 26.17361,
+  "focused_moving_seconds": 33.830057,
+  "focused_moving_fraction": 0.5637998257673151,
+  "position_range_m": {
+    "x": [
+      -31.7000007629395,
+      -0.84852796792984
+    ],
+    "z": [
+      -31.7000007629395,
+      -0.84852796792984
+    ]
+  },
+  "ortho_range_m": [
+    18.0,
+    18.0
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 800,
+      "window_width": 1280,
+      "window_height": 800
+    }
+  ],
+  "max_observation_age_ms": 22.328,
+  "warnings": [
+    "The window lost focus; all affected intervals remain in the results.",
+    "Stationary intervals are present; inspect traversal coverage before accepting a walking run."
+  ]
+}

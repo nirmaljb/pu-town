@@ -99,11 +99,14 @@ func _build_surface() -> void:
 
 func _snow_height(x: float, z: float) -> float:
 	# The absolute weights total one: interior relief stays within 0.10–0.25 m.
-	# Oblique harmonics distribute it across the field without reserving a flat site.
+	# Warped, oblique pillows break up long waves without sharp or tiled detail.
+	# Their 2–8 m wavelengths are readable beside the figure at exploration zoom.
+	var wind_x := x + 0.65 * sin(z * 0.23 + 0.4)
+	var wind_z := z + 0.55 * sin(x * 0.19 - 0.8)
 	var relief := (
-		0.44 * sin(x * 0.29 + z * 0.15 + 0.7)
-		+ 0.32 * cos(z * 0.39 - x * 0.11 - 0.4)
-		+ 0.24 * sin(x * 0.51 + z * 0.27 + 2.1)
+		0.46 * sin(wind_x * 0.73 + wind_z * 0.31 + 0.7)
+		+ 0.34 * cos(wind_z * 1.19 - wind_x * 0.43 - 0.4)
+		+ 0.20 * sin(wind_x * 1.83 + wind_z * 1.47 + 2.1)
 	)
 	var interior_height := 0.175 + 0.075 * relief
 	var x_drift := smoothstep(HALF_EXTENT - PERIMETER_WIDTH, HALF_EXTENT, absf(x))

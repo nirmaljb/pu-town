@@ -1,0 +1,28 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+64 × 64 metres; 1.7 m figure; 2.25 m/s horizontal; captures/records: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Press F7 in the scene to start the graphical route; keep its window focused.
+Walking: straight interior for 2.0 s
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792034623-8631.csv
+Recording 60-second frame trace: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/frames-1792034624-38082.csv
+Walking: diagonal interior for 2.0 s
+Walking: west boundary approach for 14.0 s
+Walking: northwest corner for 14.0 s
+Walking: north perimeter for 29.0 s
+Route paused: restore scene focus to continue north perimeter
+Route paused: restore scene focus to continue north perimeter
+Saved frame trace: 7386 frames / 60.004 s (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/frames-1792034624-38082.csv)
+Recording 60-second frame trace: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/frames-1792034712-59881.csv
+Walking: east perimeter for 29.0 s
+Walking: south perimeter for 29.0 s
+Saved frame trace: 7175 frames / 60.008 s (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/frames-1792034712-59881.csv)
+Walking: west perimeter for 29.0 s
+Walking: interior return for 22.0 s
+Saved user://capture-1792034844-83809.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792034844-83809.png)
+Saved user://capture-1792034845-84488.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792034845-84488.png)
+Saved user://route-1792034623-8631.csv
+Checking recorded scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792034623-8631.csv
+Coverage: 13349 observations, 1442 straight, 8278 diagonal, 7632 drift, 477 boundary, 60 overview, 13289 camera follow
+SCENE WALK: PASS · 0 failures

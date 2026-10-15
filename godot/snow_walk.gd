@@ -3,6 +3,7 @@ extends Node3D
 const Surface = preload("res://snow_surface.gd")
 const Walker = preload("res://walker.gd")
 const Inspection = preload("res://inspection.gd")
+const InspectionRoute = preload("res://inspection_route.gd")
 const EXPLORE_SIZE := 18.0
 const MIN_SIZE := 10.0
 const OVERVIEW_SIZE := 118.0
@@ -32,6 +33,8 @@ func _ready() -> void:
 	get_window().focus_exited.connect(func() -> void: focused = false)
 	print("Snow Walk: Godot ", Engine.get_version_info().string, " · ", RenderingServer.get_current_rendering_method())
 	print("64 × 64 metres; 1.7 m figure; 2.25 m/s horizontal; captures/records: ", OS.get_user_data_dir())
+	if OS.get_cmdline_user_args().has("--walk-scene-check"):
+		add_child(InspectionRoute.new())
 
 
 func _physics_process(delta: float) -> void:
@@ -59,6 +62,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.physical_keycode:
 			KEY_F1:
 				inspection.visible = not inspection.visible
+			KEY_F6:
+				inspection.start_frame_recording()
 			KEY_F8:
 				inspection.toggle_recording()
 			KEY_F9:
@@ -68,19 +73,22 @@ func _unhandled_input(event: InputEvent) -> void:
 func _add_overcast_light() -> void:
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color("637583")
+	# The retained image's blue-grey atmosphere and diffuse snow relationships
+	# guide the rendered view; its sampled pixels are not material albedo values.
+	environment.background_color = Color("828792")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("c0d0df")
-	environment.ambient_light_energy = 0.3
+	environment.ambient_light_color = Color("c0c4ce")
+	environment.ambient_light_energy = 0.70
 	environment.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	var world := WorldEnvironment.new()
 	world.environment = environment
 	add_child(world)
 	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-32, -35, 0)
-	light.light_color = Color("dce5ee")
-	light.light_energy = 0.55
+	light.rotation_degrees = Vector3(-52, -35, 0)
+	light.light_color = Color("dedee4")
+	light.light_energy = 0.25
 	light.shadow_enabled = true
+	light.shadow_opacity = 0.75
 	light.directional_shadow_max_distance = 160.0
-	light.shadow_blur = 3.0
+	light.shadow_blur = 4.0
 	add_child(light)

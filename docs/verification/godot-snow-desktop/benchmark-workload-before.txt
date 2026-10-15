@@ -1,0 +1,16 @@
+ %CPU %MEM COMM
+ 33.7  0.5 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer
+ 32.5  3.2 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+ 26.1  0.2 /usr/sbin/installer
+ 12.4  0.8 godot/build/macos/release/PU-Town-Snow-Walk.app/Contents/MacOS/PU Town · Snow Walk
+ 10.4  0.4 /Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app/Contents/MacOS/Microsoft Update Assistant.app/Contents/MacOS/Microsoft Update Assistant
+  9.9  0.3 /Library/PrivilegedHelperTools/com.microsoft.autoupdate.helper
+  8.5  0.4 /Users/kaizenjb/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUseService
+  6.9  7.6 /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)
+  5.8  1.6 /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+  5.2  0.1 /usr/sbin/coreaudiod
+  4.5  1.9 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+  4.0  0.0 /usr/libexec/diskarbitrationd
+  2.5  0.4 /System/Library/DriverExtensions/com.apple.DriverKit-AppleBCMWLAN.dext/com.apple.DriverKit-AppleBCMWLAN
+  2.3  0.1 /usr/libexec/replayd
+  2.2  0.1 /usr/libexec/storagekitd

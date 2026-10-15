@@ -1,0 +1,27 @@
+{
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "renderer": "gl_compatibility",
+  "configured_viewport": [
+    1280,
+    800
+  ],
+  "platform": "windows",
+  "build_mode": "release",
+  "git_revision": "8c011432cbecd774e673ac26a8ce732816185bf5",
+  "godot_source_dirty": true,
+  "sources_sha256": {
+    "export_presets.cfg": "3fc639a1d00e635a74c167b0634b116415f95e60b085bf29c167fcd4c533e3f8",
+    "inspection.gd": "68c6f156ea14e09081cfaf8459c762d656222dcef11921f143a155af4531bf21",
+    "inspection_route.gd": "f49fb07848bdf17a9a013609afeb9cc899b4d3f499995c64d8b62305b197e668",
+    "project.godot": "8bd36a29eaa9b59353ea7d7d1f7f57646cf472d3503185902716e0ec576f959e",
+    "snow.gdshader": "b985b150d9e92c8e565605b50f0d2bc1fcbeea31881e61865f4144c8a6eea369",
+    "snow_surface.gd": "fb0225403ee17483bff5556789d2d006fbe6b73e6a4b2de3ed1170db1e6d212b",
+    "snow_walk.gd": "89eff9b6e2032cb66f0696858af78aecc28ead3bd4742364842626fe94a4dee3",
+    "snow_walk.tscn": "712874be226e5d69947d4030ba35feb306f5aca59df469b3bc349b23cc0259fd",
+    "tests/walk_scene.gd": "882c4a3519c28da9a3e6bcc8e0c1628d5f6b65c97ab2776848102d1bf606b339",
+    "walker.gd": "019606bfebf82d2a0487e59cf96d401012fa085da6677552c2b7edf18c5fcc60"
+  },
+  "package_sha256": {
+    "PU-Town-Snow-Walk.exe": "8d06fe6662ec6d411966d90d5cc3b523c0240c294a56cef669885f9e6e884142"
+  }
+}

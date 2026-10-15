@@ -1,0 +1,33 @@
+{
+  "observations": 10435,
+  "focused_observations": 10435,
+  "elapsed_seconds": 173.921,
+  "distance_m": 364.582711428404,
+  "all_grounded": true,
+  "max_abs_contact_gap_m": 0.0,
+  "position_range_m": {
+    "x_m": [
+      -31.7000007629395,
+      31.7000007629395
+    ],
+    "z_m": [
+      -31.7000007629395,
+      31.7000007629395
+    ],
+    "feet_y_m": [
+      0.10052156448364,
+      0.89931488037109
+    ]
+  },
+  "unblocked_walking_mps": [
+    2.24995382130146,
+    2.25003473460674
+  ],
+  "camera_pitch_deg": [
+    -54.9999961853027
+  ],
+  "camera_yaw_deg": [
+    45.0
+  ],
+  "whole_map_visible_observations": 60
+}

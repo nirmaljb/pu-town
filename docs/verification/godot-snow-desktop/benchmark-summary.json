@@ -1,0 +1,46 @@
+{
+  "source": "benchmark-frames.csv.gz",
+  "frame_count": 7175,
+  "interval_start_usec": 100284581,
+  "interval_end_usec": 160292972,
+  "elapsed_seconds": 60.008391,
+  "duration_complete": true,
+  "average_fps": 119.56661194265315,
+  "mean_frame_ms": 8.363538815331012,
+  "p95_frame_ms": 12.363,
+  "p99_frame_ms": 14.028,
+  "max_frame_ms": 34.366,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 0,
+  "unfocused_seconds": 0.0,
+  "stationary_frames": 230,
+  "stationary_seconds": 1.915872,
+  "focused_moving_seconds": 58.092519,
+  "focused_moving_fraction": 0.9680732649538962,
+  "position_range_m": {
+    "x": [
+      -15.5373363494873,
+      31.7000007629395
+    ],
+    "z": [
+      -31.7000007629395,
+      31.7000007629395
+    ]
+  },
+  "ortho_range_m": [
+    18.0,
+    18.0
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 800,
+      "window_width": 1280,
+      "window_height": 800
+    }
+  ],
+  "max_observation_age_ms": 20.481,
+  "warnings": [
+    "Stationary intervals are present; inspect traversal coverage before accepting a walking run."
+  ]
+}

@@ -1,0 +1,16 @@
+ %CPU %MEM COMM
+ 34.0  0.5 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer
+ 22.1  1.4 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+ 15.2  0.5 godot/build/macos/release/PU-Town-Snow-Walk.app/Contents/MacOS/PU Town · Snow Walk
+ 13.1  2.9 /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)
+  9.7  0.3 /Users/kaizenjb/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUseService
+  9.5  1.7 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+  6.6  2.3 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+  6.4  6.0 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+  6.3  1.3 /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+  5.1  0.1 /usr/sbin/coreaudiod
+  5.0  0.1 /usr/libexec/replayd
+  4.3  0.4 /Applications/iTerm.app/Contents/MacOS/iTerm2
+  3.7  1.3 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+  2.6  0.8 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)
+  2.5  0.6 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)

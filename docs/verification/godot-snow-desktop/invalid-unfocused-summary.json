@@ -1,0 +1,47 @@
+{
+  "source": "invalid-unfocused-frames.csv.gz",
+  "frame_count": 6738,
+  "interval_start_usec": 48091908,
+  "interval_end_usec": 108102422,
+  "elapsed_seconds": 60.010514,
+  "duration_complete": true,
+  "average_fps": 112.28032474442729,
+  "mean_frame_ms": 8.906279905016326,
+  "p95_frame_ms": 11.725,
+  "p99_frame_ms": 25.413,
+  "max_frame_ms": 228.25,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 2354,
+  "unfocused_seconds": 22.016982,
+  "stationary_frames": 2404,
+  "stationary_seconds": 22.713399,
+  "focused_moving_seconds": 37.297115,
+  "focused_moving_fraction": 0.6215096741214381,
+  "position_range_m": {
+    "x": [
+      -28.6907081604004,
+      3.97747254371643
+    ],
+    "z": [
+      -31.7000007629395,
+      -4.79948234558105
+    ]
+  },
+  "ortho_range_m": [
+    18.0,
+    18.0
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 800,
+      "window_width": 1280,
+      "window_height": 800
+    }
+  ],
+  "max_observation_age_ms": 27.175,
+  "warnings": [
+    "The window lost focus; all affected intervals remain in the results.",
+    "Stationary intervals are present; inspect traversal coverage before accepting a walking run."
+  ]
+}
