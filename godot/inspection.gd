@@ -21,6 +21,12 @@ var observed_input := Vector2.ZERO
 var observed_speed := 0.0
 var observed_position := Vector3.ZERO
 var observed_camera_distance := 0.0
+var observed_wind_total_ms := 0.0
+var observed_wind_updates := 0
+var observed_wind_strength := 0.0
+var observed_wind_from := 0.0
+var frame_wind_total_ms := 0.0
+var frame_wind_updates := 0
 var checkpoint := 0
 ## Fixed world probes, in the order F5 placed them, and their latest readings.
 const MAX_PROBES := 6
@@ -84,6 +90,10 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	observed_speed = walker.horizontal_speed
 	observed_position = walker.position
 	observed_camera_distance = camera.current_distance()
+	observed_wind_total_ms = surface.wind_total_ms
+	observed_wind_updates = surface.wind_updates
+	observed_wind_strength = surface.wind_strength
+	observed_wind_from = surface.wind_from()
 	tick += 1
 	probe_readings.clear()
 	for probe in probes:
@@ -248,7 +258,8 @@ func start_frame_recording() -> void:
 	frame_recording.store_csv_line(PackedStringArray([
 		"frame", "interval_start_usec", "interval_end_usec", "frame_ms", "elapsed_ms", "focused", "moving",
 		"input_x", "input_y", "horizontal_mps", "x_m", "feet_y_m", "z_m", "camera_distance_m",
-		"viewport_width", "viewport_height", "window_width", "window_height", "observation_age_ms"
+		"viewport_width", "viewport_height", "window_width", "window_height", "observation_age_ms",
+		"wind_ms", "wind_updates", "wind_strength", "wind_from_deg"
 	]))
 	print("Recording 60-second frame trace: ", ProjectSettings.globalize_path(frame_record_path))
 
@@ -262,6 +273,8 @@ func _process(_delta: float) -> void:
 		frame_started_usec = now
 		previous_frame_usec = now
 		frame_flushed_usec = now
+		frame_wind_total_ms = observed_wind_total_ms
+		frame_wind_updates = observed_wind_updates
 		return
 	frame_count += 1
 	var viewport_size := get_viewport().get_visible_rect().size
@@ -272,9 +285,14 @@ func _process(_delta: float) -> void:
 		str(observed_input.x), str(observed_input.y), str(observed_speed),
 		str(observed_position.x), str(observed_position.y), str(observed_position.z), str(observed_camera_distance),
 		str(viewport_size.x), str(viewport_size.y), str(window_size.x), str(window_size.y),
-		str(float(now - observed_usec) / 1000.0)
+		str(float(now - observed_usec) / 1000.0),
+		# The wind's work in the physics frames since the previous rendered frame.
+		str(observed_wind_total_ms - frame_wind_total_ms), str(observed_wind_updates - frame_wind_updates),
+		str(observed_wind_strength), str(observed_wind_from)
 	]))
 	previous_frame_usec = now
+	frame_wind_total_ms = observed_wind_total_ms
+	frame_wind_updates = observed_wind_updates
 	if now - frame_flushed_usec >= 1000000:
 		frame_recording.flush()
 		frame_flushed_usec = now

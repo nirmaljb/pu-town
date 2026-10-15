@@ -8,6 +8,33 @@ import math
 from pathlib import Path
 
 
+def summarize_wind(rows: list, intervals: list) -> dict:
+    """The wind's share of each rendered frame, from traces that record it."""
+    if "wind_ms" not in rows[0]:
+        return {"recorded": False}
+    costs = sorted(float(row["wind_ms"]) for row in rows)
+    updates = sum(int(row["wind_updates"]) for row in rows)
+    single = sorted(float(row["wind_ms"]) for row in rows if int(row["wind_updates"]) == 1)
+    percentile = lambda values, fraction: values[math.ceil(len(values) * fraction) - 1] if values else None
+    return {
+        "recorded": True,
+        "settings": [
+            {"strength": strength, "from_deg": bearing}
+            for strength, bearing in sorted({(float(row["wind_strength"]), float(row["wind_from_deg"])) for row in rows})
+        ],
+        "physics_updates": updates,
+        "mean_ms_per_update": sum(costs) / updates if updates else None,
+        "single_update_frames": len(single),
+        "single_update_p95_ms": percentile(single, 0.95),
+        "single_update_max_ms": single[-1] if single else None,
+        "mean_ms_per_frame": sum(costs) / len(rows),
+        "p95_ms_per_frame": percentile(costs, 0.95),
+        "p99_ms_per_frame": percentile(costs, 0.99),
+        "max_ms_per_frame": costs[-1],
+        "share_of_frame_time": sum(costs) / sum(intervals),
+    }
+
+
 def summarize(path: Path) -> dict:
     with path.open(newline="", encoding="utf-8") as source:
         rows = list(csv.DictReader(source))
@@ -96,6 +123,8 @@ def summarize(path: Path) -> dict:
             for width, height, window_width, window_height in sorted(resolutions)
         ],
         "max_observation_age_ms": max(float(row["observation_age_ms"]) for row in rows),
+        # Wind work is CPU time inside physics frames, charged to the rendered frame that followed.
+        "wind": summarize_wind(rows, intervals),
         "warnings": warnings,
     }
 

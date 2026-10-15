@@ -47,6 +47,10 @@ var wind_elapsed := 0.0
 var wind := SnowWind.new()
 ## Milliseconds the wind spent in the latest physics frame, including publication.
 var wind_update_ms := 0.0
+## Running totals of that work and of the physics frames it ran in, so a frame trace
+## can charge each rendered frame with the wind updates since the previous one.
+var wind_total_ms := 0.0
+var wind_updates := 0
 var footprint_count := 0
 var footprint_image_bytes := TILE_GRID.x * TILE_GRID.y * TILE_BYTES
 ## Footprint picture bytes sent to the GPU in the latest rendered frame and in total,
@@ -150,6 +154,8 @@ func advance(delta: float) -> void:
 	if wind.step(wind_elapsed):
 		_publish_snow()
 	wind_update_ms = float(Time.get_ticks_usec() - began) / 1000.0
+	wind_total_ms += wind_update_ms
+	wind_updates += 1
 
 
 ## Centre the detail region on the camera's focus. It snaps to coarse vertices,
