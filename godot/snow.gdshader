@@ -2,6 +2,10 @@ shader_type spatial;
 render_mode diffuse_burley, specular_schlick_ggx;
 
 uniform sampler2D footprint_image : filter_nearest, repeat_disable;
+// Static ground heights at the town layout's picture nodes, counted from the
+// map's west and north edges and read bilinearly, as in SnowTownLayout.ground_height.
+uniform sampler2D ground_image : filter_nearest, repeat_disable;
+uniform float ground_nodes_per_metre = 5.0;
 uniform vec2 patch_center = vec2(0.0);
 // East–west and north–south half extents of the map rectangle, set from the town layout.
 uniform vec2 map_half_extents;
@@ -37,7 +41,17 @@ float compaction(vec2 point) {
 		mix(pixel_compaction(cell + ivec2(0, 1), image_size), pixel_compaction(cell + ivec2(1, 1), image_size), blend.x), blend.y);
 }
 
-// Paired with SnowSurface._uncompressed_height. Both start above flat y=0.
+float ground_height(vec2 point) {
+	ivec2 size = textureSize(ground_image, 0);
+	vec2 node = (point + map_half_extents) * ground_nodes_per_metre;
+	ivec2 cell = clamp(ivec2(floor(node)), ivec2(0), size - ivec2(2));
+	vec2 blend = clamp(node - vec2(cell), vec2(0.0), vec2(1.0));
+	return mix(
+		mix(texelFetch(ground_image, cell, 0).r, texelFetch(ground_image, cell + ivec2(1, 0), 0).r, blend.x),
+		mix(texelFetch(ground_image, cell + ivec2(0, 1), 0).r, texelFetch(ground_image, cell + ivec2(1, 1), 0).r, blend.x), blend.y);
+}
+
+// Paired with SnowSurface._uncompressed_height: Snow Depth above the ground.
 float uncompressed_height(vec2 point) {
 	float field = sin(point.x * 0.14 - 0.7) * cos(point.y * 0.12 + 0.4);
 	float height = 0.08 + 0.52 * smoothstep(0.0, 0.85, field);
@@ -57,7 +71,7 @@ float uncompressed_height(vec2 point) {
 }
 
 float field_height(vec2 point) {
-	return max(0.025, uncompressed_height(point) * (1.0 - 0.86 * compaction(point)));
+	return ground_height(point) + max(0.025, uncompressed_height(point) * (1.0 - 0.86 * compaction(point)));
 }
 
 float coarse_height(vec2 point) {

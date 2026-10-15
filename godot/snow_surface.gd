@@ -1,8 +1,9 @@
 extends Node3D
 class_name SnowSurface
 
-## Flat substrate, a world-fixed snow field, and a small moving geometry window.
-## The field spans the town layout's map rectangle.
+## Static ground levels, a world-fixed snow field, and a small moving geometry window.
+## The field spans the town layout's map rectangle; its surface is the layout's
+## ground-height picture plus Snow Depth.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
 ## collider stands in for snow contact. Footsteps mutate one bounded image only.
 const TownLayout = preload("res://town_layout.gd")
@@ -27,6 +28,7 @@ var interior_height_range := Vector2.ZERO
 var perimeter_height_range := Vector2.ZERO
 var _footprints: Image
 var _texture: ImageTexture
+var _layout: Node3D
 var _dirty := false
 var _detail: MeshInstance3D
 var _materials: Array[ShaderMaterial] = []
@@ -50,6 +52,22 @@ func _process(_delta: float) -> void:
 	if _dirty:
 		_texture.update(_footprints)
 		_dirty = false
+
+
+func configure_ground(town: Node3D) -> void:
+	# The layout owns the static ground picture. The shader reads the same nodes.
+	_layout = town
+	var ground_texture := ImageTexture.create_from_image(town.ground_image)
+	var heights: Vector2 = town.ground_range
+	for material in _materials:
+		material.set_shader_parameter("ground_image", ground_texture)
+		material.set_shader_parameter("ground_nodes_per_metre", TownLayout.GROUND_NODES_PER_METRE)
+	for child in get_children():
+		if child is MeshInstance3D:
+			var bounds: AABB = child.custom_aabb
+			child.custom_aabb = AABB(Vector3(bounds.position.x, heights.x - 0.1, bounds.position.z),
+				Vector3(bounds.size.x, heights.y - heights.x + 1.2, bounds.size.z))
+	_refresh_height_ranges()
 
 
 func configure_obstacles(obstacles: Array[Dictionary]) -> void:
@@ -85,15 +103,21 @@ func advance(delta: float, focus_xz: Vector2) -> void:
 		_refresh_height_ranges()
 
 
-func sample_depth(point: Vector2) -> float:
+## Visible snow height: ground plus compacted Snow Depth, on the drawn triangles.
+func sample_height(point: Vector2) -> float:
 	var local := (point - patch_center).abs()
 	if maxf(local.x, local.y) < PATCH_SIZE * 0.5:
 		return _triangle_height(point, DETAIL_STEP, true)
 	return _triangle_height(point, COARSE_STEP, false)
 
 
-func sample_uncompressed_depth(point: Vector2) -> float:
-	return _uncompressed_height(point)
+func sample_ground(point: Vector2) -> float:
+	return _layout.ground_height(point) if _layout else 0.0
+
+
+## Snow height before any compaction: ground plus loose Snow Depth.
+func sample_uncompressed_height(point: Vector2) -> float:
+	return sample_ground(point) + _uncompressed_height(point)
 
 
 func sample_compaction(point: Vector2) -> float:
@@ -165,7 +189,7 @@ func _pixel_compaction(pixel: Vector2i) -> float:
 
 func _uncompressed_height(point: Vector2) -> float:
 	# This formula and the shader's uncompressed_height are intentionally paired.
-	# Underneath is y=0. Initial broad shallow/deep fields remain bounded while
+	# It is Snow Depth above the ground. Initial broad shallow/deep fields remain bounded while
 	# the wind slowly moves relief and builds/lowers drifts on the +X lee of boxes.
 	var field := sin(point.x * 0.14 - 0.7) * cos(point.y * 0.12 + 0.4)
 	var height := 0.08 + 0.52 * smoothstep(0.0, 0.85, field)
@@ -182,8 +206,8 @@ func _uncompressed_height(point: Vector2) -> float:
 
 
 func _field_height(point: Vector2) -> float:
-	# Even completely packed snow retains a thin layer over its flat substrate.
-	return maxf(0.025, _uncompressed_height(point) * (1.0 - 0.86 * sample_compaction(point)))
+	# Even completely packed snow retains a thin layer over the ground.
+	return sample_ground(point) + maxf(0.025, _uncompressed_height(point) * (1.0 - 0.86 * sample_compaction(point)))
 
 
 func _detail_vertex_height(point: Vector2) -> float:
@@ -312,7 +336,7 @@ func _refresh_height_ranges() -> void:
 	for row in range(9):
 		for column in range(9):
 			var point := Vector2(float(column - 4), float(row - 4)) * spacing
-			var height := sample_depth(point)
+			var height := sample_height(point) - sample_ground(point)
 			if row == 0 or row == 8 or column == 0 or column == 8:
 				perimeter_height_range.x = minf(perimeter_height_range.x, height)
 				perimeter_height_range.y = maxf(perimeter_height_range.y, height)

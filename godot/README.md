@@ -16,10 +16,11 @@ changing surface and persistent world tracks.
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
 the agreed rebuild as the 100 × 56 m town of the
 [whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes its first slice: the 100 × 56 m town laid out from that reference as
-solid placeholder boxes, still on flat ground with the existing snow, camera and
-idle second figure. Ground levels and the stair, saved Snow Depth with wind
-drifts, the perspective camera and the walking second figure follow later.
+describes its first two slices: the 100 × 56 m town laid out from that reference
+as solid placeholder boxes, on a town shelf about 5 m above the southern forest
+and joined to it by the snow-buried stair, with the existing snow, camera and
+idle second figure. Saved Snow Depth with wind drifts, the perspective camera and
+the walking second figure follow later.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -94,10 +95,29 @@ The town follows the composition of the whole-map reference, with north up (−Z
   crates and barrels, and fences surround an open yard.
 - **Rim and forest**. Rock masses close the north, east and south-east rim, and
   pines fill the southern forest and the ground north of the compound. An open
-  lane runs south from the gatehouse.
+  lane runs south from the foot of the stair.
 
-Every placeholder is a solid, non-enterable box anchored to the flat substrate,
-with a size and colour that distinguish its kind. Walk around them; their roofs
+### Two levels and the stair
+
+The compound, meeting hall and outpost stand on the **town shelf**, at ground
+height 0 m. The **southern forest**, west of x −5.5 m and south of z 10 m, lies
+5 m lower, at −5 m. The two levels meet only in two ways:
+
+- **The stair** continues the compound's 3 m south gate. It is one snow-buried
+  slope, 10 m long from z 9 m to z 19 m, with no individual steps and nothing
+  walkable beneath it. Low walls run along both sides, each 1 m segment standing
+  on the slope beneath it, so you cannot step off. Slope never changes speed:
+  walking stays 2.25 m/s on the way down and back up.
+- **Cliff rock** covers every other step between the levels: a band along the
+  shelf's southern edge, two masses flanking the stair, and a mass along the
+  forest's east side. Each rises 2 m above the shelf and stops you from either
+  level. The step in the ground lies at least one coarse snow cell inside each
+  mass, so no stretched snow face shows in normal views.
+
+Every placeholder is a solid, non-enterable box standing on the ground of its
+level, with a size and colour that distinguish its kind. A box rises from the
+lowest ground beneath it to its height above the highest; only cliff rock spans
+both levels. Walk around them; their roofs
 are not walking surfaces, and generators have no interaction. The reference guides
 the composition, not measured dimensions or a final asset layout. The route's
 named landmarks are, in metres:
@@ -113,6 +133,9 @@ named landmarks are, in metres:
 | `courtyard_east` | −12, 0 | Courtyard, inside the east gate |
 | `courtyard` | −22, 0 | Middle of the courtyard |
 | `courtyard_west` | −30, 3 | Deep snow in the west of the courtyard |
+| `south_gate` | −23.5, 2 | Courtyard, inside the south gate at the top of the stair |
+| `forest_lane` | −23.5, 22 | Forest floor, south of the foot of the stair |
+| `forest_west` | −28, 24 | Forest floor, south of the cliff beside the stair |
 
 The orthographic camera starts at 45° yaw, −55° pitch and a 6 m view size, close
 enough to read the Avatar with a little of the town around it.
@@ -137,7 +160,8 @@ that same weather sixteen times faster. Wind also changes broad snow relief and
 accumulation beside selected obstacles. Movement pauses when the window loses
 focus, but the scene and wind keep advancing.
 
-The HUD and CSV expose figure identity, position, speed, run request, surface and
+The HUD and CSV expose figure identity, position, the ground height beneath the
+figure (`ground_y_m`), speed, run request, Snow Depth above that ground and
 loose depth, compaction, sinking, contact gap, obstacle/boundary contact, steps,
 the moving patch, wind, image allocation and the other figure's position. The F5
 probe stays at its world location when you walk away or switch figures; its depth,
@@ -154,8 +178,11 @@ F5. Leave the detailed patch, then return and check that the trail remains at th
 same place. Switch figures and follow or cross it to inspect overlapping prints
 and Packed Paths. Compare Shift movement in shallow and deep snow, approach the
 lodge diagonally to inspect sliding along its sides, then increase wind and watch
-the fixed probe and visible trail fade. Check close and overview framing, snow
-contact, and the transition between detailed and distant snow while moving.
+the fixed probe and visible trail fade. Walk out of the compound's south gate,
+down the stair to the forest and back up, and check that boots stay on the snow,
+the HUD's ground height changes by 5 m and the cliff rock stops you on both
+levels. Check close and overview framing, snow contact, and the transition
+between detailed and distant snow while moving.
 
 The scene route sends keyboard and wheel events through Godot's input API and
 checks the public observation CSV without addressing private scene nodes, mesh
@@ -175,7 +202,11 @@ into the courtyard, is stopped by the courtyard wall and crosses the courtyard.
 It then shows a Packed Path's running advantage in the courtyard's deep snow. The
 second figure walks from the outpost yard to overlap the trail. The first figure
 returns through the gate to find the trail retained, watches wind erase it, and
-walks south through the forest until the map edge stops it. Finally it zooms to
+walks south until the cliff rock at the shelf's edge stops it. It then crosses
+the courtyard to the south gate and walks down the stair to the forest,
+observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
+speed on the slope. On the forest floor the map edge and the cliff beside the
+stair each stop it, and it climbs the stair back to the gate. Finally it zooms to
 the whole-map overview and back, capturing graphical views along the way. Every
 navigation leg must reach its landmark. The process returns nonzero on failure. `--walk-scene-check` remains an alias; the
 existing `--script res://tests/walk_scene.gd` launcher opens the same route.
@@ -201,17 +232,22 @@ containment, the camera overview and the scene route all derive from it; do not
 repeat map dimensions elsewhere. The half extents are 50 m east–west and 28 m
 north–south: a 100 × 56 m field spanning −50 to +50 m in X and −28 to +28 m in Z.
 
-[`snow_surface.gd`](snow_surface.gd) defines a flat substrate at Y=0 beneath that
-snow field. Snow begins
-with broad shallow/deep variation and responds to wind and compaction. The
-uncompressed depth is bounded to 5–85 cm; packing retains at least 2.5 cm over the
-substrate. The yard remains open without being flattened.
+Ground height is static. At launch, [`town_layout.gd`](town_layout.gd) builds a
+fixed world ground-height picture from the authored levels and the stair's one
+slope: 501 × 281 single-float nodes 0.2 m apart, read bilinearly. Its boxes stand
+on that picture, and [`snow_surface.gd`](snow_surface.gd) and the shader read the
+same nodes with the same interpolation. The snow surface is ground height plus
+Snow Depth. Snow Depth begins with broad shallow/deep variation and responds to
+wind and compaction. It is measured vertically above the ground and bounded to
+5–85 cm before packing; packing retains at least 2.5 cm over the ground. The yard
+remains open without being flattened.
 
 A 12.8 × 12.8 m patch uses a 0.1 m grid around the controlled figure; a 0.8 m grid
 keeps the full town visible outside it. The patch moves in coarse-grid increments
 and stays within the map, blending into the coarse surface over a 1.6 m border.
-[`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the current field.
-CPU foot support evaluates the same height formula and triangle interpolation,
+[`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the ground picture
+and the current field.
+CPU foot support evaluates the same heights and triangle interpolation,
 including the patch border, rather than querying a stale static collision mesh.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.

@@ -25,11 +25,12 @@ var checkpoint := 0
 var probe_set := false
 var probe := Vector2.ZERO
 var probe_depth := 0.0
+var probe_uncompressed_depth := 0.0
 var probe_compaction := 0.0
 var latest := {}
 
 const ROUTE_COLUMNS := [
-	"elapsed_ms", "x_m", "feet_y_m", "z_m", "input_x", "input_y", "horizontal_mps", "grounded",
+	"elapsed_ms", "x_m", "feet_y_m", "z_m", "ground_y_m", "input_x", "input_y", "horizontal_mps", "grounded",
 	"contact_gap_m", "boundary_limited", "travel_m", "ortho_m", "pitch_deg", "yaw_deg", "focused", "fps",
 	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
@@ -67,7 +68,10 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	observed_camera_size = camera.size
 	tick += 1
 	if probe_set:
-		probe_depth = surface.sample_depth(probe)
+		# Depths are measured vertically above the ground at the probe.
+		var probe_ground: float = surface.sample_ground(probe)
+		probe_depth = surface.sample_height(probe) - probe_ground
+		probe_uncompressed_depth = surface.sample_uncompressed_height(probe) - probe_ground
 		probe_compaction = surface.sample_compaction(probe)
 	var viewport_size := get_viewport().get_visible_rect().size
 	var figure_screen := camera.unproject_position(walker.global_position)
@@ -81,6 +85,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	latest = {
 		"elapsed_ms": Time.get_ticks_msec() - started_ms,
 		"x_m": walker.position.x, "feet_y_m": walker.position.y, "z_m": walker.position.z,
+		"ground_y_m": walker.ground_height,
 		"input_x": walker.direction.x, "input_y": walker.direction.y,
 		"horizontal_mps": walker.horizontal_speed, "grounded": walker.grounded,
 		"contact_gap_m": walker.contact_gap, "boundary_limited": walker.boundary_limited,
@@ -100,7 +105,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"footprint_image_width": surface.IMAGE_SIZE.x, "footprint_image_height": surface.IMAGE_SIZE.y,
 		"footprint_image_bytes": surface.footprint_image_bytes,
 		"probe_set": probe_set, "probe_x_m": probe.x, "probe_z_m": probe.y,
-		"probe_depth_m": probe_depth, "probe_uncompressed_depth_m": surface.sample_uncompressed_depth(probe) if probe_set else 0.0, "probe_compaction": probe_compaction,
+		"probe_depth_m": probe_depth, "probe_uncompressed_depth_m": probe_uncompressed_depth, "probe_compaction": probe_compaction,
 		"probe_in_patch": probe_set and maxf(probe_offset.x, probe_offset.y) <= surface.PATCH_SIZE * 0.5,
 		"other_figure_id": other.figure_id if other else -1,
 		"other_x_m": other.position.x if other else 0.0, "other_z_m": other.position.z if other else 0.0,
@@ -113,9 +118,9 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %5.3f   Z %6.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\nOrtho %5.1f m · angle 55° / 45° · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · Tab switch · wheel zoom\n− / = wind · 0 reset wind · F1 overlay\nF4 checkpoint · F5 trail probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nDetailed patch %.1f × %.1f m at %.1f, %.1f\nWind %.0f · weather clock %.1f s · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\nOrtho %5.1f m · angle 55° / 45° · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
-		walker.position.x, walker.position.y, walker.position.z,
+		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
 		"obstacle" if walker.obstacle_limited else ("boundary" if walker.boundary_limited else "clear"),
 		walker.snow_depth, walker.loose_depth, walker.sink_depth,

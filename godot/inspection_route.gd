@@ -6,9 +6,12 @@ extends Node
 const TownLayout = preload("res://town_layout.gd")
 const LANDMARKS := TownLayout.LANDMARKS
 # Specified values: a figure keeps its 0.3 m radius inside the map, and the
-# footprint image covers the whole map at 31.25 mm per texel.
+# footprint image covers the whole map at 31.25 mm per texel. The town shelf
+# stands about 5 m above the forest; contact stays within today's 2 mm bound.
 const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
+const LEVEL_DROP_M := 5.0
+const CONTACT_BOUND_M := 0.002
 
 var failures: Array[String] = []
 var stages := {}
@@ -106,9 +109,23 @@ func _run() -> void:
 	await _leg([], 8.2, "wind erases trail")
 	await _leg([], 0.5, "erased probe")
 	_tap(KEY_0)
-	# South from the meeting-hall gap, past the southern forest, to the map edge.
-	await _leg([KEY_S, KEY_A], 12.0, "south boundary")
+	# South from the meeting-hall gap, the shelf ends at cliff rock above the forest.
+	await _leg([KEY_S, KEY_A], 3.0, "shelf cliff approach")
+	await _leg([KEY_S, KEY_A], 1.2, "shelf cliff blocked")
+	# The stair from the compound's south gate is the way down to the forest.
+	await _goto(LANDMARKS.meeting_hall_gap, "return to meeting-hall gap")
+	await _goto(LANDMARKS.courtyard_east, "re-enter courtyard")
+	await _goto(LANDMARKS.courtyard, "cross to south gate")
+	await _goto(LANDMARKS.south_gate, "reach south gate")
+	await _goto(LANDMARKS.forest_lane, "descend stair")
+	await _leg([KEY_S, KEY_A], 3.0, "south boundary")
 	await _leg([KEY_S, KEY_A], 1.0, "boundary blocked")
+	# From the forest floor the cliff beside the stair is equally impassable.
+	await _goto(LANDMARKS.forest_west, "reach forest west")
+	await _leg([KEY_W, KEY_D], 2.5, "forest cliff approach")
+	await _leg([KEY_W, KEY_D], 1.2, "forest cliff blocked")
+	await _goto(LANDMARKS.forest_lane, "return to stair foot")
+	await _goto(LANDMARKS.south_gate, "climb stair")
 	for step in range(26):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
@@ -294,10 +311,11 @@ func _check_record() -> void:
 		figure_ids[row.figure_id] = true
 		if absf(float(row.x_m)) > bounds.x + 0.001 or absf(float(row.z_m)) > bounds.y + 0.001:
 			_fail_once("Figure escaped the map rectangle")
-		if row.grounded != "true" or absf(float(row.contact_gap_m)) > 0.002:
+		if row.grounded != "true" or absf(float(row.contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("Figure lost its observed snow contact")
-		if float(row.feet_y_m) > 1.3 or float(row.feet_y_m) < -0.001:
-			_fail_once("Figure teleported onto a box roof or below the flat ground")
+		var above_ground := float(row.feet_y_m) - float(row.ground_y_m)
+		if above_ground > 1.3 or above_ground < -0.001:
+			_fail_once("Figure teleported onto a box roof or below the ground")
 		if absf(float(row.pitch_deg) + 55.0) > 0.01 or absf(float(row.yaw_deg) - 45.0) > 0.01:
 			_fail_once("Camera angle changed")
 		if absf(float(row.patch_size_m) - 12.8) > 0.001:
@@ -359,6 +377,9 @@ func _check_record() -> void:
 	_check_arrivals(rows)
 	_check_held_by_obstacle(rows, "lodge blocked", "the lodge")
 	_check_held_by_obstacle(rows, "wall blocked", "the courtyard's south wall")
+	_check_held_by_obstacle(rows, "shelf cliff blocked", "the cliff rock below the shelf")
+	_check_held_by_obstacle(rows, "forest cliff blocked", "the cliff rock above the forest")
+	_check_stair(rows)
 	_check_courtyard_entry(rows)
 	_check_probe(rows)
 	_check_second_figure(rows)
@@ -401,6 +422,53 @@ func _check_held_by_obstacle(rows: Array[Dictionary], stage: String, obstacle: S
 			held += 1
 	if held < 30:
 		failures.append("Route did not reach and stop at %s (%d held observations)" % [obstacle, held])
+
+
+func _check_stair(rows: Array[Dictionary]) -> void:
+	# Down the stair from the south gate to the forest and back up: the ground
+	# under the figure changes by about 5 m along one slope, walking speed and
+	# snow contact are unchanged on it, and the cliffs keep each level separate.
+	var down := _rows_for(rows, "descend stair z")
+	var up := _rows_for(rows, "climb stair z")
+	if down.is_empty() or up.is_empty():
+		failures.append("Stair route stages were missing")
+		return
+	for stage in [down, up]:
+		var heights := Vector2(INF, -INF)
+		for row in stage:
+			heights = Vector2(minf(heights.x, float(row.ground_y_m)), maxf(heights.y, float(row.ground_y_m)))
+			if row.obstacle_limited == "true" or row.boundary_limited == "true":
+				_fail_once("The stair or its low walls obstructed the walk between levels")
+		# Observations strictly between the two levels lie on the slope.
+		var on_slope := 0
+		var slope_gap := 0.0
+		var slope_speed := 0.0
+		for row in stage:
+			var ground := float(row.ground_y_m)
+			if ground > heights.x + 0.1 and ground < heights.y - 0.1:
+				on_slope += 1
+				slope_gap = maxf(slope_gap, absf(float(row.contact_gap_m)))
+				slope_speed = maxf(slope_speed, absf(float(row.horizontal_mps) - 2.25))
+		var change := heights.y - heights.x
+		if absf(change - LEVEL_DROP_M) > 0.25:
+			failures.append("The stair did not join levels about 5 m apart (observed %.3f m)" % change)
+		if on_slope < 120:
+			failures.append("Too few observations on the stair's slope (%d)" % on_slope)
+		if slope_gap > CONTACT_BOUND_M:
+			failures.append("Boots left the snow on the stair's slope (gap %.4f m)" % slope_gap)
+		if slope_speed > 0.003:
+			failures.append("Walking speed changed on the stair's slope (by %.4f m/s)" % slope_speed)
+	if float(down.front().ground_y_m) <= float(down.back().ground_y_m) or float(up.front().ground_y_m) >= float(up.back().ground_y_m):
+		failures.append("The route did not walk down the stair and back up")
+	# The southern map edge is reached on the forest floor, and the forest cliff
+	# is met from below: both stages lie on the lower level.
+	for stage in ["boundary blocked", "forest cliff blocked"]:
+		for row in _rows_for(rows, stage):
+			if absf(float(row.ground_y_m) - float(up.front().ground_y_m)) > 0.01:
+				_fail_once("A forest stage left the forest floor")
+	for row in _rows_for(rows, "shelf cliff blocked"):
+		if absf(float(row.ground_y_m) - float(down.front().ground_y_m)) > 0.01:
+			_fail_once("The shelf cliff stage left the town shelf")
 
 
 func _check_courtyard_entry(rows: Array[Dictionary]) -> void:

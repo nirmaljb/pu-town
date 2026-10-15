@@ -1,5 +1,6 @@
 extends Node3D
 ## Horizontal obstacles and changing snow support are separate: roofs are never ground.
+## Speed is horizontal, so the stair's slope never changes it.
 ## The figure is the parka Avatar; its steps, Footprints and clips share one gait.
 
 const Avatar = preload("res://parka_avatar.gd")
@@ -20,6 +21,7 @@ var boundary_limited := false
 var obstacle_limited := false
 var run_requested := false
 var snow_depth := 0.0
+var ground_height := 0.0
 var loose_depth := 0.0
 var foot_compaction := 0.0
 var sink_depth := 0.0
@@ -132,16 +134,17 @@ func _update_pose(delta: float = 1.0 / 60.0) -> void:
 		if foot_points[index].distance_to(centre) > 0.65:
 			foot_points[index] = centre + lateral * (-boot_lateral if index == 0 else boot_lateral)
 			_feet[index] = foot_points[index]
-	var supports := Vector2(surface.sample_depth(foot_points[0]), surface.sample_depth(foot_points[1]))
+	var supports := Vector2(surface.sample_height(foot_points[0]), surface.sample_height(foot_points[1]))
 	position.y = (supports.x + supports.y) * 0.5
-	snow_depth = surface.sample_depth(centre)
+	ground_height = surface.sample_ground(centre)
+	snow_depth = surface.sample_height(centre) - ground_height
 	foot_compaction = surface.sample_compaction(last_footprint) if has_footprint else 0.0
-	sink_depth = maxf(0.0, (surface.sample_uncompressed_depth(foot_points[0]) + surface.sample_uncompressed_depth(foot_points[1])) * 0.5 - position.y)
+	sink_depth = maxf(0.0, (surface.sample_uncompressed_height(foot_points[0]) + surface.sample_uncompressed_height(foot_points[1])) * 0.5 - position.y)
 	grounded = layout.point_clear(centre, FOOTPRINT_RADIUS - 0.001)
 	# One cycle is two steps: the left boot (index 0) lands at phase 0, the right at 0.5.
 	var phase := 0.5 * _landed_side + 0.5 * fraction
 	avatar.animate(phase, _run_amount, _moving, delta)
-	var support := func(point: Vector2) -> float: return surface.sample_depth(point)
+	var support := func(point: Vector2) -> float: return surface.sample_height(point)
 	contact_gap = avatar.ground(support, position.y, avatar.planted(phase, _run_amount))
 
 

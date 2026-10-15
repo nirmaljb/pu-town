@@ -25,6 +25,7 @@ func _ready() -> void:
 	headless_replay = DisplayServer.get_name() == "headless" and OS.get_cmdline_user_args().has("--headless-scene-check")
 	add_child(town)
 	add_child(surface)
+	surface.configure_ground(town)
 	surface.configure_obstacles(town.drift_obstacles)
 	walker.configure(surface, town, 1, TownLayout.LANDMARKS.outpost_yard_west)
 	second_walker.configure(surface, town, 2, TownLayout.LANDMARKS.outpost_yard_east)
