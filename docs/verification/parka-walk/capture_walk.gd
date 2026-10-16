@@ -1,21 +1,21 @@
 extends SceneTree
 # Capture driver for the parka walk record. From the outpost yard the controlled
 # figure walks west into the Shallow Snow, seen from its left side as in the owner's
-# recording, then walks south toward the camera and stands. The cursor's
-# ground point sits 1 m ahead so Facing follows travel without leaning the camera
-# off the figure. It holds the keys through Godot's input API, keeps the scene
-# focused and moves the camera's cursor directly each frame, so it is visual
-# evidence for before/after comparison, not a scene route. Every third frame of
-# each leg's second second is saved, with the figure's screen position, speed and
-# how far its boots have sunk.
+# recording, then turns and walks east, past where it started, into the yard's
+# Deep drift, and stands there. The cursor's ground point sits 1 m ahead so Facing
+# follows travel without leaning the camera off the figure. It holds the keys
+# through Godot's input API, keeps the scene focused and moves the camera's cursor
+# directly each frame, so it is visual evidence for before/after comparison, not a
+# scene route. Twelve frames, every third, are saved from each leg's capture frame
+# on, with the figure's screen position, speed and how far its boots have sunk.
 # From the repository root:
 #   CAPTURE_DIR=/abs/out "$GODOT" --path godot \
 #     --resolution 1280x800 --fixed-fps 60 -s "$PWD/docs/verification/parka-walk/capture_walk.gd"
 const CURSOR_DISTANCE := 1.0
-# [first frame, keys held, cursor bearing, name]
-const LEGS := [[30, [KEY_A], 270.0, "walk-west"], [150, [KEY_S], 180.0, "walk-south"],
-	[270, [], 180.0, "stand"]]
-const END := 330
+# [first frame, keys held, cursor bearing, name, frames into the leg before capturing]
+const LEGS := [[30, [KEY_A], 270.0, "walk-west", 60], [150, [KEY_D], 90.0, "walk-deep", 540],
+	[750, [], 90.0, "stand", 30]]
+const END := 820
 
 var scene: Node
 var out := ""
@@ -61,9 +61,9 @@ func _physics_process(_delta: float) -> bool:
 	var bearing := deg_to_rad(leg[2])
 	var ground := figure + Vector3(sin(bearing), 0, -cos(bearing)) * CURSOR_DISTANCE
 	scene.camera.point_at(scene.camera.unproject_position(ground))
-	var into_leg: int = frame - leg[0]
-	if into_leg >= 60 and into_leg < 96 and into_leg % 3 == 0:
-		var name := "%s-%02d" % [leg[3], (into_leg - 60) / 3]
+	var into_leg: int = frame - leg[0] - leg[4]
+	if into_leg >= 0 and into_leg < 36 and into_leg % 3 == 0:
+		var name := "%s-%02d" % [leg[3], into_leg / 3]
 		root.get_texture().get_image().save_png(out.path_join(name + ".png"))
 		var screen: Vector2 = scene.camera.unproject_position(figure + Vector3(0, 0.85, 0))
 		log_lines.append("%s,%.1f,%.1f,%.3f,%.3f,%.3f" % [name, screen.x, screen.y, scene.walker.horizontal_speed,

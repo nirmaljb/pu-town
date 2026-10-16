@@ -294,8 +294,10 @@ func _update_pose(delta: float = 1.0 / 60.0) -> void:
 	avatar.animate(phase, _run_amount, _moving, delta)
 	twist = wrapf(facing_yaw - _heading, -PI, PI)
 	avatar.twist(twist)
-	var support := func(point: Vector2) -> float: return surface.sample_height(point)
-	contact_gap = avatar.ground(support, position.y, avatar.planted(phase, _run_amount))
+	# Boots settle into their Footprints and swing through loose snow over the ground.
+	var footprints := {"Left": supports.x, "Right": supports.y}
+	var terrain := func(point: Vector2) -> float: return surface.sample_ground(point)
+	contact_gap = avatar.ground(footprints, terrain, avatar.planted(phase, _run_amount))
 
 
 ## Where the figure stands, at the height of the untouched snow there.

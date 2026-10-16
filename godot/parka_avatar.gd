@@ -7,6 +7,9 @@ extends Node3D
 const MODEL := preload("res://characters/parka/parka.glb")
 const GAIT_PATH := "res://characters/parka/gait.json"
 const STAND_BLEND_RATE := 6.0
+## How far a planted boot may settle into loose snow below its Footprint rather
+## than bend its knee, when the other boot's Footprint is lower.
+const SETTLE_M := 0.15
 ## Facing twists the spine above the hips, shared out from the lower spine to the head.
 const TWIST_SHARES := {"Spine": 0.15, "Chest": 0.2, "UpperChest": 0.3, "Neck": 0.2, "Head": 0.15}
 
@@ -120,32 +123,41 @@ func planted(phase: float, run_amount: float) -> Dictionary:
 	}
 
 
-## Bend each leg so a planted boot rests on `support`, a callable from a world XZ
-## point to the snow height there: its heel, ball or toe tip touches the snow and
-## none sinks below it. A lifted boot keeps its clearance above the snow under it.
-## Returns the largest gap left between a planted boot and the snow.
-func ground(support: Callable, root_height: float, planted_boots: Dictionary) -> float:
+## Bend each leg so a planted boot rests in its Footprint and a swinging boot
+## clears the ground. `footprints` holds, per side, the snow height in the boot's
+## Footprint: where a planted boot stands, or where a swinging one is headed.
+## `terrain` maps a world XZ point to the ground under the snow. The body settles
+## to the planted boot that needs the least lift, so the legs keep the clip's shape.
+## Another planted boot on a higher Footprint first settles into the loose snow
+## under it, up to SETTLE_M and never below the ground; only what remains bends its
+## knee. A swinging boot ploughs through loose snow and is raised only where the
+## ground rises. Returns the largest gap left above a planted boot's Footprint.
+func ground(footprints: Dictionary, terrain: Callable, planted_boots: Dictionary) -> float:
 	contact_gap = 0.0
 	position.y = 0.0
 	var to_skeleton := skeleton.global_transform.affine_inverse()
 	var lifts := {}
-	var drop := 0.0
+	var drop := INF
 	for side in _legs:
 		if planted_boots[side]:
-			lifts[side] = -_clearance(_legs[side], support)
-		else:
-			var sole := _sole_points(_legs[side])[0]
-			lifts[side] = float(support.call(Vector2(sole.x, sole.z))) - root_height
-		if planted_boots[side]:
+			lifts[side] = float(footprints[side]) - _sole_points(_legs[side])[0].y
 			drop = minf(drop, lifts[side])
-	# A straight leg cannot reach lower snow, so the body settles to the lowest
-	# planted boot and every leg only has to bend.
+	if is_inf(drop):
+		drop = 0.0
+	for side in _legs:
+		var sole := _sole_points(_legs[side])[0]
+		var ground_y := float(terrain.call(Vector2(sole.x, sole.z)))
+		if planted_boots[side]:
+			var settle := clampf(float(footprints[side]) - ground_y, 0.0, SETTLE_M)
+			lifts[side] = drop + maxf(0.0, lifts[side] - drop - settle)
+		else:
+			lifts[side] = drop + maxf(0.0, ground_y - (sole.y + drop))
 	position.y = drop
 	for side in _legs:
 		var leg: Dictionary = _legs[side]
 		_reach(leg, to_skeleton.basis * Vector3(0, lifts[side] - drop, 0))
 		if planted_boots[side]:
-			contact_gap = maxf(contact_gap, absf(_clearance(leg, support)))
+			contact_gap = maxf(contact_gap, _sole_points(leg)[0].y - float(footprints[side]))
 	return contact_gap
 
 
@@ -156,14 +168,6 @@ func _sole_points(leg: Dictionary) -> Array[Vector3]:
 	var points: Array[Vector3] = [foot * (leg.heel as Vector3), toes * (leg.ball as Vector3), toes * (leg.tip as Vector3)]
 	points.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.y < b.y)
 	return points
-
-
-## How far the boot's sole is above the snow: negative when part of it is buried.
-func _clearance(leg: Dictionary, support: Callable) -> float:
-	var clearance := INF
-	for point in _sole_points(leg):
-		clearance = minf(clearance, point.y - float(support.call(Vector2(point.x, point.z))))
-	return clearance
 
 
 ## Two-bone reach: move the ankle by `offset` (skeleton space) keeping the boot's angle.

@@ -226,6 +226,73 @@ The same headless replay: **PASS, 0 failures, 32,838 observations**
 In play, walking takes about twice as long to cover ground, and Deep Snow, where
 running is held to walking, is crossed at 1.06 m/s.
 
+## 6. Grounding in the game
+
+After section 5 the owner found the walk right in Blender but the knees still
+bent in the game. [`knee_probe.gd`](parka-walk/knee_probe.gd) measures, every
+physics frame, the knee the game renders against the clip's own knee at the
+same phase. It covers the controlled figure walking in Shallow Snow, walking
+into the outpost yard's Deep drift and standing there, and the loop figure.
+[Before](parka-walk/knee-probe-before.txt) is `476e645`;
+[after](parka-walk/knee-probe-after.txt) is this change. The values are mean
+degrees added to the clip, for planted and swinging legs:
+
+| | Before | After |
+| --- | --- | --- |
+| Standing in Deep Snow (clip 4°) | +52.6 (57° rendered) | 0.0 |
+| Walking in Shallow Snow | +8.0 / +5.8 | 0.0 / 0.0 |
+| Walking into Deep Snow | +13.0 / +9.1 | 0.0 / 0.0 |
+| Loop figure, mostly running | +19.5 / +10.9 | 0.0 / 0.0 |
+
+The same probe on `40192c2`, before any of this work, stood at 68° and added
+18° walking into Deep Snow. So the squat came from the game, not the clip.
+
+**Cause.** `parka_avatar.ground()` raised every planted boot until its heel,
+ball and toe tip were all out of the snow. Those points reach past the 0.28 m
+print onto its rim or untouched snow. The body was only ever allowed to sink, so
+each lift came from the knee. Standing was worst: Stand puts the boots beside
+the hips, away from the last prints, so both sat on untouched snow, lifted
+about 10 cm. A swinging boot was also raised over untouched snow, so Deep Snow
+high-stepped.
+
+**Change.** [`parka_avatar.gd`](../../godot/parka_avatar.gd) and
+[`walker.gd`](../../godot/walker.gd):
+- A planted boot rests at its own Footprint's height, which the walker already
+  samples.
+- The body settles to the planted boot needing the least lift, up or down, so
+  the legs keep the clip's shape.
+- A planted boot whose Footprint is higher settles first into the loose snow
+  under it, up to `SETTLE_M` (15 cm) and never below the ground. Only the rest
+  bends its knee. Consecutive prints differ by up to 7.5 cm where the snow
+  deepens toward a drift, and a nearly straight leg shortened that much bends
+  about 50°.
+- A swinging boot ploughs through loose snow. It is raised only where the
+  ground under the snow rises, on the stair and the shelf's crest.
+- Boots never float. The contact gap the route checks is the height of a
+  planted boot above its Footprint.
+
+The probe's single largest remaining spike is 37° on one frame. The loop figure
+then crosses a 20 cm drift edge between consecutive prints.
+
+**Route.** The import check and the headless replay pass: **0 failures,
+32,838 observations** ([log](parka-walk/headless-route.log)). That includes
+nine stair descents and ascents, stair-crest and region-border contact, and
+every speed check.
+
+**Captures.** [`capture_walk.gd`](parka-walk/capture_walk.gd) now walks west in
+Shallow Snow, then east into the Deep drift (loose 0.42–0.45 m, boots sunk
+8–16 cm), and stands there. Section 4's images came from its earlier form,
+which walked south instead. Both revisions ran it at 1.06 m/s along identical
+paths ([positions](parka-walk/engine-positions-after.csv)):
+
+| | Before above, after below | Inspection |
+| --- | --- | --- |
+| Standing in Deep Snow | [engine-grounding-stand.png](parka-walk/engine-grounding-stand.png) | Before: a squat, gloves at the knees. After: upright on straight legs, boots settled a little into the snow. |
+| Walking into Deep Snow | [engine-grounding-walk-deep.png](parka-walk/engine-grounding-walk-deep.png) | Before: bent stance legs and high steps. After: the stance leg extends and the swinging boot ploughs through the snow. |
+| Walking in Shallow Snow | [engine-grounding-walk-west.png](parka-walk/engine-grounding-walk-west.png) | After: the clip's legs, unchanged by the snow. |
+
+![Standing in Deep Snow, before above and after below](parka-walk/engine-grounding-stand.png)
+
 ## Limits of this evidence
 
 - **Pace.** Walking now matches the recording's 1.06 m/s and 1.17 s cycle. The

@@ -5,8 +5,8 @@ changing snow depth, overlapping bootprints, wind and a town made of solid box
 placeholders. Two 1.7 m parka Avatars share one snow field; Tab switches which
 one you control, and the other walks a loop through the town. Each walks, runs and stands with clips exported by
 [`tools/characters/parka`](../tools/characters/parka/README.md); the clips follow the
-figure's step phase, its boots are bent onto the snow under them, and its
-Footprints use the same stride. Their gloves carry stand-in Player Colours. It runs without Java, LiveKit, a Room or Game state. Sharing
+figure's step phase, its planted boots settle into their Footprints with the clip's
+legs, its swinging boots plough through loose snow, and its Footprints use the same stride. Their gloves carry stand-in Player Colours. It runs without Java, LiveKit, a Room or Game state. Sharing
 trails between these local figures does not establish multiplayer synchronization.
 Existing clients retain their current integration.
 [ADR 0025](../docs/adr/0025-godot-single-snow-map-prototype.md) records the engine
