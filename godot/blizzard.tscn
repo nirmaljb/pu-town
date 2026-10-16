@@ -18,7 +18,8 @@ fog_enabled = true
 fog_mode = 1
 fog_light_color = Color(0.5843, 0.6039, 0.6431, 1)
 fog_density = 0.92
-fog_depth_end = 48.0
+fog_depth_begin = 34.0
+fog_depth_end = 73.0
 adjustment_enabled = true
 adjustment_contrast = 1.05
 adjustment_saturation = 0.85
@@ -125,7 +126,8 @@ light_energy = 0.32
 shadow_enabled = true
 shadow_opacity = 0.35
 shadow_blur = 6.0
-directional_shadow_max_distance = 160.0
+directional_shadow_mode = 0
+directional_shadow_max_distance = 60.0
 
 [node name="LightningFlash" type="DirectionalLight3D" parent="." unique_id=1902182139]
 transform = Transform3D(0.9396926, -0.33454618, 0.07110997, 0, 0.20791166, 0.9781476, -0.34202012, -0.9191581, 0.19537304, 0, 0, 0)

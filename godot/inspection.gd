@@ -168,7 +168,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch −55°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch %.0f°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
@@ -183,7 +183,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		_other_text(other),
 		_probe_text(),
 		"Overview %.0f m" % camera.current_distance() if camera.overview else "Distance %.1f m" % camera.distance,
-		camera.lean.length(), "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
+		camera.lean.length(), camera.rotation_degrees.x, "Focused" if focused else "Input paused", Engine.get_frames_per_second(),
 		"RECORDING  " + record_path if recording else notice,
 		"FRAME TRACE  %.1f / %.0f s" % [float(Time.get_ticks_usec() - frame_started_usec) / 1000000.0, FRAME_TRACE_SECONDS] if frame_recording and frame_started_usec > 0 else frame_notice
 	]

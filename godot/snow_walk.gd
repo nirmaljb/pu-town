@@ -21,6 +21,7 @@ var headless_replay := false
 
 func _ready() -> void:
 	headless_replay = DisplayServer.get_name() == "headless" and OS.get_cmdline_user_args().has("--headless-scene-check")
+	_fit_window()
 	add_child(town)
 	add_child(surface)
 	surface.configure_ground(town)
@@ -43,6 +44,22 @@ func _ready() -> void:
 		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0, Surface.DETAIL_SIZE.x, Surface.DETAIL_SIZE.y], OS.get_user_data_dir())
 	if OS.get_cmdline_user_args().has("--walk-scene-check") or OS.get_cmdline_user_args().has("--snow-scene-check"):
 		add_child(InspectionRoute.new())
+
+
+## The window opens at 2560 × 1440. Where the screen has no room for it, as on a
+## 1080p display, it shrinks to the largest size of the same shape that fills nine
+## tenths of the screen, centred.
+func _fit_window() -> void:
+	var window := get_window()
+	if DisplayServer.get_name() == "headless" or window.mode != Window.MODE_WINDOWED:
+		return
+	var usable := DisplayServer.screen_get_usable_rect(window.current_screen)
+	var room := Vector2(usable.size) * 0.9
+	var size := Vector2(window.size)
+	if size.x <= room.x and size.y <= room.y:
+		return
+	window.size = Vector2i(size * minf(room.x / size.x, room.y / size.y))
+	window.position = usable.position + (usable.size - window.size) / 2
 
 
 func _physics_process(delta: float) -> void:

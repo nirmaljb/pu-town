@@ -8,9 +8,9 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 window/size/viewport_width=1280
-window/size/viewport_height=800
-window/size/window_width_override=1280
-window/size/window_height_override=800
+window/size/viewport_height=720
+window/size/window_width_override=2560
+window/size/window_height_override=1440
 window/stretch/mode="canvas_items"
 
 [rendering]
@@ -18,7 +18,8 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
 textures/vram_compression/import_etc2_astc=true
-anti_aliasing/quality/msaa_3d=2
+; Off: at 2560 × 1440 on a Retina screen its edges cost more than they show.
+anti_aliasing/quality/msaa_3d=0
 environment/defaults/default_clear_color=Color(0.39, 0.46, 0.52, 1)
 
 [physics]

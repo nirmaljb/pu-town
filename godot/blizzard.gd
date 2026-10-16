@@ -6,23 +6,31 @@ extends Node3D
 ##
 ## Tune it live in the editor: open blizzard.tscn, run the project and edit this node,
 ## SkyKey or WorldEnvironment in the Inspector; Ctrl+S keeps the values. This node
-## owns the Environment's fog density, depth range and light energy and its
-## background energy; every other Environment and SkyKey property is edited directly.
+## owns the Environment's fog density, depth range and light energy, its background
+## energy and SkyKey's shadow distance; every other Environment and SkyKey property
+## is edited directly.
 
 const TownLayout = preload("res://town_layout.gd")
 const FollowCamera = preload("res://follow_camera.gd")
 
 @export_group("Whiteout")
-## Fog begins this far from the camera at play distance; every distance here scales
-## with the camera's, so the overview is hazy but legible.
-@export_range(0.0, 60.0, 0.5, "suffix:m") var fog_begin := 10.0
+## Fog begins this far from the camera at play distance, a few metres short of the
+## figure 40 m away; every distance here scales with the camera's, so the overview
+## is hazy but legible.
+@export_range(0.0, 100.0, 0.5, "suffix:m") var fog_begin := 34.0
 ## Fog reaches its full amount this far from the camera at play distance.
-@export_range(5.0, 200.0, 0.5, "suffix:m") var fog_end := 48.0
+@export_range(5.0, 300.0, 0.5, "suffix:m") var fog_end := 73.0
 ## How much of a distant view the fog replaces.
 @export_range(0.0, 1.0, 0.01) var whiteout := 0.92
 ## Above one the fog thickens late; below one it thickens early.
 @export_exp_easing var fog_curve := 1.0
 @export_range(0.0, 4.0, 0.01) var fog_brightness := 1.0
+
+@export_group("Shadows")
+## SkyKey draws one shadow map from the camera out to this distance at play
+## distance, scaled with the camera's like the fog. The view's far edge is about
+## 47 m away, so splitting the map across a longer range only costs frame time.
+@export_range(10.0, 400.0, 1.0, "suffix:m") var shadow_reach := 60.0
 
 @export_group("Snowfall")
 @export_range(0.0, 1.0, 0.01) var snowfall := 0.7
@@ -127,6 +135,7 @@ func _process(delta: float) -> void:
 	environment.fog_depth_end = maxf(environment.fog_depth_begin + 1.0, fog_end * reach * closing)
 	environment.fog_light_energy = fog_brightness * (1.0 + 0.45 * flash * lightning_brightness)
 	environment.background_energy_multiplier = 1.0 + 0.45 * flash * lightning_brightness
+	_sky_key.directional_shadow_max_distance = shadow_reach * reach
 	_flash.light_energy = flash * lightning_brightness
 	_flash.visible = flash > 0.0
 	_place_snow(reach)

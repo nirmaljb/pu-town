@@ -1,0 +1,155 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+100 × 56 metres; 24 × 16 m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Route paused: restore scene focus to continue
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792138614-37253.csv
+Snow route: initial idle · 0.5 s
+Snow route: turn in place
+Snow route: lean to corner · 1.5 s
+Snow route: cursor on figure · 1.5 s
+Snow route: repeated brief taps must accumulate foot travel
+Snow route: north-west walk · 2.0 s
+Snow route: south-east return · 2.0 s
+Snow route: walk north facing east · 2.0 s
+Snow route: walk south facing east · 2.0 s
+Snow route: cursor back on figure · 1.5 s
+Snow route: run across outpost yard · 2.5 s
+Snow route: reach lodge front z · 2.66666666666667 s
+Snow route: reach lodge front x · 1.15744357638889 s
+Snow route: lodge approach · 2.5 s
+Snow route: lodge blocked · 1.2 s
+Snow route: blocked idle · 0.5 s
+Snow route: reach meeting-hall lane z · 5.86662228902181 s
+Snow route: reach meeting-hall lane x · 16.2314571804471 s
+Snow route: run through deep snow · 2.0 s
+Snow route: pack deep trail return z · 2.03360260857476 s
+Snow route: pack deep trail again · 2.0 s
+Snow route: packed run start z · 2.00026936001248 s
+Snow route: run on packed trail · 2.0 s
+Snow route: reach meeting-hall gap z · 2.48779439926148 s
+Snow route: reach meeting-hall gap x · 0.6646908654107 s
+Snow route: first trail · 2.0 s
+World probe 1: (-6.109442, 2.82996)
+Snow route: fresh probe · 0.5 s
+Snow route: leave detail region z · 1.32887119717068 s
+Snow route: enter courtyard x · 2.66469256083171 s
+Snow route: wall approach · 2.2 s
+Snow route: wall blocked · 1.2 s
+Snow route: cross courtyard z · 1.86662228902181 s
+Snow route: cross courtyard x · 4.44245444403755 s
+Snow route: probe outside region · 0.5 s
+Snow route: reach courtyard west z · 1.33337565263112 s
+Snow route: reach courtyard west x · 3.54796515570747 s
+Snow route: run in courtyard · 2.0 s
+Snow route: return to courtyard z · 2.68337546454536 s
+Snow route: return to courtyard x · 3.55762651231556 s
+Snow route: reach the walking figure's trail z · 0.90550928976801 s
+Snow route: reach the walking figure's trail x · 2.42428165011937 s
+World probe 2: (-16.68203, -2.130105)
+Snow route: trail found · 0.5 s
+Snow route: follow trail · 2.0 s
+Snow route: overlap trail return 0 · 3.0 s
+Snow route: overlap trail repeat 0 · 3.0 s
+Snow route: overlap trail return 1 · 3.05 s
+Snow route: overlap trail repeat 1 · 3.05 s
+Snow route: overlap trail return 2 · 3.1 s
+Snow route: overlap trail repeat 2 · 3.1 s
+Snow route: overlap trail return 3 · 3.15 s
+Snow route: overlap trail repeat 3 · 3.15 s
+Snow route: trail overlapped · 0.5 s
+Snow route: leave courtyard z · 0.90004666646322 s
+Snow route: leave courtyard x · 0.42574734157987 s
+Snow route: return to east gate z · 0.01662040087912 s
+Snow route: return to east gate x · 4.45203484429253 s
+Snow route: leave through east gate x · 2.65198940700956 s
+Snow route: return to trail z · 1.25780620839861 s
+Snow route: return to trail x · 0.06333351135254 s
+Snow route: probe revisited · 0.5 s
+Saved user://capture-1792138761-33512.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792138761-33512.png)
+Snow route: shelf cliff approach · 3.0 s
+Snow route: shelf cliff blocked · 1.2 s
+Snow route: return to meeting-hall gap z · 3.86662207709418 s
+Snow route: return to meeting-hall gap x · 0.05197376675076 s
+Snow route: re-enter courtyard x · 2.68135939704047 s
+Snow route: cross to south gate x · 4.4424548678928 s
+Snow route: reach south gate z · 0.88893014854855 s
+Snow route: reach south gate x · 0.65907626681858 s
+Snow route: descend stair z · 8.87781863742405 s
+Snow route: run in forest · 3.0 s
+Snow route: boundary blocked · 1.0 s
+Snow route: reach forest west z · 1.64439985487196 s
+Snow route: reach forest west x · 1.99240281846787 s
+Snow route: run to forest cliff foot · 2.5 s
+Snow route: forest cliff blocked · 1.2 s
+Snow route: return to stair foot z · 1.19995541042751 s
+Snow route: return to stair foot x · 2.00761752658422 s
+Snow route: climb stair z · 8.88894568549262 s
+Snow route: climb stair x · 0.00906965467667 s
+Snow route: lean before overview · 1.0 s
+Snow route: overview by M · 1.0 s
+Snow route: overview walk back · 1.0 s
+Snow route: overview wheel out · 0.3 s
+Snow route: overview closed by M · 0.5 s
+Snow route: walk north sweeping behind
+Saved user://capture-1792138826-20803.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792138826-20803.png)
+Snow route: stop facing behind · 1.0 s
+Snow route: face east again · 0.5 s
+Snow route: cursor on figure after sweep · 1.5 s
+Snow route: return to south gate z · 2.99444177415636 s
+Snow route: reach courtyard shelter z · 4.00555589463976 s
+Snow route: reach courtyard shelter x · 3.3257361518012 s
+World probe 3: (-30.95217, -7.129988)
+Snow route: leave courtyard shelter z · 3.1222169664171 s
+Snow route: leave courtyard shelter x · 4.00763108995227 s
+Snow route: head for the outpost z · 0.01111108726925 s
+Snow route: head for the outpost x · 4.43536800808378 s
+Snow route: overview before border · 0.5 s
+Snow route: leave courtyard for the outpost x · 2.65198940700956 s
+Snow route: walk to the outpost z · 3.33888891339302 s
+Snow route: walk to the outpost x · 13.3186406029595 s
+Snow route: overview wheel in · 0.3 s
+Snow route: reach open yard z · 2.01110521952311 s
+Snow route: reach open yard x · 0.01475440131293 s
+World probe 4: (23.9282, 3.164997)
+Snow route: reach shed windward face x · 4.89080132378471 s
+World probe 5: (34.99317, 3.092498)
+Snow route: reach lodge lee z · 3.46111043294271 s
+Snow route: reach lodge lee x · 0.00918070475262 s
+World probe 6: (34.91566, -4.972494)
+Snow route: probes placed · 0.5 s
+Snow route: wind fills prints · 2.5 s
+Snow route: drifts build · 16.0 s
+Saved user://capture-1792138917-89283.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792138917-89283.png)
+Snow route: run through drift · 2.0 s
+Snow route: wind turned · 10.0 s
+Snow route: wind frozen · 2.0 s
+Snow route: widest play view · 0.5 s
+Snow route: whole map · 0.5 s
+Saved user://capture-1792138933-6609.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792138933-6609.png)
+Snow route: close view · 0.5 s
+Saved user://capture-1792138934-57413.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792138934-57413.png)
+Snow route: second figure idle · 0.5 s
+Snow route: cursor on second figure · 1.5 s
+Snow route: first figure rejoins loop · 8.0 s
+Saved user://route-1792138614-37253.csv
+Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792138614-37253.csv
+Walking figure: 18004 moving observations, 17897 at the speed its snow allows, 7322 running in Shallow Snow, 2724 walking in Deep, 3376 in the courtyard, 1541 on the stair, 6 descents and 6 ascents
+Tracked the walking figure's trail at (-16.52494, -2.0), laid 37.6 s into the record 43.8 m from the controlled figure; probe (-16.68203, -2.130105) compaction 0.656
+Tracking probe compaction 0.656 -> 0.763 after following and overlapping
+Wind filled 0.734 of the tracked trail's compaction
+Released figure stood 9.15 m off the loop at (30.44576, -4.812494), joined it at (28.0, 4.0) and walked on to 12% of the loop
+Same deep corridor, Shift held: fresh 2.250 m/s -> packed 2.890 m/s (53 / 41 samples)
+Camera steadiness over 131 steps: deepest sink 0.391 m; largest per-observation change, figure's sink 0.1108 m, camera against untouched snow 0.0022 m
+Walking with the cursor behind: 52 observations directly behind, held east 79 and west 23, shoulder changes ["+110° to -7° with the cursor at -97°"]
+Stopped 68° from the cursor; expected to reach it within 9 observations
+After 41.1 wind-seconds, prints remain: exposed 0.69, sheltered 0.92, lee 0.00
+Lee drift 0.604 -> 1.112 m (first second +0.100, last second +0.001)
+Windward scour 0.494 -> 0.033 m
+Reversed wind: old lee -0.696 m, old windward face +0.494 m
+Detail region at (22.0, 3.2); leaned to (23.6, 0.8); returned to (22.0, 3.2)
+Overview walk across the region border: outside 440, border 562, inside 279; border contact gap 0.0000 m
+Footprint uploads: 253030400 bytes for 2346 footsteps (107856 per step; touched-tile bound 409600 per step)
+Coverage: 18004 observations; straight 12186, diagonal 242, fast run 199, deep run 622, blocked 501, overview 1406, camera follow 15409
+SNOW SCENE GRAPHICAL ENGINE-EVENT REPLAY: PASS · 0 failures

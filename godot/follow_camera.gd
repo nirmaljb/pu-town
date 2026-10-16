@@ -1,17 +1,19 @@
 extends Camera3D
 ## A north-up perspective camera that follows the controlled figure. Its yaw never
-## changes. Its focus leans toward the cursor's point on the ground, and the wheel
+## changes. Like the owner's reference views, it looks down at 45° through a long
+## lens from far off, so verticals barely splay and near and far snow keep nearly
+## the same scale, and the figure stands about an eighth of the screen tall. Its focus leans toward the cursor's point on the ground, and the wheel
 ## zooms through the play range or out to a whole-map overview of the town, which
 ## M also opens and closes. It frames the untouched snow where the figure stands
 ## and takes only a softened share of each step's sink into it, so the view settles
 ## gently at a footfall instead of jolting with it.
 
 const TownLayout = preload("res://town_layout.gd")
-const FIELD_OF_VIEW := 40.0
-const PITCH := -55.0
-const PLAY_DISTANCE := 16.0
-const MIN_DISTANCE := 10.0
-const MAX_DISTANCE := 30.0
+const FIELD_OF_VIEW := 16.0
+const PITCH := -45.0
+const PLAY_DISTANCE := 40.0
+const MIN_DISTANCE := 25.0
+const MAX_DISTANCE := 75.0
 const ZOOM_STEP := 1.15
 const MAX_LEAN := 3.0
 ## The focus leans by this share of the cursor's offset from the figure. Below one,
@@ -20,7 +22,7 @@ const LEAN_SHARE := 0.25
 const LEAN_RATE := 6.0
 ## The focus sits this share of the distance north of the figure, so the figure
 ## stands slightly below the centre of the screen at every play distance.
-const FRAMING_SHARE := 0.075
+const FRAMING_SHARE := 0.012
 ## The overview frames the map rectangle with this margin, from the forest floor
 ## to the top of the cliff rock.
 const OVERVIEW_MARGIN := 3.0
@@ -47,8 +49,10 @@ func _ready() -> void:
 	projection = PROJECTION_PERSPECTIVE
 	keep_aspect = KEEP_HEIGHT
 	fov = FIELD_OF_VIEW
-	near = 0.1
-	far = 400.0
+	# The camera stands at least 25 m from its focus and a few hundred metres off
+	# in the overview, so a deeper near plane keeps depth precision.
+	near = 1.0
+	far = 1000.0
 	rotation_degrees = Vector3(PITCH, 0.0, 0.0)
 	current = true
 	get_window().mouse_exited.connect(func() -> void: cursor_inside = false)

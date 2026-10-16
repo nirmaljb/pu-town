@@ -58,9 +58,13 @@ inside the map, and it blends into the live 0.8 m surface. Sole outlines are
 shaded from the picture everywhere, without changing height. CPU foot support
 still evaluates exactly the heights and triangles the shader draws.
 
-A perspective camera (40° vertical field of view, −55° pitch, 16 m from its
-focus) follows the figure with north up and never rotates. Its focus leans up to
-3 m toward the cursor's point on the ground. The wheel zooms from 10 to 30 m,
+A perspective camera follows the figure with north up and never rotates. It
+first used a 40° vertical field of view, a −55° pitch and 16 m from its focus;
+as revised to match the owner's reference views
+([record](../verification/2026-10-16-godot-snow-view.md)), it now looks down at
+−45° through a 16° long lens from 40 m, so the figure stands about an eighth of
+the screen tall and verticals barely splay. Its focus leans up to
+3 m toward the cursor's point on the ground. The wheel zooms from 25 to 75 m,
 plus a whole-map overview for inspection, which M also opens and closes. WASD
 moves relative to the screen. Facing follows the cursor, including while standing
 still, but while walking the upper body turns no more than 110° from travel and
