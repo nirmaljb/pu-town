@@ -10,7 +10,8 @@ extends Node3D
 
 const Avatar = preload("res://parka_avatar.gd")
 const TownLayout = preload("res://town_layout.gd")
-const WALK_SPEED := 2.25
+# Walking matches the owner's walk recording, so the clip plays at its recorded pace.
+const WALK_SPEED := 1.06
 const RUN_SPEED := 4.5
 const HEIGHT := 1.7
 const FOOTPRINT_RADIUS := 0.3

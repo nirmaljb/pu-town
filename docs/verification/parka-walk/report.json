@@ -37,12 +37,12 @@
   "height_m": 1.695,
   "motion": {
     "Walk": {
-      "frames": 33,
-      "cycle_seconds": 0.5513,
+      "frames": 70,
+      "cycle_seconds": 1.1701,
       "step_m": 0.6202,
       "max_planted_slip_per_frame_mm": 0.0,
       "lowest_vertex_mm": -8.2,
-      "highest_frame_low_point_mm": 0.2
+      "highest_frame_low_point_mm": -0.1
     },
     "Run": {
       "frames": 25,
@@ -53,5 +53,5 @@
       "highest_frame_low_point_mm": 57.5
     }
   },
-  "glb_bytes": 687944
+  "glb_bytes": 721724
 }

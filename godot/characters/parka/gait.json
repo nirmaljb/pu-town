@@ -8,7 +8,7 @@
   "phase": "one cycle is two steps; the left boot lands at 0 and the right at 0.5",
   "boot_lateral_m": 0.105,
   "walk": {
-    "speed_mps": 2.25,
+    "speed_mps": 1.06,
     "step_m": 0.6202,
     "duty": 0.62,
     "landing_ahead_m": 0.369

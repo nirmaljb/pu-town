@@ -76,9 +76,8 @@ and, for the walk, [its rework](../../../docs/verification/2026-10-16-parka-walk
   but stands taller: the knee bends at most 39° in stance, and the lean is 10°.
 - **Gait data.** `gait.json` carries step lengths, stance fractions and how far
   ahead a boot lands. The walker places Footprints from it, so the prints match
-  the boots: walk 2.25 m/s with the recording's 0.62 m steps, run 4.5 m/s with
-  0.95 m steps. The recording walks at 1.06 m/s, so in the game Walk plays about
-  twice as fast as recorded.
+  the boots: walk 1.06 m/s with 0.62 m steps, the recording's pace, so Walk plays
+  at its recorded cadence; run 4.5 m/s with 0.95 m steps.
 - **Boots.** They follow the walk recording rather than the static sheet. Each has a
   full, nearly round shaft flush with the heel, under trousers that end at 27 cm,
   and a low domed toe that slopes from 11 cm to a rounded 6 cm nose; the boot is

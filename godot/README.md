@@ -76,7 +76,7 @@ this source-project slice.
 
 ## Inspect
 
-Walk with WASD at 2.25 m/s. Directions follow the screen, whose north is always
+Walk with WASD at 1.06 m/s, the pace of the owner's walk recording. Directions follow the screen, whose north is always
 up: W walks north, S south, D east and A west. Diagonal input is normalized. Hold Shift to request running at up to 4.5 m/s.
 Loose snow at or below 10 cm allows full running, while the permitted speed
 smoothly falls to walking at 40 cm. Repeated traffic compresses the snow and can
@@ -156,7 +156,7 @@ height 0 m. The **southern forest**, west of x −5.5 m and south of z 10 m, lie
   slope, 10 m long from z 9 m to z 19 m, with no individual steps and nothing
   walkable beneath it. Low walls run along both sides, each 1 m segment standing
   on the slope beneath it, so you cannot step off. Slope never changes speed:
-  walking stays 2.25 m/s on the way down and back up.
+  walking stays 1.06 m/s on the way down and back up.
 - **Cliff rock** covers every other step between the levels: a band along the
   shelf's southern edge, two masses flanking the stair, and a mass along the
   forest's east side. Each rises 2 m above the shelf and stops you from either

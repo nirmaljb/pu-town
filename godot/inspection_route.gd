@@ -26,7 +26,8 @@ const MAX_TILES_PER_STEP := 4
 # Running is full at or below 10 cm of loose snow and falls to walking at 40 cm.
 const FULL_RUN_DEPTH_M := 0.10
 const WALK_ONLY_DEPTH_M := 0.40
-const WALK_MPS := 2.25
+# Walking matches the owner's walk recording (1.06 m/s); running is unchanged.
+const WALK_MPS := 1.06
 const RUN_MPS := 4.5
 # The specified camera: perspective, 16° field of view, −45° pitch, north up,
 # 40 m from its focus in a 25–75 m play range, and a lean of at most 3 m.
@@ -142,37 +143,39 @@ func _run() -> void:
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure")
 	await _short_steps()
 	# Both figures start in the outpost yard, where shallow and deep snow mix.
-	await _leg([KEY_W, KEY_A], 2.0, "north-west walk")
-	await _leg([KEY_S, KEY_D], 2.0, "south-east return")
+	# Legs that walk, or run where Deep Snow holds the figure to walking, are given
+	# as a distance over WALK_MPS, so each footstep lands where it did at any pace.
+	await _leg([KEY_W, KEY_A], 4.5 / WALK_MPS, "north-west walk")
+	await _leg([KEY_S, KEY_D], 4.5 / WALK_MPS, "south-east return")
 	# Facing east, the figure still walks north and back, at walking speed, with its prints.
-	await _cursor_leg(Vector2(0.3, 0), [KEY_W], 2.0, "walk north facing east")
-	await _cursor_leg(Vector2(0.3, 0), [KEY_S], 2.0, "walk south facing east")
+	await _cursor_leg(Vector2(0.3, 0), [KEY_W], 4.5 / WALK_MPS, "walk north facing east")
+	await _cursor_leg(Vector2(0.3, 0), [KEY_S], 4.5 / WALK_MPS, "walk south facing east")
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor back on figure")
 	# Running east from the Shallow west of the outpost yard reaches its Deep drift.
 	await _leg([KEY_D, KEY_SHIFT], 2.5, "run across outpost yard")
 	await _goto(LANDMARKS.lodge_front, "reach lodge front")
-	await _leg([KEY_W], 2.5, "lodge approach")
+	await _leg([KEY_W], 5.625 / WALK_MPS, "lodge approach")
 	await _leg([KEY_W], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
 	# Repeated traffic packs a lane of the meeting-hall gap's Deep Snow until it is runnable.
 	# The parka's 0.62 m walking steps press fewer prints per pass, so it takes three.
 	await _goto(LANDMARKS.meeting_hall_lane, "reach meeting-hall lane")
-	await _leg([KEY_W, KEY_SHIFT], 2.0, "run through deep snow")
+	await _leg([KEY_W, KEY_SHIFT], 4.5 / WALK_MPS, "run through deep snow")
 	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail return")
-	await _leg([KEY_W], 2.0, "pack deep trail again")
+	await _leg([KEY_W], 4.5 / WALK_MPS, "pack deep trail again")
 	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail third return")
-	await _leg([KEY_W], 2.0, "pack deep trail third")
+	await _leg([KEY_W], 4.5 / WALK_MPS, "pack deep trail third")
 	await _goto(LANDMARKS.meeting_hall_lane, "packed run start")
-	await _leg([KEY_W, KEY_SHIFT], 2.0, "run on packed trail")
+	await _leg([KEY_W, KEY_SHIFT], 4.5 / WALK_MPS, "run on packed trail")
 	# Lay a trail in the meeting-hall gap and fix a world probe on it.
 	await _goto(LANDMARKS.meeting_hall_gap_south, "reach meeting-hall gap")
-	await _leg([KEY_W], 2.0, "first trail")
+	await _leg([KEY_W], 4.5 / WALK_MPS, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
 	# Leave the detail region through the compound's east gate into the courtyard.
 	await _goto(LANDMARKS.meeting_hall_gap, "leave detail region")
 	await _goto(LANDMARKS.courtyard_east, "enter courtyard")
-	await _leg([KEY_S], 2.2, "wall approach")
+	await _leg([KEY_S], 4.95 / WALK_MPS, "wall approach")
 	await _leg([KEY_S], 1.2, "wall blocked")
 	await _goto(LANDMARKS.courtyard, "cross courtyard")
 	await _leg([], 0.5, "probe outside region")
@@ -192,12 +195,12 @@ func _run() -> void:
 	await _goto(laid_trail.point, "reach the walking figure's trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "trail found")
-	await _leg([KEY_A], 2.0, "follow trail")
+	await _leg([KEY_A], 4.5 / WALK_MPS, "follow trail")
 	# Gait phase differs between figures. Passes of slightly different lengths move
-	# where the boots land along both lanes, a fifth of a step at a time, instead of
-	# assuming a particular step lands on an exact world texel.
+	# where the boots land along both lanes, about a fifth of a step at a time, instead
+	# of assuming a particular step lands on an exact world texel.
 	for pass_index in range(4):
-		var seconds := 3.0 + 0.05 * pass_index
+		var seconds := (6.75 + 0.1125 * pass_index) / WALK_MPS
 		await _leg([KEY_D], seconds, "overlap trail return %d" % pass_index)
 		await _leg([KEY_A], seconds, "overlap trail repeat %d" % pass_index)
 	await _leg([], 0.5, "trail overlapped")
@@ -212,7 +215,7 @@ func _run() -> void:
 		_tap(KEY_F9)
 		await _wait(0.2)
 	# South from the meeting-hall gap, the shelf ends at cliff rock above the forest.
-	await _leg([KEY_S], 3.0, "shelf cliff approach")
+	await _leg([KEY_S], 6.75 / WALK_MPS, "shelf cliff approach")
 	await _leg([KEY_S], 1.2, "shelf cliff blocked")
 	# The stair from the compound's south gate is the way down to the forest.
 	await _goto(LANDMARKS.meeting_hall_gap, "return to meeting-hall gap")
@@ -221,11 +224,11 @@ func _run() -> void:
 	await _goto(LANDMARKS.south_gate, "reach south gate")
 	await _goto(LANDMARKS.forest_lane, "descend stair")
 	# The forest's Deep Snow allows only walking, as does the Deep Snow at the cliff foot.
-	await _leg([KEY_S, KEY_SHIFT], 3.0, "run in forest")
+	await _leg([KEY_S, KEY_SHIFT], 6.75 / WALK_MPS, "run in forest")
 	await _leg([KEY_S], 1.0, "boundary blocked")
 	# From the forest floor the cliff beside the stair is equally impassable.
 	await _goto(LANDMARKS.forest_west, "reach forest west")
-	await _leg([KEY_W, KEY_SHIFT], 2.5, "run to forest cliff foot")
+	await _leg([KEY_W, KEY_SHIFT], 5.625 / WALK_MPS, "run to forest cliff foot")
 	await _leg([KEY_W], 1.2, "forest cliff blocked")
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
@@ -235,8 +238,8 @@ func _run() -> void:
 	# returns to the play distance it left, and a held M's repeat does not toggle.
 	await _cursor_leg(Vector2(0.3, 0), [], 1.0, "lean before overview")
 	_tap(KEY_M)
-	await _leg([KEY_W], 1.0, "overview by M")
-	await _leg([KEY_S], 1.0, "overview walk back")
+	await _leg([KEY_W], 2.25 / WALK_MPS, "overview by M")
+	await _leg([KEY_S], 2.25 / WALK_MPS, "overview walk back")
 	_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.3, "overview wheel out")
 	_tap(KEY_M)
@@ -457,11 +460,11 @@ func _goto(destination: Vector2, description: String) -> void:
 	var row: Dictionary = rows.back()
 	var dz := z - float(row.z_m)
 	if absf(dz) > 0.02:
-		await _leg([KEY_S] if dz > 0 else [KEY_W], absf(dz) / 2.25, description + " z")
+		await _leg([KEY_S] if dz > 0 else [KEY_W], absf(dz) / WALK_MPS, description + " z")
 		arrivals.append({"stage": description + " z", "destination": destination})
 	var dx := x - float(row.x_m)
 	if absf(dx) > 0.02:
-		await _leg([KEY_D] if dx > 0 else [KEY_A], absf(dx) / 2.25, description + " x")
+		await _leg([KEY_D] if dx > 0 else [KEY_A], absf(dx) / WALK_MPS, description + " x")
 		arrivals.append({"stage": description + " x", "destination": destination})
 
 
@@ -618,14 +621,14 @@ func _check_record() -> void:
 			_fail_once("Diagonal or running input exceeded the 4.5 m/s cap")
 		if input.length() > 0.5 and not obstruction:
 			if row.run_requested == "false":
-				if absf(speed - 2.25) > 0.003:
-					_fail_once("Unobstructed ordinary walking did not stay at 2.25 m/s")
+				if absf(speed - WALK_MPS) > 0.003:
+					_fail_once("Unobstructed ordinary walking did not stay at %.2f m/s" % WALK_MPS)
 				if absf(input.x) > 0.1 and absf(input.y) > 0.1:
 					diagonal += 1
 				else:
 					straight += 1
 			else:
-				var expected_speed := lerpf(2.25, 4.5, 1.0 - smoothstep(0.10, 0.40, float(row.loose_depth_m)))
+				var expected_speed := lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, float(row.loose_depth_m)))
 				if absf(speed - expected_speed) > 0.003:
 					_fail_once("Running speed did not follow observed loose snow depth")
 				if speed > 3.0:
@@ -749,7 +752,7 @@ func _check_stair(rows: Array[Dictionary]) -> void:
 			if ground > heights.x + 0.1 and ground < heights.y - 0.1:
 				on_slope += 1
 				slope_gap = maxf(slope_gap, absf(float(row.contact_gap_m)))
-				slope_speed = maxf(slope_speed, absf(float(row.horizontal_mps) - 2.25))
+				slope_speed = maxf(slope_speed, absf(float(row.horizontal_mps) - WALK_MPS))
 		var change := heights.y - heights.x
 		if absf(change - LEVEL_DROP_M) > 0.25:
 			failures.append("The stair did not join levels about 5 m apart (observed %.3f m)" % change)
@@ -1187,7 +1190,7 @@ func _check_facing(rows: Array[Dictionary]) -> void:
 				continue
 			if _angle_between(float(row.facing_deg), 90.0) > 20.0:
 				_fail_once("Facing left the cursor while walking")
-			if _angle_between(float(row.travel_deg), leg[1]) > 0.5 or absf(float(row.horizontal_mps) - 2.25) > 0.003:
+			if _angle_between(float(row.travel_deg), leg[1]) > 0.5 or absf(float(row.horizontal_mps) - WALK_MPS) > 0.003:
 				_fail_once("Walking while facing elsewhere changed travel direction or speed")
 			if int(row.step_count) > int(walk.front().step_count) and _angle_between(float(row.print_deg), leg[1]) > 0.5:
 				_fail_once("Bootprints did not point the way the figure travelled")

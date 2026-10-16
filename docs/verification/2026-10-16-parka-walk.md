@@ -63,6 +63,7 @@ turns `left.mp4` into [`walk-left.png`](../../tools/characters/parka/reference/w
 - [`gait.json`](../../godot/characters/parka/gait.json): walk step 0.62 m
   (was 0.53), stance 0.62 (was 0.60), landing 0.369 m ahead (was 0.31). Run is
   unchanged.
+- Walking speed is 1.06 m/s, the recording's pace (was 2.25; see section 5).
 
 ## 1. Knee flexion
 
@@ -149,8 +150,9 @@ Headless engine-event replay:
   --snow-scene-check --headless-scene-check --auto-start
 ```
 
-**PASS, 0 failures, 18,178 observations** ([log](parka-walk/headless-route.log)).
-It renders nothing. The log ends with the headless renderer's known
+At 2.25 m/s, as first pushed in `4024883`:
+**PASS, 0 failures, 18,178 observations** ([log](parka-walk/headless-route-2.25.log)).
+It renders nothing. Section 5 has the run at the recording's pace. The log ends with the headless renderer's known
 `Parameter "material" is null` at shutdown.
 
 **Packed Path.** The longer step changed one stage. With the route unchanged,
@@ -188,12 +190,46 @@ that crossed the yard's Deep drift showed exactly that.
 
 ![In the Godot scene, before above and after below, walking west](parka-walk/engine-walk-west.png)
 
+The captures were taken at 2.25 m/s. Section 5 changes only the pace, not the poses.
+
+## 5. Walking at the recording's pace
+
+At 2.25 m/s the 0.62 m steps cycled about 2.1 times faster than recorded, so the
+owner asked for the walk to be slowed toward the recording's 1.06 m/s.
+
+- **Speed.** `WALK_SPEED` in [`walker.gd`](../../godot/walker.gd) and Walk's
+  speed in [`gait.py`](../../tools/characters/parka/gait.py) are both 1.06 m/s.
+  The rebuilt Walk clip is a 1.170 s cycle (70 frames); the recording's is
+  1.167 s. Poses, step and slip are unchanged (planted slip 0 mm per frame;
+  silhouette IoU 0.823, legs 0.784). Running stays 4.5 m/s.
+- **Route.** [`inspection_route.gd`](../../godot/inspection_route.gd) now checks
+  every walking speed against `WALK_MPS`, which is 1.06; it had several 2.25
+  literals, including in navigation.
+  - With only that change the route failed six checks. Timed walking legs now
+    covered less than half their ground, so they no longer reached the lodge,
+    the courtyard wall, the shelf cliff or the map boundary. They also left
+    too few prints in the facing walk and too little walking in the overview.
+  - Every leg that walks, or runs where Deep Snow holds it to walking, is now
+    given as its former distance over `WALK_MPS`. Prints are laid by distance,
+    so each footstep lands where it did before.
+
+`GODOT_BIN=~/Downloads/Godot.app ./godot/run.sh --check` completed without errors.
+The same headless replay: **PASS, 0 failures, 32,838 observations**
+([log](parka-walk/headless-route.log)).
+- The route takes longer: 32,838 observations at 60 Hz, against 18,178.
+- On the packed lane, running reaches 2.05 m/s against 1.06 m/s on fresh Deep
+  Snow.
+- Every other check passes unchanged. That includes stair contact and speed,
+  Facing, the overview, wind probes, trail tracking and the camera's
+  footfall steadiness (deepest sink 0.40 m).
+
+In play, walking takes about twice as long to cover ground, and Deep Snow, where
+running is held to walking, is crossed at 1.06 m/s.
+
 ## Limits of this evidence
 
-- **Cadence.** The game walks at 2.25 m/s and the recording at 1.06 m/s. Walk is
-  driven by distance, so in play its 0.551 s cycle runs about 2.1 times faster
-  than recorded. The step, poses and timing within the cycle match. The speed
-  is unchanged.
+- **Pace.** Walking now matches the recording's 1.06 m/s and 1.17 s cycle. The
+  pace was checked by the headless replay's speed checks, not in a focused window.
 - **Scope of the comparison.** Only the side view is scored. The other five
   cameras were compared by eye and by the reviewer's measurements, with phases
   matched approximately.

@@ -34,9 +34,9 @@ GAITS = {
     # rocker: the boot stays stiff and rolls off the TIP; otherwise it bends at the ball.
     # pelvis/shoulders: yaw of the hips with the legs and of the shoulders against them.
     # Walk is fitted to the owner's walk recording (reference/walk-left.png): its
-    # 0.62 m step, stance, toe-up landing and 3 cm bob are measured, and the rest
-    # were chosen to match its silhouettes phase by phase (README, Walk).
-    'Walk': dict(speed=2.25, duty=0.62, front=0.319, back=0.45, hip=0.8635, bob=0.0145, bob_phase=0.0,
+    # 1.06 m/s pace, 0.62 m step, stance, toe-up landing and 3 cm bob are measured,
+    # and the rest were chosen to match its silhouettes phase by phase (README, Walk).
+    'Walk': dict(speed=1.06, duty=0.62, front=0.319, back=0.45, hip=0.8635, bob=0.0145, bob_phase=0.0,
                  lift=0.0, lift_peak=0.3, kick=0.019, kick_rise=2.27, kick_end=0.52, swing_delay=0.0,
                  reach=0.74, reach_end=0.94, strike=-20, roll=0.21, heel=0.68, toe_off=46.2,
                  pitch_hold=0.70, pitch_turn=0.35, lean=1.5, arm=16.8, arm_back=-1.8, arm_lag=-0.032,

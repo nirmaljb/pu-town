@@ -27,6 +27,10 @@ determines movement. Feet settle below the surrounding loose snow into that
 compressed surface. Compression is bounded rather than cutting indefinitely
 through the underlying ground.
 
+**Update 2026-10-16.** Walking is now 1.06 m/s, the pace of the owner's walk
+recording, so the parka's Walk clip plays at its recorded cadence. Running is
+unchanged. See the [parka walk record](../verification/2026-10-16-parka-walk.md).
+
 Steady, adjustable wind softens Footprints, refills depressions and builds
 Snowdrifts with obstacle influence. The default track-erasure timescale is
 120 seconds. The world retains tracks when the controlled figure leaves a
