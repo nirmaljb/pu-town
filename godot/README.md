@@ -23,7 +23,9 @@ follows the controlled figure while the mouse sets its Facing; a saved Snow
 Depth that starts Deep or Shallow by place; a north-west wind that builds
 Snowdrifts, scours windward sides and fills Footprints faster or slower by place;
 a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
-up close; and a walking figure whose loop lays trails you did not watch being made.
+up close; a walking figure whose loop lays trails you did not watch being made;
+and a blizzard in overcast polar twilight, tuned live in the editor's Inspector
+(see [Lighting and the blizzard](#lighting-and-the-blizzard)).
 The [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
 holds its import checks, engine-event replay, ordinary input, visual inspection,
 frame measurement and exports, each kept separate, with their limits.
@@ -463,6 +465,57 @@ observed scene behavior but supplies no visual, native input, window-focus or
 hardware-rendering evidence. Graphical engine-event replay likewise complements
 ordinary window input and visual inspection; it does not establish OS keyboard
 behavior or a performance baseline.
+
+## Lighting and the blizzard
+
+The town sits in a blizzard under overcast polar twilight, after the
+[mood references](../docs/art/snow-town-reference/README.md): a whiteout that
+swallows the distance, falling snow, snow blowing along the ground, gusts that
+thicken both and pull the whiteout closer, a rare diffuse lightning flash, and
+eight warm lamps at doorways and windows against the cold light. A dim, cool,
+low **SkyKey** light casts faint soft shadows, which keep Footprints readable;
+their own shading follows its direction.
+
+The blizzard is only how the town looks. Gusts never change the wind that
+shapes Snow Depth, builds Snowdrifts and fills Footprints, so wind 0 still keeps
+trails intact during a storm, and fog does not limit what a Player may see.
+Falling and blowing snow travel the way the wind blows and turn with `[` and `]`.
+Every fog distance scales with the camera's, so play distances and the M
+overview show the same haze and the overview stays legible. The scene routes
+hold lightning off so their captures stay comparable. The lamps' places are
+`WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd); there are eight, the
+Compatibility renderer's lights per object, so each one reaches the snow. They
+move onto the buildings when the placeholder boxes are replaced.
+
+### Tune it in the Godot editor
+
+All of it lives in [`blizzard.tscn`](blizzard.tscn), so the editor's Inspector is
+its control panel:
+
+1. Open Godot 4.7.2, choose **Import**, select [`project.godot`](project.godot)
+   and open the project.
+2. In the **FileSystem** dock, double-click `blizzard.tscn`.
+3. Press **F5** (Run Project) and arrange the editor beside the game window.
+   **Debug → Synchronize Scene Changes** must be ticked (the default).
+4. In the **Scene** dock, select a node and drag values in the **Inspector**;
+   the running game changes at once:
+   - **Blizzard**: grouped Whiteout, Snowfall, Blowing snow, Gusts, Lightning
+     and Warm lights settings, and the random seed.
+   - **SkyKey**: the cool key light's angle (Rotation), Color, Energy and shadow
+     Opacity and Blur.
+   - **WorldEnvironment → Environment**: Background colour, Ambient Light,
+     Tonemap and exposure, Glow, Fog colour and Adjustments. The Blizzard node
+     sets the fog's density, depth range and light energy and the background
+     energy every frame, so edit those through the Blizzard's Whiteout group.
+   - **Snowfall** and **BlowingSnow**: particle count, lifetime, flake texture
+     and material. Changing the amount restarts their particles.
+5. Press **Ctrl+S** (⌘S on macOS) to keep the values; the next launch uses them.
+
+Editing nodes in the **Remote** tab of the Scene dock also changes the running
+game, but is not saved. Exported packages have no editor, so tune in the editor
+and export afterwards. The eight lamps together cost about 1.4 ms per frame in
+the [measurement](../docs/verification/2026-10-16-godot-snow-blizzard.md); the
+falling snow, blowing snow and fog each cost less than 0.5 ms.
 
 ## Reproduce the surface
 

@@ -16,6 +16,7 @@ var camera := FollowCamera.new()
 var inspection := Inspection.new()
 var focused := true
 var headless_replay := false
+@onready var blizzard: Node3D = $Blizzard
 
 
 func _ready() -> void:
@@ -33,7 +34,7 @@ func _ready() -> void:
 	add_child(inspection)
 	camera.follow(walker.position, 0.0)
 	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
-	_add_overcast_light()
+	blizzard.attach(surface, camera, town)
 	get_window().focus_entered.connect(func() -> void: focused = true)
 	get_window().focus_exited.connect(func() -> void: focused = headless_replay)
 	focused = headless_replay or get_window().has_focus()
@@ -115,28 +116,3 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_F9:
 				inspection.capture()
 
-
-func _add_overcast_light() -> void:
-	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	# The retained image's blue-grey atmosphere and diffuse snow relationships
-	# guide the rendered view; its sampled pixels are not material albedo values.
-	environment.background_color = Color("828792")
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("c0c4ce")
-	environment.ambient_light_energy = 0.70
-	environment.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	var world := WorldEnvironment.new()
-	world.environment = environment
-	add_child(world)
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-52, -35, 0)
-	light.light_color = Color("dedee4")
-	light.light_energy = 0.25
-	light.shadow_enabled = true
-	light.shadow_opacity = 0.75
-	light.directional_shadow_max_distance = 160.0
-	light.shadow_blur = 4.0
-	add_child(light)
-	# The light shines along its −Z axis, so its +Z axis points toward the sun.
-	surface.set_sun_direction(light.global_basis.z)

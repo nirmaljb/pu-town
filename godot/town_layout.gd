@@ -58,6 +58,20 @@ const LOOP: Array[String] = [
 	"outpost_yard_east", "loop_outpost_lane", "loop_gap_south", "loop_gap", "loop_east_gate",
 	"loop_courtyard_east", "loop_courtyard_west", "south_gate", "loop_stair_foot", "loop_forest",
 ]
+## Warm doorway and window lamps, the references' contrast against the cold
+## blizzard: (x, height above the ground, z), each against a box's face. They stay
+## at eight, the Compatibility renderer's lights per object, so every one reaches
+## the snow, and move onto the buildings when the boxes are replaced.
+const WARM_LIGHTS := {
+	"lodge_door": Vector3(31, 2.4, -5.6),
+	"lodge_window": Vector3(25, 2.2, -5.6),
+	"generator_shed": Vector3(13.5, 2.2, -8.6),
+	"workshop": Vector3(15.9, 2.2, 3.5),
+	"east_shed": Vector3(35.1, 2.2, 4.5),
+	"meeting_hall_door": Vector3(0.5, 2.4, 5.2),
+	"south_gate": Vector3(-23.5, 3.0, 3.6),
+	"courtyard_arcade": Vector3(-20, 2.4, -8.6),
+}
 ## Ground levels. The shelf carries the compound, meeting hall and outpost; the
 ## forest lies west of FOREST_EAST and south of FOREST_NORTH. Both lines run
 ## beneath cliff rock, at least one coarse snow cell inside every rock face.

@@ -1,0 +1,158 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://blizzard.gd" id="1_ccpmy"]
+
+[sub_resource type="Environment" id="Environment_1uesp"]
+background_mode = 1
+background_color = Color(0.5843, 0.6039, 0.6431, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.6667, 0.6902, 0.7373, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 2
+tonemap_white = 1.6
+glow_enabled = true
+glow_intensity = 0.7
+glow_blend_mode = 2
+glow_hdr_threshold = 1.1
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.5843, 0.6039, 0.6431, 1)
+fog_density = 0.92
+fog_depth_end = 48.0
+adjustment_enabled = true
+adjustment_contrast = 1.05
+adjustment_saturation = 0.85
+
+[sub_resource type="Gradient" id="Gradient_uhsm6"]
+offsets = PackedFloat32Array(0, 0.12, 0.85, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_jnvdf"]
+gradient = SubResource("Gradient_uhsm6")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_v5hcr"]
+emission_shape = 3
+emission_box_extents = Vector3(20, 8, 15)
+direction = Vector3(0.6, -1, 0.6)
+spread = 8.0
+initial_velocity_min = 2.0
+initial_velocity_max = 3.0
+gravity = Vector3(0, 0, 0)
+color_ramp = SubResource("GradientTexture1D_jnvdf")
+turbulence_enabled = true
+turbulence_noise_scale = 4.0
+turbulence_influence_min = 0.03
+turbulence_influence_max = 0.08
+
+[sub_resource type="Gradient" id="Gradient_b8wpl"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.75, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ra3qh"]
+gradient = SubResource("Gradient_b8wpl")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pnv8o"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.96, 0.97, 1, 0.9)
+albedo_texture = SubResource("GradientTexture2D_ra3qh")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_3r15i"]
+material = SubResource("StandardMaterial3D_pnv8o")
+
+[sub_resource type="Gradient" id="Gradient_7atav"]
+offsets = PackedFloat32Array(0, 0.25, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_m3d3m"]
+gradient = SubResource("Gradient_7atav")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_d2d36"]
+emission_shape = 3
+emission_box_extents = Vector3(18, 0.5, 13)
+direction = Vector3(1, 0.04, 0)
+spread = 6.0
+initial_velocity_min = 4.5
+initial_velocity_max = 8.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.12
+scale_max = 0.35
+color_ramp = SubResource("GradientTexture1D_m3d3m")
+turbulence_enabled = true
+turbulence_noise_strength = 1.5
+turbulence_noise_scale = 6.0
+turbulence_influence_min = 0.05
+turbulence_influence_max = 0.12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dgtue"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.92, 0.94, 0.98, 0.16)
+albedo_texture = SubResource("GradientTexture2D_ra3qh")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_pa6yi"]
+material = SubResource("StandardMaterial3D_dgtue")
+
+[node name="Blizzard" type="Node3D" unique_id=1864740618]
+script = ExtResource("1_ccpmy")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=744118612]
+environment = SubResource("Environment_1uesp")
+
+[node name="SkyKey" type="DirectionalLight3D" parent="." unique_id=172306005]
+transform = Transform3D(0.81915206, 0.3686878, -0.43938506, 0, 0.76604444, 0.6427876, 0.57357645, -0.52654076, 0.62750685, 0, 0, 0)
+light_color = Color(0.76862746, 0.8156863, 0.89411765, 1)
+light_energy = 0.32
+shadow_enabled = true
+shadow_opacity = 0.35
+shadow_blur = 6.0
+directional_shadow_max_distance = 160.0
+
+[node name="LightningFlash" type="DirectionalLight3D" parent="." unique_id=1902182139]
+transform = Transform3D(0.9396926, -0.33454618, 0.07110997, 0, 0.20791166, 0.9781476, -0.34202012, -0.9191581, 0.19537304, 0, 0, 0)
+visible = false
+light_color = Color(0.8745098, 0.90588236, 1, 1)
+light_energy = 0.0
+
+[node name="WarmLights" type="Node3D" parent="." unique_id=549767294]
+
+[node name="Snowfall" type="GPUParticles3D" parent="." unique_id=776752590]
+cast_shadow = 0
+amount = 9000
+lifetime = 5.0
+preprocess = 5.0
+use_fixed_seed = true
+seed = 91
+visibility_aabb = AABB(-160, -40, -120, 320, 80, 240)
+process_material = SubResource("ParticleProcessMaterial_v5hcr")
+draw_pass_1 = SubResource("QuadMesh_3r15i")
+
+[node name="BlowingSnow" type="GPUParticles3D" parent="." unique_id=1647482193]
+cast_shadow = 0
+amount = 2500
+lifetime = 2.5
+preprocess = 2.5
+use_fixed_seed = true
+seed = 37
+visibility_aabb = AABB(-160, -40, -120, 320, 80, 240)
+process_material = SubResource("ParticleProcessMaterial_d2d36")
+draw_pass_1 = SubResource("QuadMesh_pa6yi")
