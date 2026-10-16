@@ -73,6 +73,10 @@ It exercises no movement or rendering.
 ([log](godot-snow-oblique-camera/headless-route.log)); the same command on
 `39cd394` also passed ([log](godot-snow-oblique-camera/headless-route-before.log)).
 It renders nothing; the screen positions come from the camera's projection.
+After review, `_check_overview_key` reads the default distance from the
+"initial idle" stage rather than the first observation and reports a missing
+stage directly; this log is the rerun after that change. The graphical and
+package runs below used the route before it, which differed only in that check.
 
 > Framing: figure 0.0841 of the screen's height by default at 22.56 m, 0.1259
 > closest at 15.40 m, 0.0630 widest at 29.72 m
@@ -111,11 +115,15 @@ godot/build/macos/release/PU-Town-Snow-Walk.app/Contents/MacOS/PU\ Town\ ·\ Sno
 
 **PASSED with 0 failures, 32,969 observations**
 ([log](godot-snow-oblique-camera/packaged-route.log)), with the same framing:
-0.0841 by default, 0.1260 closest and 0.0630 widest.
+0.0841 by default, 0.1260 closest and 0.0630 widest. The same focus helper ran
+alongside it; the route paused once, before recording began.
 
 ### Captures, inspected against the reference frames
 
-All four are the package's own F9 captures from that route, 2560 × 1440.
+All four are the package's own F9 captures from that route, 2560 × 1440, copied
+unchanged from the files its log names: default `capture-1792182580-22393.png`,
+widest `capture-1792183204-88482.png`, overview `capture-1792183205-99461.png` and
+closest `capture-1792183206-98239.png`.
 
 | View | Capture | Seen |
 | --- | --- | --- |
@@ -141,14 +149,16 @@ box sides match. Two differences remain:
 figure walked back and forth across the outpost yard, alternating revisions. The
 Mac was busy (two Blender instances, Chrome and other applications open), so the
 absolute rates are far below the earlier record's 32.5 fps and only the
-same-session comparison means anything:
+same-session comparison means anything ([raw output](godot-snow-oblique-camera/frame-timing.log)):
 
 | Revision | Mean frame | Mean fps | p95 | Worst |
 | --- | --- | --- | --- | --- |
 | Before (`39cd394`) | 56.82, 54.44 ms | 17.6, 18.4 | 70.92, 67.18 ms | 247.43, 223.95 ms |
 | After | 50.84, 51.64 ms | 19.7, 19.4 | 71.96, 73.33 ms | 218.48, 224.94 ms |
 
-The wider view did not cost frame time in this session. This does **not**
+The wider view's mean frame time was no worse in this session, while its 95th
+percentile was 1–6 ms worse; under this load neither difference is clearly
+outside run-to-run variation. This does **not**
 establish the 24 fps acceptance on an idle machine; that needs a release F6 trace
 under the conditions of the earlier records.
 
@@ -159,3 +169,8 @@ under the conditions of the earlier records.
 - Windows was not exported or run.
 - The lean (still at most 3 m at every distance) and the detail region are
   unchanged; #108 covers both.
+- The default distance is not a whole number of wheel steps from either end of
+  the play range (as 40 m was not before), so once zoomed the wheel cannot return
+  to exactly 1/12; M's round trip keeps the distance it left.
+- `figure_screen_height` projects the 1.7 m `Walker.HEIGHT` above the feet, not
+  the rendered mesh; the captures are the check on the parka itself.

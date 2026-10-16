@@ -3,7 +3,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
 100 × 56 metres; 24 × 16 m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
 HEADLESS ENGINE-EVENT REPLAY: no rendered view, native focus or OS keyboard evidence.
-Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792181080-94386.csv
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792183797-53329.csv
 Inspection checkpoint 1
 Snow route: initial idle · 0.5 s
 Inspection checkpoint 2
@@ -271,10 +271,10 @@ Inspection checkpoint 146
 Snow route: cursor on second figure · 1.5 s
 Inspection checkpoint 147
 Snow route: first figure rejoins loop · 8.0 s
-Saved user://route-1792181080-94386.csv
-Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792181080-94386.csv
-Walking figure: 32838 moving observations, 32674 at the speed its snow allows, 12074 running in Shallow Snow, 6547 walking in Deep, 5012 in the courtyard, 2304 on the stair, 9 descents and 9 ascents
-Tracked the walking figure's trail at (-16.52494, -2.0), laid 3.7 s into the record 49.4 m from the controlled figure; probe (-16.73994, -1.908087) compaction 0.637
+Saved user://route-1792183797-53329.csv
+Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792183797-53329.csv
+Walking figure: 32838 moving observations, 32674 at the speed its snow allows, 12071 running in Shallow Snow, 6621 walking in Deep, 5012 in the courtyard, 2304 on the stair, 9 descents and 9 ascents
+Tracked the walking figure's trail at (-16.52494, -2.0), laid 3.3 s into the record 49.4 m from the controlled figure; probe (-16.73994, -1.908087) compaction 0.637
 Tracking probe compaction 0.637 -> 0.750 after following and overlapping
 Wind filled 0.826 of the tracked trail's compaction
 Released figure stood 10.07 m off the loop at (32.86943, -4.814841), joined it at (28.0, 4.0) and walked on to 1% of the loop
@@ -285,11 +285,11 @@ Stopped 68° from the cursor; expected to reach it within 9 observations
 After 41.1 wind-seconds, prints remain: exposed 0.67, sheltered 0.92, lee 0.00
 Lee drift 0.602 -> 1.118 m (first second +0.087, last second +0.001)
 Windward scour 0.491 -> 0.033 m
-Reversed wind: old lee -0.679 m, old windward face +0.472 m
+Reversed wind: old lee -0.676 m, old windward face +0.468 m
 Framing: figure 0.0841 of the screen's height by default at 22.56 m, 0.1259 closest at 15.40 m, 0.0630 widest at 29.72 m
 Detail region at (22.0, 3.2); leaned to (23.6, 0.8); returned to (22.0, 3.2)
 Overview walk across the region border: outside 934, border 1196, inside 588; border contact gap 0.0000 m
-Footprint uploads: 298905600 bytes for 2781 footsteps (107481 per step; touched-tile bound 409600 per step)
+Footprint uploads: 299110400 bytes for 2781 footsteps (107555 per step; touched-tile bound 409600 per step)
 Coverage: 32838 observations; straight 26062, diagonal 510, fast run 179, deep run 1128, blocked 684, overview 2830, camera follow 28534
 SNOW SCENE HEADLESS REPLAY: PASS · 0 failures
 ERROR: Parameter "material" is null.

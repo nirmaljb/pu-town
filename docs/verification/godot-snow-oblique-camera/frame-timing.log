@@ -1,0 +1,5 @@
+# frame_timing.gd output, alternating revisions, 2026-10-17 on the M1 MacBook Air under load
+before 1: TIMING window (2560, 1440) · mean 56.82 ms (17.6 fps) · p95 70.92 ms · worst 247.43 ms
+after 1: TIMING window (2560, 1440) · mean 50.84 ms (19.7 fps) · p95 71.96 ms · worst 218.48 ms
+before 2: TIMING window (2560, 1440) · mean 54.44 ms (18.4 fps) · p95 67.18 ms · worst 223.95 ms
+after 2: TIMING window (2560, 1440) · mean 51.64 ms (19.4 fps) · p95 73.33 ms · worst 224.94 ms

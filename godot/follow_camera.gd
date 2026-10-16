@@ -14,7 +14,8 @@ const Walker = preload("res://walker.gd")
 const FIELD_OF_VIEW := 40.0
 const PITCH := -40.0
 ## The share of the screen's height the figure stands at by default and at either
-## end of the wheel's play range; the distances below follow from them.
+## end of the wheel's play range. The distances below follow from them once, at
+## load; GDScript cannot make a constant from a function, so never assign them.
 const PLAY_SHARE := 1.0 / 12.0
 const CLOSEST_SHARE := 1.0 / 8.0
 const WIDEST_SHARE := 1.0 / 16.0

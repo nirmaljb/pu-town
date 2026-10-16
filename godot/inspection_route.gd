@@ -1300,9 +1300,13 @@ func _check_overview_key(rows: Array[Dictionary]) -> void:
 	# M opens the overview from the default distance and returns to exactly it.
 	# Walking carries on in it, the lean falls to zero, and a wheel step out changes
 	# nothing. From an overview M opened, one wheel step in reaches the widest end of play.
-	var default_distance := float(rows.front().camera_distance_m)
+	var initial := _rows_for(rows, "initial idle")
 	var widest := _rows_for(rows, "widest play view")
-	var widest_distance := float(widest.back().camera_distance_m) if not widest.is_empty() else -1.0
+	if initial.is_empty() or widest.is_empty():
+		failures.append("The default or widest play view stage was missing")
+		return
+	var default_distance := float(initial.back().camera_distance_m)
+	var widest_distance := float(widest.back().camera_distance_m)
 	var leaned := _rows_for(rows, "lean before overview")
 	var opened := _rows_for(rows, "overview by M")
 	var open := opened + _rows_for(rows, "overview walk back") + _rows_for(rows, "overview wheel out")
