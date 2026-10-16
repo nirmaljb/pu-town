@@ -35,6 +35,11 @@ const CAMERA_PITCH_DEG := -55.0
 const PLAY_RANGE_M := Vector2(10.0, 30.0)
 const PLAY_DISTANCE_M := 16.0
 const MAX_LEAN_M := 3.0
+# The camera frames the untouched snow under the boots and takes a fifth of the
+# sink below it, eased, so a footfall settles the view instead of jolting it.
+const CAMERA_SINK_SHARE := 0.2
+const STEADY_STAGES := ["north-west walk", "south-east return", "run across outpost yard",
+	"run through deep snow", "pack deep trail again", "descend stair z", "run in forest", "climb stair z"]
 # Walking, the upper body turns no more than 110° from travel, and Facing turns no
 # faster than 540° per second: 9° in each 60 Hz physics observation. Standing, the
 # legs pivot once the twist passes 60°.
@@ -667,6 +672,7 @@ func _check_record() -> void:
 	_check_tracking(rows)
 	_check_rejoin(rows)
 	_check_packed_speed(rows)
+	_check_camera_steadiness(rows)
 	_check_snow_zones(rows)
 	_check_facing(rows)
 	_check_walking_facing(rows)
@@ -1064,6 +1070,40 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 		failures.append("Repeated traffic did not produce a measurable running advantage in the same deep corridor")
 	if fresh_depth / maxi(1, fresh_samples) < WALK_ONLY_DEPTH_M:
 		failures.append("The packed corridor did not start as Deep Snow")
+
+
+func _check_camera_steadiness(rows: Array[Dictionary]) -> void:
+	# Per observation, how far the figure's sink and the camera's height against
+	# the untouched snow each change: the figure by its whole sink, the camera by its
+	# eased fifth of it. Real changes of level, such as the stair, move neither.
+	# The eased sink never exceeds the deepest sink observed so far.
+	var checked := {}
+	for stage in STEADY_STAGES:
+		if _rows_for(rows, stage).is_empty():
+			failures.append("No observations for camera steadiness stage '%s'" % stage)
+		checked[int(stages.get(stage, -1))] = true
+	var figure_jolt := 0.0
+	var camera_jolt := 0.0
+	var deepest := 0.0
+	var steps := 0
+	var previous := {}
+	for row in rows:
+		deepest = maxf(deepest, float(row.sink_depth_m))
+		var framed := float(row.focus_y_m) - float(row.untouched_y_m)
+		var steady: bool = checked.has(int(row.checkpoint)) and not previous.is_empty() and previous.checkpoint == row.checkpoint
+		if steady:
+			if framed > 0.0005 or -framed > CAMERA_SINK_SHARE * deepest + 0.0005:
+				_fail_once("The camera left the untouched snow by more than a fifth of the sink")
+			steps += int(row.step_count) - int(previous.step_count)
+			figure_jolt = maxf(figure_jolt, absf(float(row.sink_depth_m) - float(previous.sink_depth_m)))
+			camera_jolt = maxf(camera_jolt, absf(framed - (float(previous.focus_y_m) - float(previous.untouched_y_m))))
+		previous = row
+	print("Camera steadiness over %d steps: deepest sink %.3f m; largest per-observation change, figure's sink %.4f m, camera against untouched snow %.4f m" % [
+		steps, deepest, figure_jolt, camera_jolt])
+	if steps < 20 or figure_jolt < 0.005:
+		failures.append("The camera steadiness stages showed no footfall sink to soften")
+	if camera_jolt > 0.1 * figure_jolt:
+		failures.append("The camera still moved with a footfall's sink instead of easing a share of it")
 
 
 func _check_snow_zones(rows: Array[Dictionary]) -> void:

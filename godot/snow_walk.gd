@@ -32,7 +32,7 @@ func _ready() -> void:
 	second_walker.rejoin_loop()
 	add_child(camera)
 	add_child(inspection)
-	camera.follow(walker.position, 0.0)
+	camera.follow(walker.untouched_position(), walker.sink_depth, 0.0)
 	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
 	blizzard.attach(surface, camera, town)
 	get_window().focus_entered.connect(func() -> void: focused = true)
@@ -50,13 +50,13 @@ func _physics_process(delta: float) -> void:
 	var idle := _uncontrolled()
 	# The cursor is read through the view that was last drawn, where the Player saw it.
 	if focused:
-		camera.update_cursor(controlled.position)
+		camera.update_cursor(controlled.untouched_position())
 		if camera.cursor_inside and camera.has_cursor_ground:
 			controlled.face_toward(camera.cursor_ground)
 	surface.advance(delta)
 	controlled.walk(delta, camera.global_basis, focused)
 	idle.walk_loop(delta)
-	camera.follow(controlled.position, delta)
+	camera.follow(controlled.untouched_position(), controlled.sink_depth, delta)
 	# The detail region follows what the camera shows. Its 5 cm grid is world-aligned,
 	# so the figure's full-detail support is the same before and after it moves.
 	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
@@ -89,7 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_uncontrolled().rejoin_loop()
 				# Frame the newly controlled figure at once, so it takes its Facing
 				# from the cursor in the view that shows it.
-				camera.follow(_controlled().position, 0.0)
+				camera.follow(_controlled().untouched_position(), _controlled().sink_depth, 0.0)
 				surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
 			KEY_M:
 				camera.toggle_overview()

@@ -275,6 +275,14 @@ M again returns to the distance you left. A wheel step out does nothing while th
 overview is open, and one step in returns to 30 m however it was opened. Walking,
 the lean and the detail region behave the same whichever way it was opened.
 
+The camera frames the untouched snow where the figure stands, before Footprints
+packed it, so the stair, the shelf and Snowdrifts move it exactly as the ground
+does. Each footfall sinks the figure into the snow it packs; the camera takes only
+a fifth of that sink, eased over about 0.2 s (`SINK_SHARE` and `SINK_SETTLE` in
+`follow_camera.gd`), so walking reads as a gentle settle at every step rather than
+a jolt. The cursor's point on the ground is found at the untouched snow's height
+too, so a footfall never moves Facing or the lean.
+
 The cursor's point on the ground sets the bearing the figure wants to look
 along. A cursor within 25 cm of the figure, or outside the window, gives no new
 bearing. The upper body, from the lower spine to the head, turns toward Facing;
@@ -330,7 +338,8 @@ point (`cursor_x_m`, `cursor_z_m`), speed, run request, the visible Snow Depth a
 that ground (`snow_depth_m`), the saved loose Snow Depth under the figure before
 packing (`saved_depth_m`), the loose depth that sets running speed after nearby
 packing (`loose_depth_m`), compaction, sinking, contact gap, obstacle/boundary contact, steps,
-the camera's focus (`focus_x_m`, `focus_z_m`), the detail region's centre and size
+the camera's focus (`focus_x_m`, `focus_y_m`, `focus_z_m`), the untouched snow's height
+where the figure stands (`untouched_y_m`), the detail region's centre and size
 (`region_x_m`, `region_z_m`, `region_width_m`, `region_depth_m`), the Footprint
 picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
 total (`upload_total_bytes`) and the footsteps those uploads carried
@@ -450,7 +459,11 @@ allows, faces its travel, passes through the courtyard and goes down and back up
 the stair. Throughout, the
 camera stays a 40° perspective view at −55° pitch with north up, its lean stays
 within 3 m, its play distance within 10–30 m, and without lean it holds the
-figure slightly below the centre of the screen. Every
+figure slightly below the centre of the screen. Walking and running through the
+outpost yard, the meeting-hall gap's Deep Snow, down the stair and in the forest,
+the camera stays on the untouched snow less at most a fifth of the sink, and in
+any observation moves against it by under a tenth of the figure's own change of
+sink. Every
 navigation leg must reach its landmark. The process returns nonzero on failure. `--walk-scene-check` remains an alias; the
 existing `--script res://tests/walk_scene.gd` launcher opens the same route.
 
@@ -619,6 +632,9 @@ trace with the wind's cost, and both exports. The
 those defects and compares before and after captures; its smooth shading adds
 about 2 ms per frame in an unfocused source-scene timing and 1.7 ms in the
 remeasured release trace.
+The [camera steadiness record](../docs/verification/2026-10-16-godot-snow-camera.md)
+measures the camera's per-step vertical travel before and after it took only a
+softened share of each footfall's sink.
 
 ## Desktop exports
 

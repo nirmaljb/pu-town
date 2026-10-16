@@ -43,6 +43,8 @@ var ground_height := 0.0
 var loose_depth := 0.0
 var foot_compaction := 0.0
 var sink_depth := 0.0
+## Height of the snow at the figure's centre before Footprints packed it.
+var untouched_height := 0.0
 var step_count := 0
 var last_footprint := Vector2.ZERO
 var has_footprint := false
@@ -283,6 +285,7 @@ func _update_pose(delta: float = 1.0 / 60.0) -> void:
 	snow_depth = surface.sample_height(centre) - ground_height
 	saved_depth = surface.sample_saved_depth(centre)
 	foot_compaction = surface.sample_compaction(last_footprint) if has_footprint else 0.0
+	untouched_height = surface.sample_uncompressed_height(centre)
 	sink_depth = maxf(0.0, (surface.sample_uncompressed_height(foot_points[0]) + surface.sample_uncompressed_height(foot_points[1])) * 0.5 - position.y)
 	grounded = layout.point_clear(centre, FOOTPRINT_RADIUS - 0.001)
 	# One cycle is two steps: the left boot (index 0) lands at phase 0, the right at 0.5.
@@ -292,6 +295,11 @@ func _update_pose(delta: float = 1.0 / 60.0) -> void:
 	avatar.twist(twist)
 	var support := func(point: Vector2) -> float: return surface.sample_height(point)
 	contact_gap = avatar.ground(support, position.y, avatar.planted(phase, _run_amount))
+
+
+## Where the figure stands, at the height of the untouched snow there.
+func untouched_position() -> Vector3:
+	return Vector3(position.x, untouched_height, position.z)
 
 
 func _landing_ahead() -> float:

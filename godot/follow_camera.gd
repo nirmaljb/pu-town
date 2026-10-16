@@ -2,7 +2,9 @@ extends Camera3D
 ## A north-up perspective camera that follows the controlled figure. Its yaw never
 ## changes. Its focus leans toward the cursor's point on the ground, and the wheel
 ## zooms through the play range or out to a whole-map overview of the town, which
-## M also opens and closes.
+## M also opens and closes. It frames the untouched snow where the figure stands
+## and takes only a softened share of each step's sink into it, so the view settles
+## gently at a footfall instead of jolting with it.
 
 const TownLayout = preload("res://town_layout.gd")
 const FIELD_OF_VIEW := 40.0
@@ -23,6 +25,11 @@ const FRAMING_SHARE := 0.075
 ## to the top of the cliff rock.
 const OVERVIEW_MARGIN := 3.0
 const OVERVIEW_HEIGHTS := Vector2(TownLayout.FOREST_GROUND, TownLayout.SHELF_GROUND + 2.0)
+## The camera takes this share of how far the figure has sunk below the untouched
+## snow, so each step reads as a small settle.
+const SINK_SHARE := 0.2
+## That share eases toward each new sink with this time constant, in seconds.
+const SINK_SETTLE := 0.2
 
 var distance := PLAY_DISTANCE
 var overview := false
@@ -33,6 +40,7 @@ var cursor_screen := Vector2.ZERO
 var has_cursor_ground := false
 var cursor_ground := Vector2.ZERO
 var _cursor_offset := Vector2.ZERO
+var _sink := 0.0
 
 
 func _ready() -> void:
@@ -79,8 +87,9 @@ func point_at(screen: Vector2) -> void:
 	cursor_inside = true
 
 
-## Find the cursor's point on the horizontal plane through the figure's feet.
-## While the cursor is outside the window the last point holds.
+## Find the cursor's point on the horizontal plane through `figure`, given at the
+## height of the untouched snow, so a footfall never moves it. While the cursor is
+## outside the window the last point holds.
 func update_cursor(figure: Vector3) -> void:
 	if not cursor_inside:
 		return
@@ -95,8 +104,11 @@ func update_cursor(figure: Vector3) -> void:
 	has_cursor_ground = true
 
 
-## Frame `figure`. A zero `delta` moves straight to the new figure, as after Tab.
-func follow(figure: Vector3, delta: float) -> void:
+## Frame a figure at `figure`, given at the height of the untouched snow, that has
+## sunk `sink` below it. A zero `delta` moves straight to the new figure, as after Tab.
+func follow(figure: Vector3, sink: float, delta: float) -> void:
+	_sink = sink if delta <= 0.0 else lerpf(_sink, sink, 1.0 - exp(-delta / SINK_SETTLE))
+	var framed := figure - Vector3(0.0, SINK_SHARE * _sink, 0.0)
 	var target_lean := lean
 	if overview:
 		target_lean = Vector2.ZERO
@@ -107,7 +119,7 @@ func follow(figure: Vector3, delta: float) -> void:
 		focus = Vector3(0.0, (OVERVIEW_HEIGHTS.x + OVERVIEW_HEIGHTS.y) * 0.5, 0.0)
 		position = focus + basis.z * _overview_distance()
 	else:
-		focus = figure + Vector3(lean.x, 0.0, lean.y - distance * FRAMING_SHARE)
+		focus = framed + Vector3(lean.x, 0.0, lean.y - distance * FRAMING_SHARE)
 		position = focus + basis.z * distance
 
 
