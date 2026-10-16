@@ -14,7 +14,7 @@ Eight actual Unity garden previews were rendered and inspected at Townhall, libr
 
 The garden prefab contains 643 renderers, 298,885 triangles and 30 materials, measured in Unity 6000.6.0f1. These counts cover that prefab alone, excluding Avatars and runtime-created geometry, and are not a frame-rate acceptance result. Clothed Ash and Lea contain 18,791 and 22,120 triangles respectively; their standing, walking and seated animations come from the free Standard Universal Animation Library. The fantasy clothing has boots and belts; the modern building modules, neutral furniture and foliage provide the campus setting.
 
-![Close camera at the library](../../campus/assets/sources/quaternius/previews/library-day.png)
+The library preview was removed from the repository with the rest of the retired campus art; it remains in Git history.
 
 The final refreshed EditMode run passed all 36 tests without skips. A real newly created Room loaded and instantiated both published Avatars through the Java HTTP collection and strict native loader. Packaged runtime and performance outcomes follow below; editor renders alone do not establish them.
 

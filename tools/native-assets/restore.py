@@ -44,7 +44,7 @@ def main():
         if valid and not args.force:
             continue
         archive = (ROOT / entry["archive"]).resolve()
-        if not any(archive.is_relative_to(ROOT / directory) for directory in ("campus/assets/sources", "towns/assets/sources")):
+        if not any(archive.is_relative_to(ROOT / directory) for directory in ("towns/assets/sources",)):
             raise ValueError("Archive must be inside the local source workspace")
         if not archive.is_file():
             raise FileNotFoundError("Download the recorded Standard archive first: " + entry["archive"])

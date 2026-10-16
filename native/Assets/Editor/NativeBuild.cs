@@ -11,28 +11,6 @@ namespace PUtown.Editor
     {
         public const string ScenePath = "Assets/Scenes/Town.unity";
 
-        [MenuItem("PU Town/Prepare authoring proof")]
-        public static void PrepareAuthoringProof()
-        {
-            Directory.CreateDirectory("Assets/Scenes");
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Starter/starter-courtyard.obj");
-            if (model == null) throw new InvalidOperationException("Import the Blender starter before preparing the scene.");
-            PrefabUtility.InstantiatePrefab(model);
-            new GameObject("Server health").AddComponent<PUtown.Bootstrap.ServerHealth>();
-            var camera = new GameObject("Camera").AddComponent<Camera>();
-            camera.tag = "MainCamera";
-            camera.transform.position = new Vector3(3, 3, -3);
-            camera.transform.LookAt(new Vector3(0, .2f, 0));
-            camera.backgroundColor = new Color(.28f, .43f, .34f);
-            var sunlight = new GameObject("Sunlight").AddComponent<Light>();
-            sunlight.type = LightType.Directional;
-            sunlight.transform.rotation = Quaternion.Euler(45, -30, 0);
-            RenderSettings.ambientLight = new Color(.48f, .55f, .52f);
-            EditorSceneManager.SaveScene(scene, "Assets/Scenes/AuthoringProof.unity");
-            AssetDatabase.SaveAssets();
-        }
-
         [MenuItem("PU Town/Prepare native town scene")]
         public static void Prepare()
         {

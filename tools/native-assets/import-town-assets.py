@@ -17,7 +17,7 @@ PINS = {
     'animations': ('kaykit/KayKit Character Animations Free 1.1.zip', '65882f31f905ad2e953819648a59287cdeab8f623908d5ef701971d3758be20f'),
     'village': ('quaternius/Medieval Village MegaKit[Standard].zip', 'e60dea67c10f30dccccfbff92a7933f5ea5cfe99be0e2a0fa5118cceabeec5c4'),
 }
-NATURE_ARCHIVE = ROOT / 'campus/assets/sources/quaternius/Stylized Nature MegaKit[Standard].zip'
+NATURE_ARCHIVE = SOURCES / 'quaternius/Stylized Nature MegaKit[Standard].zip'
 NATURE_HASH = '298f6732b872e4cf7b30e6e7abf9641c7f6dc6b326df37ac089533ed7e3d58c9'
 CHARACTERS = ('Barbarian', 'Knight', 'Mage', 'Ranger', 'Rogue')
 ANIMATION_SETS = ('General', 'MovementBasic', 'Simulation')
@@ -138,21 +138,22 @@ def main():
                         member = prefix + 'Animations/gltf/Rig_Medium/Rig_Medium_' + name + '.glb'
                         copy_member(archive, member, extracted / ('Rig_Medium_' + name + '.glb'), args.check)
     with retained_zip(NATURE_ARCHIVE, NATURE_HASH) as archive:
-        existing = json.loads((ROOT / 'campus/assets/sources/quaternius/Nature-selection.json').read_text())
-        names = [entry['name'] for entry in existing['models']] + ['Pine_1', 'Pine_2', 'Pine_3']
+        existing = json.loads((SOURCES / 'quaternius/Nature-selection.json').read_text())
+        names = [entry['name'] for entry in existing['models']]
         selection = import_environment(archive, '', names, 'Nature', args.check)
         selection.update(archive=str(NATURE_ARCHIVE.relative_to(ROOT)), archiveSha256=NATURE_HASH,
-                         reuse='The exact older Standard source remains unchanged; existing campus selection/provenance is historical evidence.')
+                         reuse='The exact older Standard source remains unchanged.')
         write(SOURCES / 'quaternius/Nature-selection.json', (json.dumps(selection, indent=2) + '\n').encode(), args.check)
         for name in ('Bark_DeadTree_Normal.png', 'Bark_TwistedTree_Normal.png'):
             copy_member(archive, 'Textures/' + name, ROOT / 'native/Assets/Art/Quaternius/Nature/Textures' / name, args.check)
-    props = json.loads((ROOT / 'campus/assets/sources/quaternius/Props-selection.json').read_text())
+    props = json.loads((SOURCES / 'quaternius/Props-selection.json').read_text())
+    props['archive'] = 'towns/assets/sources/quaternius/Fantasy Props MegaKit[Standard].zip'
     names = {'Chair_1', 'Bench', 'Table_Large'}
     props['models'] = [entry for entry in props['models'] if entry['name'] in names]
     needed = {entry[field] for model in props['models'] for entry in model['materials']
               for field in ('baseColorTexture', 'normalTexture', 'metallicRoughnessTexture', 'occlusionTexture') if entry.get(field)}
     props['textures'] = [entry for entry in props['textures'] if Path(entry['importPath']).name in needed]
-    props['reuse'] = 'Three already imported free Fantasy Props Standard meshes serve Meeting Seats and street furnishing; no campus map content is reused.'
+    props['reuse'] = 'Three already imported free Fantasy Props Standard meshes serve Meeting Seats and street furnishing.'
     write(SOURCES / 'quaternius/Props-selection.json', (json.dumps(props, indent=2) + '\n').encode(), args.check)
     write(SOURCES / 'archive-inventory.json', (json.dumps(inventory, indent=2) + '\n').encode(), args.check)
     print('Verified free source hashes, CRCs, exact selected imports and retained licenses.' if args.check else 'Imported free sources; no Avatar publication was changed.')

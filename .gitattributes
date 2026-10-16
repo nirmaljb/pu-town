@@ -1,7 +1,6 @@
 # Preserve exact source and license bytes from the retained creator archives.
-campus/assets/avatars/sources/quaternius/** -text -whitespace
-campus/assets/sources/quaternius/** -text -whitespace
-campus/assets/sources/quaternius-character/** -text -whitespace
+towns/assets/sources/quaternius/*/License_Standard.txt -text -whitespace
+towns/assets/sources/quaternius/license-evidence/** -text -whitespace
 
 # Unity serializers emit spaces after empty YAML values.
 native/Assets/**/*.meta -whitespace

@@ -130,7 +130,7 @@ The client accepts this infrastructure query parameter (room/name options are ig
 - `frontend/src/avatar-reconciler.ts` — creates, moves, and removes Phaser avatars to match world state.
 - `frontend/src/room-rules.ts` — client copies of the shared town dimensions, obstacles, Vision.
 - `frontend/src/meeting-area.ts` — loads the generated Sunwater Village tilemap and every tileset it embeds, draws its tile layers and its y-sorted, animated objects, the Seat chairs shown in the Lobby and Meetings.
-- `frontend/public/maps/pu-town/` — the served Tiled map, its tilesets, and `pu-town.collision.json`, the source of both obstacle lists. `pu-town/variants/` keeps the current generator and catalogue publisher, editable Tiled JSON exports, supplied asset sources, provenance and previews. Run `generate.py`, then `publish.py`, to synchronize the served village and shared collision, interior and Task rules; older root `.tmx` files are historical.
+- `frontend/public/maps/pu-town/` — the served Tiled map, its `supplied/` sheets and tiles, and `pu-town.collision.json`, the source of both obstacle lists. `pu-town/variants/` keeps the current generator and catalogue publisher, editable Tiled JSON exports, supplied asset sources, provenance and previews. Run `generate.py`, then `publish.py`, to synchronize the served village and shared collision, interior and Task rules.
 - `frontend/src/avatar-seating.ts` — client-only sit-down timing for a newly taken Seat.
 - `frontend/src/avatar-chooser.ts` — Lobby chooser; clicking a character requests it from the Room.
 - `frontend/src/avatar-presets.ts` — the active Room collection, its strict decoding, and the join-time fetch.

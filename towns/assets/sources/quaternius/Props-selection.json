@@ -1,7 +1,7 @@
 {
   "pack": "Props",
   "edition": "Standard",
-  "archive": "campus/assets/sources/quaternius/Fantasy Props MegaKit[Standard].zip",
+  "archive": "towns/assets/sources/quaternius/Fantasy Props MegaKit[Standard].zip",
   "archiveSha256": "8b6f7e806d222e585478f0e1bdc6b271bbc7bc6f84dd6af8ca703a7c64f0cb1e",
   "models": [
     {
@@ -184,5 +184,5 @@
       "byteLength": 1871475
     }
   ],
-  "reuse": "Three already imported free Fantasy Props Standard meshes serve Meeting Seats and street furnishing; no campus map content is reused."
+  "reuse": "Three already imported free Fantasy Props Standard meshes serve Meeting Seats and street furnishing."
 }

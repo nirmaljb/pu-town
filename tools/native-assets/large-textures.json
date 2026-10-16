@@ -2,5 +2,5 @@
   "version": 1,
   "maximumTrackedBlobBytes": 5242880,
   "files": [],
-  "note": "The active Woodland/Market art and KayKit Avatar sources have no runtime texture exceeding 5 MiB. Retired campus restore records are retained in campus/assets/sources/large-textures-historical.json."
+  "note": "The active Woodland/Market art and KayKit Avatar sources have no runtime texture exceeding 5 MiB."
 }

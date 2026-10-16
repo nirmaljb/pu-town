@@ -16,9 +16,10 @@ Official sources:
 
 `archive-inventory.json` records exact archive hashes, lengths and member CRCs.
 The original included licenses are retained beside each pack's inventory. These
-exact downloads contain explicit CC0 notices. The pre-existing Nature/Props
-source and license evidence remain under `campus/assets/sources/quaternius/` as
-shared provenance; those paths do not make campus a playable map.
+exact downloads contain explicit CC0 notices. The Nature and Props licenses and
+inventories are in `quaternius/stylized-nature-megakit/` and
+`quaternius/fantasy-props-megakit/`, with the retrieved license pages in
+`quaternius/license-evidence/`.
 
 Restore the exact locally downloaded free ZIPs named in
 `tools/native-assets/import-town-assets.py`, then run:
@@ -43,5 +44,4 @@ Downloaded archives, extracted originals, editable masters, duplicate exports,
 platform bundles and embedded publication remain local under `.gitignore`.
 Selected runtime meshes/textures, Unity metadata, code, geometry, licenses,
 provenance and compact camera evidence are tracked. No active runtime texture
-exceeds 5 MiB. Historical oversized-texture restore records remain separate from
-the active empty restoration manifest.
+exceeds 5 MiB, so the restoration manifest is empty.

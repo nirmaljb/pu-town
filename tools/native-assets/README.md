@@ -31,12 +31,6 @@ runtime texture above 5 MiB. Accordingly `large-textures.json` has an empty
 python3 tools/native-assets/restore.py --check
 ```
 
-The ten old campus/Quaternius-character restore records are retained separately
-in [large-textures-historical.json](../../campus/assets/sources/large-textures-historical.json)
-for provenance. They are outside the active restore manifest and do not become a
-fresh-clone build requirement. Their original ignored local bytes are preserved
-where available.
-
 For current source re-import or a new Avatar revision, restore the exact free
 ZIPs recorded in [the town source inventory](../../towns/assets/sources/README.md),
 then run:

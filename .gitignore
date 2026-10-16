@@ -32,8 +32,8 @@ native/Builds/
 native/TestResults/
 .scratch/native/
 
-# FBX export copies duplicate the retained, explicitly mapped texture directory.
-campus/assets/avatars/exports/*/avatar.fbm/
+# The retired campus was removed from Git; keep any local leftovers out of it.
+/campus/
 *.blend1
 
 # Keep downloaded packs, editable binary masters and generated distributions local.
@@ -42,23 +42,9 @@ campus/assets/avatars/exports/*/avatar.fbm/
 *.unitypackage
 *.blend
 *.bundle
-/campus/assets/avatars/publication.json
-/campus/assets/avatars/exports/*/avatar.fbx
-/campus/assets/avatars/exports/*/textures/
-/campus/assets/avatars/sources/*
-!/campus/assets/avatars/sources/quaternius/
-/campus/assets/avatars/sources/quaternius/*
-!/campus/assets/avatars/sources/quaternius/README.md
 
 # Original textures over 5 MiB are restored locally from the licensed packs.
 # Keep their Unity .meta files and the hash-verified restore manifest in Git.
-/native/Assets/Art/Avatars/campus-ash/textures/T_Peasant_Normal.png
-/native/Assets/Art/Avatars/campus-ash/textures/T_Peasant_ORM.png
-/native/Assets/Art/Avatars/campus-lea/textures/T_Peasant_Normal.png
-/native/Assets/Art/Avatars/campus-lea/textures/T_Peasant_ORM.png
-/native/Assets/Art/Quaternius/City/Textures/T_Dirt_Normal.png
-/native/Assets/Art/Quaternius/City/Textures/T_Ornaments_Normal.png
-/native/Assets/Art/Quaternius/City/Textures/T_RedBrick_Normal.png
 /native/Assets/Art/Quaternius/Nature/Textures/Bark_DeadTree_Normal.png
 /native/Assets/Art/Quaternius/Nature/Textures/Bark_TwistedTree_Normal.png
 /native/Assets/Art/Quaternius/Props/Textures/T_Page_Noise.png
