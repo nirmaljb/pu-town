@@ -62,7 +62,17 @@ const LEE_PROBE := 6
 # NEAR_PROBE_M from a probe cannot press a boot onto it.
 const ELSEWHERE_M := 15.0
 const NEAR_PROBE_M := 1.5
-const STRIDE_SLOPE_M := 0.1
+# A figure stands at the mean height of its two boots' snow surfaces, which never
+# lie below the ground. Crossing the stair's crest with its centre still on the
+# shelf, one boot can stand up to STEP_REACH_M down a slope that falls
+# STAIR_SLOPE metres per metre while the other stays on the shelf, so the mean can
+# sit at most STEP_REACH_M × STAIR_SLOPE ÷ 2 below the ground at the centre:
+# 0.65 × 0.5 ÷ 2 = 0.1625 m. Straddling the stair's concave foot only raises the
+# mean, and every other change of level lies beneath cliff rock, beyond a boot's
+# reach. A figure sinking further through the ground, or rising 1.3 m onto a box
+# roof, is still caught.
+const STAIR_SLOPE := (TownLayout.SHELF_GROUND - TownLayout.FOREST_GROUND) / (TownLayout.STAIR_FOOT - TownLayout.STAIR_TOP)
+const CREST_SAG_M := STEP_REACH_M * STAIR_SLOPE * 0.5
 # Cursor points around the figure, as screen offsets in viewport heights and the
 # compass bearing each shows on a north-up view.
 const SWEEP := [
@@ -550,9 +560,10 @@ func _check_record() -> void:
 		if row.grounded != "true" or absf(float(row.contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("Figure lost its observed snow contact")
 		# Crossing the stair's crest, one boot can stand on the slope while the other is
-		# on the shelf, so their mean height may sit just below the ground at the centre.
+		# on the shelf, so their mean height may sit up to CREST_SAG_M below the ground
+		# at the centre.
 		var above_ground := float(row.feet_y_m) - float(row.ground_y_m)
-		if above_ground > 1.3 or above_ground < -STRIDE_SLOPE_M:
+		if above_ground > 1.3 or above_ground < -CREST_SAG_M:
 			_fail_once("Figure teleported onto a box roof or below the ground")
 		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
 			_fail_once("Camera is not a 40° perspective view")
@@ -839,10 +850,10 @@ func _check_walking_figure(rows: Array[Dictionary]) -> void:
 			_fail_once("The walking figure escaped the map rectangle")
 		if row.other_grounded != "true" or absf(float(row.other_contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("The walking figure entered an obstacle or lost its snow contact")
-		# Running on the stair, its boots straddle a slope that falls 0.5 m per metre,
-		# so their mean height may sit a few centimetres below the ground at its centre.
+		# Crossing the stair's crest, its boots straddle the shelf and the slope, so
+		# their mean height may sit up to CREST_SAG_M below the ground at its centre.
 		var above_ground := float(row.other_feet_y_m) - ground
-		if above_ground > 1.3 or above_ground < -STRIDE_SLOPE_M:
+		if above_ground > 1.3 or above_ground < -CREST_SAG_M:
 			_fail_once("The walking figure teleported onto a box roof or below the ground")
 		if row.other_rejoining == "false" and _loop_distance(other) > 0.01:
 			_fail_once("The walking figure left its loop")

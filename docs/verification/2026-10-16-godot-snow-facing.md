@@ -150,6 +150,21 @@ when straddling the crest. The 0.1 m allowance is therefore not a geometric
 bound. Per the spec, existing checks stay unchanged here; widening the allowance
 is left as a follow-up.
 
+### Follow-up: derived stair-crest allowance
+
+The route now derives the allowance from the geometry instead of the hand-picked
+`STRIDE_SLOPE_M`. `CREST_SAG_M` in `godot/inspection_route.gd` is the boot reach
+(`STEP_REACH_M`, 0.65 m) × the stair slope (the 5 m drop between `SHELF_GROUND`
+and `FOREST_GROUND` over `STAIR_TOP` to `STAIR_FOOT`, 0.5 m per metre) ÷ 2, which
+is 0.1625 m. Both feet-to-ground checks use it. The upper 1.3 m bound for a box
+roof is unchanged. Run 1's −0.102 m is within the new bound.
+
+After the change, `GODOT_BIN=~/Downloads/Godot.app ./godot/run.sh --check`
+completed, and the headless replay reported **PASS, 0 failures** (17,942
+observations). The lowest feet-to-ground readings were −0.083 m for the loop
+figure and +0.013 m for the controlled figure, the same as before. The release
+package was neither rebuilt nor rerun for this change.
+
 ## Evidence limits
 
 - Captures come from a driver that sets the cursor directly and forces focus, not
@@ -160,4 +175,5 @@ is left as a follow-up.
 - Only the macOS release package was rebuilt. The Windows package was neither
   rebuilt nor run.
 - One of two package runs failed on the pre-existing stair-crest allowance
-  described above.
+  described above. The allowance has since been derived from the
+  geometry; only the headless replay was rerun with it.
