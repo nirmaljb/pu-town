@@ -38,7 +38,7 @@ const ROUTE_COLUMNS := [
 	"elapsed_ms", "x_m", "feet_y_m", "z_m", "ground_y_m", "input_x", "input_y", "horizontal_mps", "grounded",
 	"contact_gap_m", "boundary_limited", "travel_m", "camera_projection", "camera_fov_deg", "camera_distance_m",
 	"overview", "lean_x_m", "lean_z_m", "lean_m", "pitch_deg", "yaw_deg", "focused", "fps",
-	"figure_screen_x", "figure_screen_y", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
+	"figure_screen_x", "figure_screen_y", "figure_screen_height", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "saved_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
 	"focus_x_m", "focus_y_m", "focus_z_m", "untouched_y_m", "region_x_m", "region_z_m", "region_width_m", "region_depth_m", "wind_strength", "wind_from_deg", "wind_elapsed_s", "wind_update_ms",
 	"footprint_count", "footprint_image_width", "footprint_image_height", "footprint_image_bytes",
@@ -106,6 +106,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		})
 	var viewport_size := get_viewport().get_visible_rect().size
 	var figure_screen := camera.unproject_position(walker.global_position)
+	var head_screen := camera.unproject_position(walker.global_position + Vector3.UP * walker.HEIGHT)
 	var whole_map_visible := true
 	var edge: Vector2 = surface.HALF_EXTENTS
 	for x in [-edge.x, edge.x]:
@@ -127,6 +128,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"focused": focused, "fps": Engine.get_frames_per_second(),
 		"figure_screen_x": figure_screen.x / viewport_size.x,
 		"figure_screen_y": figure_screen.y / viewport_size.y,
+		"figure_screen_height": (figure_screen.y - head_screen.y) / viewport_size.y,
 		"whole_map_visible": whole_map_visible, "checkpoint": checkpoint,
 		"figure_id": walker.figure_id, "run_requested": walker.run_requested,
 		"snow_depth_m": walker.snow_depth, "saved_depth_m": walker.saved_depth, "loose_depth_m": walker.loose_depth,

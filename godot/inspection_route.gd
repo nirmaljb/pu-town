@@ -29,12 +29,17 @@ const WALK_ONLY_DEPTH_M := 0.40
 # Walking matches the owner's walk recording (1.06 m/s); running is unchanged.
 const WALK_MPS := 1.06
 const RUN_MPS := 4.5
-# The specified camera: perspective, 16° field of view, −45° pitch, north up,
-# 40 m from its focus in a 25–75 m play range, and a lean of at most 3 m.
-const CAMERA_FOV_DEG := 16.0
-const CAMERA_PITCH_DEG := -45.0
-const PLAY_RANGE_M := Vector2(25.0, 75.0)
-const PLAY_DISTANCE_M := 40.0
+# The specified camera: perspective, 40° field of view, −40° pitch, north up, and
+# a lean of at most 3 m. The 1.7 m figure stands about a twelfth of the screen tall
+# by default, and the wheel's play range runs from about an eighth to a sixteenth.
+# Shares are measured on screen, so they hold within FRAMING_TOLERANCE of their
+# specified value wherever the lean and the figure's place below centre put it.
+const CAMERA_FOV_DEG := 40.0
+const CAMERA_PITCH_DEG := -40.0
+const PLAY_SHARE := 1.0 / 12.0
+const CLOSEST_SHARE := 1.0 / 8.0
+const WIDEST_SHARE := 1.0 / 16.0
+const FRAMING_TOLERANCE := 0.08
 const MAX_LEAN_M := 3.0
 # The camera frames the untouched snow under the boots and takes a fifth of the
 # sink below it, eased, so a footfall settles the view instead of jolting it.
@@ -133,6 +138,7 @@ func _run() -> void:
 		return
 
 	await _leg([], 0.5, "initial idle")
+	await _framing_capture()
 	var idle_row: Dictionary = _read_rows().back()
 	figure_screen = Vector2(float(idle_row.figure_screen_x), float(idle_row.figure_screen_y))
 	# Facing follows the cursor round the standing figure without a step.
@@ -233,7 +239,7 @@ func _run() -> void:
 	await _goto(LANDMARKS.forest_lane, "return to stair foot")
 	await _goto(LANDMARKS.south_gate, "climb stair")
 	# In the courtyard, after the tracking stages so their timing is unchanged: M
-	# opens the whole-map overview from the 40 m play distance, without lean, and
+	# opens the whole-map overview from the default play distance, without lean, and
 	# the figure walks on while it is open. A wheel step out does nothing there, M
 	# returns to the play distance it left, and a held M's repeat does not toggle.
 	await _cursor_leg(Vector2(0.3, 0), [], 1.0, "lean before overview")
@@ -255,10 +261,12 @@ func _run() -> void:
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure after sweep")
 	await _goto(LANDMARKS.south_gate, "return to south gate")
 	await _wind_stages()
-	# Eight steps out from 25 m reach the 75 m end of the play range; the next opens the overview.
-	for step in range(8):
+	# Five steps out from the closest view reach the widest end of the play range;
+	# the next opens the overview.
+	for step in range(5):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "widest play view")
+	await _framing_capture()
 	for step in range(7):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
@@ -268,9 +276,7 @@ func _run() -> void:
 	for step in range(12):
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _leg([], 0.5, "close view")
-	if not headless:
-		_tap(KEY_F9)
-		await _wait(0.2)
+	await _framing_capture()
 	# Tab, with the cursor west of the figure, hands control to the walking figure
 	# wherever the loop has taken it; it faces west. The released figure walks back
 	# to the loop from where it stands, off the loop in the outpost yard.
@@ -295,14 +301,14 @@ func _wind_stages() -> void:
 	await _goto(LANDMARKS.courtyard_east, "head for the outpost")
 	# The overview's detail region stays at the map centre, so the figure walks into
 	# it across its blended border through the east gate and out again by the outpost.
-	# M opens it here; one wheel step in still leaves it at the 75 m end of play.
+	# M opens it here; one wheel step in still leaves it at the widest end of play.
 	_tap(KEY_M)
 	await _leg([], 0.5, "overview before border")
 	await _goto(LANDMARKS.meeting_hall_gap, "leave courtyard for the outpost")
 	await _goto(LANDMARKS.outpost_lane, "walk to the outpost")
 	_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _leg([], 0.3, "overview wheel in")
-	# On in to the 25 m end of the play range.
+	# On in to the closest end of the play range.
 	for step in range(11):
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _goto(LANDMARKS.yard_open, "reach open yard")
@@ -496,6 +502,19 @@ func _repeat(code: Key) -> void:
 	_key(code, false)
 
 
+## In a rendered window, capture the view without the inspection overlay, so the
+## framing can be compared with the owner's reference frames.
+func _framing_capture() -> void:
+	if headless:
+		return
+	_tap(KEY_F1)
+	await _wait(0.1)
+	_tap(KEY_F9)
+	await _wait(0.2)
+	_tap(KEY_F1)
+	await _wait(0.1)
+
+
 func _wheel(button: MouseButton) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
@@ -577,17 +596,16 @@ func _check_record() -> void:
 		if above_ground > 1.3 or above_ground < -CREST_SAG_M:
 			_fail_once("Figure teleported onto a box roof or below the ground")
 		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
-			_fail_once("Camera is not a 16° perspective view")
+			_fail_once("Camera is not a 40° perspective view")
 		if absf(float(row.pitch_deg) - CAMERA_PITCH_DEG) > 0.01 or absf(float(row.yaw_deg)) > 0.01:
 			_fail_once("Camera tilted or turned away from north-up")
 		if float(row.lean_m) > MAX_LEAN_M + 0.0001:
 			_fail_once("Camera leaned more than 3 m")
-		var distance := float(row.camera_distance_m)
 		if row.overview == "true":
 			if row.whole_map_visible != "true":
 				_fail_once("The overview did not frame the town")
-		elif distance < PLAY_RANGE_M.x - 0.001 or distance > PLAY_RANGE_M.y + 0.001:
-			_fail_once("Play zoom left the 25–75 m range")
+		elif not _framed_between(row, WIDEST_SHARE, CLOSEST_SHARE):
+			_fail_once("Play zoom left the figure outside an eighth to a sixteenth of the screen's height")
 		var region := Vector2(float(row.region_x_m), float(row.region_z_m))
 		if Vector2(float(row.region_width_m), float(row.region_depth_m)).distance_to(DETAIL_SIZE_M) > 0.001:
 			_fail_once("Detail region is not 24 × 16 m")
@@ -1279,9 +1297,12 @@ func _check_walking_facing(rows: Array[Dictionary]) -> void:
 
 
 func _check_overview_key(rows: Array[Dictionary]) -> void:
-	# M opens the overview from 40 m and returns to exactly 40 m. Walking carries on
-	# in it, the lean falls to zero, and a wheel step out changes nothing. From an
-	# overview M opened, one wheel step in reaches the 75 m end of play.
+	# M opens the overview from the default distance and returns to exactly it.
+	# Walking carries on in it, the lean falls to zero, and a wheel step out changes
+	# nothing. From an overview M opened, one wheel step in reaches the widest end of play.
+	var default_distance := float(rows.front().camera_distance_m)
+	var widest := _rows_for(rows, "widest play view")
+	var widest_distance := float(widest.back().camera_distance_m) if not widest.is_empty() else -1.0
 	var leaned := _rows_for(rows, "lean before overview")
 	var opened := _rows_for(rows, "overview by M")
 	var open := opened + _rows_for(rows, "overview walk back") + _rows_for(rows, "overview wheel out")
@@ -1290,8 +1311,8 @@ func _check_overview_key(rows: Array[Dictionary]) -> void:
 	if leaned.is_empty() or opened.is_empty() or closed.is_empty() or wheel_in.is_empty():
 		failures.append("Overview key stages were missing")
 		return
-	if leaned.back().overview != "false" or absf(float(leaned.back().camera_distance_m) - PLAY_DISTANCE_M) > 0.001 or float(leaned.back().lean_m) < 0.5:
-		failures.append("The route did not open the overview from a leaning 40 m play view")
+	if leaned.back().overview != "false" or absf(float(leaned.back().camera_distance_m) - default_distance) > 0.001 or float(leaned.back().lean_m) < 0.5:
+		failures.append("The route did not open the overview from a leaning play view at the default distance")
 	for row in open:
 		if row.overview != "true" or row.whole_map_visible != "true":
 			_fail_once("M did not hold the whole-map overview open")
@@ -1300,11 +1321,11 @@ func _check_overview_key(rows: Array[Dictionary]) -> void:
 	if float(opened.back().travel_m) - float(opened.front().travel_m) < 1.5:
 		failures.append("The figure did not walk while the overview was open")
 	for row in closed:
-		if row.overview != "false" or absf(float(row.camera_distance_m) - PLAY_DISTANCE_M) > 0.001:
-			_fail_once("M did not return to the 40 m play distance, or its repeat toggled the overview")
+		if row.overview != "false" or absf(float(row.camera_distance_m) - default_distance) > 0.001:
+			_fail_once("M did not return to the default play distance, or its repeat toggled the overview")
 	for row in wheel_in:
-		if row.overview != "false" or absf(float(row.camera_distance_m) - PLAY_RANGE_M.y) > 0.001:
-			_fail_once("One wheel step in from the overview did not reach 75 m")
+		if row.overview != "false" or absf(float(row.camera_distance_m) - widest_distance) > 0.001:
+			_fail_once("One wheel step in from the overview did not reach the widest play distance")
 
 
 func _check_detail_region(rows: Array[Dictionary]) -> void:
@@ -1386,15 +1407,40 @@ func _region_inset(row: Dictionary, point: Vector2) -> float:
 
 
 func _check_zoom(rows: Array[Dictionary]) -> void:
+	# Before any zoom the figure stands about a twelfth of the screen tall. Five
+	# wheel steps out from the closest view stop at about a sixteenth, the next
+	# opens the overview, and twelve steps back in stop at about an eighth.
+	var initial := _rows_for(rows, "initial idle")
+	if initial.is_empty() or not _framed_at(initial.back(), PLAY_SHARE):
+		failures.append("The default view did not show the figure about a twelfth of the screen tall (%s)" % _share_text(initial))
 	var overview := _rows_for(rows, "whole map")
 	var close := _rows_for(rows, "close view")
 	if overview.is_empty() or overview.back().overview != "true" or overview.back().whole_map_visible != "true":
 		failures.append("Zooming out did not reach the whole-map overview")
-	if close.is_empty() or close.back().overview != "false" or absf(float(close.back().camera_distance_m) - PLAY_RANGE_M.x) > 0.001:
-		failures.append("Zooming in did not stop at the 25 m play distance")
+	if close.is_empty() or close.back().overview != "false" or not _framed_at(close.back(), CLOSEST_SHARE):
+		failures.append("Zooming in did not stop with the figure about an eighth of the screen tall (%s)" % _share_text(close))
 	var widest := _rows_for(rows, "widest play view")
-	if widest.is_empty() or widest.back().overview != "false" or absf(float(widest.back().camera_distance_m) - PLAY_RANGE_M.y) > 0.001:
-		failures.append("Zooming out did not stop at the 75 m play distance before the overview")
+	if widest.is_empty() or widest.back().overview != "false" or not _framed_at(widest.back(), WIDEST_SHARE):
+		failures.append("Zooming out did not stop with the figure about a sixteenth of the screen tall before the overview (%s)" % _share_text(widest))
+	if not initial.is_empty() and not close.is_empty() and not widest.is_empty():
+		print("Framing: figure %.4f of the screen's height by default at %.2f m, %.4f closest at %.2f m, %.4f widest at %.2f m" % [
+			float(initial.back().figure_screen_height), float(initial.back().camera_distance_m),
+			float(close.back().figure_screen_height), float(close.back().camera_distance_m),
+			float(widest.back().figure_screen_height), float(widest.back().camera_distance_m)])
+
+
+## Whether the figure stands `share` of the screen's height tall, within the tolerance.
+func _framed_at(row: Dictionary, share: float) -> bool:
+	return _framed_between(row, share, share)
+
+
+func _framed_between(row: Dictionary, smallest: float, largest: float) -> bool:
+	var height := float(row.figure_screen_height)
+	return height >= smallest * (1.0 - FRAMING_TOLERANCE) and height <= largest * (1.0 + FRAMING_TOLERANCE)
+
+
+func _share_text(stage: Array[Dictionary]) -> String:
+	return "no observation" if stage.is_empty() else "%.4f of the screen's height" % float(stage.back().figure_screen_height)
 
 
 func _check_wind(rows: Array[Dictionary]) -> void:

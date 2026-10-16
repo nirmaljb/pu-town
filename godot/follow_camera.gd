@@ -1,28 +1,35 @@
 extends Camera3D
 ## A north-up perspective camera that follows the controlled figure. Its yaw never
-## changes. Like the owner's reference views, it looks down at 45° through a long
-## lens from far off, so verticals barely splay and near and far snow keep nearly
-## the same scale, and the figure stands about an eighth of the screen tall. Its focus leans toward the cursor's point on the ground, and the wheel
-## zooms through the play range or out to a whole-map overview of the town, which
-## M also opens and closes. It frames the untouched snow where the figure stands
-## and takes only a softened share of each step's sink into it, so the view settles
-## gently at a footfall instead of jolting with it.
+## changes. Like the owner's reference frames, it looks down at 40° through a wide
+## 40° lens, so the figure's body and the sides of boxes show, and by default the
+## figure stands about a twelfth of the screen tall. Its focus leans toward the
+## cursor's point on the ground, and the wheel zooms through the play range, from
+## the figure an eighth of the screen tall to a sixteenth, or out to a whole-map
+## overview of the town, which M also opens and closes. It frames the untouched
+## snow where the figure stands and takes only a softened share of each step's sink
+## into it, so the view settles gently at a footfall instead of jolting with it.
 
 const TownLayout = preload("res://town_layout.gd")
-const FIELD_OF_VIEW := 16.0
-const PITCH := -45.0
-const PLAY_DISTANCE := 40.0
-const MIN_DISTANCE := 25.0
-const MAX_DISTANCE := 75.0
+const Walker = preload("res://walker.gd")
+const FIELD_OF_VIEW := 40.0
+const PITCH := -40.0
+## The share of the screen's height the figure stands at by default and at either
+## end of the wheel's play range; the distances below follow from them.
+const PLAY_SHARE := 1.0 / 12.0
+const CLOSEST_SHARE := 1.0 / 8.0
+const WIDEST_SHARE := 1.0 / 16.0
+static var PLAY_DISTANCE := distance_for_share(PLAY_SHARE)
+static var MIN_DISTANCE := distance_for_share(CLOSEST_SHARE)
+static var MAX_DISTANCE := distance_for_share(WIDEST_SHARE)
 const ZOOM_STEP := 1.15
 const MAX_LEAN := 3.0
 ## The focus leans by this share of the cursor's offset from the figure. Below one,
 ## the lean converges while the cursor holds still on screen.
 const LEAN_SHARE := 0.25
 const LEAN_RATE := 6.0
-## The focus sits this share of the distance north of the figure, so the figure
-## stands slightly below the centre of the screen at every play distance.
-const FRAMING_SHARE := 0.012
+## The focus sits this share of the distance north of the figure, so the figure's
+## feet stand slightly below the centre of the screen at every play distance.
+const FRAMING_SHARE := 0.034
 ## The overview frames the map rectangle with this margin, from the forest floor
 ## to the top of the cliff rock.
 const OVERVIEW_MARGIN := 3.0
@@ -49,8 +56,8 @@ func _ready() -> void:
 	projection = PROJECTION_PERSPECTIVE
 	keep_aspect = KEEP_HEIGHT
 	fov = FIELD_OF_VIEW
-	# The camera stands at least 25 m from its focus and a few hundred metres off
-	# in the overview, so a deeper near plane keeps depth precision.
+	# The camera stands at least 15 m from its focus and a couple of hundred metres
+	# off in the overview, so a deeper near plane keeps depth precision.
 	near = 1.0
 	far = 1000.0
 	rotation_degrees = Vector3(PITCH, 0.0, 0.0)
@@ -80,6 +87,14 @@ func zoom_out() -> void:
 ## Open the overview, or return from it to the play distance the Player left.
 func toggle_overview() -> void:
 	overview = not overview
+
+
+## The distance from its focus at which an upright figure standing there fills
+## `share` of the screen's height: its head is nearer the camera than its feet by
+## the height's share along the view.
+static func distance_for_share(share: float) -> float:
+	var pitch := deg_to_rad(-PITCH)
+	return Walker.HEIGHT * (sin(pitch) + cos(pitch) / (2.0 * tan(deg_to_rad(FIELD_OF_VIEW) * 0.5) * share))
 
 
 func current_distance() -> float:

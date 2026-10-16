@@ -1,0 +1,296 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+100 × 56 metres; 24 × 16 m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+HEADLESS ENGINE-EVENT REPLAY: no rendered view, native focus or OS keyboard evidence.
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792180955-80673.csv
+Inspection checkpoint 1
+Snow route: initial idle · 0.5 s
+Inspection checkpoint 2
+Snow route: turn in place
+Inspection checkpoint 3
+Snow route: lean to corner · 1.5 s
+Inspection checkpoint 4
+Snow route: cursor on figure · 1.5 s
+Inspection checkpoint 5
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 6
+Snow route: north-west walk · 4.24528301886792 s
+Inspection checkpoint 7
+Snow route: south-east return · 4.24528301886792 s
+Inspection checkpoint 8
+Snow route: walk north facing east · 4.24528301886792 s
+Inspection checkpoint 9
+Snow route: walk south facing east · 4.24528301886792 s
+Inspection checkpoint 10
+Snow route: cursor back on figure · 1.5 s
+Inspection checkpoint 11
+Snow route: run across outpost yard · 2.5 s
+Inspection checkpoint 12
+Inspection checkpoint 13
+Snow route: reach lodge front z · 5.66037735849057 s
+Inspection checkpoint 14
+Snow route: reach lodge front x · 4.27955411515142 s
+Inspection checkpoint 15
+Snow route: lodge approach · 5.30660377358491 s
+Inspection checkpoint 16
+Snow route: lodge blocked · 1.2 s
+Inspection checkpoint 17
+Snow route: blocked idle · 0.5 s
+Inspection checkpoint 18
+Inspection checkpoint 19
+Snow route: reach meeting-hall lane z · 12.4527359908482 s
+Inspection checkpoint 20
+Snow route: reach meeting-hall lane x · 34.4375466400723 s
+Inspection checkpoint 21
+Snow route: run through deep snow · 4.24528301886792 s
+Inspection checkpoint 22
+Inspection checkpoint 23
+Snow route: pack deep trail return z · 4.30607008484175 s
+Inspection checkpoint 24
+Snow route: pack deep trail again · 4.24528301886792 s
+Inspection checkpoint 25
+Inspection checkpoint 26
+Snow route: pack deep trail third return z · 4.23940375166119 s
+Inspection checkpoint 27
+Snow route: pack deep trail third · 4.24528301886792 s
+Inspection checkpoint 28
+Inspection checkpoint 29
+Snow route: packed run start z · 4.23940375166119 s
+Inspection checkpoint 30
+Snow route: run on packed trail · 4.24528301886792 s
+Inspection checkpoint 31
+Inspection checkpoint 32
+Snow route: reach meeting-hall gap z · 6.34350366187545 s
+Inspection checkpoint 33
+Snow route: reach meeting-hall gap x · 1.40324358670217 s
+Inspection checkpoint 34
+Snow route: first trail · 4.24528301886792 s
+World probe 1: (-5.909241, 3.198213)
+Inspection checkpoint 35
+Snow route: fresh probe · 0.5 s
+Inspection checkpoint 36
+Inspection checkpoint 37
+Snow route: leave detail region z · 2.83196489765959 s
+Inspection checkpoint 38
+Inspection checkpoint 39
+Snow route: enter courtyard x · 5.64694224663501 s
+Inspection checkpoint 40
+Snow route: wall approach · 4.66981132075472 s
+Inspection checkpoint 41
+Snow route: wall blocked · 1.2 s
+Inspection checkpoint 42
+Inspection checkpoint 43
+Snow route: cross courtyard z · 3.96216995311233 s
+Inspection checkpoint 44
+Snow route: cross courtyard x · 9.43085652477339 s
+Inspection checkpoint 45
+Snow route: probe outside region · 0.5 s
+Inspection checkpoint 46
+Inspection checkpoint 47
+Snow route: reach courtyard west z · 2.83467845007215 s
+Inspection checkpoint 48
+Snow route: reach courtyard west x · 7.54491878005698 s
+Inspection checkpoint 49
+Snow route: run in courtyard · 2.0 s
+Inspection checkpoint 50
+Inspection checkpoint 51
+Snow route: return to courtyard z · 5.71581192736356 s
+Inspection checkpoint 52
+Snow route: return to courtyard x · 7.55190759334924 s
+Inspection checkpoint 53
+Inspection checkpoint 54
+Snow route: reach the walking figure's trail z · 1.88765511408729 s
+Inspection checkpoint 55
+Snow route: reach the walking figure's trail x · 5.15073200441753 s
+World probe 2: (-16.73994, -1.908087)
+Inspection checkpoint 56
+Snow route: trail found · 0.5 s
+Inspection checkpoint 57
+Snow route: follow trail · 4.24528301886792 s
+Inspection checkpoint 58
+Snow route: overlap trail return 0 · 6.36792452830189 s
+Inspection checkpoint 59
+Snow route: overlap trail repeat 0 · 6.36792452830189 s
+Inspection checkpoint 60
+Snow route: overlap trail return 1 · 6.47405660377358 s
+Inspection checkpoint 61
+Snow route: overlap trail repeat 1 · 6.47405660377358 s
+Inspection checkpoint 62
+Snow route: overlap trail return 2 · 6.58018867924528 s
+Inspection checkpoint 63
+Snow route: overlap trail repeat 2 · 6.58018867924528 s
+Inspection checkpoint 64
+Snow route: overlap trail return 3 · 6.68632075471698 s
+Inspection checkpoint 65
+Snow route: overlap trail repeat 3 · 6.68632075471698 s
+Inspection checkpoint 66
+Snow route: trail overlapped · 0.5 s
+Inspection checkpoint 67
+Inspection checkpoint 68
+Snow route: leave courtyard z · 1.89913826168708 s
+Inspection checkpoint 69
+Snow route: leave courtyard x · 0.9310398461684 s
+Inspection checkpoint 70
+Inspection checkpoint 71
+Snow route: return to east gate x · 9.43621329541472 s
+Inspection checkpoint 72
+Inspection checkpoint 73
+Snow route: leave through east gate x · 5.64681538995707 s
+Inspection checkpoint 74
+Inspection checkpoint 75
+Snow route: return to trail z · 3.01631973388622 s
+Inspection checkpoint 76
+Snow route: return to trail x · 0.08238891385636 s
+Inspection checkpoint 77
+Snow route: probe revisited · 0.5 s
+Inspection checkpoint 78
+Snow route: shelf cliff approach · 6.36792452830189 s
+Inspection checkpoint 79
+Snow route: shelf cliff blocked · 1.2 s
+Inspection checkpoint 80
+Inspection checkpoint 81
+Snow route: return to meeting-hall gap z · 8.20745252213388 s
+Inspection checkpoint 82
+Snow route: return to meeting-hall gap x · 0.08656663714715 s
+Inspection checkpoint 83
+Inspection checkpoint 84
+Snow route: re-enter courtyard x · 5.64694314632775 s
+Inspection checkpoint 85
+Inspection checkpoint 86
+Snow route: cross to south gate x · 9.43085742446613 s
+Inspection checkpoint 87
+Inspection checkpoint 88
+Snow route: reach south gate z · 1.8960356940779 s
+Inspection checkpoint 89
+Snow route: reach south gate x · 1.41284330835887 s
+Inspection checkpoint 90
+Inspection checkpoint 91
+Snow route: descend stair z · 18.8639593574236 s
+Inspection checkpoint 92
+Snow route: run in forest · 6.36792452830189 s
+Inspection checkpoint 93
+Snow route: boundary blocked · 1.0 s
+Inspection checkpoint 94
+Inspection checkpoint 95
+Snow route: reach forest west z · 3.4904713900584 s
+Inspection checkpoint 96
+Snow route: reach forest west x · 4.24152410255293 s
+Inspection checkpoint 97
+Snow route: run to forest cliff foot · 5.30660377358491 s
+Inspection checkpoint 98
+Snow route: forest cliff blocked · 1.2 s
+Inspection checkpoint 99
+Inspection checkpoint 100
+Snow route: return to stair foot z · 2.5470751636433 s
+Inspection checkpoint 101
+Snow route: return to stair foot x · 4.2535655903366 s
+Inspection checkpoint 102
+Inspection checkpoint 103
+Snow route: climb stair z · 18.8707333690715 s
+Inspection checkpoint 104
+Snow route: lean before overview · 1.0 s
+Inspection checkpoint 105
+Snow route: overview by M · 2.12264150943396 s
+Inspection checkpoint 106
+Snow route: overview walk back · 2.12264150943396 s
+Inspection checkpoint 107
+Snow route: overview wheel out · 0.3 s
+Inspection checkpoint 108
+Snow route: overview closed by M · 0.5 s
+Inspection checkpoint 109
+Snow route: walk north sweeping behind
+Inspection checkpoint 110
+Snow route: stop facing behind · 1.0 s
+Inspection checkpoint 111
+Snow route: face east again · 0.5 s
+Inspection checkpoint 112
+Snow route: cursor on figure after sweep · 1.5 s
+Inspection checkpoint 113
+Inspection checkpoint 114
+Snow route: return to south gate z · 2.99576352227409 s
+Inspection checkpoint 115
+Inspection checkpoint 116
+Snow route: reach courtyard shelter z · 8.49480291582504 s
+Inspection checkpoint 117
+Snow route: reach courtyard shelter x · 7.08837869032377 s
+World probe 3: (-31.11599, -7.110527)
+Inspection checkpoint 118
+Inspection checkpoint 119
+Snow route: leave courtyard shelter z · 6.60898730439959 s
+Inspection checkpoint 120
+Snow route: leave courtyard shelter x · 8.50186437930698 s
+Inspection checkpoint 121
+Inspection checkpoint 122
+Snow route: head for the outpost x · 9.41954738688915 s
+Inspection checkpoint 123
+Snow route: overview before border · 0.5 s
+Inspection checkpoint 124
+Inspection checkpoint 125
+Snow route: leave courtyard for the outpost x · 5.64681538995707 s
+Inspection checkpoint 126
+Inspection checkpoint 127
+Snow route: walk to the outpost z · 7.06777682809054 s
+Inspection checkpoint 128
+Snow route: walk to the outpost x · 28.2986541963973 s
+Inspection checkpoint 129
+Snow route: overview wheel in · 0.3 s
+Inspection checkpoint 130
+Inspection checkpoint 131
+Snow route: reach open yard z · 4.26085939947164 s
+World probe 4: (23.89616, 3.13715)
+Inspection checkpoint 132
+Inspection checkpoint 133
+Snow route: reach shed windward face x · 10.3762608654094 s
+World probe 5: (35.02268, 2.888819)
+Inspection checkpoint 134
+Inspection checkpoint 135
+Snow route: reach lodge lee z · 7.35266006217813 s
+World probe 6: (35.112, -5.07784)
+Inspection checkpoint 136
+Snow route: probes placed · 0.5 s
+Inspection checkpoint 137
+Snow route: wind fills prints · 2.5 s
+Inspection checkpoint 138
+Snow route: drifts build · 16.0 s
+Inspection checkpoint 139
+Snow route: run through drift · 2.0 s
+Inspection checkpoint 140
+Snow route: wind turned · 10.0 s
+Inspection checkpoint 141
+Snow route: wind frozen · 2.0 s
+Inspection checkpoint 142
+Snow route: widest play view · 0.5 s
+Inspection checkpoint 143
+Snow route: whole map · 0.5 s
+Inspection checkpoint 144
+Snow route: close view · 0.5 s
+Inspection checkpoint 145
+Snow route: second figure idle · 0.5 s
+Inspection checkpoint 146
+Snow route: cursor on second figure · 1.5 s
+Inspection checkpoint 147
+Snow route: first figure rejoins loop · 8.0 s
+Saved user://route-1792180955-80673.csv
+Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792180955-80673.csv
+Walking figure: 32838 moving observations, 32674 at the speed its snow allows, 12071 running in Shallow Snow, 6653 walking in Deep, 5012 in the courtyard, 2304 on the stair, 9 descents and 9 ascents
+Tracked the walking figure's trail at (-16.52494, -2.0), laid 3.3 s into the record 49.4 m from the controlled figure; probe (-16.73994, -1.908087) compaction 0.637
+Tracking probe compaction 0.637 -> 0.750 after following and overlapping
+Wind filled 0.826 of the tracked trail's compaction
+Released figure stood 10.07 m off the loop at (32.86943, -4.814841), joined it at (28.0, 4.0) and walked on to 1% of the loop
+Same deep corridor, Shift held: fresh 1.060 m/s -> packed 2.053 m/s (113 / 59 samples)
+Camera steadiness over 109 steps: deepest sink 0.400 m; largest per-observation change, figure's sink 0.0892 m, camera against untouched snow 0.0017 m
+Walking with the cursor behind: 52 observations directly behind, held east 79 and west 23, shoulder changes ["+110° to -7° with the cursor at -97°"]
+Stopped 68° from the cursor; expected to reach it within 9 observations
+After 41.1 wind-seconds, prints remain: exposed 0.67, sheltered 0.92, lee 0.00
+Lee drift 0.602 -> 1.118 m (first second +0.087, last second +0.001)
+Windward scour 0.491 -> 0.033 m
+Reversed wind: old lee -0.679 m, old windward face +0.468 m
+Detail region at (22.0, 3.2); leaned to (23.6, 0.8); returned to (22.0, 3.2)
+Overview walk across the region border: outside 934, border 1196, inside 588; border contact gap 0.0000 m
+Footprint uploads: 299110400 bytes for 2781 footsteps (107555 per step; touched-tile bound 409600 per step)
+Coverage: 32838 observations; straight 26062, diagonal 510, fast run 179, deep run 1128, blocked 684, overview 2830, camera follow 28550
+SNOW SCENE HEADLESS REPLAY: PASS · 0 failures
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:264)
+$G --headless --path $S/godot-baseline --fixed-fps 60 -- --snow-scene-check    100.35s user 4.49s system 95% cpu 1:49.30 total

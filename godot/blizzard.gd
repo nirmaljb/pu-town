@@ -14,12 +14,13 @@ const TownLayout = preload("res://town_layout.gd")
 const FollowCamera = preload("res://follow_camera.gd")
 
 @export_group("Whiteout")
-## Fog begins this far from the camera at play distance, a few metres short of the
-## figure 40 m away; every distance here scales with the camera's, so the overview
-## is hazy but legible.
-@export_range(0.0, 100.0, 0.5, "suffix:m") var fog_begin := 34.0
+## Fog begins this far from the camera at play distance, about halfway to the
+## figure 22.6 m away, so it takes an eighth of the figure, a third of the top
+## edge 42 m away and a sixteenth of the bottom edge; every distance here scales
+## with the camera's, so the overview is hazy but legible.
+@export_range(0.0, 100.0, 0.5, "suffix:m") var fog_begin := 11.0
 ## Fog reaches its full amount this far from the camera at play distance.
-@export_range(5.0, 300.0, 0.5, "suffix:m") var fog_end := 73.0
+@export_range(5.0, 300.0, 0.5, "suffix:m") var fog_end := 105.0
 ## How much of a distant view the fog replaces.
 @export_range(0.0, 1.0, 0.01) var whiteout := 0.92
 ## Above one the fog thickens late; below one it thickens early.
@@ -29,8 +30,8 @@ const FollowCamera = preload("res://follow_camera.gd")
 @export_group("Shadows")
 ## SkyKey draws one shadow map from the camera out to this distance at play
 ## distance, scaled with the camera's like the fog. The view's far edge is about
-## 47 m away, so splitting the map across a longer range only costs frame time.
-@export_range(10.0, 400.0, 1.0, "suffix:m") var shadow_reach := 60.0
+## 42 m away, so splitting the map across a longer range only costs frame time.
+@export_range(10.0, 400.0, 1.0, "suffix:m") var shadow_reach := 54.0
 
 @export_group("Snowfall")
 @export_range(0.0, 1.0, 0.01) var snowfall := 0.7
