@@ -64,9 +64,11 @@ func _ready() -> void:
 			"upper": skeleton.find_bone(side + "UpperLeg"),
 			"lower": skeleton.find_bone(side + "LowerLeg"),
 			"foot": foot, "toes": toes,
-			# Sole points under the heel and the ball of the boot, as in gait.py.
+			# Sole points under the heel, the ball and the toe tip a stiff boot rolls
+			# off, as in gait.py.
 			"heel": foot_rest.affine_inverse() * (foot_rest.origin + Vector3(0, -0.09, -0.08)),
 			"ball": toes_rest.affine_inverse() * (toes_rest.origin + Vector3(0, -0.03, 0)),
+			"tip": toes_rest.affine_inverse() * (toes_rest.origin + Vector3(0, -0.028, 0.08)),
 		}
 
 
@@ -119,8 +121,8 @@ func planted(phase: float, run_amount: float) -> Dictionary:
 
 
 ## Bend each leg so a planted boot rests on `support`, a callable from a world XZ
-## point to the snow height there: its heel or ball touches the snow and neither
-## sinks below it. A lifted boot keeps its clearance above the snow under it.
+## point to the snow height there: its heel, ball or toe tip touches the snow and
+## none sinks below it. A lifted boot keeps its clearance above the snow under it.
 ## Returns the largest gap left between a planted boot and the snow.
 func ground(support: Callable, root_height: float, planted_boots: Dictionary) -> float:
 	contact_gap = 0.0
@@ -147,11 +149,13 @@ func ground(support: Callable, root_height: float, planted_boots: Dictionary) ->
 	return contact_gap
 
 
-## Heel and ball sole points in world space, lowest first.
+## Heel, ball and toe-tip sole points in world space, lowest first.
 func _sole_points(leg: Dictionary) -> Array[Vector3]:
-	var heel := skeleton.global_transform * skeleton.get_bone_global_pose(leg.foot) * (leg.heel as Vector3)
-	var ball := skeleton.global_transform * skeleton.get_bone_global_pose(leg.toes) * (leg.ball as Vector3)
-	return [heel, ball] if heel.y < ball.y else [ball, heel]
+	var foot := skeleton.global_transform * skeleton.get_bone_global_pose(leg.foot)
+	var toes := skeleton.global_transform * skeleton.get_bone_global_pose(leg.toes)
+	var points: Array[Vector3] = [foot * (leg.heel as Vector3), toes * (leg.ball as Vector3), toes * (leg.tip as Vector3)]
+	points.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.y < b.y)
+	return points
 
 
 ## How far the boot's sole is above the snow: negative when part of it is buried.

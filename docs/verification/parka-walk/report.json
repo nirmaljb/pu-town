@@ -1,0 +1,57 @@
+{
+  "triangles": 4178,
+  "vertices": 2161,
+  "materials": {
+    "Void": "#202123",
+    "Boots": "#36383C",
+    "Accent": "#36383C",
+    "Parka": "#3C3E42",
+    "Trousers": "#44474D",
+    "Fur": "#A7ABB5"
+  },
+  "bones": [
+    "Root",
+    "Hips",
+    "Spine",
+    "Chest",
+    "UpperChest",
+    "Neck",
+    "Head",
+    "LeftShoulder",
+    "LeftUpperArm",
+    "LeftLowerArm",
+    "LeftHand",
+    "RightShoulder",
+    "RightUpperArm",
+    "RightLowerArm",
+    "RightHand",
+    "LeftUpperLeg",
+    "LeftLowerLeg",
+    "LeftFoot",
+    "LeftToes",
+    "RightUpperLeg",
+    "RightLowerLeg",
+    "RightFoot",
+    "RightToes"
+  ],
+  "height_m": 1.695,
+  "motion": {
+    "Walk": {
+      "frames": 33,
+      "cycle_seconds": 0.5513,
+      "step_m": 0.6202,
+      "max_planted_slip_per_frame_mm": 0.0,
+      "lowest_vertex_mm": -8.2,
+      "highest_frame_low_point_mm": 0.2
+    },
+    "Run": {
+      "frames": 25,
+      "cycle_seconds": 0.4222,
+      "step_m": 0.95,
+      "max_planted_slip_per_frame_mm": 0.0,
+      "lowest_vertex_mm": -1.9,
+      "highest_frame_low_point_mm": 57.5
+    }
+  },
+  "glb_bytes": 687944
+}

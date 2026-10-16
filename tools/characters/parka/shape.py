@@ -333,20 +333,24 @@ def shape():
 
         cx = s * 0.105
         # The hems bunch over the boot tops.
-        trousers = [(0.315, cx, 0.005, 0.092, 0.100), (0.36, cx, 0, 0.094, 0.100), (0.42, cx, 0, 0.088, 0.093),
+        trousers = [(0.275, cx, 0.012, 0.092, 0.100), (0.33, cx, 0.006, 0.094, 0.100), (0.42, cx, 0, 0.088, 0.093),
                     (0.50, cx, 0, 0.085, 0.092), (0.60, cx, 0, 0.087, 0.100), (0.72, cx, 0, 0.093, 0.103),
                     (0.85, cx, 0, 0.100, 0.100), (0.98, cx, 0, 0.108, 0.105)]
         mesh.tube(f'trousers{s}', trousers, 'z', 'Trousers', leg_weights, n=10, step=0.07, jitter=0.005)
-        shaft = [(0.05, cx, 0.01, 0.066, 0.087), (0.20, cx, 0.01, 0.068, 0.084),
-                 (0.30, cx, 0.01, 0.080, 0.088), (0.345, cx, 0.01, 0.084, 0.092)]
-        mesh.tube(f'shaft{s}', shaft, 'z', 'Boots', foot_weights, n=10, step=0.08, jitter=0.004)
-        foot = [(0.095, cx, 0.050, 0.050, 0.050), (0.06, cx, 0.068, 0.060, 0.068), (-0.02, cx, 0.068, 0.062, 0.066),
-                (-0.10, cx, 0.068, 0.061, 0.066), (-0.16, cx, 0.062, 0.055, 0.058), (-0.195, cx, 0.055, 0.040, 0.045)]
-        mesh.tube(f'boot{s}', foot, 'y', 'Boots', foot_weights, n=10, exp=3.0, step=0.06, jitter=0.003)
-        # A flared sole under the whole boot.
-        sole = [(0.100, cx, 0.013, 0.054, 0.013), (0.0, cx, 0.013, 0.065, 0.013), (-0.15, cx, 0.015, 0.062, 0.014),
-                (-0.200, cx, 0.020, 0.045, 0.015)]
-        mesh.tube(f'sole{s}', sole, 'y', 'Boots', foot_weights, n=8, exp=3.0, step=0.1, jitter=0.002)
+        # Boots as in the owner's walk recording: a full, nearly round shaft flush with
+        # the heel, under trousers that end at 27 cm, and a low domed toe from 11 cm
+        # at the instep to a rounded 6 cm nose, 32 cm long.
+        shaft = [(0.05, cx, 0.015, 0.074, 0.088), (0.14, cx, 0.015, 0.076, 0.089),
+                 (0.22, cx, 0.015, 0.079, 0.090), (0.29, cx, 0.015, 0.084, 0.093)]
+        mesh.tube(f'shaft{s}', shaft, 'z', 'Boots', foot_weights, n=10, exp=2.4, step=0.08, jitter=0.004)
+        foot = [(0.100, cx, 0.052, 0.068, 0.046), (0.075, cx, 0.060, 0.078, 0.052), (0.0, cx, 0.060, 0.080, 0.052),
+                (-0.07, cx, 0.058, 0.079, 0.050), (-0.11, cx, 0.056, 0.077, 0.048), (-0.15, cx, 0.053, 0.073, 0.046),
+                (-0.18, cx, 0.050, 0.066, 0.044), (-0.20, cx, 0.044, 0.054, 0.032), (-0.212, cx, 0.040, 0.034, 0.020)]
+        mesh.tube(f'boot{s}', foot, 'y', 'Boots', foot_weights, n=10, exp=2.5, step=0.05, jitter=0.003)
+        # A sole a little proud of the boot all round.
+        sole = [(0.105, cx, 0.016, 0.066, 0.016), (0.07, cx, 0.015, 0.080, 0.015), (-0.05, cx, 0.015, 0.084, 0.015),
+                (-0.15, cx, 0.016, 0.080, 0.016), (-0.195, cx, 0.020, 0.062, 0.018), (-0.215, cx, 0.028, 0.034, 0.014)]
+        mesh.tube(f'sole{s}', sole, 'y', 'Boots', foot_weights, n=8, exp=2.6, step=0.1, jitter=0.002)
 
     # The hood sits inside the fur collar at the back of the neck, as on the back sheet.
     hood = [(1.42, 0, 0.000, 0.125, 0.120), (1.50, 0, 0.000, 0.148, 0.128), (1.56, 0, 0.000, 0.152, 0.135),

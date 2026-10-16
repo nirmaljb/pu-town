@@ -155,10 +155,13 @@ func _run() -> void:
 	await _leg([KEY_W], 1.2, "lodge blocked")
 	await _leg([], 0.5, "blocked idle")
 	# Repeated traffic packs a lane of the meeting-hall gap's Deep Snow until it is runnable.
+	# The parka's 0.62 m walking steps press fewer prints per pass, so it takes three.
 	await _goto(LANDMARKS.meeting_hall_lane, "reach meeting-hall lane")
 	await _leg([KEY_W, KEY_SHIFT], 2.0, "run through deep snow")
 	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail return")
 	await _leg([KEY_W], 2.0, "pack deep trail again")
+	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail third return")
+	await _leg([KEY_W], 2.0, "pack deep trail third")
 	await _goto(LANDMARKS.meeting_hall_lane, "packed run start")
 	await _leg([KEY_W, KEY_SHIFT], 2.0, "run on packed trail")
 	# Lay a trail in the meeting-hall gap and fix a world probe on it.

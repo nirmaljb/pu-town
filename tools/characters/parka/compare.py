@@ -1,9 +1,11 @@
 """Score review renders against the owner's sheets and tile them for inspection.
 
 Usage: python3 tools/characters/parka/compare.py REFERENCE_DIR BUILD_DIR
-REFERENCE_DIR holds front.png, side.png and back.png from the character sheets.
-Prints silhouette IoU per view and writes BUILD_DIR/review/{turnaround,cycles,game}.png.
-In the overlay, red is reference only, blue is render only and dark grey is shared.
+REFERENCE_DIR holds front.png, side.png and back.png from the character sheets and
+walk-left.png from the owner's walk recording (see walk_reference.py).
+Prints silhouette IoU per view and per walk phase, and writes
+BUILD_DIR/review/{turnaround,cycles,game,walk}.png.
+In the overlays, red is reference only, blue is render only and dark grey is shared.
 """
 import json
 import sys
@@ -91,5 +93,39 @@ for i, (view, box) in enumerate([('front', (557, 50, 817, 310)), ('side', (557, 
     details.paste(ref, (i * 260, 0))
     details.paste(ren, (i * 260, 260))
 details.save(build / 'details.png')
+# Walk against the recording, phase by phase. The recording's tiles follow the back
+# of the hood, so the hips sit at one unknown offset along it: the best single
+# shift for the whole cycle is used. Legs are everything below the coat's hem.
+walk_ref = np.asarray(Image.open(reference / 'walk-left.png').convert('L')) < 128
+TW, TH, PHASES, HEM_ROW = 180, 190, 16, 190 - 5 - 72
+refs = [walk_ref[:, i * TW:(i + 1) * TW] for i in range(PHASES)]
+rens = [np.asarray(Image.open(build / f'walk-left-{i}.png').convert('RGBA'))[..., 3] > 128 for i in range(PHASES)]
+
+
+def iou(a, b):
+    return float((a & b).sum() / max(1, (a | b).sum()))
+
+
+def shifted(mask, dx):
+    return np.roll(mask, dx, axis=1)
+
+
+best = max(range(-30, 31), key=lambda dx: sum(iou(r, shifted(m, dx)) for r, m in zip(refs, rens)))
+whole = [iou(r, shifted(m, best)) for r, m in zip(refs, rens)]
+legs = [iou(r[HEM_ROW:], shifted(m, best)[HEM_ROW:]) for r, m in zip(refs, rens)]
+scores['walk_left'] = {
+    'mean_iou': round(float(np.mean(whole)), 4), 'mean_leg_iou': round(float(np.mean(legs)), 4),
+    'hip_offset_m': best / 100, 'iou_by_phase': [round(v, 3) for v in whole],
+    'leg_iou_by_phase': [round(v, 3) for v in legs],
+}
+walk = Image.new('RGB', (PHASES // 2 * TW, 2 * TH), 'white')
+for i, (r, m) in enumerate(zip(refs, rens)):
+    m = shifted(m, best)
+    overlay = np.full(r.shape + (3,), 255, np.uint8)
+    overlay[r & ~m] = (220, 40, 40)
+    overlay[m & ~r] = (40, 90, 230)
+    overlay[r & m] = (90, 90, 90)
+    walk.paste(Image.fromarray(overlay), ((i % 8) * TW, (i // 8) * TH))
+walk.resize((PHASES // 2 * TW * 2, 4 * TH), Image.NEAREST).save(build / 'walk.png')
 (build / 'scores.json').write_text(json.dumps(scores, indent=2) + '\n')
 print(json.dumps(scores, indent=1))

@@ -407,7 +407,7 @@ camera to its 3 m bound toward a corner of the view and back, and walks north an
 south while facing east, with prints and speed following the travel. Running east
 across the outpost yard, it runs at full speed in the Shallow Snow and only walks
 in the Deep drift, and it is stopped by the lodge. In the meeting-hall gap it
-runs, walks and runs again along one lane of Deep Snow, showing a measurable
+runs, walks twice more and runs again along one lane of Deep Snow, showing a measurable
 Packed Path running advantage over the fresh lane. While the cursor leans the
 camera toward a corner and back, the detail region follows the focus and returns
 with it. Every observation checks that the region is 24 × 16 m, centred on the

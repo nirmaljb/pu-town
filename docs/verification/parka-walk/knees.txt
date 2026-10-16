@@ -1,0 +1,44 @@
+Walk
+0.00 L* thigh   27.7 knee  16.8 | hipz 0.849
+0.05 L* thigh   26.3 knee  21.0 | hipz 0.852
+0.10 L* thigh   20.9 knee  17.1 | hipz 0.859
+0.15 L* thigh   13.6 knee   9.9 | hipz 0.868
+0.20 L* thigh    8.8 knee   8.5 | hipz 0.875
+0.25 L* thigh    4.6 knee   8.0 | hipz 0.878
+0.30 L* thigh    2.0 knee  10.7 | hipz 0.875
+0.35 L* thigh   -0.7 knee  13.5 | hipz 0.868
+0.40 L* thigh   -5.2 knee  12.9 | hipz 0.859
+0.45 L* thigh   -7.7 knee  16.2 | hipz 0.852
+0.50 L* thigh   -0.6 knee  37.7 | hipz 0.849
+0.55 L* thigh    3.6 knee  50.9 | hipz 0.852
+0.60 L* thigh    2.0 knee  52.2 | hipz 0.859
+0.65 L  thigh    3.7 knee  55.0 | hipz 0.868
+0.70 L  thigh   15.6 knee  63.3 | hipz 0.875
+0.75 L  thigh   25.3 knee  62.0 | hipz 0.878
+0.80 L  thigh   28.8 knee  49.0 | hipz 0.875
+0.85 L  thigh   29.2 knee  35.1 | hipz 0.868
+0.90 L  thigh   28.7 knee  24.6 | hipz 0.859
+0.95 L  thigh   27.2 knee  16.5 | hipz 0.852
+Stand
+0.00 L* thigh    2.0 knee   4.1 | hipz 0.879
+Run
+0.00 L* thigh   16.2 knee   4.8 | hipz 0.862
+0.05 L* thigh   21.9 knee  29.0 | hipz 0.848
+0.10 L* thigh   19.3 knee  37.9 | hipz 0.837
+0.15 L* thigh   12.2 knee  37.7 | hipz 0.833
+0.20 L* thigh    2.5 knee  31.3 | hipz 0.837
+0.25 L* thigh    0.3 knee  35.6 | hipz 0.848
+0.30 L  thigh   -9.3 knee  24.5 | hipz 0.862
+0.35 L  thigh   -2.9 knee  41.2 | hipz 0.873
+0.40 L  thigh    0.2 knee  50.7 | hipz 0.877
+0.45 L  thigh    4.3 knee  59.9 | hipz 0.873
+0.50 L  thigh    9.9 knee  68.8 | hipz 0.862
+0.55 L  thigh   16.6 knee  76.2 | hipz 0.848
+0.60 L  thigh   23.7 knee  80.5 | hipz 0.837
+0.65 L  thigh   30.0 knee  80.7 | hipz 0.833
+0.70 L  thigh   34.3 knee  75.7 | hipz 0.837
+0.75 L  thigh   35.8 knee  67.8 | hipz 0.848
+0.80 L  thigh   35.0 knee  57.8 | hipz 0.862
+0.85 L  thigh   32.1 knee  45.6 | hipz 0.873
+0.90 L  thigh   27.8 knee  32.2 | hipz 0.877
+0.95 L  thigh   22.5 knee  18.5 | hipz 0.873

@@ -159,14 +159,13 @@ def measure(rig, mesh_obj, lengths):
             _, _, planted = gait.pose(name, phase)
             for side, start in (('Left', 0.0), ('Right', 0.5)):
                 foot = rig.pose.bones[f'{side}Foot']
-                # The heel carries the boot until the heel rises, then the ball does.
+                # The heel carries the boot until the heel rises, then the ball or the
+                # toe tip does.
                 stance = ((phase - start) % 1.0) / g['duty']
-                kind = 'heel' if stance < 0.6 else 'ball'
-                if kind == 'heel':
-                    delta = foot.matrix.to_quaternion() @ rest_rotation(rig, f'{side}Foot').inverted()
-                    contact = foot.head + delta @ gait.HEEL
-                else:
-                    contact = foot.tail
+                kind = 'heel' if stance < g['heel'] else 'toe'
+                point = gait.HEEL if kind == 'heel' else gait.TIP if g['rocker'] else gait.BALL
+                delta = foot.matrix.to_quaternion() @ rest_rotation(rig, f'{side}Foot').inverted()
+                contact = foot.head + delta @ point
                 if planted[side]:
                     anchors[side].append((phase, contact.y - phase * travel, kind))
             evaluated = mesh_obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
@@ -238,4 +237,5 @@ def main():
     print('PARKA_REPORT', json.dumps(report))
 
 
-main()
+if __name__ == '__main__':
+    main()

@@ -5,8 +5,9 @@ Usage:
 
 Writes BUILD_DIR/review/: front, side and back at the owner's sheet framing
 (1376 x 768, 680 px = 1.7 m), the Stand pose, side-view cycle frames of Walk and
-Run, and the game camera (orthographic, 55 degrees down, 45 degrees round, the
-prototype's 6 m view at 1280 x 800). compare.py scores and tiles them.
+Run, Walk from its left side at each phase of reference/walk-left.png (180 x 190,
+100 px = 1 m), and the game camera (orthographic, 55 degrees down, 45 degrees round,
+the prototype's 6 m view at 1280 x 800). compare.py scores and tiles them.
 """
 import math
 import sys
@@ -68,7 +69,7 @@ def pose(clip, frame):
         for bone in rig.pose.bones:
             bone.rotation_quaternion = (1, 0, 0, 0)
             bone.location = (0, 0, 0)
-    scene.frame_set(frame)
+    scene.frame_set(int(frame), subframe=frame - int(frame))
 
 
 camera, sun = setup()
@@ -93,6 +94,13 @@ for clip in ('Walk', 'Run'):
         shoot(f'{clip.lower()}-{i}')
         aim(camera, (-0.6, 0.75, -0.2), (0, 0, 0.90), 2.2, (420, 520))
         shoot(f'{clip.lower()}-quarter-{i}')
+
+# The owner's walk recording: left side to the lens, 16 phases from the left boot's landing.
+frames = bpy.data.actions['Walk'].frame_range[1]
+for i in range(16):
+    pose('Walk', frames * i / 16)
+    aim(camera, (-1, 0, 0), (0, 0, 0.90), 1.9, (180, 190))
+    shoot(f'walk-left-{i}')
 
 # Game camera: Godot's rotation (-55, 45, 0) looks down 55 degrees from a 45 degree heading.
 pitch, yaw = math.radians(55), math.radians(45)
