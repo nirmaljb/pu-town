@@ -1,0 +1,65 @@
+pid 69692
+window 80, 73, 1280, 752
+content origin 80 105 (title bar 32), content 1280x720, figure at 640 417
+frontmost before input: 69692
+trace frames-1792244116-98524.csv
+## Input driver
+trusted for input: true
+   1.06 s  warm-up walk
+   5.71 s  F6 pressed; walking west out of the Town Square into open snow, north, east and back south
+  68.19 s  walk finished
+## Focus watcher (empty means it logged nothing)
+## workload-before.txt
+Processes: 548 total, 2 running, 546 sleeping, 3582 threads 
+2026/10/17 19:05:02
+Load Avg: 1.69, 2.10, 2.23 
+CPU usage: 4.81% user, 5.71% sys, 89.47% idle 
+SharedLibs: 226M resident, 69M data, 53M linkedit.
+MemRegions: 0 total, 0B resident, 43M private, 687M shared.
+PhysMem: 7556M used (1675M wired, 3323M compressor), 75M unused.
+VM: 271T vsize, 5268M framework vsize, 146392058(172) swapins, 151952908(0) swapouts.
+Networks: packets: 23005156/23G in, 13624200/7775M out.
+Disks: 184877249/4589G read, 56524640/2566G written.
+
+PID    COMMAND          %CPU MEM   
+401    WindowServer     14.3 617M+ 
+672    NotificationCent 12.3 83M   
+0      kernel_task      9.7  116M  
+69688  top              7.0  4657K+
+70306  WhatsApp         3.9  438M- 
+40680  Blender          1.4  2540M 
+33271  Codex (Service)  1.1  299M+ 
+1081   Google Chrome He 0.9  94M-  
+572    com.apple.Driver 0.8  30M-  
+405    runningboardd    0.7  11M+  
+33232  ChatGPT          0.7  517M+ 
+98506  Google Chrome He 0.6  1144M 
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	48%; charging; 2:11 remaining present: true
+## workload-during.txt
+Processes: 556 total, 4 running, 552 sleeping, 3646 threads 
+2026/10/17 19:05:48
+Load Avg: 1.93, 2.13, 2.23 
+CPU usage: 10.86% user, 7.5% sys, 82.8% idle 
+SharedLibs: 249M resident, 63M data, 58M linkedit.
+MemRegions: 30 total, 384K resident, 47M private, 837M shared.
+PhysMem: 7559M used (2068M wired, 3277M compressor), 73M unused.
+VM: 274T vsize, 5268M framework vsize, 146398637(8) swapins, 151980668(0) swapouts.
+Networks: packets: 23005865/23G in, 13624895/7775M out.
+Disks: 184918868/4590G read, 56534509/2566G written.
+
+PID    COMMAND          %CPU MEM   
+69692  PU Town · Snow  22.6 633M- 
+0      kernel_task      19.9 117M+ 
+401    WindowServer     8.9  622M+ 
+69868  top              7.1  4721K+
+404    loginwindow      6.4  56M   
+67338  System Events    5.6  14M   
+412    coreaudiod       5.0  22M   
+371    launchservicesd  3.2  8273K 
+402    tccd             3.1  5937K 
+484    syspolicyd       2.9  47M   
+632    trustd           1.8  8385K-
+405    runningboardd    1.8  11M+  
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	49%; charging; 2:14 remaining present: true

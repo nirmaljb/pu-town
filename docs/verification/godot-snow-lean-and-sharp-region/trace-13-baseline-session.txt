@@ -1,0 +1,65 @@
+pid 68406
+window 80, 73, 1280, 752
+content origin 80 105 (title bar 32), content 1280x720, figure at 640 417
+frontmost before input: 68406
+trace frames-1792243705-12498.csv
+## Input driver
+trusted for input: true
+   1.08 s  warm-up walk
+   5.73 s  F6 pressed; walking west out of the Town Square into open snow, north, east and back south
+  68.15 s  walk finished
+## Focus watcher (empty means it logged nothing)
+## workload-before.txt
+Processes: 533 total, 3 running, 530 sleeping, 3732 threads 
+2026/10/17 18:58:10
+Load Avg: 1.84, 2.04, 2.26 
+CPU usage: 5.81% user, 5.25% sys, 88.92% idle 
+SharedLibs: 253M resident, 57M data, 56M linkedit.
+MemRegions: 45 total, 1392K resident, 129M private, 691M shared.
+PhysMem: 7531M used (1649M wired, 3002M compressor), 103M unused.
+VM: 266T vsize, 17G framework vsize, 146357938(16) swapins, 151936668(0) swapouts.
+Networks: packets: 22995621/23G in, 13614916/7771M out.
+Disks: 184758724/4586G read, 56503865/2565G written.
+
+PID    COMMAND          %CPU MEM   
+401    WindowServer     13.4 612M- 
+672    NotificationCent 12.3 82M-  
+0      kernel_task      10.6 116M+ 
+68400  top              7.1  4625K+
+40680  Blender          1.4  2540M 
+33271  Codex (Service)  1.4  299M+ 
+33232  ChatGPT          1.2  515M+ 
+572    com.apple.Driver 1.2  30M-  
+98506  Google Chrome He 1.0  1141M+
+63503  suggestd         0.9  10M+  
+52076  claude           0.8  267M  
+1081   Google Chrome He 0.7  95M+  
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	44%; charging; 2:19 remaining present: true
+## workload-during.txt
+Processes: 547 total, 2 running, 545 sleeping, 3636 threads 
+2026/10/17 18:58:56
+Load Avg: 2.38, 2.13, 2.28 
+CPU usage: 10.12% user, 8.21% sys, 81.66% idle 
+SharedLibs: 222M resident, 60M data, 57M linkedit.
+MemRegions: 111 total, 18M resident, 52M private, 874M shared.
+PhysMem: 7557M used (2092M wired, 3056M compressor), 76M unused.
+VM: 271T vsize, 17G framework vsize, 146359594(28) swapins, 151942356(0) swapouts.
+Networks: packets: 22996547/23G in, 13615567/7771M out.
+Disks: 184775409/4587G read, 56506652/2565G written.
+
+PID    COMMAND          %CPU MEM   
+82831  Claude Helper (R 66.6 836M- 
+0      kernel_task      41.3 116M- 
+68406  PU Town · Snow  20.1 627M  
+401    WindowServer     5.9  616M- 
+68583  top              5.6  4705K+
+412    coreaudiod       4.9  22M   
+67338  System Events    3.3  13M   
+404    loginwindow      3.1  56M   
+484    syspolicyd       2.8  47M   
+402    tccd             2.6  5953K 
+371    launchservicesd  2.1  8321K+
+20833  trustd           1.8  7745K 
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=22413411)	44%; charging; 2:19 remaining present: true

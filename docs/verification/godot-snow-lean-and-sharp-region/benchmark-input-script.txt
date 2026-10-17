@@ -1,0 +1,29 @@
+# 60 s F6 trace in the release package at the default wind (1 from NW). Fresh launch,
+# controlled figure at start_west (-1.5, 0) in the Town Square. The cursor rests on the
+# figure (centre of the view, 58% down), so it sets no Facing and no lean.
+# FIGURE x y is replaced by the runner with the figure's place in window-content points.
+move FIGURE
+sleep 1
+log warm-up walk
+down d
+sleep 2
+up d
+down a
+sleep 2
+up a
+sleep 0.5
+tap f6
+log F6 pressed; walking west out of the Town Square into open snow, north, east and back south
+down a
+sleep 25
+up a
+down w
+sleep 10
+up w
+down d
+sleep 22
+up d
+down s
+sleep 4.5
+up s
+log walk finished

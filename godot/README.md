@@ -703,17 +703,17 @@ focus/movement coverage, resolution and observation age so invalid runs can be
 identified. Keep the raw trace with engine/mode, hardware, OS and concurrent
 workload notes; HUD FPS and fixed-rate route CSV are not benchmark substitutes.
 
-The [shading record](../docs/verification/2026-10-16-godot-snow-shading.md)
-holds the latest release trace, of the earlier reference town at `c81b7b0` on an Apple M1 under macOS 26.2 at
-wind 1: 46.6 FPS average, 21.5 ms mean, 27.6 ms p99 and 0.70 ms of wind work per
-rendered frame, over three runs. The earlier package, run alternately on the same
-machine state, averaged 50.7 FPS and 19.7 ms, so the smooth shading costs about
-1.7 ms per frame. That earlier package reached 55.2 FPS in the
-[town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
-under a lighter load, so compare packages within one session rather than across
-records. No release trace has been taken of the flat interim map; its
-[record](../docs/verification/2026-10-17-godot-snow-flat-interim-map.md) holds a
-same-session source timing against the reference town. These are one machine
+The [lean and sharp-region record](../docs/verification/2026-10-17-godot-snow-lean-and-sharp-region.md)
+holds the latest release traces, of the flat interim map at the 2560 × 1440
+window on an Apple M1 under macOS 26.2, posted as ordinary macOS events by a
+driver that stops when the package loses the front (its input script and runner
+are in the record's folder). In the one pair taken while the load eased, the
+current build averaged 27.9 FPS against the previous revision's 30.4 FPS, about
+2.9 ms a frame more; under memory pressure from other applications both fell to
+21–24 FPS. The
+[shading record](../docs/verification/2026-10-16-godot-snow-shading.md) holds the
+reference town's traces at 1280 × 800, where its smooth shading cost about 1.7 ms
+per frame; compare packages within one session rather than across records. These are one machine
 with a desktop workload, not a platform baseline. The
 [#92–93 record](../docs/verification/2026-10-15-godot-snow-desktop.md) measured
 the older static scene and is not a current result. Rebuild and remeasure after

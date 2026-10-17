@@ -1,0 +1,65 @@
+{
+  "source": "/private/tmp/claude-501/-Users-kaizenjb-project-pu-town--claude-worktrees-lucid-cerf-805fbb/a5fc0601-dcd8-426a-b3b7-d9b264cb7288/scratchpad/bench/final/run-185931/frames.csv",
+  "frame_count": 1279,
+  "interval_start_usec": 13603917,
+  "interval_end_usec": 73648928,
+  "elapsed_seconds": 60.045011,
+  "duration_complete": true,
+  "average_fps": 21.300687246106094,
+  "mean_frame_ms": 46.94684206411259,
+  "p95_frame_ms": 53.8,
+  "p99_frame_ms": 57.29,
+  "max_frame_ms": 179.783,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 0,
+  "unfocused_seconds": 0.0,
+  "stationary_frames": 0,
+  "stationary_seconds": 0.0,
+  "focused_moving_seconds": 60.045011,
+  "focused_moving_fraction": 1.0,
+  "position_range_m": {
+    "x": [
+      -28.4411926269531,
+      -1.58833348751068
+    ],
+    "z": [
+      -10.7413816452026,
+      0.0
+    ]
+  },
+  "camera_range_m": [
+    22.5605749961016,
+    22.5605749961016
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 720,
+      "window_width": 2560,
+      "window_height": 1440
+    }
+  ],
+  "max_observation_age_ms": 2.209,
+  "wind": {
+    "recorded": true,
+    "settings": [
+      {
+        "strength": 1.0,
+        "from_deg": 315.0
+      }
+    ],
+    "physics_updates": 3602,
+    "mean_ms_per_update": 2.2129991671293756,
+    "single_update_frames": 0,
+    "single_update_p95_ms": null,
+    "single_update_max_ms": null,
+    "mean_ms_per_frame": 6.232387021110251,
+    "p95_ms_per_frame": 8.61599999999999,
+    "p99_ms_per_frame": 9.83400000000074,
+    "max_ms_per_frame": 12.0890000000018,
+    "share_of_frame_time": 0.13275412673336026
+  },
+  "warnings": [
+    "The viewport or window differed from the 1280 by 800 measurement target."
+  ]
+}

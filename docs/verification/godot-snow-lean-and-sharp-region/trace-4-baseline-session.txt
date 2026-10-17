@@ -1,0 +1,67 @@
+pid 59605
+window 80, 73, 1280, 752
+content origin 80 105 (title bar 32), content 1280x720, figure at 640 417
+frontmost before input: 59605
+trace frames-1792238984-72924.csv
+## Input driver
+trusted for input: true
+   1.08 s  warm-up walk
+   5.74 s  F6 pressed; walking west out of the Town Square into open snow, north, east and back south
+  68.23 s  walk finished
+## Focus watcher (empty means it logged nothing)
+## workload-before.txt
+Processes: 561 total, 3 running, 558 sleeping, 3819 threads 
+2026/10/17 17:39:30
+Load Avg: 3.09, 3.00, 2.77 
+CPU usage: 16.20% user, 23.35% sys, 60.44% idle 
+SharedLibs: 190M resident, 36M data, 21M linkedit.
+MemRegions: 0 total, 0B resident, 27M private, 597M shared.
+PhysMem: 7490M used (1701M wired, 2360M compressor), 137M unused.
+VM: 275T vsize, 5268M framework vsize, 138113596(1574) swapins, 142627915(684) swapouts.
+Networks: packets: 22501069/23G in, 12684243/6674M out.
+Disks: 175415338/4347G read, 53541040/2418G written.
+
+PID    COMMAND          %CPU  MEM   
+0      kernel_task      118.6 113M+ 
+40680  Blender          82.2  6022M-
+401    WindowServer     13.5  620M- 
+50965  coreduetd        7.1   7393K+
+59601  top              5.9   4737K+
+33656  codex            3.9   305M+ 
+572    com.apple.Driver 3.3   30M-  
+70306  WhatsApp         3.3   442M- 
+657    corespotlightd   3.1   22M+  
+33658  Codex (Renderer) 2.9   1415M+
+712    Spotlight        2.5   193M+ 
+51095  suggestd         2.3   11M-  
+Now drawing from 'Battery Power'
+ -InternalBattery-0 (id=22413411)	8%; discharging; 0:15 remaining present: true
+	Battery Warning: Early
+## workload-during.txt
+Processes: 553 total, 4 running, 1 stuck, 548 sleeping, 3702 threads 
+2026/10/17 17:40:15
+Load Avg: 2.82, 2.98, 2.77 
+CPU usage: 11.31% user, 5.8% sys, 83.60% idle 
+SharedLibs: 158M resident, 35M data, 46M linkedit.
+MemRegions: 107 total, 18M resident, 70M private, 752M shared.
+PhysMem: 7430M used (1586M wired, 1884M compressor), 201M unused.
+VM: 273T vsize, 5268M framework vsize, 138336136(2860) swapins, 142823535(0) swapouts.
+Networks: packets: 22515522/23G in, 12727159/6731M out.
+Disks: 175642699/4353G read, 53600865/2421G written.
+
+PID    COMMAND          %CPU MEM   
+59605  PU Town · Snow  19.1 378M  
+0      kernel_task      11.1 113M- 
+59229  System Events    6.8  12M+  
+404    loginwindow      4.8  55M   
+59790  top              4.8  4689K+
+412    coreaudiod       4.3  22M   
+484    syspolicyd       4.2  47M   
+402    tccd             4.1  5889K 
+371    launchservicesd  3.2  8257K 
+572    com.apple.Driver 3.1  30M   
+20833  trustd           2.1  7649K+
+70306  WhatsApp         1.8  442M- 
+Now drawing from 'Battery Power'
+ -InternalBattery-0 (id=22413411)	8%; discharging; 0:13 remaining present: true
+	Battery Warning: Early

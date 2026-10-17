@@ -1,0 +1,67 @@
+pid 59979
+window 80, 73, 1280, 752
+content origin 80 105 (title bar 32), content 1280x720, figure at 640 417
+frontmost before input: 59979
+trace frames-1792239067-79215.csv
+## Input driver
+trusted for input: true
+   1.09 s  warm-up walk
+   5.74 s  F6 pressed; walking west out of the Town Square into open snow, north, east and back south
+  68.14 s  walk finished
+## Focus watcher (empty means it logged nothing)
+## workload-before.txt
+Processes: 537 total, 2 running, 535 sleeping, 3757 threads 
+2026/10/17 17:40:53
+Load Avg: 2.54, 2.90, 2.75 
+CPU usage: 2.91% user, 4.25% sys, 92.83% idle 
+SharedLibs: 227M resident, 47M data, 45M linkedit.
+MemRegions: 0 total, 0B resident, 156M private, 774M shared.
+PhysMem: 7447M used (1574M wired, 1982M compressor), 186M unused.
+VM: 266T vsize, 17G framework vsize, 138426334(44) swapins, 142857628(0) swapouts.
+Networks: packets: 22522327/23G in, 12740298/6748M out.
+Disks: 175708171/4355G read, 53612130/2422G written.
+
+PID    COMMAND          %CPU MEM   
+0      kernel_task      8.4  113M- 
+59971  top              6.9  4673K+
+1      launchd          4.2  30M   
+579    mds_stores       2.5  38M+  
+70306  WhatsApp         2.1  442M  
+401    WindowServer     2.0  592M- 
+40680  Blender          1.6  2385M 
+380    dasd             1.3  12M-  
+1068   Google Chrome    1.2  464M  
+672    NotificationCent 1.0  81M+  
+52076  claude           1.0  228M- 
+357    mds              0.9  33M-  
+Now drawing from 'Battery Power'
+ -InternalBattery-0 (id=22413411)	8%; discharging; 0:13 remaining present: true
+	Battery Warning: Early
+## workload-during.txt
+Processes: 503 total, 4 running, 499 sleeping, 3535 threads 
+2026/10/17 17:41:38
+Load Avg: 2.73, 2.91, 2.76 
+CPU usage: 9.89% user, 6.7% sys, 84.2% idle 
+SharedLibs: 292M resident, 72M data, 61M linkedit.
+MemRegions: 0 total, 0B resident, 52M private, 903M shared.
+PhysMem: 7550M used (1993M wired, 2773M compressor), 82M unused.
+VM: 253T vsize, 5268M framework vsize, 138443012(16) swapins, 142857628(0) swapouts.
+Networks: packets: 22525420/23G in, 12742540/6749M out.
+Disks: 175742887/4356G read, 53614849/2422G written.
+
+PID    COMMAND          %CPU MEM   
+59979  PU Town · Snow  24.6 625M+ 
+0      kernel_task      15.6 114M+ 
+401    WindowServer     7.1  600M  
+60151  top              6.5  4657K+
+412    coreaudiod       5.1  22M   
+404    loginwindow      4.3  55M   
+59229  System Events    3.9  12M   
+402    tccd             2.8  5889K 
+484    syspolicyd       2.7  47M   
+371    launchservicesd  2.5  8369K 
+70306  WhatsApp         2.1  442M  
+20833  trustd           1.8  7681K 
+Now drawing from 'Battery Power'
+ -InternalBattery-0 (id=22413411)	7%; discharging; 0:15 remaining present: true
+	Battery Warning: Early
