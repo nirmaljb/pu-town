@@ -5,12 +5,10 @@ render_mode diffuse_burley, specular_schlick_ggx;
 // the map's north-west corner, as in SnowSurface._tile_layer.
 uniform sampler2DArray footprint_tiles : filter_nearest, repeat_disable;
 uniform ivec2 footprint_tile_grid;
-// Static ground heights at the town layout's picture nodes, counted from the
-// map's west and north edges and read bilinearly, as in SnowTownLayout.ground_height.
-uniform sampler2D ground_image : filter_nearest, repeat_disable;
-uniform float ground_nodes_per_metre = 5.0;
-// The saved Snow Depth picture: loose depth above the ground at nodes counted the
-// same way and read bilinearly, as in SnowSurface.sample_saved_depth.
+// The flat ground's height, set from the town layout, as in SnowTownLayout.ground_height.
+uniform float ground_level = 0.0;
+// The saved Snow Depth picture: loose depth above the ground at nodes counted from
+// the map's west and north edges and read bilinearly, as in SnowSurface.sample_saved_depth.
 uniform sampler2D depth_image : filter_nearest, repeat_disable;
 // The fill clock, on the same nodes: fill-seconds of wind-blown snow that have
 // fallen there, as in SnowSurface.sample_fill.
@@ -69,21 +67,6 @@ vec2 smooth_picture_slope(sampler2D picture, float nodes_per_metre, vec2 point) 
 	return slope * nodes_per_metre;
 }
 
-// Height and slope of the bilinear ground picture, which are exact for its authored
-// levels and slope: (height, east slope, south slope).
-vec3 ground_with_slope(vec2 point) {
-	ivec2 size = textureSize(ground_image, 0);
-	vec2 node = (point + map_half_extents) * ground_nodes_per_metre;
-	ivec2 cell = clamp(ivec2(floor(node)), ivec2(0), size - ivec2(2));
-	vec2 blend = clamp(node - vec2(cell), vec2(0.0), vec2(1.0));
-	float a = texelFetch(ground_image, cell, 0).r;
-	float b = texelFetch(ground_image, cell + ivec2(1, 0), 0).r;
-	float c = texelFetch(ground_image, cell + ivec2(0, 1), 0).r;
-	float d = texelFetch(ground_image, cell + ivec2(1, 1), 0).r;
-	return vec3(mix(mix(a, b, blend.x), mix(c, d, blend.x), blend.y),
-		vec2(mix(b - a, d - c, blend.y), mix(c - a, d - b, blend.x)) * ground_nodes_per_metre);
-}
-
 ivec2 footprint_size() {
 	return textureSize(footprint_tiles, 0).xy * footprint_tile_grid;
 }
@@ -134,16 +117,12 @@ float shading_compaction(vec2 point, float filled) {
 		mix(filled_compaction(cell + ivec2(0, 1), image_size, filled), filled_compaction(cell + ivec2(1, 1), image_size, filled), blend.x), blend.y);
 }
 
-float ground_height(vec2 point) {
-	return picture_value(ground_image, ground_nodes_per_metre, point);
-}
-
 float saved_depth(vec2 point) {
 	return picture_value(depth_image, depth_nodes_per_metre, point);
 }
 
 float field_height(vec2 point) {
-	return ground_height(point) + max(0.025, saved_depth(point) * (1.0 - 0.86 * compaction(point)));
+	return ground_level + max(0.025, saved_depth(point) * (1.0 - 0.86 * compaction(point)));
 }
 
 float coarse_height(vec2 point) {
@@ -161,17 +140,11 @@ float coarse_height(vec2 point) {
 	return diagonal + (1.0 - blend.x) * (bottom - diagonal) + (1.0 - blend.y) * (right - diagonal);
 }
 
-// Full detail inside the region's border, falling to the coarse surface across it,
-// as in SnowSurface._region_weight. A side on the map edge has no border.
+// Full detail inside the region's border, falling to the coarse surface across it
+// on every side, as in SnowSurface._region_weight.
 float region_weight(vec2 point) {
-	vec2 low = region_center - detail_half_extents;
-	vec2 high = region_center + detail_half_extents;
-	float edge = 1.0e6;
-	if (low.x > -map_half_extents.x + 0.001) { edge = min(edge, point.x - low.x); }
-	if (high.x < map_half_extents.x - 0.001) { edge = min(edge, high.x - point.x); }
-	if (low.y > -map_half_extents.y + 0.001) { edge = min(edge, point.y - low.y); }
-	if (high.y < map_half_extents.y - 0.001) { edge = min(edge, high.y - point.y); }
-	return smoothstep(0.0, EDGE_BLEND, edge);
+	vec2 inset = detail_half_extents - abs(point - region_center);
+	return smoothstep(0.0, EDGE_BLEND, min(inset.x, inset.y));
 }
 
 float detail_height(vec2 point) {
@@ -222,11 +195,10 @@ void fragment() {
 	float grain = snow_noise(point * 7.0);
 	float pixel_width = max(length(dFdx(point)), length(dFdy(point)));
 	float grain_visibility = 1.0 - smoothstep(0.04, 0.16, pixel_width);
-	// The shading normal is the height field's own slope, evaluated smoothly: the
-	// ground's, Snow Depth's through a quadratic B-spline, and each depression's from the
-	// Footprint picture. The triangles beneath keep their bilinear heights.
-	vec3 ground = ground_with_slope(point);
-	vec2 rise = ground.yz + smooth_picture_slope(depth_image, depth_nodes_per_metre, point) * (1.0 - 0.86 * packed);
+	// The shading normal is the height field's own slope, evaluated smoothly: Snow
+	// Depth's through a quadratic B-spline over the flat ground, and each depression's
+	// from the Footprint picture. The triangles beneath keep their bilinear heights.
+	vec2 rise = smooth_picture_slope(depth_image, depth_nodes_per_metre, point) * (1.0 - 0.86 * packed);
 	vec3 shaded_normal = normalize(vec3(-rise.x + tilt.x, 1.0, -rise.y + tilt.y));
 	NORMAL = normalize((VIEW_MATRIX * vec4(shaded_normal, 0.0)).xyz);
 	// A fresh print in loose snow is a hollow: the sky sees less of its floor, and
@@ -246,13 +218,10 @@ void fragment() {
 		}
 	}
 	// Legibility from above: wind-heaped snow is a little whiter than the scoured
-	// and trodden snow around it, and the forest floor 5 m below the shelf sits in
-	// cooler, dimmer light, so the level change reads where cliff boxes hide it.
+	// and trodden snow around it.
 	float heaped = smoothstep(0.5, 1.2, loose);
-	float lowered = 1.0 - smoothstep(-5.0, -0.5, ground.x);
 	ALBEDO = mix(vec3(0.64, 0.64, 0.645), vec3(0.43, 0.47, 0.51), packed * 0.65)
 		* (1.0 + 0.07 * heaped)
-		* mix(vec3(1.0), vec3(0.86, 0.89, 0.95), lowered)
 		* (1.0 - 0.12 * outline)
 		* mix(vec3(1.0), vec3(0.80, 0.84, 0.90), hollow)
 		* (1.0 - 0.28 * shadow)

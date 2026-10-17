@@ -1,6 +1,6 @@
 extends Node3D
 ## Horizontal obstacles and changing snow support are separate: roofs are never ground.
-## Speed is horizontal, so the stair's slope never changes it.
+## Speed is horizontal, so a slope would never change it.
 ## The figure is the parka Avatar; its steps, Footprints and clips share one gait.
 ## Facing turns the upper body. Legs, boots and Footprints keep the direction of
 ## travel; standing still, the legs pivot after the upper body without stepping.

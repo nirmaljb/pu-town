@@ -1,8 +1,15 @@
 ---
-status: accepted
+status: partly superseded by [ADR 0028](0028-frostwatch-outpost-flat-snowfield-and-camp.md)
 ---
 
 # Rebuild the snow prototype as the reference town with wind-shaped Snow Depth
+
+**Partly superseded.** [ADR 0028](0028-frostwatch-outpost-flat-snowfield-and-camp.md)
+replaces this town's layout, its 100 × 56 m scale, its shelf and stair ground
+levels and its camera with Frostwatch Outpost, a flat snowfield with a fenced Camp
+at its centre. Saved Snow Depth with authored-relaxation wind, Footprint fill from
+a stamped fill clock, the agreement of visible snow and foot contact, the Facing
+rules and validation at the running scene stand.
 
 Issue #94 rebuilds the offline Godot prototype around the owner's whole-map
 reference, so the town is recognisable and Players can read its snow. The

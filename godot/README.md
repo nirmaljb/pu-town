@@ -1,9 +1,8 @@
 # Godot snow prototype
 
 This standalone preview extends the ground milestone from issues #91–93 with
-changing snow depth, overlapping bootprints, wind and a town made of solid box
-placeholders. Two 1.7 m parka Avatars share one snow field; Tab switches which
-one you control, and the other walks a loop through the town. Each walks, runs and stands with clips exported by
+changing snow depth, overlapping bootprints and wind. Two 1.7 m parka Avatars share one snow field; Tab switches which
+one you control, and the other walks a loop across the map. Each walks, runs and stands with clips exported by
 [`tools/characters/parka`](../tools/characters/parka/README.md); the clips follow the
 figure's step phase, its planted boots settle into their Footprints with the clip's
 legs, its swinging boots plough through loose snow, and its Footprints use the same stride. Their gloves carry stand-in Player Colours. It runs without Java, LiveKit, a Room or Game state. Sharing
@@ -12,23 +11,26 @@ Existing clients retain their current integration.
 [ADR 0025](../docs/adr/0025-godot-single-snow-map-prototype.md) records the engine
 and single-map direction;
 [ADR 0026](../docs/adr/0026-dynamic-snow-and-persistent-footprints.md) records the
-changing surface and persistent world tracks.
+changing surface and persistent world tracks;
 [ADR 0027](../docs/adr/0027-reference-snow-town-with-wind-shaped-depth.md) records
-the agreed rebuild as the 100 × 56 m town of the
-[whole-map reference](../docs/art/snow-town-reference/README.md). This guide
-describes the delivered desktop preview of that town: the 100 × 56 m town laid out from that reference
-as solid placeholder boxes, on a town shelf about 5 m above the southern forest
-and joined to it by the snow-buried stair; a north-up perspective camera that
-follows the controlled figure while the mouse sets its Facing; a saved Snow
-Depth that starts Deep or Shallow by place; a north-west wind that builds
-Snowdrifts, scours windward sides and fills Footprints faster or slower by place;
-a 24 × 16 m detail region at the camera's focus that makes bootprints crisp
-up close; a walking figure whose loop lays trails you did not watch being made;
-and a blizzard in overcast polar twilight, tuned live in the editor's Inspector
-(see [Lighting and the blizzard](#lighting-and-the-blizzard)).
-The [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
-holds its import checks, engine-event replay, ordinary input, visual inspection,
-frame measurement and exports, each kept separate, with their limits.
+saved Snow Depth, wind and Facing.
+[ADR 0028](../docs/adr/0028-frostwatch-outpost-flat-snowfield-and-camp.md) records
+Frostwatch Outpost, the agreed design that replaces ADR 0027's 100 × 56 m reference
+town: a flat 500 × 550 m snowfield with a fenced Camp at its centre, Roads, a traced
+pine forest and an oblique camera, after the owner's
+[references](../docs/art/frostwatch-reference/README.md). It lands in slices. This
+guide describes the delivered interim preview: one flat **160 × 160 m** level of
+open snow with a Shallow Town Square at its centre and nothing yet standing on it;
+a north-up perspective camera that follows the controlled figure while the mouse
+sets its Facing; a saved Snow Depth that starts Shallow in the Town Square and
+deeper beyond it; a north-west wind that fills Footprints; a 24 × 16 m detail
+region at the camera's focus that makes bootprints crisp up close; a walking
+figure whose loop lays trails you did not watch being made; and a blizzard in
+overcast polar twilight, tuned live in the editor's Inspector (see
+[Lighting and the blizzard](#lighting-and-the-blizzard)). The
+[flat interim map record](../docs/verification/2026-10-17-godot-snow-flat-interim-map.md)
+holds its import checks, engine-event replay, graphical route in source and the
+Mac release package, each kept separate, with their limits.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -86,114 +88,69 @@ figures remain temporary scale and contact references, not final Avatar artwork.
 Tab switches between the orange and blue-grey figures. Both contribute anonymous
 bootprints to the same world field. Tracks overlap, remain when the detail region
 moves away, and fade as wind fills them. A fresh launch resets the snow and both
-figures. Both start in the outpost yard, at its `outpost_yard_west` and
-`outpost_yard_east` landmarks, (22, 4) m and (28, 4) m: the first in the yard's
-Shallow Snow, the second in its eastern Deep drift.
+figures. Both start in the Town Square's Shallow Snow either side of the map's
+centre, at its `start_west` and `start_east` landmarks, (−1.5, 0) m and (1.5, 0) m.
 
 ### The walking figure
 
 The figure you are not controlling walks a loop without stopping:
 
-outpost yard → meeting-hall gap → compound's east gate → across the courtyard →
-south gate → down the stair → southern forest → back the same way
+centre → east across the Town Square → north → west along its own lane across the
+square → north out of the square into open snow → back the same way
 
-It always asks to run, so it runs where the snow is Shallow (the courtyard, the
-stair, the west of the outpost yard) and only walks in Deep Snow, and it speeds up
-on Packed Paths like you do. It faces the way it travels. It moves with the same
-speed, collision and sliding rules as the controlled figure, never through a box
-or cliff, and goes down and up the stair's one slope. Its loop is about 184 m out
-and back, about a minute at its pace.
+It always asks to run, so it runs at full speed in the Town Square's Shallow Snow
+and is held back in the deeper open snow beyond it, and it speeds up on Packed
+Paths like you do. It faces the way it travels and moves with the same speed,
+collision and sliding rules as the controlled figure. Its loop is about 129 m out
+and back, about half a minute at its pace.
 
 When you press Tab, the walking figure stops where it is and you take it over. The
 figure you released walks in a straight line from where it stands to the nearest
 point of the loop it can reach without contact, then carries on around the loop.
 
 Its trail is ordinary Footprints in the shared picture: it persists, fills with
-the wind like any other and overlaps yours. The loop's corners are the `loop_…`
-landmarks below and the `outpost_yard_east` and `south_gate` landmarks, listed in
-`LOOP` in [`town_layout.gd`](town_layout.gd). It keeps clear of the scene route's
-trail probe, Packed Path corridor and wind probes, and crosses the courtyard on
-its own lane, 2 m south of the route's crossing.
+the wind like any other and overlaps yours. The loop's corners are the
+`start_east` and `loop_…` landmarks below, listed in `LOOP` in
+[`town_layout.gd`](town_layout.gd). It keeps clear of the scene route's trail
+probe, Packed Path corridor and exposed probe.
 
 #### Practise tracking
 
 1. Press `−` to set wind 0, so trails stay as they are while you look for them.
-2. Walk away from the walking figure, for example to the meeting hall or the
-   lodge, and let it pass through the courtyard without watching. The HUD shows
-   where it is and how far round the loop it has gone.
-3. Head into the courtyard or down to the stair and look for a line of bootprints
-   you did not make. Bootprints point the way it was going; prints in Shallow
-   Snow are spaced further apart because it was running.
+2. Walk away from the walking figure, for example west into the open snow, and
+   let it cross the Town Square without watching. The HUD shows where it is and
+   how far round the loop it has gone.
+3. Head back into the square and look for a line of bootprints you did not make.
+   Bootprints point the way it was going; prints in Shallow Snow are spaced
+   further apart because it was running.
 4. Follow the trail. Press F5 on it to fix a probe, then walk along and over it
    and watch the probe's compaction rise as your prints overlap its own.
-5. Restore wind with `0`, or raise it with `=`, and watch the trail fill. It lasts
-   longer in the sheltered courtyard and on the walled stair than in the open.
+5. Restore wind with `0`, or raise it with `=`, and watch the trail fill.
 
-### The town
+### The map
 
-The town follows the composition of the whole-map reference, with north up (−Z):
-
-- **Walled compound** (west). Its ranges, including the long hall on the north
-  side, the bell tower, outer walls and gatehouse enclose a courtyard of about
-  24 × 13.5 m with a well pavilion and two pines. Reach the courtyard through
-  either 3 m gate: the east gate faces the meeting hall, and the gatehouse's
-  south gate faces the forest.
-- **Meeting hall** in the central gap, at its reference place and shape. The gaps
-  on its west, north and east sides stay passable.
-- **Outpost** (east). The lodge, two sheds, workshop, radio tower, generator,
-  crates and barrels, and fences surround an open yard.
-- **Rim and forest**. Rock masses close the north, east and south-east rim, and
-  pines fill the southern forest and the ground north of the compound. An open
-  lane runs south from the foot of the stair.
-
-### Two levels and the stair
-
-The compound, meeting hall and outpost stand on the **town shelf**, at ground
-height 0 m. The **southern forest**, west of x −5.5 m and south of z 10 m, lies
-5 m lower, at −5 m. The two levels meet only in two ways:
-
-- **The stair** continues the compound's 3 m south gate. It is one snow-buried
-  slope, 10 m long from z 9 m to z 19 m, with no individual steps and nothing
-  walkable beneath it. Low walls run along both sides, each 1 m segment standing
-  on the slope beneath it, so you cannot step off. Slope never changes speed:
-  walking stays 1.06 m/s on the way down and back up.
-- **Cliff rock** covers every other step between the levels: a band along the
-  shelf's southern edge, two masses flanking the stair, and a mass along the
-  forest's east side. Each rises 2 m above the shelf and stops you from either
-  level. The step in the ground lies at least one coarse snow cell inside each
-  mass, so no stretched snow face shows in normal views.
-
-Every placeholder is a solid, non-enterable box standing on the ground of its
-level, with a size and colour that distinguish its kind. A box rises from the
-lowest ground beneath it to its height above the highest; only cliff rock spans
-both levels. Walk around them; their roofs
-are not walking surfaces, and generators have no interaction. The reference guides
-the composition, not measured dimensions or a final asset layout. The route's
-named landmarks are, in metres:
+The interim map is one flat level, 160 × 160 m, with north up (−Z), centred on
+the origin. Ground height is 0 m everywhere; nothing stands on it yet. ADR 0027's
+compound, meeting hall, outpost, shelf, stair, cliffs, rim rocks and their
+landmarks are gone. The map's edge is a plain containment boundary with no wall:
+the figure stops 0.3 m inside it. The snow runs on 40 m beyond it as an apron no
+figure can reach, so the edge shows no end to the snowfield, and the whiteout
+swallows the apron's own far edge. The Camp, its
+Perimeter and the Roads come next, on this same ground. The route's named
+landmarks are, in metres:
 
 | Landmark | X, Z | Place |
 | --- | --- | --- |
-| `outpost_yard_west` | 22, 4 | Outpost yard; figure 1 starts here |
-| `outpost_yard_east` | 28, 4 | Outpost yard; figure 2 starts here |
-| `lodge_front` | 32, −2 | Yard south of the lodge |
-| `loop_outpost_lane` | 28, 7.5 | Loop corner: the outpost yard's south lane |
-| `meeting_hall_gap_south` | −6, 7.5 | South end of the gap between compound and meeting hall |
-| `meeting_hall_lane` | −4.5, 7.5 | That gap's Deep Snow, beside the meeting hall's west face |
-| `meeting_hall_gap` | −6, 0 | That gap, outside the east gate |
-| `east_gate` | −9.25, 0 | The compound's east gate |
-| `courtyard_east` | −12, 0 | Courtyard, inside the east gate |
-| `courtyard` | −22, 0 | Middle of the courtyard |
-| `courtyard_west` | −30, 3 | West of the courtyard |
-| `south_gate` | −23.5, 2 | Courtyard, inside the south gate at the top of the stair |
-| `forest_lane` | −23.5, 22 | Forest floor, south of the foot of the stair |
-| `forest_west` | −28, 24 | Forest floor, south of the cliff beside the stair |
-| `loop_gap_south` | −7.5, 7.5 | Loop corner: the meeting-hall gap's south end, west of the route's trail |
-| `loop_gap` | −7.5, 0 | Loop corner: the meeting-hall gap, before the east gate |
-| `loop_east_gate` | −11, 0 | Loop corner: the courtyard, inside the east gate |
-| `loop_courtyard_east` | −11, −2 | Loop corner: east end of the walking figure's courtyard lane |
-| `loop_courtyard_west` | −22, −2 | Loop corner: west end of that lane, before the south gate |
-| `loop_stair_foot` | −23.5, 21 | Loop corner: forest floor below the stair |
-| `loop_forest` | −18, 21 | Loop corner: the loop's far end, in the forest east of the stair |
+| `start_west` | −1.5, 0 | Town Square; figure 1 starts here |
+| `start_east` | 1.5, 0 | Town Square; figure 2 starts here, the loop's first corner |
+| `packed_lane` | −24, 0 | Open snow west of the square, where the route packs a lane northward |
+| `trail_start` | −30, −12 | Open snow, where the route lays and probes a trail before running north to the edge |
+| `overview_west` | −18, 4 | Town Square's west edge, where the route opens the overview |
+| `exposed_probe` | 4, 4 | Town Square, where the route fixes a probe exposed to the wind |
+| `loop_east` | 8, 0 | Loop corner, east of the centre |
+| `loop_north` | 8, −10 | Loop corner: east end of the walking figure's lane across the square |
+| `loop_lane_west` | −14, −10 | Loop corner: west end of that lane |
+| `loop_open` | −14, −36 | Loop corner: the loop's far end, in open snow north of the square |
 
 ### Deep and Shallow Snow
 
@@ -201,22 +158,15 @@ Snow Depth starts by place, so you can predict where you can run. Loose snow at
 or below 10 cm allows full running; from 40 cm you can only walk until repeated
 traffic packs a Packed Path.
 
-- **Shallow Snow**, 9 cm: the compound's courtyard, and the stair from its south
-  gate down to the forest floor. Run freely.
-- **Mixed**: the outpost yard is Shallow, with Deep drifts in its east, around
-  `outpost_yard_east`, and along the lodge's south face. Your first steps cross
-  both.
-- **Deep Snow**, 60 cm: the forest floor, within 2 m of any cliff rock on either
-  level, and the meeting-hall gap around the meeting hall, between the compound
-  and the outpost. Walk only.
-- **Elsewhere** on the shelf, such as north of the compound and around the rim,
-  the snow starts at 25 cm, where running is partly slowed.
+- **Shallow Snow**, 9 cm: the **Town Square**, 40 × 40 m at the centre of the
+  map. Run freely.
+- **Open snow**, 25 cm: everywhere else. Running is partly slowed; your own fresh
+  prints pack part of the snow you run through, so you reach about 3.8 m/s, and
+  repeated traffic packs a faster Packed Path.
 
-Each zone fades into its surroundings over 1.5 m, except the outpost yard and its
-Deep drifts, which lie in open ground and taper over 3.5 m so they never rise in
-a visible terrace. No place starts below 3 cm.
-Where zones overlap, the courtyard and stair stay Shallow beside the cliffs that
-flank them. A fresh launch restores this starting snow; wind then reshapes it.
+The square fades into the open snow over 1.5 m. No place starts below 3 cm. There
+is no Deep Snow on the interim map; it returns in the forest's tree clusters. A
+fresh launch restores this starting snow; wind then reshapes it.
 
 ### Wind, Snowdrifts and Footprints
 
@@ -229,7 +179,7 @@ already there.
 Wind reshapes Snow Depth by relaxation toward a steady shape, so drifts build and
 settle instead of growing forever or pulsing:
 
-- **Snowdrifts** build in the lee of boxes and cliffs, the side facing away from
+- **Snowdrifts** build in the lee of obstacles, the side facing away from
   the wind. A drift rises toward the obstacle's height, at most about 1.2 m, right
   behind it and tapers away within three obstacle heights (at most 6 m). Only
   obstacles whose windward side faces open ground build one: an obstacle standing
@@ -241,23 +191,22 @@ settle instead of growing forever or pulsing:
   a minute at the default wind, or under four seconds at 16. At wind 1 a drift is
   most of the way built after about three minutes.
 
-With the prevailing wind the lodge's south face and the south-east sides of exposed
-buildings and rim rocks drift deep, while exposed north-west faces such as the east
-shed's west face scour to 3 cm. Turning the wind recomputes which side
-of every obstacle is sheltered: old drifts wear away and new ones build in the new
-lee. Snowdrifts stay walkable at walking speed, and running always follows the
-current loose depth, so a scoured face can become runnable and a drift walk-only.
+The interim map has no obstacles, so its wind builds no Snowdrifts and scours
+nothing: Snow Depth keeps its starting shape and every place is open. Drift,
+scour and shelter return with the Camp's buildings, the Perimeter and the pines.
+Turning the wind recomputes which side of every obstacle is sheltered: old drifts
+wear away and new ones build in the new lee. Snowdrifts stay walkable at walking
+speed, and running always follows the current loose depth, so a scoured face can
+become runnable and a drift walk-only.
 
 A Footprint fills as wind drops snow on it. In the open it fills in **about 120
 wind-seconds**: two minutes at the default wind, 7.5 seconds at 16. It fills faster,
 up to four times faster, where a drift is building, so drifting snow buries tracks.
-In shelter, within two obstacle heights downwind of a box or cliff (at most 6 m),
+In shelter, within two obstacle heights downwind of an obstacle (at most 6 m),
 it lasts **up to four times longer**, fading out of shelter by five obstacle heights
-(at most 12 m). **Tracks last longest in sheltered places**: the compound's
-courtyard, the walled stair and the lee of large buildings once their drifts have
-settled. Wind 0 freezes both drifts and Footprints.
+(at most 12 m). Wind 0 freezes both drifts and Footprints.
 
-Wind updates the Snow Depth picture four times a second, ten rows of the
+Wind updates the Snow Depth picture four times a second, 27 rows of the
 picture per physics frame, and never rewrites the Footprint picture. Each
 place keeps a fill clock that runs at its own rate; a print remembers the fill
 clock when it was pressed and fills by how far that clock has run since.
@@ -284,8 +233,7 @@ and one step in returns to the widest play distance however it was opened.
 Walking, the lean and the detail region behave the same whichever way it was opened.
 
 The camera frames the untouched snow where the figure stands, before Footprints
-packed it, so the stair, the shelf and Snowdrifts move it exactly as the ground
-does. Each footfall sinks the figure into the snow it packs; the camera takes only
+packed it, so Snowdrifts move it exactly as the snow does. Each footfall sinks the figure into the snow it packs; the camera takes only
 a fifth of that sink, eased over about 0.2 s (`SINK_SHARE` and `SINK_SETTLE` in
 `follow_camera.gd`), so walking reads as a gentle settle at every step rather than
 a jolt. The cursor's point on the ground is found at the untouched snow's height
@@ -373,24 +321,21 @@ application-data directory, outside this checkout. Use the editor's **Project �
 Open User Data Folder** to find them. These records support inspection; a CSV or
 capture alone is not packaged-platform or hardware performance acceptance.
 
-For a manual check, reduce wind to zero, walk a trail across the outpost yard and press
+For a manual check, reduce wind to zero, walk a trail across the Town Square and press
 F5. Leave the detail region, then return and check that the trail remains at the
 same place. Switch figures and follow or cross it to inspect overlapping prints
 and Packed Paths, then find and follow the walking figure's trail as described
-under [Practise tracking](#practise-tracking). Compare Shift movement in shallow and deep snow, approach the
-lodge diagonally to inspect sliding along its sides, then increase wind and watch
-the fixed probe and visible trail fade. Lay probes in the courtyard, in the open
-outpost yard and against the lodge's south face, raise the wind to 16 and compare
-how fast each print fills while the lodge's drift grows; then turn the wind with
-`]` and watch the drift wear away. Walk out of the compound's south gate,
-down the stair to the forest and back up, and check that boots stay on the snow,
-the HUD's ground height changes by 5 m and the cliff rock stops you on both
-levels. Move the cursor round the standing figure to turn it in place without
-prints, then walk while facing elsewhere and check that the bootprints follow the
-travel. Walk with the cursor behind the figure and check that it looks over one
-shoulder rather than twisting backwards, and that it changes shoulder through the
-front. Press M to open and close the overview. Check close and overview framing, the camera's lean toward the cursor,
-snow contact, and the transition between detailed and distant snow while moving.
+under [Practise tracking](#practise-tracking). Compare Shift movement in the
+square's Shallow Snow and the open snow beyond it, then increase wind and watch
+the fixed probe and visible trail fade. Run to the map's edge and check that it
+stops you without a visible wall, lost in the whiteout. Move the cursor round the
+standing figure to turn it in place without prints, then walk while facing
+elsewhere and check that the bootprints follow the travel. Walk with the cursor
+behind the figure and check that it looks over one shoulder rather than twisting
+backwards, and that it changes shoulder through the front. Press M to open and
+close the overview. Check close and overview framing, the camera's lean toward the
+cursor, snow contact, and the transition between detailed and distant snow while
+moving.
 
 The scene route sends keyboard, wheel and mouse-movement events through Godot's input API and
 checks the public observation CSV without addressing private scene nodes, mesh
@@ -403,38 +348,33 @@ ordering or procedural samples. Its destinations are the named landmarks in
 
 Press **F7** in the scene to begin and keep the window focused. Add `--auto-start`
 after `--snow-scene-check` to skip the F7 gate; focus is still required. The route
-pauses on focus loss and fails after 60 seconds without focus. Starting from the
-outpost yard, it moves the cursor round the standing figure and checks that
+pauses on focus loss and fails after 60 seconds without focus. Starting at the
+centre, it moves the cursor round the standing figure and checks that
 Facing points at the cursor's ground point with no new bootprint, leans the
 camera to its 3 m bound toward a corner of the view and back, and walks north and
-south while facing east, with prints and speed following the travel. Running east
-across the outpost yard, it runs at full speed in the Shallow Snow and only walks
-in the Deep drift, and it is stopped by the lodge. In the meeting-hall gap it
-runs, walks twice more and runs again along one lane of Deep Snow, showing a measurable
-Packed Path running advantage over the fresh lane. While the cursor leans the
-camera toward a corner and back, the detail region follows the focus and returns
-with it. Every observation checks that the region is 24 × 16 m, centred on the
-camera's focus to within half a coarse cell, on the coarse grid and inside the
-map, that in play the figure stands far enough inside it for every footstep to
-land in full detail, and that Footprint uploads never exceed the 2 × 2 tiles each
-uploaded footstep may touch. It lays a probed trail in the
-gap, walks through the east gate into the courtyard, is stopped by the courtyard
-wall, crosses the courtyard and runs at full speed in its Shallow Snow. Meanwhile the
-walking figure has crossed the courtyard on its own lane while the controlled
-figure was at least 15 m away. The route picks a point of that trail from the
-public record, walks to it, fixes a probe there and follows the trail the way it
-was laid, then walks back and forth over it until the probe's compaction rises.
-The figure then returns through the gate to find its own trail retained, and walks south until the
-cliff rock at the shelf's edge stops it. It then crosses
-the courtyard to the south gate and walks down the stair to the forest,
-observing 5 m of ground change, a contact gap within 2 mm and unchanged walking
-speed on the slope. On the forest floor, requested running only walks in the Deep
-Snow, both toward the map edge and to the foot of the cliff beside the stair;
-each stops it, and it climbs the stair back to the gate. In the courtyard it then
-presses M at the default play distance with the camera leaning: the whole map
-shows without lean while it walks north and back, a wheel step out changes
-nothing, and M returns to exactly that distance while a repeat of the held key
-does not toggle. Walking
+south while facing east, with prints and speed following the travel. Running west
+across the Town Square, it runs at full speed in the Shallow Snow and is held back
+in the open snow beyond it. West of the square it runs, walks twice more and runs
+again along one lane of open snow, showing a measurable Packed Path running
+advantage over the fresh lane. While the cursor leans the camera toward a corner
+and back, the detail region follows the focus and returns with it. Every
+observation checks that the region is 24 × 16 m, centred on the camera's focus to
+within half a coarse cell and on the coarse grid, that in play the
+figure stands far enough inside it for every footstep to land in full detail, and
+that Footprint uploads never exceed the 2 × 2 tiles each uploaded footstep may
+touch. Every observation also checks that the ground under both figures is one
+flat level and that no obstacle ever holds either of them. It lays a probed trail
+in the open snow and runs on north, far out of the detail region, until the map's
+northern edge holds it 0.3 m inside the map rectangle; a rendered run captures the
+view there. It runs back beside its outward trail and finds its own trail
+retained. Meanwhile the walking figure has crossed the Town Square on its own lane
+while the controlled figure was at least 15 m away. The route picks a point of
+that trail from the public record, walks to it, fixes a probe there and follows
+the trail the way it was laid, then walks back and forth over it until the probe's
+compaction rises. It then presses M at the default play distance with the camera
+leaning: the whole map shows without lean while it walks north and back, a wheel
+step out changes nothing, and M returns to exactly that distance while a repeat of
+the held key does not toggle. Walking
 north, it sweeps the cursor from east through directly behind to west and behind
 again. The twist never exceeds 110°, holds the east shoulder while the cursor is
 beyond 110°, changes once to the west shoulder through the front after the cursor
@@ -442,43 +382,37 @@ comes within 110° on the west, and Facing never turns faster than 540° per
 second; travel, speed and bootprints stay a plain northward walk's. Stopped with
 the cursor behind, Facing reaches it within the time that rate allows, with the
 legs within 60° and no new print, and then tracks it to 0.5°. Wind stays at 0
-until then. The figure next fixes four more probes: sheltered in the courtyard
-(`courtyard_shelter`), exposed in the open outpost yard (`yard_open`), on the east
-shed's windward west face (`shed_windward`) and in the lee of the lodge's south
-face (`lodge_lee`). Between the first two it opens the whole-map overview with M,
-whose detail region stays at the map centre, and walks from the courtyard through the
-east gate into the region and out past the meeting hall toward the outpost:
+until then. From the square's west edge it opens the whole-map overview with M,
+whose detail region stays at the map centre, and walks east into the region:
 across the blended border the region holds still and the contact gap stays within
 2 mm. One wheel step in leaves it at the widest play distance, and it zooms on in
-to the closest. At wind 16 from the north-west the exposed print fills at the
-120 wind-second rate, the sheltered one four times more slowly and the lee one
-faster still; the lodge's drift grows from 60 cm toward 1.2 m without shrinking
-and settles, and the shed's face scours to the 3 cm floor and holds. The figure
-wades through the drift with Shift held at walking speed. Four turns of `]`
-reverse the wind: the lodge's drift wears away and one builds on the shed's face.
-During the wind stages the tracked trail fills whenever no figure is near it.
-Wind 0 then freezes every probe's depth, and the compaction of every probe no
-figure walks past. Five wheel steps out reach the widest end of the play range,
-where the figure must stand about a sixteenth of the screen tall; the next opens
-the whole-map overview, which must frame the town; and twelve steps back in stop
-with the figure about an eighth of the screen tall. Before any zoom it must stand
-about a twelfth; "about" is within 8% of each share. A rendered run captures each
-of the three framings without the overlay, and graphical views along the way. Finally Tab, with the cursor west of the figure,
-hands control to the walking figure wherever the loop has taken it, which then
-faces west and stands still, while the released figure walks straight from where
-it stood in the outpost yard back onto the loop and on around it. Throughout, the
-walking figure stays on its loop and never goes backwards round it, keeps snow
-contact, runs in Shallow Snow and walks in Deep at the speed its loose snow
-allows, faces its travel, passes through the courtyard and goes down and back up
-the stair. Throughout, the
+to the closest and fixes a third probe on its own print in the open. At wind 16
+from the north-west that print fills at the 120 wind-second rate and then fills
+completely, its visible depression with it, while no probe's Snow Depth changes:
+with nothing on the flat field to shelter or drift behind, wind leaves the
+starting snow as it was. Four turns of `]` reverse the wind. During the wind
+stages the tracked trail fills whenever no figure is near it. Wind 0 then freezes
+every probe's depth, and the compaction of every probe no figure walks past. Five
+wheel steps out reach the widest end of the play range, where the figure must
+stand about a sixteenth of the screen tall; the next opens the whole-map overview,
+which must frame the map; and twelve steps back in stop with the figure about an
+eighth of the screen tall. Before any zoom it must stand about a twelfth; "about"
+is within 8% of each share. A rendered run captures each of the three framings
+without the overlay, and graphical views along the way. Finally Tab, with the
+cursor west of the figure, hands control to the walking figure wherever the loop
+has taken it, which then faces west and stands still, while the released figure
+walks straight from where it stood in the Town Square back onto the loop and on
+around it. Throughout, the walking figure stays on its loop and never goes
+backwards round it, keeps snow contact, runs at full speed in the Town Square and
+is held back in open snow at the speed its loose snow allows, faces its travel and
+crosses from the square into open snow. Throughout, the
 camera stays a 40° perspective view at −40° pitch with north up, its lean stays
 within 3 m, in play the figure stays between about a sixteenth and an eighth of
 the screen tall, and without lean it holds the figure slightly below the centre
-of the screen. Walking and running through the
-outpost yard, the meeting-hall gap's Deep Snow, down the stair and in the forest,
-the camera stays on the untouched snow less at most a fifth of the sink, and in
-any observation moves against it by under a tenth of the figure's own change of
-sink. Every
+of the screen. Walking and running in the Town Square, across open snow and to the
+northern edge, the camera stays on the untouched snow less at most a fifth of the
+sink, and in any observation moves against it by under a tenth of the figure's own
+change of sink. Every
 navigation leg must reach its landmark. The process returns nonzero on failure. `--walk-scene-check` remains an alias; the
 existing `--script res://tests/walk_scene.gd` launcher opens the same route.
 
@@ -496,11 +430,12 @@ behavior or a performance baseline.
 
 ## Lighting and the blizzard
 
-The town sits in a blizzard under overcast polar twilight, after the
+The map sits in a blizzard under overcast polar twilight, after the
 [mood references](../docs/art/snow-town-reference/README.md): a whiteout that
 swallows the distance, falling snow, snow blowing along the ground, gusts that
 thicken both and pull the whiteout closer, a rare diffuse lightning flash, and
-eight warm lamps at doorways and windows against the cold light. A dim, cool,
+eight warm lanterns standing in the snow round the Town Square against the cold
+light. A dim, cool,
 low **SkyKey** light casts faint soft shadows, which keep Footprints readable;
 their own shading follows its direction.
 
@@ -515,10 +450,11 @@ about an eighth of the figure, a third of the top edge 42 m away and a sixteenth
 of the bottom edge 17 m away, as the long lens's fog did before. SkyKey draws a
 single shadow map out to 54 m, scaled the same way, a little beyond the view's
 far edge; splitting shadows over a longer range cost about 4 ms a frame for nothing. The scene routes
-hold lightning off so their captures stay comparable. The lamps' places are
-`WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd); there are eight, the
-Compatibility renderer's lights per object, so each one reaches the snow. They
-move onto the buildings when the placeholder boxes are replaced.
+hold lightning off so their captures stay comparable. The lanterns' places are
+`WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd), 30 cm above the ground in a
+ring about 17 m from the centre; there are eight, the Compatibility renderer's
+lights per object, so each one reaches the snow. They move onto the Camp's doors
+and windows when its buildings stand.
 
 ### Tune it in the Godot editor
 
@@ -557,24 +493,22 @@ falling snow, blowing snow and fog each cost less than 0.5 ms.
 separate east–west and north–south half extents, together with its named
 landmarks. The snow surface, the shader's map uniform, obstacle and figure
 containment, the camera overview and the scene route all derive from it; do not
-repeat map dimensions elsewhere. The half extents are 50 m east–west and 28 m
-north–south: a 100 × 56 m field spanning −50 to +50 m in X and −28 to +28 m in Z.
+repeat map dimensions elsewhere. The half extents are 80 m east–west and 80 m
+north–south: a 160 × 160 m field spanning −80 to +80 m in X and in Z.
 
-Ground height is static. At launch, [`town_layout.gd`](town_layout.gd) builds a
-fixed world ground-height picture from the authored levels and the stair's one
-slope: 501 × 281 single-float nodes 0.2 m apart, read bilinearly. Its boxes stand
-on that picture, and [`snow_surface.gd`](snow_surface.gd) and the shader read the
-same nodes with the same interpolation. The snow surface is ground height plus
-loose Snow Depth, reduced by Footprint compaction; packing retains at least 2.5 cm
-over the ground. Snow Depth is saved state, not a formula: a fixed world picture
-of 251 × 141 single-float nodes 0.4 m apart, counted and read bilinearly like the
-ground picture, measured vertically above the ground. A fresh launch saves it from
-the authored zones in [`town_layout.gd`](town_layout.gd) and never loads saved
-snow. Every rendered vertex and every foot-support query reads it, with the
-Footprint picture, each frame.
+The ground is one flat level, `GROUND_LEVEL` in [`town_layout.gd`](town_layout.gd),
+0 m. [`snow_surface.gd`](snow_surface.gd) and the shader read that same level, so
+shader heights and CPU foot support agree everywhere. The snow surface is the
+ground plus loose Snow Depth, reduced by Footprint compaction; packing retains at
+least 2.5 cm over the ground. Snow Depth is saved state, not a formula: a fixed
+world picture of 401 × 401 single-float nodes 0.4 m apart, counted from the map's
+west and north edges and read bilinearly, measured vertically above the ground. A
+fresh launch saves it from the authored zones in [`town_layout.gd`](town_layout.gd)
+and never loads saved snow. Every rendered vertex and every foot-support query
+reads it, with the Footprint picture, each frame.
 
 Bootprints are shaped in height inside a **detail region** of 24 × 16 m at a
-**5 cm grid** (480 × 320 cells); a live 0.8 m grid keeps the whole town's snow
+**5 cm grid** (480 × 320 cells); a live 0.8 m grid keeps the whole map's snow
 visible beyond it. Its centre is the camera's focus, including the lean, so at
 every play distance the controlled figure stands well inside it. The wide lens
 shows more than the region, about 28 m across at the figure and 21 m north of
@@ -584,19 +518,19 @@ Footprint picture without their 5 cm relief. With the focus at most 3 m of lean 
 0.65 m reach, every footstep lands at least 1.6 m inside its blended sides.
 The region snaps to coarse vertices counted from the map's west and north edges,
 so its 5 cm grid is world-aligned and the figure's support does not change when
-it moves, and it stays inside the map. It blends into the coarse surface over a
-1.6 m border on each side inside the map; a side on the map edge has no coarse
-snow beyond it and no border. Coarse cells under the region collapse in the
+it moves; it may reach over the edge onto the apron. It blends into the coarse
+surface over a 1.6 m border on every side, beyond the map's edge into the apron's
+snow. Coarse cells under the region collapse in the
 vertex shader, so the two surfaces never overlap. In the whole-map overview the
 focus is the map centre, so the region stays there while the figure walks.
-[`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the ground picture
+[`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the ground level
 and the current field.
 CPU foot support evaluates the same heights and triangle interpolation,
 including the region border, rather than querying a stale static collision mesh.
 
 The shading normal is not taken from the triangles. It is the height field's own
-slope evaluated smoothly: the ground picture's, Snow Depth's through a quadratic
-B-spline over the same 0.4 m nodes, and each depression's from the Footprint
+slope evaluated smoothly: Snow Depth's through a quadratic B-spline over its
+0.4 m nodes, over the flat ground, and each depression's from the Footprint
 picture. Bilinear Snow Depth changes slope abruptly at every node line, so
 triangle normals shaded Snowdrifts and zone edges as straight bands; the smooth
 slope keeps them continuous while every height stays bilinear. Sole outlines are
@@ -607,31 +541,31 @@ cooled by how deep it is pressed, as overcast sky reaches less of it, and a shor
 march toward the sun across the Footprint picture shades the part its sunward rim
 hides. The sun stands behind the play camera, so lit far walls alone made fresh
 prints in loose snow read as raised pads. For legibility from above, snow heaped
-deeper than about 0.5 m is slightly whiter and the forest floor, 5 m below the
-shelf, slightly cooler and dimmer. All of this changes shading only, never height
-or foot support, so distant trails still read.
+deeper than about 0.5 m is slightly whiter. All of this changes shading only,
+never height or foot support, so distant trails still read.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
 Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
-to cover the whole map rectangle: **3200 × 1792** for the 100 × 56 m town. It stores compaction and the fill clock
+to cover the whole map rectangle: **5120 × 5120** for the 160 × 160 m map. It stores compaction and the fill clock
 at the texel's centre when it was last pressed; no growing list of steps is retained. Both figures use
 this same image, and moving the detail region does not move or clear its contents.
-The picture is held in **200 × 128 texel tiles** (6.25 × 4 m), 16 × 14 of them,
+The picture is held in **256 × 128 texel tiles** (8 × 4 m), 20 × 40 of them,
 and its GPU copy is a texture array with one layer per tile. A sole spans at most
 0.36 m, so a footstep touches at most 2 × 2 tiles; at the end of each rendered
 frame only the tiles that frame's footsteps touched are resent, at most
-**409,600 bytes per footstep** (four 102,400-byte tiles), never the whole picture.
-The CPU tile payload is **22,937,600 bytes** (about 21.9 MiB), whatever the
-number of steps. The GPU texture array is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
+**524,288 bytes per footstep** (four 131,072-byte tiles), never the whole picture.
+The CPU tile payload is **104,857,600 bytes** (100 MiB), whatever the
+number of steps, about 4.6 times the reference town's; the full Frostwatch
+Outpost replaces it with tiles created where steps land. The GPU texture array is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
 memory. Wind ages the encoded values without rewriting the image each frame;
 new footfalls update it. [`snow_wind.gd`](snow_wind.gd) holds the wind: the
-working Snow Depth and fill-clock pictures (251 × 141 nodes each), the target
+working Snow Depth and fill-clock pictures (401 × 401 nodes each), the target
 shape for the current direction, marched cell by cell from the obstacles upwind
 and downwind of each node and shaped on a worker thread when the wind turns (nodes
 inside an obstacle take their open neighbours' mean, so a drift meets the wall
 without a trough), and
-the sweep that relaxes ten rows per physics frame. At the end of each sweep the
+the sweep that relaxes 27 rows per physics frame. At the end of each sweep the
 surface publishes both pictures to its CPU copies and the shader's textures in
 the same physics frame, so visible snow and foot support keep agreeing. A fresh process recreates the field rather than loading
 saved snow.
@@ -645,9 +579,9 @@ describe the preceding static milestone. Their results do not establish dynamic
 snow behavior, current appearance or performance.
 
 The [dynamic-snow verification record](../docs/verification/2026-10-15-godot-dynamic-snow.md)
-describes the 64 × 64 m scene that preceded this town. The
+describes the 64 × 64 m scene that preceded the reference town. The
 [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
-describes the current town: the headless and focused graphical scene routes in
+describes that 100 × 56 m reference town: the headless and focused graphical scene routes in
 the source scene and the Mac release package, ordinary macOS keyboard and mouse
 input, inspected captures with the defects they show, a 60-second release frame
 trace with the wind's cost, and both exports. The
@@ -657,7 +591,9 @@ about 2 ms per frame in an unfocused source-scene timing and 1.7 ms in the
 remeasured release trace.
 The [camera steadiness record](../docs/verification/2026-10-16-godot-snow-camera.md)
 measures the camera's per-step vertical travel before and after it took only a
-softened share of each footfall's sink.
+softened share of each footfall's sink. The
+[flat interim map record](../docs/verification/2026-10-17-godot-snow-flat-interim-map.md)
+describes the current 160 × 160 m map.
 
 ## Desktop exports
 
@@ -703,9 +639,9 @@ evidence for the current implementation.
 ## Measure a traversal
 
 Launch the **release package**, keep it focused at its 2560 × 1440 window, warm it by walking,
-then press F6 and immediately walk for 60 seconds. Cross shallow and deep snow,
-leave a trail, and turn around the boxes without standing against an obstacle or
-boundary. Record the wind setting and any figure switching. The recorder
+then press F6 and immediately walk for 60 seconds. Cross the Town Square's
+Shallow Snow and the open snow beyond it and leave a trail, without standing
+against the map's edge. Record the wind setting and any figure switching. The recorder
 stops automatically using real elapsed time. Focus loss and stationary intervals
 remain in the trace, and are reported rather than filtered. F8 may run alongside
 it for detailed contact/camera observations. Avoid F9 capture during the measured
@@ -731,14 +667,17 @@ identified. Keep the raw trace with engine/mode, hardware, OS and concurrent
 workload notes; HUD FPS and fixed-rate route CSV are not benchmark substitutes.
 
 The [shading record](../docs/verification/2026-10-16-godot-snow-shading.md)
-holds the current release trace, at `c81b7b0` on an Apple M1 under macOS 26.2 at
+holds the latest release trace, of the earlier reference town at `c81b7b0` on an Apple M1 under macOS 26.2 at
 wind 1: 46.6 FPS average, 21.5 ms mean, 27.6 ms p99 and 0.70 ms of wind work per
 rendered frame, over three runs. The earlier package, run alternately on the same
 machine state, averaged 50.7 FPS and 19.7 ms, so the smooth shading costs about
 1.7 ms per frame. That earlier package reached 55.2 FPS in the
 [town verification record](../docs/verification/2026-10-16-godot-snow-town.md)
 under a lighter load, so compare packages within one session rather than across
-records. These are one machine with a desktop workload, not a platform baseline. The
+records. No release trace has been taken of the flat interim map; its
+[record](../docs/verification/2026-10-17-godot-snow-flat-interim-map.md) holds a
+same-session source timing against the reference town. These are one machine
+with a desktop workload, not a platform baseline. The
 [#92–93 record](../docs/verification/2026-10-15-godot-snow-desktop.md) measured
 the older static scene and is not a current result. Rebuild and remeasure after
 source changes. Final town assets, Game/networking integration and coordinated

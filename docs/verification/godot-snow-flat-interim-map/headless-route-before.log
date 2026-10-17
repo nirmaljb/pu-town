@@ -1,0 +1,94 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+100 × 56 metres; 24 × 16 m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+HEADLESS ENGINE-EVENT REPLAY: no rendered view, native focus or OS keyboard evidence.
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792215980-37537.csv
+Inspection checkpoint 1
+Snow route: initial idle · 0.5 s
+Inspection checkpoint 2
+Snow route: turn in place
+Inspection checkpoint 3
+Snow route: lean to corner · 1.5 s
+Inspection checkpoint 4
+Snow route: cursor on figure · 1.5 s
+Inspection checkpoint 5
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 6
+Snow route: north-west walk · 4.24528301886792 s
+Inspection checkpoint 7
+Snow route: south-east return · 4.24528301886792 s
+Inspection checkpoint 8
+Snow route: walk north facing east · 4.24528301886792 s
+Inspection checkpoint 9
+Snow route: walk south facing east · 4.24528301886792 s
+Inspection checkpoint 10
+Snow route: cursor back on figure · 1.5 s
+Inspection checkpoint 11
+Snow route: run into open snow · 6.0 s
+Inspection checkpoint 12
+Inspection checkpoint 13
+Snow route: reach packed lane z · 3.77358490566038 s
+Inspection checkpoint 14
+Snow route: reach packed lane x · 37.5472644589982 s
+Inspection checkpoint 15
+Snow route: run through fresh snow · 4.24528301886792 s
+Inspection checkpoint 16
+Inspection checkpoint 17
+Snow route: pack trail return z · 8.28025655926398 s
+Inspection checkpoint 18
+Snow route: pack trail return x · 37.4536487291444 s
+Inspection checkpoint 19
+Snow route: pack trail again · 4.24528301886792 s
+Inspection checkpoint 20
+Inspection checkpoint 21
+Snow route: pack trail third return z · 4.31063220186054 s
+Inspection checkpoint 22
+Snow route: pack trail third return x · 37.5472644589982 s
+Inspection checkpoint 23
+Snow route: pack trail third · 4.24528301886792 s
+Inspection checkpoint 24
+Inspection checkpoint 25
+Snow route: packed run start z · 4.24396496898723 s
+Inspection checkpoint 26
+Snow route: packed run start x · 37.5472644589982 s
+Inspection checkpoint 27
+Snow route: run on packed trail · 4.24528301886792 s
+Inspection checkpoint 28
+Inspection checkpoint 29
+Snow route: reach trail start z · 3.04055303897498 s
+Inspection checkpoint 30
+Snow route: reach trail start x · 43.1139649085279 s
+Inspection checkpoint 31
+Snow route: first trail · 4.24528301886792 s
+World probe 1: (-8.279416, -8.804873)
+Inspection checkpoint 32
+Snow route: fresh probe · 0.5 s
+Inspection checkpoint 33
+Snow route: run to north edge · 26.0 s
+Inspection checkpoint 34
+Snow route: boundary blocked · 1.0 s
+Inspection checkpoint 35
+Snow route: probe outside region · 0.5 s
+Inspection checkpoint 36
+Snow route: step off the edge trail · 1.41509433962264 s
+Inspection checkpoint 37
+Snow route: run back from the edge · 18.0 s
+Inspection checkpoint 38
+Inspection checkpoint 39
+Snow route: return to trail z · 16.5139369244845 s
+Inspection checkpoint 40
+Snow route: return to trail x · 1.49169418047059 s
+Inspection checkpoint 41
+Snow route: probe revisited · 0.5 s
+ERROR: The record showed no trail laid along the Town Square lane while the controlled figure was elsewhere
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://inspection_route.gd:299)
+       [1] _run (res://inspection_route.gd:193)
+       [2] _leg (res://inspection_route.gd:315)
+       [3] _wait (res://inspection_route.gd:395)
+SNOW SCENE HEADLESS REPLAY: FAIL · 1 failures
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:264)
+$G --headless --path godot --fixed-fps 60 -- --snow-scene-check  --auto-start  27.66s user 0.45s system 98% cpu 28.559 total

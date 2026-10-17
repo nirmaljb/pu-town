@@ -1,7 +1,7 @@
 extends RefCounted
 ## Wind reshapes the saved Snow Depth by authored relaxation, not a conserved fluid
 ## simulation. Each node of the Snow Depth picture relaxes toward a target shape:
-## its authored start, plus a Snowdrift in the lee of boxes and cliffs, less scour
+## its authored start, plus a Snowdrift in the lee of boxes, less scour
 ## on their windward sides. Relaxation speed follows the wind clock, so drifts build
 ## and settle instead of oscillating, and wind 0 freezes them. There is no snowfall.
 ##

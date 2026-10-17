@@ -66,6 +66,18 @@ _Avoid_: Avatar Preset, personal preview
 **Town Square**:
 The open square at the centre of the town, that holds the Meeting Area.
 
+**Camp**:
+The fenced settlement at the centre of the town, holding its buildings and the Town Square.
+_Avoid_: Compound, base
+
+**Perimeter**:
+The fence that encloses the Camp, crossed only at its openings onto the Roads.
+_Avoid_: Wall, map boundary
+
+**Road**:
+A way laid through the snow from the Town Square toward the edge of the town, kept shallow enough to run along. Unlike a Packed Path, it exists before anyone walks it.
+_Avoid_: Packed Path, trail
+
 **Snow Depth**:
 The thickness of snow above the underlying ground at a place. It can change as footsteps compress the snow or wind accumulates it.
 _Avoid_: Ground elevation

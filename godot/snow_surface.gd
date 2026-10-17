@@ -1,9 +1,9 @@
 extends Node3D
 class_name SnowSurface
 
-## Static ground levels, a world-fixed snow field, and a camera-sized detail region.
+## Flat ground, a world-fixed snow field, and a camera-sized detail region.
 ## The field spans the town layout's map rectangle; its surface is the layout's
-## ground-height picture plus the saved Snow Depth picture, less Footprint compaction.
+## ground level plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
 ## collider stands in for snow contact. Footsteps mutate one bounded, tiled picture
 ## and resend only the tiles they touched.
@@ -14,26 +14,30 @@ const SnowWind = preload("res://snow_wind.gd")
 const HALF_EXTENTS := TownLayout.HALF_EXTENTS
 ## The detail region covers what the play camera shows at a 5 cm grid; the coarse
 ## 0.8 m surface keeps the whole town live beyond it. It blends into the coarse
-## surface over a border on every side that does not lie on the map edge.
+## surface over a border on every side.
 const DETAIL_SIZE := Vector2(24.0, 16.0)
 const DETAIL_HALF := DETAIL_SIZE * 0.5
 const COARSE_STEP := 0.8
 const DETAIL_STEP := 0.05
 const EDGE_BLEND := 1.6
+## The snowfield runs on this far beyond the map's edge, on the coarse grid, so the
+## edge that stops a figure shows no end to the snow; the whiteout swallows the
+## apron's own far edge. No figure reaches it, and nothing is stamped there.
+const APRON := 40.0
 # 31.25 mm per texel; the image covers the whole map rectangle at this density.
 const TEXELS_PER_METRE := 32.0
 const IMAGE_SIZE := Vector2i(HALF_EXTENTS * (2.0 * TEXELS_PER_METRE))
-## The Footprint picture is held in 200 × 128 texel tiles (6.25 × 4 m), 16 × 14 of
+## The Footprint picture is held in 256 × 128 texel tiles (8 × 4 m), 20 × 40 of
 ## them, each one layer of the GPU copy. A sole spans at most 0.36 m, less than a
 ## tile either way, so one footstep touches at most 2 × 2 tiles.
-const TILE_SIZE := Vector2i(200, 128)
+const TILE_SIZE := Vector2i(256, 128)
 const TILE_GRID := IMAGE_SIZE / TILE_SIZE
 const TILE_BYTES := TILE_SIZE.x * TILE_SIZE.y * 4
 const MAX_TILES_PER_STEP := 4
 ## Fill-clock seconds for a Footprint to fill: 120 wind-seconds in the open.
 const PRINT_LIFETIME := 120.0
 ## The saved Snow Depth and fill-clock pictures hold values at nodes 0.4 m apart,
-## counted from the map's west and north edges and read bilinearly, like the ground picture.
+## counted from the map's west and north edges and read bilinearly.
 const DEPTH_NODES_PER_METRE := 2.5
 const DEPTH_SIZE := Vector2i(HALF_EXTENTS * (2.0 * DEPTH_NODES_PER_METRE)) + Vector2i.ONE
 const SNOW_SHADER := preload("res://snow.gdshader")
@@ -81,6 +85,11 @@ func _ready() -> void:
 		_tiles.append(tile)
 	_texture.create_from_images(_tiles)
 	_make_mesh(HALF_EXTENTS.x * 2.0, HALF_EXTENTS.y * 2.0, COARSE_STEP, false)
+	# The apron: four strips round the map, north and south spanning its corners.
+	var outer := HALF_EXTENTS + Vector2.ONE * APRON
+	for strip in [Rect2(-outer.x, -outer.y, outer.x * 2.0, APRON), Rect2(-outer.x, HALF_EXTENTS.y, outer.x * 2.0, APRON),
+			Rect2(-outer.x, -HALF_EXTENTS.y, APRON, HALF_EXTENTS.y * 2.0), Rect2(HALF_EXTENTS.x, -HALF_EXTENTS.y, APRON, HALF_EXTENTS.y * 2.0)]:
+		_make_mesh(strip.size.x, strip.size.y, COARSE_STEP, false, strip.get_center())
 	_detail = _make_mesh(DETAIL_SIZE.x, DETAIL_SIZE.y, DETAIL_STEP, true)
 	_update_uniforms()
 
@@ -104,9 +113,8 @@ func _exit_tree() -> void:
 
 
 func configure_ground(town: Node3D) -> void:
-	# The layout owns the static ground picture. The shader reads the same nodes.
+	# The layout owns the flat ground level. The shader reads the same level.
 	_layout = town
-	var ground_texture := ImageTexture.create_from_image(town.ground_image)
 	# A fresh launch saves the layout's authored zones; nothing is loaded from disk.
 	wind.configure(town, DEPTH_SIZE, DEPTH_NODES_PER_METRE)
 	_depth = wind.depth.duplicate()
@@ -115,18 +123,16 @@ func configure_ground(town: Node3D) -> void:
 	_depth_texture = ImageTexture.create_from_image(_depth_image)
 	_fill_image = Image.create_from_data(DEPTH_SIZE.x, DEPTH_SIZE.y, false, Image.FORMAT_RF, _fill.to_byte_array())
 	_fill_texture = ImageTexture.create_from_image(_fill_image)
-	var heights: Vector2 = town.ground_range
 	for material in _materials:
-		material.set_shader_parameter("ground_image", ground_texture)
-		material.set_shader_parameter("ground_nodes_per_metre", TownLayout.GROUND_NODES_PER_METRE)
+		material.set_shader_parameter("ground_level", TownLayout.GROUND_LEVEL)
 		material.set_shader_parameter("depth_image", _depth_texture)
 		material.set_shader_parameter("fill_image", _fill_texture)
 		material.set_shader_parameter("depth_nodes_per_metre", DEPTH_NODES_PER_METRE)
 	for child in get_children():
 		if child is MeshInstance3D:
 			var bounds: AABB = child.custom_aabb
-			child.custom_aabb = AABB(Vector3(bounds.position.x, heights.x - 0.1, bounds.position.z),
-				Vector3(bounds.size.x, heights.y - heights.x + 1.2, bounds.size.z))
+			child.custom_aabb = AABB(Vector3(bounds.position.x, TownLayout.GROUND_LEVEL - 0.1, bounds.position.z),
+				Vector3(bounds.size.x, 1.2, bounds.size.z))
 
 
 ## Shade Footprints' own shadows toward this unit direction to the sun. Shading only.
@@ -166,9 +172,10 @@ func advance(delta: float) -> void:
 
 ## Centre the detail region on the camera's focus. It snaps to coarse vertices,
 ## counted from the map's west and north edges, so its 5 cm grid stays world-aligned,
-## and it stays inside the map. Moving it never moves or clears the Footprint picture.
+## and it stays over the snowfield and its apron. Moving it never moves or clears the
+## Footprint picture.
 func centre_detail(focus: Vector2) -> void:
-	var centre_limit := HALF_EXTENTS - DETAIL_HALF
+	var centre_limit := HALF_EXTENTS + Vector2.ONE * APRON - DETAIL_HALF
 	region_center = Vector2(
 		clampf(snappedf(focus.x + HALF_EXTENTS.x, COARSE_STEP) - HALF_EXTENTS.x, -centre_limit.x, centre_limit.x),
 		clampf(snappedf(focus.y + HALF_EXTENTS.y, COARSE_STEP) - HALF_EXTENTS.y, -centre_limit.y, centre_limit.y)
@@ -316,21 +323,11 @@ func _field_height(point: Vector2) -> float:
 	return sample_ground(point) + maxf(0.025, sample_saved_depth(point) * (1.0 - 0.86 * sample_compaction(point)))
 
 
-## Full detail inside the region's border, falling to the coarse surface across it.
-## A side on the map edge has no coarse surface beyond it, so it has no border.
+## Full detail inside the region's border, falling to the coarse surface across it
+## on every side; beyond the map's edge the coarse surface is the apron's.
 func _region_weight(point: Vector2) -> float:
-	var low := region_center - DETAIL_HALF
-	var high := region_center + DETAIL_HALF
-	var edge := 1.0e6
-	if low.x > -HALF_EXTENTS.x + 0.001:
-		edge = minf(edge, point.x - low.x)
-	if high.x < HALF_EXTENTS.x - 0.001:
-		edge = minf(edge, high.x - point.x)
-	if low.y > -HALF_EXTENTS.y + 0.001:
-		edge = minf(edge, point.y - low.y)
-	if high.y < HALF_EXTENTS.y - 0.001:
-		edge = minf(edge, high.y - point.y)
-	return smoothstep(0.0, EDGE_BLEND, edge)
+	var inset := (DETAIL_HALF - (point - region_center).abs())
+	return smoothstep(0.0, EDGE_BLEND, minf(inset.x, inset.y))
 
 
 func _detail_vertex_height(point: Vector2) -> float:
@@ -355,8 +352,8 @@ func _triangle_height(point: Vector2, step: float, detail: bool) -> float:
 	return diagonal + (1.0 - blend.x) * (bottom - diagonal) + (1.0 - blend.y) * (right - diagonal)
 
 
-func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshInstance3D:
-	# Width runs east–west (X) and depth north–south (Z).
+func _make_mesh(width: float, depth: float, step: float, detail: bool, centre := Vector2.ZERO) -> MeshInstance3D:
+	# Width runs east–west (X) and depth north–south (Z), centred on `centre`.
 	var cells := Vector2i(roundi(width / step), roundi(depth / step))
 	var points := cells + Vector2i.ONE
 	var vertices := PackedVector3Array()
@@ -394,13 +391,13 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 			for column in range(cells.x):
 				var quad := (row * cells.x + column) * 4
 				var base := Vector2(float(column) * step - width * 0.5, float(row) * step - depth * 0.5)
-				var centre := base + Vector2.ONE * step * 0.5
+				var cell_centre := centre + base + Vector2.ONE * step * 0.5
 				quads[quad] = Vector3(base.x, 0, base.y)
 				quads[quad + 1] = Vector3(base.x + step, 0, base.y)
 				quads[quad + 2] = Vector3(base.x, 0, base.y + step)
 				quads[quad + 3] = Vector3(base.x + step, 0, base.y + step)
 				for corner in range(4):
-					cell_centres[quad + corner] = centre
+					cell_centres[quad + corner] = cell_centre
 				var start := (row * cells.x + column) * 6
 				quad_indices[start] = quad
 				quad_indices[start + 1] = quad + 1
@@ -433,6 +430,7 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool) -> MeshIn
 	visible_surface.name = "DetailedSnow" if detail else "CoarseSnow"
 	visible_surface.mesh = mesh
 	visible_surface.material_override = material
+	visible_surface.position = Vector3(centre.x, 0, centre.y)
 	visible_surface.custom_aabb = AABB(Vector3(-width * 0.5, -0.1, -depth * 0.5), Vector3(width, 1.2, depth))
 	add_child(visible_surface)
 	return visible_surface

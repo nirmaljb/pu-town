@@ -1,11 +1,11 @@
 extends Camera3D
 ## A north-up perspective camera that follows the controlled figure. Its yaw never
 ## changes. Like the owner's reference frames, it looks down at 40° through a wide
-## 40° lens, so the figure's body and the sides of boxes show, and by default the
+## 40° lens, so the figure's body and the sides of things show, and by default the
 ## figure stands about a twelfth of the screen tall. Its focus leans toward the
 ## cursor's point on the ground, and the wheel zooms through the play range, from
 ## the figure an eighth of the screen tall to a sixteenth, or out to a whole-map
-## overview of the town, which M also opens and closes. It frames the untouched
+## overview of the map, which M also opens and closes. It frames the untouched
 ## snow where the figure stands and takes only a softened share of each step's sink
 ## into it, so the view settles gently at a footfall instead of jolting with it.
 
@@ -31,10 +31,10 @@ const LEAN_RATE := 6.0
 ## The focus sits this share of the distance north of the figure, so the figure's
 ## feet stand slightly below the centre of the screen at every play distance.
 const FRAMING_SHARE := 0.034
-## The overview frames the map rectangle with this margin, from the forest floor
-## to the top of the cliff rock.
+## The overview frames the map rectangle with this margin, from the ground to
+## 2 m above it.
 const OVERVIEW_MARGIN := 3.0
-const OVERVIEW_HEIGHTS := Vector2(TownLayout.FOREST_GROUND, TownLayout.SHELF_GROUND + 2.0)
+const OVERVIEW_HEIGHTS := Vector2(TownLayout.GROUND_LEVEL, TownLayout.GROUND_LEVEL + 2.0)
 ## The camera takes this share of how far the figure has sunk below the untouched
 ## snow, so each step reads as a small settle.
 const SINK_SHARE := 0.2
@@ -144,7 +144,7 @@ func follow(figure: Vector3, sink: float, delta: float) -> void:
 
 
 ## The nearest distance from the map centre at which every corner of the map
-## rectangle, at both ground levels, lies inside the view.
+## rectangle, at both of the overview's heights, lies inside the view.
 func _overview_distance() -> float:
 	var viewport_size := get_viewport().get_visible_rect().size
 	var tan_vertical := tan(deg_to_rad(fov) * 0.5)

@@ -8,11 +8,10 @@ extends Node
 const TownLayout = preload("res://town_layout.gd")
 const LANDMARKS := TownLayout.LANDMARKS
 # Specified values: a figure keeps its 0.3 m radius inside the map, and the
-# footprint image covers the whole map at 31.25 mm per texel. The town shelf
-# stands about 5 m above the forest; contact stays within today's 2 mm bound.
+# footprint image covers the whole map at 31.25 mm per texel. The ground is one
+# flat level; contact stays within today's 2 mm bound.
 const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
-const LEVEL_DROP_M := 5.0
 const CONTACT_BOUND_M := 0.002
 # The detail region: 24 × 16 m, centred on the camera focus, snapped to the 0.8 m
 # coarse grid and blended into it over a 1.6 m border on sides inside the map. A
@@ -44,46 +43,42 @@ const MAX_LEAN_M := 3.0
 # The camera frames the untouched snow under the boots and takes a fifth of the
 # sink below it, eased, so a footfall settles the view instead of jolting it.
 const CAMERA_SINK_SHARE := 0.2
-const STEADY_STAGES := ["north-west walk", "south-east return", "run across outpost yard",
-	"run through deep snow", "pack deep trail again", "descend stair z", "run in forest", "climb stair z"]
+const STEADY_STAGES := ["north-west walk", "south-east return", "run into open snow",
+	"run through fresh snow", "pack trail again", "run to north edge"]
 # Walking, the upper body turns no more than 110° from travel, and Facing turns no
 # faster than 540° per second: 9° in each 60 Hz physics observation. Standing, the
 # legs pivot once the twist passes 60°.
 const WALKING_TWIST_DEG := 110.0
 const TURN_PER_OBSERVATION_DEG := 540.0 / 60.0
 const STANDING_TWIST_DEG := 60.0
-# Wind: prints fill in about 120 wind-seconds in the open and up to four times
-# slower in shelter; Snowdrifts reach about 1.2 m and scour stops at 3 cm. The
-# prevailing wind blows from the north-west, and four turns of 45° reverse it.
+# Wind: prints fill in about 120 wind-seconds in the open; Snow Depth stays
+# between the 3 cm scour floor and 1.2 m Snowdrifts. The prevailing wind blows
+# from the north-west, and four turns of 45° reverse it.
 const OPEN_FILL_S := 120.0
-const SHELTERED_FILL_S := 480.0
 const DRIFT_MAX_M := 1.2
 const SCOUR_FLOOR_M := 0.03
 const PREVAILING_FROM_DEG := 315.0
 const REVERSED_FROM_DEG := 135.0
+# The trail the route probes is this long, walked north from its landmark.
+const TRAIL_M := 4.5
 # Probes in the order the route places them with F5.
 const TRAIL_PROBE := 1
 const TRACK_PROBE := 2
-const SHELTERED_PROBE := 3
-const EXPOSED_PROBE := 4
-const WINDWARD_PROBE := 5
-const LEE_PROBE := 6
+const EXPOSED_PROBE := 3
+# Open snow away from the Town Square starts at least OPEN_DEPTH_M deep, too deep
+# to run through at full speed. A runner's own fresh prints pack part of the snow
+# it reads, so running there is held at least OPEN_RUN_SLOWDOWN below full speed.
+const OPEN_DEPTH_M := 0.24
+const OPEN_RUN_SLOWDOWN := 0.3
 # The walking figure's trail counts as laid while the controlled figure was
 # elsewhere when they stood at least this far apart. A figure further than
 # NEAR_PROBE_M from a probe cannot press a boot onto it.
 const ELSEWHERE_M := 15.0
 const NEAR_PROBE_M := 1.5
 # A figure stands at the mean height of its two boots' snow surfaces, which never
-# lie below the ground. Crossing the stair's crest with its centre still on the
-# shelf, one boot can stand up to STEP_REACH_M down a slope that falls
-# STAIR_SLOPE metres per metre while the other stays on the shelf, so the mean can
-# sit at most STEP_REACH_M × STAIR_SLOPE ÷ 2 below the ground at the centre:
-# 0.65 × 0.5 ÷ 2 = 0.1625 m. Straddling the stair's concave foot only raises the
-# mean, and every other change of level lies beneath cliff rock, beyond a boot's
-# reach. A figure sinking further through the ground, or rising 1.3 m onto a box
-# roof, is still caught.
-const STAIR_SLOPE := (TownLayout.SHELF_GROUND - TownLayout.FOREST_GROUND) / (TownLayout.STAIR_FOOT - TownLayout.STAIR_TOP)
-const CREST_SAG_M := STEP_REACH_M * STAIR_SLOPE * 0.5
+# lie below the flat ground. A figure sinking through the ground, or rising 1.3 m
+# above it, is caught.
+const BELOW_GROUND_M := 0.0005
 # Cursor points around the figure, as screen offsets in viewport heights and the
 # compass bearing each shows on a north-up view.
 const SWEEP := [
@@ -137,6 +132,7 @@ func _run() -> void:
 		_finish()
 		return
 
+	await _settle_cursor()
 	await _leg([], 0.5, "initial idle")
 	await _framing_capture()
 	var idle_row: Dictionary = _read_rows().back()
@@ -148,54 +144,62 @@ func _run() -> void:
 	# A cursor resting on the figure gives no Facing and no lean, so the camera centres it again.
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure")
 	await _short_steps()
-	# Both figures start in the outpost yard, where shallow and deep snow mix.
-	# Legs that walk, or run where Deep Snow holds the figure to walking, are given
-	# as a distance over WALK_MPS, so each footstep lands where it did at any pace.
+	# Both figures start in the Town Square's Shallow Snow, either side of the centre.
+	# Legs that walk are given as a distance over WALK_MPS, so each footstep lands
+	# where it did at any pace.
 	await _leg([KEY_W, KEY_A], 4.5 / WALK_MPS, "north-west walk")
 	await _leg([KEY_S, KEY_D], 4.5 / WALK_MPS, "south-east return")
 	# Facing east, the figure still walks north and back, at walking speed, with its prints.
 	await _cursor_leg(Vector2(0.3, 0), [KEY_W], 4.5 / WALK_MPS, "walk north facing east")
 	await _cursor_leg(Vector2(0.3, 0), [KEY_S], 4.5 / WALK_MPS, "walk south facing east")
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor back on figure")
-	# Running east from the Shallow west of the outpost yard reaches its Deep drift.
-	await _leg([KEY_D, KEY_SHIFT], 2.5, "run across outpost yard")
-	await _goto(LANDMARKS.lodge_front, "reach lodge front")
-	await _leg([KEY_W], 5.625 / WALK_MPS, "lodge approach")
-	await _leg([KEY_W], 1.2, "lodge blocked")
-	await _leg([], 0.5, "blocked idle")
-	# Repeated traffic packs a lane of the meeting-hall gap's Deep Snow until it is runnable.
-	# The parka's 0.62 m walking steps press fewer prints per pass, so it takes three.
-	await _goto(LANDMARKS.meeting_hall_lane, "reach meeting-hall lane")
-	await _leg([KEY_W, KEY_SHIFT], 4.5 / WALK_MPS, "run through deep snow")
-	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail return")
-	await _leg([KEY_W], 4.5 / WALK_MPS, "pack deep trail again")
-	await _goto(LANDMARKS.meeting_hall_lane, "pack deep trail third return")
-	await _leg([KEY_W], 4.5 / WALK_MPS, "pack deep trail third")
-	await _goto(LANDMARKS.meeting_hall_lane, "packed run start")
-	await _leg([KEY_W, KEY_SHIFT], 4.5 / WALK_MPS, "run on packed trail")
-	# Lay a trail in the meeting-hall gap and fix a world probe on it.
-	await _goto(LANDMARKS.meeting_hall_gap_south, "reach meeting-hall gap")
-	await _leg([KEY_W], 4.5 / WALK_MPS, "first trail")
+	# Running west at full speed across the Town Square's Shallow Snow, then held
+	# back in the deeper open snow beyond it.
+	await _leg([KEY_A, KEY_SHIFT], 6.0, "run into open snow")
+	# Repeated traffic packs a lane of open snow until it runs faster. The parka's
+	# 0.62 m walking steps press fewer prints per pass, so it takes three. Each run
+	# passes the corridor 1–3 m north of the lane's landmark.
+	await _goto(LANDMARKS.packed_lane, "reach packed lane")
+	await _leg([KEY_W, KEY_SHIFT], 1.5, "run through fresh snow")
+	await _goto(LANDMARKS.packed_lane, "pack trail return")
+	await _leg([KEY_W], 4.5 / WALK_MPS, "pack trail again")
+	await _goto(LANDMARKS.packed_lane, "pack trail third return")
+	await _leg([KEY_W], 4.5 / WALK_MPS, "pack trail third")
+	await _goto(LANDMARKS.packed_lane, "packed run start")
+	await _leg([KEY_W, KEY_SHIFT], 1.5, "run on packed trail")
+	# Lay a trail in open snow and fix a world probe on it.
+	await _goto(LANDMARKS.trail_start, "reach trail start")
+	await _leg([KEY_W], TRAIL_M / WALK_MPS, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
-	# Leave the detail region through the compound's east gate into the courtyard.
-	await _goto(LANDMARKS.meeting_hall_gap, "leave detail region")
-	await _goto(LANDMARKS.courtyard_east, "enter courtyard")
-	await _leg([KEY_S], 4.95 / WALK_MPS, "wall approach")
-	await _leg([KEY_S], 1.2, "wall blocked")
-	await _goto(LANDMARKS.courtyard, "cross courtyard")
+	# Run on north, far out of the detail region, until the map's edge holds the
+	# figure. The edge is a containment boundary with no wall, lost in the whiteout.
+	# Fresh open snow allows at least its untrodden running speed, so the edge is
+	# reached in time; the figure's own prints only hasten it.
+	var to_edge: float = TownLayout.HALF_EXTENTS.y - FIGURE_RADIUS_M + LANDMARKS.trail_start.y - TRAIL_M
+	await _leg([KEY_W, KEY_SHIFT], to_edge / _running_speed(TownLayout.OPEN_SNOW) + 1.0, "run to north edge")
+	await _leg([KEY_W], 1.0, "boundary blocked")
+	if not headless:
+		_tap(KEY_F9)
+		await _wait(0.2)
 	await _leg([], 0.5, "probe outside region")
-	# The courtyard's Shallow Snow allows full running.
-	await _goto(LANDMARKS.courtyard_west, "reach courtyard west")
-	await _leg([KEY_W, KEY_SHIFT], 2.0, "run in courtyard")
-	# Tracking. While this figure worked the outpost and the meeting-hall gap, the
-	# walking figure laid a trail along its courtyard lane. The route finds a point
-	# of that trail in the public record, fixes a probe there, then follows the
-	# trail the way it was laid and walks back and forth over it.
-	await _goto(LANDMARKS.courtyard, "return to courtyard")
+	# Back south beside the outward trail, then revisit the probe.
+	await _leg([KEY_D], 1.5 / WALK_MPS, "step off the edge trail")
+	# Even at full speed this stops short of the probe; walking covers the rest.
+	await _leg([KEY_S, KEY_SHIFT], (to_edge - 8.0) / RUN_MPS, "run back from the edge")
+	var probe_row: Dictionary = _rows_for(_read_rows(), "fresh probe").back()
+	await _goto(Vector2(_probe(probe_row, TRAIL_PROBE, "x_m"), _probe(probe_row, TRAIL_PROBE, "z_m")), "return to trail")
+	await _leg([], 0.5, "probe revisited")
+	if not headless:
+		_tap(KEY_F9)
+		await _wait(0.2)
+	# Tracking. While this figure worked the open snow in the west, the walking
+	# figure laid a trail along its Town Square lane. The route finds a point of
+	# that trail in the public record, fixes a probe there, then follows the trail
+	# the way it was laid and walks back and forth over it.
 	laid_trail = _laid_trail(_read_rows())
 	if laid_trail.is_empty():
-		failures.append("The record showed no trail laid across the courtyard while the controlled figure was elsewhere")
+		failures.append("The record showed no trail laid along the Town Square lane while the controlled figure was elsewhere")
 		_finish()
 		return
 	await _goto(laid_trail.point, "reach the walking figure's trail")
@@ -210,37 +214,9 @@ func _run() -> void:
 		await _leg([KEY_D], seconds, "overlap trail return %d" % pass_index)
 		await _leg([KEY_A], seconds, "overlap trail repeat %d" % pass_index)
 	await _leg([], 0.5, "trail overlapped")
-	# The figure leaves the courtyard through the east gate and revisits the probe.
-	await _goto(LANDMARKS.courtyard, "leave courtyard")
-	await _goto(LANDMARKS.courtyard_east, "return to east gate")
-	await _goto(LANDMARKS.meeting_hall_gap, "leave through east gate")
-	var probe_row: Dictionary = _rows_for(_read_rows(), "fresh probe").back()
-	await _goto(Vector2(_probe(probe_row, TRAIL_PROBE, "x_m"), _probe(probe_row, TRAIL_PROBE, "z_m")), "return to trail")
-	await _leg([], 0.5, "probe revisited")
-	if not headless:
-		_tap(KEY_F9)
-		await _wait(0.2)
-	# South from the meeting-hall gap, the shelf ends at cliff rock above the forest.
-	await _leg([KEY_S], 6.75 / WALK_MPS, "shelf cliff approach")
-	await _leg([KEY_S], 1.2, "shelf cliff blocked")
-	# The stair from the compound's south gate is the way down to the forest.
-	await _goto(LANDMARKS.meeting_hall_gap, "return to meeting-hall gap")
-	await _goto(LANDMARKS.courtyard_east, "re-enter courtyard")
-	await _goto(LANDMARKS.courtyard, "cross to south gate")
-	await _goto(LANDMARKS.south_gate, "reach south gate")
-	await _goto(LANDMARKS.forest_lane, "descend stair")
-	# The forest's Deep Snow allows only walking, as does the Deep Snow at the cliff foot.
-	await _leg([KEY_S, KEY_SHIFT], 6.75 / WALK_MPS, "run in forest")
-	await _leg([KEY_S], 1.0, "boundary blocked")
-	# From the forest floor the cliff beside the stair is equally impassable.
-	await _goto(LANDMARKS.forest_west, "reach forest west")
-	await _leg([KEY_W, KEY_SHIFT], 5.625 / WALK_MPS, "run to forest cliff foot")
-	await _leg([KEY_W], 1.2, "forest cliff blocked")
-	await _goto(LANDMARKS.forest_lane, "return to stair foot")
-	await _goto(LANDMARKS.south_gate, "climb stair")
-	# In the courtyard, after the tracking stages so their timing is unchanged: M
-	# opens the whole-map overview from the default play distance, without lean, and
-	# the figure walks on while it is open. A wheel step out does nothing there, M
+	# After the tracking stages, so their timing is unchanged: M opens the
+	# whole-map overview from the default play distance, without lean, and the
+	# figure walks on while it is open. A wheel step out does nothing there, M
 	# returns to the play distance it left, and a held M's repeat does not toggle.
 	await _cursor_leg(Vector2(0.3, 0), [], 1.0, "lean before overview")
 	_tap(KEY_M)
@@ -259,7 +235,6 @@ func _run() -> void:
 	# Facing east again before the cursor rests on the figure, as earlier stages left it.
 	await _cursor_leg(Vector2(0.3, 0), [], 0.5, "face east again")
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure after sweep")
-	await _goto(LANDMARKS.south_gate, "return to south gate")
 	await _wind_stages()
 	# Five steps out from the closest view reach the widest end of the play range;
 	# the next opens the overview.
@@ -279,7 +254,7 @@ func _run() -> void:
 	await _framing_capture()
 	# Tab, with the cursor west of the figure, hands control to the walking figure
 	# wherever the loop has taken it; it faces west. The released figure walks back
-	# to the loop from where it stands, off the loop in the outpost yard.
+	# to the loop from where it stands, off the loop south of it in the Town Square.
 	_point(Vector2(-0.25, 0))
 	await _wait(0.2)
 	_tap(KEY_TAB)
@@ -293,45 +268,34 @@ func _run() -> void:
 
 
 func _wind_stages() -> void:
-	# Probes where the north-west wind shelters, exposes, scours and drifts, each
-	# fixed by F5 at the latest bootprint of a leg that ends there.
-	await _goto(LANDMARKS.courtyard_shelter, "reach courtyard shelter")
-	_tap(KEY_F5)
-	await _goto(LANDMARKS.courtyard, "leave courtyard shelter")
-	await _goto(LANDMARKS.courtyard_east, "head for the outpost")
 	# The overview's detail region stays at the map centre, so the figure walks into
-	# it across its blended border through the east gate and out again by the outpost.
-	# M opens it here; one wheel step in still leaves it at the widest end of play.
+	# it across its blended border from the west. M opens it here; one wheel step in
+	# still leaves it at the widest end of play.
+	await _goto(LANDMARKS.overview_west, "reach overview start")
 	_tap(KEY_M)
 	await _leg([], 0.5, "overview before border")
-	await _goto(LANDMARKS.meeting_hall_gap, "leave courtyard for the outpost")
-	await _goto(LANDMARKS.outpost_lane, "walk to the outpost")
+	await _goto(LANDMARKS.exposed_probe, "walk into the overview region")
 	_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _leg([], 0.3, "overview wheel in")
-	# On in to the closest end of the play range.
+	# On in to the closest end of the play range, and a probe on the figure's own
+	# latest print, exposed to the wind.
 	for step in range(11):
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
-	await _goto(LANDMARKS.yard_open, "reach open yard")
-	_tap(KEY_F5)
-	await _goto(LANDMARKS.shed_windward, "reach shed windward face")
-	_tap(KEY_F5)
-	await _goto(LANDMARKS.lodge_lee, "reach lodge lee")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "probes placed")
-	# Accelerated wind fills the prints and builds the lodge's drift, then the
-	# figure wades through it with Shift held.
+	# Accelerated wind fills the prints. With nothing on the flat field to shelter
+	# or drift behind, it leaves Snow Depth as it started.
 	for step in range(16):
 		_tap(KEY_EQUAL)
 	await _leg([], 2.5, "wind fills prints")
-	await _leg([], 16.0, "drifts build")
+	await _leg([], 6.0, "prints filled")
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
-	await _leg([KEY_A, KEY_SHIFT], 2.0, "run through drift")
-	# Reversing the wind wears the lee drift away and builds one on the scoured face.
+	# Four turns reverse the wind; wind 0 then freezes everything.
 	for step in range(4):
 		_tap(KEY_BRACKETRIGHT)
-	await _leg([], 10.0, "wind turned")
+	await _leg([], 1.0, "wind turned")
 	for step in range(16):
 		_tap(KEY_MINUS)
 	await _leg([], 2.0, "wind frozen")
@@ -390,6 +354,31 @@ func _walking_sweep(description: String) -> void:
 			await _wait(BEHIND_SWEEP[index][1], [KEY_W])
 	_key(KEY_W, false)
 	await _wait(0.05)
+
+
+## The speed that running reaches in loose snow of this depth.
+func _running_speed(loose_depth: float) -> float:
+	return lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, loose_depth))
+
+
+## A real cursor already over the window when it opens leans the camera before the
+## route begins. Rest the route's cursor where the record shows the figure until
+## that lean has died away: each rest leaves a third of the lean, the other way.
+func _settle_cursor() -> void:
+	for attempt in range(6):
+		checkpoint += 1
+		_tap(KEY_F4)
+		await get_tree().process_frame
+		var rows := _read_rows()
+		if rows.is_empty():
+			return
+		var row: Dictionary = rows.back()
+		figure_screen = Vector2(float(row.figure_screen_x), float(row.figure_screen_y))
+		if float(row.lean_m) < 0.01:
+			return
+		print("Snow route: settling a %.2f m lean from a cursor already over the window" % float(row.lean_m))
+		_point(Vector2.ZERO)
+		await _wait(1.0)
 
 
 func _cursor_leg(offset: Vector2, keys: Array, seconds: float, description: String) -> void:
@@ -570,15 +559,15 @@ func _check_record() -> void:
 	var straight := 0
 	var diagonal := 0
 	var fast_run := 0
-	var deep_run := 0
+	var slow_run := 0
 	var blocked := 0
 	var follow := 0
 	var overview := 0
 	var previous := {}
 	var figure_ids := {}
 	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
-	var region_limit := TownLayout.HALF_EXTENTS - DETAIL_SIZE_M * 0.5
 	var previous_upload := {}
+	var ground := float(rows.front().ground_y_m)
 	var image_texels := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
 	for row in rows:
 		var input := Vector2(float(row.input_x), float(row.input_y))
@@ -589,12 +578,14 @@ func _check_record() -> void:
 			_fail_once("Figure escaped the map rectangle")
 		if row.grounded != "true" or absf(float(row.contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("Figure lost its observed snow contact")
-		# Crossing the stair's crest, one boot can stand on the slope while the other is
-		# on the shelf, so their mean height may sit up to CREST_SAG_M below the ground
-		# at the centre.
 		var above_ground := float(row.feet_y_m) - float(row.ground_y_m)
-		if above_ground > 1.3 or above_ground < -CREST_SAG_M:
-			_fail_once("Figure teleported onto a box roof or below the ground")
+		if above_ground > 1.3 or above_ground < -BELOW_GROUND_M:
+			_fail_once("Figure rose 1.3 m above the snow or sank below the ground")
+		# The ground is one flat level with nothing standing on it.
+		if absf(float(row.ground_y_m) - ground) > 0.000001 or absf(float(row.other_ground_y_m) - ground) > 0.000001:
+			_fail_once("The ground under the figures was not one flat level")
+		if row.obstacle_limited == "true" or row.other_obstacle_limited == "true":
+			_fail_once("An obstacle held a figure on the open snowfield")
 		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
 			_fail_once("Camera is not a 40° perspective view")
 		if absf(float(row.pitch_deg) - CAMERA_PITCH_DEG) > 0.01 or absf(float(row.yaw_deg)) > 0.01:
@@ -609,10 +600,10 @@ func _check_record() -> void:
 		var region := Vector2(float(row.region_x_m), float(row.region_z_m))
 		if Vector2(float(row.region_width_m), float(row.region_depth_m)).distance_to(DETAIL_SIZE_M) > 0.001:
 			_fail_once("Detail region is not 24 × 16 m")
-		var focus := Vector2(float(row.focus_x_m), float(row.focus_z_m)).clamp(-region_limit, region_limit)
+		var focus := Vector2(float(row.focus_x_m), float(row.focus_z_m))
 		var grid := (region + TownLayout.HALF_EXTENTS) / COARSE_STEP_M
 		if maxf(absf(region.x - focus.x), absf(region.y - focus.y)) > COARSE_STEP_M * 0.5 + 0.001 or grid.distance_to(grid.round()) > 0.001:
-			_fail_once("Detail region was not centred on the camera focus, snapped to the coarse grid and kept inside the map")
+			_fail_once("Detail region was not centred on the camera focus and snapped to the coarse grid")
 		if row.overview == "false" and _region_inset(row, Vector2(float(row.x_m), float(row.z_m))) < DETAIL_BORDER_M + STEP_REACH_M:
 			_fail_once("In play the controlled figure's steps could land outside the full-detail region")
 		if not previous_upload.is_empty():
@@ -646,13 +637,13 @@ func _check_record() -> void:
 				else:
 					straight += 1
 			else:
-				var expected_speed := lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, float(row.loose_depth_m)))
+				var expected_speed := _running_speed(float(row.loose_depth_m))
 				if absf(speed - expected_speed) > 0.003:
 					_fail_once("Running speed did not follow observed loose snow depth")
 				if speed > 3.0:
 					fast_run += 1
-				if float(row.loose_depth_m) >= 0.4 and speed <= 2.3:
-					deep_run += 1
+				if float(row.loose_depth_m) > FULL_RUN_DEPTH_M + 0.05 and speed < RUN_MPS - OPEN_RUN_SLOWDOWN:
+					slow_run += 1
 		if obstruction and speed < 0.01:
 			blocked += 1
 		if row.overview == "true" and row.whole_map_visible == "true":
@@ -671,12 +662,13 @@ func _check_record() -> void:
 		previous = row
 	if straight < 60 or diagonal < 60 or blocked < 30 or overview < 10 or follow < 1000 or figure_ids.size() != 2:
 		failures.append("Missing route coverage: straight=%d diagonal=%d blocked=%d overview=%d follow=%d figures=%d" % [straight, diagonal, blocked, overview, follow, figure_ids.size()])
-	if fast_run < 15 or deep_run < 15:
-		failures.append("Route did not demonstrate light-snow running and deep-snow walking (fast=%d, deep=%d)" % [fast_run, deep_run])
+	if fast_run < 15 or slow_run < 15:
+		failures.append("Route did not demonstrate full running in Shallow Snow and held-back running in open snow (fast=%d, slow=%d)" % [fast_run, slow_run])
+	# The northern edge holds the figure at the map rectangle, less its radius.
 	var boundary_rows := _rows_for(rows, "boundary blocked")
 	var held_boundary := 0
 	for row in boundary_rows:
-		if row.boundary_limited == "true" and float(row.horizontal_mps) < 0.01:
+		if row.boundary_limited == "true" and float(row.horizontal_mps) < 0.01 and absf(float(row.z_m) + bounds.y) < 0.001:
 			held_boundary += 1
 	if held_boundary < 30:
 		failures.append("Route did not reach and stop at the map boundary")
@@ -685,12 +677,6 @@ func _check_record() -> void:
 		failures.append("Repeated brief taps lost accumulated footsteps")
 	_check_start(rows)
 	_check_arrivals(rows)
-	_check_held_by_obstacle(rows, "lodge blocked", "the lodge")
-	_check_held_by_obstacle(rows, "wall blocked", "the courtyard's south wall")
-	_check_held_by_obstacle(rows, "shelf cliff blocked", "the cliff rock below the shelf")
-	_check_held_by_obstacle(rows, "forest cliff blocked", "the cliff rock above the forest")
-	_check_stair(rows)
-	_check_courtyard_entry(rows)
 	_check_probe(rows)
 	_check_walking_figure(rows)
 	_check_tracking(rows)
@@ -705,12 +691,13 @@ func _check_record() -> void:
 	_check_zoom(rows)
 	_check_detail_region(rows)
 	_check_uploads(rows)
-	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, deep run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, deep_run, blocked, overview, follow])
+	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, slow run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, slow_run, blocked, overview, follow])
 
 
 func _check_start(rows: Array[Dictionary]) -> void:
-	# Both figures begin a fresh launch at their outpost yard landmarks. The walking
-	# figure has set off already, but no further than it has walked.
+	# Both figures begin a fresh launch either side of the map's centre, in the Town
+	# Square's Shallow Snow. The walking figure has set off already, but no further
+	# than it has walked.
 	var idle := _rows_for(rows, "initial idle")
 	if idle.is_empty():
 		failures.append("Initial idle observations were missing")
@@ -718,8 +705,10 @@ func _check_start(rows: Array[Dictionary]) -> void:
 	var row: Dictionary = idle.front()
 	var controlled := Vector2(float(row.x_m), float(row.z_m))
 	var other := _other(row)
-	if controlled.distance_to(LANDMARKS.outpost_yard_west) > 0.001 or other.distance_to(LANDMARKS.outpost_yard_east) > float(row.other_travel_m) + 0.001:
-		failures.append("The figures did not start at the outpost yard landmarks")
+	if controlled.distance_to(LANDMARKS.start_west) > 0.001 or other.distance_to(LANDMARKS.start_east) > float(row.other_travel_m) + 0.001:
+		failures.append("The figures did not start at their landmarks either side of the centre")
+	if controlled.length() > 2.0 or float(row.saved_depth_m) > FULL_RUN_DEPTH_M:
+		failures.append("The controlled figure did not start at the centre in Shallow Snow")
 
 
 func _check_arrivals(rows: Array[Dictionary]) -> void:
@@ -735,84 +724,6 @@ func _check_arrivals(rows: Array[Dictionary]) -> void:
 		var axis := 1 if String(arrival.stage).ends_with(" z") else 0
 		if absf(reached[axis] - destination[axis]) > 0.1:
 			failures.append("Navigation %s ended at %s instead of %s" % [arrival.stage, reached, destination])
-
-
-func _check_held_by_obstacle(rows: Array[Dictionary], stage: String, obstacle: String) -> void:
-	var held := 0
-	for row in _rows_for(rows, stage):
-		if row.obstacle_limited == "true" and row.boundary_limited == "false" and float(row.horizontal_mps) < 0.01:
-			held += 1
-	if held < 30:
-		failures.append("Route did not reach and stop at %s (%d held observations)" % [obstacle, held])
-
-
-func _check_stair(rows: Array[Dictionary]) -> void:
-	# Down the stair from the south gate to the forest and back up: the ground
-	# under the figure changes by about 5 m along one slope, walking speed and
-	# snow contact are unchanged on it, and the cliffs keep each level separate.
-	var down := _rows_for(rows, "descend stair z")
-	var up := _rows_for(rows, "climb stair z")
-	if down.is_empty() or up.is_empty():
-		failures.append("Stair route stages were missing")
-		return
-	for stage in [down, up]:
-		var heights := Vector2(INF, -INF)
-		for row in stage:
-			heights = Vector2(minf(heights.x, float(row.ground_y_m)), maxf(heights.y, float(row.ground_y_m)))
-			if row.obstacle_limited == "true" or row.boundary_limited == "true":
-				_fail_once("The stair or its low walls obstructed the walk between levels")
-		# Observations strictly between the two levels lie on the slope.
-		var on_slope := 0
-		var slope_gap := 0.0
-		var slope_speed := 0.0
-		for row in stage:
-			var ground := float(row.ground_y_m)
-			if ground > heights.x + 0.1 and ground < heights.y - 0.1:
-				on_slope += 1
-				slope_gap = maxf(slope_gap, absf(float(row.contact_gap_m)))
-				slope_speed = maxf(slope_speed, absf(float(row.horizontal_mps) - WALK_MPS))
-		var change := heights.y - heights.x
-		if absf(change - LEVEL_DROP_M) > 0.25:
-			failures.append("The stair did not join levels about 5 m apart (observed %.3f m)" % change)
-		if on_slope < 120:
-			failures.append("Too few observations on the stair's slope (%d)" % on_slope)
-		if slope_gap > CONTACT_BOUND_M:
-			failures.append("Boots left the snow on the stair's slope (gap %.4f m)" % slope_gap)
-		if slope_speed > 0.003:
-			failures.append("Walking speed changed on the stair's slope (by %.4f m/s)" % slope_speed)
-	if float(down.front().ground_y_m) <= float(down.back().ground_y_m) or float(up.front().ground_y_m) >= float(up.back().ground_y_m):
-		failures.append("The route did not walk down the stair and back up")
-	# The southern map edge is reached on the forest floor, and the forest cliff
-	# is met from below: both stages lie on the lower level.
-	for stage in ["boundary blocked", "forest cliff blocked"]:
-		for row in _rows_for(rows, stage):
-			if absf(float(row.ground_y_m) - float(up.front().ground_y_m)) > 0.01:
-				_fail_once("A forest stage left the forest floor")
-	for row in _rows_for(rows, "shelf cliff blocked"):
-		if absf(float(row.ground_y_m) - float(down.front().ground_y_m)) > 0.01:
-			_fail_once("The shelf cliff stage left the town shelf")
-
-
-func _check_courtyard_entry(rows: Array[Dictionary]) -> void:
-	# The east gate is the only opening on the courtyard's east side. Walking
-	# through it unobstructed and on into the courtyard shows the gate is passable.
-	var entry := _rows_for(rows, "enter courtyard x")
-	if entry.is_empty():
-		failures.append("Courtyard entry stage was missing")
-		return
-	var gate: Vector2 = LANDMARKS.east_gate
-	var in_gate := 0
-	for row in entry:
-		if row.obstacle_limited == "true" or row.boundary_limited == "true":
-			_fail_once("The east gate obstructed the walk into the courtyard")
-		if absf(float(row.x_m) - gate.x) < 0.5 and absf(float(row.z_m) - gate.y) < 0.05:
-			in_gate += 1
-	var inside := Vector2(float(entry.back().x_m), float(entry.back().z_m))
-	if in_gate < 10 or inside.distance_to(LANDMARKS.courtyard_east) > 0.05:
-		failures.append("Route did not walk through the east gate into the courtyard")
-	var crossed := _rows_for(rows, "probe outside region")
-	if crossed.is_empty() or Vector2(float(crossed.back().x_m), float(crossed.back().z_m)).distance_to(LANDMARKS.courtyard) > 0.05:
-		failures.append("Route did not cross the courtyard")
 
 
 func _check_probe(rows: Array[Dictionary]) -> void:
@@ -834,11 +745,11 @@ func _check_probe(rows: Array[Dictionary]) -> void:
 		failures.append("The original footprint was not retained on revisiting its world position")
 
 
-## The recorded point of the walking figure's courtyard lane nearest the lane's
+## The recorded point of the walking figure's Town Square lane nearest the lane's
 ## middle, laid while the controlled figure stood at least ELSEWHERE_M away.
 func _laid_trail(rows: Array[Dictionary]) -> Dictionary:
-	var east: Vector2 = LANDMARKS.loop_courtyard_east
-	var west: Vector2 = LANDMARKS.loop_courtyard_west
+	var east: Vector2 = LANDMARKS.loop_north
+	var west: Vector2 = LANDMARKS.loop_lane_west
 	var middle := (east + west) * 0.5
 	var best := {}
 	for row in rows:
@@ -856,35 +767,31 @@ func _laid_trail(rows: Array[Dictionary]) -> Dictionary:
 
 func _check_walking_figure(rows: Array[Dictionary]) -> void:
 	# The figure you are not controlling walks the loop from launch: it stays on the
-	# loop, never goes backwards along it, runs where the snow allows, faces the way
-	# it goes, keeps snow contact and passes through the courtyard and down and up
-	# the stair. The final Tab stage checks how a released figure rejoins.
+	# loop, never goes backwards along it, runs at full speed in the Town Square's
+	# Shallow Snow and is held back in the open snow beyond it, faces the way it
+	# goes and keeps snow contact. The final Tab stage checks how a released figure
+	# rejoins.
 	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
+	var square := TownLayout.TOWN_SQUARE
 	var moving := 0
 	var matched := 0
 	var running := 0
-	var walking := 0
-	var in_courtyard := 0
-	var on_slope := 0
-	var descents := 0
-	var ascents := 0
-	var level := ""
+	var held_back := 0
+	var in_square := 0
+	var in_open := 0
 	var previous := {}
 	var steps := {}
 	for row in rows:
 		var other := _other(row)
 		var speed := float(row.other_mps)
 		var loose := float(row.other_loose_depth_m)
-		var ground := float(row.other_ground_y_m)
 		if absf(other.x) > bounds.x + 0.001 or absf(other.y) > bounds.y + 0.001:
 			_fail_once("The walking figure escaped the map rectangle")
 		if row.other_grounded != "true" or absf(float(row.other_contact_gap_m)) > CONTACT_BOUND_M:
 			_fail_once("The walking figure entered an obstacle or lost its snow contact")
-		# Crossing the stair's crest, its boots straddle the shelf and the slope, so
-		# their mean height may sit up to CREST_SAG_M below the ground at its centre.
-		var above_ground := float(row.other_feet_y_m) - ground
-		if above_ground > 1.3 or above_ground < -CREST_SAG_M:
-			_fail_once("The walking figure teleported onto a box roof or below the ground")
+		var above_ground := float(row.other_feet_y_m) - float(row.other_ground_y_m)
+		if above_ground > 1.3 or above_ground < -BELOW_GROUND_M:
+			_fail_once("The walking figure rose 1.3 m above the snow or sank below the ground")
 		if row.other_rejoining == "false" and _loop_distance(other) > 0.01:
 			_fail_once("The walking figure left its loop")
 		# Footsteps laid by each figure while it walked the loop.
@@ -899,13 +806,11 @@ func _check_walking_figure(rows: Array[Dictionary]) -> void:
 					_fail_once("The walking figure went backwards around its loop")
 				if walked < 0.0001:
 					_fail_once("The walking figure stood still on its loop")
-		else:
-			level = ""
 		if speed > 0.01:
 			moving += 1
 			if row.other_run_requested != "true":
 				_fail_once("The walking figure did not request running")
-			var expected := lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, loose))
+			var expected := _running_speed(loose)
 			# A frame that ends on a loop corner stops there, so it may be shorter.
 			if absf(speed - expected) <= 0.003:
 				matched += 1
@@ -913,39 +818,24 @@ func _check_walking_figure(rows: Array[Dictionary]) -> void:
 				_fail_once("The walking figure exceeded the speed its snow allows")
 			if loose <= FULL_RUN_DEPTH_M and speed >= RUN_MPS - 0.003:
 				running += 1
-			if loose >= WALK_ONLY_DEPTH_M and absf(speed - WALK_MPS) <= 0.003:
-				walking += 1
+			if loose > FULL_RUN_DEPTH_M + 0.05 and speed < RUN_MPS - OPEN_RUN_SLOWDOWN:
+				held_back += 1
 			if _angle_between(float(row.other_facing_deg), float(row.other_travel_deg)) > 0.5:
 				_fail_once("The walking figure did not face its direction of travel")
-		if TownLayout.COURTYARD.has_point(other):
-			in_courtyard += 1
-		# Ground strictly between the two levels lies on the stair's slope.
-		if ground < TownLayout.SHELF_GROUND - 0.1 and ground > TownLayout.FOREST_GROUND + 0.1:
-			on_slope += 1
-			if other.x < TownLayout.STAIR_GROUND_X.x or other.x > TownLayout.STAIR_GROUND_X.y:
-				_fail_once("The walking figure changed level away from the stair")
-		var now := level
-		if ground > TownLayout.SHELF_GROUND - 0.01:
-			now = "shelf"
-		elif ground < TownLayout.FOREST_GROUND + 0.01:
-			now = "forest"
-		if level == "shelf" and now == "forest":
-			descents += 1
-		elif level == "forest" and now == "shelf":
-			ascents += 1
-		level = now
+		if square.has_point(other):
+			in_square += 1
+		elif square.grow(TownLayout.ZONE_BLEND).has_point(other) == false:
+			in_open += 1
 		previous = row
 	var laid: Vector2i = steps.get(rows.front().other_figure_id, Vector2i.ZERO)
-	print("Walking figure: %d moving observations, %d at the speed its snow allows, %d running in Shallow Snow, %d walking in Deep, %d in the courtyard, %d on the stair, %d descents and %d ascents" % [
-		moving, matched, running, walking, in_courtyard, on_slope, descents, ascents])
+	print("Walking figure: %d moving observations, %d at the speed its snow allows, %d running in Shallow Snow, %d held back in open snow, %d in the Town Square, %d beyond it" % [
+		moving, matched, running, held_back, in_square, in_open])
 	if moving < 1000 or matched < moving * 0.98:
 		failures.append("The walking figure did not keep walking at the speed its snow allows (%d of %d)" % [matched, moving])
-	if running < 60 or walking < 60:
-		failures.append("The walking figure did not run in Shallow Snow and walk in Deep (running %d, walking %d)" % [running, walking])
-	if in_courtyard < 60:
-		failures.append("The walking figure's loop did not pass through the courtyard")
-	if descents < 1 or ascents < 1 or on_slope < 60:
-		failures.append("The walking figure did not go down and back up the stair (down %d, up %d, slope %d)" % [descents, ascents, on_slope])
+	if running < 60 or held_back < 60:
+		failures.append("The walking figure did not run in Shallow Snow and slow in open snow (running %d, held back %d)" % [running, held_back])
+	if in_square < 60 or in_open < 60:
+		failures.append("The walking figure's loop did not cross from the Town Square into open snow (square %d, open %d)" % [in_square, in_open])
 	if laid.y - laid.x < 100:
 		failures.append("The walking figure laid too few footsteps (%d)" % (laid.y - laid.x))
 
@@ -982,7 +872,7 @@ func _check_tracking(rows: Array[Dictionary]) -> void:
 	# Wind fills the loop's trail like any other: at wind 16 the probe's compaction
 	# falls between rows in which no figure can reach it, and never rises then.
 	var filled := 0.0
-	var wind_rows := _rows_for(rows, "wind fills prints") + _rows_for(rows, "drifts build")
+	var wind_rows := _rows_for(rows, "wind fills prints") + _rows_for(rows, "prints filled")
 	for index in range(1, wind_rows.size()):
 		var before: Dictionary = wind_rows[index - 1]
 		var after: Dictionary = wind_rows[index]
@@ -1067,10 +957,10 @@ func _loop_distance(point: Vector2) -> float:
 
 
 func _check_packed_speed(rows: Array[Dictionary]) -> void:
-	var fresh := _rows_for(rows, "run through deep snow")
+	var fresh := _rows_for(rows, "run through fresh snow")
 	var packed := _rows_for(rows, "run on packed trail")
-	# The corridor runs north from the meeting-hall lane landmark where both runs start.
-	var corridor_z: float = LANDMARKS.meeting_hall_lane.y - 2.0
+	# The corridor runs north from the packed lane landmark where both runs start.
+	var corridor_z: float = LANDMARKS.packed_lane.y - 2.0
 	var fresh_distance := 0.0
 	var fresh_samples := 0
 	var fresh_depth := 0.0
@@ -1089,17 +979,17 @@ func _check_packed_speed(rows: Array[Dictionary]) -> void:
 			packed_samples += 1
 	var fresh_speed := fresh_distance / maxi(1, fresh_samples)
 	var packed_speed := packed_distance / maxi(1, packed_samples)
-	print("Same deep corridor, Shift held: fresh %.3f m/s -> packed %.3f m/s (%d / %d samples)" % [fresh_speed, packed_speed, fresh_samples, packed_samples])
+	print("Same open-snow corridor, Shift held: fresh %.3f m/s -> packed %.3f m/s (%d / %d samples)" % [fresh_speed, packed_speed, fresh_samples, packed_samples])
 	if fresh_samples < 20 or packed_samples < 20 or packed_speed < fresh_speed + 0.10:
-		failures.append("Repeated traffic did not produce a measurable running advantage in the same deep corridor")
-	if fresh_depth / maxi(1, fresh_samples) < WALK_ONLY_DEPTH_M:
-		failures.append("The packed corridor did not start as Deep Snow")
+		failures.append("Repeated traffic did not produce a measurable running advantage in the same open-snow corridor")
+	if fresh_depth / maxi(1, fresh_samples) < OPEN_DEPTH_M:
+		failures.append("The packed corridor did not start too deep to run through at full speed")
 
 
 func _check_camera_steadiness(rows: Array[Dictionary]) -> void:
 	# Per observation, how far the figure's sink and the camera's height against
 	# the untouched snow each change: the figure by its whole sink, the camera by its
-	# eased fifth of it. Real changes of level, such as the stair, move neither.
+	# eased fifth of it.
 	# The eased sink never exceeds the deepest sink observed so far.
 	var checked := {}
 	for stage in STEADY_STAGES:
@@ -1131,34 +1021,21 @@ func _check_camera_steadiness(rows: Array[Dictionary]) -> void:
 
 
 func _check_snow_zones(rows: Array[Dictionary]) -> void:
-	# Starting Snow Depth follows the town's places: the courtyard is Shallow, the
-	# outpost yard mixes Shallow and Deep, and the forest and cliff feet are Deep.
-	var courtyard := _running_rows(rows, "run in courtyard")
-	if courtyard.size() < 30:
-		failures.append("Too few running observations in the courtyard (%d)" % courtyard.size())
-	for row in courtyard:
-		if float(row.saved_depth_m) > FULL_RUN_DEPTH_M or float(row.horizontal_mps) < RUN_MPS - 0.003:
-			_fail_once("The courtyard's Shallow Snow did not allow full running")
+	# Starting Snow Depth follows the map's places: the Town Square is Shallow and
+	# allows full running; the open snow beyond it is deeper and holds running back.
 	var full := 0
-	var walking := 0
-	for row in _running_rows(rows, "run across outpost yard"):
-		if float(row.horizontal_mps) >= RUN_MPS - 0.01:
+	var held_back := 0
+	for row in _running_rows(rows, "run into open snow"):
+		if float(row.saved_depth_m) <= FULL_RUN_DEPTH_M:
 			full += 1
-		elif float(row.horizontal_mps) <= WALK_MPS + 0.003:
-			walking += 1
-	if full < 10 or walking < 10:
-		failures.append("The outpost yard did not mix full running and walking (full=%d, walking=%d)" % [full, walking])
-	for stage in ["run in forest", "run to forest cliff foot"]:
-		var running := _running_rows(rows, stage)
-		var walked := 0
-		for row in running:
-			if float(row.saved_depth_m) < WALK_ONLY_DEPTH_M:
-				_fail_once("The forest or a cliff foot did not start with Deep Snow")
-			if float(row.horizontal_mps) <= WALK_MPS + 0.003:
-				walked += 1
-		# Its own arrival prints may pack the first steps of each run.
-		if running.size() < 30 or walked < running.size() * 0.9:
-			failures.append("Requested running was not held to walking in %s (%d of %d)" % [stage, walked, running.size()])
+			if float(row.horizontal_mps) < RUN_MPS - 0.003:
+				_fail_once("The Town Square's Shallow Snow did not allow full running")
+		elif float(row.saved_depth_m) >= OPEN_DEPTH_M:
+			held_back += 1
+			if float(row.horizontal_mps) > RUN_MPS - OPEN_RUN_SLOWDOWN:
+				_fail_once("Open snow beyond the Town Square did not hold running back")
+	if full < 30 or held_back < 30:
+		failures.append("Running west did not cross from the Town Square's Shallow Snow into open snow (full %d, held back %d)" % [full, held_back])
 
 
 ## Unobstructed observations of a stage that requested running with movement input.
@@ -1393,21 +1270,11 @@ func _region(row: Dictionary) -> Vector2:
 	return Vector2(float(row.region_x_m), float(row.region_z_m))
 
 
-## How far a point lies inside the detail region from its nearest blended side.
-## A side on the map edge has no coarse surface beyond it and no border.
+## How far a point lies inside the detail region from its nearest side. Every side
+## is blended, including one beyond the map's edge, where the apron's snow lies.
 func _region_inset(row: Dictionary, point: Vector2) -> float:
-	var low := _region(row) - DETAIL_SIZE_M * 0.5
-	var high := _region(row) + DETAIL_SIZE_M * 0.5
-	var edge := INF
-	if low.x > -TownLayout.HALF_EXTENTS.x + 0.001:
-		edge = minf(edge, point.x - low.x)
-	if high.x < TownLayout.HALF_EXTENTS.x - 0.001:
-		edge = minf(edge, high.x - point.x)
-	if low.y > -TownLayout.HALF_EXTENTS.y + 0.001:
-		edge = minf(edge, point.y - low.y)
-	if high.y < TownLayout.HALF_EXTENTS.y - 0.001:
-		edge = minf(edge, high.y - point.y)
-	return edge
+	var inset := DETAIL_SIZE_M * 0.5 - (point - _region(row)).abs()
+	return minf(inset.x, inset.y)
 
 
 func _check_zoom(rows: Array[Dictionary]) -> void:
@@ -1450,94 +1317,55 @@ func _share_text(stage: Array[Dictionary]) -> String:
 func _check_wind(rows: Array[Dictionary]) -> void:
 	var placed := _rows_for(rows, "probes placed")
 	var filling := _rows_for(rows, "wind fills prints")
-	var building := _rows_for(rows, "drifts build")
-	var wading := _running_rows(rows, "run through drift")
+	var filled := _rows_for(rows, "prints filled")
 	var turned := _rows_for(rows, "wind turned")
 	var frozen := _rows_for(rows, "wind frozen")
-	if placed.is_empty() or filling.size() < 60 or building.size() < 60 or turned.size() < 60 or frozen.size() < 60:
+	if placed.is_empty() or filling.size() < 60 or filled.size() < 60 or turned.size() < 30 or frozen.size() < 60:
 		failures.append("Wind route stages were missing")
 		return
-	if int(placed.back().probe_count) != LEE_PROBE:
-		failures.append("The route did not fix its six world probes (%s)" % placed.back().probe_count)
+	if int(placed.back().probe_count) != EXPOSED_PROBE:
+		failures.append("The route did not fix its three world probes (%s)" % placed.back().probe_count)
 		return
-	for row in placed + filling + building:
+	for row in placed + filling + filled:
 		if absf(float(row.wind_from_deg) - PREVAILING_FROM_DEG) > 0.01:
 			_fail_once("The default wind did not blow from the north-west")
 	if absf(float(turned.back().wind_from_deg) - REVERSED_FROM_DEG) > 0.01:
 		failures.append("Four turns of ] did not reverse the wind to the south-east")
-	# Fill: the same wind fills exposed, sheltered and lee prints at distinctly
-	# different rates, measured against each probe's own compaction.
+	# Fill: an exposed print fills at the base rate, measured against its own compaction.
 	var first: Dictionary = filling.front()
 	var last: Dictionary = filling.back()
 	var wind_seconds := float(last.wind_elapsed_s) - float(first.wind_elapsed_s)
-	var remaining := {}
-	for probe in [SHELTERED_PROBE, EXPOSED_PROBE, LEE_PROBE]:
-		var baseline := _probe(first, probe, "compaction")
-		if baseline < 0.05:
-			failures.append("Probe %d did not start on a measurable footprint (%.3f)" % [probe, baseline])
-			return
-		remaining[probe] = _probe(last, probe, "compaction") / baseline
-	print("After %.1f wind-seconds, prints remain: exposed %.2f, sheltered %.2f, lee %.2f" % [
-		wind_seconds, remaining[EXPOSED_PROBE], remaining[SHELTERED_PROBE], remaining[LEE_PROBE]])
-	if absf(remaining[EXPOSED_PROBE] - (1.0 - wind_seconds / OPEN_FILL_S)) > 0.06:
+	var baseline := _probe(first, EXPOSED_PROBE, "compaction")
+	if baseline < 0.05:
+		failures.append("The exposed probe did not start on a measurable footprint (%.3f)" % baseline)
+		return
+	var remaining := _probe(last, EXPOSED_PROBE, "compaction") / baseline
+	print("After %.1f wind-seconds, the exposed print remains %.2f" % [wind_seconds, remaining])
+	if absf(remaining - (1.0 - wind_seconds / OPEN_FILL_S)) > 0.06:
 		failures.append("An exposed print did not fill at the 120 wind-second rate")
-	if absf(remaining[SHELTERED_PROBE] - (1.0 - wind_seconds / SHELTERED_FILL_S)) > 0.06:
-		failures.append("A sheltered print did not fill four times more slowly")
-	if remaining[LEE_PROBE] > remaining[EXPOSED_PROBE] - 0.2:
-		failures.append("A print where a drift builds did not fill faster than in the open")
-	# By the end of the drift stage the exposed and lee prints have filled completely,
-	# while the sheltered print still remains. The figure stands at the lee probe,
-	# inside the detail region, where its visible depression fills as well.
-	var settled: Dictionary = building.back()
-	var fresh_depression := _probe(placed.back(), LEE_PROBE, "depth_m") - _probe(placed.back(), LEE_PROBE, "visible_m")
-	var filled_depression := _probe(settled, LEE_PROBE, "depth_m") - _probe(settled, LEE_PROBE, "visible_m")
-	if _probe(settled, EXPOSED_PROBE, "compaction") > 0.001 or _probe(settled, LEE_PROBE, "compaction") > 0.001:
-		failures.append("Wind did not fill the exposed and lee prints")
-	var lee_in_region := "probe%d_in_region" % LEE_PROBE
-	if placed.back()[lee_in_region] != "true" or settled[lee_in_region] != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
-		failures.append("Wind did not fill the lee print's visible depression")
-	if _probe(settled, SHELTERED_PROBE, "compaction") < 0.2 * _probe(first, SHELTERED_PROBE, "compaction"):
-		failures.append("The sheltered print did not outlast the exposed one")
-	# Drift: the lee probe grows toward 1.2 m without oscillating and settles.
-	var growth := _probe(settled, LEE_PROBE, "depth_m") - _probe(first, LEE_PROBE, "depth_m")
-	var previous := -INF
-	for row in filling + building:
-		var depth := _probe(row, LEE_PROBE, "depth_m")
-		if depth < previous - 0.0001:
-			_fail_once("The lee Snowdrift shrank while it was building")
-		previous = depth
-	var early := _probe(filling[59], LEE_PROBE, "depth_m") - _probe(first, LEE_PROBE, "depth_m")
-	var late := _probe(settled, LEE_PROBE, "depth_m") - _probe(building[building.size() - 60], LEE_PROBE, "depth_m")
-	print("Lee drift %.3f -> %.3f m (first second +%.3f, last second +%.3f)" % [
-		_probe(first, LEE_PROBE, "depth_m"), _probe(settled, LEE_PROBE, "depth_m"), early, late])
-	if growth < 0.3 or _probe(settled, LEE_PROBE, "depth_m") < DRIFT_MAX_M - 0.15:
-		failures.append("No Snowdrift grew toward 1.2 m at the lee probe")
-	if late > 0.2 * early:
-		failures.append("The lee Snowdrift did not settle toward a steady shape")
-	# Scour: the windward probe falls to the 3 cm floor and holds there.
-	var scoured := _probe(settled, WINDWARD_PROBE, "depth_m")
-	print("Windward scour %.3f -> %.3f m" % [_probe(first, WINDWARD_PROBE, "depth_m"), scoured])
-	if _probe(first, WINDWARD_PROBE, "depth_m") < SCOUR_FLOOR_M + 0.1 or scoured > SCOUR_FLOOR_M + 0.005:
-		failures.append("The windward probe was not scoured to the 3 cm floor")
-	# Snowdrifts stay walkable at walking speed; running follows the loose depth.
-	var waded := 0
-	for row in wading:
-		if float(row.loose_depth_m) >= WALK_ONLY_DEPTH_M and absf(float(row.horizontal_mps) - WALK_MPS) <= 0.003:
-			waded += 1
-	if waded < 60:
-		failures.append("The figure did not wade through the Snowdrift at walking speed (%d observations)" % waded)
-	# Turning the wind moves the growth: the old lee wears away and the scoured face drifts.
-	var before: Dictionary = turned.front()
-	var after: Dictionary = turned.back()
-	var worn := _probe(before, LEE_PROBE, "depth_m") - _probe(after, LEE_PROBE, "depth_m")
-	var drifted := _probe(after, WINDWARD_PROBE, "depth_m") - _probe(before, WINDWARD_PROBE, "depth_m")
-	print("Reversed wind: old lee -%.3f m, old windward face +%.3f m" % [worn, drifted])
-	if worn < 0.2 or drifted < 0.1:
-		failures.append("Reversing the wind did not move where the Snowdrift grows")
+	# By the end of the fill stage the exposed print has filled completely. The figure
+	# stands at it, inside the detail region, where its visible depression fills too.
+	var settled: Dictionary = filled.back()
+	var fresh_depression := _probe(placed.back(), EXPOSED_PROBE, "depth_m") - _probe(placed.back(), EXPOSED_PROBE, "visible_m")
+	var filled_depression := _probe(settled, EXPOSED_PROBE, "depth_m") - _probe(settled, EXPOSED_PROBE, "visible_m")
+	if _probe(settled, EXPOSED_PROBE, "compaction") > 0.001:
+		failures.append("Wind did not fill the exposed print")
+	var in_region := "probe%d_in_region" % EXPOSED_PROBE
+	if placed.back()[in_region] != "true" or settled[in_region] != "true" or fresh_depression < 0.002 or filled_depression > 0.003:
+		failures.append("Wind did not fill the exposed print's visible depression")
+	# With nothing on the flat field to shelter or drift behind, wind neither builds
+	# Snowdrifts nor scours: every probe keeps the Snow Depth it started with.
+	var changed := 0.0
+	for row in filling + filled + turned + frozen:
+		for probe in range(1, EXPOSED_PROBE + 1):
+			changed = maxf(changed, absf(_probe(row, probe, "depth_m") - _probe(placed.back(), probe, "depth_m")))
+	print("Largest change of Snow Depth at a probe under wind: %.4f m" % changed)
+	if changed > 0.001:
+		failures.append("Wind changed Snow Depth on the open, flat field (%.4f m)" % changed)
 	# Wind 0 freezes Snow Depth and every print once the last sweep has landed. Only
 	# a boot can still press a print, so a probe the walking figure passes is skipped.
 	var settled_rows := frozen.slice(30)
-	for probe in range(1, LEE_PROBE + 1):
+	for probe in range(1, EXPOSED_PROBE + 1):
 		var trodden := false
 		for row in settled_rows:
 			trodden = trodden or _near_probe(row, probe)

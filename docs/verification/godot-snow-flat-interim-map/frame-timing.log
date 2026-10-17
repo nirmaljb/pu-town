@@ -1,0 +1,9 @@
+# frame_timing.gd output, alternating revisions, 2026-10-17 11:48 on the M1 MacBook Air under load
+before 1: TIMING play window (2560, 1440) · mean 51.99 ms (19.2 fps) · p95 70.59 ms · worst 225.00 ms · wind 0.772 ms per update over 2802 updates
+after 1: TIMING play window (2560, 1440) · mean 51.33 ms (19.5 fps) · p95 69.16 ms · worst 719.94 ms · wind 3.034 ms per update over 2739 updates
+before 1: TIMING overview window (2560, 1440) · mean 23.14 ms (43.2 fps) · p95 29.68 ms · worst 31.51 ms · wind 0.689 ms per update over 1251 updates
+after 1: TIMING overview window (2560, 1440) · mean 39.45 ms (25.4 fps) · p95 44.55 ms · worst 49.00 ms · wind 2.878 ms per update over 2131 updates
+before 2: TIMING play window (2560, 1440) · mean 36.95 ms (27.1 fps) · p95 47.41 ms · worst 63.55 ms · wind 0.781 ms per update over 1994 updates
+after 2: TIMING play window (2560, 1440) · mean 40.10 ms (24.9 fps) · p95 46.43 ms · worst 101.32 ms · wind 3.042 ms per update over 2167 updates
+before 2: TIMING overview window (2560, 1440) · mean 20.68 ms (48.3 fps) · p95 25.25 ms · worst 123.33 ms · wind 0.547 ms per update over 1118 updates
+after 2: TIMING overview window (2560, 1440) · mean 35.36 ms (28.3 fps) · p95 39.65 ms · worst 42.55 ms · wind 2.945 ms per update over 1909 updates

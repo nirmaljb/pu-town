@@ -25,8 +25,8 @@ func _ready() -> void:
 	add_child(town)
 	add_child(surface)
 	surface.configure_ground(town)
-	walker.configure(surface, town, 1, TownLayout.LANDMARKS.outpost_yard_west)
-	second_walker.configure(surface, town, 2, TownLayout.LANDMARKS.outpost_yard_east)
+	walker.configure(surface, town, 1, TownLayout.LANDMARKS.start_west)
+	second_walker.configure(surface, town, 2, TownLayout.LANDMARKS.start_east)
 	add_child(walker)
 	add_child(second_walker)
 	# The figure you are not controlling walks the town loop, from its first corner.
