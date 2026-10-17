@@ -13,14 +13,22 @@ const LANDMARKS := TownLayout.LANDMARKS
 const FIGURE_RADIUS_M := 0.3
 const FOOTPRINT_TEXEL_M := 0.03125
 const CONTACT_BOUND_M := 0.002
-# The detail region: 24 × 16 m, centred on the camera focus, snapped to the 0.8 m
-# coarse grid and blended into it over a 1.6 m border on sides inside the map. A
-# boot lands within 0.65 m of the figure's centre. One footstep touches at most
-# 2 × 2 tiles of the Footprint picture's GPU copy.
-const DETAIL_SIZE_M := Vector2(24.0, 16.0)
+# The detail region follows the camera focus with its edges on the 0.8 m coarse
+# grid, and blends into the coarse surface over a 1.6 m border on every side. It
+# has two parts meeting at a seam: a near part, where every footstep of the
+# controlled figure lands (a boot lands within 0.65 m of its centre), and a far part
+# north of it, up the view. Bootprints are crisp, in full detail, wherever the
+# oblique view shows snow within 20 m of the figure without lean, and along the
+# bottom of the view at any lean.
+# One footstep touches at most 2 × 2 tiles of the Footprint picture's GPU copy.
 const COARSE_STEP_M := 0.8
 const DETAIL_BORDER_M := 1.6
 const STEP_REACH_M := 0.65
+const CRISP_REACH_M := 20.0
+# The 20 m outline is checked along this many rays; between two of them the circle
+# bulges out by at most CRISP_SAG_M, allowed for.
+const CRISP_RAYS := 48
+const CRISP_SAG_M := 0.05
 const MAX_TILES_PER_STEP := 4
 # Running is full at or below 10 cm of loose snow and falls to walking at 40 cm.
 const FULL_RUN_DEPTH_M := 0.10
@@ -28,18 +36,26 @@ const WALK_ONLY_DEPTH_M := 0.40
 # Walking matches the owner's walk recording (1.06 m/s); running is unchanged.
 const WALK_MPS := 1.06
 const RUN_MPS := 4.5
-# The specified camera: perspective, 40° field of view, −40° pitch, north up, and
-# a lean of at most 3 m. The 1.7 m figure stands about a twelfth of the screen tall
-# by default, and the wheel's play range runs from about an eighth to a sixteenth.
-# Shares are measured on screen, so they hold within FRAMING_TOLERANCE of their
-# specified value wherever the lean and the figure's place below centre put it.
+# The specified camera: perspective, 40° field of view, −40° pitch, north up. The
+# 1.7 m figure stands about a twelfth of the screen tall by default, and the wheel's
+# play range runs from about an eighth to a sixteenth. Shares are measured on screen
+# without lean, so they hold within FRAMING_TOLERANCE of their specified value
+# wherever the figure's place below centre puts it.
 const CAMERA_FOV_DEG := 40.0
 const CAMERA_PITCH_DEG := -40.0
 const PLAY_SHARE := 1.0 / 12.0
 const CLOSEST_SHARE := 1.0 / 8.0
 const WIDEST_SHARE := 1.0 / 16.0
 const FRAMING_TOLERANCE := 0.08
-const MAX_LEAN_M := 3.0
+# The lean toward the cursor is at most 3 m at the closest play distance and grows
+# with zoom to at most 8 m at the widest, so a Player zoomed out can look further ahead.
+const CLOSEST_LEAN_M := 3.0
+const WIDEST_LEAN_M := 8.0
+# The cursor point the lean stages use: the view's north-east corner, far enough
+# from the figure at every play distance for the lean to reach its limit; and its
+# south-east corner, nearer the figure, which leans the view south toward the camera.
+const TOP_CORNER := Vector2(0.48, -0.48)
+const BOTTOM_CORNER := Vector2(0.45, 0.45)
 # The camera frames the untouched snow under the boots and takes a fifth of the
 # sink below it, eased, so a footfall settles the view instead of jolting it.
 const CAMERA_SINK_SHARE := 0.2
@@ -139,8 +155,9 @@ func _run() -> void:
 	figure_screen = Vector2(float(idle_row.figure_screen_x), float(idle_row.figure_screen_y))
 	# Facing follows the cursor round the standing figure without a step.
 	await _sweep_cursor("turn in place")
-	# The camera leans toward a cursor in the corner of the view, but no further than its bound.
-	await _cursor_leg(Vector2(0.48, -0.48), [], 1.5, "lean to corner")
+	# The camera leans toward a cursor in the corner of the view, but no further than
+	# the default play distance allows.
+	await _cursor_leg(TOP_CORNER, [], 1.5, "lean to corner")
 	# A cursor resting on the figure gives no Facing and no lean, so the camera centres it again.
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure")
 	await _short_steps()
@@ -222,6 +239,7 @@ func _run() -> void:
 	_tap(KEY_M)
 	await _leg([KEY_W], 2.25 / WALK_MPS, "overview by M")
 	await _leg([KEY_S], 2.25 / WALK_MPS, "overview walk back")
+	await _cross_region_seam()
 	_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.3, "overview wheel out")
 	_tap(KEY_M)
@@ -242,6 +260,12 @@ func _run() -> void:
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "widest play view")
 	await _framing_capture()
+	# Zoomed out, the camera leans its furthest toward the same corner cursor. A
+	# cursor in the view's bottom corner leans it south and east, as far as the
+	# nearer snow allows, putting the figure north of the focus.
+	await _cursor_leg(TOP_CORNER, [], 2.0, "lean at widest")
+	await _cursor_leg(BOTTOM_CORNER, [], 2.0, "lean toward the bottom at widest")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure at widest")
 	for step in range(7):
 		_wheel(MOUSE_BUTTON_WHEEL_DOWN)
 	await _leg([], 0.5, "whole map")
@@ -252,11 +276,13 @@ func _run() -> void:
 		_wheel(MOUSE_BUTTON_WHEEL_UP)
 	await _leg([], 0.5, "close view")
 	await _framing_capture()
+	# Close in, it leans least.
+	await _cursor_leg(TOP_CORNER, [], 2.0, "lean at closest")
+	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on figure at closest")
 	# Tab, with the cursor west of the figure, hands control to the walking figure
 	# wherever the loop has taken it; it faces west. The released figure walks back
 	# to the loop from where it stands, off the loop south of it in the Town Square.
-	_point(Vector2(-0.25, 0))
-	await _wait(0.2)
+	await _cursor_leg(Vector2(-0.25, 0), [], 0.15, "cursor west before Tab")
 	_tap(KEY_TAB)
 	await _leg([], 0.5, "second figure idle")
 	await _cursor_leg(Vector2.ZERO, [], 1.5, "cursor on second figure")
@@ -379,6 +405,18 @@ func _settle_cursor() -> void:
 		print("Snow route: settling a %.2f m lean from a cursor already over the window" % float(row.lean_m))
 		_point(Vector2.ZERO)
 		await _wait(1.0)
+
+
+## While the overview holds the detail region still at the map centre, walk south
+## across its seam, from 1.5 m north of it to 1.5 m south.
+func _cross_region_seam() -> void:
+	var rows := _read_rows()
+	if rows.is_empty() or rows.back().overview != "true":
+		failures.append("No overview observation to find the detail region's seam")
+		return
+	var row: Dictionary = rows.back()
+	await _goto(Vector2(float(row.x_m), float(row.region_seam_z_m) - 1.5), "reach the region's seam")
+	await _leg([KEY_S], 3.0 / WALK_MPS, "cross the region's seam")
 
 
 func _cursor_leg(offset: Vector2, keys: Array, seconds: float, description: String) -> void:
@@ -569,6 +607,8 @@ func _check_record() -> void:
 	var previous_upload := {}
 	var ground := float(rows.front().ground_y_m)
 	var image_texels := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
+	var play_range := _play_range(rows)
+	var region_offset := Vector2.INF
 	for row in rows:
 		var input := Vector2(float(row.input_x), float(row.input_y))
 		var speed := float(row.horizontal_mps)
@@ -590,22 +630,31 @@ func _check_record() -> void:
 			_fail_once("Camera is not a 40° perspective view")
 		if absf(float(row.pitch_deg) - CAMERA_PITCH_DEG) > 0.01 or absf(float(row.yaw_deg)) > 0.01:
 			_fail_once("Camera tilted or turned away from north-up")
-		if float(row.lean_m) > MAX_LEAN_M + 0.0001:
-			_fail_once("Camera leaned more than 3 m")
+		if float(row.lean_m) > WIDEST_LEAN_M + 0.0001 or (play_range != Vector2.ZERO and row.overview == "false"
+				and float(row.camera_distance_m) < play_range.x + 0.001 and float(row.lean_m) > CLOSEST_LEAN_M + 0.0001):
+			_fail_once("Camera leaned further than 8 m, or further than 3 m at the closest play distance")
 		if row.overview == "true":
 			if row.whole_map_visible != "true":
 				_fail_once("The overview did not frame the town")
-		elif not _framed_between(row, WIDEST_SHARE, CLOSEST_SHARE):
+		elif float(row.lean_m) < 0.05 and not _framed_between(row, WIDEST_SHARE, CLOSEST_SHARE):
 			_fail_once("Play zoom left the figure outside an eighth to a sixteenth of the screen's height")
-		var region := Vector2(float(row.region_x_m), float(row.region_z_m))
-		if Vector2(float(row.region_width_m), float(row.region_depth_m)).distance_to(DETAIL_SIZE_M) > 0.001:
-			_fail_once("Detail region is not 24 × 16 m")
-		var focus := Vector2(float(row.focus_x_m), float(row.focus_z_m))
-		var grid := (region + TownLayout.HALF_EXTENTS) / COARSE_STEP_M
-		if maxf(absf(region.x - focus.x), absf(region.y - focus.y)) > COARSE_STEP_M * 0.5 + 0.001 or grid.distance_to(grid.round()) > 0.001:
-			_fail_once("Detail region was not centred on the camera focus and snapped to the coarse grid")
-		if row.overview == "false" and _region_inset(row, Vector2(float(row.x_m), float(row.z_m))) < DETAIL_BORDER_M + STEP_REACH_M:
-			_fail_once("In play the controlled figure's steps could land outside the full-detail region")
+		var size := _region_size(row)
+		if size.distance_to(_region_size(rows.front())) > 0.001:
+			_fail_once("The detail region changed size")
+		# Its edges and the line between its parts lie on coarse vertices, so both
+		# parts' grids stay world-aligned wherever it moves.
+		var corner := (_region(row) - size * 0.5 + TownLayout.HALF_EXTENTS) / COARSE_STEP_M
+		var seam := (float(row.region_seam_z_m) + TownLayout.HALF_EXTENTS.y) / COARSE_STEP_M
+		if corner.distance_to(corner.round()) > 0.001 or absf(seam - roundf(seam)) > 0.001:
+			_fail_once("The detail region's edges or parts were not snapped to the coarse grid")
+		if row.overview == "false":
+			_check_sharp_view(row)
+			# It keeps its place relative to the camera focus, give or take a coarse cell's snap.
+			var offset := _region(row) - Vector2(float(row.focus_x_m), float(row.focus_z_m))
+			if region_offset == Vector2.INF:
+				region_offset = offset
+			elif maxf(absf(offset.x - region_offset.x), absf(offset.y - region_offset.y)) > COARSE_STEP_M + 0.001:
+				_fail_once("The detail region did not keep its place relative to the camera focus")
 		if not previous_upload.is_empty():
 			var sent := int(row.upload_total_bytes) - int(previous_upload.upload_total_bytes)
 			var steps := int(row.uploaded_steps) - int(previous_upload.uploaded_steps)
@@ -685,6 +734,7 @@ func _check_record() -> void:
 	_check_camera_steadiness(rows)
 	_check_snow_zones(rows)
 	_check_facing(rows)
+	_check_lean(rows)
 	_check_walking_facing(rows)
 	_check_overview_key(rows)
 	_check_wind(rows)
@@ -1068,12 +1118,6 @@ func _check_facing(rows: Array[Dictionary]) -> void:
 				bearings[entry[1]] = true
 	if bearings.size() != SWEEP.size():
 		failures.append("Facing did not follow the cursor all the way round (%d of %d directions)" % [bearings.size(), SWEEP.size()])
-	var corner := _rows_for(rows, "lean to corner")
-	if corner.is_empty() or float(corner.back().lean_m) < MAX_LEAN_M - 0.01:
-		failures.append("The camera did not lean the full 3 m toward a distant cursor")
-	var centred := _rows_for(rows, "cursor on figure")
-	if centred.is_empty() or float(centred.back().lean_m) > 0.05:
-		failures.append("The lean did not return when the cursor rested on the figure")
 	# Facing elsewhere: prints and speed follow travel north and back south.
 	for leg in [["walk north facing east", 0.0], ["walk south facing east", 180.0]]:
 		var walk := _rows_for(rows, leg[0])
@@ -1097,6 +1141,44 @@ func _check_facing(rows: Array[Dictionary]) -> void:
 		failures.append("Tab Facing observations were missing")
 	elif _angle_between(float(swapped.front().facing_deg), 270.0) > 20.0 or _angle_between(float(swapped.front().facing_deg), _cursor_bearing(swapped.front())) > 0.5:
 		failures.append("After Tab the newly controlled figure did not face the cursor")
+
+
+func _check_lean(rows: Array[Dictionary]) -> void:
+	# The corner cursor leans the camera as far as its play distance allows: exactly
+	# 3 m closest and 8 m widest, and further at the default distance than closest,
+	# less far than widest. Each time the lean is held at that limit, short of the
+	# quarter of the cursor's offset it would otherwise take. Resting the cursor on
+	# the figure takes the lean away again.
+	var reached: Array[float] = []
+	for stage in [["lean at closest", "cursor on figure at closest"], ["lean to corner", "cursor on figure"],
+			["lean at widest", "cursor on figure at widest"]]:
+		var leaned := _rows_for(rows, stage[0])
+		var returned := _rows_for(rows, stage[1])
+		if leaned.size() < 2 or returned.is_empty():
+			failures.append("Lean stage '%s' was missing" % stage[0])
+			return
+		var row: Dictionary = leaned.back()
+		var lean := float(row.lean_m)
+		var offset := Vector2(float(row.cursor_x_m) - float(row.x_m), float(row.cursor_z_m) - float(row.z_m))
+		if absf(lean - float(leaned[-2].lean_m)) > 0.0001 or lean > offset.length() * 0.25 - 0.05:
+			failures.append("The camera's lean was not held at its limit toward a distant cursor (%s: %.2f m)" % [stage[0], lean])
+		if float(returned.back().lean_m) > 0.05:
+			failures.append("The lean did not return when the cursor rested on the figure (%s)" % stage[1])
+		reached.append(lean)
+	print("Lean toward the corner cursor: %.2f m closest, %.2f m default, %.2f m widest" % reached)
+	if absf(reached[0] - CLOSEST_LEAN_M) > 0.01 or absf(reached[2] - WIDEST_LEAN_M) > 0.01:
+		failures.append("The lean did not reach 3 m at the closest play distance and 8 m at the widest")
+	if reached[1] < reached[0] + 0.05 or reached[1] > reached[2] - 0.05:
+		failures.append("The lean did not grow from the closest play distance through the default to the widest")
+
+
+## The closest and widest play distances, read from the stages that reach them.
+func _play_range(rows: Array[Dictionary]) -> Vector2:
+	var close := _rows_for(rows, "close view")
+	var widest := _rows_for(rows, "widest play view")
+	if close.is_empty() or widest.is_empty():
+		return Vector2.ZERO
+	return Vector2(float(close.back().camera_distance_m), float(widest.back().camera_distance_m))
 
 
 func _check_walking_facing(rows: Array[Dictionary]) -> void:
@@ -1253,6 +1335,33 @@ func _check_detail_region(rows: Array[Dictionary]) -> void:
 		failures.append("The figure did not walk across the detail region's border (outside %d, border %d, inside %d)" % [outside, border, inside])
 	if border_gap > CONTACT_BOUND_M:
 		failures.append("Boots left the snow across the detail region's border (gap %.4f m)" % border_gap)
+	# Leaning toward the bottom of the widest view puts the figure north of the focus,
+	# as far north as it ever stands; the near part still holds its every step.
+	var south := _rows_for(rows, "lean toward the bottom at widest")
+	var north_of_focus := -INF
+	for row in south:
+		north_of_focus = maxf(north_of_focus, float(row.focus_z_m) - float(row.z_m))
+	print("Leaning toward the bottom of the widest view put the figure %.2f m north of the focus" % north_of_focus)
+	if south.is_empty() or north_of_focus < 1.0:
+		failures.append("Leaning toward the bottom of the view did not put the figure north of the focus")
+	# And across its seam, inside the region's full detail, laying prints on both sides.
+	var crossing := _rows_for(rows, "cross the region's seam")
+	var far := 0
+	var near := 0
+	var seam_gap := 0.0
+	for row in crossing:
+		if _region_inset(row, Vector2(float(row.x_m), float(row.z_m))) < DETAIL_BORDER_M + STEP_REACH_M:
+			continue
+		if float(row.z_m) < float(row.region_seam_z_m):
+			far += 1
+		else:
+			near += 1
+		seam_gap = maxf(seam_gap, absf(float(row.contact_gap_m)))
+	print("Overview walk across the region's seam: far %d, near %d; contact gap %.4f m" % [far, near, seam_gap])
+	if far < 30 or near < 30 or crossing.is_empty() or int(crossing.back().step_count) - int(crossing.front().step_count) < 4:
+		failures.append("The figure did not walk across the detail region's seam in full detail (far %d, near %d)" % [far, near])
+	if seam_gap > CONTACT_BOUND_M:
+		failures.append("Boots left the snow across the detail region's seam (gap %.4f m)" % seam_gap)
 
 
 func _check_uploads(rows: Array[Dictionary]) -> void:
@@ -1270,11 +1379,73 @@ func _region(row: Dictionary) -> Vector2:
 	return Vector2(float(row.region_x_m), float(row.region_z_m))
 
 
+func _region_size(row: Dictionary) -> Vector2:
+	return Vector2(float(row.region_width_m), float(row.region_depth_m))
+
+
 ## How far a point lies inside the detail region from its nearest side. Every side
 ## is blended, including one beyond the map's edge, where the apron's snow lies.
 func _region_inset(row: Dictionary, point: Vector2) -> float:
-	var inset := DETAIL_SIZE_M * 0.5 - (point - _region(row)).abs()
+	var inset := _region_size(row) * 0.5 - (point - _region(row)).abs()
 	return minf(inset.x, inset.y)
+
+
+## In play: the controlled figure's every step lands in the near part's full detail,
+## the snow along the bottom of the view lies in full detail and, without lean, so
+## does all the snow the view shows within 20 m of the figure.
+func _check_sharp_view(row: Dictionary) -> void:
+	var figure := Vector2(float(row.x_m), float(row.z_m))
+	if _region_inset(row, figure) < DETAIL_BORDER_M + STEP_REACH_M or figure.y - STEP_REACH_M < float(row.region_seam_z_m):
+		_fail_once("In play the controlled figure's steps could land outside the near part's full detail")
+	var view := _view_corners(row)
+	for point in [view[0], (view[0] + view[1]) * 0.5, view[1]]:
+		if _region_inset(row, point) < DETAIL_BORDER_M:
+			_fail_once("Snow along the bottom of the view lay outside the detail region's full detail")
+	if float(row.lean_m) >= 0.05:
+		return
+	# That snow is the view's ground quadrilateral cut by a 20 m circle round the
+	# figure, which stands inside it. Both are convex, so its outline settles it: each
+	# ray from the figure, stopped at 20 m or where it leaves the view, and the view's
+	# corners within reach.
+	var outline: Array[Vector2] = []
+	for index in range(CRISP_RAYS):
+		var direction := Vector2.from_angle(TAU * float(index) / float(CRISP_RAYS))
+		outline.append(figure + direction * minf(CRISP_REACH_M, _view_exit(figure, direction, view)))
+	for corner in view:
+		if corner.distance_to(figure) <= CRISP_REACH_M:
+			outline.append(corner)
+	for point in outline:
+		if _region_inset(row, point) < DETAIL_BORDER_M - CRISP_SAG_M:
+			_fail_once("Without lean, snow the view shows within 20 m of the figure lay outside the detail region's full detail")
+			return
+
+
+## How far a ray from `origin`, inside the view, runs before it leaves the view.
+func _view_exit(origin: Vector2, direction: Vector2, view: Array[Vector2]) -> float:
+	var nearest := INF
+	for index in range(view.size()):
+		var crossing: Variant = Geometry2D.segment_intersects_segment(origin, origin + direction * 1000.0,
+			view[index], view[(index + 1) % view.size()])
+		if crossing != null:
+			nearest = minf(nearest, origin.distance_to(crossing))
+	return nearest
+
+
+## Where the view's corners meet the horizontal plane through the camera focus, as
+## world points: bottom left, bottom right, top right and top left. They follow from
+## the observed focus, distance, pitch, yaw and lens, and this viewport's shape.
+func _view_corners(row: Dictionary) -> Array[Vector2]:
+	var size := get_viewport().get_visible_rect().size
+	var half := tan(deg_to_rad(float(row.camera_fov_deg)) * 0.5)
+	var view := Basis.from_euler(Vector3(deg_to_rad(float(row.pitch_deg)), deg_to_rad(float(row.yaw_deg)), 0.0))
+	var focus := Vector3(float(row.focus_x_m), float(row.focus_y_m), float(row.focus_z_m))
+	var eye := focus + view.z * float(row.camera_distance_m)
+	var corners: Array[Vector2] = []
+	for screen in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+		var ray: Vector3 = -view.z + view.x * (screen.x * half * size.x / size.y) + view.y * (screen.y * half)
+		var hit := eye + ray * ((focus.y - eye.y) / ray.y)
+		corners.append(Vector2(hit.x, hit.z))
+	return corners
 
 
 func _check_zoom(rows: Array[Dictionary]) -> void:

@@ -34,13 +34,13 @@ func _ready() -> void:
 	add_child(camera)
 	add_child(inspection)
 	camera.follow(walker.untouched_position(), walker.sink_depth, 0.0)
-	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
+	surface.place_detail(Vector2(camera.focus.x, camera.focus.z))
 	blizzard.attach(surface, camera, town)
 	get_window().focus_entered.connect(func() -> void: focused = true)
 	get_window().focus_exited.connect(func() -> void: focused = headless_replay)
 	focused = headless_replay or get_window().has_focus()
 	print("Snow Walk: Godot ", Engine.get_version_info().string, " · ", RenderingServer.get_current_rendering_method())
-	print("%d × %d metres; %d × %d m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: " % [
+	print("%d × %d metres; %.1f × %.1f m detail region following the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: " % [
 		TownLayout.HALF_EXTENTS.x * 2.0, TownLayout.HALF_EXTENTS.y * 2.0, Surface.DETAIL_SIZE.x, Surface.DETAIL_SIZE.y], OS.get_user_data_dir())
 	if OS.get_cmdline_user_args().has("--walk-scene-check") or OS.get_cmdline_user_args().has("--snow-scene-check"):
 		add_child(InspectionRoute.new())
@@ -74,9 +74,9 @@ func _physics_process(delta: float) -> void:
 	controlled.walk(delta, camera.global_basis, focused)
 	idle.walk_loop(delta)
 	camera.follow(controlled.untouched_position(), controlled.sink_depth, delta)
-	# The detail region follows what the camera shows. Its 5 cm grid is world-aligned,
+	# The detail region follows what the camera shows. Its grids are world-aligned,
 	# so the figure's full-detail support is the same before and after it moves.
-	surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
+	surface.place_detail(Vector2(camera.focus.x, camera.focus.z))
 	inspection.observe(controlled, camera, surface, focused, idle)
 
 
@@ -107,7 +107,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				# Frame the newly controlled figure at once, so it takes its Facing
 				# from the cursor in the view that shows it.
 				camera.follow(_controlled().untouched_position(), _controlled().sink_depth, 0.0)
-				surface.centre_detail(Vector2(camera.focus.x, camera.focus.z))
+				surface.place_detail(Vector2(camera.focus.x, camera.focus.z))
 			KEY_M:
 				camera.toggle_overview()
 			KEY_MINUS, KEY_KP_SUBTRACT:

@@ -57,9 +57,13 @@ clock, exposure, shelter and drift. To fit a 500 × 550 m map in memory, the
 single whole-map Footprint picture becomes world-anchored tiles at the same
 31.25 mm resolution, created where a step lands and freed once wind has filled
 every print in them; the GPU copy stays tile-updated. Snow Depth may use a coarser
-grid away from the Camp, with no visible difference in behaviour. The 5 cm detail
-region is sized for the oblique view, sharp to about 20 m from the figure, and
-the live coarse surface follows the camera rather than covering the whole map.
+grid away from the Camp, with no visible difference in behaviour. The detail
+region is sized and shaped for the oblique view, sharp to about 20 m from the
+figure. (Amended by #108: it keeps 5 cm cells where the figure walks and nearer
+the camera, and has 10 cm cells further up the view, because a 5 cm grid all the
+way out cost more frame time than walking at 24 fps allows; the Footprint picture
+still shades sole outlines there.) The live coarse surface follows the camera
+rather than covering the whole map.
 
 **Camera.** North up and never rotating, perspective at about −40° pitch through
 a 40° vertical lens, as in the owner's reference frames. By default the figure

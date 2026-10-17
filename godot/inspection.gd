@@ -40,7 +40,7 @@ const ROUTE_COLUMNS := [
 	"overview", "lean_x_m", "lean_z_m", "lean_m", "pitch_deg", "yaw_deg", "focused", "fps",
 	"figure_screen_x", "figure_screen_y", "figure_screen_height", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "saved_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
-	"focus_x_m", "focus_y_m", "focus_z_m", "untouched_y_m", "region_x_m", "region_z_m", "region_width_m", "region_depth_m", "wind_strength", "wind_from_deg", "wind_elapsed_s", "wind_update_ms",
+	"focus_x_m", "focus_y_m", "focus_z_m", "untouched_y_m", "region_x_m", "region_z_m", "region_width_m", "region_depth_m", "region_seam_z_m", "wind_strength", "wind_from_deg", "wind_elapsed_s", "wind_update_ms",
 	"footprint_count", "footprint_image_width", "footprint_image_height", "footprint_image_bytes",
 	"footprint_tile_bytes", "upload_bytes", "upload_total_bytes", "uploaded_steps",
 	"other_figure_id", "other_x_m", "other_z_m", "other_steps",
@@ -137,7 +137,8 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"focus_x_m": camera.focus.x, "focus_y_m": camera.focus.y, "focus_z_m": camera.focus.z,
 		"untouched_y_m": walker.untouched_height,
 		"region_x_m": surface.region_center.x, "region_z_m": surface.region_center.y,
-		"region_width_m": surface.DETAIL_SIZE.x, "region_depth_m": surface.DETAIL_SIZE.y, "wind_strength": surface.wind_strength, "wind_from_deg": surface.wind_from(),
+		"region_width_m": surface.DETAIL_SIZE.x, "region_depth_m": surface.DETAIL_SIZE.y, "region_seam_z_m": surface.region_seam,
+		"wind_strength": surface.wind_strength, "wind_from_deg": surface.wind_from(),
 		"wind_elapsed_s": surface.wind_elapsed, "wind_update_ms": surface.wind_update_ms, "footprint_count": surface.footprint_count,
 		"footprint_image_width": surface.IMAGE_SIZE.x, "footprint_image_height": surface.IMAGE_SIZE.y,
 		"footprint_image_bytes": surface.footprint_image_bytes, "footprint_tile_bytes": surface.TILE_BYTES,
@@ -170,7 +171,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.0f × %.0f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch %.0f°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.1f × %.1f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch %.0f°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,

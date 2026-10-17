@@ -71,27 +71,39 @@ ivec2 footprint_size() {
 	return textureSize(footprint_tiles, 0).xy * footprint_tile_grid;
 }
 
-// Compaction at one texel of the Footprint picture, once the fill clock has reached `filled`.
-float filled_compaction(ivec2 pixel, ivec2 image_size, float filled) {
+// One texel of the Footprint picture; nothing is pressed outside it.
+vec4 footprint_texel(ivec2 pixel, ivec2 image_size) {
 	if (pixel.x < 0 || pixel.y < 0 || pixel.x >= image_size.x || pixel.y >= image_size.y) {
-		return 0.0;
+		return vec4(0.0);
 	}
 	ivec2 tile_size = textureSize(footprint_tiles, 0).xy;
 	ivec2 tile = pixel / tile_size;
-	vec4 value = texelFetch(footprint_tiles, ivec3(pixel - tile * tile_size, tile.y * footprint_tile_grid.x + tile.x), 0);
-	if (value.r <= 0.0) {
-		return 0.0;
-	}
+	return texelFetch(footprint_tiles, ivec3(pixel - tile * tile_size, tile.y * footprint_tile_grid.x + tile.x), 0);
+}
+
+// A pressed texel's compaction, once the fill clock has reached `filled`.
+float aged_compaction(vec4 value, float filled) {
 	vec3 bytes = floor(value.gba * 255.0 + vec3(0.5));
 	float stamped = dot(bytes, vec3(65536.0, 256.0, 1.0)) * 0.1;
 	return value.r * max(0.0, 1.0 - max(0.0, filled - stamped) / PRINT_LIFETIME);
 }
 
+// Compaction at one texel of the Footprint picture, once the fill clock has reached `filled`.
+float filled_compaction(ivec2 pixel, ivec2 image_size, float filled) {
+	vec4 value = footprint_texel(pixel, image_size);
+	return value.r > 0.0 ? aged_compaction(value, filled) : 0.0;
+}
+
 float pixel_compaction(ivec2 pixel, ivec2 image_size) {
 	// Snow has filled the print by as much as the fill clock at the texel's centre
-	// has run since it was pressed, as in SnowSurface._pixel_compaction.
+	// has run since it was pressed, as in SnowSurface._pixel_compaction. Most texels
+	// were never pressed and need no fill clock, so it is read only for pressed ones.
+	vec4 value = footprint_texel(pixel, image_size);
+	if (value.r <= 0.0) {
+		return 0.0;
+	}
 	vec2 centre = (vec2(pixel) + vec2(0.5)) / vec2(image_size) * 2.0 * map_half_extents - map_half_extents;
-	return filled_compaction(pixel, image_size, picture_value(fill_image, depth_nodes_per_metre, centre));
+	return aged_compaction(value, picture_value(fill_image, depth_nodes_per_metre, centre));
 }
 
 float compaction(vec2 point) {

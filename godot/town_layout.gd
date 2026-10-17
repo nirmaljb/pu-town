@@ -25,7 +25,7 @@ const LANDMARKS := {
 	"trail_start": Vector2(-30, -12),
 	# The route walks east from here into the overview's detail region, and fixes
 	# a probe exposed to the wind where it stops.
-	"overview_west": Vector2(-18, 4),
+	"overview_west": Vector2(-26, 4),
 	"exposed_probe": Vector2(4, 4),
 	# Corners of the walking figure's loop. It keeps clear of the route's trail
 	# probe, Packed Path corridor and exposed probe, and crosses the Town Square

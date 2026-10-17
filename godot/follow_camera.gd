@@ -3,11 +3,12 @@ extends Camera3D
 ## changes. Like the owner's reference frames, it looks down at 40° through a wide
 ## 40° lens, so the figure's body and the sides of things show, and by default the
 ## figure stands about a twelfth of the screen tall. Its focus leans toward the
-## cursor's point on the ground, and the wheel zooms through the play range, from
-## the figure an eighth of the screen tall to a sixteenth, or out to a whole-map
-## overview of the map, which M also opens and closes. It frames the untouched
-## snow where the figure stands and takes only a softened share of each step's sink
-## into it, so the view settles gently at a footfall instead of jolting with it.
+## cursor's point on the ground, further the further out it is zoomed, and the
+## wheel zooms through the play range, from the figure an eighth of the screen tall
+## to a sixteenth, or out to a whole-map overview of the map, which M also opens
+## and closes. It frames the untouched snow where the figure stands and takes only
+## a softened share of each step's sink into it, so the view settles gently at a
+## footfall instead of jolting with it.
 
 const TownLayout = preload("res://town_layout.gd")
 const Walker = preload("res://walker.gd")
@@ -23,7 +24,11 @@ static var PLAY_DISTANCE := distance_for_share(PLAY_SHARE)
 static var MIN_DISTANCE := distance_for_share(CLOSEST_SHARE)
 static var MAX_DISTANCE := distance_for_share(WIDEST_SHARE)
 const ZOOM_STEP := 1.15
-const MAX_LEAN := 3.0
+## The furthest the focus leans toward the cursor: this far at the closest play
+## distance, growing in step with the distance to WIDEST_LEAN at the widest, so a
+## Player zoomed out can look further ahead along a Road.
+const CLOSEST_LEAN := 3.0
+const WIDEST_LEAN := 8.0
 ## The focus leans by this share of the cursor's offset from the figure. Below one,
 ## the lean converges while the cursor holds still on screen.
 const LEAN_SHARE := 0.25
@@ -102,6 +107,12 @@ func current_distance() -> float:
 	return _overview_distance() if overview else distance
 
 
+## The furthest the focus may lean at the play distance, which the overview leaves
+## as it was. Zooming in shortens a longer lean at once.
+func max_lean() -> float:
+	return remap(distance, MIN_DISTANCE, MAX_DISTANCE, CLOSEST_LEAN, WIDEST_LEAN)
+
+
 func point_at(screen: Vector2) -> void:
 	cursor_screen = screen
 	cursor_inside = true
@@ -130,11 +141,12 @@ func follow(figure: Vector3, sink: float, delta: float) -> void:
 	_sink = sink if delta <= 0.0 else lerpf(_sink, sink, 1.0 - exp(-delta / SINK_SETTLE))
 	var framed := figure - Vector3(0.0, SINK_SHARE * _sink, 0.0)
 	var target_lean := lean
+	var reach := max_lean()
 	if overview:
 		target_lean = Vector2.ZERO
 	elif cursor_inside and has_cursor_ground:
-		target_lean = (_cursor_offset * LEAN_SHARE).limit_length(MAX_LEAN)
-	lean = lean.lerp(target_lean, 1.0 - exp(-LEAN_RATE * delta)).limit_length(MAX_LEAN)
+		target_lean = (_cursor_offset * LEAN_SHARE).limit_length(reach)
+	lean = lean.lerp(target_lean, 1.0 - exp(-LEAN_RATE * delta)).limit_length(reach)
 	if overview:
 		focus = Vector3(0.0, (OVERVIEW_HEIGHTS.x + OVERVIEW_HEIGHTS.y) * 0.5, 0.0)
 		position = focus + basis.z * _overview_distance()

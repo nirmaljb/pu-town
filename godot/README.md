@@ -23,8 +23,9 @@ guide describes the delivered interim preview: one flat **160 × 160 m** level o
 open snow with a Shallow Town Square at its centre and nothing yet standing on it;
 a north-up perspective camera that follows the controlled figure while the mouse
 sets its Facing; a saved Snow Depth that starts Shallow in the Town Square and
-deeper beyond it; a north-west wind that fills Footprints; a 24 × 16 m detail
-region at the camera's focus that makes bootprints crisp up close; a walking
+deeper beyond it; a north-west wind that fills Footprints; a detail region shaped
+for the oblique view that keeps bootprints crisp within 20 m of the figure;
+a walking
 figure whose loop lays trails you did not watch being made; and a blizzard in
 overcast polar twilight, tuned live in the editor's Inspector (see
 [Lighting and the blizzard](#lighting-and-the-blizzard)). The
@@ -147,7 +148,7 @@ landmarks are, in metres:
 | `start_east` | 1.5, 0 | Town Square; figure 2 starts here, the loop's first corner |
 | `packed_lane` | −24, 0 | Open snow west of the square, where the route packs a lane northward |
 | `trail_start` | −30, −12 | Open snow, where the route lays and probes a trail before running north to the edge |
-| `overview_west` | −18, 4 | Town Square's west edge, where the route opens the overview |
+| `overview_west` | −26, 4 | West of the Town Square and of the overview's detail region, where the route opens the overview |
 | `exposed_probe` | 4, 4 | Town Square, where the route fixes a probe exposed to the wind |
 | `loop_east` | 8, 0 | Loop corner, east of the centre |
 | `loop_north` | 8, −10 | Loop corner: east end of the walking figure's lane across the square |
@@ -223,8 +224,11 @@ screen tall, 22.6 m from the camera. North is always up and the camera never
 turns. Its focus sits a little north of the controlled figure, 3.4% of the
 distance, so the figure's feet stand just below the centre of the screen at every
 play distance. The focus leans toward the cursor's point on the ground, by a
-quarter of the cursor's distance from the figure and never more than 3 m, so you
-see further where you look. The mouse wheel zooms between the figure an eighth of
+quarter of the cursor's distance from the figure, so you see further where you
+look. How far it may lean grows with the play distance: 3 m at the closest, 5.5 m
+by default and 8 m at the widest, in step with the distance, so zoomed out you can
+look further ahead along a Road; zooming in shortens a longer lean at once
+([record](../docs/verification/2026-10-17-godot-snow-lean-and-sharp-region.md)). The mouse wheel zooms between the figure an eighth of
 the screen tall, the references' framing (15.4 m), and a sixteenth (29.7 m);
 `follow_camera.gd` derives these distances from the shares. One step out beyond
 the widest opens a whole-map overview for inspection, which frames the map
@@ -269,7 +273,7 @@ walks.
 | --- | --- |
 | WASD | Walk relative to the screen: W north, S south, D east, A west; diagonals are normalized |
 | Shift | Request running, up to 4.5 m/s where the snow allows it |
-| Mouse | Face the cursor's point on the ground; the camera leans up to 3 m toward it |
+| Mouse | Face the cursor's point on the ground; the camera leans toward it, up to 3 m close in and 8 m zoomed out |
 | Mouse wheel | Zoom between the figure an eighth and a sixteenth of the screen tall, or one step further out to the whole-map overview; one step in from the overview returns to the widest play distance |
 | M | Open the whole-map overview, or return from it to the play distance you left |
 | Tab | Switch the controlled figure; the released figure walks back to the loop |
@@ -298,7 +302,8 @@ packing (`saved_depth_m`), the loose depth that sets running speed after nearby
 packing (`loose_depth_m`), compaction, sinking, contact gap, obstacle/boundary contact, steps,
 the camera's focus (`focus_x_m`, `focus_y_m`, `focus_z_m`), the untouched snow's height
 where the figure stands (`untouched_y_m`), the detail region's centre and size
-(`region_x_m`, `region_z_m`, `region_width_m`, `region_depth_m`), the Footprint
+(`region_x_m`, `region_z_m`, `region_width_m`, `region_depth_m`) and the world line
+where its far part meets its near part (`region_seam_z_m`), the Footprint
 picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
 total (`upload_total_bytes`) and the footsteps those uploads carried
 (`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`), the
@@ -353,18 +358,23 @@ after `--snow-scene-check` to skip the F7 gate; focus is still required. The rou
 pauses on focus loss and fails after 60 seconds without focus. Starting at the
 centre, it moves the cursor round the standing figure and checks that
 Facing points at the cursor's ground point with no new bootprint, leans the
-camera to its 3 m bound toward a corner of the view and back, and walks north and
+camera toward a corner of the view exactly as far as the default play distance
+allows and back, and walks north and
 south while facing east, with prints and speed following the travel. Running west
 across the Town Square, it runs at full speed in the Shallow Snow and is held back
 in the open snow beyond it. West of the square it runs, walks twice more and runs
 again along one lane of open snow, showing a measurable Packed Path running
 advantage over the fresh lane. While the cursor leans the camera toward a corner
 and back, the detail region follows the focus and returns with it. Every
-observation checks that the region is 24 × 16 m, centred on the camera's focus to
-within half a coarse cell and on the coarse grid, that in play the
-figure stands far enough inside it for every footstep to land in full detail, and
-that Footprint uploads never exceed the 2 × 2 tiles each uploaded footstep may
-touch. Every observation also checks that the ground under both figures is one
+observation checks that the region keeps its size with its edges and its seam on
+the coarse grid, and that Footprint uploads never exceed the 2 × 2 tiles each
+uploaded footstep may touch. In play it checks that the region keeps its place
+relative to the focus, that the figure stands far enough inside the near part for
+every footstep to land in full 5 cm detail, that the snow along the bottom of the
+view lies in full detail and, without lean, that all the snow the view shows within
+20 m of the figure does too: the outline of that snow is followed along 48 rays from
+the figure. The view's corners on the ground follow from the observed focus,
+distance, pitch, yaw and lens. Every observation also checks that the ground under both figures is one
 flat level and that no obstacle ever holds either of them. It lays a probed trail
 in the open snow and runs on north, far out of the detail region, until the map's
 northern edge holds it 0.3 m inside the map rectangle; a rendered run captures the
@@ -376,7 +386,9 @@ the trail the way it was laid, then walks back and forth over it until the probe
 compaction rises. It then presses M at the default play distance with the camera
 leaning: the whole map shows without lean while it walks north and back, a wheel
 step out changes nothing, and M returns to exactly that distance while a repeat of
-the held key does not toggle. Walking
+the held key does not toggle. Before closing it, the route walks south across the
+region's seam, which the overview holds still, with the contact gap within 2 mm on
+both sides. Walking
 north, it sweeps the cursor from east through directly behind to west and behind
 again. The twist never exceeds 110°, holds the east shoulder while the cursor is
 beyond 110°, changes once to the west shoulder through the front after the cursor
@@ -384,7 +396,7 @@ comes within 110° on the west, and Facing never turns faster than 540° per
 second; travel, speed and bootprints stay a plain northward walk's. Stopped with
 the cursor behind, Facing reaches it within the time that rate allows, with the
 legs within 60° and no new print, and then tracks it to 0.5°. Wind stays at 0
-until then. From the square's west edge it opens the whole-map overview with M,
+until then. From west of the square it opens the whole-map overview with M,
 whose detail region stays at the map centre, and walks east into the region:
 across the blended border the region holds still and the contact gap stays within
 2 mm. One wheel step in leaves it at the widest play distance, and it zooms on in
@@ -396,9 +408,14 @@ starting snow as it was. Four turns of `]` reverse the wind. During the wind
 stages the tracked trail fills whenever no figure is near it. Wind 0 then freezes
 every probe's depth, and the compaction of every probe no figure walks past. Five
 wheel steps out reach the widest end of the play range, where the figure must
-stand about a sixteenth of the screen tall; the next opens the whole-map overview,
-which must frame the map; and twelve steps back in stop with the figure about an
-eighth of the screen tall. Before any zoom it must stand about a twelfth; "about"
+stand about a sixteenth of the screen tall and the corner cursor must lean the
+camera exactly 8 m; a cursor in the bottom corner of the view leans it south,
+putting the figure north of the focus but its footsteps still in the near part. The
+next step out opens the whole-map overview, which must frame the map; and twelve
+steps back in stop with the figure about an eighth of the screen tall, where the
+corner cursor leans the camera exactly 3 m. Earlier, at the default distance, it
+must lean further than that and less far than 8 m; each time the lean must hold at
+its limit, short of the quarter of the cursor's offset it would otherwise take. Before any zoom it must stand about a twelfth; "about"
 is within 8% of each share. A rendered run captures each of the three framings
 without the overlay, and graphical views along the way. Finally Tab, with the
 cursor west of the figure, hands control to the walking figure wherever the loop
@@ -409,9 +426,10 @@ backwards round it, keeps snow contact, runs at full speed in the Town Square an
 is held back in open snow at the speed its loose snow allows, faces its travel and
 crosses from the square into open snow. Throughout, the
 camera stays a 40° perspective view at −40° pitch with north up, its lean stays
-within 3 m, in play the figure stays between about a sixteenth and an eighth of
-the screen tall, and without lean it holds the figure slightly below the centre
-of the screen. Walking and running in the Town Square, across open snow and to the
+within 8 m, and within 3 m at the closest play distance, and without lean in play
+the figure stays
+between about a sixteenth and an eighth of the screen tall and slightly below the
+centre of the screen. Walking and running in the Town Square, across open snow and to the
 northern edge, the camera stays on the untouched snow less at most a fifth of the
 sink, and in any observation moves against it by under a tenth of the figure's own
 change of sink. Every
@@ -451,7 +469,10 @@ distance the fog begins 11 m from the camera and is full at 105 m, so it takes
 about an eighth of the figure, a third of the top edge 42 m away and a sixteenth
 of the bottom edge 17 m away, as the long lens's fog did before. SkyKey draws a
 single shadow map out to 54 m, scaled the same way, a little beyond the view's
-far edge; splitting shadows over a longer range cost about 4 ms a frame for nothing. The scene routes
+far edge; splitting shadows over a longer range cost about 4 ms a frame for nothing.
+The snow receives those shadows but casts none: with SkyKey 40° up its smooth
+surface cannot shade itself, and drawing it into the map ran its vertex heights a
+second time. The scene routes
 hold lightning off so their captures stay comparable. The lanterns' places are
 `WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd), 30 cm above the ground in a
 ring about 17 m from the centre; there are eight, the Compatibility renderer's
@@ -509,22 +530,36 @@ fresh launch saves it from the authored zones in [`town_layout.gd`](town_layout.
 and never loads saved snow. Every rendered vertex and every foot-support query
 reads it, with the Footprint picture, each frame.
 
-Bootprints are shaped in height inside a **detail region** of 24 × 16 m at a
-**5 cm grid** (480 × 320 cells); a live 0.8 m grid keeps the whole map's snow
-visible beyond it. Its centre is the camera's focus, including the lean, so at
-every play distance the controlled figure stands well inside it. The wide lens
-shows more than the region, about 28 m across at the figure and 21 m north of
-the focus at the default distance; beyond it bootprints are shaded from the
-Footprint picture without their 5 cm relief. With the focus at most 3 m of lean plus
-1.0 m of framing from the figure, half a coarse cell of snapping and a boot's
-0.65 m reach, every footstep lands at least 1.6 m inside its blended sides.
-The region snaps to coarse vertices counted from the map's west and north edges,
-so its 5 cm grid is world-aligned and the figure's support does not change when
-it moves; it may reach over the edge onto the apron. It blends into the coarse
-surface over a 1.6 m border on every side, beyond the map's edge into the apron's
-snow. Coarse cells under the region collapse in the
+Bootprints are shaped in height inside a **detail region** that follows the
+camera's focus, including the lean, and is shaped for the oblique view: 44 m wide,
+from 14.4 m south of the focus to 21.6 m north of it. Its **near part**, from its
+south edge to a **seam** 4 m north of the focus, has a **5 cm grid** (880 × 368
+cells); its **far part**, on up the view, a **10 cm grid** (440 × 176 cells). A
+live 0.8 m grid keeps the whole map's snow visible beyond it. Without lean, the
+region holds in full detail all the snow the view shows within 20 m of the figure
+at every play distance: along the bottom of the view, 20 m ahead and out to the
+sides, which at the widest reach 19.9 m either side just north of the focus. Up
+the view, past the seam, the depressions are drawn on 10 cm cells while the
+Footprint picture still shades each sole's outline at its own 31.25 mm texels: a
+5 cm grid all the way up cost more frame time than walking at 24 fps allows (the
+[record](../docs/verification/2026-10-17-godot-snow-lean-and-sharp-region.md)
+measures it). Beyond the region, bootprints are shaded from the Footprint picture
+without their relief. The figure stands north of the focus only while the camera
+leans toward a cursor nearer the bottom of the view, at most 2.6 m at the widest;
+with half a coarse cell of snapping and a boot's 0.65 m reach every footstep lands
+in the near part, at least 1.6 m inside the region's blended sides at any lean.
+The region's corner snaps to coarse vertices counted from the map's west and north
+edges, so both grids are world-aligned and the figure's support does not change
+when it moves; it may reach over the edge onto the apron. Each cell of the far
+part's last row meets two near cells and is split into three triangles that share
+the near vertex between them, so the parts meet at the seam without a crack. The
+region blends into the coarse surface over a 1.6 m border on every side, beyond the
+map's edge into the apron's snow. Coarse cells under the region collapse in the
 vertex shader, so the two surfaces never overlap. In the whole-map overview the
-focus is the map centre, so the region stays there while the figure walks.
+focus is the map centre, so the region stays there while the figure walks. The
+snow is drawn in chunks, the coarse surface in squares of up to 32 m and the
+region in eight columns cut into strips, so the camera skips those outside the
+view.
 [`snow.gdshader`](snow.gdshader) reevaluates vertex heights from the ground level
 and the current field.
 CPU foot support evaluates the same heights and triangle interpolation,

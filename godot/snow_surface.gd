@@ -1,7 +1,7 @@
 extends Node3D
 class_name SnowSurface
 
-## Flat ground, a world-fixed snow field, and a camera-sized detail region.
+## Flat ground, a world-fixed snow field, and a detail region shaped for the view.
 ## The field spans the town layout's map rectangle; its surface is the layout's
 ## ground level plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
@@ -12,14 +12,47 @@ class_name SnowSurface
 const TownLayout = preload("res://town_layout.gd")
 const SnowWind = preload("res://snow_wind.gd")
 const HALF_EXTENTS := TownLayout.HALF_EXTENTS
-## The detail region covers what the play camera shows at a 5 cm grid; the coarse
-## 0.8 m surface keeps the whole town live beyond it. It blends into the coarse
-## surface over a border on every side.
-const DETAIL_SIZE := Vector2(24.0, 16.0)
+## The detail region shapes bootprints in height where the oblique play view shows
+## them sharp; the coarse 0.8 m surface keeps the whole town live beyond it. It is a
+## rectangle that follows the camera focus and blends into the coarse surface over a
+## border on every side. Its near part, from the bottom of the view to beyond where
+## the controlled figure can stand, has a 5 cm grid. Its far part, up the view, has a
+## 10 cm grid: there the snow lies further from the camera, and a 5 cm grid all the
+## way up cost more frame time than the 24 fps walking budget allows. The Footprint
+## picture still shades each sole's outline there at its own 31.25 mm texels. With
+## the view's 40° pitch, 40° lens and 16:9 shape, and allowing the border and a
+## coarse cell's snap, it holds all the snow the view shows within 20 m of the
+## figure without lean, at every play distance:
+## - it is 44 m wide: at the widest, that snow reaches 19.9 m to either side just
+##   north of the focus;
+## - it reaches 14.4 m south of the focus, past the bottom of the widest view (11.7 m);
+## - and 21.6 m north of it, 20 m ahead of the figure, which stands at most 1 m south
+##   of the focus without lean;
+## - its seam, where the far part meets the near part, lies 4 m north of the focus.
+##   The figure stands north of the focus only while the camera leans toward a
+##   cursor nearer the bottom of the view, and the lean settles at a third of the
+##   cursor's offset from the figure in the unleaned view, so at the widest the
+##   figure stands at most 2.6 m north of the focus.
+const DETAIL_SIZE := Vector2(44.0, 36.0)
 const DETAIL_HALF := DETAIL_SIZE * 0.5
+const DETAIL_NORTH := 21.6
+## The far part runs this far south from the region's north edge to the seam.
+const FAR_DEPTH := 17.6
+## The seam, north–south from the region's middle.
+const SEAM := FAR_DEPTH - DETAIL_HALF.y
 const COARSE_STEP := 0.8
 const DETAIL_STEP := 0.05
+const FAR_STEP := 0.1
 const EDGE_BLEND := 1.6
+## Snow is drawn in chunks, so the camera skips those it cannot see: the coarse
+## surface in squares of up to COARSE_CHUNK cells, the detail region in as many
+## columns as DETAIL_COLUMNS, each cut into strips of up to NEAR_STRIP_ROWS or
+## FAR_STRIP_ROWS rows. Neighbouring chunks place their shared edge's vertices at the
+## same points, so they meet exactly.
+const COARSE_CHUNK := 40
+const DETAIL_COLUMNS := 8
+const NEAR_STRIP_ROWS := 92
+const FAR_STRIP_ROWS := 88
 ## The snowfield runs on this far beyond the map's edge, on the coarse grid, so the
 ## edge that stops a figure shows no end to the snow; the whiteout swallows the
 ## apron's own far edge. No figure reaches it, and nothing is stamped there.
@@ -46,6 +79,8 @@ const SNOW_SHADER := preload("res://snow.gdshader")
 const CLOCK_LIMIT := 1677700.0 / (1.0 + SnowWind.BUILDING_FILL)
 
 var region_center := Vector2.ZERO
+## The detail region's seam, north–south in the world.
+var region_seam := SEAM
 var wind_strength := 1.0
 var wind_elapsed := 0.0
 var wind := SnowWind.new()
@@ -67,7 +102,12 @@ var _texture := Texture2DArray.new()
 var _layout: Node3D
 var _dirty_tiles := {}
 var _pending_steps := 0
-var _detail: MeshInstance3D
+## The detail region's strips hang from this node, which follows the region.
+var _detail := Node3D.new()
+var _surfaces: Array[MeshInstance3D] = []
+## Every coarse chunk shares one material and every detail strip another.
+var _coarse_material: ShaderMaterial
+var _detail_material: ShaderMaterial
 var _materials: Array[ShaderMaterial] = []
 var _depth := PackedFloat32Array()
 var _fill := PackedFloat32Array()
@@ -84,13 +124,17 @@ func _ready() -> void:
 		tile.fill(Color(0, 0, 0, 0))
 		_tiles.append(tile)
 	_texture.create_from_images(_tiles)
-	_make_mesh(HALF_EXTENTS.x * 2.0, HALF_EXTENTS.y * 2.0, COARSE_STEP, false)
+	_coarse_material = _make_material(false)
+	_detail_material = _make_material(true)
+	_make_coarse_surface(Rect2(-HALF_EXTENTS, HALF_EXTENTS * 2.0))
 	# The apron: four strips round the map, north and south spanning its corners.
 	var outer := HALF_EXTENTS + Vector2.ONE * APRON
 	for strip in [Rect2(-outer.x, -outer.y, outer.x * 2.0, APRON), Rect2(-outer.x, HALF_EXTENTS.y, outer.x * 2.0, APRON),
 			Rect2(-outer.x, -HALF_EXTENTS.y, APRON, HALF_EXTENTS.y * 2.0), Rect2(HALF_EXTENTS.x, -HALF_EXTENTS.y, APRON, HALF_EXTENTS.y * 2.0)]:
-		_make_mesh(strip.size.x, strip.size.y, COARSE_STEP, false, strip.get_center())
-	_detail = _make_mesh(DETAIL_SIZE.x, DETAIL_SIZE.y, DETAIL_STEP, true)
+		_make_coarse_surface(strip)
+	_detail.name = "DetailedSnow"
+	add_child(_detail)
+	_make_detail_surface()
 	_update_uniforms()
 
 
@@ -128,11 +172,10 @@ func configure_ground(town: Node3D) -> void:
 		material.set_shader_parameter("depth_image", _depth_texture)
 		material.set_shader_parameter("fill_image", _fill_texture)
 		material.set_shader_parameter("depth_nodes_per_metre", DEPTH_NODES_PER_METRE)
-	for child in get_children():
-		if child is MeshInstance3D:
-			var bounds: AABB = child.custom_aabb
-			child.custom_aabb = AABB(Vector3(bounds.position.x, TownLayout.GROUND_LEVEL - 0.1, bounds.position.z),
-				Vector3(bounds.size.x, 1.2, bounds.size.z))
+	for surface in _surfaces:
+		var bounds: AABB = surface.custom_aabb
+		surface.custom_aabb = AABB(Vector3(bounds.position.x, TownLayout.GROUND_LEVEL - 0.1, bounds.position.z),
+			Vector3(bounds.size.x, 1.2, bounds.size.z))
 
 
 ## Shade Footprints' own shadows toward this unit direction to the sun. Shading only.
@@ -170,16 +213,16 @@ func advance(delta: float) -> void:
 	wind_updates += 1
 
 
-## Centre the detail region on the camera's focus. It snaps to coarse vertices,
-## counted from the map's west and north edges, so its 5 cm grid stays world-aligned,
-## and it stays over the snowfield and its apron. Moving it never moves or clears the
-## Footprint picture.
-func centre_detail(focus: Vector2) -> void:
-	var centre_limit := HALF_EXTENTS + Vector2.ONE * APRON - DETAIL_HALF
-	region_center = Vector2(
-		clampf(snappedf(focus.x + HALF_EXTENTS.x, COARSE_STEP) - HALF_EXTENTS.x, -centre_limit.x, centre_limit.x),
-		clampf(snappedf(focus.y + HALF_EXTENTS.y, COARSE_STEP) - HALF_EXTENTS.y, -centre_limit.y, centre_limit.y)
-	)
+## Place the detail region at the camera's focus: centred east–west on it, its north
+## edge DETAIL_NORTH beyond it. Its corner snaps to coarse vertices, counted from the
+## map's west and north edges, so both parts' grids stay world-aligned, and it stays
+## over the snowfield and its apron. Moving it never moves or clears the Footprint picture.
+func place_detail(focus: Vector2) -> void:
+	var outer := HALF_EXTENTS + Vector2.ONE * APRON
+	var corner := (focus - Vector2(DETAIL_HALF.x, DETAIL_NORTH) + HALF_EXTENTS).snapped(Vector2.ONE * COARSE_STEP) - HALF_EXTENTS
+	corner = corner.clamp(-outer, outer - DETAIL_SIZE)
+	region_center = corner + DETAIL_HALF
+	region_seam = region_center.y + SEAM
 	_detail.position = Vector3(region_center.x, 0, region_center.y)
 	_update_uniforms()
 
@@ -192,8 +235,8 @@ func in_detail_region(point: Vector2) -> bool:
 ## Visible snow height: ground plus compacted Snow Depth, on the drawn triangles.
 func sample_height(point: Vector2) -> float:
 	if in_detail_region(point):
-		return _triangle_height(point, DETAIL_STEP, true)
-	return _triangle_height(point, COARSE_STEP, false)
+		return _detail_height(point)
+	return _coarse_height(point)
 
 
 func sample_ground(point: Vector2) -> float:
@@ -334,11 +377,44 @@ func _detail_vertex_height(point: Vector2) -> float:
 	var weight := _region_weight(point)
 	if weight >= 0.99999:
 		return _field_height(point)
-	return lerpf(_triangle_height(point, COARSE_STEP, false), _field_height(point), weight)
+	return lerpf(_coarse_height(point), _field_height(point), weight)
 
 
-func _triangle_height(point: Vector2, step: float, detail: bool) -> float:
-	var origin := region_center - DETAIL_HALF if detail else -HALF_EXTENTS
+func _coarse_height(point: Vector2) -> float:
+	return _triangle_height(point, -HALF_EXTENTS, COARSE_STEP, false)
+
+
+## The detail region's drawn triangles: the near part's 5 cm cells south of the seam,
+## the far part's 10 cm cells north of it, and along it the far part's last row, each
+## of whose cells meets two near cells and is split into three triangles, as in
+## _make_detail_surface, so the parts share every vertex along the seam.
+func _detail_height(point: Vector2) -> float:
+	var west := region_center.x - DETAIL_HALF.x
+	if point.y >= region_seam:
+		return _triangle_height(point, Vector2(west, region_seam), DETAIL_STEP, true)
+	var row_north := region_seam - FAR_STEP
+	if point.y < row_north:
+		return _triangle_height(point, Vector2(west, region_center.y - DETAIL_HALF.y), FAR_STEP, true)
+	var across := (point.x - west) / FAR_STEP
+	var column := floorf(across)
+	# Within the joining cell: east and south, from 0 at its north-west corner to 1.
+	var u := across - column
+	var v := (point.y - row_north) / FAR_STEP
+	var north_west := Vector2(west + column * FAR_STEP, row_north)
+	var middle := Vector2(north_west.x + DETAIL_STEP, region_seam)
+	if u <= 0.5 * v:
+		return (1.0 - v) * _detail_vertex_height(north_west) + 2.0 * u * _detail_vertex_height(middle) \
+			+ (v - 2.0 * u) * _detail_vertex_height(Vector2(north_west.x, region_seam))
+	var north_east := north_west + Vector2(FAR_STEP, 0.0)
+	if u >= 1.0 - 0.5 * v:
+		return (1.0 - v) * _detail_vertex_height(north_east) + 2.0 * (1.0 - u) * _detail_vertex_height(middle) \
+			+ (v + 2.0 * u - 2.0) * _detail_vertex_height(Vector2(north_east.x, region_seam))
+	return (1.0 - u - 0.5 * v) * _detail_vertex_height(north_west) + (u - 0.5 * v) * _detail_vertex_height(north_east) \
+		+ v * _detail_vertex_height(middle)
+
+
+## A height on one of the drawn grids, whose cells of `step` are counted from `origin`.
+func _triangle_height(point: Vector2, origin: Vector2, step: float, detail: bool) -> float:
 	var grid := (point - origin) / step
 	var cell := grid.floor()
 	var blend := grid - cell
@@ -352,72 +428,124 @@ func _triangle_height(point: Vector2, step: float, detail: bool) -> float:
 	return diagonal + (1.0 - blend.x) * (bottom - diagonal) + (1.0 - blend.y) * (right - diagonal)
 
 
-func _make_mesh(width: float, depth: float, step: float, detail: bool, centre := Vector2.ZERO) -> MeshInstance3D:
-	# Width runs east–west (X) and depth north–south (Z), centred on `centre`.
-	var cells := Vector2i(roundi(width / step), roundi(depth / step))
-	var points := cells + Vector2i.ONE
+## Cover `area` with coarse chunks. Each chunk's quads own their vertices so the
+## vertex shader can collapse complete covered cells under the detail region. A
+## fragment discard across MSAA samples leaves a dotted gap.
+func _make_coarse_surface(area: Rect2) -> void:
+	var cells := Vector2i((area.size / COARSE_STEP).round())
+	for first_row in range(0, cells.y, COARSE_CHUNK):
+		for first_column in range(0, cells.x, COARSE_CHUNK):
+			var chunk := Vector2i(mini(COARSE_CHUNK, cells.x - first_column), mini(COARSE_CHUNK, cells.y - first_row))
+			var size := Vector2(chunk) * COARSE_STEP
+			var centre := area.position + Vector2(first_column, first_row) * COARSE_STEP + size * 0.5
+			var vertices := PackedVector3Array()
+			var cell_centres := PackedVector2Array()
+			var indices := PackedInt32Array()
+			vertices.resize(chunk.x * chunk.y * 4)
+			cell_centres.resize(vertices.size())
+			indices.resize(chunk.x * chunk.y * 6)
+			for row in range(chunk.y):
+				for column in range(chunk.x):
+					var quad := (row * chunk.x + column) * 4
+					var base := Vector2(float(column) * COARSE_STEP - size.x * 0.5, float(row) * COARSE_STEP - size.y * 0.5)
+					var cell_centre := centre + base + Vector2.ONE * COARSE_STEP * 0.5
+					vertices[quad] = Vector3(base.x, 0, base.y)
+					vertices[quad + 1] = Vector3(base.x + COARSE_STEP, 0, base.y)
+					vertices[quad + 2] = Vector3(base.x, 0, base.y + COARSE_STEP)
+					vertices[quad + 3] = Vector3(base.x + COARSE_STEP, 0, base.y + COARSE_STEP)
+					for corner in range(4):
+						cell_centres[quad + corner] = cell_centre
+					var start := (row * chunk.x + column) * 6
+					indices[start] = quad
+					indices[start + 1] = quad + 1
+					indices[start + 2] = quad + 2
+					indices[start + 3] = quad + 1
+					indices[start + 4] = quad + 3
+					indices[start + 5] = quad + 2
+			_add_surface(self, "CoarseChunk", vertices, indices, cell_centres, _coarse_material,
+				Vector3(centre.x, 0, centre.y), _flat_bounds(-size.x * 0.5, -size.y * 0.5, size.x, size.y))
+
+
+## The detail region's chunks, placed from its middle: the far part's 10 cm grid
+## from its north edge, then the near part's 5 cm grid from the seam to its south
+## edge. Each cell of the far part's last row meets two near cells; it is split into
+## three triangles that use the near vertex between them, so the parts share every
+## vertex along the seam and leave no crack. _detail_height samples the same triangles.
+func _make_detail_surface() -> void:
+	var near := Vector2i(roundi(DETAIL_SIZE.x / DETAIL_STEP), roundi((DETAIL_SIZE.y - FAR_DEPTH) / DETAIL_STEP))
+	var far := Vector2i(roundi(DETAIL_SIZE.x / FAR_STEP), roundi(FAR_DEPTH / FAR_STEP))
+	assert(near.x == far.x * 2 and far.x % DETAIL_COLUMNS == 0, "Each far cell must meet two near cells, in whole columns")
+	# Far cells across each column; it holds twice as many near cells.
+	var cells := far.x / DETAIL_COLUMNS
+	for column in range(DETAIL_COLUMNS):
+		var west := float(column * cells) * FAR_STEP - DETAIL_HALF.x
+		var width := float(cells) * FAR_STEP
+		for first in range(0, far.y, FAR_STRIP_ROWS):
+			var rows := mini(FAR_STRIP_ROWS, far.y - first)
+			var reaches_seam := first + rows == far.y
+			# The strip along the seam stops its own vertex rows a far row short of it
+			# and takes the near part's first row of vertices instead.
+			var north := float(first) * FAR_STEP - DETAIL_HALF.y
+			var vertices := _grid_vertices(west, north, FAR_STEP, cells + 1, rows if reaches_seam else rows + 1)
+			var indices := _grid_indices(Vector2i(cells, rows - 1 if reaches_seam else rows), cells + 1)
+			if reaches_seam:
+				var last_row := (rows - 1) * (cells + 1)
+				var seam_row := vertices.size()
+				vertices.append_array(_grid_vertices(west, SEAM, DETAIL_STEP, cells * 2 + 1, 1))
+				for cell in range(cells):
+					var north_west := last_row + cell
+					var south_west := seam_row + cell * 2
+					for corner in [north_west, north_west + 1, south_west + 1, north_west, south_west + 1, south_west,
+							north_west + 1, south_west + 2, south_west + 1]:
+						indices.append(corner)
+			_add_surface(_detail, "FarChunk", vertices, indices, PackedVector2Array(), _detail_material, Vector3.ZERO,
+				_flat_bounds(west, north, width, float(rows) * FAR_STEP))
+		for first in range(0, near.y, NEAR_STRIP_ROWS):
+			var rows := mini(NEAR_STRIP_ROWS, near.y - first)
+			var north := SEAM + float(first) * DETAIL_STEP
+			_add_surface(_detail, "NearChunk", _grid_vertices(west, north, DETAIL_STEP, cells * 2 + 1, rows + 1),
+				_grid_indices(Vector2i(cells * 2, rows), cells * 2 + 1), PackedVector2Array(), _detail_material,
+				Vector3.ZERO, _flat_bounds(west, north, width, float(rows) * DETAIL_STEP))
+
+
+## `rows` rows of `width` vertices `step` apart, the first at `west` and `north`,
+## relative to the detail region's middle.
+func _grid_vertices(west: float, north: float, step: float, width: int, rows: int) -> PackedVector3Array:
 	var vertices := PackedVector3Array()
-	var normals := PackedVector3Array()
+	vertices.resize(width * rows)
+	for row in range(rows):
+		for column in range(width):
+			vertices[row * width + column] = Vector3(west + float(column) * step, 0, north + float(row) * step)
+	return vertices
+
+
+## Two triangles for each of `cells` of a grid whose rows hold `width` vertices,
+## each cell split along its north-east to south-west diagonal, as _triangle_height
+## samples it.
+func _grid_indices(cells: Vector2i, width: int) -> PackedInt32Array:
 	var indices := PackedInt32Array()
-	vertices.resize(points.x * points.y)
-	normals.resize(vertices.size())
 	indices.resize(cells.x * cells.y * 6)
-	for row in range(points.y):
-		for column in range(points.x):
-			var index := row * points.x + column
-			vertices[index] = Vector3(float(column) * step - width * 0.5, 0, float(row) * step - depth * 0.5)
-			normals[index] = Vector3.UP
 	var next := 0
 	for row in range(cells.y):
 		for column in range(cells.x):
-			var top_left := row * points.x + column
+			var top_left := row * width + column
 			indices[next] = top_left
 			indices[next + 1] = top_left + 1
-			indices[next + 2] = top_left + points.x
+			indices[next + 2] = top_left + width
 			indices[next + 3] = top_left + 1
-			indices[next + 4] = top_left + points.x + 1
-			indices[next + 5] = top_left + points.x
+			indices[next + 4] = top_left + width + 1
+			indices[next + 5] = top_left + width
 			next += 6
-	# Coarse quads own their vertices so the vertex shader can collapse complete
-	# covered cells. A fragment discard across MSAA samples leaves a dotted gap.
-	var cell_centres := PackedVector2Array()
-	if not detail:
-		var quads := PackedVector3Array()
-		quads.resize(cells.x * cells.y * 4)
-		cell_centres.resize(quads.size())
-		var quad_indices := PackedInt32Array()
-		quad_indices.resize(indices.size())
-		for row in range(cells.y):
-			for column in range(cells.x):
-				var quad := (row * cells.x + column) * 4
-				var base := Vector2(float(column) * step - width * 0.5, float(row) * step - depth * 0.5)
-				var cell_centre := centre + base + Vector2.ONE * step * 0.5
-				quads[quad] = Vector3(base.x, 0, base.y)
-				quads[quad + 1] = Vector3(base.x + step, 0, base.y)
-				quads[quad + 2] = Vector3(base.x, 0, base.y + step)
-				quads[quad + 3] = Vector3(base.x + step, 0, base.y + step)
-				for corner in range(4):
-					cell_centres[quad + corner] = cell_centre
-				var start := (row * cells.x + column) * 6
-				quad_indices[start] = quad
-				quad_indices[start + 1] = quad + 1
-				quad_indices[start + 2] = quad + 2
-				quad_indices[start + 3] = quad + 1
-				quad_indices[start + 4] = quad + 3
-				quad_indices[start + 5] = quad + 2
-		vertices = quads
-		indices = quad_indices
-		normals.resize(vertices.size())
-		normals.fill(Vector3.UP)
-	var arrays: Array = []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_INDEX] = indices
-	if not detail:
-		arrays[Mesh.ARRAY_TEX_UV] = cell_centres
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return indices
+
+
+## Bounds of a chunk of snow from its north-west corner, deep enough for any snow
+## over the ground; configure_ground sets their height once it knows the ground level.
+func _flat_bounds(west: float, north: float, width: float, depth: float) -> AABB:
+	return AABB(Vector3(west, -0.1, north), Vector3(width, 1.2, depth))
+
+
+func _make_material(detail: bool) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = SNOW_SHADER
 	material.set_shader_parameter("detail_mesh", detail)
@@ -426,14 +554,37 @@ func _make_mesh(width: float, depth: float, step: float, detail: bool, centre :=
 	material.set_shader_parameter("footprint_tile_grid", TILE_GRID)
 	material.set_shader_parameter("detail_half_extents", DETAIL_HALF)
 	_materials.append(material)
+	return material
+
+
+## One chunk of snow under `parent`. Coarse chunks carry each quad's world centre
+## in `cell_centres`; detail strips carry none.
+func _add_surface(parent: Node3D, name: String, vertices: PackedVector3Array, indices: PackedInt32Array,
+		cell_centres: PackedVector2Array, material: ShaderMaterial, at: Vector3, bounds: AABB) -> void:
+	var normals := PackedVector3Array()
+	normals.resize(vertices.size())
+	normals.fill(Vector3.UP)
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_INDEX] = indices
+	if not cell_centres.is_empty():
+		arrays[Mesh.ARRAY_TEX_UV] = cell_centres
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	var visible_surface := MeshInstance3D.new()
-	visible_surface.name = "DetailedSnow" if detail else "CoarseSnow"
+	visible_surface.name = name
 	visible_surface.mesh = mesh
 	visible_surface.material_override = material
-	visible_surface.position = Vector3(centre.x, 0, centre.y)
-	visible_surface.custom_aabb = AABB(Vector3(-width * 0.5, -0.1, -depth * 0.5), Vector3(width, 1.2, depth))
-	add_child(visible_surface)
-	return visible_surface
+	visible_surface.position = at
+	visible_surface.custom_aabb = bounds
+	# Snow receives shadows but casts none into SkyKey's shadow map: with the light
+	# 40° up, its smooth surface cannot shade itself there, and drawing it into the
+	# map ran its costly vertex heights a second time.
+	visible_surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(visible_surface)
+	_surfaces.append(visible_surface)
 
 
 func _update_uniforms() -> void:
