@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PINE_IMPORT pine.glb Pine surface 0 Needles: 5860 triangles, 0 LODs, both sides
+PINE_IMPORT pine.glb Pine surface 1 Shadow: 836 triangles, 0 LODs, both sides
+PINE_IMPORT pine.glb Pine surface 2 Snow: 3827 triangles, 0 LODs, both sides
+PINE_IMPORT pine.glb Pine surface 3 Ice: 30 triangles, 0 LODs, both sides
+PINE_IMPORT pine.glb Pine surface 4 Bark: 147 triangles, 0 LODs, both sides
+PINE_IMPORT pine.glb Pine: 10700 triangles, bounds [P: (-1.469594, -0.021936, -1.400986), S: (3.05295, 6.519472, 2.914154)]
+PINE_IMPORT pine_far.glb PineFar surface 0 Needles: 188 triangles, 0 LODs, both sides
+PINE_IMPORT pine_far.glb PineFar surface 1 Shadow: 36 triangles, 0 LODs, both sides
+PINE_IMPORT pine_far.glb PineFar surface 2 Snow: 185 triangles, 0 LODs, both sides
+PINE_IMPORT pine_far.glb PineFar surface 3 Bark: 26 triangles, 0 LODs, both sides
+PINE_IMPORT pine_far.glb PineFar: 435 triangles, bounds [P: (-1.471921, -0.004257, -1.392585), S: (3.051065, 6.507785, 2.898769)]
+PINE_IMPORT PASS · 0 failures

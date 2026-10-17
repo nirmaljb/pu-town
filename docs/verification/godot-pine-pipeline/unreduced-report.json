@@ -1,0 +1,42 @@
+{
+  "triangles": 18133,
+  "vertices": 16818,
+  "triangles_by_material": {
+    "Bark": 147,
+    "Shadow": 1200,
+    "Needles": 11382,
+    "Snow": 5374,
+    "Ice": 30
+  },
+  "materials": {
+    "Needles": "#4A5352",
+    "Shadow": "#2E3536",
+    "Snow": "#C2CBDE",
+    "Ice": "#8E9AB2",
+    "Bark": "#5C5250"
+  },
+  "height_m": 6.498,
+  "crown_m": {
+    "x": [
+      -1.49,
+      1.58
+    ],
+    "y": [
+      -1.52,
+      1.4
+    ]
+  },
+  "structure": {
+    "tiers": 16,
+    "branches": 91,
+    "stripped": 6,
+    "broken": 2,
+    "icicles": 10
+  },
+  "wind_from": [
+    -0.7071067811865476,
+    0.7071067811865476,
+    0.0
+  ],
+  "glb_bytes": 1418916
+}

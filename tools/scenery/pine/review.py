@@ -16,6 +16,7 @@ and, once:
   distance.png             near (left) and far (right) side by side through the same lens from 60 m
 """
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -28,11 +29,25 @@ scene = bpy.context.scene
 camera = scene.camera
 SIDE_SCALE, SIDE_CENTRE = 6.728, 3.228
 TOP_SCALE = 4.0
-VERSIONS = {'': bpy.data.objects['Pine'], 'far-': bpy.data.objects['PineFar']}  # file prefix -> object
+NEAR, FAR = bpy.data.objects['Pine'], bpy.data.objects['PineFar']
+PREFIXES = {NEAR: '', FAR: 'far-'}  # object -> review file prefix
+GODOT = Path(__file__).resolve().parents[3] / 'godot'
 
-# The snow walk's camera, from godot/follow_camera.gd: pitch, vertical field of view,
-# and the distance that frames the 1.7 m figure at a twelfth of the screen's height.
-PITCH, FIELD_OF_VIEW, FIGURE, PLAY_SHARE, FRAMING_SHARE = 40.0, 40.0, 1.7, 1 / 12, 0.034
+
+def godot_constant(script, name):
+    """A numeric constant from the snow walk's source, such as `const PITCH := -40.0`."""
+    found = re.search(rf'^const {name} := ([0-9.+\-*/ ()]+)$', (GODOT / script).read_text(), re.M)
+    return float(eval(found.group(1), {'__builtins__': {}}))
+
+
+# The snow walk's camera: its pitch, vertical field of view and the distance that
+# frames the figure at its default share of the screen's height, as
+# follow_camera.gd's distance_for_share() derives it.
+PITCH = -godot_constant('follow_camera.gd', 'PITCH')
+FIELD_OF_VIEW = godot_constant('follow_camera.gd', 'FIELD_OF_VIEW')
+FRAMING_SHARE = godot_constant('follow_camera.gd', 'FRAMING_SHARE')
+PLAY_SHARE = godot_constant('follow_camera.gd', 'PLAY_SHARE')
+FIGURE = godot_constant('walker.gd', 'HEIGHT')
 PLAY_DISTANCE = FIGURE * (math.sin(math.radians(PITCH))
                           + math.cos(math.radians(PITCH)) / (2 * math.tan(math.radians(FIELD_OF_VIEW / 2)) * PLAY_SHARE))
 
@@ -93,13 +108,13 @@ def snow_only(enabled, saved={}):
 
 
 def show(*shown):
-    for obj in VERSIONS.values():
+    for obj in PREFIXES:
         obj.hide_render = obj not in shown
 
 
 world = scene.world.node_tree.nodes['Background']
 studio = tuple(world.inputs['Color'].default_value), world.inputs['Strength'].default_value
-for prefix, obj in VERSIONS.items():
+for obj, prefix in PREFIXES.items():
     show(obj)
     world.inputs['Color'].default_value, world.inputs['Strength'].default_value = studio
     for azimuth in (0, 90, 180, 270):
@@ -122,12 +137,12 @@ for prefix, obj in VERSIONS.items():
 
 # The game camera, on a dark grey surround: the near tree where the figure would stand.
 world.inputs['Color'].default_value = (0.32, 0.34, 0.37, 1)
-show(VERSIONS[''])
+show(NEAR)
 game_lens((0, FRAMING_SHARE * PLAY_DISTANCE, 0), PLAY_DISTANCE)
 shoot('game', (1280, 720), transparent=False)
 
 # Both versions side by side, 8 m apart, through the same lens from 60 m.
-show(*VERSIONS.values())
-VERSIONS[''].location.x, VERSIONS['far-'].location.x = -4, 4
+show(NEAR, FAR)
+NEAR.location.x, FAR.location.x = -4, 4
 game_lens((0, 0, 3), 60)
 shoot('distance', (1280, 720), transparent=False)

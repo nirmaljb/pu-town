@@ -1,0 +1,10 @@
+FAIL  near triangles: 18133 (8000-12000)
+PASS  near side_mean_iou: 0.6482 (>= 0.6182)
+PASS  near side_mean_envelope_iou: 0.7918 (>= 0.7718)
+PASS  near top_iou: 0.772 (>= 0.752)
+PASS  near side snow share off the sheet: 0.099 (<= 0.119)
+PASS  near top snow share off the sheet: 0.034 (<= 0.054)
+PASS  near rendered snow colour against the sheet: 4 (<= 12 steps)
+PASS  near rendered needles colour against the sheet: 6 (<= 12 steps)
+FAIL  far version built: False (present)
+PINE_CHECKS 7 passed, 2 failed

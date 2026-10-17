@@ -1,9 +1,9 @@
 extends SceneTree
 # Pine pipeline record: load the two exported pines as the game will and print what
 # Godot imported for each: its meshes, their surfaces' materials and cull modes,
-# triangle counts, generated LODs and bounds. It fails if either is missing, has
-# import-generated LODs or draws a surface from one side only. Run from the
-# repository root after ./godot/run.sh --check:
+# triangle counts, generated LODs and bounds. It fails if either is missing, holds
+# no mesh, has import-generated LODs or draws a surface from one side only. Run
+# from the repository root after ./godot/run.sh --check:
 #   "$GODOT" --headless --path godot -s "$PWD/docs/verification/godot-pine-pipeline/import_check.gd"
 const FILES := ["res://scenery/pine/pine.glb", "res://scenery/pine/pine_far.glb"]
 
@@ -17,7 +17,11 @@ func _initialize() -> void:
 			failures += 1
 			continue
 		var root := scene.instantiate()
-		for instance: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		var instances := root.find_children("*", "MeshInstance3D", true, false)
+		if instances.is_empty():
+			print("PINE_IMPORT no mesh in ", path)
+			failures += 1
+		for instance: MeshInstance3D in instances:
 			var mesh := instance.mesh
 			var triangles := 0
 			for surface in mesh.get_surface_count():

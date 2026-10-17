@@ -1,0 +1,184 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+160 × 160 metres; 24 × 16 m detail region at the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792226110-26773.csv
+Inspection checkpoint 1
+Inspection checkpoint 2
+Snow route: initial idle · 0.5 s
+Saved user://capture-1792226111-17687.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226111-17687.png)
+Inspection checkpoint 3
+Snow route: turn in place
+Inspection checkpoint 4
+Snow route: lean to corner · 1.5 s
+Inspection checkpoint 5
+Snow route: cursor on figure · 1.5 s
+Inspection checkpoint 6
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 7
+Snow route: north-west walk · 4.24528301886792 s
+Inspection checkpoint 8
+Snow route: south-east return · 4.24528301886792 s
+Inspection checkpoint 9
+Snow route: walk north facing east · 4.24528301886792 s
+Inspection checkpoint 10
+Snow route: walk south facing east · 4.24528301886792 s
+Inspection checkpoint 11
+Snow route: cursor back on figure · 1.5 s
+Inspection checkpoint 12
+Snow route: run into open snow · 6.0 s
+Inspection checkpoint 13
+Inspection checkpoint 14
+Snow route: reach packed lane x · 3.23576657277236 s
+Inspection checkpoint 15
+Snow route: run through fresh snow · 1.5 s
+Inspection checkpoint 16
+Inspection checkpoint 17
+Snow route: pack trail return z · 5.47623814276929 s
+Inspection checkpoint 18
+Snow route: pack trail again · 4.24528301886792 s
+Inspection checkpoint 19
+Inspection checkpoint 20
+Snow route: pack trail third return z · 4.24289433461315 s
+Inspection checkpoint 21
+Snow route: pack trail third · 4.24528301886792 s
+Inspection checkpoint 22
+Inspection checkpoint 23
+Snow route: packed run start z · 4.24289433461315 s
+Inspection checkpoint 24
+Snow route: run on packed trail · 1.5 s
+Inspection checkpoint 25
+Inspection checkpoint 26
+Snow route: reach trail start z · 5.14863527046059 s
+Inspection checkpoint 27
+Snow route: reach trail start x · 5.67446294820538 s
+Inspection checkpoint 28
+Snow route: first trail · 4.24528301886792 s
+World probe 1: (-30.11413, -16.68118)
+Inspection checkpoint 29
+Snow route: fresh probe · 0.5 s
+Inspection checkpoint 30
+Snow route: run to north edge · 23.7338129496403 s
+Inspection checkpoint 31
+Snow route: boundary blocked · 1.0 s
+Saved user://capture-1792226215-16853.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226215-16853.png)
+Inspection checkpoint 32
+Snow route: probe outside region · 0.5 s
+Inspection checkpoint 33
+Snow route: step off the edge trail · 1.41509433962264 s
+Inspection checkpoint 34
+Snow route: run back from the edge · 12.2666666666667 s
+Inspection checkpoint 35
+Inspection checkpoint 36
+Snow route: return to trail z · 15.3346691491469 s
+Inspection checkpoint 37
+Snow route: return to trail x · 1.51565839659497 s
+Inspection checkpoint 38
+Snow route: probe revisited · 0.5 s
+Saved user://capture-1792226249-08364.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226249-08364.png)
+Inspection checkpoint 39
+Inspection checkpoint 40
+Snow route: reach the walking figure's trail z · 6.28836649768755 s
+Inspection checkpoint 41
+Snow route: reach the walking figure's trail x · 25.6038670269948 s
+World probe 2: (-2.663669, -9.882648)
+Inspection checkpoint 42
+Snow route: trail found · 0.5 s
+Inspection checkpoint 43
+Snow route: follow trail · 4.24528301886792 s
+Inspection checkpoint 44
+Snow route: overlap trail return 0 · 6.36792452830189 s
+Inspection checkpoint 45
+Snow route: overlap trail repeat 0 · 6.36792452830189 s
+Inspection checkpoint 46
+Snow route: overlap trail return 1 · 6.47405660377358 s
+Inspection checkpoint 47
+Snow route: overlap trail repeat 1 · 6.47405660377358 s
+Inspection checkpoint 48
+Snow route: overlap trail return 2 · 6.58018867924528 s
+Inspection checkpoint 49
+Snow route: overlap trail repeat 2 · 6.58018867924528 s
+Inspection checkpoint 50
+Snow route: overlap trail return 3 · 6.68632075471698 s
+Inspection checkpoint 51
+Snow route: overlap trail repeat 3 · 6.68632075471698 s
+Inspection checkpoint 52
+Snow route: trail overlapped · 0.5 s
+Inspection checkpoint 53
+Snow route: lean before overview · 1.0 s
+Inspection checkpoint 54
+Snow route: overview by M · 2.12264150943396 s
+Inspection checkpoint 55
+Snow route: overview walk back · 2.12264150943396 s
+Inspection checkpoint 56
+Snow route: overview wheel out · 0.3 s
+Inspection checkpoint 57
+Snow route: overview closed by M · 0.5 s
+Inspection checkpoint 58
+Snow route: walk north sweeping behind
+Saved user://capture-1792226349-10378.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226349-10378.png)
+Inspection checkpoint 59
+Snow route: stop facing behind · 1.0 s
+Inspection checkpoint 60
+Snow route: face east again · 0.5 s
+Inspection checkpoint 61
+Snow route: cursor on figure after sweep · 1.5 s
+Inspection checkpoint 62
+Inspection checkpoint 63
+Snow route: reach overview start z · 16.1792521206838 s
+Inspection checkpoint 64
+Snow route: reach overview start x · 9.93676725423561 s
+Inspection checkpoint 65
+Snow route: overview before border · 0.5 s
+Inspection checkpoint 66
+Inspection checkpoint 67
+Snow route: walk into the overview region x · 20.7679316682636 s
+Inspection checkpoint 68
+Snow route: overview wheel in · 0.3 s
+World probe 3: (4.155653, 3.899385)
+Inspection checkpoint 69
+Snow route: probes placed · 0.5 s
+Inspection checkpoint 70
+Snow route: wind fills prints · 2.5 s
+Inspection checkpoint 71
+Snow route: prints filled · 6.0 s
+Saved user://capture-1792226415-20757.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226415-20757.png)
+Inspection checkpoint 72
+Snow route: wind turned · 1.0 s
+Inspection checkpoint 73
+Snow route: wind frozen · 2.0 s
+Inspection checkpoint 74
+Snow route: widest play view · 0.5 s
+Saved user://capture-1792226419-54846.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226419-54846.png)
+Inspection checkpoint 75
+Snow route: whole map · 0.5 s
+Saved user://capture-1792226421-15033.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226421-15033.png)
+Inspection checkpoint 76
+Snow route: close view · 0.5 s
+Saved user://capture-1792226422-94463.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792226422-94463.png)
+Inspection checkpoint 77
+Snow route: second figure idle · 0.5 s
+Inspection checkpoint 78
+Snow route: cursor on second figure · 1.5 s
+Inspection checkpoint 79
+Snow route: first figure rejoins loop · 8.0 s
+Saved user://route-1792226110-26773.csv
+Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792226110-26773.csv
+Walking figure: 18784 moving observations, 18697 at the speed its snow allows, 16554 running in Shallow Snow, 956 held back in open snow, 14224 in the Town Square, 4138 beyond it
+Tracked the walking figure's trail at (-2.975025, -10.0), laid 53.5 s into the record 23.2 m from the controlled figure; probe (-2.663669, -9.882648) compaction 0.687
+Tracking probe compaction 0.687 -> 0.894 after following and overlapping
+Wind filled 0.828 of the tracked trail's compaction
+Released figure stood 4.00 m off the loop at (4.016318, 4.004385), joined it at (4.016318, 0.0) and walked on to 34% of the loop
+Same open-snow corridor, Shift held: fresh 3.784 m/s -> packed 4.468 m/s (32 / 27 samples)
+Camera steadiness over 135 steps: deepest sink 0.126 m; largest per-observation change, figure's sink 0.0348 m, camera against untouched snow 0.0008 m
+Walking with the cursor behind: 51 observations directly behind, held east 79 and west 23, shoulder changes ["+110° to -7° with the cursor at -97°"]
+Stopped 68° from the cursor; expected to reach it within 9 observations
+After 41.1 wind-seconds, the exposed print remains 0.67
+Largest change of Snow Depth at a probe under wind: 0.0000 m
+Framing: figure 0.0841 of the screen's height by default at 22.56 m, 0.1262 closest at 15.40 m, 0.0630 widest at 29.72 m
+Detail region at (-1.6, -0.8); leaned to (0.0, -3.2); returned to (-1.6, -0.8)
+Overview walk across the region border: outside 596, border 90, inside 817; border contact gap 0.0000 m
+Footprint uploads: 280363008 bytes for 2042 footsteps (137298 per step; touched-tile bound 524288 per step)
+Coverage: 18784 observations; straight 12634, diagonal 510, fast run 2138, slow run 1942, blocked 490, overview 1620, camera follow 7510
+SNOW SCENE GRAPHICAL ENGINE-EVENT REPLAY: PASS · 0 failures

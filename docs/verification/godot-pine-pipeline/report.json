@@ -1,0 +1,70 @@
+{
+  "near": {
+    "triangles": 10700,
+    "vertices": 10105,
+    "triangles_by_material": {
+      "Bark": 147,
+      "Shadow": 836,
+      "Needles": 5860,
+      "Snow": 3827,
+      "Ice": 30
+    },
+    "height_m": 6.498,
+    "crown_m": {
+      "x": [
+        -1.47,
+        1.58
+      ],
+      "y": [
+        -1.51,
+        1.4
+      ]
+    },
+    "file": "pine.glb",
+    "glb_bytes": 839184,
+    "glb_sha256": "0ec27ed0c4a7eac4e65469efb4dfeeb29fcb36543e461c60b52751a542594cdb"
+  },
+  "far": {
+    "triangles": 435,
+    "vertices": 785,
+    "triangles_by_material": {
+      "Bark": 26,
+      "Shadow": 36,
+      "Needles": 188,
+      "Snow": 185
+    },
+    "height_m": 6.504,
+    "crown_m": {
+      "x": [
+        -1.47,
+        1.58
+      ],
+      "y": [
+        -1.51,
+        1.39
+      ]
+    },
+    "file": "pine_far.glb",
+    "glb_bytes": 37636,
+    "glb_sha256": "bed890a1ef8adee2bd91ea2245810474fd27b726c0322ee8a83b7a9594ce14f7"
+  },
+  "structure": {
+    "tiers": 16,
+    "branches": 91,
+    "stripped": 6,
+    "broken": 2,
+    "icicles": 10
+  },
+  "materials": {
+    "Needles": "#4A5352",
+    "Shadow": "#2E3536",
+    "Snow": "#C2CBDE",
+    "Ice": "#8E9AB2",
+    "Bark": "#5C5250"
+  },
+  "wind_from": [
+    -0.7071067811865476,
+    0.7071067811865476,
+    0.0
+  ]
+}

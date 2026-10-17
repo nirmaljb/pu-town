@@ -131,6 +131,16 @@ def sprig(mesh, root, direction, normal, length, teeth):
 SNOW_WIDTHS = (0.6, 1.0, 0.92, 0.78, 0.55)  # a tongue's half-width along it, as a share of its widest
 
 
+def sprig_length(length, share=1.0):
+    """A row sprig's length on a branch of this length, before it tapers along the branch."""
+    return share * (0.17 + 0.22 * min(length, 1.2)) * min(1.0, 0.35 + 1.3 * length)
+
+
+def snow_depth(length, load, share=1.0):
+    """How thick the snow lies on a branch of this length under this load."""
+    return share * (0.025 + 0.08 * min(length, 1.4)) * load
+
+
 def snow_width(length, load):
     """A snow tongue's widest half-width: near the trunk, wide enough to meet its neighbours'."""
     return (0.03 + 0.15 * min(length, 1.4)) * load
@@ -150,9 +160,10 @@ def rim(width, t, until):
     return width * rim_share(t / until)
 
 
-def needles(mesh, branch, rng, width, snow_until, until=1.0):
+def needles(mesh, bough):
     """Rows of sprigs rooted just under the snow's edge on both sides of a branch, hanging
     forward and down as a dark fringe, over a dark tent that keeps the branch solid."""
+    branch, rng, width, snow_until, until = bough.branch, bough.rng, bough.width, bough.snow_until, bough.until
     L = branch.length
     spread = width
     rows = max(SPRIG_ROWS, round(L * until / SPRIG_SPACING))
@@ -162,7 +173,7 @@ def needles(mesh, branch, rng, width, snow_until, until=1.0):
             tangent, side_dir, normal = branch.frame(t)
             out = rim(width, t, snow_until) * rng.uniform(0.7, 0.9)
             root = add(branch.point(t), mul(side_dir, side * out), (0, 0, -0.45 * out - 0.02))
-            size = SPRIG_SIZE * (0.17 + 0.22 * min(L, 1.2)) * min(1.0, 0.35 + 1.3 * L) * (1 - 0.3 * t) * rng.uniform(0.85, 1.15)
+            size = sprig_length(L, SPRIG_SIZE) * (1 - 0.3 * t) * rng.uniform(0.85, 1.15)
             forward, droop = math.radians(rng.uniform(20, 45)), math.radians(rng.uniform(35, 55) + 15 * t)
             flat = add(mul(tangent, math.cos(forward)), mul(side_dir, side * math.sin(forward)))
             direction = unit(add(mul(flat, math.cos(droop)), (0, 0, -math.sin(droop))))
@@ -191,11 +202,12 @@ def needles(mesh, branch, rng, width, snow_until, until=1.0):
     return spread
 
 
-def slab(mesh, branch, rng, width, load, until, icicles):
+def slab(mesh, bough):
     """The snow on a branch: a faceted tongue, widest near the trunk where it meets its
     neighbours' snow, hanging over both sides in pointed lobes and tapering to a tip."""
+    branch, rng, width, load, until, icicles = bough.branch, bough.rng, bough.width, bough.load, bough.snow_until, bough.icicles
     L = branch.length
-    thick = (0.025 + 0.08 * min(L, 1.4)) * load * rng.uniform(0.8, 1.2)
+    thick = snow_depth(L, load) * rng.uniform(0.8, 1.2)
     n = SNOW_STATIONS
     stations = [0.02 + (until - 0.02) * j / n for j in range(n)]
     points, rim = [], []
@@ -380,8 +392,8 @@ def shape():
     shadow(mesh)
     spire(mesh)
     for b in boughs(stats):
-        needles(mesh, b.branch, b.rng, b.width, b.snow_until, until=b.until)
-        slab(mesh, b.branch, b.rng, b.width, b.load, b.snow_until, b.icicles)
+        needles(mesh, b)
+        slab(mesh, b)
         if b.broken:
             stub(mesh, b.branch)
     return mesh, stats
@@ -391,9 +403,10 @@ def shape():
 # from above match the near tree's (budget.py). Its snow roof is this much wider than
 # a near tongue's widest, widest this share of the way along the snow, droops at its
 # edges by this share of its half-width and is this share of a near tongue's
-# thickness. Its needle roof reaches this far past the snow's edge and hangs this far
-# below it, widest this share of the way along the branch, with its tip this far
-# below the branch's end; those three as shares of a near sprig's length.
+# thickness. Its needle roof reaches this far past the snow's edge (short of it when
+# negative) and hangs this far below it, widest this share of the way along the
+# branch, with its tip this far below the branch's end; those three as shares of a
+# near sprig's length.
 FAR_SNOW_SPREAD = 2.8
 FAR_SNOW_WIDEST = 0.55
 FAR_SNOW_DROOP = 0.45
@@ -407,8 +420,8 @@ FAR_NEEDLE_TIP = 0.3
 def roof(mesh, bough):
     """A branch far away: a snow roof over a roof of needles that hangs below it, two triangles each."""
     branch, L = bough.branch, bough.branch.length
-    sprig_length = (0.17 + 0.22 * min(L, 1.2)) * min(1.0, 0.35 + 1.3 * L)
-    thick = FAR_SNOW_DEPTH * (0.025 + 0.08 * min(L, 1.4)) * bough.load
+    sprig = sprig_length(L)
+    thick = snow_depth(L, bough.load, FAR_SNOW_DEPTH)
 
     def ridge(t, out, rise, drop, forward=0.0):
         """The roof's root or tip at t (out 0), or its two edges `out` either side of the branch."""
@@ -420,9 +433,9 @@ def roof(mesh, bough):
     hw = FAR_SNOW_SPREAD * bough.width
     snow = (ridge(0.02, 0, 0.03 + thick, 0) + ridge(FAR_SNOW_WIDEST * snow_end, hw, 0.03 + 0.25 * thick, FAR_SNOW_DROOP * hw)
             + ridge(snow_end, 0, 0, 0.08, 0.06 * L))
-    wing = hw + FAR_NEEDLE_REACH * sprig_length
-    needle = (ridge(0.05, 0, 0, 0.03) + ridge(FAR_NEEDLE_WIDEST * end, wing, 0, FAR_SNOW_DROOP * hw + FAR_NEEDLE_HANG * sprig_length)
-              + ridge(end, 0, 0, FAR_NEEDLE_TIP * sprig_length, 0.06 * L + 0.3 * sprig_length))
+    wing = hw + FAR_NEEDLE_REACH * sprig
+    needle = (ridge(0.05, 0, 0, 0.03) + ridge(FAR_NEEDLE_WIDEST * end, wing, 0, FAR_SNOW_DROOP * hw + FAR_NEEDLE_HANG * sprig)
+              + ridge(end, 0, 0, FAR_NEEDLE_TIP * sprig, 0.06 * L + 0.3 * sprig))
     mesh.add(needle, [(0, 1, 3), (0, 3, 2)], 'Needles')
     mesh.add(snow, [(0, 1, 3), (0, 3, 2)], 'Snow')
 

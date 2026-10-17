@@ -64,8 +64,12 @@ changes nothing leaves `git status` clean.
   channel of the sheet's (the palette check);
 - the distance version's side outline and top IoU are no more than 0.06 below the
   unreduced tree's, its snow shares are within 0.05 of the near tree's, and its side
-  outline matches the near tree's with an IoU of at least 0.85, so the swap between
-  them does not show.
+  outline matches the near tree's with an IoU of at least 0.85, so the two match in
+  shape and tone. These are proxies: side by side at 60 m the two are still plainly
+  different, and the distance at which a swap goes unnoticed is the game's to choose.
+
+`run.sh` exports only when scoring against `reference/`: the limits are scores against
+those sheets, so a run given another `REFERENCE_DIR` scores it and exports nothing.
 
 ## Files
 
@@ -147,6 +151,10 @@ share moves closer to the sheet's. The raw side IoU compares where each needle t
 falls against one particular painting; the outline score is the fairer measure of
 the crown's shape. The distance version's top IoU is higher than the near tree's
 because its solid roofs have no gaps between sprigs, as the painted sheet has none.
+
+The [verification record](../../../docs/verification/2026-10-17-godot-pine-pipeline.md)
+holds the reduction's evidence: the checks failing on the unreduced tree and passing
+on the reduced one, determinism, the Godot import and the pines in the running scene.
 
 ## In Godot
 

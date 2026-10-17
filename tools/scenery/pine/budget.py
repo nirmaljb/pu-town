@@ -13,7 +13,6 @@ FAR_TRIANGLES = (0, 600)
 # sources on 2026-10-16 and rebuilt byte-identical from this directory on 2026-10-17.
 # The reduced tree must not score materially worse than this.
 BEFORE_REDUCTION = {
-    'triangles': 18_133,
     'side_mean_iou': 0.6482,
     'side_mean_envelope_iou': 0.7918,
     'top_iou': 0.772,
@@ -27,8 +26,9 @@ BEFORE_REDUCTION = {
 SLACK = {'side_mean_iou': 0.03, 'side_mean_envelope_iou': 0.02, 'top_iou': 0.02, 'snow_share': 0.02}
 
 # The distance version scores against the same sheets, with more room, and must keep
-# the near tree's outline and its balance of snow and needles so the swap between
-# them does not show.
+# the near tree's outline and its balance of snow and needles, so that the two match
+# in shape and tone. These are proxies: up close the two are plainly different, and
+# the distance at which a swap goes unnoticed is chosen in the game, not here.
 FAR_SLACK = {'side_mean_envelope_iou': 0.06, 'top_iou': 0.06, 'snow_share': 0.05}
 FAR_OUTLINE_AGAINST_NEAR = 0.85
 
@@ -49,7 +49,10 @@ def checks(report, scores):
         out.append({'name': name, 'value': value, 'limit': limit, 'pass': bool(passed)})
 
     before = BEFORE_REDUCTION
-    near = scores['near']
+    near = scores.get('near')
+    check('near version built', near is not None and 'near' in report, 'present', near is not None and 'near' in report)
+    if near is None or 'near' not in report:
+        return out
     low, high = NEAR_TRIANGLES
     check('near triangles', report['near']['triangles'], f'{low}-{high}', low <= report['near']['triangles'] <= high)
     for key in ('side_mean_iou', 'side_mean_envelope_iou', 'top_iou'):

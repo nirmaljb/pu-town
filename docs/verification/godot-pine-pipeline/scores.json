@@ -1,0 +1,329 @@
+{
+  "side_reference_snow_share": 0.408,
+  "top_reference_snow_share": 0.425,
+  "reference_colour": {
+    "snow": "#B2BCD0",
+    "needles": "#464D4F"
+  },
+  "near": {
+    "side": {
+      "0": {
+        "iou": 0.64,
+        "envelope_iou": 0.7725,
+        "mirrored": false,
+        "snow_share": 0.495
+      },
+      "90": {
+        "iou": 0.6479,
+        "envelope_iou": 0.7948,
+        "mirrored": false,
+        "snow_share": 0.48
+      },
+      "180": {
+        "iou": 0.648,
+        "envelope_iou": 0.7919,
+        "mirrored": false,
+        "snow_share": 0.5
+      },
+      "270": {
+        "iou": 0.6468,
+        "envelope_iou": 0.7932,
+        "mirrored": false,
+        "snow_share": 0.491
+      }
+    },
+    "rendered_colour": {
+      "snow": "#B3BDD1",
+      "needles": "#495152"
+    },
+    "side_mean_iou": 0.6457,
+    "side_mean_envelope_iou": 0.7881,
+    "side_snow_share": 0.492,
+    "width_by_height": [
+      {
+        "from_m": 0.0,
+        "reference_m": 0.78,
+        "render_m": 0.94
+      },
+      {
+        "from_m": 0.5,
+        "reference_m": 2.24,
+        "render_m": 2.19
+      },
+      {
+        "from_m": 1.0,
+        "reference_m": 1.78,
+        "render_m": 2.16
+      },
+      {
+        "from_m": 1.5,
+        "reference_m": 2.0,
+        "render_m": 1.75
+      },
+      {
+        "from_m": 2.0,
+        "reference_m": 1.57,
+        "render_m": 1.68
+      },
+      {
+        "from_m": 2.5,
+        "reference_m": 1.55,
+        "render_m": 1.62
+      },
+      {
+        "from_m": 3.0,
+        "reference_m": 1.49,
+        "render_m": 1.67
+      },
+      {
+        "from_m": 3.5,
+        "reference_m": 1.27,
+        "render_m": 1.24
+      },
+      {
+        "from_m": 4.0,
+        "reference_m": 0.82,
+        "render_m": 0.91
+      },
+      {
+        "from_m": 4.5,
+        "reference_m": 0.61,
+        "render_m": 0.71
+      },
+      {
+        "from_m": 5.0,
+        "reference_m": 0.55,
+        "render_m": 0.36
+      },
+      {
+        "from_m": 5.5,
+        "reference_m": 0.33,
+        "render_m": 0.31
+      },
+      {
+        "from_m": 6.0,
+        "reference_m": 0.12,
+        "render_m": 0.16
+      }
+    ],
+    "top": {
+      "iou": 0.767,
+      "scale": 1.36,
+      "rotation_deg": 5,
+      "mirrored": true
+    },
+    "top_iou": 0.767,
+    "top_snow_share": 0.46
+  },
+  "far": {
+    "side": {
+      "0": {
+        "iou": 0.6438,
+        "envelope_iou": 0.76,
+        "mirrored": false,
+        "snow_share": 0.447
+      },
+      "90": {
+        "iou": 0.6425,
+        "envelope_iou": 0.771,
+        "mirrored": false,
+        "snow_share": 0.475
+      },
+      "180": {
+        "iou": 0.6356,
+        "envelope_iou": 0.7685,
+        "mirrored": false,
+        "snow_share": 0.429
+      },
+      "270": {
+        "iou": 0.6427,
+        "envelope_iou": 0.7697,
+        "mirrored": false,
+        "snow_share": 0.433
+      }
+    },
+    "rendered_colour": {
+      "snow": "#A4ADC0",
+      "needles": "#434849"
+    },
+    "side_mean_iou": 0.6411,
+    "side_mean_envelope_iou": 0.7673,
+    "side_snow_share": 0.446,
+    "width_by_height": [
+      {
+        "from_m": 0.0,
+        "reference_m": 0.78,
+        "render_m": 1.4
+      },
+      {
+        "from_m": 0.5,
+        "reference_m": 2.24,
+        "render_m": 2.13
+      },
+      {
+        "from_m": 1.0,
+        "reference_m": 1.78,
+        "render_m": 2.0
+      },
+      {
+        "from_m": 1.5,
+        "reference_m": 2.0,
+        "render_m": 1.66
+      },
+      {
+        "from_m": 2.0,
+        "reference_m": 1.57,
+        "render_m": 1.61
+      },
+      {
+        "from_m": 2.5,
+        "reference_m": 1.55,
+        "render_m": 1.49
+      },
+      {
+        "from_m": 3.0,
+        "reference_m": 1.49,
+        "render_m": 1.59
+      },
+      {
+        "from_m": 3.5,
+        "reference_m": 1.27,
+        "render_m": 1.1
+      },
+      {
+        "from_m": 4.0,
+        "reference_m": 0.82,
+        "render_m": 0.87
+      },
+      {
+        "from_m": 4.5,
+        "reference_m": 0.61,
+        "render_m": 0.65
+      },
+      {
+        "from_m": 5.0,
+        "reference_m": 0.55,
+        "render_m": 0.36
+      },
+      {
+        "from_m": 5.5,
+        "reference_m": 0.33,
+        "render_m": 0.28
+      },
+      {
+        "from_m": 6.0,
+        "reference_m": 0.12,
+        "render_m": 0.14
+      }
+    ],
+    "top": {
+      "iou": 0.8179,
+      "scale": 1.18,
+      "rotation_deg": 75,
+      "mirrored": true
+    },
+    "top_iou": 0.8179,
+    "top_snow_share": 0.456
+  },
+  "far_against_near": {
+    "side_mean_envelope_iou": 0.8619
+  },
+  "checks": [
+    {
+      "name": "near version built",
+      "value": true,
+      "limit": "present",
+      "pass": true
+    },
+    {
+      "name": "near triangles",
+      "value": 10700,
+      "limit": "8000-12000",
+      "pass": true
+    },
+    {
+      "name": "near side_mean_iou",
+      "value": 0.6457,
+      "limit": ">= 0.6182",
+      "pass": true
+    },
+    {
+      "name": "near side_mean_envelope_iou",
+      "value": 0.7881,
+      "limit": ">= 0.7718",
+      "pass": true
+    },
+    {
+      "name": "near top_iou",
+      "value": 0.767,
+      "limit": ">= 0.752",
+      "pass": true
+    },
+    {
+      "name": "near side snow share off the sheet",
+      "value": 0.084,
+      "limit": "<= 0.119",
+      "pass": true
+    },
+    {
+      "name": "near top snow share off the sheet",
+      "value": 0.035,
+      "limit": "<= 0.054",
+      "pass": true
+    },
+    {
+      "name": "near rendered snow colour against the sheet",
+      "value": 1,
+      "limit": "<= 12 steps",
+      "pass": true
+    },
+    {
+      "name": "near rendered needles colour against the sheet",
+      "value": 4,
+      "limit": "<= 12 steps",
+      "pass": true
+    },
+    {
+      "name": "far version built",
+      "value": true,
+      "limit": "present",
+      "pass": true
+    },
+    {
+      "name": "far triangles",
+      "value": 435,
+      "limit": "0-600",
+      "pass": true
+    },
+    {
+      "name": "far side_mean_envelope_iou",
+      "value": 0.7673,
+      "limit": ">= 0.7318",
+      "pass": true
+    },
+    {
+      "name": "far top_iou",
+      "value": 0.8179,
+      "limit": ">= 0.712",
+      "pass": true
+    },
+    {
+      "name": "far side snow share against the near tree",
+      "value": 0.046,
+      "limit": "<= 0.05",
+      "pass": true
+    },
+    {
+      "name": "far top snow share against the near tree",
+      "value": 0.004,
+      "limit": "<= 0.05",
+      "pass": true
+    },
+    {
+      "name": "far outline against the near tree",
+      "value": 0.8619,
+      "limit": ">= 0.85",
+      "pass": true
+    }
+  ]
+}

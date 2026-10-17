@@ -1,0 +1,112 @@
+{
+  "side_reference_snow_share": 0.408,
+  "side": {
+    "0": {
+      "iou": 0.64,
+      "envelope_iou": 0.7747,
+      "mirrored": false,
+      "snow_share": 0.513
+    },
+    "90": {
+      "iou": 0.6501,
+      "envelope_iou": 0.7981,
+      "mirrored": false,
+      "snow_share": 0.497
+    },
+    "180": {
+      "iou": 0.6539,
+      "envelope_iou": 0.7963,
+      "mirrored": false,
+      "snow_share": 0.509
+    },
+    "270": {
+      "iou": 0.6487,
+      "envelope_iou": 0.798,
+      "mirrored": false,
+      "snow_share": 0.508
+    }
+  },
+  "rendered_colour": {
+    "snow": "#AFB8CD",
+    "reference_snow": "#B2BCD0",
+    "needles": "#4B5354",
+    "reference_needles": "#464D4F"
+  },
+  "side_mean_iou": 0.6482,
+  "side_mean_envelope_iou": 0.7918,
+  "width_by_height": [
+    {
+      "from_m": 0.0,
+      "reference_m": 0.78,
+      "render_m": 0.93
+    },
+    {
+      "from_m": 0.5,
+      "reference_m": 2.24,
+      "render_m": 2.25
+    },
+    {
+      "from_m": 1.0,
+      "reference_m": 1.78,
+      "render_m": 2.21
+    },
+    {
+      "from_m": 1.5,
+      "reference_m": 2.0,
+      "render_m": 1.77
+    },
+    {
+      "from_m": 2.0,
+      "reference_m": 1.57,
+      "render_m": 1.74
+    },
+    {
+      "from_m": 2.5,
+      "reference_m": 1.55,
+      "render_m": 1.61
+    },
+    {
+      "from_m": 3.0,
+      "reference_m": 1.49,
+      "render_m": 1.73
+    },
+    {
+      "from_m": 3.5,
+      "reference_m": 1.27,
+      "render_m": 1.26
+    },
+    {
+      "from_m": 4.0,
+      "reference_m": 0.82,
+      "render_m": 0.95
+    },
+    {
+      "from_m": 4.5,
+      "reference_m": 0.61,
+      "render_m": 0.72
+    },
+    {
+      "from_m": 5.0,
+      "reference_m": 0.55,
+      "render_m": 0.39
+    },
+    {
+      "from_m": 5.5,
+      "reference_m": 0.33,
+      "render_m": 0.33
+    },
+    {
+      "from_m": 6.0,
+      "reference_m": 0.12,
+      "render_m": 0.16
+    }
+  ],
+  "top": {
+    "iou": 0.772,
+    "scale": 1.32,
+    "rotation_deg": 5,
+    "mirrored": true,
+    "snow_share": 0.459,
+    "reference_snow_share": 0.425
+  }
+}
