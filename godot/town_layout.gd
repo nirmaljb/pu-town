@@ -1,9 +1,10 @@
 extends Node3D
 class_name SnowTownLayout
 ## The interim snowfield: one flat level of open snow, north up and centred on the
-## origin, with Shallow Snow in the Town Square at its centre. Its edge is a plain
-## containment boundary with no wall, lost in the whiteout. Nothing stands on it
-## yet: the obstacle list that movement, wind and the walking figure read is empty.
+## origin, with the Camp at its centre: placeholder boxes for its buildings round the
+## open Town Square's Shallow Snow. Its edge is a plain containment boundary with no
+## wall, lost in the whiteout. Movement, wind and the walking figure read the
+## buildings from one obstacle list; their roofs never become walking ground.
 
 ## The map is a rectangle centred on the origin: X runs east–west and Z
 ## north–south (north is −Z). Snow, shader, containment, camera and route all
@@ -18,18 +19,27 @@ const GROUND_LEVEL := 0.0
 const LANDMARKS := {
 	"start_west": Vector2(-1.5, 0),
 	"start_east": Vector2(1.5, 0),
-	# The route's stages in the open snow west of the Town Square: a lane it packs
-	# by running and walking north from its landmark, and the start of the trail it
-	# probes before running on to the northern edge.
-	"packed_lane": Vector2(-24, 0),
-	"trail_start": Vector2(-30, -12),
-	# The route walks east from here into the overview's detail region, and fixes
-	# a probe exposed to the wind where it stops.
+	# The route's stages in the open snow west of the Camp, reached along the lane
+	# that leaves the Town Square westward between the generator shed and the crate
+	# stacks: a lane it packs by running and walking north from its landmark, and the
+	# start of the trail it probes before running on to the northern edge.
+	"packed_lane": Vector2(-44, 0),
+	"trail_start": Vector2(-50, -12),
+	# The route walks east along that lane from here into the overview's detail
+	# region, and fixes a probe exposed to the wind where it stops in the Town Square.
 	"overview_west": Vector2(-26, 4),
 	"exposed_probe": Vector2(4, 4),
+	# Where the route walks into the Camp's buildings and probes the wind beside
+	# them: north into the small shed's south face, whose lee the workshop shelters;
+	# up the Town Square's west side to the lodge's west face, exposed to the
+	# north-west wind; and north into the lodge's south face, in its lee.
+	"small_shed_south": Vector2(28, 4),
+	"town_square_west": Vector2(-12, 3),
+	"lodge_windward": Vector2(-9.7, -22),
+	"lodge_south": Vector2(4, -14),
 	# Corners of the walking figure's loop. It keeps clear of the route's trail
-	# probe, Packed Path corridor and exposed probe, and crosses the Town Square
-	# on its own lane before heading north into open snow.
+	# probe, Packed Path corridor and wind probes, crosses the Town Square on its own
+	# lane south of the lodge and heads north past the lodge's west end into open snow.
 	"loop_east": Vector2(8, 0),
 	"loop_north": Vector2(8, -10),
 	"loop_lane_west": Vector2(-14, -10),
@@ -39,29 +49,53 @@ const LANDMARKS := {
 ## and west across the Town Square, then north out into open snow, and back the
 ## same way. Consecutive landmarks are joined by straight, open ground.
 const LOOP: Array[String] = ["start_east", "loop_east", "loop_north", "loop_lane_west", "loop_open"]
-## Warm lanterns standing in the snow round the Town Square, the references'
-## contrast against the cold blizzard: (x, height above the ground, z). They stay
-## at eight, the Compatibility renderer's lights per object, so every one reaches
-## the snow, and move onto the buildings when the Camp stands here.
+## The Camp's placeholder buildings round the Town Square, arranged after the
+## owner's painted centre reference: the lodge to the north with the antenna mast
+## beside its west end, the two cabins to the south, the generator shed, radio tower
+## and crate and barrel stacks to the west, and the open workshop and small shed to
+## the east. Each is a solid box
+## on the ground, given by its name, the kind that colours its placeholder, its
+## centre, east–west × north–south size and height; a
+## figure can neither enter one nor stand on its roof. The four diagonals out of the
+## Town Square's corners stay open for the Roads.
+const CAMP: Array[Dictionary] = [
+	{"name": "lodge", "kind": "lodge", "center": Vector2(1, -22), "size": Vector2(20, 12), "height": 7.0},
+	{"name": "chimney", "kind": "chimney", "center": Vector2(11.7, -20), "size": Vector2(1.4, 1.4), "height": 9.5},
+	{"name": "generator_shed", "kind": "shed", "center": Vector2(-26, -6), "size": Vector2(8, 6), "height": 3.5},
+	{"name": "antenna_mast", "kind": "mast", "center": Vector2(-12, -26), "size": Vector2(0.5, 0.5), "height": 12.0},
+	{"name": "radio_tower", "kind": "mast", "center": Vector2(-28, 10.5), "size": Vector2(3, 3), "height": 16.0},
+	{"name": "crate_stack", "kind": "crates", "center": Vector2(-23.5, 8), "size": Vector2(2.4, 1.6), "height": 1.2},
+	{"name": "crate_stack_tall", "kind": "crates", "center": Vector2(-21.5, 10.5), "size": Vector2(1.6, 1.6), "height": 1.6},
+	{"name": "barrel_stack", "kind": "barrels", "center": Vector2(-24, 11), "size": Vector2(1.2, 1.2), "height": 1.0},
+	{"name": "cabin_west", "kind": "cabin", "center": Vector2(-6.5, 19.5), "size": Vector2(7, 5.5), "height": 4.0},
+	{"name": "cabin_east", "kind": "cabin", "center": Vector2(6.5, 19.5), "size": Vector2(7, 5.5), "height": 4.0},
+	{"name": "workshop", "kind": "workshop", "center": Vector2(25, -6), "size": Vector2(8, 6), "height": 3.5},
+	{"name": "small_shed", "kind": "shed", "center": Vector2(28, 0), "size": Vector2(4, 3), "height": 2.6},
+]
+## Warm lamps on the Camp's doors and windows facing the Town Square, the
+## references' contrast against the cold blizzard: (x, height above the ground, z),
+## each just outside a building's face. They stay at eight, the Compatibility
+## renderer's lights per object, so every one reaches the snow.
 const WARM_LIGHTS := {
-	"lantern_north_north_east": Vector3(6.5, 0.3, -15.7),
-	"lantern_east_north_east": Vector3(15.7, 0.3, -6.5),
-	"lantern_east_south_east": Vector3(15.7, 0.3, 6.5),
-	"lantern_south_south_east": Vector3(6.5, 0.3, 15.7),
-	"lantern_south_south_west": Vector3(-6.5, 0.3, 15.7),
-	"lantern_west_south_west": Vector3(-15.7, 0.3, 6.5),
-	"lantern_west_north_west": Vector3(-15.7, 0.3, -6.5),
-	"lantern_north_north_west": Vector3(-6.5, 0.3, -15.7),
+	"lodge_door": Vector3(1, 2.4, -15.85),
+	"lodge_window_west": Vector3(-5, 2.2, -15.85),
+	"lodge_window_east": Vector3(7, 2.2, -15.85),
+	"generator_shed_door": Vector3(-21.85, 2.2, -6),
+	"workshop_door": Vector3(20.85, 2.2, -6),
+	"small_shed_window": Vector3(25.85, 1.8, 0),
+	"cabin_west_door": Vector3(-6.5, 2.2, 16.6),
+	"cabin_east_door": Vector3(6.5, 2.2, 16.6),
 }
 ## Starting Snow Depth by place, measured vertically above the ground. Shallow
 ## Snow lets a Player run; deeper snow holds running back until traffic packs it.
-## The Town Square is Shallow and the open snow beyond it lies at an in-between
-## depth; the square fades into it over ZONE_BLEND metres.
+## The Town Square, the Camp's open yard between its buildings, is Shallow and the
+## open snow beyond it lies at an in-between depth; the square fades into it over
+## ZONE_BLEND metres.
 const SHALLOW_SNOW := 0.09
 const OPEN_SNOW := 0.25
 const MIN_SNOW_DEPTH := 0.03
 const ZONE_BLEND := 1.5
-const TOWN_SQUARE := Rect2(-20, -20, 40, 40)
+const TOWN_SQUARE := Rect2(-20, -15, 40, 30)
 const CONTACT_MARGIN := 0.0001
 
 var obstacles: Array[Dictionary] = []
@@ -73,6 +107,10 @@ var loop_length := 0.0
 
 
 func _init() -> void:
+	# North is -Z. A building stands on the ground and rises its height above it.
+	for building in CAMP:
+		obstacles.append({"name": building.name, "kind": building.kind, "center": building.center, "size": building.size,
+			"base": GROUND_LEVEL, "top": GROUND_LEVEL + building.height})
 	for name in LOOP:
 		loop_corners.append(LANDMARKS[name])
 	for index in range(LOOP.size() - 2, 0, -1):
@@ -80,6 +118,35 @@ func _init() -> void:
 	for index in range(loop_corners.size()):
 		loop_starts.append(loop_length)
 		loop_length += loop_corners[index].distance_to(loop_corners[(index + 1) % loop_corners.size()])
+
+
+func _ready() -> void:
+	for obstacle in obstacles:
+		var material := StandardMaterial3D.new()
+		material.albedo_color = _colour_for(obstacle.kind)
+		material.roughness = 0.96
+		var shape := BoxMesh.new()
+		shape.size = Vector3(obstacle.size.x, obstacle.top - obstacle.base, obstacle.size.y)
+		var box := MeshInstance3D.new()
+		box.name = obstacle.name.to_pascal_case()
+		box.mesh = shape
+		box.material_override = material
+		box.position = Vector3(obstacle.center.x, (obstacle.base + obstacle.top) * 0.5, obstacle.center.y)
+		add_child(box)
+
+
+func _colour_for(kind: String) -> Color:
+	# Muted timber, stone and metal tones keep each kind distinguishable in the blockout.
+	match kind:
+		"lodge": return Color("716960")
+		"chimney": return Color("8c857b")
+		"shed": return Color("697477")
+		"mast": return Color("5a636c")
+		"crates": return Color("8a7559")
+		"barrels": return Color("625447")
+		"cabin": return Color("6b5a4a")
+		"workshop": return Color("7a6f5f")
+	return Color("808080")
 
 
 ## Ground height at a world XZ point. SnowSurface and snow.gdshader read the same level.

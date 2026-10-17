@@ -20,10 +20,12 @@ town: a flat 500 × 550 m snowfield with a fenced Camp at its centre, Roads, a t
 pine forest and an oblique camera, after the owner's
 [references](../docs/art/frostwatch-reference/README.md). It lands in slices. This
 guide describes the delivered interim preview: one flat **160 × 160 m** level of
-open snow with a Shallow Town Square at its centre and nothing yet standing on it;
+open snow with the Camp at its centre, placeholder boxes for its lodge, sheds,
+cabins, workshop, towers and crate stacks round the Shallow Town Square;
 a north-up perspective camera that follows the controlled figure while the mouse
 sets its Facing; a saved Snow Depth that starts Shallow in the Town Square and
-deeper beyond it; a north-west wind that fills Footprints; a detail region shaped
+deeper beyond it; a north-west wind that builds Snowdrifts in the buildings' lee,
+scours their windward faces and fills Footprints; a detail region shaped
 for the oblique view that keeps bootprints crisp within 20 m of the figure;
 a walking
 figure whose loop lays trails you did not watch being made; and a blizzard in
@@ -31,7 +33,9 @@ overcast polar twilight, tuned live in the editor's Inspector (see
 [Lighting and the blizzard](#lighting-and-the-blizzard)). The
 [flat interim map record](../docs/verification/2026-10-17-godot-snow-flat-interim-map.md)
 holds its import checks, engine-event replay, graphical route in source and the
-Mac release package, each kept separate, with their limits.
+Mac release package, each kept separate, with their limits; the
+[Camp record](../docs/verification/2026-10-18-godot-snow-camp.md) holds the same
+evidence for the Camp's buildings, with captures beside the owner's painted Camp.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).
@@ -99,7 +103,8 @@ centre, at its `start_west` and `start_east` landmarks, (−1.5, 0) m and (1.5, 
 The figure you are not controlling walks a loop without stopping:
 
 centre → east across the Town Square → north → west along its own lane across the
-square → north out of the square into open snow → back the same way
+square, south of the lodge → north past the lodge's west end into open snow → back
+the same way
 
 It always asks to run, so it runs at full speed in the Town Square's Shallow Snow
 and is held back in the deeper open snow beyond it, and it speeds up on Packed
@@ -115,7 +120,7 @@ Its trail is ordinary Footprints in the shared picture: it persists, fills with
 the wind like any other and overlaps yours. The loop's corners are the
 `start_east` and `loop_…` landmarks below, listed in `LOOP` in
 [`town_layout.gd`](town_layout.gd). It keeps clear of the scene route's trail
-probe, Packed Path corridor and exposed probe.
+probe, Packed Path corridor and wind probes, and of every Camp building.
 
 #### Practise tracking
 
@@ -133,12 +138,12 @@ probe, Packed Path corridor and exposed probe.
 ### The map
 
 The interim map is one flat level, 160 × 160 m, with north up (−Z), centred on
-the origin. Ground height is 0 m everywhere; nothing stands on it yet. ADR 0027's
+the origin. Ground height is 0 m everywhere. ADR 0027's
 compound, meeting hall, outpost, shelf, stair, cliffs, rim rocks and their
 landmarks are gone. The map's edge is a plain containment boundary with no wall:
 the figure stops 0.3 m inside it. The snow runs on 40 m beyond it as an apron no
 figure can reach, so the edge shows no end to the snowfield, and the whiteout
-swallows the apron's own far edge. The Camp, its
+swallows the apron's own far edge. The Camp stands at the centre; its
 Perimeter and the Roads come next, on this same ground. The route's named
 landmarks are, in metres:
 
@@ -146,14 +151,44 @@ landmarks are, in metres:
 | --- | --- | --- |
 | `start_west` | −1.5, 0 | Town Square; figure 1 starts here |
 | `start_east` | 1.5, 0 | Town Square; figure 2 starts here, the loop's first corner |
-| `packed_lane` | −24, 0 | Open snow west of the square, where the route packs a lane northward |
-| `trail_start` | −30, −12 | Open snow, where the route lays and probes a trail before running north to the edge |
-| `overview_west` | −26, 4 | West of the Town Square and of the overview's detail region, where the route opens the overview |
+| `packed_lane` | −44, 0 | Open snow west of the Camp, where the route packs a lane northward |
+| `trail_start` | −50, −12 | Open snow west of the Camp, where the route lays and probes a trail before running north to the edge |
+| `overview_west` | −26, 4 | The lane west out of the Town Square, outside the overview's detail region, where the route opens the overview |
 | `exposed_probe` | 4, 4 | Town Square, where the route fixes a probe exposed to the wind |
+| `small_shed_south` | 28, 4 | South of the small shed, whence the route walks north into its face |
+| `town_square_west` | −12, 3 | The Town Square's west side, whence the route walks north beside the lodge |
+| `lodge_windward` | −9.7, −22 | Against the lodge's west face, exposed to the north-west wind |
+| `lodge_south` | 4, −14 | South of the lodge, whence the route walks north into its face, in its lee |
 | `loop_east` | 8, 0 | Loop corner, east of the centre |
 | `loop_north` | 8, −10 | Loop corner: east end of the walking figure's lane across the square |
 | `loop_lane_west` | −14, −10 | Loop corner: west end of that lane |
 | `loop_open` | −14, −36 | Loop corner: the loop's far end, in open snow north of the square |
+
+### The Camp
+
+The Camp's buildings stand round the Town Square as placeholder boxes, arranged
+after the owner's [painted centre reference](../docs/art/frostwatch-reference/README.md#the-camp)
+and turned so that the four diagonals out of the square's corners stay open for
+the Roads, as the satellite sketch lays them. All are listed once, in `CAMP` in
+[`town_layout.gd`](town_layout.gd), by centre, size and height, in metres:
+
+| Building | Centre X, Z | East–west × north–south | Height |
+| --- | --- | --- | --- |
+| Lodge | 1, −22 | 20 × 12 | 7 |
+| Chimney, on the lodge's east gable | 11.7, −20 | 1.4 × 1.4 | 9.5 |
+| Generator shed | −26, −6 | 8 × 6 | 3.5 |
+| Antenna mast, beside the lodge's west end | −12, −26 | 0.5 × 0.5 | 12 |
+| Lattice radio tower | −28, 10.5 | 3 × 3 | 16 |
+| Crate stacks | −23.5, 8 and −21.5, 10.5 | 2.4 × 1.6 and 1.6 × 1.6 | 1.2 and 1.6 |
+| Barrel stack | −24, 11 | 1.2 × 1.2 | 1 |
+| Two cabins | ±6.5, 19.5 | 7 × 5.5 | 4 |
+| Open workshop | 25, −6 | 8 × 6 | 3.5 |
+| Small shed | 28, 0 | 4 × 3 | 2.6 |
+
+Every box is solid: a figure stops 0.3 m from its faces and slides along them, can
+never enter it and never stands on its roof. A lane leaves the square westward
+between the generator shed and the crate stacks, and an alley runs south between
+the cabins. There are no boulders.
 
 ### Deep and Shallow Snow
 
@@ -161,8 +196,8 @@ Snow Depth starts by place, so you can predict where you can run. Loose snow at
 or below 10 cm allows full running; from 40 cm you can only walk until repeated
 traffic packs a Packed Path.
 
-- **Shallow Snow**, 9 cm: the **Town Square**, 40 × 40 m at the centre of the
-  map. Run freely.
+- **Shallow Snow**, 9 cm: the **Town Square**, the Camp's open yard, 40 × 30 m at
+  the centre of the map between the lodge and the cabins. Run freely.
 - **Open snow**, 25 cm: everywhere else. Running is partly slowed; your own fresh
   prints pack part of the snow you run through, so you reach about 3.8 m/s, and
   repeated traffic packs a faster Packed Path.
@@ -194,10 +229,13 @@ settle instead of growing forever or pulsing:
   a minute at the default wind, or under four seconds at 16. At wind 1 a drift is
   most of the way built after about three minutes.
 
-The interim map has no obstacles, so its wind builds no Snowdrifts and scours
-nothing: Snow Depth keeps its starting shape and every place is open. Drift,
-scour and shelter return with the Camp's buildings, the Perimeter and the pines.
-Turning the wind recomputes which side of every obstacle is sheltered: old drifts
+The Camp's buildings are the map's obstacles. The north-west wind builds a
+Snowdrift along the lodge's south face, into the Town Square, and scours the
+lodge's west face; the small shed stands in the workshop's shelter, so it gathers
+no blown snow and builds no drift of its own, and the snow in its lee keeps its
+depth while Footprints there last longer. Open snow away from the buildings keeps
+its starting shape. The Perimeter and the pines will add more shelter. Turning the
+wind recomputes which side of every obstacle is sheltered: old drifts
 wear away and new ones build in the new lee. Snowdrifts stay walkable at walking
 speed, and running always follows the current loose depth, so a scoured face can
 become runnable and a drift walk-only.
@@ -210,7 +248,10 @@ it lasts **up to four times longer**, fading out of shelter by five obstacle hei
 (at most 12 m). Wind 0 freezes both drifts and Footprints.
 
 Wind updates the Snow Depth picture four times a second, 27 rows of the
-picture per physics frame, and never rewrites the Footprint picture. Each
+picture per physics frame, and never rewrites the Footprint picture. A turned
+wind's new drifts, scour and shelter are shaped on a worker thread, which takes
+0.8–1 s on this map; until then the snow keeps following the old shape, and
+the HUD marks the wind as turning. Each
 place keeps a fill clock that runs at its own rate; a print remembers the fill
 clock when it was pressed and fills by how far that clock has run since.
 
@@ -306,7 +347,9 @@ where the figure stands (`untouched_y_m`), the detail region's centre and size
 where its far part meets its near part (`region_seam_z_m`), the Footprint
 picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
 total (`upload_total_bytes`) and the footsteps those uploads carried
-(`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`), the
+(`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`) and
+the bearing whose shape the snow follows now (`wind_shaped_from_deg`, which lags a
+turn until it is shaped), the
 weather clock, the wind's work in the latest physics frame (`wind_update_ms`),
 image allocation and the walking figure: its identity, position, step count and
 progress round the loop as a fraction of its length (`other_loop_progress`, the
@@ -362,8 +405,8 @@ camera toward a corner of the view exactly as far as the default play distance
 allows and back, and walks north and
 south while facing east, with prints and speed following the travel. Running west
 across the Town Square, it runs at full speed in the Shallow Snow and is held back
-in the open snow beyond it. West of the square it runs, walks twice more and runs
-again along one lane of open snow, showing a measurable Packed Path running
+in the open snow beyond it, on the lane between the Camp's western buildings. West
+of the Camp it runs, walks twice more and runs again along one lane of open snow, showing a measurable Packed Path running
 advantage over the fresh lane. While the cursor leans the camera toward a corner
 and back, the detail region follows the focus and returns with it. Every
 observation checks that the region keeps its size with its edges and its seam on
@@ -375,15 +418,23 @@ view lies in full detail and, without lean, that all the snow the view shows wit
 20 m of the figure does too: the outline of that snow is followed along 48 rays from
 the figure. The view's corners on the ground follow from the observed focus,
 distance, pitch, yaw and lens. Every observation also checks that the ground under both figures is one
-flat level and that no obstacle ever holds either of them. It lays a probed trail
+flat level, that neither figure ever stands within a Camp building's footprint,
+where its roof is, nor higher above the ground than the deepest snow (the taller
+roofs' height), and that
+a building holds the controlled figure only in the stages that walk into one and
+never holds the walking figure. It lays a probed trail
 in the open snow and runs on north, far out of the detail region, until the map's
 northern edge holds it 0.3 m inside the map rectangle; a rendered run captures the
 view there. It runs back beside its outward trail and finds its own trail
 retained. Meanwhile the walking figure has crossed the Town Square on its own lane
 while the controlled figure was at least 15 m away. The route picks a point of
 that trail from the public record, walks to it, fixes a probe there and follows
-the trail the way it was laid, then walks back and forth over it until the probe's
-compaction rises. It then presses M at the default play distance with the camera
+the trail the way it was laid, then walks back and forth over it four times, each
+pass 6.75 m, and the probe's compaction must rise. The lengths are chosen for the
+parka's 0.62 m walking step and a trail reached from the west: the fourth return
+east comes within about a centimetre of a whole number of strides from the probe's
+print, so a boot lands on it again whichever boot made it and wherever the figure
+stopped within its step. It then presses M at the default play distance with the camera
 leaning: the whole map shows without lean while it walks north and back, a wheel
 step out changes nothing, and M returns to exactly that distance while a repeat of
 the held key does not toggle. Before closing it, the route walks south across the
@@ -400,12 +451,22 @@ until then. From west of the square it opens the whole-map overview with M,
 whose detail region stays at the map centre, and walks east into the region:
 across the blended border the region holds still and the contact gap stays within
 2 mm. One wheel step in leaves it at the widest play distance, and it zooms on in
-to the closest and fixes a third probe on its own print in the open. At wind 16
-from the north-west that print fills at the 120 wind-second rate and then fills
-completely, its visible depression with it, while no probe's Snow Depth changes:
-with nothing on the flat field to shelter or drift behind, wind leaves the
-starting snow as it was. Four turns of `]` reverse the wind. During the wind
-stages the tracked trail fills whenever no figure is near it. Wind 0 then freezes
+to the closest and fixes a third probe on its own print in the open Town Square.
+It walks north into the small shed's south face, which must hold it still against
+the face for at least half a second, steps back into the shed's lee and fixes a
+fourth probe there; walks up the square's west side to the lodge's west face and
+fixes a fifth; and walks north into the lodge's south face, which must hold it
+still too, then steps back and fixes a sixth in the lodge's lee. At wind 16 from
+the north-west the open print fills at the 120 wind-second rate, the print in the
+shed's lee four times more slowly and the lee print faster than either, while a
+Snowdrift grows there toward 1.2 m without shrinking and settles. The open and
+lee prints fill completely, the lee print's visible depression with them, and the
+sheltered print outlasts them. The lodge's west face scours to the 3 cm floor,
+while neither the open square nor the shed's sheltered lee changes depth. With
+Shift held the figure wades through the drift at walking speed. Four turns of `]`
+reverse the wind; once the record shows the snow following it, the old lee wears
+away and the scoured face drifts within ten seconds. During the wind stages the
+tracked trail fills whenever no figure is near it. Wind 0 then freezes
 every probe's depth, and the compaction of every probe no figure walks past. Five
 wheel steps out reach the widest end of the play range, where the figure must
 stand about a sixteenth of the screen tall and the corner cursor must lean the
@@ -454,8 +515,8 @@ The map sits in a blizzard under overcast polar twilight, after the
 [mood references](../docs/art/snow-town-reference/README.md): a whiteout that
 swallows the distance, falling snow, snow blowing along the ground, gusts that
 thicken both and pull the whiteout closer, a rare diffuse lightning flash, and
-eight warm lanterns standing in the snow round the Town Square against the cold
-light. A dim, cool,
+eight warm lamps on the Camp's doors and windows facing the Town Square against
+the cold light. A dim, cool,
 low **SkyKey** light casts faint soft shadows, which keep Footprints readable;
 their own shading follows its direction.
 
@@ -473,11 +534,12 @@ far edge; splitting shadows over a longer range cost about 4 ms a frame for noth
 The snow receives those shadows but casts none: with SkyKey 40° up its smooth
 surface cannot shade itself, and drawing it into the map ran its vertex heights a
 second time. The scene routes
-hold lightning off so their captures stay comparable. The lanterns' places are
-`WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd), 30 cm above the ground in a
-ring about 17 m from the centre; there are eight, the Compatibility renderer's
-lights per object, so each one reaches the snow. They move onto the Camp's doors
-and windows when its buildings stand.
+hold lightning off so their captures stay comparable. The lamps' places are
+`WARM_LIGHTS` in [`town_layout.gd`](town_layout.gd), each 15 cm outside a
+building's face at door or window height, 1.8–2.4 m: the lodge's door and two
+windows, the generator shed's and workshop's doors, the small shed's window and the
+two cabins' doors. There are eight, the Compatibility renderer's lights per object,
+so each one reaches the snow; the route checks that each hangs on a Camp building.
 
 ### Tune it in the Godot editor
 
@@ -514,9 +576,10 @@ falling snow, blowing snow and fog each cost less than 0.5 ms.
 
 [`town_layout.gd`](town_layout.gd) defines the map once, as a rectangle with
 separate east–west and north–south half extents, together with its named
-landmarks. The snow surface, the shader's map uniform, obstacle and figure
-containment, the camera overview and the scene route all derive from it; do not
-repeat map dimensions elsewhere. The half extents are 80 m east–west and 80 m
+landmarks, the Camp's buildings and the warm lamps. The snow surface, the shader's
+map uniform, obstacle and figure containment, wind shelter, the camera overview
+and the scene route all derive from it; do not repeat map dimensions or building
+positions in other code. The half extents are 80 m east–west and 80 m
 north–south: a 160 × 160 m field spanning −80 to +80 m in X and in Z.
 
 The ground is one flat level, `GROUND_LEVEL` in [`town_layout.gd`](town_layout.gd),

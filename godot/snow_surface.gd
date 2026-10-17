@@ -189,6 +189,12 @@ func wind_from() -> float:
 	return wind.from_bearing
 
 
+## The bearing whose drifts, scour and shelter the snow follows now. It catches up
+## with wind_from() once a turn has been shaped.
+func wind_shaped_from() -> float:
+	return wind.shaped_from()
+
+
 ## Turn the wind by whole 45° steps; positive turns clockwise.
 func turn_wind(steps: int) -> void:
 	wind.turn(steps)

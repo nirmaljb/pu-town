@@ -104,6 +104,12 @@ func configure(layout: Node3D, picture_size: Vector2i, nodes_per_metre: float) -
 	_adopt(from_bearing, _shape(from_bearing))
 
 
+## The compass bearing whose target Snow Depth relaxes toward now. After a turn it
+## lags from_bearing until the worker has shaped the new target.
+func shaped_from() -> float:
+	return _shaped_bearing
+
+
 ## Turn the wind by whole 45° steps; positive turns clockwise. The new target is
 ## shaped on a worker thread; relaxation keeps the old one until it is ready.
 func turn(steps: int) -> void:
