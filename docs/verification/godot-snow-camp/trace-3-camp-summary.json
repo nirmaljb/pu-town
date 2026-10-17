@@ -1,0 +1,65 @@
+{
+  "source": "SCRATCH/bench/3-new/run-015759/frames.csv",
+  "frame_count": 1876,
+  "interval_start_usec": 13907351,
+  "interval_end_usec": 73938458,
+  "elapsed_seconds": 60.031107,
+  "duration_complete": true,
+  "average_fps": 31.250464863158363,
+  "mean_frame_ms": 31.99952398720682,
+  "p95_frame_ms": 35.985,
+  "p99_frame_ms": 37.628,
+  "max_frame_ms": 228.146,
+  "percentile_method": "nearest rank; every recorded interval included",
+  "unfocused_frames": 0,
+  "unfocused_seconds": 0.0,
+  "stationary_frames": 0,
+  "stationary_seconds": 0.0,
+  "focused_moving_seconds": 60.031107,
+  "focused_moving_fraction": 1.0,
+  "position_range_m": {
+    "x": [
+      -17.8416748046875,
+      5.77867364883423
+    ],
+    "z": [
+      -10.7590484619141,
+      2.31433248519897
+    ]
+  },
+  "camera_range_m": [
+    22.5605749961016,
+    22.5605749961016
+  ],
+  "resolutions": [
+    {
+      "viewport_width": 1280,
+      "viewport_height": 720,
+      "window_width": 2560,
+      "window_height": 1440
+    }
+  ],
+  "max_observation_age_ms": 2.041,
+  "wind": {
+    "recorded": true,
+    "settings": [
+      {
+        "strength": 1.0,
+        "from_deg": 315.0
+      }
+    ],
+    "physics_updates": 3599,
+    "mean_ms_per_update": 2.0467804945818284,
+    "single_update_frames": 184,
+    "single_update_p95_ms": 2.9050000000002,
+    "single_update_max_ms": 3.40200000000004,
+    "mean_ms_per_frame": 3.926632729211088,
+    "p95_ms_per_frame": 5.60800000000017,
+    "p99_ms_per_frame": 6.32799999999997,
+    "max_ms_per_frame": 9.31500000000051,
+    "share_of_frame_time": 0.12270909813473874
+  },
+  "warnings": [
+    "The viewport or window differed from the 1280 by 800 measurement target."
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "renderer": "gl_compatibility",
+  "configured_viewport": [
+    1280,
+    720
+  ],
+  "platform": "macos",
+  "build_mode": "release",
+  "git_revision": "1003fd4508aa4543c57c103b583cfad19fcaa425",
+  "godot_source_dirty": false,
+  "sources_sha256": {
+    "blizzard.gd": "18300818e39cb05078fd130afd68f60812115ec26b5f2c1e2d9e647c161123bb",
+    "blizzard.tscn": "899c8b3594c91ea3db33f8d07892d1f82f55b2072c59c6e19906d75e2ac4822f",
+    "export_presets.cfg": "af537fa07690aeaab51c4712fe6e0b11e71b3ff00dba05a20c2c2189fa04dbfd",
+    "follow_camera.gd": "467a619da7b87391e488cc992a6f6dddb42b4ffb45d26404be7dbf7012e6d83b",
+    "inspection.gd": "a52cb62245ecdfd2b9c4db59c61828119ab9b805ebae078f6eb4f6ad5465badf",
+    "inspection_route.gd": "e2d11b17a70376f8a30bf43225fb1e5dbaf242868957eef3f5d19f67a6c6f0d0",
+    "parka_avatar.gd": "82e0676f304dc2e65d14c9ace89179dcf68c0f46852fd20568274d7fceae62cd",
+    "project.godot": "4ba92c23c64463903a590f0dce41b2df2d95a9b4cb1296cb1602dfff37c02b79",
+    "snow.gdshader": "aaf6fcc9e28440c0dfb70480d993e0f345cae622da25c68f51794c51a096e0d4",
+    "snow_surface.gd": "5eca570c97ea1fb913f1ecbb35680d4ed893933277bed0e098fec2e18f6544d4",
+    "snow_walk.gd": "fbf247bc3401dc44ea8dec5e5bdd8a9a39de168bd4deb56b0db064a3934bdc6f",
+    "snow_walk.tscn": "3724c61ed953cb90e81fe13309e7d35f8074a46b7e7accddd480fec4c2efda97",
+    "snow_wind.gd": "dc490c6ef434b44b4082832e429e7ca3d202f05d3f9301043ee37602b5a86bbf",
+    "tests/walk_scene.gd": "d8c65bacc079c8f5c42235c3b9fd97eaa93da3595bae5d2e8c602f1e82c70d21",
+    "town_layout.gd": "1def7076f7effa7bb054e28d9d7170bf61b35dbc5ef3113243eb8a821151923a",
+    "walker.gd": "56dd667bf346c09cbfa73c2bb282a1f7b2d4df41eb2ecd77287d89a86a7bbd97"
+  },
+  "package_sha256": {
+    "PU-Town-Snow-Walk.app/Contents/Info.plist": "28303a24b06d8bdebcf002449ad54c1ed87f3f0332a41ac610f6e167e2403bfe",
+    "PU-Town-Snow-Walk.app/Contents/MacOS/PU Town \u00b7 Snow Walk": "a6cc6a768887543e891d3ef80304e0e60c02be2cc081f0b2c37171ec32cf27b8",
+    "PU-Town-Snow-Walk.app/Contents/PkgInfo": "7e50a30efad50208a173203ced60818d693bb61266b75aa10927d1a2adce80cb",
+    "PU-Town-Snow-Walk.app/Contents/Resources/PU Town \u00b7 Snow Walk.pck": "e6606054b77749df8c75cb27f703d5023957139167f4fae44c519cbcc610caa7",
+    "PU-Town-Snow-Walk.app/Contents/Resources/PrivacyInfo.xcprivacy": "0535353bb08c25b8ce5ed9ac7e442a5994f402e0f6cbc4bed668cfc63c2ceac3",
+    "PU-Town-Snow-Walk.app/Contents/Resources/icon.icns": "779ff524928785811d6d4c61f47a26491160b1092db9b610e85fcdfd9b2d2b2a",
+    "PU-Town-Snow-Walk.app/Contents/_CodeSignature/CodeResources": "e1bdf420072a8d8869dcd9669b477bf4ae5eaab6071e5d66eb356ca8ff4eb736"
+  }
+}
