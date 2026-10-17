@@ -4,7 +4,8 @@ Blender axes: +Z up, +Y north, one unit one metre, origin at the foot of the tru
 The tree is a trunk carrying whorls of drooping branches. Each branch is a fan of
 serrated needle sprigs under one faceted snow slab, as in the owner's sheets.
 The storm comes from WIND_FROM: branches facing it are shorter and carry more snow,
-and every branch tip is swept a little downwind.
+and every branch tip is swept a little downwind. shape() builds the near tree and
+far() the distance version, both from the same branches (boughs()).
 """
 import math
 import random
@@ -18,6 +19,19 @@ WIND_FROM = (-math.sqrt(0.5), math.sqrt(0.5), 0.0)  # north-west, the town's pre
 REACH = ((0.0, 1.95), (0.5, 1.95), (1.0, 1.25), (1.5, 1.15), (2.0, 1.02), (2.5, 1.02), (3.0, 1.02),
          (3.5, 1.0), (4.0, 0.72), (4.5, 0.48), (5.0, 0.4), (5.5, 0.13), (6.0, 0.04), (6.5, 0.0))
 FIRST_TIER, LAST_TIER = 1.15, 6.25
+
+# Detail, set to hold the near tree inside its triangle budget (budget.py). The
+# unreduced tree had rows every 0.19 m and at least two a side, three serrations on a
+# sprig longer than 16 cm, two sprigs at each branch's end, five snow cross-sections
+# with an end cap, and four tent cross-sections.
+SPRIG_SPACING = 0.25  # metres of branch between rows of sprigs on each side
+SPRIG_ROWS = 1  # rows on each side of even the shortest branch
+SPRIG_TEETH = 2  # serrations on each side of a sprig
+SPRIG_SIZE = 1.12  # every row sprig's length, as a share of the length its branch gives it
+SNOW_STATIONS = 4  # cross-sections along a snow tongue, before its tip
+TENT_STATIONS = (0.0, 0.5, 1.0)  # cross-sections along a branch's dark tent, as shares of it
+SNOW_END_CAP = False  # close the tongue's end against the trunk, inside the crown
+TIP_SPRIGS = (0.0,)  # sprigs at a branch's end, each turned this far to one side
 
 
 def add(*vs):
@@ -122,13 +136,18 @@ def snow_width(length, load):
     return (0.03 + 0.15 * min(length, 1.4)) * load
 
 
+def rim_share(along):
+    """A tongue's half-width as a share of its widest, `along` from its root (0) to its tip (1)."""
+    x = along * (len(SNOW_WIDTHS) - 1)
+    i = min(int(x), len(SNOW_WIDTHS) - 2)
+    return SNOW_WIDTHS[i] + (SNOW_WIDTHS[i + 1] - SNOW_WIDTHS[i]) * (x - i)
+
+
 def rim(width, t, until):
     """How far out from the branch the snow's edge lies at t (none past the tongue's end)."""
     if t > until:
         return 0.35 * width
-    x = t / until * (len(SNOW_WIDTHS) - 1)
-    i = min(int(x), len(SNOW_WIDTHS) - 2)
-    return width * (SNOW_WIDTHS[i] + (SNOW_WIDTHS[i + 1] - SNOW_WIDTHS[i]) * (x - i))
+    return width * rim_share(t / until)
 
 
 def needles(mesh, branch, rng, width, snow_until, until=1.0):
@@ -136,35 +155,36 @@ def needles(mesh, branch, rng, width, snow_until, until=1.0):
     forward and down as a dark fringe, over a dark tent that keeps the branch solid."""
     L = branch.length
     spread = width
-    rows = max(2, round(L * until / 0.19))
+    rows = max(SPRIG_ROWS, round(L * until / SPRIG_SPACING))
     for side in (1, -1):
         for k in range(rows):
             t = 0.1 + (until - 0.1) * (k + rng.uniform(0.3, 0.7)) / rows
             tangent, side_dir, normal = branch.frame(t)
             out = rim(width, t, snow_until) * rng.uniform(0.7, 0.9)
             root = add(branch.point(t), mul(side_dir, side * out), (0, 0, -0.45 * out - 0.02))
-            size = (0.17 + 0.22 * min(L, 1.2)) * min(1.0, 0.35 + 1.3 * L) * (1 - 0.3 * t) * rng.uniform(0.85, 1.15)
+            size = SPRIG_SIZE * (0.17 + 0.22 * min(L, 1.2)) * min(1.0, 0.35 + 1.3 * L) * (1 - 0.3 * t) * rng.uniform(0.85, 1.15)
             forward, droop = math.radians(rng.uniform(20, 45)), math.radians(rng.uniform(35, 55) + 15 * t)
             flat = add(mul(tangent, math.cos(forward)), mul(side_dir, side * math.sin(forward)))
             direction = unit(add(mul(flat, math.cos(droop)), (0, 0, -math.sin(droop))))
             up = unit(add(UP, mul(direction, -dot(UP, direction))))
-            sprig(mesh, root, direction, up, size, 3 if size > 0.16 else 2)
+            sprig(mesh, root, direction, up, size, SPRIG_TEETH)
     tangent, side_dir, _ = branch.frame(until)
-    for turn in (-0.35, 0.35):
+    for turn in TIP_SPRIGS:
         direction = unit(add(tangent, mul(side_dir, turn), (0, 0, -0.3)))
         up = unit(add(UP, mul(direction, -dot(UP, direction))))
-        sprig(mesh, branch.point(until), direction, up, 0.07 + 0.16 * min(L, 1.2), 3 if L > 0.6 else 2)
+        sprig(mesh, branch.point(until), direction, up, 0.07 + 0.16 * min(L, 1.2), SPRIG_TEETH)
     # The dark tent under the branch.
     points = []
     end = min(until, snow_until)  # past the snow the tent would show from above
-    for t in (0.0, 0.35 * end, 0.7 * end, end):
+    for share in TENT_STATIONS:
+        t = share * end
         tangent, side_dir, normal = branch.frame(t)
         centre = branch.point(t)
         out = spread * 0.6 * (1 - 0.6 * t)
         points += [centre, add(centre, mul(side_dir, out), (0, 0, -0.6 * out - 0.03)),
                    add(centre, mul(side_dir, -out), (0, 0, -0.6 * out - 0.03))]
     faces = []
-    for j in range(3):
+    for j in range(len(TENT_STATIONS) - 1):
         a, b = 3 * j, 3 * (j + 1)
         faces += [(a, a + 1, b + 1, b), (a, b, b + 2, a + 2)]
     mesh.add(points, faces, 'Shadow', jitter=0.01)
@@ -176,16 +196,17 @@ def slab(mesh, branch, rng, width, load, until, icicles):
     neighbours' snow, hanging over both sides in pointed lobes and tapering to a tip."""
     L = branch.length
     thick = (0.025 + 0.08 * min(L, 1.4)) * load * rng.uniform(0.8, 1.2)
-    widths = SNOW_WIDTHS
-    stations = [0.02 + (until - 0.02) * j / 5 for j in range(5)]
+    n = SNOW_STATIONS
+    stations = [0.02 + (until - 0.02) * j / n for j in range(n)]
     points, rim = [], []
     for j, t in enumerate(stations):
         tangent, side_dir, normal = branch.frame(t)
         centre = branch.point(t)
-        th = thick * (1.0 - 0.15 * j / 4)
+        th = thick * (1.0 - 0.15 * j / (n - 1))
+        share = rim_share(j / (n - 1))
         points.append(add(centre, mul(normal, 0.03 + th)))
         for side in (1, -1):
-            hw = width * widths[j] * rng.uniform(0.8, 1.2)
+            hw = width * share * rng.uniform(0.8, 1.2)
             lobe = rng.uniform(0.4, 1.2) * th + 0.03 if rng.random() < 0.5 else 0.0  # a hanging point
             shoulder = add(centre, mul(side_dir, side * 0.5 * hw), mul(normal, 0.03 + 0.6 * th), (0, 0, -0.12 * hw))
             edge = add(centre, mul(side_dir, side * hw), mul(normal, 0.03 + 0.25 * th), (0, 0, -0.45 * hw))
@@ -195,17 +216,18 @@ def slab(mesh, branch, rng, width, load, until, icicles):
     points.append(add(branch.point(until), mul(tangent, 0.06 * L), (0, 0, -0.08)))
     tip = len(points) - 1
     faces = []
-    for j in range(5):
+    for j in range(n):
         a = 7 * j
         for s0 in (1, 4):
             chain = [a, a + s0, a + s0 + 1, a + s0 + 2]
-            if j < 4:
+            if j < n - 1:
                 nxt = [c + 7 for c in chain]
                 quads = [(chain[i], chain[i + 1], nxt[i + 1], nxt[i]) for i in range(3)]
             else:
                 quads = [(chain[i], chain[i + 1], tip) for i in range(3)]
             faces += quads if s0 == 1 else [tuple(reversed(q)) for q in quads]
-    faces.append((0, 1, 2, 3, 6, 5, 4))  # the end against the trunk
+    if SNOW_END_CAP:
+        faces.append((0, 1, 2, 3, 6, 5, 4))  # the end against the trunk
     mesh.add(points, faces, 'Snow', jitter=0.026)
     # Ice drips under the heaviest slabs, hanging from the rim near the tip.
     for _ in range(icicles):
@@ -215,23 +237,21 @@ def slab(mesh, branch, rng, width, load, until, icicles):
         mesh.add(ring + [add(hang, (0, 0, -depth))], [(0, 1, 3), (1, 2, 3), (2, 0, 3)], 'Ice')
 
 
-def trunk(mesh):
-    """A faceted bark column with a root flare; its last metre leans downwind."""
-    sides = 7
-    levels = [0.0, 0.12, 0.35, 0.9, 1.8, 3.0, 4.2, 5.2, 5.8, 6.15]
+def axis(z):
+    """Where the trunk's axis stands at height z: its last metre leans downwind."""
+    return mul(DOWNWIND, max(0.0, z - 5.4) ** 1.6 * 0.12)
 
-    def axis(z):
-        lean = max(0.0, z - 5.4) ** 1.6 * 0.12
-        return mul(DOWNWIND, lean)
 
+def trunk(mesh, sides=7, levels=(0.0, 0.12, 0.35, 0.9, 1.8, 3.0, 4.2, 5.2, 5.8, 6.15), roots=True):
+    """A faceted bark column with a root flare."""
     def radius(z):
         return 0.165 * (1 - z / 6.6) ** 1.1 + 0.012 + 0.05 * max(0.0, 1 - z / 0.3) ** 2
 
     points = []
-    for z in levels:
+    for k, z in enumerate(levels):
         centre = add(axis(z), (0, 0, z))
         for i in range(sides):
-            a = 2 * math.pi * (i + 0.5 * (levels.index(z) % 2)) / sides
+            a = 2 * math.pi * (i + 0.5 * (k % 2)) / sides
             points.append(add(centre, (radius(z) * math.cos(a), radius(z) * math.sin(a), 0)))
     faces = []
     for k in range(len(levels) - 1):
@@ -239,6 +259,8 @@ def trunk(mesh):
             a, b = k * sides + i, k * sides + (i + 1) % sides
             faces.append((a, b, b + sides, a + sides))
     mesh.add(points, faces, 'Bark', jitter=0.008)
+    if not roots:
+        return
     # Three roots splay into the snow.
     rng = random.Random(SEED + '-roots')
     for k in range(3):
@@ -254,29 +276,28 @@ def trunk(mesh):
         tip = add(mul(out, 0.1 + length), (0, 0, -0.02))
         ring.append(tip)
         mesh.add(ring, [(0, 2, 3, 1), (0, 4, 2), (1, 3, 4), (0, 1, 4)], 'Bark', jitter=0.01)
-    return axis
 
 
-def spire(mesh, axis):
+def spire(mesh, sides=5):
     """The leader above the last whorl: a needle spike with a snow-capped tip."""
-    def ring(z, r, sides=5):
+    def ring(z, r):
         centre = add(axis(z), (0, 0, z))
         return [add(centre, (r * math.cos(a), r * math.sin(a), 0)) for a in (2 * math.pi * i / sides for i in range(sides))]
 
     top = add(axis(HEIGHT + 0.2), (0, 0, HEIGHT))
-    mesh.add(ring(5.8, 0.06) + ring(6.15, 0.04), [(i, (i + 1) % 5, 5 + (i + 1) % 5, 5 + i) for i in range(5)],
+    n = sides
+    mesh.add(ring(5.8, 0.06) + ring(6.15, 0.04), [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n)],
              'Needles', jitter=0.004)
-    mesh.add(ring(6.1, 0.05) + [top], [(i, (i + 1) % 5, 5) for i in range(5)], 'Snow', jitter=0.004)
+    mesh.add(ring(6.1, 0.05) + [top], [(i, (i + 1) % n, n) for i in range(n)], 'Snow', jitter=0.004)
 
 
-def shadow(mesh):
+def shadow(mesh, sides=9, rings=(0.95, 1.6, 2.4, 3.4, 4.4, 5.3, 6.05)):
     """Dark needles filling the crown's core, so the gaps between whorls read as depth."""
-    sides, rings = 9, [0.95, 1.6, 2.4, 3.4, 4.4, 5.3, 6.05]
     rng = random.Random(SEED + '-shadow')
     points = []
-    for z in rings:
+    for k, z in enumerate(rings):
         for i in range(sides):
-            a = 2 * math.pi * (i + 0.5 * (rings.index(z) % 2)) / sides
+            a = 2 * math.pi * (i + 0.5 * (k % 2)) / sides
             r = 0.36 * reach(z) * rng.uniform(0.8, 1.15)
             points.append((r * math.cos(a), r * math.sin(a), z - 0.1))
     faces = []
@@ -296,14 +317,23 @@ def tiers():
     return heights
 
 
-def shape():
-    mesh = Mesh()
-    axis = trunk(mesh)
-    shadow(mesh)
-    spire(mesh, axis)
+BROKEN = {(2, 1), (5, 3)}  # (whorl, branch) snapped by the storm
+
+
+class Bough:
+    """One branch as the storm left it: its curve, its snow and its own random stream."""
+
+    def __init__(self, branch, rng, broken, load, snow_until, icicles):
+        self.branch, self.rng, self.broken = branch, rng, broken
+        self.load, self.snow_until, self.icicles = load, snow_until, icicles
+        self.until = 0.7 if broken else 1.0
+        self.width = snow_width(branch.length, load)
+
+
+def boughs(stats):
+    """Every branch of the tree, whorl by whorl. Both versions are built from these."""
     heights = tiers()
-    broken = {(2, 1), (5, 3)}
-    stats = {'tiers': len(heights), 'branches': 0, 'stripped': 0, 'broken': len(broken), 'icicles': 0}
+    stats.update({'tiers': len(heights), 'branches': 0, 'stripped': 0, 'broken': len(BROKEN), 'icicles': 0})
     for tier, h in enumerate(heights):
         f = h / HEIGHT
         count = round(4.5 + 3 * (1 - f))
@@ -321,30 +351,98 @@ def shape():
             z = h + rng.uniform(-0.08, 0.08) * (1 - f)
             branch = Branch(z, azimuth, L, pitch, drop, 0.04, axis(z))
             stats['branches'] += 1
-            if (tier, i) in broken:
+            if (tier, i) in BROKEN:
                 # Snapped by the storm: half its length, a bare splintered end.
                 branch.length *= 0.5
-                width = snow_width(branch.length, 0.9)
-                needles(mesh, branch, rng, width, 0.7, until=0.7)
-                slab(mesh, branch, rng, width, 0.9, 0.7, 0)
-                end, (tangent, side, normal) = branch.point(0.72), branch.frame(0.72)
-                stick = add(end, mul(tangent, 0.28), (0, 0, -0.05))
-                mesh.add([add(end, mul(side, 0.025)), add(end, mul(side, -0.025)), add(end, mul(normal, 0.03)), stick],
-                         [(0, 1, 3), (1, 2, 3), (2, 0, 3)], 'Bark')
+                yield Bough(branch, rng, True, 0.9, 0.7, 0)
                 continue
             load = rng.uniform(0.8, 1.15) * (1 + 0.3 * max(0.0, windward)) * (0.7 + 0.4 * (1 - f))
             stripped = rng.random() < 0.08
             stats['stripped'] += stripped
             icicles = rng.randrange(0, 3) if load > 1.05 and L > 0.7 else 0
             stats['icicles'] += icicles
-            width = snow_width(L, load)
             snow_until = rng.uniform(0.4, 0.55) if stripped else rng.uniform(0.9, 1.0)
-            needles(mesh, branch, rng, width, snow_until)
-            slab(mesh, branch, rng, width, load, snow_until, icicles)
+            yield Bough(branch, rng, False, load, snow_until, icicles)
+
+
+def stub(mesh, branch):
+    """The bare splintered end of a snapped branch."""
+    end, (tangent, side, normal) = branch.point(0.72), branch.frame(0.72)
+    stick = add(end, mul(tangent, 0.28), (0, 0, -0.05))
+    mesh.add([add(end, mul(side, 0.025)), add(end, mul(side, -0.025)), add(end, mul(normal, 0.03)), stick],
+             [(0, 1, 3), (1, 2, 3), (2, 0, 3)], 'Bark')
+
+
+def shape():
+    """The near tree, seen close to the camera."""
+    mesh, stats = Mesh(), {}
+    trunk(mesh)
+    shadow(mesh)
+    spire(mesh)
+    for b in boughs(stats):
+        needles(mesh, b.branch, b.rng, b.width, b.snow_until, until=b.until)
+        slab(mesh, b.branch, b.rng, b.width, b.load, b.snow_until, b.icicles)
+        if b.broken:
+            stub(mesh, b.branch)
+    return mesh, stats
+
+
+# The distance version, tuned so its outline and its share of snow from the side and
+# from above match the near tree's (budget.py). Its snow roof is this much wider than
+# a near tongue's widest, widest this share of the way along the snow, droops at its
+# edges by this share of its half-width and is this share of a near tongue's
+# thickness. Its needle roof reaches this far past the snow's edge and hangs this far
+# below it, widest this share of the way along the branch, with its tip this far
+# below the branch's end; those three as shares of a near sprig's length.
+FAR_SNOW_SPREAD = 2.8
+FAR_SNOW_WIDEST = 0.55
+FAR_SNOW_DROOP = 0.45
+FAR_SNOW_DEPTH = 1.5
+FAR_NEEDLE_REACH = -0.05
+FAR_NEEDLE_HANG = 0.55
+FAR_NEEDLE_WIDEST = 0.6
+FAR_NEEDLE_TIP = 0.3
+
+
+def roof(mesh, bough):
+    """A branch far away: a snow roof over a roof of needles that hangs below it, two triangles each."""
+    branch, L = bough.branch, bough.branch.length
+    sprig_length = (0.17 + 0.22 * min(L, 1.2)) * min(1.0, 0.35 + 1.3 * L)
+    thick = FAR_SNOW_DEPTH * (0.025 + 0.08 * min(L, 1.4)) * bough.load
+
+    def ridge(t, out, rise, drop, forward=0.0):
+        """The roof's root or tip at t (out 0), or its two edges `out` either side of the branch."""
+        tangent, side_dir, normal = branch.frame(t)
+        centre = add(branch.point(t), mul(normal, rise), mul(tangent, forward), (0, 0, -drop))
+        return [add(centre, mul(side_dir, out)), add(centre, mul(side_dir, -out))] if out else [centre]
+
+    snow_end, end = bough.snow_until, bough.until
+    hw = FAR_SNOW_SPREAD * bough.width
+    snow = (ridge(0.02, 0, 0.03 + thick, 0) + ridge(FAR_SNOW_WIDEST * snow_end, hw, 0.03 + 0.25 * thick, FAR_SNOW_DROOP * hw)
+            + ridge(snow_end, 0, 0, 0.08, 0.06 * L))
+    wing = hw + FAR_NEEDLE_REACH * sprig_length
+    needle = (ridge(0.05, 0, 0, 0.03) + ridge(FAR_NEEDLE_WIDEST * end, wing, 0, FAR_SNOW_DROOP * hw + FAR_NEEDLE_HANG * sprig_length)
+              + ridge(end, 0, 0, FAR_NEEDLE_TIP * sprig_length, 0.06 * L + 0.3 * sprig_length))
+    mesh.add(needle, [(0, 1, 3), (0, 3, 2)], 'Needles')
+    mesh.add(snow, [(0, 1, 3), (0, 3, 2)], 'Snow')
+
+
+def far():
+    """The distance version, for far trees and the whole-map overview: the same trunk,
+    crown and branches, each branch reduced to a snow roof over a roof of needles."""
+    mesh, stats = Mesh(), {}
+    trunk(mesh, sides=5, levels=(0.0, 0.4, 6.15), roots=False)
+    shadow(mesh, sides=6, rings=(0.95, 2.4, 4.4, 6.05))
+    spire(mesh, sides=3)
+    for b in boughs(stats):
+        roof(mesh, b)
+        if b.broken:
+            stub(mesh, b.branch)
     return mesh, stats
 
 
 if __name__ == '__main__':
-    built, stats = shape()
-    tris = sum(len(f) - 2 for f in built.faces)
-    print(stats, 'triangles', tris, 'vertices', len(built.verts))
+    for name, build in (('near', shape), ('far', far)):
+        built, stats = build()
+        tris = sum(len(f) - 2 for f in built.faces)
+        print(name, stats, 'triangles', tris, 'vertices', len(built.verts))

@@ -1,12 +1,14 @@
-"""Build the snow pine inside a headless Blender and save it for review.
+"""Build the snow pine's two versions inside a headless Blender and save them for review.
 
 Usage (from the repository root, see README.md):
   Blender -b --factory-startup --python tools/scenery/pine/make.py -- BUILD_DIR
 
-Writes BUILD_DIR/pine.blend (the tree plus a review stage: grey studio world, key
-light and a camera at the side sheet's framing), BUILD_DIR/pine.glb and
-BUILD_DIR/report.json. Nothing is written to the Godot project.
+Writes BUILD_DIR/pine.blend (both versions plus a review stage: grey studio world,
+key light and a camera at the side sheet's framing), BUILD_DIR/pine.glb (the near
+tree), BUILD_DIR/pine_far.glb (the distance version) and BUILD_DIR/report.json.
+Nothing is written to the Godot project; run.sh exports the files once they pass.
 """
+import hashlib
 import json
 import math
 import sys
@@ -44,13 +46,13 @@ def make_materials():
     return made
 
 
-def make_mesh(materials):
-    built, stats = shape.shape()
-    mesh = bpy.data.meshes.new('Pine')
+def make_mesh(materials, name, build):
+    built, stats = build()
+    mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(built.verts, [], built.faces)
     order = list(materials)
-    for name in order:
-        mesh.materials.append(materials[name])
+    for material in order:
+        mesh.materials.append(materials[material])
     for polygon, material in zip(mesh.polygons, built.materials):
         polygon.material_index = order.index(material)
     bm = bmesh.new()
@@ -60,7 +62,7 @@ def make_mesh(materials):
     bm.free()
     for polygon in mesh.polygons:
         polygon.use_smooth = False  # the faceted look comes from flat triangles
-    obj = bpy.data.objects.new('Pine', mesh)
+    obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
     return obj, stats
 
@@ -99,20 +101,21 @@ def make_stage():
     camera.data.show_background_images = True
 
 
-def main():
-    build = Path(sys.argv[sys.argv.index('--') + 1]).resolve()
-    build.mkdir(parents=True, exist_ok=True)
-    reset()
-    obj, stats = make_mesh(make_materials())
-    make_stage()
-    bpy.ops.wm.save_as_mainfile(filepath=str(build / 'pine.blend'))
+# Version -> (Blender object, exported file, builder in shape.py).
+VERSIONS = {'near': ('Pine', 'pine.glb', shape.shape), 'far': ('PineFar', 'pine_far.glb', shape.far)}
+
+
+def export(obj, path):
     bpy.ops.object.select_all(action='DESELECT')
     obj.select_set(True)
     bpy.ops.export_scene.gltf(
-        filepath=str(build / 'pine.glb'), export_format='GLB', export_yup=True, use_selection=True,
+        filepath=str(path), export_format='GLB', export_yup=True, use_selection=True,
         export_texcoords=False, export_normals=True, export_materials='EXPORT',
         export_cameras=False, export_lights=False, export_extras=False,
     )
+
+
+def describe(obj, path):
     mesh = obj.data
     per_material = {}
     for polygon in mesh.polygons:
@@ -120,16 +123,30 @@ def main():
         per_material[name] = per_material.get(name, 0) + 1
     xs = [v.co.x for v in mesh.vertices]
     ys = [v.co.y for v in mesh.vertices]
-    report = {
+    return {
         'triangles': len(mesh.polygons), 'vertices': len(mesh.vertices),
         'triangles_by_material': per_material,
-        'materials': palette.SWATCHES,
         'height_m': round(max(v.co.z for v in mesh.vertices), 3),
         'crown_m': {'x': [round(min(xs), 2), round(max(xs), 2)], 'y': [round(min(ys), 2), round(max(ys), 2)]},
-        'structure': stats,
-        'wind_from': shape.WIND_FROM,
-        'glb_bytes': (build / 'pine.glb').stat().st_size,
+        'file': path.name, 'glb_bytes': path.stat().st_size,
+        'glb_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
     }
+
+
+def main():
+    build = Path(sys.argv[sys.argv.index('--') + 1]).resolve()
+    build.mkdir(parents=True, exist_ok=True)
+    reset()
+    materials = make_materials()
+    built = {version: make_mesh(materials, name, builder) for version, (name, _, builder) in VERSIONS.items()}
+    make_stage()
+    bpy.ops.wm.save_as_mainfile(filepath=str(build / 'pine.blend'))
+    report = {}
+    for version, (obj, stats) in built.items():
+        path = build / VERSIONS[version][1]
+        export(obj, path)
+        report[version] = describe(obj, path)
+    report.update({'structure': built['near'][1], 'materials': palette.SWATCHES, 'wind_from': shape.WIND_FROM})
     (build / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print('PINE_REPORT', json.dumps(report))
 
