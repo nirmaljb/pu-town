@@ -1,0 +1,50 @@
+{
+  "source": "Owner-supplied /Users/kaizenjb/Downloads/designs/generator-room",
+  "images": [
+    {
+      "file": "Snow-capped timber utility shed-1.png",
+      "pixels": [
+        1774,
+        887
+      ],
+      "sha256": "85d6acc4287ef69ac31b9af49a6b97e109c55b222102f55024baaf542f523965"
+    },
+    {
+      "file": "Snow-capped timber utility shed-3.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "467cdb21cb304817726bc532494b9ef7b1c14e1b143dc71c795b4e3272839e80"
+    },
+    {
+      "file": "Snow-capped timber utility shed-2.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "0519ce112c4e96478685dae28dcacd31f35b73fafc609422e70ca4315edaae03"
+    },
+    {
+      "file": "Charcoal Timber Shed Side Elevation-6.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "e321a8278969bd49515d076be4fb583b336927a5a5b5249678ccec032673ce59"
+    },
+    {
+      "file": "Top-down snowy shed roof cutout-5.png",
+      "pixels": [
+        1774,
+        887
+      ],
+      "sha256": "63f9a2d894a0213653060e057cc2864705eec4ce61b3021b489e8d0e8d86e9a3"
+    }
+  ],
+  "atmosphere_reference": {
+    "original_path": "/Users/kaizenjb/Downloads/map-design/Gemini_Generated_Image_vifothvifothvifo (1).png",
+    "sha256": "68e2fb7109f75a9b99b7262e057e123426b8be45c0300454ffce011cb5c41d0f",
+    "use": "Palette and atmosphere only; no embedded map pixels."
+  }
+}
