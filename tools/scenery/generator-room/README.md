@@ -13,6 +13,16 @@ interior lining and one caged lamp. Its root is `SHED / 8.8 × 3.8 m` at ground 
 Use Blender's Append > Collection > Shed to reuse the building. Toggle
 `02 Roof and snow` to inspect the interior or `07 Lamp` to remove the lamp.
 
+**`build/roof.blend`** contains the independent, marked **`Snowy timber roof`**
+collection asset. It includes only the roof deck, fascia, rafters, snow cap, bolts
+and ice, with both textures packed. Append that collection into another Blender
+file, then move, rotate or scale its `ROOF / mounting plane centre` root. Its pivot
+is at `(0, 0, 0)`, centred on the mounting plane; rafters extend below that plane.
+The nominal deck is 9.66 × 4.36 m; trim extends the overall footprint to about
+9.82 × 4.57 m. It retains the shallow pitch, rising toward +Y. The matching shed
+places this pivot at `(0, 0, 2.72)` m. Scaling X and Y changes its span; keep Z at
+1 if the snow thickness and timber depth should stay constant.
+
 `build/generator-room.blend` is the working review master, with the same shed plus
 a separate presentation stage and exterior/interior inspection cameras. The
 standalone file contains no review cameras, ground or presentation lights.
@@ -104,6 +114,29 @@ floor throughout the empty room, checks evaluated mesh topology, packed images,
 one physical lamp and exclusion of review objects. These are saved-artifact
 checks, not gameplay or performance tests. `package.py` uses a regular scene save
 because partial library writing of a new scene crashed this Blender build.
+
+Package and inspect the roof separately:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender \
+  -b tools/scenery/generator-room/build/generator-room.blend \
+  --python-exit-code 1 --python tools/scenery/generator-room/package.py -- roof
+/Applications/Blender.app/Contents/MacOS/Blender \
+  -b tools/scenery/generator-room/build/roof.blend \
+  --python-exit-code 1 --python tools/scenery/generator-room/review_roof.py -- \
+  tools/scenery/generator-room/build
+/Applications/Blender.app/Contents/MacOS/Blender \
+  -b tools/scenery/generator-room/build/roof.blend \
+  --python-exit-code 1 --python tools/scenery/generator-room/check_roof.py -- \
+  tools/scenery/generator-room/build/generator-room.blend
+```
+
+Run the roof packaging command again after rendering to embed its Asset Browser
+thumbnail. `check_roof.py` checks self-containment, topology and packed materials,
+then compares evaluated vertices against the roof's assembled position. An
+optional second file argument compares the complete shed with an earlier master.
+The main master keeps the roof parented to the shed; the roof-only file removes
+that external parent and normalises its placement origin.
 
 ## Reference and material provenance
 

@@ -16,8 +16,11 @@ shed images and the map atmosphere reference. No game integration was attempted.
 | 6 | Full floor and empty room added; threshold overlap caused a dark seam, lamp hidden behind the front wall | Removed the overlap, moved the single lamp to the rear wall and widened cutaway framing |
 | 7 | Floor seam resolved and full room visible; doorway glow subdued and inspection camera cropped the lamp | Increased lamp power and repositioned entry/interior inspection cameras |
 | 8 | Complete empty wooden interior, visible amber lamp, clear entry and consistent exterior | Nine final views inspected; standalone shed file saved and independently checked |
+| 9 | Owner requested a separately reusable roof | Added a mounting pivot and standalone roof asset; upper and underside renders checked |
 
-The selected renders here are untouched Blender outputs from pass 8.
+The shed renders here are untouched Blender outputs from pass 8.
+Pass 9 separates the roof hierarchy without altering the shed geometry;
+`roof.png` and `roof-underside.png` show the independently saved roof.
 `hero.png` presents the cold exterior; `front.png`, `right.png`, `top.png` and
 `back.png` are transparent orthographic inspections. `entry.png` shows the open
 entrance, `cutaway.png` and `floorplan.png` hide the removable roof to expose the
@@ -25,7 +28,7 @@ whole empty floor, and `inside.png` shows the atmosphere under the closed roof.
 The full room is an explicit owner-requested extension of the reference exterior.
 
 `inspection.json` records checks on the independently reopened **`build/shed.blend`**.
-The asset has **44,102 evaluated triangles**, **373 objects** including one point
+The asset has **44,102 evaluated triangles**, **374 objects** including one point
 light and the root, no non-manifold mesh edges, and both image textures packed.
 Door clearance is **1.44 × 2.10 m above the floor**, centred **1.64 m** right of the
 footprint centre. Nine rays traverse the entry to the back wall or its lamp;
@@ -49,3 +52,14 @@ MCP request/response records, every earlier pass and the editable `.blend` remai
 local in `../build/`. Both the reusable shed and review master contain real 3D parts and packed shader textures;
 there is no runtime export, collision setup, LOD acceptance or game performance
 claim in this delivery.
+
+## Independent roof inspection
+
+`roof-inspection.json` records a self-contained collection asset with 61 objects,
+11,710 evaluated triangles, packed textures, no non-manifold mesh edges and no
+parents outside the roof. The origin is the mounting-plane centre. Repositioning
+the standalone roof at the shed's 2.72 m mount reproduces every evaluated vertex
+to within 0.000001 m. Comparing the full shed before and after separation found
+zero geometry change. The existing floor and doorway checks also still pass.
+The roof review worker adds temporary lights/cameras without saving them to the
+asset. The roof file includes a thumbnail for its marked Asset Browser collection.

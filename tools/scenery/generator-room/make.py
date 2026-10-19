@@ -13,7 +13,7 @@ from mathutils import Vector, noise
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / 'build'
 OUT.mkdir(exist_ok=True)
-PASS = globals().get('BUILD_PASS', '08')
+PASS = globals().get('BUILD_PASS', '09')
 W, D = 8.8, 3.8
 DOOR_X, DOOR_W, DOOR_H = 1.64, 1.44, 2.1
 FRONT_H, BACK_H = 2.52, 2.92
@@ -415,6 +415,23 @@ for i in range(26):
     bpy.ops.mesh.primitive_cone_add(vertices=6,radius1=0,radius2=rng.uniform(.009,.025),depth=length,location=(x,y,roof_z(y)+.09-length/2))
     ob=move(bpy.context.object,'02');ob.name='Ice / eave drip';ob.data.materials.append(ice);ob.parent=root
 
+# Roof has its own mounting pivot while retaining its exact assembled placement.
+roof_root=bpy.data.objects.new('ROOF / mounting plane centre',None)
+collections['02'].objects.link(roof_root)
+roof_root.parent=root
+roof_root.location=(0,0,(FRONT_H+BACK_H)/2)
+roof_root['nominal_deck_m']=[roof_w,roof_d]
+roof_root['matching_wall_footprint_m']=[W,D]
+roof_root['pitch_degrees']=math.degrees(slope)
+roof_root['pivot_note']='Centre of nominal wall-top mounting plane; rafters extend below.'
+bpy.context.view_layer.update()
+for ob in list(collections['02'].objects):
+    if ob==roof_root:continue
+    world_matrix=ob.matrix_world.copy()
+    ob.parent=roof_root
+    ob.matrix_world=world_matrix
+bpy.context.view_layer.update()
+
 # Separate presentation stage; the building stays cleanly selectable as one root.
 world=bpy.data.worlds.new('Polar overcast / review')
 scene.world=world;world.use_nodes=True
@@ -469,6 +486,7 @@ report={'pass':PASS,'footprint_m':[W,D],'wall_height_front_back_m':[FRONT_H,BACK
         'roof_deck_m':[roof_w,roof_d],'window_count':0,
         'asset_objects':len(asset.all_objects),'interior_clear_floor_m':[INNER_W,INNER_D],
         'floor_top_m':FLOOR_TOP,'physical_lamps':1,'room_contents':'Empty',
+        'roof_mounting_pivot_m':list(roof_root.location),
         'unmodified_game':True,'blender_version':bpy.app.version_string}
 (OUT/f'pass-{PASS}-dimensions.json').write_text(json.dumps(report,indent=2)+'\n')
 # Separate scene is packaged into its own file by package.py after saving.

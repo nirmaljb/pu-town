@@ -1,0 +1,34 @@
+{
+  "standalone_objects": 61,
+  "evaluated_triangles": 11710,
+  "nominal_deck_m": [
+    9.66,
+    4.36
+  ],
+  "complete_bounds_m": [
+    [
+      -4.91,
+      -2.29,
+      -0.50947
+    ],
+    [
+      4.91,
+      2.28,
+      0.61477
+    ]
+  ],
+  "origin": "Centre of mounting plane; rafters below origin",
+  "non_manifold_meshes": {},
+  "packed_images": [
+    "Snow-capped timber utility shed-1.png",
+    "Top-down snowy shed roof cutout-5.png"
+  ],
+  "self_contained_collection_asset": true,
+  "roof_registration_max_error_m": 1.1920928955078125e-07,
+  "shed_mounting_origin_m": [
+    0.0,
+    0.0,
+    2.7200000286102295
+  ],
+  "shed_geometry_change_max_error_m": 0
+}

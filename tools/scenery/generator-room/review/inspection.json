@@ -4,7 +4,7 @@
   "measured_door_center_x_m": 1.64,
   "evaluated_triangles": 44102,
   "non_manifold_meshes": {},
-  "asset_objects": 373,
+  "asset_objects": 374,
   "floor_samples_passed": 714,
   "doorway_rays_passed": 9,
   "physical_lamps": 1,
