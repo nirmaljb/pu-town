@@ -1,16 +1,21 @@
-# Generator room
+# Reusable generator-room shed
 
-Standalone Blender exterior asset, authored and revised through the official
+Standalone Blender shed asset, authored and revised through the official
 [MCP for Blender](https://github.com/ahujasid/mcp-for-blender) bridge. This follows
 the scripted build / render / inspect loop in the owner's supplied
 [case study](https://www.mcp-for-blender.com/creations/case-studies/i-just-wanted-to-fish/).
 No game scenes, runtime resources, geometry or contracts are changed.
 
-The deliverable is `build/generator-room.blend`. It contains separate editable
-collections for the timber shell, roof and snow, recessed entry, hardware, and
-review stage. Both source textures are packed into the file. All asset parts are
-children of `GENERATOR_ROOM / 8.8 × 3.8 m`; lights, cameras and the presentation
-ground are kept in `90 Review stage`. The two entry lights belong to the asset.
+The reusable deliverable is **`build/shed.blend`**. It contains only the marked
+`Shed` asset collection in a single scene, with packed textures and editable
+collections for timber walls, roof and snow, open doorway, hardware, wooden floor,
+interior lining and one caged lamp. Its root is `SHED / 8.8 × 3.8 m` at ground level.
+Use Blender's Append > Collection > Shed to reuse the building. Toggle
+`02 Roof and snow` to inspect the interior or `07 Lamp` to remove the lamp.
+
+`build/generator-room.blend` is the working review master, with the same shed plus
+a separate presentation stage and exterior/interior inspection cameras. The
+standalone file contains no review cameras, ground or presentation lights.
 
 ## Dimensions and interpretation
 
@@ -28,14 +33,17 @@ solid boarded walls and exposed frame.
 | Roof deck, before fascia and snow | 9.66 × 4.36 |
 | Doorway jamb clearance | 1.44 × 2.10 |
 | Door centre, from building centre toward right | 1.64 |
-| Timber-lined recess depth | 0.72 |
+| Interior lining-to-lining dimensions | 8.5 × 3.5 |
+| Wooden floor top above ground | 0.12 |
 | Nominal snow blanket depth | 0.29 |
 
 One Blender unit is one metre; +Z is up, +Y points to the rear, the front faces −Y,
-and the root is at the footprint centre on the ground. The reference depicts a
-shallow lit recess: it is modeled with a rear lining, rather than inventing an
-unreferenced generator machine or furnished room. The roof and walls are separate
-solid meshes. The authoring file does not provide a traversable gameplay interior.
+and the root is at the footprint centre on the ground. The latest owner request
+supersedes the initial shallow recess: the entrance now opens into the full empty
+room. Staggered wooden boards cover a continuous subfloor, and the single warm
+lamp is mounted on the rear wall. There are no generators, props, partitions,
+windows or door leaves. The 2.10 m doorway clearance is measured above the floor;
+its lintel is at 2.22 m above ground. The roof and snow can be removed together.
 
 ## Rebuild and review
 
@@ -77,12 +85,25 @@ an isolated process so long renders do not occupy the live MCP connection:
 /Applications/Blender.app/Contents/MacOS/Blender \
   -b tools/scenery/generator-room/build/generator-room.blend \
   --python tools/scenery/generator-room/review.py -- \
-  tools/scenery/generator-room/build final hero front right top back entry
+  tools/scenery/generator-room/build final hero front right top back entry cutaway floorplan inside
 ```
 
-Execute `check_asset.py` through MCP, or with Blender's `--python`, for independent
-doorway measurements, evaluated triangle counts, manifold mesh checks and packed
-image checks. These are artifact checks, not gameplay or performance tests.
+Package the isolated reusable asset, then verify that saved file independently:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender \
+  -b tools/scenery/generator-room/build/generator-room.blend \
+  --python-exit-code 1 --python tools/scenery/generator-room/package.py
+/Applications/Blender.app/Contents/MacOS/Blender \
+  -b tools/scenery/generator-room/build/shed.blend \
+  --python-exit-code 1 --python tools/scenery/generator-room/check_asset.py
+```
+
+`check_asset.py` measures the doorway, casts through the opening, samples the
+floor throughout the empty room, checks evaluated mesh topology, packed images,
+one physical lamp and exclusion of review objects. These are saved-artifact
+checks, not gameplay or performance tests. `package.py` uses a regular scene save
+because partial library writing of a new scene crashed this Blender build.
 
 ## Reference and material provenance
 

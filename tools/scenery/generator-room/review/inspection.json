@@ -1,13 +1,17 @@
 {
   "measured_door_width_m": 1.44,
-  "measured_door_upright_height_m": 2.1,
+  "measured_door_clear_height_m": 2.1,
   "measured_door_center_x_m": 1.64,
-  "evaluated_triangles": 27678,
+  "evaluated_triangles": 44102,
   "non_manifold_meshes": {},
-  "asset_objects": 221,
+  "asset_objects": 373,
+  "floor_samples_passed": 714,
+  "doorway_rays_passed": 9,
+  "physical_lamps": 1,
+  "standalone_library_verified": true,
   "packed_images": [
     "Snow-capped timber utility shed-1.png",
     "Top-down snowy shed roof cutout-5.png"
   ],
-  "checks": "Door jamb placement, closed mesh topology, embedded reference textures. Visual match reviewed separately."
+  "checks": "Clear doorway into full room, continuous wooden floor, empty interior, one lamp, closed mesh topology and embedded textures. Visual match reviewed separately."
 }

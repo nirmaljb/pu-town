@@ -1,4 +1,4 @@
-# Generator-room inspection — 18 October 2026
+# Generator-room inspection — 19 October 2026
 
 Status: **ready for the owner's final check, not owner-approved**.
 
@@ -12,20 +12,32 @@ shed images and the map atmosphere reference. No game integration was attempted.
 | 2 | Better reference finish; texture stretching on side fascia and snow thickness | Corrected beam mapping direction and limited roof projection to upward-facing snow |
 | 3 | Side, top and rear checks passed visually; recess too smooth; support details understated | Added reference timber inside the recess and strengthened rafter ends and fascia caps |
 | 4 | Roof supports read correctly; new recess material too pale | Reduced the recess albedo and restored amber saturation |
-| 5 | Amber recess, dark timber, cold snow and framing read together | Accepted for owner review; re-rendered hero, front and entry |
+| 5 | Amber recess, dark timber, cold snow and framing read together | Exterior ready for review before the owner requested a full empty room |
+| 6 | Full floor and empty room added; threshold overlap caused a dark seam, lamp hidden behind the front wall | Removed the overlap, moved the single lamp to the rear wall and widened cutaway framing |
+| 7 | Floor seam resolved and full room visible; doorway glow subdued and inspection camera cropped the lamp | Increased lamp power and repositioned entry/interior inspection cameras |
+| 8 | Complete empty wooden interior, visible amber lamp, clear entry and consistent exterior | Nine final views inspected; standalone shed file saved and independently checked |
 
-The selected renders here are untouched Blender outputs. `hero.png` uses the
-review snow ground; `front.png`, `right.png`, `top.png` and `back.png` are transparent
-orthographic inspections; `entry.png` shows the recess and caged lamp in detail.
-The final material-only pass did not change geometry, so the unaffected side, top
-and back renders remain the fourth-pass images.
+The selected renders here are untouched Blender outputs from pass 8.
+`hero.png` presents the cold exterior; `front.png`, `right.png`, `top.png` and
+`back.png` are transparent orthographic inspections. `entry.png` shows the open
+entrance, `cutaway.png` and `floorplan.png` hide the removable roof to expose the
+whole empty floor, and `inside.png` shows the atmosphere under the closed roof.
+The full room is an explicit owner-requested extension of the reference exterior.
 
-`inspection.json` records independent measurements of the modeled jambs and
-checks evaluated meshes. The final asset has **27,678 evaluated triangles**,
-**221 child objects** including its two entry lights, no non-manifold mesh edges,
-and both textures packed. Door jamb clearance is **1.44 × 2.10 m**, with its centre
-**1.64 m** to the right of the footprint centre. The threshold and interior head
-are modeled within that framed opening.
+`inspection.json` records checks on the independently reopened **`build/shed.blend`**.
+The asset has **44,102 evaluated triangles**, **373 objects** including one point
+light and the root, no non-manifold mesh edges, and both image textures packed.
+Door clearance is **1.44 × 2.10 m above the floor**, centred **1.64 m** right of the
+footprint centre. Nine rays traverse the entry to the back wall or its lamp;
+714 downward samples across the room find only floor at the expected height.
+The standalone file has one scene, a marked reusable `Shed` collection, and no
+review cameras, ground or staging lights. Python syntax and Git whitespace checks
+also passed. No game files were changed.
+
+The cutaway is an inspection mode, not another furnished asset. Restore the
+`02 Roof and snow` collection for the complete exterior. The lamp can be removed
+independently using `07 Lamp`. The floor is continuous, with narrow plank seams
+backed by a subfloor. There is no generator, furniture or partition inside.
 
 The five sheets are illustration references with slight differences in framing,
 roof edge and board placement. The approved footprint is inferred, and the result
@@ -34,6 +46,6 @@ pixel-identical geometry. Repeated timber strips are visible at close inspection
 the result was judged primarily from the reference elevations and oblique view.
 
 MCP request/response records, every earlier pass and the editable `.blend` remain
-local in `../build/`. The master contains real 3D parts and packed shader textures;
+local in `../build/`. Both the reusable shed and review master contain real 3D parts and packed shader textures;
 there is no runtime export, collision setup, LOD acceptance or game performance
 claim in this delivery.
