@@ -41,7 +41,12 @@ crosses it. Its runs block movement and shelter snow like any other obstacle.
 the north-west and south-west Roads each branch west, as in the satellite sketch.
 A Road is an authored corridor about 4 m wide with no ground geometry of its
 own; it starts as Shallow Snow, and wind can drift over it. Open ground starts at
-the in-between depth and tree clusters as Deep Snow.
+the in-between depth and tree clusters as Deep Snow. (Amended by #110: on the
+160 × 160 m interim map the four Roads run straight along the diagonals from the
+Town Square's corners, so a figure follows one with two movement keys, and the
+west branches come with the full-size map. Until pines are placed, placeholder
+tree clusters are Deep Snow zones holding solid tree boxes that block and shelter
+snow as the pines will.)
 
 **Traced forest.** A deterministic offline step traces the tree marks of the
 satellite sketch onto the map and writes checked-in placements: position, scale,

@@ -2,9 +2,11 @@ extends Node3D
 class_name SnowTownLayout
 ## The interim snowfield: one flat level of open snow, north up and centred on the
 ## origin, with the Camp at its centre: placeholder boxes for its buildings round the
-## open Town Square's Shallow Snow. Its edge is a plain containment boundary with no
-## wall, lost in the whiteout. Movement, wind and the walking figure read the
-## buildings from one obstacle list; their roofs never become walking ground.
+## open Town Square's Shallow Snow. Four Shallow Roads run from the square's corners
+## to the map's edge, and placeholder tree clusters stand in Deep Snow round the Camp.
+## Its edge is a plain containment boundary with no wall, lost in the whiteout.
+## Movement, wind and the walking figure read the buildings and trees from one
+## obstacle list; their roofs never become walking ground.
 
 ## The map is a rectangle centred on the origin: X runs east–west and Z
 ## north–south (north is −Z). Snow, shader, containment, camera and route all
@@ -19,12 +21,14 @@ const GROUND_LEVEL := 0.0
 const LANDMARKS := {
 	"start_west": Vector2(-1.5, 0),
 	"start_east": Vector2(1.5, 0),
-	# The route's stages in the open snow west of the Camp, reached along the lane
-	# that leaves the Town Square westward between the generator shed and the crate
-	# stacks: a lane it packs by running and walking north from its landmark, and the
-	# start of the trail it probes before running on to the northern edge.
-	"packed_lane": Vector2(-44, 0),
-	"trail_start": Vector2(-50, -12),
+	# The route's stages west of the Camp, reached along the lane that leaves the
+	# Town Square westward between the generator shed and the crate stacks. From the
+	# lane's west end it walks south past the south-west tree cluster's east side into
+	# its Deep Snow, where it packs a lane by running and walking west from its
+	# landmark. From there it walks east to the south-west Road's corner of the Town
+	# Square and follows the Road to the map's edge.
+	"west_lane": Vector2(-34, 0),
+	"deep_lane": Vector2(-38, 16),
 	# The route walks east along that lane from here into the overview's detail
 	# region, and fixes a probe exposed to the wind where it stops in the Town Square.
 	"overview_west": Vector2(-26, 4),
@@ -86,19 +90,53 @@ const WARM_LIGHTS := {
 	"cabin_west_door": Vector3(-6.5, 2.2, 16.6),
 	"cabin_east_door": Vector3(6.5, 2.2, 16.6),
 }
+## Roads, ways laid through the snow from the Town Square to the map's edge. Each
+## leaves the square's corner on its side and runs straight on along its diagonal
+## heading until it meets the edge. A Road is a Shallow corridor ROAD_WIDTH wide
+## with no ground of its own: it exists before anyone walks it, unlike a Packed
+## Path, and wind can still drift over it.
+const ROAD_WIDTH := 4.0
+const ROADS := {
+	"north_west": Vector2(-1, -1),
+	"north_east": Vector2(1, -1),
+	"south_west": Vector2(-1, 1),
+	"south_east": Vector2(1, 1),
+}
+## Placeholder tree clusters, standing where the owner's satellite sketch has trees
+## near the Camp until pines replace them: each a zone of Deep Snow holding solid
+## placeholder tree boxes, TREE_SIZE across and TREE_HEIGHT tall, which block a
+## figure and shelter, drift and scour snow like the Camp's buildings. The
+## south-west cluster's corner tree stands upwind of the south-west Road with no
+## tree upwind of it within its shelter, so its Snowdrift builds over the Road.
+const TREE_SIZE := Vector2(2, 2)
+const TREE_HEIGHT := 6.5
+const TREE_CLUSTERS: Array[Dictionary] = [
+	{"name": "west", "zone": Rect2(-78, -36, 20, 24), "trees": [Vector2(-62, -16), Vector2(-66.5, -20), Vector2(-71, -15.5),
+		Vector2(-75, -21), Vector2(-61, -24.5), Vector2(-69, -27), Vector2(-64.5, -32), Vector2(-74, -32.5)]},
+	{"name": "south_west", "zone": Rect2(-54, 12, 18.5, 14.5), "trees": [Vector2(-36.5, 25.5), Vector2(-44.5, 25),
+		Vector2(-50, 21.5), Vector2(-52.5, 25), Vector2(-48.5, 18.6), Vector2(-52.5, 15), Vector2(-47.5, 13.2), Vector2(-42.5, 13.2)]},
+	{"name": "north_east", "zone": Rect2(60, -46, 18, 16), "trees": [Vector2(63, -43), Vector2(67.5, -39.5), Vector2(72, -44),
+		Vector2(76, -38.5), Vector2(64, -34.5), Vector2(69, -32), Vector2(74, -32.5)]},
+	{"name": "south_east", "zone": Rect2(44, 14, 16, 16), "trees": [Vector2(47, 17), Vector2(51.5, 20.5), Vector2(56.5, 16.5),
+		Vector2(58, 24), Vector2(53, 27.5), Vector2(47.5, 24.5)]},
+]
 ## Starting Snow Depth by place, measured vertically above the ground. Shallow
-## Snow lets a Player run; deeper snow holds running back until traffic packs it.
-## The Town Square, the Camp's open yard between its buildings, is Shallow and the
-## open snow beyond it lies at an in-between depth; the square fades into it over
-## ZONE_BLEND metres.
+## Snow lets a Player run; deeper snow holds running back until traffic packs it,
+## and Deep Snow allows only walking until it is packed. The Town Square, the
+## Camp's open yard between its buildings, and the Roads are Shallow; the tree
+## clusters are Deep; the open snow elsewhere lies at an in-between depth. Each zone
+## fades into its surroundings over ZONE_BLEND metres, and Shallow wins where they meet.
 const SHALLOW_SNOW := 0.09
 const OPEN_SNOW := 0.25
+const DEEP_SNOW := 0.6
 const MIN_SNOW_DEPTH := 0.03
 const ZONE_BLEND := 1.5
 const TOWN_SQUARE := Rect2(-20, -15, 40, 30)
 const CONTACT_MARGIN := 0.0001
 
-var obstacles: Array[Dictionary] = []
+var obstacles := solid_boxes()
+## Each Road's centre line, from its Town Square corner to the map's edge.
+var road_lines: Array[PackedVector2Array] = []
 ## The closed loop: out along LOOP and back, so its last corner leads to its first.
 var loop_corners := PackedVector2Array()
 ## Distance along the closed loop to each corner, and the loop's whole length.
@@ -107,10 +145,8 @@ var loop_length := 0.0
 
 
 func _init() -> void:
-	# North is -Z. A building stands on the ground and rises its height above it.
-	for building in CAMP:
-		obstacles.append({"name": building.name, "kind": building.kind, "center": building.center, "size": building.size,
-			"base": GROUND_LEVEL, "top": GROUND_LEVEL + building.height})
+	for name in ROADS:
+		road_lines.append(road(name))
 	for name in LOOP:
 		loop_corners.append(LANDMARKS[name])
 	for index in range(LOOP.size() - 2, 0, -1):
@@ -121,16 +157,20 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	# Boxes of a kind share one material.
+	var materials := {}
 	for obstacle in obstacles:
-		var material := StandardMaterial3D.new()
-		material.albedo_color = _colour_for(obstacle.kind)
-		material.roughness = 0.96
+		if not materials.has(obstacle.kind):
+			var material := StandardMaterial3D.new()
+			material.albedo_color = _colour_for(obstacle.kind)
+			material.roughness = 0.96
+			materials[obstacle.kind] = material
 		var shape := BoxMesh.new()
 		shape.size = Vector3(obstacle.size.x, obstacle.top - obstacle.base, obstacle.size.y)
 		var box := MeshInstance3D.new()
 		box.name = obstacle.name.to_pascal_case()
 		box.mesh = shape
-		box.material_override = material
+		box.material_override = materials[obstacle.kind]
 		box.position = Vector3(obstacle.center.x, (obstacle.base + obstacle.top) * 0.5, obstacle.center.y)
 		add_child(box)
 
@@ -146,7 +186,32 @@ func _colour_for(kind: String) -> Color:
 		"barrels": return Color("625447")
 		"cabin": return Color("6b5a4a")
 		"workshop": return Color("7a6f5f")
+		"tree": return Color("34433b")
 	return Color("808080")
+
+
+## The obstacle list: every Camp building and placeholder tree as a solid box by
+## name, kind, centre, size and the heights of its base and top. North is −Z; each
+## stands on the ground and rises its height above it.
+static func solid_boxes() -> Array[Dictionary]:
+	var boxes: Array[Dictionary] = []
+	for building in CAMP:
+		boxes.append({"name": building.name, "kind": building.kind, "center": building.center, "size": building.size,
+			"base": GROUND_LEVEL, "top": GROUND_LEVEL + building.height})
+	for cluster in TREE_CLUSTERS:
+		for index in range(cluster.trees.size()):
+			boxes.append({"name": "%s_tree_%d" % [cluster.name, index + 1], "kind": "tree", "center": cluster.trees[index],
+				"size": TREE_SIZE, "base": GROUND_LEVEL, "top": GROUND_LEVEL + TREE_HEIGHT})
+	return boxes
+
+
+## A Road's centre line, from its Town Square corner to where its heading meets
+## the map's edge.
+static func road(name: String) -> PackedVector2Array:
+	var heading: Vector2 = ROADS[name].normalized()
+	var start := TOWN_SQUARE.get_center() + TOWN_SQUARE.size * 0.5 * heading.sign()
+	var reach := minf((HALF_EXTENTS.x - absf(start.x)) / absf(heading.x), (HALF_EXTENTS.y - absf(start.y)) / absf(heading.y))
+	return PackedVector2Array([start, start + heading * reach])
 
 
 ## Ground height at a world XZ point. SnowSurface and snow.gdshader read the same level.
@@ -157,8 +222,14 @@ func ground_height(_point: Vector2) -> float:
 ## Snow Depth at a world XZ point when the map starts: the authored zones,
 ## never less than MIN_SNOW_DEPTH. SnowSurface saves it into its Snow Depth picture.
 func starting_snow_depth(point: Vector2) -> float:
-	var depth := lerpf(OPEN_SNOW, SHALLOW_SNOW, _zone_weight(_outside(TOWN_SQUARE, point)))
-	return maxf(MIN_SNOW_DEPTH, depth)
+	var depth := OPEN_SNOW
+	for cluster in TREE_CLUSTERS:
+		depth = lerpf(depth, DEEP_SNOW, _zone_weight(_outside(cluster.zone, point)))
+	var shallow := _zone_weight(_outside(TOWN_SQUARE, point))
+	for line in road_lines:
+		var beside := point.distance_to(Geometry2D.get_closest_point_to_segment(point, line[0], line[1])) - ROAD_WIDTH * 0.5
+		shallow = maxf(shallow, _zone_weight(beside))
+	return maxf(MIN_SNOW_DEPTH, lerpf(depth, SHALLOW_SNOW, shallow))
 
 
 ## How fully a zone applies at a point this far outside it.

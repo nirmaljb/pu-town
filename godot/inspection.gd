@@ -29,7 +29,7 @@ var frame_wind_total_ms := 0.0
 var frame_wind_updates := 0
 var checkpoint := 0
 ## Fixed world probes, in the order F5 placed them, and their latest readings.
-const MAX_PROBES := 6
+const MAX_PROBES := 7
 var probes: Array[Vector2] = []
 var probe_readings: Array[Dictionary] = []
 var latest := {}
@@ -49,7 +49,7 @@ const ROUTE_COLUMNS := [
 	"other_travel_m", "other_loop_progress", "other_rejoining",
 	"facing_deg", "twist_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
 ]
-## Every probe slot has the same columns, prefixed probe1_ … probe6_: its world
+## Every probe slot has the same columns, prefixed probe1_ … probe7_: its world
 ## position, loose Snow Depth, visible snow above the ground after packing,
 ## compaction and whether the detail region covers it. Unused slots stay empty.
 const PROBE_COLUMNS := ["x_m", "z_m", "depth_m", "visible_m", "compaction", "in_region"]

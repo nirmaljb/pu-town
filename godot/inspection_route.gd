@@ -34,7 +34,9 @@ const MAX_TILES_PER_STEP := 4
 const FULL_RUN_DEPTH_M := 0.10
 const WALK_ONLY_DEPTH_M := 0.40
 # Walking matches the owner's walk recording (1.06 m/s); running is unchanged.
+# The parka lays a print every WALK_STEP_M of walking (its gait.json).
 const WALK_MPS := 1.06
+const WALK_STEP_M := 0.6202
 const RUN_MPS := 4.5
 # The specified camera: perspective, 40° field of view, −40° pitch, north up. The
 # 1.7 m figure stands about a twelfth of the screen tall by default, and the wheel's
@@ -60,7 +62,7 @@ const BOTTOM_CORNER := Vector2(0.45, 0.45)
 # sink below it, eased, so a footfall settles the view instead of jolting it.
 const CAMERA_SINK_SHARE := 0.2
 const STEADY_STAGES := ["north-west walk", "south-east return", "run into open snow",
-	"run through fresh snow", "pack trail again", "run to north edge"]
+	"run through deep snow", "pack trail again", "run along the south-west Road"]
 # Walking, the upper body turns no more than 110° from travel, and Facing turns no
 # faster than 540° per second: 9° in each 60 Hz physics observation. Standing, the
 # legs pivot once the twist passes 60°.
@@ -76,15 +78,24 @@ const DRIFT_MAX_M := 1.2
 const SCOUR_FLOOR_M := 0.03
 const PREVAILING_FROM_DEG := 315.0
 const REVERSED_FROM_DEG := 135.0
-# The trail the route probes is this long, walked north from its landmark.
+# The trail the route probes is this long, walked along the south-west Road from
+# its Town Square corner.
 const TRAIL_M := 4.5
+# Coming back along the Road, the route walks this last stretch onto the probe
+# point, so its latest print lies within a walking step of it.
+const ROAD_WALK_M := 1.5
+# The corner tree's Snowdrift raises the Road's Shallow Snow by at least this much.
+const ROAD_DRIFT_M := 0.3
+# Packing a lane of Deep Snow lets running there beat its fresh walking pace by this much.
+const PACKED_GAIN_MPS := 0.5
 # Probes in the order the route places them with F5.
 const TRAIL_PROBE := 1
-const TRACK_PROBE := 2
-const EXPOSED_PROBE := 3
-const SHELTERED_PROBE := 4
-const WINDWARD_PROBE := 5
-const LEE_PROBE := 6
+const ROAD_PROBE := 2
+const TRACK_PROBE := 3
+const EXPOSED_PROBE := 4
+const SHELTERED_PROBE := 5
+const WINDWARD_PROBE := 6
+const LEE_PROBE := 7
 # The stages that walk a figure into a Camp building on purpose. Anywhere else an
 # obstacle holding a figure means the route or the loop met a building it should
 # have passed.
@@ -99,6 +110,9 @@ const LAMP_COUNT := 8
 # it reads, so running there is held at least OPEN_RUN_SLOWDOWN below full speed.
 const OPEN_DEPTH_M := 0.24
 const OPEN_RUN_SLOWDOWN := 0.3
+# A tree cluster's Deep Snow starts at least DEEP_DEPTH_M deep: even with a
+# runner's own fresh prints counted, too deep for anything faster than walking.
+const DEEP_DEPTH_M := 0.55
 # The walking figure's trail counts as laid while the controlled figure was
 # elsewhere when they stood at least this far apart. A figure further than
 # NEAR_PROBE_M from a probe cannot press a boot onto it.
@@ -134,6 +148,8 @@ var figure_screen := Vector2(0.5, 0.5)
 var cursor_window := Vector2.ZERO
 # The recorded point of the walking figure's trail that the route tracked.
 var laid_trail := {}
+# Footprints of the Camp's buildings and the placeholder trees, from the town layout.
+var obstacle_boxes := TownLayout.solid_boxes()
 
 
 func _ready() -> void:
@@ -187,44 +203,59 @@ func _run() -> void:
 	# Running west at full speed across the Town Square's Shallow Snow, then held
 	# back in the deeper open snow beyond it, between the Camp's western buildings.
 	await _leg([KEY_A, KEY_SHIFT], 6.0, "run into open snow")
-	# Repeated traffic packs a lane of open snow until it runs faster. The parka's
-	# 0.62 m walking steps press fewer prints per pass, so it takes three. Each run
-	# passes the corridor 1–3 m north of the lane's landmark.
-	await _goto(LANDMARKS.packed_lane, "reach packed lane")
-	await _leg([KEY_W, KEY_SHIFT], 1.5, "run through fresh snow")
-	await _goto(LANDMARKS.packed_lane, "pack trail return")
-	await _leg([KEY_W], 4.5 / WALK_MPS, "pack trail again")
-	await _goto(LANDMARKS.packed_lane, "pack trail third return")
-	await _leg([KEY_W], 4.5 / WALK_MPS, "pack trail third")
-	await _goto(LANDMARKS.packed_lane, "packed run start")
-	await _leg([KEY_W, KEY_SHIFT], 1.5, "run on packed trail")
-	# Lay a trail in open snow and fix a world probe on it.
-	await _goto(LANDMARKS.trail_start, "reach trail start")
-	await _leg([KEY_W], TRAIL_M / WALK_MPS, "first trail")
+	# On to the lane's west end, then south beside the south-west tree cluster into
+	# its Deep Snow, where running is held to walking. Repeated traffic packs a lane
+	# there until it runs faster: a fresh run west, two walks, each followed by the
+	# walk back over it, then a run. Each run passes the corridor 1–3 m west of the
+	# lane's landmark.
+	await _goto(LANDMARKS.west_lane, "reach the west lane")
+	await _goto(LANDMARKS.deep_lane, "reach the deep lane")
+	await _leg([KEY_A, KEY_SHIFT], 4.5 / WALK_MPS, "run through deep snow")
+	await _goto(LANDMARKS.deep_lane, "pack trail return")
+	await _leg([KEY_A], 4.5 / WALK_MPS, "pack trail again")
+	await _goto(LANDMARKS.deep_lane, "pack trail third return")
+	await _leg([KEY_A], 4.5 / WALK_MPS, "pack trail third")
+	await _goto(LANDMARKS.deep_lane, "packed run start")
+	await _leg([KEY_A, KEY_SHIFT], 1.5, "run on packed trail")
+	# East to the south-west Road's corner of the Town Square. Walk the first stretch
+	# of the Road, laying a trail, and fix a world probe on it.
+	var road := TownLayout.road("south_west")
+	var heading: Vector2 = TownLayout.ROADS.south_west
+	await _goto(LANDMARKS.deep_lane, "leave the packed lane")
+	await _goto(road[0], "reach the south-west Road")
+	await _leg(_keys_toward(heading), TRAIL_M / WALK_MPS, "first trail")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "fresh probe")
-	# Run on north, far out of the detail region, until the map's edge holds the
-	# figure. The edge is a containment boundary with no wall, lost in the whiteout.
-	# Fresh open snow allows at least its untrodden running speed, so the edge is
-	# reached in time; the figure's own prints only hasten it.
-	var to_edge: float = TownLayout.HALF_EXTENTS.y - FIGURE_RADIUS_M + LANDMARKS.trail_start.y - TRAIL_M
-	await _leg([KEY_W, KEY_SHIFT], to_edge / _running_speed(TownLayout.OPEN_SNOW) + 1.0, "run to north edge")
-	await _leg([KEY_W], 1.0, "boundary blocked")
+	# Run on along the Road, far out of the detail region, until the map's edge holds
+	# the figure. The Road is Shallow all the way, so running keeps full speed to the
+	# edge, a containment boundary with no wall, lost in the whiteout.
+	var trail_end: Dictionary = await _latest_observation()
+	var to_edge := _distance_to_edge(Vector2(float(trail_end.x_m), float(trail_end.z_m)), heading)
+	await _leg(_keys_toward(heading) + [KEY_SHIFT], to_edge / RUN_MPS + 0.1, "run along the south-west Road")
+	await _leg(_keys_toward(_edge_normal(road[1])), 1.0, "boundary blocked")
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
 	await _leg([], 0.5, "probe outside region")
-	# Back south beside the outward trail, then revisit the probe.
-	await _leg([KEY_D], 1.5 / WALK_MPS, "step off the edge trail")
-	# Even at full speed this stops short of the probe; walking covers the rest.
-	await _leg([KEY_S, KEY_SHIFT], (to_edge - 8.0) / RUN_MPS, "run back from the edge")
+	# Back along the Road, running and then walking onto the point where the
+	# cluster's corner tree will drift snow over it, and fix a probe there.
+	var edge_row: Dictionary = await _latest_observation()
+	var back := (_road_drift_point() - Vector2(float(edge_row.x_m), float(edge_row.z_m))).dot(-heading.normalized())
+	await _leg(_keys_toward(-heading) + [KEY_SHIFT], (back - ROAD_WALK_M) / RUN_MPS, "run back along the Road")
+	await _leg(_keys_toward(-heading), ROAD_WALK_M / WALK_MPS, "walk onto the Road's drift point")
+	_tap(KEY_F5)
+	await _leg([], 0.5, "road probe")
+	# North and east to the trail, and revisit its probe.
 	var probe_row: Dictionary = _rows_for(_read_rows(), "fresh probe").back()
-	await _goto(Vector2(_probe(probe_row, TRAIL_PROBE, "x_m"), _probe(probe_row, TRAIL_PROBE, "z_m")), "return to trail")
+	var trail_probe := Vector2(_probe(probe_row, TRAIL_PROBE, "x_m"), _probe(probe_row, TRAIL_PROBE, "z_m"))
+	await _goto(trail_probe, "return to trail")
 	await _leg([], 0.5, "probe revisited")
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
-	# Tracking. While this figure worked the open snow in the west, the walking
+	# West, clear of the crate stacks north of the trail, to the line of the west lane.
+	await _goto(Vector2(LANDMARKS.west_lane.x, trail_probe.y), "back to the west lane's line")
+	# Tracking. While this figure worked the snow west of the Camp, the walking
 	# figure laid a trail along its Town Square lane. The route finds a point of
 	# that trail in the public record, fixes a probe there, then follows the trail
 	# the way it was laid and walks back and forth over it.
@@ -340,11 +371,14 @@ func _wind_stages() -> void:
 	await _goto(LANDMARKS.town_square_west, "cross the Town Square")
 	await _goto(LANDMARKS.lodge_windward, "reach the lodge's windward face")
 	_tap(KEY_F5)
-	# The lodge's south face stops the figure, which steps back into its lee.
+	# The lodge's south face stops the figure, which steps back into its lee. One
+	# walking step lays a print there wherever the figure was within its step, within
+	# about 1.3 m of the face, where the Snowdrift builds fullest; a longer step back
+	# left the print anywhere up to 1.7 m away, where the drift settles lower.
 	await _goto(LANDMARKS.lodge_south, "reach the lodge's south face")
 	await _leg([KEY_W], 1.9, "lodge approach")
 	await _leg([KEY_W], 1.2, "lodge blocked")
-	await _leg([KEY_S], 1.0 / WALK_MPS, "step back into the lodge's lee")
+	await _leg([KEY_S], WALK_STEP_M / WALK_MPS, "step back into the lodge's lee")
 	_tap(KEY_F5)
 	await _leg([], 0.5, "probes placed")
 	# Accelerated wind fills the prints and builds the lodge's drift, then the
@@ -426,6 +460,56 @@ func _walking_sweep(description: String) -> void:
 ## The speed that running reaches in loose snow of this depth.
 func _running_speed(loose_depth: float) -> float:
 	return lerpf(WALK_MPS, RUN_MPS, 1.0 - smoothstep(FULL_RUN_DEPTH_M, WALK_ONLY_DEPTH_M, loose_depth))
+
+
+## The movement keys that walk a figure along a compass direction on the north-up
+## view, where W walks north (−Z) and D east (+X): one key for each axis it moves on.
+func _keys_toward(direction: Vector2) -> Array:
+	var keys := []
+	if absf(direction.x) > 0.001:
+		keys.append(KEY_D if direction.x > 0.0 else KEY_A)
+	if absf(direction.y) > 0.001:
+		keys.append(KEY_S if direction.y > 0.0 else KEY_W)
+	return keys
+
+
+## How far a figure walks from `from` along `heading` before the map's edge holds it.
+func _distance_to_edge(from: Vector2, heading: Vector2) -> float:
+	var direction := heading.normalized()
+	var limit := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
+	var reach := INF
+	for axis in [0, 1]:
+		if absf(direction[axis]) > 0.000001:
+			reach = minf(reach, (limit[axis] * signf(direction[axis]) - from[axis]) / direction[axis])
+	return reach
+
+
+## The outward direction of the map edge on which a point lies; zero off the edge.
+func _edge_normal(point: Vector2) -> Vector2:
+	if absf(point.x) >= TownLayout.HALF_EXTENTS.x - 0.001:
+		return Vector2(signf(point.x), 0.0)
+	if absf(point.y) >= TownLayout.HALF_EXTENTS.y - 0.001:
+		return Vector2(0.0, signf(point.y))
+	return Vector2.ZERO
+
+
+## Distance from a point to a Road's centre line.
+func _off_line(point: Vector2, line: PackedVector2Array) -> float:
+	return point.distance_to(Geometry2D.get_closest_point_to_segment(point, line[0], line[1]))
+
+
+## The point on the south-west Road's centre line straight downwind, under the
+## prevailing wind, of the placeholder tree nearest that Road: where its Snowdrift
+## builds over the Road.
+func _road_drift_point() -> Vector2:
+	var line := TownLayout.road("south_west")
+	var nearest := Vector2.INF
+	for cluster in TownLayout.TREE_CLUSTERS:
+		for tree in cluster.trees:
+			if nearest == Vector2.INF or _off_line(tree, line) < _off_line(nearest, line):
+				nearest = tree
+	var travel := deg_to_rad(PREVAILING_FROM_DEG + 180.0)
+	return Geometry2D.line_intersects_line(nearest, Vector2(sin(travel), -cos(travel)), line[0], line[1] - line[0])
 
 
 ## A real cursor already over the window when it opens leans the camera before the
@@ -683,12 +767,12 @@ func _check_record() -> void:
 		# figure ever stands within its footprint, where its roof is.
 		if absf(float(row.ground_y_m) - ground) > 0.000001 or absf(float(row.other_ground_y_m) - ground) > 0.000001:
 			_fail_once("The ground under the figures was not one flat level")
-		if _in_building(Vector2(float(row.x_m), float(row.z_m))) or _in_building(_other(row)):
-			_fail_once("A figure stood inside or on top of a Camp building")
+		if _in_obstacle(Vector2(float(row.x_m), float(row.z_m))) or _in_obstacle(_other(row)):
+			_fail_once("A figure stood inside or on top of a Camp building or placeholder tree")
 		if row.obstacle_limited == "true" and not building_checkpoints.has(int(row.checkpoint)):
-			_fail_once("A building held the controlled figure outside the stages that walk into one")
+			_fail_once("An obstacle held the controlled figure outside the stages that walk into a building")
 		if row.other_obstacle_limited == "true":
-			_fail_once("A building held the walking figure on its loop")
+			_fail_once("An obstacle held the walking figure on its loop")
 		if row.camera_projection != "perspective" or absf(float(row.camera_fov_deg) - CAMERA_FOV_DEG) > 0.01:
 			_fail_once("Camera is not a 40° perspective view")
 		if absf(float(row.pitch_deg) - CAMERA_PITCH_DEG) > 0.01 or absf(float(row.yaw_deg)) > 0.01:
@@ -776,11 +860,13 @@ func _check_record() -> void:
 		failures.append("Missing route coverage: straight=%d diagonal=%d blocked=%d overview=%d follow=%d figures=%d" % [straight, diagonal, blocked, overview, follow, figure_ids.size()])
 	if fast_run < 15 or slow_run < 15:
 		failures.append("Route did not demonstrate full running in Shallow Snow and held-back running in open snow (fast=%d, slow=%d)" % [fast_run, slow_run])
-	# The northern edge holds the figure at the map rectangle, less its radius.
+	# The edge the south-west Road meets holds the figure at the map rectangle, less its radius.
+	var edge := _edge_normal(TownLayout.road("south_west")[1])
 	var boundary_rows := _rows_for(rows, "boundary blocked")
 	var held_boundary := 0
 	for row in boundary_rows:
-		if row.boundary_limited == "true" and float(row.horizontal_mps) < 0.01 and absf(float(row.z_m) + bounds.y) < 0.001:
+		var held := Vector2(float(row.x_m), float(row.z_m)) * edge.abs()
+		if row.boundary_limited == "true" and float(row.horizontal_mps) < 0.01 and held.distance_to(bounds * edge) < 0.001:
 			held_boundary += 1
 	if held_boundary < 30:
 		failures.append("Route did not reach and stop at the map boundary")
@@ -796,9 +882,11 @@ func _check_record() -> void:
 	_check_walking_figure(rows)
 	_check_tracking(rows)
 	_check_rejoin(rows)
-	_check_packed_speed(rows)
+	_check_deep_lane(rows)
 	_check_camera_steadiness(rows)
 	_check_snow_zones(rows)
+	_check_roads()
+	_check_road_run(rows)
 	_check_facing(rows)
 	_check_lean(rows)
 	_check_walking_facing(rows)
@@ -844,24 +932,26 @@ func _check_held_by_building(rows: Array[Dictionary], stage: String, name: Strin
 	for row in _rows_for(rows, stage):
 		var figure := Vector2(float(row.x_m), float(row.z_m))
 		if row.obstacle_limited == "true" and row.boundary_limited == "false" and float(row.horizontal_mps) < 0.01 \
-				and absf(_building_gap(figure, building) - FIGURE_RADIUS_M) < 0.01:
+				and absf(_box_gap(figure, building) - FIGURE_RADIUS_M) < 0.01:
 			held += 1
 	print("The %s held the figure still against its face for %d observations" % [name.replace("_", " "), held])
 	if held < 30:
 		failures.append("Route did not walk into the %s and stop at its face (%d held observations)" % [name.replace("_", " "), held])
 
 
-## Whether a figure's 0.3 m radius at this point would overlap a Camp building's footprint.
-func _in_building(point: Vector2) -> bool:
-	for building in TownLayout.CAMP:
-		if _building_gap(point, building) < FIGURE_RADIUS_M - 0.001:
+## Whether a figure's 0.3 m radius at this point would overlap the footprint of a
+## Camp building or a placeholder tree.
+func _in_obstacle(point: Vector2) -> bool:
+	for box in obstacle_boxes:
+		if _box_gap(point, box) < FIGURE_RADIUS_M - 0.001:
 			return true
 	return false
 
 
-## Distance from a point to a Camp building's footprint; zero inside it.
-func _building_gap(point: Vector2, building: Dictionary) -> float:
-	var offset: Vector2 = (point - building.center).abs() - building.size * 0.5
+## Distance from a point to the footprint of a box, a Camp building or a placeholder
+## tree; zero inside it.
+func _box_gap(point: Vector2, box: Dictionary) -> float:
+	var offset: Vector2 = (point - box.center).abs() - box.size * 0.5
 	return Vector2(maxf(offset.x, 0.0), maxf(offset.y, 0.0)).length()
 
 
@@ -875,7 +965,7 @@ func _check_lamps() -> void:
 		var spot: Vector3 = TownLayout.WARM_LIGHTS[name]
 		var on_face := false
 		for building in TownLayout.CAMP:
-			var gap := _building_gap(Vector2(spot.x, spot.z), building)
+			var gap := _box_gap(Vector2(spot.x, spot.z), building)
 			if gap > 0.0 and gap <= LAMP_FACE_M and spot.y >= LAMP_HEIGHTS_M.x and spot.y <= minf(LAMP_HEIGHTS_M.y, building.height):
 				on_face = true
 		if not on_face:
@@ -1127,34 +1217,39 @@ func _loop_distance(point: Vector2) -> float:
 	return nearest
 
 
-func _check_packed_speed(rows: Array[Dictionary]) -> void:
-	var fresh := _rows_for(rows, "run through fresh snow")
-	var packed := _rows_for(rows, "run on packed trail")
-	# The corridor runs north from the packed lane landmark where both runs start.
-	var corridor_z: float = LANDMARKS.packed_lane.y - 2.0
-	var fresh_distance := 0.0
-	var fresh_samples := 0
-	var fresh_depth := 0.0
-	var packed_distance := 0.0
-	var packed_samples := 0
-	# Compare the same world corridor after several passes, not elapsed legs
-	# that may cover different snow. Every included row requests running.
+func _check_deep_lane(rows: Array[Dictionary]) -> void:
+	# Running into the south-west cluster's fresh Deep Snow is held to walking
+	# speed, once past the prints of the walk that reached the lane.
+	var fresh := _running_rows(rows, "run through deep snow")
+	var held := 0
 	for row in fresh:
-		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
-			fresh_distance += float(row.horizontal_mps)
-			fresh_depth += float(row.saved_depth_m)
-			fresh_samples += 1
-	for row in packed:
-		if absf(float(row.z_m) - corridor_z) <= 1.0 and row.run_requested == "true":
-			packed_distance += float(row.horizontal_mps)
-			packed_samples += 1
-	var fresh_speed := fresh_distance / maxi(1, fresh_samples)
-	var packed_speed := packed_distance / maxi(1, packed_samples)
-	print("Same open-snow corridor, Shift held: fresh %.3f m/s -> packed %.3f m/s (%d / %d samples)" % [fresh_speed, packed_speed, fresh_samples, packed_samples])
-	if fresh_samples < 20 or packed_samples < 20 or packed_speed < fresh_speed + 0.10:
-		failures.append("Repeated traffic did not produce a measurable running advantage in the same open-snow corridor")
-	if fresh_depth / maxi(1, fresh_samples) < OPEN_DEPTH_M:
-		failures.append("The packed corridor did not start too deep to run through at full speed")
+		if float(row.x_m) > LANDMARKS.deep_lane.x - STEP_REACH_M:
+			continue
+		if float(row.saved_depth_m) < DEEP_DEPTH_M or absf(float(row.horizontal_mps) - WALK_MPS) > 0.003:
+			_fail_once("Running in a tree cluster's fresh Deep Snow was not held to walking speed")
+		held += 1
+	# The corridor runs west from the deep lane's landmark, where both runs start.
+	# Compare the same world corridor after several passes, not elapsed legs that may
+	# cover different snow. Every included row requests running.
+	var corridor_x: float = LANDMARKS.deep_lane.x - 2.0
+	var fresh_speed := _corridor_speed(fresh, corridor_x)
+	var packed_speed := _corridor_speed(_running_rows(rows, "run on packed trail"), corridor_x)
+	print("Deep cluster corridor, Shift held: fresh %.3f m/s over %d held observations -> packed %.3f m/s" % [fresh_speed.mean, held, packed_speed.mean])
+	if held < 180:
+		failures.append("The route did not run into a tree cluster's fresh Deep Snow (%d observations)" % held)
+	if fresh_speed.count < 20 or packed_speed.count < 20 or packed_speed.mean < fresh_speed.mean + PACKED_GAIN_MPS:
+		failures.append("Packing a lane of Deep Snow did not let running there beat walking by %.1f m/s" % PACKED_GAIN_MPS)
+
+
+## The mean speed of the observations within a metre of x, and how many there are.
+func _corridor_speed(rows: Array[Dictionary], x: float) -> Dictionary:
+	var total := 0.0
+	var count := 0
+	for row in rows:
+		if absf(float(row.x_m) - x) <= 1.0:
+			total += float(row.horizontal_mps)
+			count += 1
+	return {"mean": total / maxi(1, count), "count": count}
 
 
 func _check_camera_steadiness(rows: Array[Dictionary]) -> void:
@@ -1207,6 +1302,62 @@ func _check_snow_zones(rows: Array[Dictionary]) -> void:
 				_fail_once("Open snow beyond the Town Square did not hold running back")
 	if full < 30 or held_back < 30:
 		failures.append("Running west did not cross from the Town Square's Shallow Snow into open snow (full %d, held back %d)" % [full, held_back])
+
+
+func _check_roads() -> void:
+	# Four diagonal Roads about 4 m wide, one from each Town Square corner, each
+	# running on to the map's edge.
+	var square := TownLayout.TOWN_SQUARE
+	var corners := {}
+	for corner in [square.position, Vector2(square.end.x, square.position.y), square.end, Vector2(square.position.x, square.end.y)]:
+		corners[corner] = false
+	if TownLayout.ROADS.size() != 4 or absf(TownLayout.ROAD_WIDTH - 4.0) > 0.5:
+		failures.append("The town layout does not lay four Roads about 4 m wide")
+	for name in TownLayout.ROADS:
+		var heading: Vector2 = TownLayout.ROADS[name]
+		var line := TownLayout.road(name)
+		if not corners.has(line[0]) or corners[line[0]] or absf(absf(heading.x) - absf(heading.y)) > 0.0001 or _edge_normal(line[1]).dot(heading) <= 0.0:
+			failures.append("The %s Road does not run diagonally from its own Town Square corner to the map's edge" % name)
+		corners[line[0]] = true
+
+
+func _check_road_run(rows: Array[Dictionary]) -> void:
+	# From its Town Square corner the figure walks the south-west Road's first
+	# stretch, then runs the rest of it to the map's edge. It stays on the Road, whose
+	# Snow is Shallow all the way, and runs at full speed until the edge holds it at
+	# the Road's end.
+	var line := TownLayout.road("south_west")
+	var walked: Array[Dictionary] = []
+	for row in _rows_for(rows, "first trail"):
+		if absf(float(row.input_x)) + absf(float(row.input_y)) > 0.5:
+			walked.append(row)
+	var stage := _rows_for(rows, "run along the south-west Road")
+	var running := _running_rows(rows, "run along the south-west Road")
+	if walked.is_empty() or running.is_empty():
+		failures.append("The walk and run along the south-west Road were missing")
+		return
+	var deepest := 0.0
+	for row in walked + running:
+		if _off_line(Vector2(float(row.x_m), float(row.z_m)), line) > TownLayout.ROAD_WIDTH * 0.5:
+			_fail_once("The figure left the south-west Road while following it")
+		if float(row.saved_depth_m) > FULL_RUN_DEPTH_M:
+			_fail_once("The south-west Road's Snow was not Shallow all the way to the edge")
+		deepest = maxf(deepest, float(row.saved_depth_m))
+	for row in running:
+		if absf(float(row.horizontal_mps) - RUN_MPS) > 0.003:
+			_fail_once("Running along the south-west Road did not keep full speed")
+	var start := Vector2(float(walked.front().x_m), float(walked.front().z_m))
+	var held := 0
+	for row in stage:
+		if row.boundary_limited == "true" and Vector2(float(row.x_m), float(row.z_m)).distance_to(line[1]) <= TownLayout.ROAD_WIDTH * 0.5 + FIGURE_RADIUS_M:
+			held += 1
+	var reached := Vector2(float(stage.back().x_m), float(stage.back().z_m))
+	print("Followed the south-west Road from %s, %.2f m from its Town Square corner, to %s: %d observations walking and %d running, Snow Depth at most %.3f m, held at the edge %d" % [
+		start, start.distance_to(line[0]), reached, walked.size(), running.size(), deepest, held])
+	if start.distance_to(line[0]) > 0.5 or running.size() < 600:
+		failures.append("The route did not follow the south-west Road from its Town Square corner")
+	if held < 1:
+		failures.append("The run along the south-west Road did not reach the map's edge at the Road's end")
 
 
 ## Unobstructed observations of a stage that requested running with movement input.
@@ -1617,7 +1768,7 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 		failures.append("Wind route stages were missing")
 		return
 	if int(placed.back().probe_count) != LEE_PROBE:
-		failures.append("The route did not fix its six world probes (%s)" % placed.back().probe_count)
+		failures.append("The route did not fix its seven world probes (%s)" % placed.back().probe_count)
 		return
 	for row in placed + filling + building:
 		if absf(float(row.wind_from_deg) - PREVAILING_FROM_DEG) > 0.01:
@@ -1684,6 +1835,24 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 		failures.append("No Snowdrift grew toward 1.2 m in the lodge's lee")
 	if late > 0.2 * early:
 		failures.append("The lee Snowdrift did not settle toward a steady shape")
+	# A Road exists before anyone walks it, and wind can still drift over it: the
+	# probe on the south-west Road lies in its Shallow Snow, which holds while the
+	# wind is still, until the cluster's corner tree builds a Snowdrift over it.
+	var placed_road := _rows_for(rows, "road probe")
+	if placed_road.is_empty() or int(placed_road.back().probe_count) != ROAD_PROBE:
+		failures.append("The route did not fix a probe on the south-west Road")
+	else:
+		var road_probe := Vector2(_probe(placed_road.back(), ROAD_PROBE, "x_m"), _probe(placed_road.back(), ROAD_PROBE, "z_m"))
+		var road_start := _probe(placed_road.back(), ROAD_PROBE, "depth_m")
+		var road_drift := _probe(settled, ROAD_PROBE, "depth_m")
+		print("South-west Road probe at %s, %.2f m from the corner tree's drift point: Snow Depth %.3f m -> %.3f m under the prevailing wind" % [
+			road_probe, road_probe.distance_to(_road_drift_point()), road_start, road_drift])
+		if _off_line(road_probe, TownLayout.road("south_west")) > TownLayout.ROAD_WIDTH * 0.5:
+			failures.append("The Road probe does not lie on the south-west Road")
+		if road_start > FULL_RUN_DEPTH_M or absf(_probe(first, ROAD_PROBE, "depth_m") - road_start) > 0.0005:
+			failures.append("The south-west Road did not start Shallow and hold still until the wind blew")
+		if road_drift < road_start + ROAD_DRIFT_M:
+			failures.append("Wind did not drift snow over the south-west Road")
 	# Scour: the windward probe falls to the 3 cm floor and holds there.
 	var scoured := _probe(settled, WINDWARD_PROBE, "depth_m")
 	print("Windward scour %.3f -> %.3f m" % [_probe(first, WINDWARD_PROBE, "depth_m"), scoured])
