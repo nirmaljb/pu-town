@@ -1,0 +1,28 @@
+{
+  "skid_footprint_m": [
+    2.4,
+    1.2
+  ],
+  "hardware_top_m": 1.0135,
+  "top_of_snow_m": 1.0539,
+  "overall_with_snow_m": [
+    2.4037,
+    1.2035,
+    1.0539
+  ],
+  "evaluated_triangles": 102000,
+  "asset_objects": 267,
+  "non_manifold_meshes": {},
+  "louvre_blades": {
+    "Louvre / front large": 10,
+    "Louvre / front small": 9,
+    "Louvre / back large": 10,
+    "Louvre / back small": 9,
+    "Louvre / east end": 9,
+    "Louvre / west end": 9
+  },
+  "open_vent_rays_passed": 6,
+  "control_panel_rays_passed": 2,
+  "standalone_library_verified": true,
+  "checks": "Footprint, vent height, open vents, unobstructed controls, louvre blades, closed meshes, no review objects. Visual match reviewed separately."
+}

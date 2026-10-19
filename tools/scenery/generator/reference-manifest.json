@@ -1,0 +1,34 @@
+{
+  "source": "Owner-supplied /Users/kaizenjb/Downloads/designs/items/generator",
+  "images": [
+    {
+      "file": "Snow-Capped Generator Side Profile-2.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "71b578d9da70047f0776a27b4bb75f5db487b578fa51f664b40d1f7d6973dda5"
+    },
+    {
+      "file": "Snow-Covered Generator with Rooftop Vents-3.png",
+      "pixels": [
+        1672,
+        941
+      ],
+      "sha256": "8332b6ef340d6b707c3f4d1e8b5497e0309b29fd850d81760a4ef289f90e5222"
+    },
+    {
+      "file": "Snow-capped industrial generator-1.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "8a4d7338d69b8141be7b8b3e9fae95d5ceab3391ce0db9ef73dd19e16e8bcc05"
+    }
+  ],
+  "atmosphere_reference": {
+    "supplied": "Map painting attached to the request; the generator outside the open workshop door is marked in red",
+    "sha256": "e533ab089f8853808616080b8c62240e5c1b1f7c69304df263a5216a684b1b33",
+    "use": "Palette, scale beside the 1.7 m figure and atmosphere only; no embedded map pixels."
+  }
+}
