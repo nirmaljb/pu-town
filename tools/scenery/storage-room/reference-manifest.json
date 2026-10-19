@@ -1,0 +1,53 @@
+{
+  "source": "Owner-supplied /Users/kaizenjb/Downloads/designs/storage",
+  "images": [
+    {
+      "file": "Snow-Capped Gabled Timber Shed Top View-3.png",
+      "pixels": [
+        1024,
+        1536
+      ],
+      "sha256": "9f1892f22c24c343c25c49d0e7eedc272f805dc3db06d67bbf79820793377b60",
+      "governs": "Gable outline from above, porch and plinths"
+    },
+    {
+      "file": "Snow-capped timber shed front elevation-1.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "a9eabed7a03fc34e9443c3ff11be18722660ad3a99f588e8511136bbba3fde3c",
+      "governs": "Gable width, posts, tie beam, knee braces, lamp, woodpile and heights"
+    },
+    {
+      "file": "Snow-covered shed roof plan-4.png",
+      "pixels": [
+        1060,
+        1484
+      ],
+      "sha256": "0cc246c5288efc923f339246c311cf4e782cc08f49764bb2e7ce30a46827e912",
+      "governs": "Seven rafter tails per side, ridge line and snow outline"
+    },
+    {
+      "file": "Snowy charcoal timber shed side view-2.png",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "482b7fb2f7d157bf51bd35fa75b267f3b2938ccda8d4d36d4e3c4be948b433fa",
+      "governs": "Length, porch depth, eave line, rafter tails, sill and the board atlas"
+    }
+  ],
+  "atmosphere_reference": {
+    "description": "Owner-attached snowy camp map screenshot with the storage room marked in red (east side, gable toward the square)",
+    "pixels": [
+      1376,
+      768
+    ],
+    "sha256": "b773794ab293a2bf2234a60a51e9dc40f6d30a444271a3f6545c19ef23a32bc3",
+    "use": "Palette, mood and orientation only; no map pixels are embedded."
+  },
+  "derived": {
+    "textures/weathered-boards.png": "textures.py: sixteen joint-to-joint boards cut from the side sheet"
+  }
+}

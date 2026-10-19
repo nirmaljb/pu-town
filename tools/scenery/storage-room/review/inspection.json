@@ -1,0 +1,23 @@
+{
+  "file": "storage-room-asset.blend",
+  "doorway_clear_width_m": 1.0,
+  "doorway_clear_height_above_floor_m": 2.08,
+  "doorway_centre_x_m": 0.62,
+  "rays_through_doorway_to_back_wall": 9,
+  "floor_samples_on_plank_tops": 528,
+  "floor_samples_in_plank_seams_on_subfloor": 23,
+  "roof_collection_objects_incl_pivot": 4,
+  "roof_hidden_room_open_from_above_samples": 12,
+  "evaluated_triangles": 49924,
+  "asset_meshes": 15,
+  "non_manifold_meshes": {},
+  "asset_lights": [
+    "Interior lamp / 2300 K",
+    "Porch lamp / 2300 K"
+  ],
+  "packed_images": [
+    "weathered-boards.png"
+  ],
+  "window_count": 0,
+  "checks": "Ray-cast doorway and floor, roof separability, closed source meshes, lights, packed textures."
+}
