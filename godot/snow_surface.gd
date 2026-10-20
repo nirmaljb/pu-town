@@ -5,12 +5,13 @@ class_name SnowSurface
 ## The field spans the town layout's map rectangle; its surface is the layout's
 ## ground level plus the saved Snow Depth picture, less Footprint compaction.
 ## The CPU samples the same displaced triangles as snow.gdshader. No stale static
-## collider stands in for snow contact. Footsteps mutate one bounded, tiled picture
-## and resend only the tiles they touched.
+## collider stands in for snow contact. Footsteps press a Footprint picture held
+## only in the tiles where steps have landed, and resend only the tiles they touched.
 ## Wind reshapes Snow Depth and advances each place's fill clock a few times a
 ## second; both pictures are published to the CPU and the shader together.
 const TownLayout = preload("res://town_layout.gd")
 const SnowWind = preload("res://snow_wind.gd")
+const FootprintTiles = preload("res://footprint_tiles.gd")
 const HALF_EXTENTS := TownLayout.HALF_EXTENTS
 ## The detail region shapes bootprints in height where the oblique play view shows
 ## them sharp; the coarse 0.8 m surface keeps the whole town live beyond it. It is a
@@ -57,16 +58,17 @@ const FAR_STRIP_ROWS := 88
 ## edge that stops a figure shows no end to the snow; the whiteout swallows the
 ## apron's own far edge. No figure reaches it, and nothing is stamped there.
 const APRON := 40.0
-# 31.25 mm per texel; the image covers the whole map rectangle at this density.
+# 31.25 mm per texel; the Footprint picture covers the whole map rectangle at this
+# density, its texels counted from the map's west and north edges. It is held only
+# in tiles where steps have landed (FootprintTiles); one footstep touches at most
+# MAX_TILES_PER_STEP of them.
 const TEXELS_PER_METRE := 32.0
 const IMAGE_SIZE := Vector2i(HALF_EXTENTS * (2.0 * TEXELS_PER_METRE))
-## The Footprint picture is held in 256 × 128 texel tiles (8 × 4 m), 20 × 40 of
-## them, each one layer of the GPU copy. A sole spans at most 0.36 m, less than a
-## tile either way, so one footstep touches at most 2 × 2 tiles.
-const TILE_SIZE := Vector2i(256, 128)
-const TILE_GRID := IMAGE_SIZE / TILE_SIZE
-const TILE_BYTES := TILE_SIZE.x * TILE_SIZE.y * 4
 const MAX_TILES_PER_STEP := 4
+## A print's look depends on the fill clocks within FILL_REACH of its footfall:
+## those its texels' heights read, and those its shading reads round them, along
+## a 15 cm march toward the sun and a texel either side.
+const FILL_REACH := 0.4
 ## Fill-clock seconds for a Footprint to fill: 120 wind-seconds in the open.
 const PRINT_LIFETIME := 120.0
 ## The saved Snow Depth and fill-clock pictures hold values at nodes 0.4 m apart,
@@ -91,16 +93,14 @@ var wind_update_ms := 0.0
 var wind_total_ms := 0.0
 var wind_updates := 0
 var footprint_count := 0
-var footprint_image_bytes := TILE_GRID.x * TILE_GRID.y * TILE_BYTES
+## The Footprint picture's tiles and their GPU copy.
+var footprints := FootprintTiles.new(IMAGE_SIZE)
 ## Footprint picture bytes sent to the GPU in the latest rendered frame and in total,
 ## and how many footsteps those uploads carried; each carries at most MAX_TILES_PER_STEP tiles.
 var upload_bytes := 0
 var upload_total_bytes := 0
 var uploaded_steps := 0
-var _tiles: Array[Image] = []
-var _texture := Texture2DArray.new()
 var _layout: Node3D
-var _dirty_tiles := {}
 var _pending_steps := 0
 ## The detail region's strips hang from this node, which follows the region.
 var _detail := Node3D.new()
@@ -118,12 +118,6 @@ var _fill_texture: ImageTexture
 
 
 func _ready() -> void:
-	assert(TILE_GRID * TILE_SIZE == IMAGE_SIZE, "Footprint tiles must cover the picture exactly")
-	for layer in range(TILE_GRID.x * TILE_GRID.y):
-		var tile := Image.create_empty(TILE_SIZE.x, TILE_SIZE.y, false, Image.FORMAT_RGBA8)
-		tile.fill(Color(0, 0, 0, 0))
-		_tiles.append(tile)
-	_texture.create_from_images(_tiles)
 	_coarse_material = _make_material(false)
 	_detail_material = _make_material(true)
 	_make_coarse_surface(Rect2(-HALF_EXTENTS, HALF_EXTENTS * 2.0))
@@ -142,11 +136,7 @@ func _process(_delta: float) -> void:
 	# Coalesce both figures' stamps before drawing and resend only the tiles they
 	# touched. Wind ages encoded timestamps through the fill clock and never
 	# rewrites or uploads the picture by itself.
-	upload_bytes = 0
-	for layer in _dirty_tiles:
-		_texture.update_layer(_tiles[layer], layer)
-		upload_bytes += TILE_BYTES
-	_dirty_tiles.clear()
+	upload_bytes = footprints.upload()
 	upload_total_bytes += upload_bytes
 	uploaded_steps += _pending_steps
 	_pending_steps = 0
@@ -208,12 +198,15 @@ func advance(delta: float) -> void:
 	if wind_elapsed >= CLOCK_LIMIT:
 		wind_elapsed = 0.0
 		wind.restart_clock()
-		for layer in range(_tiles.size()):
-			_tiles[layer].fill(Color(0, 0, 0, 0))
-			_dirty_tiles[layer] = true
+		footprints.clear()
 		_publish_snow()
+	# Tiles are checked against fill clocks published in an earlier physics frame,
+	# whose prints the record has already observed filled.
+	if not _fill.is_empty():
+		footprints.free_filled(_fill)
 	if wind.step(wind_elapsed):
 		_publish_snow()
+		footprints.fill_clocks_moved(wind_elapsed)
 	wind_update_ms = float(Time.get_ticks_usec() - began) / 1000.0
 	wind_total_ms += wind_update_ms
 	wind_updates += 1
@@ -289,8 +282,19 @@ func _publish_snow() -> void:
 	_fill_texture.update(_fill_image)
 
 
+## Whether an allocated tile holds any of the four texels compaction at this point
+## is read from.
+func in_footprint_tile(point: Vector2) -> bool:
+	var texel := (point + HALF_EXTENTS) * TEXELS_PER_METRE - Vector2.ONE * 0.5
+	var cell := Vector2i(floori(texel.x), floori(texel.y))
+	for pixel in [cell, cell + Vector2i.RIGHT, cell + Vector2i.DOWN, cell + Vector2i.ONE]:
+		if Rect2i(Vector2i.ZERO, IMAGE_SIZE).has_point(pixel) and footprints.holds(pixel):
+			return true
+	return false
+
+
 func sample_compaction(point: Vector2) -> float:
-	if _tiles.is_empty():
+	if footprints.tiles == 0:
 		return 0.0
 	var texel := (point + HALF_EXTENTS) * TEXELS_PER_METRE - Vector2.ONE * 0.5
 	var cell := Vector2i(floori(texel.x), floori(texel.y))
@@ -319,13 +323,15 @@ func sample_loose_depth(point: Vector2) -> float:
 
 
 func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
-	if _tiles.is_empty() or absf(point.x) > HALF_EXTENTS.x or absf(point.y) > HALF_EXTENTS.y:
+	if absf(point.x) > HALF_EXTENTS.x or absf(point.y) > HALF_EXTENTS.y:
 		return
 	var forward := Vector2(-sin(heading), -cos(heading))
 	var right := Vector2(cos(heading), -sin(heading))
 	var extent := 0.18
 	var minimum := Vector2i(((point - Vector2.ONE * extent + HALF_EXTENTS) * TEXELS_PER_METRE).floor())
 	var maximum := Vector2i(((point + Vector2.ONE * extent + HALF_EXTENTS) * TEXELS_PER_METRE).ceil())
+	# The tiles this footstep presses.
+	var pressed := {}
 	for row in range(maxi(0, minimum.y), mini(IMAGE_SIZE.y - 1, maximum.y) + 1):
 		for column in range(maxi(0, minimum.x), mini(IMAGE_SIZE.x - 1, maximum.x) + 1):
 			var pixel := Vector2i(column, row)
@@ -340,23 +346,38 @@ func stamp_foot(point: Vector2, heading: float, strength: float) -> void:
 			var previous := _pixel_compaction(pixel)
 			# Each texel keeps the fill clock at its centre when it was last pressed.
 			var timestamp := int(floor(sample_fill(world) * 10.0))
-			var layer := _tile_layer(pixel)
-			_tiles[layer].set_pixel(column % TILE_SIZE.x, row % TILE_SIZE.y, Color(clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0),
-				float((timestamp >> 16) & 255) / 255.0, float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0))
-			_dirty_tiles[layer] = true
+			pressed[footprints.press(pixel, Color(clampf(previous + (1.0 - previous) * strength * weight, 0.0, 1.0),
+				float((timestamp >> 16) & 255) / 255.0, float((timestamp >> 8) & 255) / 255.0, float(timestamp & 255) / 255.0))] = true
+	_await_fill(point, pressed)
 	footprint_count += 1
 	_pending_steps += 1
 
 
-## The tile, and GPU layer, that holds a texel of the Footprint picture.
-func _tile_layer(pixel: Vector2i) -> int:
-	return (pixel.y / TILE_SIZE.y) * TILE_GRID.x + pixel.x / TILE_SIZE.x
+## A footstep's print in each tile it pressed has filled once the fill clock at every
+## Snow Depth node within FILL_REACH of the footfall has run PRINT_LIFETIME past the
+## latest of them now. Each texel was stamped with at most the fill clock its own
+## nodes give now, every fill clock its heights or shading read is one of those
+## nodes' or between them, and every node's clock only grows: by then neither the
+## print's heights nor its shading show anything.
+func _await_fill(point: Vector2, pressed: Dictionary) -> void:
+	var first := Vector2i(((point - Vector2.ONE * FILL_REACH + HALF_EXTENTS) * DEPTH_NODES_PER_METRE).floor())
+	var last := Vector2i(((point + Vector2.ONE * FILL_REACH + HALF_EXTENTS) * DEPTH_NODES_PER_METRE).floor()) + Vector2i.ONE
+	first = first.clamp(Vector2i.ZERO, DEPTH_SIZE - Vector2i.ONE)
+	last = last.clamp(Vector2i.ZERO, DEPTH_SIZE - Vector2i.ONE)
+	var nodes := PackedInt32Array()
+	var latest := 0.0
+	for row in range(first.y, last.y + 1):
+		for column in range(first.x, last.x + 1):
+			var node := row * DEPTH_SIZE.x + column
+			nodes.append(node)
+			latest = maxf(latest, _fill[node] if not _fill.is_empty() else 0.0)
+	footprints.await_fill(pressed, nodes, latest + PRINT_LIFETIME)
 
 
 func _pixel_compaction(pixel: Vector2i) -> float:
 	if pixel.x < 0 or pixel.y < 0 or pixel.x >= IMAGE_SIZE.x or pixel.y >= IMAGE_SIZE.y:
 		return 0.0
-	var value := _tiles[_tile_layer(pixel)].get_pixel(pixel.x % TILE_SIZE.x, pixel.y % TILE_SIZE.y)
+	var value := footprints.texel(pixel)
 	if value.r <= 0.0:
 		return 0.0
 	# Snow has filled the print by as much as the fill clock at the texel's centre
@@ -556,8 +577,9 @@ func _make_material(detail: bool) -> ShaderMaterial:
 	material.shader = SNOW_SHADER
 	material.set_shader_parameter("detail_mesh", detail)
 	material.set_shader_parameter("map_half_extents", HALF_EXTENTS)
-	material.set_shader_parameter("footprint_tiles", _texture)
-	material.set_shader_parameter("footprint_tile_grid", TILE_GRID)
+	material.set_shader_parameter("footprint_tiles", footprints.texture)
+	material.set_shader_parameter("footprint_layers", footprints.layer_texture)
+	material.set_shader_parameter("footprint_texels_per_metre", TEXELS_PER_METRE)
 	material.set_shader_parameter("detail_half_extents", DETAIL_HALF)
 	_materials.append(material)
 	return material

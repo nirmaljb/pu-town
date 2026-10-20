@@ -29,7 +29,7 @@ var frame_wind_total_ms := 0.0
 var frame_wind_updates := 0
 var checkpoint := 0
 ## Fixed world probes, in the order F5 placed them, and their latest readings.
-const MAX_PROBES := 7
+const MAX_PROBES := 8
 var probes: Array[Vector2] = []
 var probe_readings: Array[Dictionary] = []
 var latest := {}
@@ -41,18 +41,20 @@ const ROUTE_COLUMNS := [
 	"figure_screen_x", "figure_screen_y", "figure_screen_height", "whole_map_visible", "checkpoint", "figure_id", "run_requested",
 	"snow_depth_m", "saved_depth_m", "loose_depth_m", "foot_compaction", "sink_depth_m", "obstacle_limited", "step_count",
 	"focus_x_m", "focus_y_m", "focus_z_m", "untouched_y_m", "region_x_m", "region_z_m", "region_width_m", "region_depth_m", "region_seam_z_m", "wind_strength", "wind_from_deg", "wind_shaped_from_deg", "wind_elapsed_s", "wind_update_ms",
-	"footprint_count", "footprint_image_width", "footprint_image_height", "footprint_image_bytes",
-	"footprint_tile_bytes", "upload_bytes", "upload_total_bytes", "uploaded_steps",
+	"footprint_count", "footprint_tiles", "footprint_bytes", "footprint_tiles_created", "footprint_tiles_freed",
+	"footprint_tile_bytes", "footprint_gpu_layers", "footprint_gpu_bytes", "footprint_gpu_rebuild_bytes",
+	"upload_bytes", "upload_total_bytes", "uploaded_steps",
 	"other_figure_id", "other_x_m", "other_z_m", "other_steps",
 	"other_feet_y_m", "other_ground_y_m", "other_mps", "other_run_requested", "other_loose_depth_m", "other_grounded",
 	"other_contact_gap_m", "other_obstacle_limited", "other_boundary_limited", "other_facing_deg", "other_travel_deg",
 	"other_travel_m", "other_loop_progress", "other_rejoining",
 	"facing_deg", "twist_deg", "travel_deg", "print_deg", "cursor_set", "cursor_x_m", "cursor_z_m", "probe_count"
 ]
-## Every probe slot has the same columns, prefixed probe1_ … probe7_: its world
+## Every probe slot has the same columns, prefixed probe1_ … probe8_: its world
 ## position, loose Snow Depth, visible snow above the ground after packing,
-## compaction and whether the detail region covers it. Unused slots stay empty.
-const PROBE_COLUMNS := ["x_m", "z_m", "depth_m", "visible_m", "compaction", "in_region"]
+## compaction, whether the detail region covers it and whether an allocated
+## Footprint tile holds any texel its compaction is read from. Unused slots stay empty.
+const PROBE_COLUMNS := ["x_m", "z_m", "depth_m", "visible_m", "compaction", "in_region", "in_tile"]
 var columns := PackedStringArray(ROUTE_COLUMNS)
 
 
@@ -103,8 +105,10 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 			"visible_m": surface.sample_height(probe) - surface.sample_ground(probe),
 			"compaction": surface.sample_compaction(probe),
 			"in_region": surface.in_detail_region(probe),
+			"in_tile": surface.in_footprint_tile(probe),
 		})
 	var viewport_size := get_viewport().get_visible_rect().size
+	var footprints: RefCounted = surface.footprints
 	var figure_screen := camera.unproject_position(walker.global_position)
 	var head_screen := camera.unproject_position(walker.global_position + Vector3.UP * walker.HEIGHT)
 	var whole_map_visible := true
@@ -140,8 +144,10 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"region_width_m": surface.DETAIL_SIZE.x, "region_depth_m": surface.DETAIL_SIZE.y, "region_seam_z_m": surface.region_seam,
 		"wind_strength": surface.wind_strength, "wind_from_deg": surface.wind_from(), "wind_shaped_from_deg": surface.wind_shaped_from(),
 		"wind_elapsed_s": surface.wind_elapsed, "wind_update_ms": surface.wind_update_ms, "footprint_count": surface.footprint_count,
-		"footprint_image_width": surface.IMAGE_SIZE.x, "footprint_image_height": surface.IMAGE_SIZE.y,
-		"footprint_image_bytes": surface.footprint_image_bytes, "footprint_tile_bytes": surface.TILE_BYTES,
+		"footprint_tiles": footprints.tiles, "footprint_bytes": footprints.bytes(),
+		"footprint_tiles_created": footprints.created, "footprint_tiles_freed": footprints.freed,
+		"footprint_tile_bytes": footprints.TILE_BYTES, "footprint_gpu_layers": footprints.gpu_layers,
+		"footprint_gpu_bytes": footprints.gpu_bytes(), "footprint_gpu_rebuild_bytes": footprints.gpu_rebuild_bytes,
 		"upload_bytes": surface.upload_bytes, "upload_total_bytes": surface.upload_total_bytes,
 		"uploaded_steps": surface.uploaded_steps,
 		"other_figure_id": other.figure_id if other else -1,
@@ -171,7 +177,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 	if tick % 6 != 0:
 		return
 	var contact := "grounded" if walker.grounded else "NO SURFACE"
-	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.1f × %.1f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nShared image %d × %d · %.0f MiB · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch %.0f°, north up · %s · %d fps\n%s\n%s" % [
+	label.text = "SNOW TOWN  /  %d × %d m   ·   Figure %d\nWASD walk · Shift run · mouse Facing · Tab switch · wheel zoom · M overview\n− / = wind · 0 reset wind · [ / ] turn wind · F1 overlay\nF4 checkpoint · F5 add probe · F6 frames · F8 CSV · F9 capture\n\nFeet X %6.2f   Y %6.3f   Z %6.2f m · ground %5.2f m\nHorizontal %4.2f m/s · %s · %s\nSnow %.3f m · saved %.3f m · loose %.3f m · sunk %.3f m\nPacked %.0f%% · steps %d · travel %.2f m\nFacing %03.0f° · twist %+.0f° · travel %03.0f° · cursor %s\nDetail region %.1f × %.1f m at %.1f, %.1f · upload %.0f KiB\nWind %.0f from %s · weather clock %.1f s · %.2f ms · stamps %d\nFootprint tiles %d · %.1f MiB · GPU %d layers · checkpoint %d\n%s\n%s\n%s · lean %.2f m · pitch %.0f°, north up · %s · %d fps\n%s\n%s" % [
 		surface.HALF_EXTENTS.x * 2, surface.HALF_EXTENTS.y * 2, walker.figure_id,
 		walker.position.x, walker.position.y, walker.position.z, walker.ground_height,
 		walker.horizontal_speed, contact,
@@ -182,7 +188,7 @@ func observe(walker: Node3D, camera: Camera3D, surface: Node3D, focused: bool, o
 		"%.1f, %.1f" % [camera.cursor_ground.x, camera.cursor_ground.y] if camera.has_cursor_ground else "not yet seen",
 		surface.DETAIL_SIZE.x, surface.DETAIL_SIZE.y, surface.region_center.x, surface.region_center.y, float(surface.upload_bytes) / 1024.0,
 		surface.wind_strength, _compass(surface.wind_from()) + ("" if surface.wind_shaped_from() == surface.wind_from() else " (turning)"), surface.wind_elapsed, surface.wind_update_ms, surface.footprint_count,
-		surface.IMAGE_SIZE.x, surface.IMAGE_SIZE.y, float(surface.footprint_image_bytes) / 1048576.0, checkpoint,
+		footprints.tiles, float(footprints.bytes()) / 1048576.0, footprints.gpu_layers, checkpoint,
 		_other_text(other),
 		_probe_text(),
 		"Overview %.0f m" % camera.current_distance() if camera.overview else "Distance %.1f m" % camera.distance,
@@ -206,8 +212,9 @@ func _probe_text() -> String:
 	var lines := PackedStringArray()
 	for slot in range(probe_readings.size()):
 		var reading: Dictionary = probe_readings[slot]
-		lines.append("P%d %.1f, %.1f · depth %.2f m · packed %.0f%% · %s" % [slot + 1, reading.x_m, reading.z_m,
-			reading.depth_m, reading.compaction * 100.0, "in region" if reading.in_region else "outside region"])
+		lines.append("P%d %.1f, %.1f · depth %.2f m · packed %.0f%% · %s · %s" % [slot + 1, reading.x_m, reading.z_m,
+			reading.depth_m, reading.compaction * 100.0, "in region" if reading.in_region else "outside region",
+			"in a tile" if reading.in_tile else "no tile"])
 	return "\n".join(lines)
 
 

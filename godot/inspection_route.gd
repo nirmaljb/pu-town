@@ -30,6 +30,10 @@ const CRISP_REACH_M := 20.0
 const CRISP_RAYS := 48
 const CRISP_SAG_M := 0.05
 const MAX_TILES_PER_STEP := 4
+# The Footprint picture is held in tiles allocated where steps land; the record
+# reports them in these columns.
+const FOOTPRINT_TILE_COLUMNS := ["footprint_tiles", "footprint_bytes", "footprint_tiles_created", "footprint_tiles_freed",
+	"footprint_gpu_layers", "footprint_gpu_bytes", "footprint_gpu_rebuild_bytes", "probe1_in_tile"]
 # Running is full at or below 10 cm of loose snow and falls to walking at 40 cm.
 const FULL_RUN_DEPTH_M := 0.10
 const WALK_ONLY_DEPTH_M := 0.40
@@ -90,12 +94,13 @@ const ROAD_DRIFT_M := 0.3
 const PACKED_GAIN_MPS := 0.5
 # Probes in the order the route places them with F5.
 const TRAIL_PROBE := 1
-const ROAD_PROBE := 2
-const TRACK_PROBE := 3
-const EXPOSED_PROBE := 4
-const SHELTERED_PROBE := 5
-const WINDWARD_PROBE := 6
-const LEE_PROBE := 7
+const EDGE_PROBE := 2
+const ROAD_PROBE := 3
+const TRACK_PROBE := 4
+const EXPOSED_PROBE := 5
+const SHELTERED_PROBE := 6
+const WINDWARD_PROBE := 7
+const LEE_PROBE := 8
 # The stages that walk a figure into a Camp building on purpose. Anywhere else an
 # obstacle holding a figure means the route or the loop met a building it should
 # have passed.
@@ -233,6 +238,9 @@ func _run() -> void:
 	var to_edge := _distance_to_edge(Vector2(float(trail_end.x_m), float(trail_end.z_m)), heading)
 	await _leg(_keys_toward(heading) + [KEY_SHIFT], to_edge / RUN_MPS + 0.1, "run along the south-west Road")
 	await _leg(_keys_toward(_edge_normal(road[1])), 1.0, "boundary blocked")
+	# A probe on the trail's last print, in open snow at the map's edge where no one
+	# else walks, shows the Footprint tile that trail created there.
+	_tap(KEY_F5)
 	if not headless:
 		_tap(KEY_F9)
 		await _wait(0.2)
@@ -744,8 +752,14 @@ func _check_record() -> void:
 	var figure_ids := {}
 	var bounds := TownLayout.HALF_EXTENTS - Vector2.ONE * FIGURE_RADIUS_M
 	var previous_upload := {}
+	# A check reading a column the record lacks would stop with a script error and
+	# fail nothing, so the Footprint tile columns are required first.
+	var tile_columns := true
+	for column in FOOTPRINT_TILE_COLUMNS:
+		if not rows.front().has(column):
+			failures.append("The record has no %s column" % column)
+			tile_columns = false
 	var ground := float(rows.front().ground_y_m)
-	var image_texels := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
 	var play_range := _play_range(rows)
 	var region_offset := Vector2.INF
 	var building_checkpoints := {}
@@ -807,12 +821,11 @@ func _check_record() -> void:
 			var steps := int(row.uploaded_steps) - int(previous_upload.uploaded_steps)
 			if sent < 0 or steps < 0 or sent % int(row.footprint_tile_bytes) != 0 or sent > steps * MAX_TILES_PER_STEP * int(row.footprint_tile_bytes):
 				_fail_once("Footprint uploads exceeded the tiles their footsteps touched")
-		if int(row.uploaded_steps) > int(row.footprint_count) or int(row.upload_bytes) >= int(row.footprint_image_bytes):
-			_fail_once("The Footprint picture was resent beyond its footsteps' tiles")
+		if int(row.uploaded_steps) > int(row.footprint_count):
+			_fail_once("Footprint uploads carried more footsteps than were made")
+		if tile_columns:
+			_check_footprint_memory(row, previous_upload)
 		previous_upload = row
-		var image_size := Vector2i(int(row.footprint_image_width), int(row.footprint_image_height))
-		if image_size != image_texels or int(row.footprint_image_bytes) != image_texels.x * image_texels.y * 4:
-			_fail_once("Footprint image dimensions or allocation changed during traversal")
 		if float(row.foot_compaction) < -0.001 or float(row.foot_compaction) > 1.001:
 			_fail_once("Snow compaction escaped its bounded range")
 		for slot in range(1, int(row.probe_count) + 1):
@@ -895,6 +908,8 @@ func _check_record() -> void:
 	_check_zoom(rows)
 	_check_detail_region(rows)
 	_check_uploads(rows)
+	if tile_columns:
+		_check_footprint_tiles(rows)
 	print("Coverage: %d observations; straight %d, diagonal %d, fast run %d, slow run %d, blocked %d, overview %d, camera follow %d" % [rows.size(), straight, diagonal, fast_run, slow_run, blocked, overview, follow])
 
 
@@ -1647,6 +1662,101 @@ func _check_uploads(rows: Array[Dictionary]) -> void:
 		failures.append("Footprint uploads were missing or exceeded the touched tiles (%d bytes, %d steps)" % [sent, steps])
 
 
+## Footprint memory is the tiles allocated where steps have landed: none before the
+## first step, and counted as tiles created less tiles freed. The GPU copy holds a
+## layer for each of them, and changes size only by resending every layer once.
+func _check_footprint_memory(row: Dictionary, previous: Dictionary) -> void:
+	var tiles := int(row.footprint_tiles)
+	if int(row.footprint_count) == 0 and tiles != 0:
+		_fail_once("A Footprint tile was allocated before any step landed")
+	if tiles != int(row.footprint_tiles_created) - int(row.footprint_tiles_freed):
+		_fail_once("Footprint memory was not the tiles created less the tiles freed")
+	var layers := int(row.footprint_gpu_layers)
+	if layers < tiles:
+		_fail_once("The Footprint picture's GPU copy did not hold a layer for every tile")
+	if previous.is_empty():
+		return
+	var resent := int(row.footprint_gpu_rebuild_bytes) - int(previous.footprint_gpu_rebuild_bytes)
+	if resent != (layers * int(row.footprint_tile_bytes) if layers != int(previous.footprint_gpu_layers) else 0):
+		_fail_once("The Footprint picture's GPU copy changed size other than by resending its layers once")
+
+
+## A fresh trail far out on the Road creates the tiles its steps land in, and the
+## largest Footprint memory the route reaches stays below what a picture of the
+## whole map took at the same resolution.
+func _check_footprint_tiles(rows: Array[Dictionary]) -> void:
+	var road_run := _rows_for(rows, "run along the south-west Road")
+	var fresh := _rows_for(rows, "fresh probe")
+	var edge := _rows_for(rows, "probe outside region")
+	if road_run.is_empty() or fresh.is_empty() or edge.is_empty():
+		failures.append("The Road trail's stages were missing")
+		return
+	var created := int(road_run.back().footprint_tiles_created) - int(road_run.front().footprint_tiles_created)
+	var edge_row: Dictionary = edge.back()
+	print("The fresh trail along the south-west Road created %d Footprint tiles; its probe at the map's edge %s compaction %.3f, %s" % [
+		created, Vector2(_probe(edge_row, EDGE_PROBE, "x_m"), _probe(edge_row, EDGE_PROBE, "z_m")),
+		_probe(edge_row, EDGE_PROBE, "compaction"), "held in a tile" if _probe_in_tile(edge_row, EDGE_PROBE) else "held in no tile"])
+	if created < 1:
+		failures.append("The fresh trail along the south-west Road created no Footprint tiles")
+	if not _probe_in_tile(fresh.back(), TRAIL_PROBE):
+		failures.append("No Footprint tile held the trail's first probed print")
+	if int(edge_row.probe_count) != EDGE_PROBE or _probe(edge_row, EDGE_PROBE, "compaction") < 0.01 \
+			or not _probe_in_tile(edge_row, EDGE_PROBE):
+		failures.append("No Footprint tile held the print the trail left at the map's edge")
+	_check_tile_freeing(rows)
+	var peak: Dictionary = rows.front()
+	for row in rows:
+		if int(row.footprint_tiles) > int(peak.footprint_tiles):
+			peak = row
+	var last: Dictionary = rows.back()
+	var whole_map := Vector2i((TownLayout.HALF_EXTENTS * 2.0 / FOOTPRINT_TEXEL_M).round())
+	var whole_map_bytes := whole_map.x * whole_map.y * 4
+	print("Footprint tiles: at most %d (%d bytes) at %.1f s; %d created and %d freed; GPU copy %d layers (%d bytes, %d resent resizing it); a whole-map picture took %d bytes" % [
+		int(peak.footprint_tiles), int(peak.footprint_bytes), float(peak.elapsed_ms) / 1000.0, int(last.footprint_tiles_created),
+		int(last.footprint_tiles_freed), int(last.footprint_gpu_layers), int(last.footprint_gpu_bytes), int(last.footprint_gpu_rebuild_bytes), whole_map_bytes])
+	if int(peak.footprint_bytes) >= whole_map_bytes or int(last.footprint_gpu_bytes) >= whole_map_bytes:
+		failures.append("Footprint memory did not stay below a whole-map picture's")
+
+
+## The accelerated wind fills the trail's print at the map's edge, in open snow, and
+## the tile it lay in is freed only after the record has shown it filled: the last
+## observation that still finds it in a tile reads no compaction there. By the end
+## of the drift stage that tile is gone, and the GPU copy has shrunk with the tiles
+## the wind freed.
+func _check_tile_freeing(rows: Array[Dictionary]) -> void:
+	var placed := _rows_for(rows, "probes placed")
+	var windy := placed + _rows_for(rows, "wind fills prints") + _rows_for(rows, "drifts build")
+	if placed.is_empty() or windy.size() < 120:
+		failures.append("The wind stages that fill the edge print were missing")
+		return
+	var freed_at := -1
+	for index in range(windy.size()):
+		if not _probe_in_tile(windy[index], EDGE_PROBE):
+			freed_at = index
+			break
+	var first: Dictionary = placed.front()
+	var last: Dictionary = windy.back()
+	var most_layers := 0
+	for row in rows:
+		if int(row.checkpoint) <= int(first.checkpoint):
+			most_layers = maxi(most_layers, int(row.footprint_gpu_layers))
+	print("The edge print's tile %s; the wind freed %d tiles, %d remain; the GPU copy went from %d layers to %d" % [
+		"was freed %.1f wind-seconds into the wind, after reading %.4f compaction" % [float(windy[freed_at].wind_elapsed_s) - float(first.wind_elapsed_s),
+		_probe(windy[freed_at - 1], EDGE_PROBE, "compaction")] if freed_at > 0 else "was not freed",
+		int(last.footprint_tiles_freed) - int(first.footprint_tiles_freed), int(last.footprint_tiles), most_layers, int(last.footprint_gpu_layers)])
+	if freed_at < 1:
+		failures.append("Wind filled the trail at the map's edge but its Footprint tile was not freed")
+	elif _probe(windy[freed_at - 1], EDGE_PROBE, "compaction") > 0.0:
+		failures.append("A Footprint tile was freed before the print in it had filled")
+	if int(last.footprint_gpu_layers) >= most_layers:
+		failures.append("The Footprint picture's GPU copy did not shrink as the wind freed its tiles")
+
+
+## Whether the record finds an allocated Footprint tile at a probe, by its 1-based slot.
+func _probe_in_tile(row: Dictionary, slot: int) -> bool:
+	return row["probe%d_in_tile" % slot] == "true"
+
+
 func _region(row: Dictionary) -> Vector2:
 	return Vector2(float(row.region_x_m), float(row.region_z_m))
 
@@ -1768,7 +1878,7 @@ func _check_wind(rows: Array[Dictionary]) -> void:
 		failures.append("Wind route stages were missing")
 		return
 	if int(placed.back().probe_count) != LEE_PROBE:
-		failures.append("The route did not fix its seven world probes (%s)" % placed.back().probe_count)
+		failures.append("The route did not fix its eight world probes (%s)" % placed.back().probe_count)
 		return
 	for row in placed + filling + building:
 		if absf(float(row.wind_from_deg) - PREVAILING_FROM_DEG) > 0.01:

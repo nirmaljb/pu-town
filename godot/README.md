@@ -362,7 +362,7 @@ walks.
 | `[` / `]` | Turn the wind 45° anticlockwise/clockwise; it starts from the north-west |
 | F1 | Toggle the observation HUD |
 | F4 | Increment the checkpoint recorded in the observation CSV |
-| F5 | Add a fixed world probe at the controlled figure's latest bootprint, or at its position before its first step; up to seven |
+| F5 | Add a fixed world probe at the controlled figure's latest bootprint, or at its position before its first step; up to eight |
 | F6 | Record 60 real seconds of rendered-frame intervals |
 | F8 | Start/stop inspection observations in `user://route-….csv` |
 | F9 | Save the rendered viewport to `user://capture-….png` |
@@ -386,20 +386,26 @@ where the figure stands (`untouched_y_m`), the detail region's centre and size
 where its far part meets its near part (`region_seam_z_m`), the Footprint
 picture bytes sent to the GPU in the latest rendered frame (`upload_bytes`), in
 total (`upload_total_bytes`) and the footsteps those uploads carried
-(`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), wind strength, the bearing it blows from (`wind_from_deg`) and
+(`uploaded_steps`), with the size of one tile (`footprint_tile_bytes`), the
+Footprint tiles allocated now (`footprint_tiles`), their bytes (`footprint_bytes`)
+and the totals created and freed (`footprint_tiles_created`,
+`footprint_tiles_freed`), the layers of the picture's GPU copy
+(`footprint_gpu_layers`, `footprint_gpu_bytes`) and the bytes sent in all
+rebuilding it at a new size (`footprint_gpu_rebuild_bytes`), wind strength, the bearing it blows from (`wind_from_deg`) and
 the bearing whose shape the snow follows now (`wind_shaped_from_deg`, which lags a
 turn until it is shaped), the
 weather clock, the wind's work in the latest physics frame (`wind_update_ms`),
-image allocation and the walking figure: its identity, position, step count and
+and the walking figure: its identity, position, step count and
 progress round the loop as a fraction of its length (`other_loop_progress`, the
 point where it will join while `other_rejoining` is true), together with its feet
 and ground heights, speed, run request, loose depth, contact, obstruction, Facing
 and travel bearings and distance walked (`other_…` columns). Each F5 probe stays at its world
 location when you walk away or switch figures. For every probe the CSV reports
-`probe_count` and, in columns `probe1_…` to `probe7_…`, its position (`x_m`,
+`probe_count` and, in columns `probe1_…` to `probe8_…`, its position (`x_m`,
 `z_m`), loose Snow Depth (`depth_m`), visible snow above the ground after packing
-(`visible_m`), compaction and whether it lies in the detail region (`in_region`);
-unused slots stay empty. The HUD lists the same readings. The CSV
+(`visible_m`), compaction, whether it lies in the detail region (`in_region`) and
+whether an allocated Footprint tile holds any texel its compaction is read from
+(`in_tile`); unused slots stay empty. The HUD lists the same readings. The CSV
 also records input, the camera's projection, field of view, distance, overview
 state, lean (`lean_x_m`, `lean_z_m`, `lean_m`), pitch and yaw, framing (where the
 feet stand on screen, `figure_screen_x` and `figure_screen_y`, and the 1.7 m
@@ -453,7 +459,10 @@ measurable Packed Path running advantage over the fresh lane. While the cursor l
 and back, the detail region follows the focus and returns with it. Every
 observation checks that the region keeps its size with its edges and its seam on
 the coarse grid, and that Footprint uploads never exceed the 2 × 2 tiles each
-uploaded footstep may touch. In play it checks that the region keeps its place
+uploaded footstep may touch. It checks that Footprint memory is the allocated tiles,
+none before the first step and counted as tiles created less tiles freed, and that
+the GPU copy has a layer for each and changes size only by resending every layer
+once. In play it checks that the region keeps its place
 relative to the focus, that the figure stands far enough inside the near part for
 every footstep to land in full 5 cm detail, that the snow along the bottom of the
 view lies in full detail and, without lean, that all the snow the view shows within
@@ -470,9 +479,11 @@ walks east to the south-west Road's corner of the Town Square, lays a probed tra
 along the Road's first 4.5 m and runs on along the Road, far out of the detail
 region, until the map's west edge holds it 0.3 m inside the map rectangle at the
 Road's end; all the way the Road's Snow must be Shallow, the figure on the Road and
-its running at full speed. A rendered run captures the view there. It runs back
+its running at full speed. There it fixes a second probe on the trail's last print,
+in open snow no one else walks, and a rendered run captures the view. The fresh
+trail must have created Footprint tiles, and one must hold both probed prints. It runs back
 along the Road and walks onto the point straight downwind of the tree nearest the
-Road, where that tree will drift snow over it, fixes a second probe there, then
+Road, where that tree will drift snow over it, fixes a third probe there, then
 finds its own trail retained. Meanwhile the walking figure has crossed the Town Square on its own lane
 while the controlled figure was at least 15 m away. The route picks a point of
 that trail from the public record, walks to it, fixes a probe there and follows
@@ -498,12 +509,12 @@ until then. From west of the square it opens the whole-map overview with M,
 whose detail region stays at the map centre, and walks east into the region:
 across the blended border the region holds still and the contact gap stays within
 2 mm. One wheel step in leaves it at the widest play distance, and it zooms on in
-to the closest and fixes a fourth probe on its own print in the open Town Square.
+to the closest and fixes a fifth probe on its own print in the open Town Square.
 It walks north into the small shed's south face, which must hold it still against
 the face for at least half a second, steps back into the shed's lee and fixes a
-fifth probe there; walks up the square's west side to the lodge's west face and
-fixes a sixth; and walks north into the lodge's south face, which must hold it
-still too, then steps back one walking step and fixes a seventh in the lodge's
+sixth probe there; walks up the square's west side to the lodge's west face and
+fixes a seventh; and walks north into the lodge's south face, which must hold it
+still too, then steps back one walking step and fixes an eighth in the lodge's
 lee, within about 1.3 m of the face. At wind 16 from
 the north-west the open print fills at the 120 wind-second rate, the print in the
 shed's lee four times more slowly and the lee print faster than either, while a
@@ -512,7 +523,10 @@ lee prints fill completely, the lee print's visible depression with them, and th
 sheltered print outlasts them. The lodge's west face scours to the 3 cm floor,
 while neither the open square nor the shed's sheltered lee changes depth. The
 south-west Road's probe, Shallow and unchanged while the wind was still, rises by
-at least 0.3 m as the corner tree's Snowdrift builds over the Road. With
+at least 0.3 m as the corner tree's Snowdrift builds over the Road. The print at
+the map's edge fills in the open too: the last observation that still finds it in
+a tile must read no compaction, by the end of the drift stage its tile must have
+been freed, and the GPU copy must have shrunk with the tiles the wind freed. With
 Shift held the figure wades through the drift at walking speed. Four turns of `]`
 reverse the wind; once the record shows the snow following it, the old lee wears
 away and the scoured face drifts within ten seconds. During the wind stages the
@@ -696,19 +710,44 @@ never height or foot support, so distant trails still read.
 Horizontal movement separately sweeps a circle against the rectangles in
 [`town_layout.gd`](town_layout.gd), with sliding and map containment.
 
-Footsteps paint one world-anchored RGBA8 image at **31.25 mm per texel**, sized
-to cover the whole map rectangle: **5120 × 5120** for the 160 × 160 m map. It stores compaction and the fill clock
-at the texel's centre when it was last pressed; no growing list of steps is retained. Both figures use
-this same image, and moving the detail region does not move or clear its contents.
-The picture is held in **256 × 128 texel tiles** (8 × 4 m), 20 × 40 of them,
-and its GPU copy is a texture array with one layer per tile. A sole spans at most
-0.36 m, so a footstep touches at most 2 × 2 tiles; at the end of each rendered
-frame only the tiles that frame's footsteps touched are resent, at most
-**524,288 bytes per footstep** (four 131,072-byte tiles), never the whole picture.
-The CPU tile payload is **104,857,600 bytes** (100 MiB), whatever the
-number of steps, about 4.6 times the reference town's; the full Frostwatch
-Outpost replaces it with tiles created where steps land. The GPU texture array is a separate nominal allocation of the same size; those figures exclude driver, upload-staging and other scene
-memory. Wind ages the encoded values without rewriting the image each frame;
+Footsteps paint one world-anchored RGBA8 Footprint picture at **31.25 mm per
+texel**, covering the whole map rectangle: 5120 × 5120 texels for the 160 × 160 m
+map. It stores compaction and the fill clock at the texel's centre when it was last
+pressed; no growing list of steps is retained. Both figures use this same picture,
+and moving the detail region does not move or clear its contents.
+[`footprint_tiles.gd`](footprint_tiles.gd) holds it only where steps have landed, in
+world-anchored **256 × 128 texel tiles** (8 × 4 m, 131,072 bytes each) in rows
+from the map's north-west corner. A tile is created blank when a step first presses
+it. Each footstep notes, for the tiles it pressed, every Snow Depth node within
+0.4 m of the footfall (the nodes whose fill clocks its texels' heights and its
+shading read) and the latest of their fill clocks now. Once wind has run every
+one of those clocks 120 fill-seconds past that latest value, neither the print's
+heights nor its shading show anything, and once that holds for every print in a
+tile the tile is freed. After each wind sweep the tiles are checked, four per
+physics frame, against clocks published in an earlier frame, so the record always
+shows a print filled before its tile goes. Memory therefore follows where the
+figures have walked, not the map's area: the scene route, which walks the Camp, a
+Deep Snow lane and a Road to the map's edge, peaks at 76 tiles (9.5 MiB) where the
+whole-map picture took **104,857,600 bytes** (100 MiB) whatever the number of
+steps, and the wind frees 75 of its 92 tiles.
+
+The GPU copy is a texture array with one layer per tile, read through a picture
+with one texel per tile of the map that holds the tile's layer, or none. The shader
+reads the Footprint picture in blocks of 2 × 2 texels, which nearly always share a
+tile, so it looks up a block's layer once and reads nothing more where no tile is
+allocated; in source this drew the play view faster than the whole-map picture did
+(the record of #111 measures it). A texture
+array cannot change size in place, so the copy starts with 8 layers, doubles when a
+new tile finds no spare layer and halves once a quarter or fewer of its layers are
+in use; each time, every allocated tile is packed into the lowest layers and every
+layer is sent once. It never grows past a layer for each of the map's 800 tiles. In
+the route it reaches 128 layers (16 MiB) and is back to 32 when the drift stage
+ends. A sole spans at most 0.36 m, so a footstep touches at most 2 × 2 tiles; at
+the end of each rendered frame only the tiles that frame's footsteps touched are
+resent, at most **524,288 bytes per footstep** (four tiles), never the whole
+picture. Those figures exclude each tile's list of awaited fill clocks, the
+tile-to-layer picture, driver, upload-staging and other scene memory. Wind ages the
+encoded values without rewriting the picture each frame;
 new footfalls update it. [`snow_wind.gd`](snow_wind.gd) holds the wind: the
 working Snow Depth and fill-clock pictures (401 × 401 nodes each), the target
 shape for the current direction, marched cell by cell from the obstacles upwind

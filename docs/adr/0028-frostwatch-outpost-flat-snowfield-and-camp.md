@@ -61,7 +61,14 @@ camera-culled batches.
 clock, exposure, shelter and drift. To fit a 500 × 550 m map in memory, the
 single whole-map Footprint picture becomes world-anchored tiles at the same
 31.25 mm resolution, created where a step lands and freed once wind has filled
-every print in them; the GPU copy stays tile-updated. Snow Depth may use a coarser
+every print in them; the GPU copy stays tile-updated. (Amended by #111: a tile is
+freed once the fill clock at every Snow Depth node within 0.4 m of each of its
+prints has run a whole print lifetime past the latest of those clocks at that
+print, so neither heights nor shading show it; a few tiles are checked per physics
+frame. The GPU copy is a texture array read through a small tile-to-layer picture.
+It cannot change size in place, so it doubles when every layer is in use and
+halves when three quarters are spare, resending all of its layers once each time.
+Footsteps still resend only the tiles they touched.) Snow Depth may use a coarser
 grid away from the Camp, with no visible difference in behaviour. The detail
 region is sized and shaped for the oblique view, sharp to about 20 m from the
 figure. (Amended by #108: it keeps 5 cm cells where the figure walks and nearer

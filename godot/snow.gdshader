@@ -1,10 +1,14 @@
 shader_type spatial;
 render_mode diffuse_burley, specular_schlick_ggx;
 
-// The Footprint picture, held as tiles of equal size, each one layer, in rows from
-// the map's north-west corner, as in SnowSurface._tile_layer.
+// The Footprint picture, held only where steps have landed: tiles of equal size,
+// each one layer of footprint_tiles. footprint_layers has a texel for each tile of
+// the map, in rows from its north-west corner, holding the layer that holds the
+// tile, or -1 where none is allocated, as in SnowSurface._tile_layers.
 uniform sampler2DArray footprint_tiles : filter_nearest, repeat_disable;
-uniform ivec2 footprint_tile_grid;
+uniform sampler2D footprint_layers : filter_nearest, repeat_disable;
+// Texels of the Footprint picture per metre, counted from the map's west and north edges.
+uniform float footprint_texels_per_metre = 32.0;
 // The flat ground's height, set from the town layout, as in SnowTownLayout.ground_height.
 uniform float ground_level = 0.0;
 // The saved Snow Depth picture: loose depth above the ground at nodes counted from
@@ -67,18 +71,50 @@ vec2 smooth_picture_slope(sampler2D picture, float nodes_per_metre, vec2 point) 
 	return slope * nodes_per_metre;
 }
 
-ivec2 footprint_size() {
-	return textureSize(footprint_tiles, 0).xy * footprint_tile_grid;
-}
-
-// One texel of the Footprint picture; nothing is pressed outside it.
-vec4 footprint_texel(ivec2 pixel, ivec2 image_size) {
-	if (pixel.x < 0 || pixel.y < 0 || pixel.x >= image_size.x || pixel.y >= image_size.y) {
+// One texel of the Footprint picture; nothing is pressed outside the map's tiles or
+// in a tile that is not allocated.
+vec4 footprint_texel(ivec2 pixel) {
+	if (pixel.x < 0 || pixel.y < 0) {
 		return vec4(0.0);
 	}
 	ivec2 tile_size = textureSize(footprint_tiles, 0).xy;
 	ivec2 tile = pixel / tile_size;
-	return texelFetch(footprint_tiles, ivec3(pixel - tile * tile_size, tile.y * footprint_tile_grid.x + tile.x), 0);
+	if (any(greaterThanEqual(tile, textureSize(footprint_layers, 0)))) {
+		return vec4(0.0);
+	}
+	float layer = texelFetch(footprint_layers, tile, 0).r;
+	if (layer < 0.0) {
+		return vec4(0.0);
+	}
+	return texelFetch(footprint_tiles, ivec3(pixel - tile * tile_size, int(layer)), 0);
+}
+
+// The four texels from `cell` east and south. They nearly always lie in one tile,
+// whose layer is then read once; otherwise each is read on its own.
+void footprint_quad(ivec2 cell, out vec4 north_west, out vec4 north_east, out vec4 south_west, out vec4 south_east) {
+	ivec2 tile_size = textureSize(footprint_tiles, 0).xy;
+	ivec2 tile = cell / tile_size;
+	ivec2 inside = cell - tile * tile_size;
+	if (cell.x >= 0 && cell.y >= 0 && inside.x < tile_size.x - 1 && inside.y < tile_size.y - 1) {
+		float layer = all(lessThan(tile, textureSize(footprint_layers, 0))) ? texelFetch(footprint_layers, tile, 0).r : -1.0;
+		if (layer < 0.0) {
+			north_west = vec4(0.0);
+			north_east = vec4(0.0);
+			south_west = vec4(0.0);
+			south_east = vec4(0.0);
+			return;
+		}
+		ivec3 at = ivec3(inside, int(layer));
+		north_west = texelFetch(footprint_tiles, at, 0);
+		north_east = texelFetch(footprint_tiles, at + ivec3(1, 0, 0), 0);
+		south_west = texelFetch(footprint_tiles, at + ivec3(0, 1, 0), 0);
+		south_east = texelFetch(footprint_tiles, at + ivec3(1, 1, 0), 0);
+		return;
+	}
+	north_west = footprint_texel(cell);
+	north_east = footprint_texel(cell + ivec2(1, 0));
+	south_west = footprint_texel(cell + ivec2(0, 1));
+	south_east = footprint_texel(cell + ivec2(1, 1));
 }
 
 // A pressed texel's compaction, once the fill clock has reached `filled`.
@@ -88,45 +124,44 @@ float aged_compaction(vec4 value, float filled) {
 	return value.r * max(0.0, 1.0 - max(0.0, filled - stamped) / PRINT_LIFETIME);
 }
 
-// Compaction at one texel of the Footprint picture, once the fill clock has reached `filled`.
-float filled_compaction(ivec2 pixel, ivec2 image_size, float filled) {
-	vec4 value = footprint_texel(pixel, image_size);
+// A texel's compaction, once the fill clock has reached `filled`.
+float filled_compaction(vec4 value, float filled) {
 	return value.r > 0.0 ? aged_compaction(value, filled) : 0.0;
 }
 
-float pixel_compaction(ivec2 pixel, ivec2 image_size) {
+float pixel_compaction(vec4 value, ivec2 pixel) {
 	// Snow has filled the print by as much as the fill clock at the texel's centre
 	// has run since it was pressed, as in SnowSurface._pixel_compaction. Most texels
 	// were never pressed and need no fill clock, so it is read only for pressed ones.
-	vec4 value = footprint_texel(pixel, image_size);
 	if (value.r <= 0.0) {
 		return 0.0;
 	}
-	vec2 centre = (vec2(pixel) + vec2(0.5)) / vec2(image_size) * 2.0 * map_half_extents - map_half_extents;
+	vec2 centre = (vec2(pixel) + vec2(0.5)) / footprint_texels_per_metre - map_half_extents;
 	return aged_compaction(value, picture_value(fill_image, depth_nodes_per_metre, centre));
 }
 
 float compaction(vec2 point) {
-	// The image covers the whole map rectangle, so its size sets the texel density.
-	ivec2 image_size = footprint_size();
-	vec2 texel = (point + map_half_extents) / (2.0 * map_half_extents) * vec2(image_size) - vec2(0.5);
+	vec2 texel = (point + map_half_extents) * footprint_texels_per_metre - vec2(0.5);
 	ivec2 cell = ivec2(floor(texel));
 	vec2 blend = fract(texel);
+	vec4 north_west, north_east, south_west, south_east;
+	footprint_quad(cell, north_west, north_east, south_west, south_east);
 	return mix(
-		mix(pixel_compaction(cell, image_size), pixel_compaction(cell + ivec2(1, 0), image_size), blend.x),
-		mix(pixel_compaction(cell + ivec2(0, 1), image_size), pixel_compaction(cell + ivec2(1, 1), image_size), blend.x), blend.y);
+		mix(pixel_compaction(north_west, cell), pixel_compaction(north_east, cell + ivec2(1, 0)), blend.x),
+		mix(pixel_compaction(south_west, cell + ivec2(0, 1)), pixel_compaction(south_east, cell + ivec2(1, 1)), blend.x), blend.y);
 }
 
 // Shading only: compaction read with one fill clock for the whole neighbourhood,
 // which changes far more slowly than a sole's outline. Heights never use it.
 float shading_compaction(vec2 point, float filled) {
-	ivec2 image_size = footprint_size();
-	vec2 texel = (point + map_half_extents) / (2.0 * map_half_extents) * vec2(image_size) - vec2(0.5);
+	vec2 texel = (point + map_half_extents) * footprint_texels_per_metre - vec2(0.5);
 	ivec2 cell = ivec2(floor(texel));
 	vec2 blend = fract(texel);
+	vec4 north_west, north_east, south_west, south_east;
+	footprint_quad(cell, north_west, north_east, south_west, south_east);
 	return mix(
-		mix(filled_compaction(cell, image_size, filled), filled_compaction(cell + ivec2(1, 0), image_size, filled), blend.x),
-		mix(filled_compaction(cell + ivec2(0, 1), image_size, filled), filled_compaction(cell + ivec2(1, 1), image_size, filled), blend.x), blend.y);
+		mix(filled_compaction(north_west, filled), filled_compaction(north_east, filled), blend.x),
+		mix(filled_compaction(south_west, filled), filled_compaction(south_east, filled), blend.x), blend.y);
 }
 
 float saved_depth(vec2 point) {
@@ -193,7 +228,7 @@ void fragment() {
 	// Sole outlines are shaded from the Footprint picture everywhere, at its own
 	// 31.25 mm texels, whatever grid the triangles beneath use. Shading only:
 	// heights and foot support never read these values.
-	float texel_m = 2.0 * map_half_extents.x / float(footprint_size().x);
+	float texel_m = 1.0 / footprint_texels_per_metre;
 	float filled = picture_value(fill_image, depth_nodes_per_metre, point);
 	float packed = shading_compaction(point, filled);
 	vec2 slope = vec2(shading_compaction(point + vec2(texel_m, 0.0), filled) - packed,
