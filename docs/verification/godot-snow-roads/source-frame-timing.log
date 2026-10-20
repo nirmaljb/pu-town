@@ -1,0 +1,24 @@
+2026-10-20 21:23:17 idle 1789s locked 1: source timing round 1 roads road
+2026-10-20 21:24:00 TIMING road window (2560, 1440) · mean 33.24 ms (30.1 fps) · p95 35.33 ms · worst 62.02 ms · wind 2.760 ms per update over 1795 updates · figure (-28.92386, 0.07175, 23.92386) [roads, locked 1]
+2026-10-20 21:24:00 idle 1832s locked 1: source timing round 1 roads camp
+2026-10-20 21:24:48 TIMING camp window (2560, 1440) · mean 37.56 ms (26.6 fps) · p95 42.13 ms · worst 67.00 ms · wind 2.756 ms per update over 2028 updates · figure (-7.049433, 0.063402, 3.542578) [roads, locked 1]
+2026-10-20 21:24:48 idle 1880s locked 1: source timing round 1 baseline road
+2026-10-20 21:25:31 TIMING road window (2560, 1440) · mean 34.09 ms (29.3 fps) · p95 37.54 ms · worst 56.80 ms · wind 2.858 ms per update over 1841 updates · figure (-28.69602, 0.165956, 23.69602) [baseline, locked 1]
+2026-10-20 21:25:32 idle 1923s locked 1: source timing round 1 baseline camp
+2026-10-20 21:26:19 TIMING camp window (2560, 1440) · mean 37.54 ms (26.6 fps) · p95 41.95 ms · worst 64.18 ms · wind 2.852 ms per update over 2027 updates · figure (-5.847681, 0.066218, 3.722847) [baseline, locked 1]
+2026-10-20 21:26:19 idle 1971s locked 1: source timing round 2 roads road
+2026-10-20 21:27:02 TIMING road window (2560, 1440) · mean 32.85 ms (30.4 fps) · p95 35.44 ms · worst 59.24 ms · wind 2.715 ms per update over 1775 updates · figure (-29.14974, 0.064594, 24.14974) [roads, locked 1]
+2026-10-20 21:27:02 idle 2013s locked 1: source timing round 2 roads camp
+2026-10-20 21:27:49 TIMING camp window (2560, 1440) · mean 36.40 ms (27.5 fps) · p95 41.02 ms · worst 64.47 ms · wind 2.642 ms per update over 1965 updates · figure (-6.012056, 0.060702, 3.698191) [roads, locked 1]
+2026-10-20 21:27:49 idle 2061s locked 1: source timing round 2 baseline road
+2026-10-20 21:28:33 TIMING road window (2560, 1440) · mean 34.19 ms (29.2 fps) · p95 37.57 ms · worst 64.48 ms · wind 2.971 ms per update over 1847 updates · figure (-28.37017, 0.153015, 23.37017) [baseline, locked 1]
+2026-10-20 21:28:33 idle 2105s locked 1: source timing round 2 baseline camp
+2026-10-20 21:29:21 TIMING camp window (2560, 1440) · mean 37.60 ms (26.6 fps) · p95 42.08 ms · worst 70.28 ms · wind 2.865 ms per update over 2031 updates · figure (-6.29119, 0.06607, 3.656312) [baseline, locked 1]
+2026-10-20 21:29:21 idle 2152s locked 1: source timing round 3 roads road
+2026-10-20 21:30:04 TIMING road window (2560, 1440) · mean 33.47 ms (29.9 fps) · p95 35.71 ms · worst 62.63 ms · wind 2.770 ms per update over 1806 updates · figure (-28.48777, 0.066367, 23.48777) [roads, locked 1]
+2026-10-20 21:30:04 idle 2196s locked 1: source timing round 3 roads camp
+2026-10-20 21:30:52 TIMING camp window (2560, 1440) · mean 37.66 ms (26.6 fps) · p95 41.77 ms · worst 67.73 ms · wind 2.782 ms per update over 2034 updates · figure (-7.060592, 0.073243, 3.540895) [roads, locked 1]
+2026-10-20 21:30:52 idle 2244s locked 1: source timing round 3 baseline road
+2026-10-20 21:31:36 TIMING road window (2560, 1440) · mean 34.29 ms (29.2 fps) · p95 38.00 ms · worst 64.47 ms · wind 2.992 ms per update over 1852 updates · figure (-28.40763, 0.142021, 23.40763) [baseline, locked 1]
+2026-10-20 21:31:36 idle 2288s locked 1: source timing round 3 baseline camp
+2026-10-20 21:32:24 TIMING camp window (2560, 1440) · mean 37.25 ms (26.8 fps) · p95 41.70 ms · worst 67.71 ms · wind 2.813 ms per update over 2012 updates · figure (-5.960543, 0.057212, 3.705922) [baseline, locked 1]

@@ -1,0 +1,268 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+160 × 160 metres; 44.0 × 36.0 m detail region following the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+HEADLESS ENGINE-EVENT REPLAY: no rendered view, native focus or OS keyboard evidence.
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792384124-13781.csv
+Inspection checkpoint 1
+Inspection checkpoint 2
+Snow route: initial idle · 0.5 s
+Inspection checkpoint 3
+Snow route: turn in place
+Inspection checkpoint 4
+Snow route: lean to corner · 1.5 s
+Inspection checkpoint 5
+Snow route: cursor on figure · 1.5 s
+Inspection checkpoint 6
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 7
+Snow route: north-west walk · 4.24528301886792 s
+Inspection checkpoint 8
+Snow route: south-east return · 4.24528301886792 s
+Inspection checkpoint 9
+Snow route: walk north facing east · 4.24528301886792 s
+Inspection checkpoint 10
+Snow route: walk south facing east · 4.24528301886792 s
+Inspection checkpoint 11
+Snow route: cursor back on figure · 1.5 s
+Inspection checkpoint 12
+Snow route: run into open snow · 6.0 s
+Inspection checkpoint 13
+Inspection checkpoint 14
+Snow route: reach the west lane x · 6.20762627079802 s
+Inspection checkpoint 15
+Inspection checkpoint 16
+Snow route: reach the deep lane z · 15.0943397667329 s
+Inspection checkpoint 17
+Snow route: reach the deep lane x · 3.76482549703349 s
+Inspection checkpoint 18
+Snow route: run through deep snow · 4.24528301886792 s
+Inspection checkpoint 19
+Inspection checkpoint 20
+Snow route: pack trail return x · 4.25147650376802 s
+Inspection checkpoint 21
+Snow route: pack trail again · 4.24528301886792 s
+Inspection checkpoint 22
+Inspection checkpoint 23
+Snow route: pack trail third return x · 4.23481059524245 s
+Inspection checkpoint 24
+Snow route: pack trail third · 4.24528301886792 s
+Inspection checkpoint 25
+Inspection checkpoint 26
+Snow route: packed run start x · 4.23481059524245 s
+Inspection checkpoint 27
+Snow route: run on packed trail · 1.5 s
+Inspection checkpoint 28
+Inspection checkpoint 29
+Snow route: leave the packed lane x · 2.64864147834057 s
+Inspection checkpoint 30
+Inspection checkpoint 31
+Snow route: reach the south-west Road z · 0.94914346371057 s
+Inspection checkpoint 32
+Snow route: reach the south-west Road x · 16.9798940982458 s
+Inspection checkpoint 33
+Snow route: first trail · 4.24528301886792 s
+World probe 1: (-23.41814, 18.27149)
+Inspection checkpoint 34
+Snow route: fresh probe · 0.5 s
+Inspection checkpoint 35
+Inspection checkpoint 36
+Snow route: run along the south-west Road · 17.8616032781332 s
+Inspection checkpoint 37
+Snow route: boundary blocked · 1.0 s
+Inspection checkpoint 38
+Snow route: probe outside region · 0.5 s
+Inspection checkpoint 39
+Inspection checkpoint 40
+Snow route: run back along the Road · 14.2386406792535 s
+Inspection checkpoint 41
+Snow route: walk onto the Road's drift point · 1.41509433962264 s
+World probe 2: (-33.23547, 28.71936)
+Inspection checkpoint 42
+Snow route: road probe · 0.5 s
+Inspection checkpoint 43
+Inspection checkpoint 44
+Snow route: return to trail z · 9.77329937916884 s
+Inspection checkpoint 45
+Snow route: return to trail x · 9.31853168415573 s
+Inspection checkpoint 46
+Snow route: probe revisited · 0.5 s
+Inspection checkpoint 47
+Inspection checkpoint 48
+Snow route: back to the west lane's line x · 9.9972598957566 s
+Inspection checkpoint 49
+Inspection checkpoint 50
+Snow route: reach the walking figure's trail z · 26.6616245485702 s
+Inspection checkpoint 51
+Snow route: reach the walking figure's trail x · 29.2711298420744 s
+World probe 3: (-2.611478, -9.900376)
+Inspection checkpoint 52
+Snow route: trail found · 0.5 s
+Inspection checkpoint 53
+Snow route: follow trail · 4.24528301886792 s
+Inspection checkpoint 54
+Snow route: overlap trail return 0 · 6.36792452830189 s
+Inspection checkpoint 55
+Snow route: overlap trail repeat 0 · 6.36792452830189 s
+Inspection checkpoint 56
+Snow route: overlap trail return 1 · 6.36792452830189 s
+Inspection checkpoint 57
+Snow route: overlap trail repeat 1 · 6.36792452830189 s
+Inspection checkpoint 58
+Snow route: overlap trail return 2 · 6.36792452830189 s
+Inspection checkpoint 59
+Snow route: overlap trail repeat 2 · 6.36792452830189 s
+Inspection checkpoint 60
+Snow route: overlap trail return 3 · 6.36792452830189 s
+Inspection checkpoint 61
+Snow route: overlap trail repeat 3 · 6.36792452830189 s
+Inspection checkpoint 62
+Snow route: trail overlapped · 0.5 s
+Inspection checkpoint 63
+Snow route: lean before overview · 1.0 s
+Inspection checkpoint 64
+Snow route: overview by M · 2.12264150943396 s
+Inspection checkpoint 65
+Snow route: overview walk back · 2.12264150943396 s
+Inspection checkpoint 66
+Inspection checkpoint 67
+Snow route: reach the region's seam z · 4.2503559364463 s
+Inspection checkpoint 68
+Snow route: cross the region's seam · 2.83018867924528 s
+Inspection checkpoint 69
+Snow route: overview wheel out · 0.3 s
+Inspection checkpoint 70
+Snow route: overview closed by M · 0.5 s
+Inspection checkpoint 71
+Snow route: walk north sweeping behind
+Inspection checkpoint 72
+Snow route: stop facing behind · 1.0 s
+Inspection checkpoint 73
+Snow route: face east again · 0.5 s
+Inspection checkpoint 74
+Snow route: cursor on figure after sweep · 1.5 s
+Inspection checkpoint 75
+Inspection checkpoint 76
+Snow route: reach overview start z · 9.09591710792397 s
+Inspection checkpoint 77
+Snow route: reach overview start x · 17.4831741261032 s
+Inspection checkpoint 78
+Snow route: overview before border · 0.5 s
+Inspection checkpoint 79
+Inspection checkpoint 80
+Snow route: walk into the overview region x · 28.3016852612765 s
+Inspection checkpoint 81
+Snow route: overview wheel in · 0.3 s
+World probe 4: (3.819179, 4.109324)
+Inspection checkpoint 82
+Inspection checkpoint 83
+Snow route: reach the small shed x · 22.6268781805938 s
+Inspection checkpoint 84
+Snow route: small shed approach · 1.8 s
+Inspection checkpoint 85
+Snow route: small shed blocked · 1.2 s
+Inspection checkpoint 86
+Snow route: step back into the shed's lee · 0.94339622641509 s
+World probe 5: (27.9014, 2.699099)
+Inspection checkpoint 87
+Snow route: leave the shed's lee · 9.43396226415094 s
+Inspection checkpoint 88
+Inspection checkpoint 89
+Snow route: cross the Town Square z · 0.18198467650504 s
+Inspection checkpoint 90
+Snow route: cross the Town Square x · 28.2923140615787 s
+Inspection checkpoint 91
+Inspection checkpoint 92
+Snow route: reach the lodge's windward face z · 23.5862534001188 s
+Inspection checkpoint 93
+Snow route: reach the lodge's windward face x · 2.17755515620393 s
+World probe 6: (-9.748859, -22.11939)
+Inspection checkpoint 94
+Inspection checkpoint 95
+Snow route: reach the lodge's south face z · 7.56074257616726 s
+Inspection checkpoint 96
+Snow route: reach the lodge's south face x · 12.9187314015514 s
+Inspection checkpoint 97
+Snow route: lodge approach · 1.9 s
+Inspection checkpoint 98
+Snow route: lodge blocked · 1.2 s
+Inspection checkpoint 99
+Snow route: step back into the lodge's lee · 0.94339622641509 s
+World probe 7: (4.120508, -14.37689)
+Inspection checkpoint 100
+Snow route: probes placed · 0.5 s
+Inspection checkpoint 101
+Snow route: wind fills prints · 2.5 s
+Inspection checkpoint 102
+Snow route: drifts build · 16.0 s
+Inspection checkpoint 103
+Snow route: run through drift · 2.0 s
+Snow route: waiting for the snow to follow the wind from 135°
+Inspection checkpoint 104
+Inspection checkpoint 105
+Inspection checkpoint 106
+Inspection checkpoint 107
+Snow route: wind turned · 10.0 s
+Inspection checkpoint 108
+Snow route: wind frozen · 2.0 s
+Inspection checkpoint 109
+Snow route: widest play view · 0.5 s
+Inspection checkpoint 110
+Snow route: lean at widest · 2.0 s
+Inspection checkpoint 111
+Snow route: lean toward the bottom at widest · 2.0 s
+Inspection checkpoint 112
+Snow route: cursor on figure at widest · 1.5 s
+Inspection checkpoint 113
+Snow route: whole map · 0.5 s
+Inspection checkpoint 114
+Snow route: close view · 0.5 s
+Inspection checkpoint 115
+Snow route: lean at closest · 2.0 s
+Inspection checkpoint 116
+Snow route: cursor on figure at closest · 1.5 s
+Inspection checkpoint 117
+Snow route: cursor west before Tab · 0.15 s
+Inspection checkpoint 118
+Snow route: second figure idle · 0.5 s
+Inspection checkpoint 119
+Snow route: cursor on second figure · 1.5 s
+Inspection checkpoint 120
+Snow route: first figure rejoins loop · 8.0 s
+Saved user://route-1792384124-13781.csv
+Checking public scene observations: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792384124-13781.csv
+The small shed held the figure still against its face for 56 observations
+The lodge held the figure still against its face for 72 observations
+Walking figure: 32290 moving observations, 32142 at the speed its snow allows, 28237 running in Shallow Snow, 1945 held back in open snow, 21670 in the Town Square, 9871 beyond it
+Tracked the walking figure's trail at (-2.975025, -10.0), laid 2.9 s into the record 39.8 m from the controlled figure; probe (-2.611478, -9.900376) compaction 0.846
+Tracking probe compaction 0.846 -> 0.924 after following and overlapping
+Wind filled 0.887 of the tracked trail's compaction
+Released figure stood 4.69 m off the loop at (1.877851, -14.69289), joined it at (1.877851, -10.0) and walked on to 47% of the loop
+Deep cluster corridor, Shift held: fresh 1.060 m/s over 219 held observations -> packed 2.028 m/s
+Camera steadiness over 140 steps: deepest sink 0.290 m; largest per-observation change, figure's sink 0.0817 m, camera against untouched snow 0.0012 m
+Followed the south-west Road from (-20.00967, 15.01158), 0.02 m from its Town Square corner, to (-79.7, 75.03548): 255 observations walking and 1065 running, Snow Depth at most 0.092 m, held at the edge 7
+Lean toward the corner cursor: 3.00 m closest, 5.50 m default, 8.00 m widest
+Walking with the cursor behind: 51 observations directly behind, held east 79 and west 23, shoulder changes ["+110° to -7° with the cursor at -97°"]
+Stopped 68° from the cursor; expected to reach it within 9 observations
+After 41.1 wind-seconds, prints remain: exposed 0.69, sheltered 0.92, lee 0.00
+Largest change of Snow Depth under the prevailing wind: exposed 0.0000 m, sheltered 0.0000 m
+Lee drift 0.093 -> 1.025 m (first second +0.180, last second +0.002)
+South-west Road probe at (-33.23547, 28.71936), 0.34 m from the corner tree's drift point: Snow Depth 0.092 m -> 0.592 m under the prevailing wind
+Windward scour 0.249 -> 0.032 m
+Reversed wind: old lee -0.876 m, old windward face +1.019 m
+Framing: figure 0.0841 of the screen's height by default at 22.56 m, 0.1261 closest at 15.40 m, 0.0630 widest at 29.72 m
+Detail region at (-1.200001, -4.399998); leaned to (1.200001, -9.200001); returned to (-1.200001, -4.399998)
+Overview walk across the region border: outside 203, border 91, inside 2087; border contact gap 0.0000 m
+Leaning toward the bottom of the widest view put the figure 2.46 m north of the focus
+Overview walk across the region's seam: far 84, near 90; contact gap 0.0000 m
+Footprint uploads: 473169920 bytes for 3458 footsteps (136833 per step; touched-tile bound 524288 per step)
+Coverage: 32290 observations; straight 23869, diagonal 850, fast run 2277, slow run 569, blocked 206, overview 2493, camera follow 27839
+ERROR: No Snowdrift grew toward 1.2 m in the lodge's lee
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://inspection_route.gd:405)
+       [1] _run (res://inspection_route.gd:341)
+SNOW SCENE HEADLESS REPLAY: FAIL · 1 failures
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:264)
+$G --headless --path godot --fixed-fps 60 -- --snow-scene-check  --auto-start  112.90s user 5.69s system 88% cpu 2:13.46 total

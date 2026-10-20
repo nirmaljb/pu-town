@@ -37,7 +37,9 @@ overcast polar twilight, tuned live in the editor's Inspector (see
 holds its import checks, engine-event replay, graphical route in source and the
 Mac release package, each kept separate, with their limits; the
 [Camp record](../docs/verification/2026-10-18-godot-snow-camp.md) holds the same
-evidence for the Camp's buildings, with captures beside the owner's painted Camp.
+evidence for the Camp's buildings, with captures beside the owner's painted Camp,
+and the [Roads record](../docs/verification/2026-10-20-godot-snow-roads.md) for the
+Roads and Deep tree clusters.
 
 Use the standard **Godot 4.7.2 stable** editor, with GDScript support. Download it
 from the [pinned release archive](https://godotengine.org/download/archive/4.7.2-stable/).

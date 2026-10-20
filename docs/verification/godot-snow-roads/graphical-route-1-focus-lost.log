@@ -1,0 +1,112 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1
+
+Snow Walk: Godot 4.7.2-stable (official) · gl_compatibility
+160 × 160 metres; 44.0 × 36.0 m detail region following the camera focus; WASD walk / Shift run / mouse Facing, bounded while walking / wheel zoom / M overview / Tab switch / [ ] turn wind; captures: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk
+Recording route: /Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/route-1792384838-99052.csv
+Inspection checkpoint 1
+Inspection checkpoint 2
+Snow route: initial idle · 0.5 s
+Saved user://capture-1792384839-92288.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792384839-92288.png)
+Inspection checkpoint 3
+Snow route: turn in place
+Inspection checkpoint 4
+Snow route: lean to corner · 1.5 s
+Inspection checkpoint 5
+Snow route: cursor on figure · 1.5 s
+Inspection checkpoint 6
+Snow route: repeated brief taps must accumulate foot travel
+Inspection checkpoint 7
+Snow route: north-west walk · 4.24528301886792 s
+Inspection checkpoint 8
+Snow route: south-east return · 4.24528301886792 s
+Inspection checkpoint 9
+Snow route: walk north facing east · 4.24528301886792 s
+Inspection checkpoint 10
+Snow route: walk south facing east · 4.24528301886792 s
+Inspection checkpoint 11
+Snow route: cursor back on figure · 1.5 s
+Inspection checkpoint 12
+Snow route: run into open snow · 6.0 s
+Inspection checkpoint 13
+Inspection checkpoint 14
+Snow route: reach the west lane x · 6.20762627079802 s
+Inspection checkpoint 15
+Inspection checkpoint 16
+Snow route: reach the deep lane z · 15.0943397667329 s
+Inspection checkpoint 17
+Snow route: reach the deep lane x · 3.76482549703349 s
+Inspection checkpoint 18
+Snow route: run through deep snow · 4.24528301886792 s
+Inspection checkpoint 19
+Inspection checkpoint 20
+Snow route: pack trail return x · 4.25147650376802 s
+Inspection checkpoint 21
+Snow route: pack trail again · 4.24528301886792 s
+Inspection checkpoint 22
+Inspection checkpoint 23
+Snow route: pack trail third return x · 4.23481059524245 s
+Inspection checkpoint 24
+Snow route: pack trail third · 4.24528301886792 s
+Inspection checkpoint 25
+Inspection checkpoint 26
+Snow route: packed run start x · 4.23481059524245 s
+Inspection checkpoint 27
+Snow route: run on packed trail · 1.5 s
+Inspection checkpoint 28
+Inspection checkpoint 29
+Snow route: leave the packed lane x · 2.64864147834057 s
+Inspection checkpoint 30
+Inspection checkpoint 31
+Snow route: reach the south-west Road z · 0.94914346371057 s
+Inspection checkpoint 32
+Snow route: reach the south-west Road x · 16.9798940982458 s
+Inspection checkpoint 33
+Snow route: first trail · 4.24528301886792 s
+World probe 1: (-23.41814, 18.27149)
+Inspection checkpoint 34
+Snow route: fresh probe · 0.5 s
+Inspection checkpoint 35
+Inspection checkpoint 36
+Snow route: run along the south-west Road · 17.8616032781332 s
+Inspection checkpoint 37
+Snow route: boundary blocked · 1.0 s
+Saved user://capture-1792384998-99754.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792384998-99754.png)
+Inspection checkpoint 38
+Snow route: probe outside region · 0.5 s
+Inspection checkpoint 39
+Inspection checkpoint 40
+Snow route: run back along the Road · 14.2386406792535 s
+Inspection checkpoint 41
+Snow route: walk onto the Road's drift point · 1.41509433962264 s
+World probe 2: (-33.23547, 28.71936)
+Inspection checkpoint 42
+Snow route: road probe · 0.5 s
+Inspection checkpoint 43
+Inspection checkpoint 44
+Snow route: return to trail z · 9.77329937916884 s
+Inspection checkpoint 45
+Snow route: return to trail x · 9.31853168415573 s
+Inspection checkpoint 46
+Snow route: probe revisited · 0.5 s
+Saved user://capture-1792385048-1358.png (/Users/kaizenjb/Library/Application Support/Godot/app_userdata/PU Town · Snow Walk/capture-1792385048-1358.png)
+Inspection checkpoint 47
+Inspection checkpoint 48
+Snow route: back to the west lane's line x · 9.9972598957566 s
+Inspection checkpoint 49
+Inspection checkpoint 50
+Snow route: reach the walking figure's trail z · 26.6616245485702 s
+Inspection checkpoint 51
+Snow route: reach the walking figure's trail x · 29.2711298420744 s
+World probe 3: (-2.611478, -9.900376)
+Inspection checkpoint 52
+Snow route: trail found · 0.5 s
+Inspection checkpoint 53
+Snow route: follow trail · 4.24528301886792 s
+Inspection checkpoint 54
+Snow route: overlap trail return 0 · 6.36792452830189 s
+Route paused: restore scene focus to continue
+ERROR: Scene remained unfocused for 60 seconds
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _wait (res://inspection_route.gd:618)

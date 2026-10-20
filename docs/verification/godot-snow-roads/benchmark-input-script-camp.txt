@@ -1,0 +1,34 @@
+# 60 s F6 trace in the release package at the default wind (1 from NW). Fresh launch,
+# controlled figure at start_west (-1.5, 0) in the Town Square. The cursor rests on the
+# figure (centre of the view, 58% down), so it sets no Facing and no lean.
+# FIGURE x y is replaced by the runner with the figure's place in window-content points.
+# The walk stays inside the Camp, clear of every building, with the lodge's lit south
+# face in view most of the time: west across the Town Square to (-17.4, 0), north past
+# the lodge's west end to (-17.4, -10.6), east along the lodge's south face to
+# (5.9, -10.6), then south across the square to (5.9, 3.2). The same input walks the
+# same path on a build without the Camp.
+move FIGURE
+sleep 1
+log warm-up walk
+down d
+sleep 2
+up d
+down a
+sleep 2
+up a
+sleep 0.5
+tap f6
+log F6 pressed; walking west across the Town Square, north, east past the lodge and back south
+down a
+sleep 15
+up a
+down w
+sleep 10
+up w
+down d
+sleep 22
+up d
+down s
+sleep 13
+up s
+log walk finished
