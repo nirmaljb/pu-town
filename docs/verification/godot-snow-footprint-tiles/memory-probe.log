@@ -1,0 +1,9 @@
+# memory_probe.gd, 2026-10-21 00:54-00:58, final code (2ce9371 sources), interleaved with the whole-map picture's build (66220a2).
+before MEMORY settled · static 147.3 MiB (peak 148.8) · texture 162.5 MiB · video 196.7 MiB · 20 footsteps · Footprint whole-map picture · figure (-20.0, 0.090045, 15.0)
+before MEMORY walked · static 147.3 MiB (peak 148.8) · texture 162.5 MiB · video 196.7 MiB · 405 footsteps · Footprint whole-map picture · figure (-64.9762, 0.077758, 59.97605)
+after MEMORY settled · static 47.9 MiB (peak 53.8) · texture 63.5 MiB · video 97.7 MiB · 16 footsteps · Footprint 6 tiles, GPU 8 layers · figure (-20.0, 0.090036, 15.0)
+after MEMORY walked · static 51.8 MiB (peak 53.8) · texture 70.5 MiB · video 104.7 MiB · 401 footsteps · Footprint 36 tiles, GPU 64 layers · figure (-64.95902, 0.077764, 59.95901)
+before MEMORY settled · static 146.0 MiB (peak 148.8) · texture 162.5 MiB · video 196.7 MiB · 20 footsteps · Footprint whole-map picture · figure (-20.0, 0.090048, 15.0)
+before MEMORY walked · static 147.3 MiB (peak 148.8) · texture 162.5 MiB · video 196.7 MiB · 405 footsteps · Footprint whole-map picture · figure (-64.96111, 0.077763, 59.96074)
+after MEMORY settled · static 47.9 MiB (peak 53.8) · texture 63.5 MiB · video 97.7 MiB · 16 footsteps · Footprint 6 tiles, GPU 8 layers · figure (-20.0, 0.090036, 15.0)
+after MEMORY walked · static 51.8 MiB (peak 53.8) · texture 70.5 MiB · video 104.7 MiB · 401 footsteps · Footprint 36 tiles, GPU 64 layers · figure (-64.98491, 0.077761, 59.98494)

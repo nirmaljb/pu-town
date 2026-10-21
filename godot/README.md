@@ -736,7 +736,7 @@ with one texel per tile of the map that holds the tile's layer, or none. The sha
 reads the Footprint picture in blocks of 2 × 2 texels, which nearly always share a
 tile, so it looks up a block's layer once and reads nothing more where no tile is
 allocated; in source this drew the play view faster than the whole-map picture did
-(the record of #111 measures it). A texture
+([measured](../docs/verification/2026-10-21-godot-snow-footprint-tiles.md)). A texture
 array cannot change size in place, so the copy starts with 8 layers, doubles when a
 new tile finds no spare layer and halves once a quarter or fewer of its layers are
 in use; each time, every allocated tile is packed into the lowest layers and every

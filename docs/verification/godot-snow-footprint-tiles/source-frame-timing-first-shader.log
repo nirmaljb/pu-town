@@ -1,0 +1,19 @@
+# First tiled shader (a layer fetch for every Footprint texel), before the 2 x 2 read; 2026-10-21.
+# Round A (00:18-00:28): road only; the Town Square runs lost their --camp argument and also walked the Road.
+before TIMING road window (2560, 1440) · mean 33.13 ms (30.2 fps) · p95 34.93 ms · worst 63.40 ms · wind 2.689 ms per update over 1789 updates · figure (-28.57851, 0.062438, 23.57851)
+after TIMING road window (2560, 1440) · mean 33.40 ms (29.9 fps) · p95 36.70 ms · worst 49.61 ms · wind 2.701 ms per update over 1805 updates · figure (-28.5031, 0.06919, 23.5031)
+before TIMING road window (2560, 1440) · mean 33.65 ms (29.7 fps) · p95 35.89 ms · worst 63.42 ms · wind 2.840 ms per update over 1816 updates · figure (-28.35007, 0.058384, 23.35007)
+after TIMING road window (2560, 1440) · mean 33.74 ms (29.6 fps) · p95 36.38 ms · worst 58.93 ms · wind 2.788 ms per update over 1822 updates · figure (-28.20803, 0.055299, 23.20803)
+before TIMING road window (2560, 1440) · mean 33.05 ms (30.3 fps) · p95 34.79 ms · worst 57.91 ms · wind 2.802 ms per update over 1784 updates · figure (-28.79336, 0.068148, 23.79336)
+after TIMING road window (2560, 1440) · mean 34.07 ms (29.4 fps) · p95 37.73 ms · worst 59.31 ms · wind 2.852 ms per update over 1840 updates · figure (-27.95891, 0.054343, 22.95891)
+before TIMING road window (2560, 1440) · mean 33.41 ms (29.9 fps) · p95 35.64 ms · worst 61.22 ms · wind 2.739 ms per update over 1804 updates · figure (-28.53095, 0.055069, 23.53095)
+after TIMING road window (2560, 1440) · mean 33.72 ms (29.7 fps) · p95 36.57 ms · worst 59.15 ms · wind 2.758 ms per update over 1822 updates · figure (-28.16029, 0.057735, 23.16029)
+# Round B (00:36-00:44): road and Town Square (camp).
+before TIMING road window (2560, 1440) · mean 33.10 ms (30.2 fps) · p95 34.61 ms · worst 61.30 ms · wind 2.752 ms per update over 1787 updates · figure (-27.96968, 0.054224, 22.96968)
+after TIMING road window (2560, 1440) · mean 33.86 ms (29.5 fps) · p95 37.01 ms · worst 60.03 ms · wind 2.753 ms per update over 1829 updates · figure (-27.80735, 0.059459, 22.80735)
+before TIMING camp window (2560, 1440) · mean 37.93 ms (26.4 fps) · p95 42.26 ms · worst 72.22 ms · wind 2.845 ms per update over 2049 updates · figure (-6.518923, 0.072882, 3.622173)
+after TIMING camp window (2560, 1440) · mean 39.77 ms (25.1 fps) · p95 44.08 ms · worst 62.85 ms · wind 2.818 ms per update over 2148 updates · figure (-4.180584, 0.051762, 3.97291)
+before TIMING road window (2560, 1440) · mean 33.85 ms (29.5 fps) · p95 36.47 ms · worst 61.13 ms · wind 2.933 ms per update over 1828 updates · figure (-28.15272, 0.06262, 23.15272)
+after TIMING road window (2560, 1440) · mean 34.29 ms (29.2 fps) · p95 38.21 ms · worst 60.52 ms · wind 2.792 ms per update over 1852 updates · figure (-27.76547, 0.055105, 22.76547)
+before TIMING camp window (2560, 1440) · mean 38.04 ms (26.3 fps) · p95 42.70 ms · worst 62.59 ms · wind 2.908 ms per update over 2054 updates · figure (-6.341709, 0.056322, 3.648736)
+after TIMING camp window (2560, 1440) · mean 39.65 ms (25.2 fps) · p95 44.08 ms · worst 68.18 ms · wind 2.822 ms per update over 2141 updates · figure (-4.304367, 0.061762, 3.954342)

@@ -1,0 +1,10 @@
+Wed Oct 21 00:46:05 IST 2026
+before TIMING camp window (2560, 1440) · mean 36.56 ms (27.4 fps) · p95 41.40 ms · worst 66.14 ms · wind 2.577 ms per update over 1974 updates · figure (-6.226263, 0.073016, 3.666044)
+after TIMING camp window (2560, 1440) · mean 30.36 ms (32.9 fps) · p95 32.75 ms · worst 63.50 ms · wind 2.611 ms per update over 1639 updates · figure (-3.732359, 0.065204, 4.040154)
+before TIMING road window (2560, 1440) · mean 33.43 ms (29.9 fps) · p95 35.28 ms · worst 68.10 ms · wind 2.911 ms per update over 1805 updates · figure (-28.29001, 0.07101, 23.29001)
+after TIMING road window (2560, 1440) · mean 26.09 ms (38.3 fps) · p95 29.97 ms · worst 47.87 ms · wind 2.702 ms per update over 1409 updates · figure (-26.23505, 0.062223, 21.23505)
+before TIMING camp window (2560, 1440) · mean 38.19 ms (26.2 fps) · p95 42.43 ms · worst 63.96 ms · wind 2.883 ms per update over 2062 updates · figure (-6.376258, 0.057573, 3.643553)
+after TIMING camp window (2560, 1440) · mean 30.66 ms (32.6 fps) · p95 33.06 ms · worst 56.68 ms · wind 2.713 ms per update over 1656 updates · figure (-3.103404, 0.050575, 4.134498)
+before TIMING road window (2560, 1440) · mean 33.56 ms (29.8 fps) · p95 36.20 ms · worst 56.36 ms · wind 2.851 ms per update over 1812 updates · figure (-28.34027, 0.059694, 23.34027)
+after TIMING road window (2560, 1440) · mean 26.11 ms (38.3 fps) · p95 29.53 ms · worst 47.62 ms · wind 2.688 ms per update over 1410 updates · figure (-26.19042, 0.061134, 21.19042)
+Wed Oct 21 00:51:37 IST 2026

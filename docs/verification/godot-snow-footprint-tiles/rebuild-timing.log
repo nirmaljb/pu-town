@@ -1,0 +1,30 @@
+# rebuild_timing.gd on the final code (2ce9371 sources), 2026-10-21 00:58-01:01.
+REBUILD grew to 16 layers (from 8, 9 tiles): frame 74.6 ms, median of the 30 before 25.4 ms
+REBUILD grew to 32 layers (from 16, 17 tiles): frame 28.2 ms, median of the 30 before 24.7 ms
+REBUILD grew to 64 layers (from 32, 33 tiles): frame 30.9 ms, median of the 30 before 25.4 ms
+REBUILD grew to 128 layers (from 64, 65 tiles): frame 36.8 ms, median of the 30 before 26.4 ms
+REBUILD grew to 256 layers (from 128, 129 tiles): frame 46.2 ms, median of the 30 before 25.8 ms
+REBUILD grew to 512 layers (from 256, 257 tiles): frame 60.4 ms, median of the 30 before 25.7 ms
+REBUILD grew to 800 layers (from 512, 513 tiles): frame 81.0 ms, median of the 30 before 26.9 ms
+REBUILD shrank to 400 layers (from 800, 195 tiles): frame 50.9 ms, median of the 30 before 29.0 ms
+REBUILD shrank to 200 layers (from 400, 93 tiles): frame 42.4 ms, median of the 30 before 27.9 ms
+REBUILD shrank to 100 layers (from 200, 51 tiles): frame 31.5 ms, median of the 30 before 29.3 ms
+REBUILD shrank to 50 layers (from 100, 21 tiles): frame 30.4 ms, median of the 30 before 29.0 ms
+REBUILD shrank to 25 layers (from 50, 10 tiles): frame 31.6 ms, median of the 30 before 29.0 ms
+REBUILD shrank to 12 layers (from 25, 6 tiles): frame 31.0 ms, median of the 30 before 29.3 ms
+REBUILD done: 800 tiles pressed, 11 tiles left, 12 layers, 340131840 bytes resent resizing
+# The same script earlier the same night (00:35), on the first tiled shader, before the 2 x 2 read.
+REBUILD grew to 16 layers (from 8, 9 tiles): frame 35.1 ms, median of the 30 before 33.4 ms
+REBUILD grew to 32 layers (from 16, 17 tiles): frame 34.8 ms, median of the 30 before 33.6 ms
+REBUILD grew to 64 layers (from 32, 33 tiles): frame 36.1 ms, median of the 30 before 33.6 ms
+REBUILD grew to 128 layers (from 64, 65 tiles): frame 44.2 ms, median of the 30 before 33.3 ms
+REBUILD grew to 256 layers (from 128, 129 tiles): frame 54.0 ms, median of the 30 before 33.5 ms
+REBUILD grew to 512 layers (from 256, 257 tiles): frame 69.7 ms, median of the 30 before 33.4 ms
+REBUILD grew to 800 layers (from 512, 513 tiles): frame 92.2 ms, median of the 30 before 33.4 ms
+REBUILD shrank to 400 layers (from 800, 197 tiles): frame 66.1 ms, median of the 30 before 37.3 ms
+REBUILD shrank to 200 layers (from 400, 93 tiles): frame 40.4 ms, median of the 30 before 36.9 ms
+REBUILD shrank to 100 layers (from 200, 50 tiles): frame 45.5 ms, median of the 30 before 34.1 ms
+REBUILD shrank to 50 layers (from 100, 17 tiles): frame 45.3 ms, median of the 30 before 36.6 ms
+REBUILD shrank to 25 layers (from 50, 9 tiles): frame 40.1 ms, median of the 30 before 37.0 ms
+REBUILD shrank to 12 layers (from 25, 6 tiles): frame 35.8 ms, median of the 30 before 35.3 ms
+REBUILD done: 800 tiles pressed, 11 tiles left, 12 layers, 340131840 bytes resent resizing
