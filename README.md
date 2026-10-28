@@ -54,7 +54,29 @@ To verify the backend is running, request [http://localhost:8080/health](http://
 {"status":"healthy"}
 ```
 
-Vite may choose another port when `5173` is unavailable, but the backend currently accepts WebSocket connections only from `http://localhost:5173` and `https://localhost:5173`. Free port `5173` before starting the frontend.
+Vite may choose another port when `5173` is unavailable, but the backend accepts pages only from port `5173`. Free port `5173` before starting the frontend.
+
+## Playing on several computers
+
+One computer runs the servers; every Player, that computer included, plays in a browser. All the computers must be on the same network (the same Wi-Fi or router).
+
+1. On the server computer, from the repository root, run:
+
+   ```sh
+   python run.py
+   ```
+
+   Both servers listen on every network interface. Once they are up, it prints the address to share, for example `On the network: http://192.168.1.5:5173/`. If it prints several, use the one on your Wi-Fi or Ethernet adapter rather than a virtual one (VMware, WSL, Hyper-V).
+2. On each other computer, open that address in a browser. Nothing needs installing there.
+3. One Player chooses Create Room and shares the Room Code; everyone else enters it and chooses Join Lobby. When four or more Players are Ready, the Host starts the Game.
+
+The page connects to the backend on port `8080` of whichever computer served it. The backend accepts pages from any host on port `5173` (`putown.allowed-origins` in `backend/src/main/resources/application.properties`).
+
+If the page does not load on another computer, the server computer's firewall is blocking it. On Windows, allow Java and Node.js when it asks, or, from an Administrator PowerShell, run:
+
+```powershell
+New-NetFirewallRule -DisplayName "PU Town" -Direction Inbound -Protocol TCP -LocalPort 5173,8080 -Action Allow
+```
 
 ## The Game
 
@@ -85,9 +107,15 @@ A Meeting eliminates a Player only on a majority of the living, and reveals only
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
 
+## The town by day and by night
+
+The town is the Hollow: a hamlet in a forest clearing, with a river and two bridges past the orchard, farm, pasture and fishing camp in the west, the manor and the cobbled Town Square in the middle, the market lane in the south, homes and the smithy on the east road, and an old shrine with a portal in the north-east glade. Its sources, generator and credits are in [`pu-town/hollow/`](pu-town/hollow/README.md).
+
+Press the ☀ Day / ☾ Night button in the corner of the town, or **N**, to see it at night: lamps, windows, hearths and the campfire light the streets, every Player carries a small lantern, the shrine glows and fireflies drift over the grass. Night is cosmetic and chosen by each Player for themselves; Vision and every rule are the same. The browser remembers the choice.
+
 ## Client options
 
-The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to `ws://localhost:8080/ws/game`. The former `room` and `name` parameters are ignored.
+The `ws` URL query parameter configures the backend WebSocket endpoint, defaulting to port `8080` on the computer that served the page. `time=night` or `time=day` overrides the remembered time of day. The former `room` and `name` parameters are ignored.
 
 Create Room generates a six-character Room Code. Join Lobby requires an existing code. Only Lobbies accept new memberships; a started game returns “Game already started”. Empty Lobbies expire five minutes after their final membership ends; started Rooms are removed immediately when their final membership ends; Disconnect reserves membership for two minutes and does not immediately empty a Room; server restart clears all Rooms.
 
@@ -137,6 +165,15 @@ npm run build
 ```
 
 The production frontend bundle is written to `frontend/dist/`.
+
+With both servers running (`python run.py`), the end-to-end test plays one whole Game with four isolated browsers through this computer's network address, the way four computers would: Create and Join, Ready and Start, private Roles, walking seen by others, an Emergency Meeting, chat, a refresh that recovers mid-Game, the vote and the Village's win.
+
+```sh
+cd frontend
+npm run test:e2e
+```
+
+The first time, install its browser with `npx playwright install chromium`. It runs on the server's real clock, so it takes about three minutes. `PU_TOWN_URL` overrides the page address, for example `PU_TOWN_URL=http://192.168.1.5:5173/`.
 
 Run the backend tests and create an executable JAR:
 

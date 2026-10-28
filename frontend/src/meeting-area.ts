@@ -1,19 +1,21 @@
 import Phaser from "phaser";
 import { seatFacing, type Direction } from "./avatar-facing.js";
+import { mapLights, type MapLight } from "./map-lights.js";
 import { BUTTON_X, BUTTON_Y } from "./room-rules.js";
 
 export const ROOM_CAPACITY = 10;
 
 const MAP_KEY = "pu-town";
 const MAP_ROOT = "maps/pu-town/";
-/** Tile layers, bottom to top, all beneath the Avatars. */
-const TILE_LAYERS = ["water", "sand", "grass", "bridge", "floor", "walls"];
 const LAYER_DEPTH = -1_100;
-/** Surf is drawn between the sea and the island; rugs and doormats lie beneath everyone. */
+/** Surf is drawn between the sea and the land; bridges, rugs and flowers lie beneath everyone. */
 const FOAM_DEPTH = LAYER_DEPTH + 0.5;
 const FLOOR_DECOR_DEPTH = -1_050;
 
 type TiledTileset = Readonly<{ name: string; image: string; tilewidth: number; tileheight: number }>;
+type TileFrame = Readonly<{ tileid: number; duration: number }>;
+/** A tile whose tileset animates it, such as flowing water. */
+type AnimatedTile = { tile: Phaser.Tilemaps.Tile; firstgid: number; frames: readonly TileFrame[]; period: number };
 
 /** Every tileset image the map names, as a texture key. */
 function textureOf(tileset: string): string {
@@ -47,8 +49,11 @@ export function meetingSeat(seat: number): { x: number; y: number; facing: Direc
 /** The town the Players roam; Meetings gather on chairs around the button in the Town Square. */
 export class MeetingArea {
   readonly #town: Phaser.GameObjects.GameObject[] = [];
+  readonly #animatedTiles: AnimatedTile[] = [];
   readonly #button: Phaser.GameObjects.Container;
   readonly #chairs: Phaser.GameObjects.Container;
+  /** The lamps, fires, windows and glowing stones the map marks for the night. */
+  readonly lights: readonly MapLight[];
 
   constructor(scene: Phaser.Scene) {
     const map = scene.make.tilemap({ key: MAP_KEY });
@@ -57,10 +62,21 @@ export class MeetingArea {
       if (!added) throw new Error(`Missing tileset ${tileset.name}`);
       return added;
     });
-    for (const [index, name] of TILE_LAYERS.entries()) {
-      const layer = map.createLayer(name, tilesets);
-      if (layer) this.#town.push(layer.setDepth(LAYER_DEPTH + index));
+    // Every tile layer the map has, in its own order, beneath the Avatars.
+    for (const [index, data] of map.layers.entries()) {
+      const layer = map.createLayer(data.name, tilesets);
+      if (!layer) continue;
+      this.#town.push(layer.setDepth(LAYER_DEPTH + index));
+      layer.forEachTile(tile => {
+        const tileset = tile.tileset;
+        if (tile.index < 0 || !tileset) return;
+        const frames = (tileset.tileData as Record<number, { animation?: TileFrame[] }>)[tile.index - tileset.firstgid]?.animation;
+        if (frames && frames.length > 1) {
+          this.#animatedTiles.push({ tile, firstgid: tileset.firstgid, frames, period: frames.reduce((sum, f) => sum + f.duration, 0) });
+        }
+      });
     }
+    this.lights = mapLights(map.getObjectLayer("lights")?.objects ?? []);
     for (const object of map.getObjectLayer("foam")?.objects ?? []) this.spawn(scene, map, object, FOAM_DEPTH);
     for (const object of map.getObjectLayer("floor_decor")?.objects ?? []) this.spawn(scene, map, object, FLOOR_DECOR_DEPTH);
     // Buildings, trees and furniture sort by their bottom edge, as the Avatars sort by their feet,
@@ -121,6 +137,21 @@ export class MeetingArea {
       sprite.play({ key: animation, startFrame: Math.floor(Math.random() * frames.length) });
     }
     this.#town.push(sprite);
+  }
+
+  /** Steps every animated tile, all in time with each other so the water flows as one. */
+  update(time: number): void {
+    for (const animated of this.#animatedTiles) {
+      let at = time % animated.period;
+      let frame = animated.frames[0]!;
+      for (const candidate of animated.frames) {
+        frame = candidate;
+        if (at < candidate.duration) break;
+        at -= candidate.duration;
+      }
+      const index = animated.firstgid + frame.tileid;
+      if (animated.tile.index !== index) animated.tile.index = index;
+    }
   }
 
   /** The town shows while in a Room; the chairs only while the Players are seated. */

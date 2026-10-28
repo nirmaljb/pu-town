@@ -225,6 +225,13 @@ export class AvatarReconciler implements WorldReconciler {
     }
   }
 
+  /** Where each drawn Avatar stands, so each can carry a lantern at night. */
+  lanterns(): { x: number; y: number }[] {
+    return [...this.#avatars.values()]
+      .filter(avatar => avatar.container.visible && avatar.container.alpha > 0)
+      .map(avatar => ({ x: avatar.container.x, y: avatar.container.y }));
+  }
+
   private createAvatar(entry: RosterEntry): AvatarView {
     const colour = Number.parseInt(entry.colour.slice(1), 16);
     const place = meetingSeat(entry.seat);

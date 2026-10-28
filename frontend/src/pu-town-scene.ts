@@ -9,7 +9,10 @@ import { NetworkInbox } from "./network-inbox.js";
 import { ReconnectingGameClient } from "./reconnecting-game-client.js";
 import { emptyWorld } from "./world-state.js";
 import { FieldController } from "./field-controller.js";
-import { VISION, WORLD_HEIGHT, WORLD_WIDTH } from "./room-rules.js";
+import { gameEndpoint } from "./game-endpoint.js";
+import { BUTTON_X, BUTTON_Y, VISION, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "./room-rules.js";
+import { NightSky } from "./night-sky.js";
+import { initialTimeOfDay, rememberTimeOfDay, TimeOfDayToggle } from "./time-of-day.js";
 
 /** Outside a Roam the camera frames the Town Square, where the Players sit. */
 const SQUARE_X = WORLD_WIDTH / 2;
@@ -31,6 +34,8 @@ export class PuTownScene extends Phaser.Scene {
   #avatarReconciler?: AvatarReconciler;
   #field?: FieldController;
   #fog?: Phaser.GameObjects.Graphics;
+  #night?: NightSky;
+  #timeOfDay?: TimeOfDayToggle;
   readonly #held = { up: false, down: false, left: false, right: false };
   #websocketUrl = "";
   // The Room whose pinned collection is loaded and active, and the one being fetched.
@@ -51,8 +56,7 @@ export class PuTownScene extends Phaser.Scene {
     this.#avatarReconciler = new AvatarReconciler(this);
     this.#frameBoundary = new NetworkFrameBoundary(this.#inbox, emptyWorld(), this.#avatarReconciler);
 
-    const parameters = new URLSearchParams(window.location.search);
-    this.#websocketUrl = parameters.get("ws") || "ws://localhost:8080/ws/game";
+    this.#websocketUrl = gameEndpoint(window.location);
     let recoveryStorage: Storage | undefined;
     try { recoveryStorage = window.sessionStorage; } catch { /* In-memory recovery remains available. */ }
     this.#client = new ReconnectingGameClient(() => new WebSocket(this.#websocketUrl), this.#inbox, Date.now, recoveryStorage);
@@ -62,6 +66,17 @@ export class PuTownScene extends Phaser.Scene {
     const client = this.#client;
     this.#field = new FieldController((x, y, facing) => client.move(x, y, facing));
     this.#fog = this.add.graphics().setDepth(6_000);
+    // Fireflies keep to open ground away from the Town Square, where the Meetings sit.
+    this.#night = new NightSky(this, this.#meetingArea.lights,
+      (x, y) => walkable(x, y) && Math.hypot(x - BUTTON_X, y - BUTTON_Y) > 420);
+    let preferences: Storage | undefined;
+    try { preferences = window.localStorage; } catch { /* The choice is simply not remembered. */ }
+    const time = initialTimeOfDay(window.location.search, preferences);
+    this.#night.setNight(time === "night");
+    this.#timeOfDay = new TimeOfDayToggle(time, chosen => {
+      this.#night?.setNight(chosen === "night");
+      rememberTimeOfDay(chosen, preferences);
+    });
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
@@ -92,6 +107,7 @@ export class PuTownScene extends Phaser.Scene {
       this.#client?.stop();
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
+      this.#timeOfDay?.destroy();
     });
   }
 
@@ -141,7 +157,10 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
-    this.#meetingArea?.setVisible(world?.phase !== null && world?.phase !== undefined, !world?.field);
+    const inRoom = world?.phase !== null && world?.phase !== undefined;
+    this.#meetingArea?.setVisible(inRoom, !world?.field);
+    this.#meetingArea?.update(time);
+    this.#night?.setShown(inRoom);
     if (this.#client?.state.status === "join") this.#frameBoundary?.reset();
     this.#avatarReconciler?.updateAnimations(time, delta, self);
     // During a Roam the camera follows this Player; otherwise it frames the Town Square.
@@ -151,6 +170,9 @@ export class PuTownScene extends Phaser.Scene {
     const follow = Math.min(1, delta / 1_000 * (self ? 10 : 6));
     camera.centerOn(camera.midPoint.x + (focusX - camera.midPoint.x) * follow,
       camera.midPoint.y + (focusY - camera.midPoint.y) * follow);
+    // The view moved this frame, so the night is drawn after it.
+    camera.preRender();
+    this.#night?.update(time, camera, this.#avatarReconciler?.lanterns() ?? [], self);
     // The living see only a circle around themselves; the server sends nothing beyond it.
     this.#fog?.clear();
     const own = world?.game?.self;

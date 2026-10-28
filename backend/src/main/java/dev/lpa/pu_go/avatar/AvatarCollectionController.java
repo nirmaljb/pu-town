@@ -3,7 +3,6 @@ package dev.lpa.pu_go.avatar;
 import dev.lpa.pu_go.room.Room;
 import dev.lpa.pu_go.room.RoomManager;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +15,6 @@ import java.util.Locale;
  * because only then do they know which Room — and so which collection — they need.
  */
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "https://localhost:5173"})
 public class AvatarCollectionController {
     private final RoomManager roomManager;
 
