@@ -60,14 +60,15 @@ Vite may choose another port when `5173` is unavailable, but the backend accepts
 
 One computer runs the servers; every Player, that computer included, plays in a browser. All the computers must be on the same network (the same Wi-Fi or router).
 
-1. On the server computer, from the repository root, run:
+1. On the server computer, double-click `Start PU Town.bat` (Windows), or from the repository root run:
 
    ```sh
    python run.py
    ```
 
-   Both servers listen on every network interface. Once they are up, it prints the address to share, for example `On the network: http://192.168.1.5:5173/`. If it prints several, use the one on your Wi-Fi or Ethernet adapter rather than a virtual one (VMware, WSL, Hyper-V).
+   Both servers listen on every network interface. Once they are up, it prints the address to share, for example `Same Wi-Fi/router:  http://192.168.1.5:5173/`. If it prints several, use the one on your Wi-Fi or Ethernet adapter rather than a virtual one (VMware, WSL, Hyper-V).
 2. On each other computer, open that address in a browser. Nothing needs installing there.
+   To play with friends on other networks, double-click `Share PU Town.bat` instead, or run `python run.py --share`: it also prints a public link through a free Cloudflare tunnel (install `cloudflared` once with `winget install --id Cloudflare.cloudflared`).
 3. One Player chooses Create Room and shares the Room Code; everyone else enters it and chooses Join Lobby. When four or more Players are Ready, the Host starts the Game.
 
 The page connects to the backend on port `8080` of whichever computer served it. The backend accepts pages from any host on port `5173` (`putown.allowed-origins` in `backend/src/main/resources/application.properties`).

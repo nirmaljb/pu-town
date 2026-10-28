@@ -196,6 +196,9 @@ def wait_for_port(process: subprocess.Popen, port: int) -> bool:
 # ----- the main program -------------------------------------------------------------------
 
 def main() -> int:
+    # Vite prints symbols (such as an arrow) that a non-UTF-8 console cannot show. Replace
+    # them rather than let the echo thread crash, which would stop draining Vite's output.
+    sys.stdout.reconfigure(errors="replace")
     parser = argparse.ArgumentParser(description="Run PU Town.")
     parser.add_argument("--share", action="store_true",
                         help="also create a public link that players on other networks can open")
