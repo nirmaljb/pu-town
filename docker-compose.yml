@@ -1,0 +1,15 @@
+# Run the whole game: `docker compose up --build`, then open http://localhost:5173
+# Other computers use http://<this computer's address>:5173 (the client finds the backend on port 8080 of the same host).
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped

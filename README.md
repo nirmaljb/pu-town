@@ -215,3 +215,13 @@ Production deployment is not configured. Before deploying, at minimum:
 - use a secure `wss://` WebSocket URL when the site is served over HTTPS
 - decide how room state will be shared or routed across server instances
 - add the required hosting, reverse-proxy, and runtime configuration
+
+## Run with Docker
+
+No JDK, Node or Maven needed:
+
+```sh
+docker compose up --build
+```
+
+Open `http://localhost:5173`; other computers use `http://<this computer's address>:5173`. The backend is on port 8080. Browsers only grant the microphone on `localhost` or https, so voice chat from another computer needs https (see `run.py`).
