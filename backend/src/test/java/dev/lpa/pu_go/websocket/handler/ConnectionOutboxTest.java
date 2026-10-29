@@ -43,6 +43,21 @@ class ConnectionOutboxTest {
         assertEquals(java.util.List.of("joined", "chat"), session.payloads());
     }
 
+    @Test
+    void aLateVoiceFrameIsDroppedAndNeverCrowdsOutAGameEvent() {
+        RecordingWebSocketSession session = new RecordingWebSocketSession("session-1");
+        PausedExecutor executor = new PausedExecutor();
+        ConnectionOutbox outbox = new ConnectionOutbox(session, executor, ConnectionOutbox.VOICE_BACKLOG + 1);
+
+        for (int frame = 0; frame < ConnectionOutbox.VOICE_BACKLOG; frame++) assertTrue(outbox.offerVoice(new TextMessage("voice")));
+        assertFalse(outbox.offerVoice(new TextMessage("late voice")), "a frame behind a full backlog is useless");
+        assertTrue(outbox.enqueue(new TextMessage("game_state")), "the Game event still has its place");
+        executor.runNext();
+
+        assertEquals(ConnectionOutbox.VOICE_BACKLOG + 1, session.payloads().size());
+        assertEquals("game_state", session.payloads().get(ConnectionOutbox.VOICE_BACKLOG));
+    }
+
     private static final class PausedExecutor implements Executor {
         private final Queue<Runnable> work = new ArrayDeque<>();
 

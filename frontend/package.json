@@ -12,6 +12,7 @@
     "avatars": "python3 ../tools/avatar-editor/server.py"
   },
   "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "playwright": "^1.63.0",
     "typescript": "^5.7.2",
     "vite": "^8.2.2"

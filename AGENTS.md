@@ -33,6 +33,7 @@ The current ADRs establish these invariants:
 - A Player holds one Seat from joining until their Membership ends. During a Roam the client sends its own positions, the server accepts only reachable ones and corrects the rest, and each Participant's `field_state` holds only what they can see (ADR 0015, which supersedes ADR 0013).
 - The Game Roster outlives Room Membership; Elimination, Leave and Forfeit are distinct.
 - `game_state` is built per recipient, and an accepted choice updates only the recipients whose authorized view changed.
+- Voice goes browser to browser over WebRTC, but every route is the server's (`Game.hears`, sent per recipient as `voice_routes`); the speaker's client enforces it, so a route never reveals more than both Players' views already do. Peers that cannot connect directly are relayed through the server as `voice_frame`, which the server routes itself and is the only outbound message it may drop. Voice messages bypass the frame boundary (ADR 0016).
 
 Do not bypass these constraints accidentally. A deliberate change should update the relevant tests and documentation and may require a new ADR when it is costly to reverse, surprising, and the result of a real trade-off.
 
@@ -62,6 +63,8 @@ The backend defaults to port `8080`:
 
 - `GET /health` returns `{"status":"healthy"}`.
 - `/ws/game` is the game WebSocket endpoint.
+
+`PU_TOWN_HTTPS=1` makes the Vite server serve https with a self-signed certificate (`@vitejs/plugin-basic-ssl`), which browsers require before granting a microphone to a page on another computer. `run.py` sets it unless given `--http` or `--share`.
 
 ### Frontend
 
@@ -117,6 +120,7 @@ The client accepts these query parameters (room/name options are ignored):
 - `tools/avatar-editor/` — local Python/Pillow workshop, curated sources and project-backed drafts; excluded from Player builds.
 - `frontend/src/style.css` — page and game-container presentation.
 - `frontend/test/` — protocol, frame-boundary, reconnection and endpoint tests.
+- `frontend/src/voice-chat.ts` — proximity voice: WebRTC peers, Opus tuning, route enforcement and distance mixing; `voice-relay.ts` is the fallback through the server (WebCodecs Opus, jitter buffer); `voice-panel.ts` holds the controls (join, mute with M, leave, who you can hear and how).
 - `frontend/src/game-endpoint.ts` — the backend WebSocket address for a page, on the computer that served it.
 - `frontend/e2e/` — the four-browser end-to-end Game over the network address; needs both servers running.
 
@@ -157,7 +161,7 @@ Lobby Avatar selection is cosmetic and optional: the Room's pinned collection of
 - Treat files under `backend/src/` and `frontend/src/` as authoritative source. Do not infer current behavior from generated `backend/target/` or `frontend/dist/` files.
 - The backend is the single reader of the publication file; never hard-code a second catalogue, and never reintroduce a build-time copy into either bundle. Publish validates at least one complete distinct design before atomic replacement. Run the authoring boundary suite through `npm test`; draft edits must not mutate publication.
 - The protocol is represented in Java message/decoder code, TypeScript protocol code, and `docs/websocket-protocol-v1.md`. Keep all three synchronized. The collection endpoint's payload shape is part of that contract: `AvatarCollectionController` and `avatar-presets.ts` must agree.
-- Town dimensions and obstacles are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`, both written from `frontend/public/maps/pu-town/pu-town.collision.json` by `pu-town/hollow/gen.py` (`RoomRulesTest` and `field-controller.test.mjs` fail if either drifts from it; `town-map.test.mjs` checks the map's tilesets, objects and lights); Seat geometry is in `RoomRules.seatX/seatY` and `meetingSeat`; Vision per Role and ranges in `FieldRules.java` and `room-rules.ts`, and Seat Facing in `RoomRules.seatFacing` and `avatar-facing.ts`. Keep shared values synchronized; the backend remains authoritative.
+- Town dimensions and obstacles are duplicated in backend `RoomRules.java` and frontend `room-rules.ts`, both written from `frontend/public/maps/pu-town/pu-town.collision.json` by `pu-town/hollow/gen.py` (`RoomRulesTest` and `field-controller.test.mjs` fail if either drifts from it; `town-map.test.mjs` checks the map's tilesets, objects and lights); Seat geometry is in `RoomRules.seatX/seatY` and `meetingSeat`; Vision per Role, `HEARING_RANGE` and ranges in `FieldRules.java` and `room-rules.ts`, and Seat Facing in `RoomRules.seatFacing` and `avatar-facing.ts`. Keep shared values synchronized; the backend remains authoritative.
 - Preserve strict message decoding: unknown fields, unsupported versions, and malformed payloads should remain explicit errors.
 - Never widen a Game view to save a round trip. `game_state` is built per recipient, an absent private field is `null` rather than filtered, and an accepted choice reaches only the recipients whose authorized view changed — broadcasting it would leak hidden Role activity through the countdown alone.
 - The Game clock is the server's. Phases end on their own deadline, each deadline derives from the one it replaces, and every submission carries the round it was chosen in. The client counts `remainingMs` down from when the message arrived (`WorldState.phaseEndsAt`), never from when a frame applied it, so a hidden tab stays in step.

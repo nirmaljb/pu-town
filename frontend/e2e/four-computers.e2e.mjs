@@ -5,7 +5,8 @@
 //
 //   npm run test:e2e
 //
-// PU_TOWN_URL overrides the page address, e.g. PU_TOWN_URL=http://192.168.1.5:5173/
+// PU_TOWN_URL overrides the page address, e.g. PU_TOWN_URL=https://192.168.1.5:5173/
+// (run.py serves https so that voice chat may use a microphone; --http serves plain http).
 // The Game runs on the server's real clock, so this takes about three minutes.
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -23,14 +24,23 @@ function networkAddress() {
   return (candidates.find(a => !VIRTUAL_ADAPTER.test(a.name)) ?? candidates[0])?.address ?? "localhost";
 }
 
-const PAGE_URL = process.env.PU_TOWN_URL ?? `http://${networkAddress()}:5173/`;
+const PAGE_URL = process.env.PU_TOWN_URL ?? `https://${networkAddress()}:5173/`;
 const BACKEND_URL = `http://${new URL(PAGE_URL).hostname}:8080`;
 const NAMES = ["Asha", "Bodhi", "Chen", "Dara"];
 
 /** One Player: their page and every Game message the server sent them, decoded from the wire. */
 async function openPlayer(browser, name) {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  // run.py's certificate is self-signed; a real Player accepts it once in the browser.
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, ignoreHTTPSErrors: true, permissions: ["microphone"] });
   const page = await context.newPage();
+  // Keeps every voice connection the page opens, so the test can ask whether audio flows.
+  await page.addInitScript(() => {
+    const Native = window.RTCPeerConnection;
+    window.__voiceConnections = [];
+    window.RTCPeerConnection = class extends Native {
+      constructor(...args) { super(...args); window.__voiceConnections.push(this); }
+    };
+  });
   const player = { name, page, errors: [], gameStates: [], fieldStates: [] };
   page.on("pageerror", error => player.errors.push(error.message));
   page.on("websocket", socket => socket.on("framereceived", frame => {
@@ -87,7 +97,8 @@ test("four computers play a whole Game over the network", { timeout: 300_000 }, 
   const health = await fetch(`${BACKEND_URL}/health`).catch(() => null);
   assert.ok(health?.ok, `The backend is not reachable at ${BACKEND_URL}. Start it with \`python run.py\`.`);
 
-  const browser = await chromium.launch();
+  // A fake microphone plays a steady tone, so audio can be measured arriving at each peer.
+  const browser = await chromium.launch({ args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] });
   t.after(() => browser.close());
   const players = [];
   for (const name of NAMES) players.push(await openPlayer(browser, name));
@@ -119,6 +130,23 @@ test("four computers play a whole Game over the network", { timeout: 300_000 }, 
     }
     for (const player of players) {
       await player.page.locator(".occupancy").filter({ hasText: "4 / 10" }).waitFor({ timeout: 10_000 });
+    }
+  });
+
+  await step("everyone who joins voice hears everyone else in the Lobby, browser to browser", async () => {
+    for (const player of players) await player.page.click(".voice-toggle");
+    for (const player of players) {
+      await player.page.locator(".voice-toggle").filter({ hasText: "Live" }).waitFor({ timeout: 10_000 });
+      await player.page.waitForFunction(async () => {
+        const live = window.__voiceConnections.filter(pc => pc.connectionState === "connected");
+        if (live.length !== 3) return false;
+        for (const pc of live) {
+          let bytes = 0;
+          (await pc.getStats()).forEach(report => { if (report.type === "inbound-rtp" && report.kind === "audio") bytes += report.bytesReceived; });
+          if (bytes === 0) return false;
+        }
+        return true;
+      }, null, { timeout: 20_000, polling: 500 });
     }
   });
 

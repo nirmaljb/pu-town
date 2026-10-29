@@ -13,6 +13,8 @@ import { gameEndpoint } from "./game-endpoint.js";
 import { BUTTON_X, BUTTON_Y, VISION, WORLD_HEIGHT, WORLD_WIDTH, walkable } from "./room-rules.js";
 import { NightSky } from "./night-sky.js";
 import { initialTimeOfDay, rememberTimeOfDay, TimeOfDayToggle } from "./time-of-day.js";
+import { FULL_VOLUME, proximityMix, VoiceChat } from "./voice-chat.js";
+import { VoicePanel } from "./voice-panel.js";
 
 /** Outside a Roam the camera frames the Town Square, where the Players sit. */
 const SQUARE_X = WORLD_WIDTH / 2;
@@ -36,6 +38,8 @@ export class PuTownScene extends Phaser.Scene {
   #fog?: Phaser.GameObjects.Graphics;
   #night?: NightSky;
   #timeOfDay?: TimeOfDayToggle;
+  #voice?: VoiceChat;
+  #voicePanel?: VoicePanel;
   readonly #held = { up: false, down: false, left: false, right: false };
   #websocketUrl = "";
   // The Room whose pinned collection is loaded and active, and the one being fetched.
@@ -77,6 +81,8 @@ export class PuTownScene extends Phaser.Scene {
       this.#night?.setNight(chosen === "night");
       rememberTimeOfDay(chosen, preferences);
     });
+    this.#voice = new VoiceChat(this.#client, preferences);
+    this.#voicePanel = new VoicePanel(this.#voice);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.centerOn(SQUARE_X, SQUARE_Y);
     if (this.input.keyboard) this.input.keyboard.enabled = false;
@@ -108,6 +114,8 @@ export class PuTownScene extends Phaser.Scene {
       this.#interface?.destroy();
       this.#gameInterface?.destroy();
       this.#timeOfDay?.destroy();
+      this.#voicePanel?.destroy();
+      this.#voice?.destroy();
     });
   }
 
@@ -157,6 +165,15 @@ export class PuTownScene extends Phaser.Scene {
     const self = this.#field?.position ?? null;
     this.#interface?.render(world);
     this.#gameInterface?.render(world, self);
+    // Who may be heard is the server's; how loud and from which side follows the field.
+    const roaming = world?.game?.phase === "roam";
+    const ghost = world?.game?.self.status !== undefined && world.game.self.status !== "living";
+    this.#voice?.mix(playerId => {
+      if (!roaming) return FULL_VOLUME;
+      const speaker = world?.field?.players.find(player => player.playerId === playerId) ?? null;
+      return proximityMix(self, speaker, ghost && speaker?.ghost === true);
+    });
+    this.#voicePanel?.render(world);
     const inRoom = world?.phase !== null && world?.phase !== undefined;
     this.#meetingArea?.setVisible(inRoom, !world?.field);
     this.#meetingArea?.update(time);

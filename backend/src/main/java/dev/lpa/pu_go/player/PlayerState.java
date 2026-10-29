@@ -34,6 +34,18 @@ public class PlayerState {
     public String getFacing() { return facing; }
     public void setFacing(String value) { facing = value; }
 
+    // Voice belongs to one connection: a Reconnect or a new Membership starts without it.
+    private boolean voiceEnabled;
+    // The routes this connection was last sent, so unchanged routes are not sent again.
+    private java.util.List<?> lastVoiceRoutes;
+    public boolean isVoiceEnabled() { return voiceEnabled; }
+    public java.util.List<?> getLastVoiceRoutes() { return lastVoiceRoutes; }
+    public void setLastVoiceRoutes(java.util.List<?> value) { lastVoiceRoutes = value; }
+    public void setVoiceEnabled(boolean value) {
+        voiceEnabled = value;
+        lastVoiceRoutes = null;
+    }
+
     public PlayerState(String playerId, WebSocketSession session) {
         this.playerId = playerId;
         this.session = session;

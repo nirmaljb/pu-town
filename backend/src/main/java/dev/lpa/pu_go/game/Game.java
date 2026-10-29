@@ -334,6 +334,33 @@ public final class Game {
         return viewer.distanceTo(other) <= vision(viewer.role());
     }
 
+    /**
+     * Whether a listener may hear a speaker's voice right now. A route is enforced by the
+     * speaker's client, so the speaker learns it too; every rule here is therefore one that
+     * both Players' views already imply.
+     * <ul>
+     *   <li>Role Reveal and the finished Game: everyone hears everyone.</li>
+     *   <li>The Roam: two living Players who see each other within {@link FieldRules#HEARING_RANGE},
+     *       so a Vanished Mafia is silent to the Village. Ghosts hear only Ghosts, town-wide; the
+     *       living never route to a Ghost, which would reveal a death the Village cannot know.</li>
+     *   <li>A Meeting: the living speak to everyone still in the Game; Ghosts only to Ghosts.</li>
+     * </ul>
+     */
+    public boolean hears(String listenerId, String speakerId, long now) {
+        Participant listener = participants.get(listenerId);
+        Participant speaker = participants.get(speakerId);
+        if (listener == null || speaker == null || listener == speaker) return false;
+        if (listener.status() == ParticipantStatus.LEFT || speaker.status() == ParticipantStatus.LEFT) return false;
+        return switch (phase) {
+            case ROLE_REVEAL, FINISHED -> true;
+            case ROAM -> listener.isLiving() && speaker.isLiving()
+                    ? listener.distanceTo(speaker) <= HEARING_RANGE
+                        && canSee(listener, speaker, now) && canSee(speaker, listener, now)
+                    : !listener.isLiving() && !speaker.isLiving();
+            case MEETING_CALL, DISCUSSION, VOTING, VOTING_RESULT -> speaker.isLiving() || !listener.isLiving();
+        };
+    }
+
     /** Every Avatar this recipient may see right now, themselves included. */
     public List<FieldPlayer> fieldPlayersFor(String viewerId, long now) {
         Participant viewer = participants.get(viewerId);

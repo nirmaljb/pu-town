@@ -576,7 +576,179 @@ class MafiaGameTest {
         assertEquals(List.of("mafia", "doctor", "sheriff", "villager"), revealedRoles(game(1)));
     }
 
+    // ----- voice --------------------------------------------------------------------------
+
+    @Test
+    void onlyVoiceEnabledPlayersAreRoutedAndSignalledInTheLobby() throws Exception {
+        var host = connect("voice-0");
+        send(host, "{\"version\":1,\"type\":\"create_room\",\"displayName\":\"Host\"}");
+        code = latest(host).path("roomId").asText();
+        table.add(host);
+        for (int seat = 1; seat < 3; seat++) {
+            var guest = connect("voice-" + seat);
+            join(guest, code);
+            table.add(guest);
+        }
+        voice(0, true);
+        voice(1, true);
+        assertEquals(List.of(playerId(1)), voicePeerIds(0));
+        assertEquals(List.of(playerId(0)), voicePeerIds(1));
+        assertTrue(voicePeer(0, 1).path("send").asBoolean());
+        assertTrue(voicePeer(0, 1).path("receive").asBoolean());
+        assertEquals(0, countOfType(table.get(2), "voice_routes"), "a Player outside voice is never routed");
+
+        signal(0, 1, "offer", "{\\\"sdp\\\":\\\"v=0\\\"}");
+        JsonNode relayed = latestOfType(table.get(1), "voice_signal");
+        assertEquals(playerId(0), relayed.path("fromPlayerId").asText());
+        assertEquals("offer", relayed.path("kind").asText());
+        assertEquals("{\"sdp\":\"v=0\"}", relayed.path("data").asText());
+        signal(0, 2, "offer", "nobody-listens");
+        assertEquals(0, countOfType(table.get(2), "voice_signal"));
+        signal(2, 0, "offer", "not-in-voice");
+        assertEquals(0, countOfType(table.get(0), "voice_signal"), "only a voice-enabled Player may signal");
+        signal(0, 1, "hangup", "x");
+        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+        send(host, "{\"version\":1,\"type\":\"voice_signal\",\"targetPlayerId\":\"player-2\",\"kind\":\"offer\",\"data\":\""
+                + "x".repeat(16_001) + "\"}");
+        assertEquals("malformed_message", latest(table.get(0)).path("code").asText());
+
+        // Leaving voice, and losing the connection, both drop the Player from every route.
+        voice(1, false);
+        assertEquals(List.of(), voicePeerIds(0));
+        voice(1, true);
+        assertEquals(List.of(playerId(1)), voicePeerIds(0));
+        handler.afterConnectionClosed(table.get(1), CloseStatus.NORMAL);
+        assertEquals(List.of(), voicePeerIds(0));
+    }
+
+    @Test
+    void inTheRoamOnlyPlayersWhoSeeEachOtherWithinEarshotHearEachOther() throws Exception {
+        assertTrue(FieldRules.HEARING_RANGE < FieldRules.VILLAGER_VISION, "hearing must never reach beyond sight");
+        startTable("earshot", 10);
+        for (int seat = 0; seat < 10; seat++) voice(seat, true);
+        // Role Reveal is spent at the table, where everyone hears everyone.
+        assertTrue(voicePeer(2, 7).path("receive").asBoolean());
+        advance(REVEAL);
+        handler.tickFields();
+        for (int seat = 0; seat < 10; seat++) {
+            for (int other = 0; other < 10; other++) {
+                if (other == seat) continue;
+                boolean near = Math.hypot(RoomRules.seatX(other) - RoomRules.seatX(seat),
+                        RoomRules.seatY(other) - RoomRules.seatY(seat)) <= FieldRules.HEARING_RANGE;
+                assertEquals(near, voicePeer(seat, other).path("send").asBoolean(), seat + " to " + other);
+                assertEquals(near, voicePeer(seat, other).path("receive").asBoolean(), seat + " from " + other);
+            }
+        }
+        // Walking into earshot opens the route on the next field.
+        assertFalse(voicePeer(5, 9).path("receive").asBoolean());
+        walk(5, RoomRules.seatX(9) + 120, RoomRules.seatY(9));
+        assertTrue(voicePeer(5, 9).path("receive").asBoolean());
+        assertTrue(voicePeer(9, 5).path("receive").asBoolean());
+        // A relayed packet reaches only the named targets who may hear the sender now.
+        assertTrue(voicePeer(9, 5).path("receive").asBoolean());
+        assertFalse(voicePeer(2, 5).path("receive").asBoolean());
+        send(table.get(5), "{\"version\":1,\"type\":\"voice_frame\",\"targetPlayerIds\":[\""
+                + playerId(9) + "\",\"" + playerId(2) + "\"],\"data\":\"T3B1cw==\"}");
+        JsonNode relayed = latestOfType(table.get(9), "voice_frame");
+        assertEquals(playerId(5), relayed.path("fromPlayerId").asText());
+        assertEquals("T3B1cw==", relayed.path("data").asText());
+        assertEquals(0, countOfType(table.get(2), "voice_frame"), "the server enforces a relayed route itself");
+        send(table.get(5), "{\"version\":1,\"type\":\"voice_frame\",\"targetPlayerIds\":[],\"data\":\"T3B1cw==\"}");
+        assertEquals("malformed_message", latest(table.get(5)).path("code").asText());
+        send(table.get(5), "{\"version\":1,\"type\":\"voice_frame\",\"targetPlayerIds\":[\"" + playerId(9) + "\"],\"data\":\"not base64!\"}");
+        assertEquals("malformed_message", latest(table.get(5)).path("code").asText());
+        // Nothing about voice ever names a Role.
+        for (var member : table) assertTrue(member.payloads().stream().filter(p -> p.contains("voice_routes")).noneMatch(p -> p.contains("\"role\"")));
+    }
+
+    @Test
+    void aVanishedMafiaIsSilentToTheVillageButNotToTheirTeam() throws Exception {
+        startTable("hush", 10);
+        for (int seat = 0; seat < 10; seat++) voice(seat, true);
+        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
+        walk(2, RoomRules.seatX(0) + 140, RoomRules.seatY(0) + 60);
+        walk(4, RoomRules.seatX(0) + 60, RoomRules.seatY(0) + 40);
+        assertTrue(voicePeer(4, 0).path("receive").asBoolean());
+        ability(0, "vanish", 1, null);
+        assertFalse(voicePeer(4, 0).path("receive").asBoolean());
+        assertFalse(voicePeer(4, 0).path("send").asBoolean(), "the Mafia must not learn who is near through voice either");
+        assertTrue(voicePeer(2, 0).path("receive").asBoolean());
+        advance(FieldRules.VANISH_DURATION);
+        handler.tickFields();
+        assertTrue(voicePeer(4, 0).path("receive").asBoolean());
+    }
+
+    @Test
+    void ghostsHearOnlyGhostsInTheRoamAndListenToTheMeeting() throws Exception {
+        startTable("ghosts", 10);
+        for (int seat = 0; seat < 10; seat++) voice(seat, true);
+        advance(REVEAL + FieldRules.OPENING_COOLDOWN);
+        walk(0, RoomRules.seatX(9) + 40, RoomRules.seatY(9));
+        // Seat 5 is across the square, out of earshot of the kill.
+        int farRoutes = countOfType(table.get(5), "voice_routes");
+        ability(0, "kill", 1, 9);
+        handler.tickFields();
+        assertEquals(farRoutes, countOfType(table.get(5), "voice_routes"), "a distant Villager learns nothing of the death");
+        for (int seat = 0; seat < 9; seat++) {
+            assertFalse(voicePeer(seat, 9).path("send").asBoolean(), "the living never route to a Ghost");
+            assertFalse(voicePeer(seat, 9).path("receive").asBoolean());
+        }
+        advance(FieldRules.KILL_COOLDOWN);
+        walk(0, RoomRules.seatX(8) + 40, RoomRules.seatY(8));
+        ability(0, "kill", 1, 8);
+        assertTrue(voicePeer(9, 8).path("receive").asBoolean(), "Ghosts hear each other across the town");
+        assertTrue(voicePeer(9, 8).path("send").asBoolean());
+
+        walk(7, RoomRules.seatX(9) - 40, RoomRules.seatY(9) + 20);
+        ability(7, "report", 1, null);
+        assertEquals("meeting_call", game(7).path("phase").asText());
+        // In a Meeting the living are heard by everyone still in the Game; Ghosts only by Ghosts.
+        assertTrue(voicePeer(5, 9).path("send").asBoolean());
+        assertFalse(voicePeer(5, 9).path("receive").asBoolean());
+        assertTrue(voicePeer(9, 5).path("receive").asBoolean());
+        assertFalse(voicePeer(9, 5).path("send").asBoolean());
+        assertTrue(voicePeer(9, 8).path("receive").asBoolean());
+        assertTrue(voicePeer(2, 7).path("receive").asBoolean());
+    }
+
+    @Test
+    void aRecoveredConnectionStartsOutsideVoice() throws Exception {
+        startTable("rejoin", 4);
+        for (int seat = 0; seat < 4; seat++) voice(seat, true);
+        handler.afterConnectionClosed(table.get(3), CloseStatus.NORMAL);
+        assertFalse(voicePeerIds(0).contains(playerId(3)));
+        var returning = connect("rejoin-return");
+        recover(returning, code, tokens.get(3));
+        assertEquals(0, countOfType(returning, "voice_routes"));
+        assertFalse(voicePeerIds(0).contains(playerId(3)));
+        table.set(3, returning);
+        voice(3, true);
+        assertTrue(voicePeerIds(0).contains(playerId(3)));
+        assertEquals(List.of(playerId(0), playerId(1), playerId(2)), voicePeerIds(3));
+    }
+
     // ----- helpers ------------------------------------------------------------------------
+
+    private void voice(int seat, boolean enabled) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"set_voice\",\"enabled\":" + enabled + "}");
+    }
+
+    private void signal(int seat, int targetSeat, String kind, String data) throws Exception {
+        send(table.get(seat), "{\"version\":1,\"type\":\"voice_signal\",\"targetPlayerId\":\"" + playerId(targetSeat)
+                + "\",\"kind\":\"" + kind + "\",\"data\":\"" + data + "\"}");
+    }
+
+    private List<String> voicePeerIds(int seat) {
+        var ids = new ArrayList<String>();
+        latestOfType(table.get(seat), "voice_routes").path("peers").forEach(node -> ids.add(node.path("playerId").asText()));
+        return ids;
+    }
+
+    private JsonNode voicePeer(int seat, int otherSeat) {
+        for (JsonNode node : latestOfType(table.get(seat), "voice_routes").path("peers"))
+            if (node.path("playerId").asText().equals(playerId(otherSeat))) return node;
+        throw new AssertionError(playerId(otherSeat) + " is not among seat " + seat + "'s voice peers");
+    }
 
     private void startTable(String label, int players) throws Exception {
         if (players >= 5) startTable(label, players, 2, 1, 1);

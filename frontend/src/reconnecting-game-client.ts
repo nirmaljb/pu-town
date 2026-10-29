@@ -1,7 +1,7 @@
 import type { Direction } from "./avatar-facing.js";
 import { GameTransport } from "./game-transport.js";
 import { NetworkInbox } from "./network-inbox.js";
-import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, move, recoverRoom, sendChat, setRoleSetup, useAbility, type Ability, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage } from "./protocol.js";
+import { selectAvatar, createRoom, decodeServerMessage, joinRoom, meetingVote, move, recoverRoom, sendChat, setRoleSetup, useAbility, type Ability, type ChatChannel, type ClientMessage, type RoleSetup, type RoomPhase, type ServerMessage, type VoiceMessage } from "./protocol.js";
 
 const RECOVERY_KEY = "pu-town.recovery";
 type RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -12,7 +12,19 @@ export type ConnectionState = Readonly<{
   error: string | null;
 }>;
 
+/**
+ * What the voice pipeline is told, straight from the socket rather than at a frame boundary:
+ * its own messages, and when this connection gains or loses a Room Membership to talk in.
+ */
+export type VoiceEvent =
+  | VoiceMessage
+  | Readonly<{ type: "voice_available"; selfPlayerId: string }>
+  | Readonly<{ type: "voice_unavailable" }>;
+
 export class ReconnectingGameClient {
+  #voiceListener: (event: VoiceEvent) => void = () => undefined;
+  // A Room Snapshot arrived on the current socket, so the server knows this connection's Room.
+  #voiceReady = false;
   #phase: RoomPhase | null = null;
   #socket: WebSocket | null = null;
   #transport: GameTransport | null = null;
@@ -177,7 +189,21 @@ export class ReconnectingGameClient {
     this.#retryDelay = Math.min(this.#retryDelay * 2, 5_000);
   }
 
+  set onVoice(listener: (event: VoiceEvent) => void) { this.#voiceListener = listener; }
+
+  /** Voice messages are sent whenever this socket has a Room, in the Lobby and in a Game alike. */
+  sendVoice(message: ClientMessage): void {
+    if (this.#voiceReady && this.#socket?.readyState === 1) this.#socket.send(JSON.stringify(message));
+  }
+
+  private voiceUnavailable(): void {
+    if (!this.#voiceReady) return;
+    this.#voiceReady = false;
+    this.#voiceListener({ type: "voice_unavailable" });
+  }
+
   private closeConnection(): void {
+    this.voiceUnavailable();
     this.#phase = null;
     this.#healthFailed = false;
     ++this.#generation;
@@ -311,7 +337,11 @@ export class ReconnectingGameClient {
         return;
       }
       this.#messages.push(message);
-    }, () => generation === this.#generation);
+      if (message.type === "room_snapshot") {
+        this.#voiceReady = true;
+        this.#voiceListener({ type: "voice_available", selfPlayerId: message.selfPlayerId });
+      } else if (message.type === "room_left") this.voiceUnavailable();
+    }, () => generation === this.#generation, message => this.#voiceListener(message));
     socket.addEventListener("close", event => {
       if (generation !== this.#generation) return;
       if (event.code === 4001) {

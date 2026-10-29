@@ -33,6 +33,10 @@ export function reduceWorldEvent(world: WorldState, event: ServerMessage, receiv
         lastError: null
       };
     case "pong":
+    // Voice drives only the audio pipeline, never the world (see ADR 0016).
+    case "voice_routes":
+    case "voice_signal":
+    case "voice_frame":
       return world;
     case "room_snapshot":
       return {

@@ -44,6 +44,23 @@ final class ConnectionOutbox {
         return true;
     }
 
+    /** Beyond this backlog a relayed voice frame would arrive too late to be worth playing. */
+    static final int VOICE_BACKLOG = 24;
+
+    /**
+     * A relayed voice frame is the one outbound message that may be dropped: it is useless
+     * once late, and a slow link must lose a syllable rather than its Game connection. It
+     * never takes a place a Game event would need.
+     */
+    boolean offerVoice(TextMessage message) {
+        synchronized (messages) {
+            if (messages.size() >= Math.min(VOICE_BACKLOG, capacity)) return false;
+            messages.add(message);
+        }
+        scheduleDrain();
+        return true;
+    }
+
     private void scheduleDrain() {
         if (draining.compareAndSet(false, true)) executor.execute(this::drain);
     }

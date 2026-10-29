@@ -66,8 +66,8 @@ One computer runs the servers; every Player, that computer included, plays in a 
    python run.py
    ```
 
-   Both servers listen on every network interface. Once they are up, it prints the address to share, for example `Same Wi-Fi/router:  http://192.168.1.5:5173/`. If it prints several, use the one on your Wi-Fi or Ethernet adapter rather than a virtual one (VMware, WSL, Hyper-V).
-2. On each other computer, open that address in a browser. Nothing needs installing there.
+   Both servers listen on every network interface. Once they are up, it prints the address to share, for example `Same Wi-Fi/router:  https://192.168.1.5:5173/`. If it prints several, use the one on your Wi-Fi or Ethernet adapter rather than a virtual one (VMware, WSL, Hyper-V).
+2. On each other computer, open that address in a browser. Nothing needs installing there. The page is https, because browsers only give a microphone (voice chat) to secure pages, and its certificate is the server computer's own: the browser warns once, so choose Advanced, then Proceed. `python run.py --http` serves plain http instead; voice then works only on the server computer.
    To play with friends on other networks, double-click `Share PU Town.bat` instead, or run `python run.py --share`: it also prints a public link through a free Cloudflare tunnel (install `cloudflared` once with `winget install --id Cloudflare.cloudflared`).
 3. One Player chooses Create Room and shares the Room Code; everyone else enters it and chooses Join Lobby. When four or more Players are Ready, the Host starts the Game.
 
@@ -107,6 +107,12 @@ Every cooldown starts 10 seconds in at the beginning of each Roam. Villagers hav
 A Meeting eliminates a Player only on a majority of the living, and reveals only their Faction. The Village wins when no Mafia is living; the Mafia win the moment they are at least as many as the Village. The Game then ends at once and every Role is revealed, including for Players who died or left.
 
 Eliminated Players keep watching and keep reading the chat they could read while living, but cannot speak or vote. Disconnecting does not forfeit: the Player stays in the Game for the whole two-minute reservation, keeps their ballot, and still counts toward every majority. Leaving, or letting the reservation expire, does Forfeit — their seat stays on the table marked as left, and they stop counting toward anything.
+
+## Voice chat
+
+Choose **🎙 Join voice** in the corner of the town and allow the microphone. Everyone in the Lobby, at the Role Reveal, in every Meeting and after the Game hears everyone. During the Roam you hear only the living Players near you, louder the closer they are and from the side they stand on. That is never further than you can see, so a voice gives nobody away. A Vanished Mafia is silent to the Village. Ghosts hear each other anywhere in the town, and in Meetings they listen to the living but only other Ghosts hear them. Press **M** or the button to mute; **Leave voice** stops it. Underneath, the list shows whom you can hear right now, and a name lights up while that Player speaks.
+
+Audio goes straight from browser to browser (WebRTC, 64 kbit/s Opus with echo cancellation and noise suppression), so on one network it has almost no delay. The server only decides who may hear whom. Headphones give the clearest sound. The browser remembers whether you joined voice and rejoins after a refresh. When two Players' browsers cannot reach each other directly (common over a shared link, behind mobile or strict home routers), their voice goes through the game server instead: it still works, with a little more delay, and the list marks that Player "via server". "connecting…" means nothing has arrived from them yet. Relaying needs a current Chrome, Edge, Firefox or Safari.
 
 ## The town by day and by night
 
@@ -167,14 +173,14 @@ npm run build
 
 The production frontend bundle is written to `frontend/dist/`.
 
-With both servers running (`python run.py`), the end-to-end test plays one whole Game with four isolated browsers through this computer's network address, the way four computers would: Create and Join, Ready and Start, private Roles, walking seen by others, an Emergency Meeting, chat, a refresh that recovers mid-Game, the vote and the Village's win.
+With both servers running (`python run.py`), the end-to-end test plays one whole Game with four isolated browsers through this computer's network address, the way four computers would: Create and Join, voice audio arriving at every browser from the three others, Ready and Start, private Roles, walking seen by others, an Emergency Meeting, chat, a refresh that recovers mid-Game, the vote and the Village's win.
 
 ```sh
 cd frontend
 npm run test:e2e
 ```
 
-The first time, install its browser with `npx playwright install chromium`. It runs on the server's real clock, so it takes about three minutes. `PU_TOWN_URL` overrides the page address, for example `PU_TOWN_URL=http://192.168.1.5:5173/`.
+The first time, install its browser with `npx playwright install chromium`. It runs on the server's real clock, so it takes about three minutes. `PU_TOWN_URL` overrides the page address, for example `PU_TOWN_URL=https://192.168.1.5:5173/`.
 
 Run the backend tests and create an executable JAR:
 

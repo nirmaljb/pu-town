@@ -176,6 +176,40 @@ h2 { margin: 16px 0; font-size: 28px; }
 .time-toggle:focus-visible { outline: 2px solid #ffe0a0; outline-offset: 2px; }
 .in-lobby .time-toggle, .in-game .time-toggle { display: block; }
 
+/* Voice, under the time of day; only while in a Room. */
+.voice-panel {
+  display: none; position: absolute; top: 46px; left: 10px; z-index: 2; max-width: 240px;
+  font: 600 12px system-ui, sans-serif; color: #fff0c9;
+}
+.in-lobby .voice-panel, .in-game .voice-panel { display: block; }
+.voice-controls { display: flex; gap: 6px; }
+.voice-toggle, .voice-leave {
+  padding: 6px 12px; border: 2px solid #9b784e; border-radius: 2px;
+  background: #302820e6; color: #fff0c9; font: 700 13px system-ui, sans-serif; cursor: pointer;
+}
+.voice-leave { padding: 6px 8px; font-size: 11px; color: #d8c8a8; }
+.voice-leave[hidden] { display: none; }
+.voice-toggle[aria-pressed="true"] { border-color: #65d6a4; }
+.voice-toggle.muted { border-color: #ff8066; color: #ffc9bd; }
+.voice-toggle.speaking { box-shadow: 0 0 0 3px #65d6a466; }
+.voice-toggle:hover, .voice-leave:hover { filter: brightness(1.15); }
+.voice-toggle:focus-visible, .voice-leave:focus-visible { outline: 2px solid #ffe0a0; outline-offset: 2px; }
+.voice-note { margin: 6px 0 0; padding: 6px 8px; background: #101725e6; border-left: 3px solid #ffc99e; color: #ffdbab; line-height: 1.4; }
+.voice-note[hidden] { display: none; }
+.voice-speakers { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.voice-speakers li {
+  display: flex; align-items: center; gap: 6px; padding: 3px 8px; background: #101725cc; border-radius: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.voice-speakers li::before {
+  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--colour); opacity: .35;
+  transition: opacity 80ms, box-shadow 80ms;
+}
+.voice-speakers li[data-link="connecting"] { color: #8f9bb0; font-style: italic; }
+.voice-speakers li[data-link="connecting"]::after { content: "connecting…"; margin-left: auto; font-size: 10px; }
+.voice-speakers li[data-link="relayed"]::after { content: "via server"; margin-left: auto; font-size: 10px; color: #b9c5d6; }
+.voice-speakers li.speaking::before { opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--colour) 40%, transparent); }
+
 /* The Meeting Area keeps the same stepped timber-and-amber vocabulary as entry. */
 .lobby-controls {
   position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);

@@ -4,6 +4,7 @@
     python run.py              # play on this computer and on your home network
     python run.py --share      # also make a public link anyone on the internet can open
     python run.py --no-browser # don't open a browser window on this computer
+    python run.py --http       # serve plain http (voice then works only on this computer)
 
 What it starts:
 
@@ -12,6 +13,8 @@ What it starts:
     frontend  ...because the Vite server on port 5173 serves the page AND passes the
               game connection (/ws/game) through to the backend. One port carries
               everything, which is what makes a single shared link possible.
+              It serves https with a self-signed certificate, because browsers give
+              a microphone (voice chat) only to secure pages.
     tunnel    (--share only) Cloudflare's free quick tunnel. It gives this computer a
               temporary https://<random>.trycloudflare.com address that forwards to
               port 5173. No account is needed; the link changes every time.
@@ -43,7 +46,6 @@ IS_WINDOWS = os.name == "nt"
 BACKEND_PORT = 8080
 FRONTEND_PORT = 5173
 HEALTH_URL = f"http://localhost:{BACKEND_PORT}/health"
-CLIENT_URL = f"http://localhost:{FRONTEND_PORT}/"
 
 # The quick tunnel prints its public address in a line like
 # "|  https://quiet-town-example.trycloudflare.com  |".
@@ -203,7 +205,13 @@ def main() -> int:
     parser.add_argument("--share", action="store_true",
                         help="also create a public link that players on other networks can open")
     parser.add_argument("--no-browser", action="store_true", help="do not open the browser")
+    parser.add_argument("--http", action="store_true",
+                        help="serve plain http; voice chat then works only on this computer")
     args = parser.parse_args()
+    # A shared link is already https at Cloudflare, which forwards to plain http here.
+    secure = not args.http and not args.share
+    scheme = "https" if secure else "http"
+    client_url = f"{scheme}://localhost:{FRONTEND_PORT}/"
 
     # 1. Check that nothing else (an older copy of the game?) already holds our ports.
     #    The backend only accepts pages from port 5173, so Vite must not pick another one.
@@ -255,7 +263,9 @@ def main() -> int:
         #    forwards the game connection to the backend (see frontend/vite.config.ts).
         mode = "preview" if args.share else "dev"
         print(f"Starting frontend on port {FRONTEND_PORT}...")
-        frontend = start("frontend", ["npx", "vite", mode, "--host", "0.0.0.0"], FRONTEND)
+        frontend_env = os.environ.copy()
+        frontend_env["PU_TOWN_HTTPS"] = "1" if secure else "0"
+        frontend = start("frontend", ["npx", "vite", mode, "--host", "0.0.0.0"], FRONTEND, env=frontend_env)
         processes.append(frontend)
         if not wait_for_port(frontend, FRONTEND_PORT):
             print("Frontend exited before it started.")
@@ -283,9 +293,12 @@ def main() -> int:
         # 7. Tell the Host which address to give to whom.
         print("\n" + "=" * 64)
         print(f"  PU Town is running.\n")
-        print(f"  This computer:      {CLIENT_URL}")
+        print(f"  This computer:      {client_url}")
         for address in lan_addresses():
-            print(f"  Same Wi-Fi/router:  http://{address}:{FRONTEND_PORT}/")
+            print(f"  Same Wi-Fi/router:  {scheme}://{address}:{FRONTEND_PORT}/")
+        if secure:
+            print("  (The browser warns about the certificate once: choose Advanced, then Proceed.")
+            print("   That is this computer's own certificate; it is what lets voice chat use a microphone.)")
         if public_link:
             print(f"\n  SHARE THIS LINK:    {public_link[0]}")
             print("  (anyone on the internet can open it; it stops working when you press Ctrl+C)")
@@ -293,7 +306,7 @@ def main() -> int:
         print("  Press Ctrl+C to stop.")
         print("=" * 64 + "\n")
         if not args.no_browser:
-            webbrowser.open(CLIENT_URL)
+            webbrowser.open(client_url)
 
         # 8. Keep running until Ctrl+C, or until one of the servers dies.
         while all(p.poll() is None for p in processes):

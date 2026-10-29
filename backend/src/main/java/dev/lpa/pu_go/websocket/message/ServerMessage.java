@@ -11,7 +11,8 @@ import java.util.List;
 
 public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMessage.Pong, ServerMessage.RoomSnapshot, ServerMessage.PlayerJoined,
         ServerMessage.PlayerLeft, ServerMessage.RoomLeft, ServerMessage.ErrorMessage,
-        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory {
+        ServerMessage.GameState, ServerMessage.FieldState, ServerMessage.ChatMessage, ServerMessage.ChatHistory,
+        ServerMessage.VoiceRoutes, ServerMessage.VoiceSignal, ServerMessage.VoiceFrame {
     int version();
     String type();
 
@@ -132,5 +133,25 @@ public sealed interface ServerMessage permits ServerMessage.RoomState, ServerMes
 
     record ChatHistory(int version, String type, List<ChatView> messages) implements ServerMessage {
         public ChatHistory(List<ChatView> messages) { this(1, "chat_history", List.copyOf(messages)); }
+    }
+
+    /**
+     * One voice-enabled Player this recipient keeps a voice connection with: whether the
+     * recipient may send them its voice, and whether it may hear theirs.
+     */
+    record VoicePeer(String playerId, boolean send, boolean receive) {}
+
+    /** This recipient's voice routes, built per recipient and sent only when they change. */
+    record VoiceRoutes(int version, String type, List<VoicePeer> peers) implements ServerMessage {
+        public VoiceRoutes(List<VoicePeer> peers) { this(1, "voice_routes", List.copyOf(peers)); }
+    }
+
+    record VoiceSignal(int version, String type, String fromPlayerId, String kind, String data) implements ServerMessage {
+        public VoiceSignal(String fromPlayerId, String kind, String data) { this(1, "voice_signal", fromPlayerId, kind, data); }
+    }
+
+    /** A relayed voice packet from a peer this recipient may hear but cannot reach directly. */
+    record VoiceFrame(int version, String type, String fromPlayerId, String data) implements ServerMessage {
+        public VoiceFrame(String fromPlayerId, String data) { this(1, "voice_frame", fromPlayerId, data); }
     }
 }

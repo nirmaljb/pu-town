@@ -17,6 +17,8 @@ export const FOOT_RADIUS = 14;
 export const WALK_SPEED = 220;
 /** How far a living Player sees, by Role: the Mafia furthest, Villagers least. */
 export const VISION: Readonly<Record<Role, number>> = { mafia: 440, doctor: 380, sheriff: 330, villager: 270 };
+/** How far a living Player's voice carries in the Roam: inside every Vision, so it reveals nothing. */
+export const HEARING_RANGE = 260;
 export const KILL_RANGE = 90;
 export const SHIELD_RANGE = 120;
 export const SCAN_RANGE = 140;

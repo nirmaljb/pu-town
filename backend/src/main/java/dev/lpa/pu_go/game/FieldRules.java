@@ -22,6 +22,12 @@ public final class FieldRules {
         };
     }
 
+    /**
+     * How far a living Player's voice carries during the Roam. It is inside every Vision, so
+     * whoever can hear a Player could already see them: voice never reveals a position.
+     */
+    public static final double HEARING_RANGE = 260;
+
     public static final double KILL_RANGE = 90;
     public static final long KILL_COOLDOWN = 25_000;
     public static final long VANISH_DURATION = 10_000;

@@ -115,6 +115,13 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     else if (incoming instanceof ClientMessage.UseAbility ability) handleAbility(player, ability);
                     else if (incoming instanceof ClientMessage.MeetingVote vote) handleMeetingVote(player, vote);
                     else if (incoming instanceof ClientMessage.SendChat chat) handleChat(player, chat);
+                    else if (incoming instanceof ClientMessage.SetVoice voice) handleSetVoice(player, voice);
+                    else if (incoming instanceof ClientMessage.VoiceSignal signal) handleVoiceSignal(player, signal);
+                    else if (incoming instanceof ClientMessage.VoiceFrame frame) handleVoiceFrame(player, frame);
+                    if (!(incoming instanceof ClientMessage.Ping || incoming instanceof ClientMessage.VoiceSignal
+                            || incoming instanceof ClientMessage.VoiceFrame)) {
+                        for (String involved : rooms) refreshVoice(involved);
+                    }
                     return null;
                 });
             } catch (InvalidClientMessageException exception) {
@@ -170,6 +177,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             }
         }
         transferDisconnectedHost(room);
+        refreshVoice(code);
         return roomManager.findRoom(code);
     }
 
@@ -191,6 +199,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     if (game.participant(memberId) != null) deliveries.add(new Delivery(memberId, fieldStateFor(game, memberId, now)));
                 }
                 deliverAll(deliveries);
+                // Walking in and out of earshot changes routes, so they follow every field.
+                refreshVoice(code);
                 return null;
             });
         }
@@ -233,6 +243,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             playersById.remove(connection.getId());
             member.setSession(connection.getSession());
             member.setDisconnectedUntil(null);
+            // The recovered connection has no voice connections yet; it rejoins voice itself.
+            member.setVoiceEnabled(false);
             if (firstReturnAfterGrace) room.setHostPlayerId(member.getId());
             playersBySession.put(member.getSession().getId(), member);
             outboxes.put(member.getId(), outbox);
@@ -288,6 +300,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 player.setRecoveryToken((UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", ""));
                 player.setFacing(RoomRules.seatFacing(seat));
                 player.setReady(false);
+                player.setVoiceEnabled(false);
                 player.setSeat(seat);
                 player.setX(RoomRules.seatX(seat));
                 player.setY(RoomRules.seatY(seat));
@@ -521,6 +534,80 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
+    // Called under the Room's serialization; the routes that follow are refreshed by the caller.
+    private void handleSetVoice(PlayerState player, ClientMessage.SetVoice message) {
+        if (player.getRoomId() == null) {
+            deliver(error(player, "not_in_room", "Join a Room before joining its voice."));
+            return;
+        }
+        player.setVoiceEnabled(message.enabled());
+    }
+
+    /**
+     * Relays one WebRTC negotiation step between two connected, voice-enabled Members of the
+     * same Room. A signal for anyone else is dropped silently: such races are ordinary while a
+     * Player leaves voice, and the routes that follow already tell the sender.
+     */
+    private void handleVoiceSignal(PlayerState player, ClientMessage.VoiceSignal message) {
+        PlayerState target = playersById.get(message.targetPlayerId());
+        if (player.getRoomId() == null || !player.isVoiceEnabled() || target == null || target == player
+                || !player.getRoomId().equals(target.getRoomId()) || !target.isConnected() || !target.isVoiceEnabled()) return;
+        deliver(new Delivery(target.getId(), new ServerMessage.VoiceSignal(player.getId(), message.kind(), message.data())));
+    }
+
+    /**
+     * Relays one voice packet for a sender whose direct connection to some peers failed. Here
+     * the route is enforced by the server itself: a packet reaches only the named targets who
+     * may hear the sender right now, and a late one is dropped rather than queued.
+     */
+    private void handleVoiceFrame(PlayerState player, ClientMessage.VoiceFrame message) {
+        String roomId = player.getRoomId();
+        Room room = roomId == null ? null : roomManager.findRoom(roomId);
+        if (room == null || !player.isVoiceEnabled()) return;
+        Game game = room.getGame();
+        long now = roomManager.currentTimeMillis();
+        TextMessage frame = null;
+        for (String targetId : new java.util.LinkedHashSet<>(message.targetPlayerIds())) {
+            PlayerState target = playersById.get(targetId);
+            if (target == null || target == player || !roomId.equals(target.getRoomId()) || !target.isConnected()
+                    || !target.isVoiceEnabled() || !hears(game, target, player, now)) continue;
+            ConnectionOutbox outbox = outboxes.get(target.getId());
+            if (outbox == null) continue;
+            if (frame == null) frame = new TextMessage(objectMapper.writeValueAsString(
+                    new ServerMessage.VoiceFrame(player.getId(), message.data())));
+            outbox.offerVoice(frame);
+        }
+    }
+
+    /**
+     * Room lock is held. Sends each connected, voice-enabled Member the routes they may use
+     * now, when those differ from the ones they were last sent. A route is decided here and
+     * never by a client: in a Game, by {@link Game#hears}; in the Lobby, everyone hears everyone.
+     */
+    private void refreshVoice(String code) {
+        Room room = roomManager.findRoom(code);
+        if (room == null) return;
+        Game game = room.getGame();
+        long now = roomManager.currentTimeMillis();
+        List<PlayerState> voices = room.playerIdsSnapshot().stream().map(playersById::get)
+                .filter(Objects::nonNull).filter(member -> member.isConnected() && member.isVoiceEnabled()).toList();
+        List<Delivery> deliveries = new ArrayList<>();
+        for (PlayerState self : voices) {
+            List<ServerMessage.VoicePeer> peers = voices.stream().filter(other -> other != self)
+                    .map(other -> new ServerMessage.VoicePeer(other.getId(),
+                            hears(game, other, self, now), hears(game, self, other, now)))
+                    .toList();
+            if (peers.equals(self.getLastVoiceRoutes())) continue;
+            self.setLastVoiceRoutes(peers);
+            deliveries.add(new Delivery(self.getId(), new ServerMessage.VoiceRoutes(peers)));
+        }
+        deliverAll(deliveries);
+    }
+
+    private static boolean hears(Game game, PlayerState listener, PlayerState speaker, long now) {
+        return game == null || game.hears(listener.getId(), speaker.getId(), now);
+    }
+
     private void withGame(PlayerState player, BiConsumer<Room, Game> action) {
         String roomId = player.getRoomId();
         if (roomId == null) {
@@ -610,10 +697,12 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     return null;
                 }
                 player.setDisconnectedUntil(roomManager.currentTimeMillis() + 120_000);
+                player.setVoiceEnabled(false);
                 Room room = roomManager.findRoom(roomId);
                 List<Delivery> deliveries = new ArrayList<>();
                 addForPlayers(deliveries, room.playerIdsSnapshot(), stateOf(room));
                 deliverAll(deliveries);
+                refreshVoice(roomId);
                 return null;
             });
         }
@@ -627,6 +716,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         // Leave and expiry end participation; the Game Roster entry and its Seat remain.
         if (game != null) game.forfeit(player.getId());
         room.removePlayer(player.getId());
+        player.setVoiceEnabled(false);
         if (hostDeparted) room.playerIdsSnapshot().stream().map(playersById::get)
                 .filter(PlayerState::isConnected).findFirst()
                 .ifPresent(successor -> room.setHostPlayerId(successor.getId()));

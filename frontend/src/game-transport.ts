@@ -4,7 +4,8 @@ import {
   joinRoom,
   leaveRoom,
   type ClientMessage,
-  type ServerMessage
+  type ServerMessage,
+  type VoiceMessage
 } from "./protocol.js";
 
 export interface GameSocket {
@@ -18,13 +19,20 @@ export class GameTransport {
     private readonly inbox: NetworkInbox,
     onProtocolError: (error: Error) => void = () => undefined,
     onServerMessage: (message: ServerMessage) => void = () => undefined,
-    isCurrent: () => boolean = () => true
+    isCurrent: () => boolean = () => true,
+    onVoice: (message: VoiceMessage) => void = () => undefined
   ) {
     socket.addEventListener("message", event => {
       if (!isCurrent()) return;
       try {
         if (typeof event.data !== "string") throw new Error("Server message must be text");
         const message = decodeServerMessage(event.data);
+        // Voice bypasses the frame boundary: it drives only audio, which must keep its routes
+        // and its latency while frames pause in a hidden tab (ADR 0016).
+        if (message.type === "voice_routes" || message.type === "voice_signal" || message.type === "voice_frame") {
+          onVoice(message);
+          return;
+        }
         inbox.enqueue(message);
         onServerMessage(message);
       } catch (error) {

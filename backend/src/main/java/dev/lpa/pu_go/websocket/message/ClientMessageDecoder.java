@@ -81,6 +81,38 @@ public final class ClientMessageDecoder {
                     throw new InvalidClientMessageException("malformed_message", "Unknown chat channel.");
                 yield new ClientMessage.SendChat(1, type, channel, chatText(root));
             }
+            case "set_voice" -> {
+                requireOnly(root, Set.of("version", "type", "enabled"));
+                if (!root.get("enabled").isBoolean())
+                    throw new InvalidClientMessageException("malformed_message", "enabled must be a boolean.");
+                yield new ClientMessage.SetVoice(1, type, root.get("enabled").asBoolean());
+            }
+            case "voice_signal" -> {
+                requireOnly(root, Set.of("version", "type", "targetPlayerId", "kind", "data"));
+                String kind = requiredText(root, "kind");
+                if (!VOICE_SIGNALS.contains(kind))
+                    throw new InvalidClientMessageException("malformed_message", "kind must be offer, answer or candidate.");
+                String data = requiredText(root, "data");
+                if (data.length() > MAX_VOICE_SIGNAL_CHARACTERS)
+                    throw new InvalidClientMessageException("malformed_message", "A voice signal is too large.");
+                yield new ClientMessage.VoiceSignal(1, type, requiredText(root, "targetPlayerId"), kind, data);
+            }
+            case "voice_frame" -> {
+                requireOnly(root, Set.of("version", "type", "targetPlayerIds", "data"));
+                JsonNode targets = root.get("targetPlayerIds");
+                if (!targets.isArray() || targets.isEmpty() || targets.size() > MAX_VOICE_TARGETS)
+                    throw new InvalidClientMessageException("malformed_message", "targetPlayerIds must list 1–9 Player IDs.");
+                java.util.List<String> ids = new java.util.ArrayList<>();
+                for (JsonNode target : targets) {
+                    if (!target.isTextual() || target.asText().isBlank())
+                        throw new InvalidClientMessageException("malformed_message", "targetPlayerIds must list 1–9 Player IDs.");
+                    ids.add(target.asText());
+                }
+                String data = requiredText(root, "data");
+                if (data.length() > MAX_VOICE_FRAME_CHARACTERS || !data.matches("[A-Za-z0-9+/]+={0,2}"))
+                    throw new InvalidClientMessageException("malformed_message", "data must be one base64 voice packet.");
+                yield new ClientMessage.VoiceFrame(1, type, java.util.List.copyOf(ids), data);
+            }
             case "ping" -> {
                 requireOnly(root, Set.of("version", "type"));
                 yield new ClientMessage.Ping(1, type);
@@ -111,6 +143,12 @@ public final class ClientMessageDecoder {
     }
 
     private static final Set<String> FACINGS = Set.of("up", "left", "down", "right");
+    private static final Set<String> VOICE_SIGNALS = Set.of("offer", "answer", "candidate");
+    /** An audio-only session description is a few kilobytes; this leaves generous room. */
+    public static final int MAX_VOICE_SIGNAL_CHARACTERS = 16_000;
+    /** A 20 ms Opus packet is a few hundred bytes at most; base64 adds a third. */
+    public static final int MAX_VOICE_FRAME_CHARACTERS = 2_000;
+    private static final int MAX_VOICE_TARGETS = 9;
 
     private static double coordinate(JsonNode root, String name) throws InvalidClientMessageException {
         JsonNode value = root.get(name);

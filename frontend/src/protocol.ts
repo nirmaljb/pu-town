@@ -117,7 +117,24 @@ export type ChatEntry = Readonly<{
   text: string;
 }>;
 
+/**
+ * A voice-enabled Player this recipient keeps a voice connection with. `send` says whether
+ * this client may send them its voice; `receive`, whether it may play theirs.
+ */
+export type VoicePeer = Readonly<{ playerId: string; send: boolean; receive: boolean }>;
+export const VOICE_SIGNAL_KINDS = ["offer", "answer", "candidate"] as const;
+export type VoiceSignalKind = typeof VOICE_SIGNAL_KINDS[number];
+export const MAX_VOICE_SIGNAL_CHARACTERS = 16_000;
+export const MAX_VOICE_FRAME_CHARACTERS = 2_000;
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
+
+export type VoiceMessage =
+  | Readonly<{ version: 1; type: "voice_routes"; peers: readonly VoicePeer[] }>
+  | Readonly<{ version: 1; type: "voice_signal"; fromPlayerId: string; kind: VoiceSignalKind; data: string }>
+  | Readonly<{ version: 1; type: "voice_frame"; fromPlayerId: string; data: string }>;
+
 export type ServerMessage =
+  | VoiceMessage
   | Readonly<{ version: 1; type: "room_state"; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
   | Readonly<{ version: 1; type: "pong" }>
   | Readonly<{ version: 1; type: "room_snapshot"; selfPlayerId: string; roomId: string; recoveryToken: string; phase: RoomPhase; hostPlayerId: string; roleSetup: RoleSetup; players: readonly PlayerView[] }>
@@ -143,7 +160,29 @@ export type ClientMessage =
   | Readonly<{ version: 1; type: "move"; x: number; y: number; facing: Direction }>
   | Readonly<{ version: 1; type: "use_ability"; ability: Ability; round: number; targetPlayerId: string | null }>
   | Readonly<{ version: 1; type: "meeting_vote"; round: number; targetPlayerId: string | null }>
-  | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>;
+  | Readonly<{ version: 1; type: "send_chat"; channel: ChatChannel; text: string }>
+  | Readonly<{ version: 1; type: "set_voice"; enabled: boolean }>
+  | Readonly<{ version: 1; type: "voice_signal"; targetPlayerId: string; kind: VoiceSignalKind; data: string }>
+  | Readonly<{ version: 1; type: "voice_frame"; targetPlayerIds: readonly string[]; data: string }>;
+
+/** One base64 Opus packet, relayed by the server to the named peers it may reach. */
+export function voiceFrame(targetPlayerIds: readonly string[], data: string): ClientMessage {
+  if (targetPlayerIds.length < 1 || targetPlayerIds.length > 9) throw new Error("A voice frame needs 1–9 targets");
+  if (data.length > MAX_VOICE_FRAME_CHARACTERS || !BASE64.test(data)) throw new Error("A voice frame must be one base64 packet");
+  return { version: 1, type: "voice_frame", targetPlayerIds: targetPlayerIds.map(id => requireNonEmptyString(id, "targetPlayerId")), data };
+}
+
+export function setVoice(enabled: boolean): ClientMessage {
+  return { version: 1, type: "set_voice", enabled: requireBoolean(enabled) };
+}
+
+export function voiceSignal(targetPlayerId: string, kind: VoiceSignalKind, data: string): ClientMessage {
+  if (data.length < 1 || data.length > MAX_VOICE_SIGNAL_CHARACTERS) throw new Error("A voice signal must be 1–16000 characters");
+  return {
+    version: 1, type: "voice_signal", targetPlayerId: requireNonEmptyString(targetPlayerId, "targetPlayerId"),
+    kind: requireMember(kind, VOICE_SIGNAL_KINDS, "voice signal kind"), data
+  };
+}
 
 export function move(x: number, y: number, facing: Direction): ClientMessage {
   return {
@@ -279,6 +318,28 @@ export function decodeServerMessage(payload: string): ServerMessage {
         reason: message.reason
       };
     }
+    case "voice_routes":
+      requireFields(message, ["version", "type", "peers"]);
+      return {
+        version: 1, type,
+        peers: requireArray(message.peers, "peers").map(value => {
+          const peer = requireRecord(value, "voice peer");
+          requireFields(peer, ["playerId", "send", "receive"]);
+          return { playerId: requireNonEmptyString(peer.playerId, "playerId"), send: requireBoolean(peer.send), receive: requireBoolean(peer.receive) };
+        })
+      };
+    case "voice_signal":
+      requireFields(message, ["version", "type", "fromPlayerId", "kind", "data"]);
+      return {
+        version: 1, type,
+        fromPlayerId: requireNonEmptyString(message.fromPlayerId, "fromPlayerId"),
+        kind: requireMember(message.kind, VOICE_SIGNAL_KINDS, "voice signal kind"),
+        data: requireNonEmptyString(message.data, "data")
+      };
+    case "voice_frame":
+      requireFields(message, ["version", "type", "fromPlayerId", "data"]);
+      if (typeof message.data !== "string" || !BASE64.test(message.data)) throw new Error("data must be base64");
+      return { version: 1, type, fromPlayerId: requireNonEmptyString(message.fromPlayerId, "fromPlayerId"), data: message.data };
     case "room_left":
       requireFields(message, ["version", "type", "roomId"]);
       return { version: 1, type, roomId: requireNonEmptyString(message.roomId, "roomId") };

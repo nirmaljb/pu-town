@@ -19,6 +19,9 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `use_ability` | `ability: Ability`, `round: integer`, `targetPlayerId: string \| null` |
 | `meeting_vote` | `round: integer`, `targetPlayerId: string \| null` |
 | `send_chat` | `channel: "public" \| "mafia"`, `text: string` |
+| `set_voice` | `enabled: boolean` |
+| `voice_signal` | `targetPlayerId: string`, `kind: "offer" \| "answer" \| "candidate"`, `data: string` |
+| `voice_frame` | `targetPlayerIds: string[]`, `data: string` |
 
 ## Server to client
 
@@ -34,6 +37,9 @@ All messages are JSON objects with `version: 1` and an exact, message-specific s
 | `chat_history` | `messages: ChatEntry[]` |
 | `player_left` | `playerId: string`, `reason: "left" \| "disconnected" \| "expired"` |
 | `room_left` | `roomId: string` |
+| `voice_routes` | `peers: VoicePeer[]` |
+| `voice_signal` | `fromPlayerId: string`, `kind: "offer" \| "answer" \| "candidate"`, `data: string` |
+| `voice_frame` | `fromPlayerId: string`, `data: string` |
 | `error` | `code: string`, `message: string` |
 
 `PlayerView` contains exactly `playerId`, `displayName`, `colour`, `avatarPreset`, `seat`, `ready`, `connected`, `x`, `y`, and `facing`. `colour` is an uppercase six-digit hex colour prefixed by `#`. `avatarPreset` is an identifier in the Published Avatar Collection the Room pinned when it was created, served over HTTP by `GET /rooms/{roomCode}/avatars` (below). Identifiers match `[a-z0-9][a-z0-9-]{0,63}`; names and published order are presentation data carried with the collection, independent of identity. Membership is the server's to enforce against the Room's own collection: a client decoding a Player View checks the identifier's form only, because a Room Snapshot can arrive before that Room's collection has been fetched. Identifiers outside the Room's collection, including unpublished draft IDs, are never valid.
@@ -210,6 +216,28 @@ Leave during recovery clears local intent immediately. A separate socket makes o
 
 These changes extend protocol v1 for the coordinated local client/server release; older clients lacking Game state, chat, permanent seating, phase, Host or readiness decoding must be updated together with the server.
 
+
+## Voice
+
+Voice is proximity voice chat between browsers over WebRTC (ADR 0016). Audio never passes through the server; the game socket carries only who may hear whom and the WebRTC negotiation.
+
+**Joining voice.** `set_voice` with `enabled: true` puts the sending connection in its Room's voice, in the Lobby or a Game; `false` takes it out. Before a membership it is `not_in_room`. Voice belongs to one connection: Join, Reconnect, Disconnect, Leave and expiry all leave the connection outside voice until it sends `set_voice` again.
+
+**Routes.** Each connected, voice-enabled Member receives `voice_routes`, built for them alone and sent only when it differs from the last one they received. `VoicePeer` is exactly `{ "playerId", "send", "receive" }` and lists every other connected, voice-enabled Member of the Room, whom the client keeps a connection with. `send` is whether the recipient may send that peer its voice, and `receive` whether it may play theirs. A client sends its microphone only where `send` is true and stops the moment a route closes; it plays a peer only while `receive` is true. Routes are decided only by the server:
+
+| When | Who hears whom |
+| --- | --- |
+| Lobby, `role_reveal`, `finished` | Everyone hears everyone. |
+| `roam` | Two living Players hear each other within 260 px when each can see the other, so a Vanished Mafia is silent to non-Mafia and does not hear them. Ghosts hear every Ghost, anywhere. A living Player and a Ghost never hear each other. |
+| `meeting_call`, `discussion`, `voting`, `voting_result` | A living Player is heard by every Participant still in the Game; a Ghost is heard only by Ghosts. |
+
+A route is enforced by the speaker's client, so the speaker learns its routes as well. Every rule above therefore follows from what both Players' views already show: 260 px is inside every Vision, and the living never route to a Ghost during a Roam, which would reveal a death before the Meeting. Routes change with the field, the phase, kills, Vanish, joins and departures, and are re-evaluated on every field tick.
+
+**Signals.** `voice_signal` relays one negotiation step to `targetPlayerId`, who receives it with `fromPlayerId`. `data` is opaque to the server: 1–16000 characters, otherwise `malformed_message`; `kind` outside the three values is `malformed_message` too. A signal is relayed only between two connected, voice-enabled Members of the same Room and is otherwise dropped without an error, since such races are ordinary while someone leaves voice. The client with the smaller Player ID makes the offer. The client's `data` is the JSON text `{ "cid", "sdp" }` for an offer or answer and `{ "cid", "candidate" }` for an ICE candidate, where `cid` names one negotiation, so steps from a superseded connection are ignored.
+
+**Relayed voice.** When a direct connection to a peer is not connected (two strict NATs across the internet, or while a link is still forming), the client sends its voice through the server instead: `voice_frame` carries one 20 ms Opus packet as base64 `data` (at most 2000 characters) for the 1–9 `targetPlayerIds` it cannot reach directly. Anything else is `malformed_message`. The server relays a frame, as `voice_frame` with `fromPlayerId`, only to targets who are connected, voice-enabled Members of the sender's Room and who may hear the sender at that moment, so a relayed route is enforced by the server itself. A frame from a sender outside voice is dropped. Frames are the one outbound message that may be dropped: one that would wait behind 24 queued messages is discarded instead of queued, and never takes a place a Game event needs. A client plays relayed frames from a peer only while it may hear that peer and has no direct connection to them, and sends none during silence.
+
+**Delivery.** Voice messages travel the same ordered outbound queue as every other event. The client hands them straight to its audio pipeline as they arrive instead of queueing them for a game frame: they change no world state, and routes must keep being followed while a hidden tab draws no frames.
 
 ## The Published Avatar Collection
 
